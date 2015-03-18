@@ -110,11 +110,50 @@ namespace Microsoft.TeamFoundation.Git.Helpers.Authentication
             switch (operationArguments.Scheme)
             {
                 case CredentialType.AzureDirectory:
+                    // if the clientId and resource values exist, use them
+                    if (!String.IsNullOrWhiteSpace(operationArguments.AuthorityClientId) && !String.IsNullOrWhiteSpace(operationArguments.AuthorityResource))
+                    {
+                        Guid clientId = Guid.Empty;
+                        string resource = operationArguments.AuthorityResource;
+
+                        if (Guid.TryParse(operationArguments.AuthorityClientId, out clientId))
+                        {
+                            // if the tenant value use it
+                            if (!String.IsNullOrWhiteSpace(operationArguments.AuthorityTenantId))
+                            {
+                                Guid tenantId = Guid.Empty;
+
+                                if (Guid.TryParse(operationArguments.AuthorityTenantId, out tenantId))
+                                {
+                                    // return a custom AAD backed VSO authentication objects
+                                    return new VsoAadAuthentication(tenantId, resource, clientId);
+                                }
+                            }
+                            // return a common tenant AAD backed VSO authentication object
+                            return new VsoAadAuthentication(resource, clientId);
+                        }
+                    }
+                    // return a generic AAD backed VSO authentication object
                     return new VsoAadAuthentication();
+
                 case CredentialType.Basic:
                 default:
                     return new BasicAuthentication();
+
                 case CredentialType.MicrosoftAccount:
+                    // if the clientId and resource values exist, use them
+                    if (!String.IsNullOrWhiteSpace(operationArguments.AuthorityClientId) && !String.IsNullOrWhiteSpace(operationArguments.AuthorityResource))
+                    {
+                        Guid clientId = Guid.Empty;
+                        string resource = operationArguments.AuthorityResource;
+
+                        if (Guid.TryParse(operationArguments.AuthorityClientId, out clientId))
+                        {
+                            // return a common tenant MSA backed VSO authentication object
+                            return new VsoMsaAuthentation(resource, clientId);
+                        }
+                    }
+                    // return a generic MSA backed VSO authentication object
                     return new VsoMsaAuthentation();
             }
         }
