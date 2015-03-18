@@ -37,15 +37,15 @@ namespace Microsoft.TeamFoundation.Git.Helpers.Authentication
             }
             if (clientId != null)
             {
-
+                operationArguments.AuthorityClientId = clientId.Value;
             }
             if (resource != null)
             {
-
+                operationArguments.AuthorityResource = resource.Value;
             }
             if (tenantId != null)
             {
-
+                operationArguments.AuthorityTenantId = tenantId.Value;
             }
 
             foreach (string arg in args)
