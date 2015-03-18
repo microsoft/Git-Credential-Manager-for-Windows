@@ -14,16 +14,7 @@ namespace Microsoft.TeamFoundation.Git.Helpers.Authentication
 
         static void Main(string[] args)
         {
-            //Uri targetUri = new Uri("https://dev-x.visualstudio.com");
-            //IMicrosoftAccountAuthentication msa = new MicrosoftAccountAuthentication("https://dev-x.visualstudio.com", ClientId);
-            //Task.Run(async () =>
-            //{
-            //    Credentials credentials = new Credentials("jeremy.wyman@outlook.com", "0thLight/");
-            //    await msa.InteractiveLogon(targetUri, credentials);
-            //}).Wait();
-
             OperationArguments operationArguments = new OperationArguments(Console.In);
-
             Repository repo = new Repository(Environment.CurrentDirectory);
 
             GitConfigValue schema = GetConfig(repo, operationArguments, "schema");
