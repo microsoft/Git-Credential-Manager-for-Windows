@@ -45,6 +45,9 @@ namespace Microsoft.TeamFoundation.Git.Helpers.Authentication
         public string Username { get; private set; }
         public string Password { get; private set; }
         public CredentialType Scheme { get; set; }
+        public string AuthorityClientId { get; set; }
+        public string AuthorityResource { get; set; }
+        public string AuthorityTenantId { get; set; }
 
         public void SetCredentials(Credentials credentials)
         {
