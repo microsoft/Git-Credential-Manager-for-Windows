@@ -1,0 +1,67 @@
+﻿using Microsoft.IdentityModel.Clients.ActiveDirectory;
+using System;
+using System.Threading.Tasks;
+using Debug = System.Diagnostics.Debug;
+
+namespace Microsoft.TeamFoundation.Git.Helpers.Authentication
+{
+    public class VsoMsaAuthentation : BaseVsoAuthentication, IVsoAuthentication
+    {
+        public VsoMsaAuthentation()
+            : base()
+        { }
+        public VsoMsaAuthentation(string resource, Guid clientId)
+            : base(resource, clientId)
+        { }
+        /// <summary>
+        /// Test constructor which allows for 
+        /// </summary>
+        /// <param name="personalAccessToken"></param>
+        /// <param name="userCredential"></param>
+        /// <param name="adaRefresh"></param>
+        internal VsoMsaAuthentation(ICredentialStore personalAccessToken, ICredentialStore userCredential, ITokenStore adaRefresh)
+            : base(personalAccessToken, userCredential, adaRefresh)
+        { }
+
+        public override async Task<bool> InteractiveLogon(Uri targetUri, Credentials credentials)
+        {
+            BaseCredentialStore.ValidateTargetUri(targetUri);
+            BaseCredentialStore.ValidateCredentials(credentials);
+
+            try
+            {
+                string clientId = this.ClientId.ToString("D");
+                string resource = this.Resource;
+
+                UserCredential userCredential = new UserCredential(credentials.Username, credentials.Password);
+                AuthenticationContext authCtx = new AuthenticationContext(this.AuthorityHostUrl, TokenCache.DefaultShared);
+                AuthenticationResult authResult = await authCtx.AcquireTokenAsync(resource, clientId, userCredential);
+
+                this.StoreRefreshToken(targetUri, authResult);
+                this.UserCredentialStore.WriteCredentials(targetUri, credentials);
+
+                return await this.GeneratePersonalAccessToken(targetUri, authResult);
+            }
+            catch (AdalException exception)
+            {
+                Debug.Write(exception);
+            }
+
+            return false;
+        }
+
+        public override bool SetCredentials(Uri targetUri, Credentials credentials)
+        {
+            BaseCredentialStore.ValidateTargetUri(targetUri);
+            BaseCredentialStore.ValidateCredentials(credentials);
+
+            var task = Task.Run<bool>(async () => { return await this.InteractiveLogon(targetUri, credentials); });
+            task.Wait();
+
+            if (task.IsFaulted)
+                throw task.Exception;
+
+            return task.Result;
+        }
+    }
+}
