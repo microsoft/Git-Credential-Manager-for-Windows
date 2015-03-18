@@ -8,7 +8,7 @@ namespace Microsoft.TeamFoundation.Git.Helpers.Authentication
     {
         internal OperationArguments(TextReader stdin)
         {
-            this.Scheme = CredentialType.Basic;
+            this.Authority = AuthorityType.Basic;
 
             string line;
             while (!String.IsNullOrWhiteSpace((line = Console.In.ReadLine())))
@@ -44,7 +44,10 @@ namespace Microsoft.TeamFoundation.Git.Helpers.Authentication
         public readonly Uri TargetUri;
         public string Username { get; private set; }
         public string Password { get; private set; }
-        public CredentialType Scheme { get; set; }
+        public AuthorityType Authority { get; set; }
+        public string AuthorityClientId { get; set; }
+        public string AuthorityResource { get; set; }
+        public string AuthorityTenantId { get; set; }
 
         public void SetCredentials(Credentials credentials)
         {
@@ -61,17 +64,17 @@ namespace Microsoft.TeamFoundation.Git.Helpers.Authentication
                 String.Equals(value, "LiveConnect", StringComparison.OrdinalIgnoreCase) ||
                 String.Equals(value, "LiveID", StringComparison.OrdinalIgnoreCase))
             {
-                this.Scheme = CredentialType.MicrosoftAccount;
+                this.Authority = AuthorityType.MicrosoftAccount;
             }
             else if (String.Equals(value, "AAD", StringComparison.OrdinalIgnoreCase) ||
                      String.Equals(value, "Azure", StringComparison.OrdinalIgnoreCase) ||
                      String.Equals(value, "AzureDirectory", StringComparison.OrdinalIgnoreCase))
             {
-                this.Scheme = CredentialType.AzureDirectory;
+                this.Authority = AuthorityType.AzureDirectory;
             }
             else
             {
-                this.Scheme = CredentialType.Basic;
+                this.Authority = AuthorityType.Basic;
             }
         }
 

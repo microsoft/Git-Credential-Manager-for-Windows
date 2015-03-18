@@ -1,5 +1,6 @@
 ﻿using Microsoft.IdentityModel.Clients.ActiveDirectory;
 using System;
+using System.Globalization;
 using System.Threading.Tasks;
 using Debug = System.Diagnostics.Debug;
 
@@ -7,17 +8,26 @@ namespace Microsoft.TeamFoundation.Git.Helpers.Authentication
 {
     public class VsoAadAuthentication : BaseVsoAuthentication, IVsoAadAuthentication
     {
+        public const string DefaultAuthorityHost = "https://login.windows.net/common";
+        private const string AuthorityHostFormat = "https://login.windows.net/{0:D}";
+
         public VsoAadAuthentication()
-        : base()
+            : base(DefaultAuthorityHost)
         { }
         public VsoAadAuthentication(Guid tenantId, string resource, Guid clientId)
-            : base(tenantId, resource, clientId)
+            : base(String.Format(CultureInfo.InvariantCulture, AuthorityHostFormat, tenantId), resource, clientId)
         { }
         public VsoAadAuthentication(string resource, Guid clientId)
-            : base(resource, clientId)
+            : base(DefaultAuthorityHost, resource, clientId)
         { }
+        /// <summary>
+        /// Test constructor which allows for using fake credential stores
+        /// </summary>
+        /// <param name="personalAccessToken"></param>
+        /// <param name="userCredential"></param>
+        /// <param name="adaRefresh"></param>
         internal VsoAadAuthentication(ICredentialStore personalAccessToken, ICredentialStore userCredential, ITokenStore adaRefresh)
-            : base(personalAccessToken, userCredential, adaRefresh)
+            : base(DefaultAuthorityHost, personalAccessToken, userCredential, adaRefresh)
         { }
 
         public override async Task<bool> InteractiveLogon(Uri targetUri, Credentials credentials)

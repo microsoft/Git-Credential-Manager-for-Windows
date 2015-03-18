@@ -2,50 +2,43 @@
 using System;
 using System.Diagnostics;
 using System.Linq;
+using System.Runtime.InteropServices;
+using System.Threading.Tasks;
+using System.Windows.Forms;
 using GitConfigValue = LibGit2Sharp.ConfigurationEntry<string>;
 
 namespace Microsoft.TeamFoundation.Git.Helpers.Authentication
 {
     class Program
     {
-        private static readonly Guid TenantId = new Guid("72f988bf-86f1-41af-91ab-2d7cd011db47");
-        private static readonly string Resource = "499b84ac-1321-427f-aa17-267ca6975798";
-        private static readonly Guid ClientId = new Guid("872cd9fa-d31f-45e0-9eab-6e460a02d1f1");
-
+        [STAThread]
         static void Main(string[] args)
         {
-            //Uri targetUri = new Uri("https://dev-x.visualstudio.com");
-            //IMicrosoftAccountAuthentication msa = new MicrosoftAccountAuthentication("https://dev-x.visualstudio.com", ClientId);
-            //Task.Run(async () =>
-            //{
-            //    Credentials credentials = new Credentials("jeremy.wyman@outlook.com", "0thLight/");
-            //    await msa.InteractiveLogon(targetUri, credentials);
-            //}).Wait();
+            // setup the application to launch dialogs if nessiary
+            Application.EnableVisualStyles();
+            Application.SetCompatibleTextRenderingDefault(true);
 
             OperationArguments operationArguments = new OperationArguments(Console.In);
-
-            Repository repo = new Repository(Environment.CurrentDirectory);
-
-            GitConfigValue schema = GetConfig(repo, operationArguments, "schema");
-            GitConfigValue clientId = GetConfig(repo, operationArguments, "clientid");
-            GitConfigValue resource = GetConfig(repo, operationArguments, "resource");
-            GitConfigValue tenantId = GetConfig(repo, operationArguments, "tenantid");
-
-            if (schema != null)
+            using (Repository repo = new Repository(Environment.CurrentDirectory))
             {
-                operationArguments.SetScheme(schema.Value);
-            }
-            if (clientId != null)
-            {
+                GitConfigValue match = null;
 
-            }
-            if (resource != null)
-            {
-
-            }
-            if (tenantId != null)
-            {
-
+                if ((match = GetConfig(repo, operationArguments, "authority")) != null)
+                {
+                    operationArguments.SetScheme(match.Value);
+                }
+                if ((match = GetConfig(repo, operationArguments, "clientid")) != null)
+                {
+                    operationArguments.AuthorityClientId = match.Value;
+                }
+                if ((match = GetConfig(repo, operationArguments, "resource")) != null)
+                {
+                    operationArguments.AuthorityResource = match.Value;
+                }
+                if ((match = GetConfig(repo, operationArguments, "tenantid")) != null)
+                {
+                    operationArguments.AuthorityTenantId = match.Value;
+                }
             }
 
             foreach (string arg in args)
@@ -86,6 +79,34 @@ namespace Microsoft.TeamFoundation.Git.Helpers.Authentication
             {
                 operationArguments.SetCredentials(credentials);
             }
+            else
+            {
+                // if the authority supports VSO personal access tokens, the username + password promp git provides will be insufficient
+                // instead of relying on Git then failing, open a modal dialog and request credentials from the user
+                // and use those credentials to logon to the service and generate a personal access token
+                // then return the personal access token to the user
+                if (operationArguments.Authority == AuthorityType.AzureDirectory || operationArguments.Authority == AuthorityType.MicrosoftAccount)
+                {
+                    // ask for credentials
+                    var dialog = new CredentialForm(operationArguments.TargetUri);
+                    dialog.ShowDialog();
+
+                    if (dialog.DialogResult == DialogResult.OK)
+                    {
+                        credentials = new Credentials(dialog.Username, dialog.Password);
+                        Task.Run(async () =>
+                        {
+                            // logon to the service via the credentials provided and return the personal access token
+                            if (await (authentication as BaseVsoAuthentication).InteractiveLogon(operationArguments.TargetUri, credentials)
+                                && authentication.GetCredentials(operationArguments.TargetUri, out credentials))
+                            {
+                                operationArguments.SetCredentials(credentials);
+                            }
+                        })
+                        .Wait();
+                    }
+                }
+            }
 
             Console.Out.Write(operationArguments);
         }
@@ -107,14 +128,53 @@ namespace Microsoft.TeamFoundation.Git.Helpers.Authentication
         {
             Debug.Assert(operationArguments != null, "The operationArguments is null");
 
-            switch (operationArguments.Scheme)
+            switch (operationArguments.Authority)
             {
-                case CredentialType.AzureDirectory:
+                case AuthorityType.AzureDirectory:
+                    // if the clientId and resource values exist, use them
+                    if (!String.IsNullOrWhiteSpace(operationArguments.AuthorityClientId) && !String.IsNullOrWhiteSpace(operationArguments.AuthorityResource))
+                    {
+                        Guid clientId = Guid.Empty;
+                        string resource = operationArguments.AuthorityResource;
+
+                        if (Guid.TryParse(operationArguments.AuthorityClientId, out clientId))
+                        {
+                            // if the tenant value use it
+                            if (!String.IsNullOrWhiteSpace(operationArguments.AuthorityTenantId))
+                            {
+                                Guid tenantId = Guid.Empty;
+
+                                if (Guid.TryParse(operationArguments.AuthorityTenantId, out tenantId))
+                                {
+                                    // return a custom AAD backed VSO authentication objects
+                                    return new VsoAadAuthentication(tenantId, resource, clientId);
+                                }
+                            }
+                            // return a common tenant AAD backed VSO authentication object
+                            return new VsoAadAuthentication(resource, clientId);
+                        }
+                    }
+                    // return a generic AAD backed VSO authentication object
                     return new VsoAadAuthentication();
-                case CredentialType.Basic:
+
+                case AuthorityType.Basic:
                 default:
                     return new BasicAuthentication();
-                case CredentialType.MicrosoftAccount:
+
+                case AuthorityType.MicrosoftAccount:
+                    // if the clientId and resource values exist, use them
+                    if (!String.IsNullOrWhiteSpace(operationArguments.AuthorityClientId) && !String.IsNullOrWhiteSpace(operationArguments.AuthorityResource))
+                    {
+                        Guid clientId = Guid.Empty;
+                        string resource = operationArguments.AuthorityResource;
+
+                        if (Guid.TryParse(operationArguments.AuthorityClientId, out clientId))
+                        {
+                            // return a common tenant MSA backed VSO authentication object
+                            return new VsoMsaAuthentation(resource, clientId);
+                        }
+                    }
+                    // return a generic MSA backed VSO authentication object
                     return new VsoMsaAuthentation();
             }
         }

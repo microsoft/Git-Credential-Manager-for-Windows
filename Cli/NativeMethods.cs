@@ -50,7 +50,7 @@ namespace Microsoft.TeamFoundation.Git.Helpers.Authentication
         [StructLayout(LayoutKind.Sequential, CharSet = CharSet.Unicode)]
         internal struct CREDUI_INFO
         {
-            public uint cbSize;
+            public int cbSize;
             public IntPtr hwndParent;
             public string pszMessageText;
             public string pszCaptionText;

@@ -13,39 +13,30 @@ namespace Microsoft.TeamFoundation.Git.Helpers.Authentication
 {
     public abstract class BaseVsoAuthentication: BaseAuthentication, IVsoAuthentication
     {
-        public const string AuthorityHostUrlFormat = "https://login.windows.net/common";
         public static readonly string DefaultResource = "499b84ac-1321-427f-aa17-267ca6975798";
         public static readonly Guid DefaultClientId = new Guid("872cd9fa-d31f-45e0-9eab-6e460a02d1f1");
 
         protected const string SecondaryCredentialPrefix = "alt-git";
         protected const string TokenPrefix = "adal-refresh";
 
-        protected BaseVsoAuthentication()
+        protected BaseVsoAuthentication(string authorityHostUrl)
         {
-            this.AuthorityHostUrl = AuthorityHostUrlFormat;
+            this.AuthorityHostUrl = authorityHostUrl;
             this.ClientId = DefaultClientId;
             this.Resource = DefaultResource;
             this.PersonalAccessTokenStore = new CredentialStore(PrimaryCredentialPrefix);
             this.UserCredentialStore = new CredentialStore(SecondaryCredentialPrefix);
             this.AdaRefreshTokenStore = new TokenStore(TokenPrefix);
         }
-        protected BaseVsoAuthentication(Guid tenantId, string resource, Guid clientId)
-            : this()
+        protected BaseVsoAuthentication(string authorityHostUrl, string resource, Guid clientId)
+            : this(authorityHostUrl)
         {
-            const string AuthorityHostUrlFormat = "https://login.windows.net/{0:D}";
 
-            this.AuthorityHostUrl = String.Format(CultureInfo.InvariantCulture, AuthorityHostUrlFormat, tenantId);
             this.ClientId = clientId;
             this.Resource = resource;
         }
-        protected BaseVsoAuthentication(string resource, Guid clientId)
-            : this()
-        {
-            this.ClientId = clientId;
-            this.Resource = resource;
-        }
-        internal BaseVsoAuthentication(ICredentialStore personalAccessToken, ICredentialStore userCredential, ITokenStore adaRefresh)
-            :this()
+        internal BaseVsoAuthentication(string authorityHostUrl, ICredentialStore personalAccessToken, ICredentialStore userCredential, ITokenStore adaRefresh)
+            :this(authorityHostUrl)
         {
             this.PersonalAccessTokenStore = personalAccessToken;
             this.UserCredentialStore = userCredential;
