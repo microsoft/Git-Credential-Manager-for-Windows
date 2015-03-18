@@ -7,11 +7,13 @@ namespace Microsoft.TeamFoundation.Git.Helpers.Authentication
 {
     public class VsoMsaAuthentation : BaseVsoAuthentication, IVsoAuthentication
     {
+        public const string DefaultAuthorityHost = "https://login.live.com/";
+
         public VsoMsaAuthentation()
-            : base()
+            : base(DefaultAuthorityHost)
         { }
         public VsoMsaAuthentation(string resource, Guid clientId)
-            : base(resource, clientId)
+            : base(DefaultAuthorityHost, resource, clientId)
         { }
         /// <summary>
         /// Test constructor which allows for 
@@ -20,7 +22,7 @@ namespace Microsoft.TeamFoundation.Git.Helpers.Authentication
         /// <param name="userCredential"></param>
         /// <param name="adaRefresh"></param>
         internal VsoMsaAuthentation(ICredentialStore personalAccessToken, ICredentialStore userCredential, ITokenStore adaRefresh)
-            : base(personalAccessToken, userCredential, adaRefresh)
+            : base(DefaultAuthorityHost, personalAccessToken, userCredential, adaRefresh)
         { }
 
         public override async Task<bool> InteractiveLogon(Uri targetUri, Credentials credentials)
