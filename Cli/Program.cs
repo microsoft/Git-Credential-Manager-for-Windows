@@ -8,10 +8,6 @@ namespace Microsoft.TeamFoundation.Git.Helpers.Authentication
 {
     class Program
     {
-        private static readonly Guid TenantId = new Guid("72f988bf-86f1-41af-91ab-2d7cd011db47");
-        private static readonly string Resource = "499b84ac-1321-427f-aa17-267ca6975798";
-        private static readonly Guid ClientId = new Guid("872cd9fa-d31f-45e0-9eab-6e460a02d1f1");
-
         static void Main(string[] args)
         {
             OperationArguments operationArguments = new OperationArguments(Console.In);
