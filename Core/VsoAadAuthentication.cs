@@ -12,7 +12,7 @@ namespace Microsoft.TeamFoundation.Git.Helpers.Authentication
         private const string AuthorityHostFormat = "https://login.windows.net/{0:D}";
 
         public VsoAadAuthentication()
-        : base(DefaultAuthorityHost)
+            : base(DefaultAuthorityHost)
         { }
         public VsoAadAuthentication(Guid tenantId, string resource, Guid clientId)
             : base(String.Format(CultureInfo.InvariantCulture, AuthorityHostFormat, tenantId), resource, clientId)
@@ -20,6 +20,12 @@ namespace Microsoft.TeamFoundation.Git.Helpers.Authentication
         public VsoAadAuthentication(string resource, Guid clientId)
             : base(DefaultAuthorityHost, resource, clientId)
         { }
+        /// <summary>
+        /// Test constructor which allows for using fake credential stores
+        /// </summary>
+        /// <param name="personalAccessToken"></param>
+        /// <param name="userCredential"></param>
+        /// <param name="adaRefresh"></param>
         internal VsoAadAuthentication(ICredentialStore personalAccessToken, ICredentialStore userCredential, ITokenStore adaRefresh)
             : base(DefaultAuthorityHost, personalAccessToken, userCredential, adaRefresh)
         { }

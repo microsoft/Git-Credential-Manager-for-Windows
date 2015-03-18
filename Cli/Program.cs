@@ -2,14 +2,22 @@
 using System;
 using System.Diagnostics;
 using System.Linq;
+using System.Runtime.InteropServices;
+using System.Threading.Tasks;
+using System.Windows.Forms;
 using GitConfigValue = LibGit2Sharp.ConfigurationEntry<string>;
 
 namespace Microsoft.TeamFoundation.Git.Helpers.Authentication
 {
     class Program
     {
+        [STAThread]
         static void Main(string[] args)
         {
+            // setup the application to launch dialogs if nessiary
+            Application.EnableVisualStyles();
+            Application.SetCompatibleTextRenderingDefault(true);
+
             OperationArguments operationArguments = new OperationArguments(Console.In);
             using (Repository repo = new Repository(Environment.CurrentDirectory))
             {
@@ -70,6 +78,34 @@ namespace Microsoft.TeamFoundation.Git.Helpers.Authentication
             if (authentication != null && authentication.GetCredentials(operationArguments.TargetUri, out credentials))
             {
                 operationArguments.SetCredentials(credentials);
+            }
+            else
+            {
+                // if the authority supports VSO personal access tokens, the username + password promp git provides will be insufficient
+                // instead of relying on Git then failing, open a modal dialog and request credentials from the user
+                // and use those credentials to logon to the service and generate a personal access token
+                // then return the personal access token to the user
+                if (operationArguments.Authority == AuthorityType.AzureDirectory || operationArguments.Authority == AuthorityType.MicrosoftAccount)
+                {
+                    // ask for credentials
+                    var dialog = new CredentialForm(operationArguments.TargetUri);
+                    dialog.ShowDialog();
+
+                    if (dialog.DialogResult == DialogResult.OK)
+                    {
+                        credentials = new Credentials(dialog.Username, dialog.Password);
+                        Task.Run(async () =>
+                        {
+                            // logon to the service via the credentials provided and return the personal access token
+                            if (await (authentication as BaseVsoAuthentication).InteractiveLogon(operationArguments.TargetUri, credentials)
+                                && authentication.GetCredentials(operationArguments.TargetUri, out credentials))
+                            {
+                                operationArguments.SetCredentials(credentials);
+                            }
+                        })
+                        .Wait();
+                    }
+                }
             }
 
             Console.Out.Write(operationArguments);

@@ -31,6 +31,7 @@ namespace Microsoft.TeamFoundation.Git.Helpers.Authentication
         protected BaseVsoAuthentication(string authorityHostUrl, string resource, Guid clientId)
             : this(authorityHostUrl)
         {
+
             this.ClientId = clientId;
             this.Resource = resource;
         }

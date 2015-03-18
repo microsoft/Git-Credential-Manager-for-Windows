@@ -16,7 +16,7 @@ namespace Microsoft.TeamFoundation.Git.Helpers.Authentication
             : base(DefaultAuthorityHost, resource, clientId)
         { }
         /// <summary>
-        /// Test constructor which allows for 
+        /// Test constructor which allows for using fake credential stores
         /// </summary>
         /// <param name="personalAccessToken"></param>
         /// <param name="userCredential"></param>
