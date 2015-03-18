@@ -1,6 +1,6 @@
 ﻿namespace Microsoft.TeamFoundation.Git.Helpers.Authentication
 {
-    internal enum CredentialType
+    internal enum AuthorityType
     {
         /// <summary>
         /// Basic username and password scheme

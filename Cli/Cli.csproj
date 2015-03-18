@@ -47,7 +47,7 @@
     <Reference Include="System.Net.Http" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="CredentialType.cs" />
+    <Compile Include="AuthorityType.cs" />
     <Compile Include="NativeMethods.cs" />
     <Compile Include="OperationArguments.cs" />
     <Compile Include="Program.cs" />

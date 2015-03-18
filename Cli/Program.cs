@@ -15,7 +15,7 @@ namespace Microsoft.TeamFoundation.Git.Helpers.Authentication
             {
                 GitConfigValue match = null;
 
-                if ((match = GetConfig(repo, operationArguments, "schema")) != null)
+                if ((match = GetConfig(repo, operationArguments, "authority")) != null)
                 {
                     operationArguments.SetScheme(match.Value);
                 }
@@ -92,9 +92,9 @@ namespace Microsoft.TeamFoundation.Git.Helpers.Authentication
         {
             Debug.Assert(operationArguments != null, "The operationArguments is null");
 
-            switch (operationArguments.Scheme)
+            switch (operationArguments.Authority)
             {
-                case CredentialType.AzureDirectory:
+                case AuthorityType.AzureDirectory:
                     // if the clientId and resource values exist, use them
                     if (!String.IsNullOrWhiteSpace(operationArguments.AuthorityClientId) && !String.IsNullOrWhiteSpace(operationArguments.AuthorityResource))
                     {
@@ -121,11 +121,11 @@ namespace Microsoft.TeamFoundation.Git.Helpers.Authentication
                     // return a generic AAD backed VSO authentication object
                     return new VsoAadAuthentication();
 
-                case CredentialType.Basic:
+                case AuthorityType.Basic:
                 default:
                     return new BasicAuthentication();
 
-                case CredentialType.MicrosoftAccount:
+                case AuthorityType.MicrosoftAccount:
                     // if the clientId and resource values exist, use them
                     if (!String.IsNullOrWhiteSpace(operationArguments.AuthorityClientId) && !String.IsNullOrWhiteSpace(operationArguments.AuthorityResource))
                     {
