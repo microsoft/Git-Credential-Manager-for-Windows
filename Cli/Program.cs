@@ -15,28 +15,26 @@ namespace Microsoft.TeamFoundation.Git.Helpers.Authentication
         static void Main(string[] args)
         {
             OperationArguments operationArguments = new OperationArguments(Console.In);
-            Repository repo = new Repository(Environment.CurrentDirectory);
+            using (Repository repo = new Repository(Environment.CurrentDirectory))
+            {
+                GitConfigValue match = null;
 
-            GitConfigValue schema = GetConfig(repo, operationArguments, "schema");
-            GitConfigValue clientId = GetConfig(repo, operationArguments, "clientid");
-            GitConfigValue resource = GetConfig(repo, operationArguments, "resource");
-            GitConfigValue tenantId = GetConfig(repo, operationArguments, "tenantid");
-
-            if (schema != null)
-            {
-                operationArguments.SetScheme(schema.Value);
-            }
-            if (clientId != null)
-            {
-                operationArguments.AuthorityClientId = clientId.Value;
-            }
-            if (resource != null)
-            {
-                operationArguments.AuthorityResource = resource.Value;
-            }
-            if (tenantId != null)
-            {
-                operationArguments.AuthorityTenantId = tenantId.Value;
+                if ((match = GetConfig(repo, operationArguments, "schema")) != null)
+                {
+                    operationArguments.SetScheme(match.Value);
+                }
+                if ((match = GetConfig(repo, operationArguments, "clientid")) != null)
+                {
+                    operationArguments.AuthorityClientId = match.Value;
+                }
+                if ((match = GetConfig(repo, operationArguments, "resource")) != null)
+                {
+                    operationArguments.AuthorityResource = match.Value;
+                }
+                if ((match = GetConfig(repo, operationArguments, "tenantid")) != null)
+                {
+                    operationArguments.AuthorityTenantId = match.Value;
+                }
             }
 
             foreach (string arg in args)
