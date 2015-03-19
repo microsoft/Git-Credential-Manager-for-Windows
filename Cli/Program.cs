@@ -18,7 +18,7 @@ namespace Microsoft.TeamFoundation.Git.Helpers.Authentication
             Application.EnableVisualStyles();
             Application.SetCompatibleTextRenderingDefault(true);
 
-            EnabelDebugTrace();
+            EnableDebugTrace();
 
             // parse the operations arguments from stdin (this is how git sends commands)
             // see: https://www.kernel.org/pub/software/scm/git/docs/technical/api-credentials.html
@@ -244,7 +244,7 @@ namespace Microsoft.TeamFoundation.Git.Helpers.Authentication
         }
 
         [Conditional("DEBUG")]
-        private static void EnabelDebugTrace()
+        private static void EnableDebugTrace()
         {
             // use the stderr stream for the trace as stdout is used in the cross-process communcations protocol
             Trace.Listeners.Add(new ConsoleTraceListener(useErrorStream: true));
