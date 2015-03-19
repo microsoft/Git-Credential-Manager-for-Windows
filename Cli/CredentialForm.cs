@@ -16,7 +16,7 @@ namespace Microsoft.TeamFoundation.Git.Helpers.Authentication
         {
             InitializeComponent();
 
-            _instructionsLabel.Text = "Enter your credentials for: " + targetUri.AbsoluteUri;
+            _uriLabel.Text = targetUri.AbsoluteUri;
         }
 
         public string Password { get; private set; }
