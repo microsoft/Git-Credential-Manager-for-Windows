@@ -54,7 +54,7 @@ namespace Microsoft.TeamFoundation.Git.Helpers.Authentication
 
             foreach (string arg in args)
             {
-                Trace.TraceInformation("git: command: {0}", arg);
+                Trace.TraceInformation("[GIT: {0}]", arg);
                 switch (arg)
                 {
                     case "erase":
@@ -150,13 +150,17 @@ namespace Microsoft.TeamFoundation.Git.Helpers.Authentication
 
             Debug.Assert(operationArguments != null, "The operationArguments is null");
             Debug.Assert(operationArguments.Username != null, "The operaionArgument.Username is null");
-            Debug.Assert(operationArguments.Password != null, "The operaionArgument.Password is null");
             Debug.Assert(operationArguments.TargetUri != null, "The operationArgument.TargetUri is null");
 
-            BaseAuthentication authentication = CreateAuthentication(operationArguments);
-            Credentials credentials = new Credentials(operationArguments.Username, operationArguments.Password);
+            if (operationArguments.Authority == AuthorityType.Basic)
+            {
+                Trace.WriteLine("writing basic authentication values");
 
-            authentication.SetCredentials(operationArguments.TargetUri, credentials);
+                BaseAuthentication authentication = CreateAuthentication(operationArguments);
+                Credentials credentials = new Credentials(operationArguments.Username, operationArguments.Password ?? String.Empty);
+
+                authentication.SetCredentials(operationArguments.TargetUri, credentials);
+            }
         }
 
         private static BaseAuthentication CreateAuthentication(OperationArguments operationArguments)
