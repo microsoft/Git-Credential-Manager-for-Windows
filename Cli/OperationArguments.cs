@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Diagnostics;
 using System.IO;
 using System.Text;
 
@@ -27,6 +28,12 @@ namespace Microsoft.TeamFoundation.Git.Helpers.Authentication
                             break;
                         case "path":
                             this.Path = pair[1];
+                            break;
+                        case "username":
+                            this.Username = pair[1];
+                            break;
+                        case "password":
+                            this.Password = pair[1];
                             break;
                     }
                 }

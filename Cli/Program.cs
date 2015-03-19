@@ -19,6 +19,7 @@ namespace Microsoft.TeamFoundation.Git.Helpers.Authentication
             Application.SetCompatibleTextRenderingDefault(true);
 
             OperationArguments operationArguments = new OperationArguments(Console.In);
+
             using (Repository repo = new Repository(Environment.CurrentDirectory))
             {
                 GitConfigValue match = null;
