@@ -14,6 +14,7 @@ namespace Microsoft.TeamFoundation.Git.Helpers.Authentication
             string line;
             while (!String.IsNullOrWhiteSpace((line = Console.In.ReadLine())))
             {
+                Trace.TraceInformation("stdin >> {0}", line);
                 string[] pair = line.Split(new[] { '=' }, 2);
 
                 if (pair.Length == 2)
@@ -83,6 +84,7 @@ namespace Microsoft.TeamFoundation.Git.Helpers.Authentication
             {
                 this.Authority = AuthorityType.Basic;
             }
+            Trace.TraceInformation("authoriy set to {0}", this.Authority);
         }
 
         public override string ToString()
@@ -120,7 +122,9 @@ namespace Microsoft.TeamFoundation.Git.Helpers.Authentication
                        .Append("\n");
             }
 
-            return builder.ToString();
+            string value = builder.ToString();
+            Trace.TraceInformation("stdout << {0}", value);
+            return value;
         }
     }
 }
