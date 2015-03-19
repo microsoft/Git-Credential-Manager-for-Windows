@@ -20,6 +20,9 @@ namespace Microsoft.TeamFoundation.Git.Helpers.Authentication
 
         protected BaseVsoAuthentication(string authorityHostUrl)
         {
+            AdalTrace.TraceSource.Switch.Level = SourceLevels.Off;
+            AdalTrace.LegacyTraceSwitch.Level = TraceLevel.Off;
+
             this.AuthorityHostUrl = authorityHostUrl;
             this.ClientId = DefaultClientId;
             this.Resource = DefaultResource;
