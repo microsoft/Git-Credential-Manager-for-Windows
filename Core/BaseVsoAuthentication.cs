@@ -3,6 +3,7 @@ using System;
 using System.Diagnostics;
 using System.Net;
 using System.Net.Http;
+using System.Net.Http.Headers;
 using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
@@ -66,6 +67,31 @@ namespace Microsoft.TeamFoundation.Git.Helpers.Authentication
         }
 
         public abstract Task<bool> InteractiveLogon(Uri targetUri, Credentials credentials);
+
+        public abstract Task<bool> RefreshCredentials(Uri targetUri);
+
+        public async Task<bool> ValidateCredentials(Credentials credentials)
+        {
+            const string VsoValidationUrl = "https://app.vssps.visualstudio.com/_apis/profile/profiles/me?api-version=1.0";
+
+            try
+            {
+                using (HttpClient httpClient = new HttpClient())
+                {
+                    string basicAuthHeader = Convert.ToBase64String(ASCIIEncoding.ASCII.GetBytes(String.Format("{0}:{1}", credentials.Username, credentials.Password)));
+                    httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Basic", basicAuthHeader);
+
+                    HttpResponseMessage response = await httpClient.GetAsync(VsoValidationUrl);
+                    return response.IsSuccessStatusCode;
+                }
+            }
+            catch (Exception exception)
+            {
+                Debug.WriteLine(exception);
+            }
+
+            return false;
+        }
 
         protected async Task<bool> GeneratePersonalAccessToken(Uri targetUri, AuthenticationResult authResult)
         {

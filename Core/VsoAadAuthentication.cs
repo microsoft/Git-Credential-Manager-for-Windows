@@ -85,7 +85,7 @@ namespace Microsoft.TeamFoundation.Git.Helpers.Authentication
             return false;
         }
 
-        public async Task<bool> RefreshCredentials(Uri targetUri)
+        public override async Task<bool> RefreshCredentials(Uri targetUri)
         {
             BaseCredentialStore.ValidateTargetUri(targetUri);
 
