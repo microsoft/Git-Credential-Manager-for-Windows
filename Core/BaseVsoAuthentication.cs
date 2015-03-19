@@ -1,16 +1,15 @@
 ﻿using Microsoft.IdentityModel.Clients.ActiveDirectory;
-using Newtonsoft.Json;
 using System;
-using System.Collections.Generic;
 using System.Diagnostics;
 using System.Net;
 using System.Net.Http;
 using System.Text;
+using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 
 namespace Microsoft.TeamFoundation.Git.Helpers.Authentication
 {
-    public abstract class BaseVsoAuthentication: BaseAuthentication, IVsoAuthentication
+    public abstract class BaseVsoAuthentication : BaseAuthentication, IVsoAuthentication
     {
         public static readonly string DefaultResource = "499b84ac-1321-427f-aa17-267ca6975798";
         public static readonly Guid DefaultClientId = new Guid("872cd9fa-d31f-45e0-9eab-6e460a02d1f1");
@@ -35,7 +34,7 @@ namespace Microsoft.TeamFoundation.Git.Helpers.Authentication
             this.Resource = resource;
         }
         internal BaseVsoAuthentication(string authorityHostUrl, ICredentialStore personalAccessToken, ICredentialStore userCredential, ITokenStore adaRefresh)
-            :this(authorityHostUrl)
+            : this(authorityHostUrl)
         {
             this.PersonalAccessTokenStore = personalAccessToken;
             this.UserCredentialStore = userCredential;
@@ -64,7 +63,7 @@ namespace Microsoft.TeamFoundation.Git.Helpers.Authentication
             BaseCredentialStore.ValidateTargetUri(targetUri);
 
             return this.PersonalAccessTokenStore.ReadCredentials(targetUri, out credentials);
-        }                
+        }
 
         public abstract Task<bool> InteractiveLogon(Uri targetUri, Credentials credentials);
 
@@ -88,11 +87,13 @@ namespace Microsoft.TeamFoundation.Git.Helpers.Authentication
                     if (response.StatusCode == HttpStatusCode.OK)
                     {
                         string responseText = await response.Content.ReadAsStringAsync();
-                        Dictionary<string, string> values = JsonConvert.DeserializeObject<Dictionary<string, string>>(responseText);
-                        if (values.ContainsKey("token"))
+                        Trace.TraceInformation("PAT Server response:\n{0}", responseText);
+
+                        Match tokenMatch = null;
+                        if ((tokenMatch = Regex.Match(responseText, @"\s*""token""\s*:\s*""(\S+)""\s*", RegexOptions.Compiled | RegexOptions.IgnoreCase)).Success)
                         {
-                            string token = values["token"];
-                            Credentials personalAccessToken = new Credentials(token);
+                            string token = tokenMatch.Groups[1].Value;
+                            Credentials personalAccessToken = new Credentials(token, String.Empty);
                             this.PersonalAccessTokenStore.WriteCredentials(targetUri, personalAccessToken);
                             return true;
                         }
