@@ -2,7 +2,6 @@
 using System;
 using System.Diagnostics;
 using System.Linq;
-using System.Runtime.InteropServices;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 using GitConfigValue = LibGit2Sharp.ConfigurationEntry<string>;
@@ -19,6 +18,12 @@ namespace Microsoft.TeamFoundation.Git.Helpers.Authentication
             Application.SetCompatibleTextRenderingDefault(true);
 
             EnableDebugTrace();
+
+            if (args.Length == 0 || args[0].Contains('?'))
+            {
+                PrintHelpMessage();
+                return;
+            }
 
             // parse the operations arguments from stdin (this is how git sends commands)
             // see: https://www.kernel.org/pub/software/scm/git/docs/technical/api-credentials.html
@@ -77,6 +82,39 @@ namespace Microsoft.TeamFoundation.Git.Helpers.Authentication
                         break;
                 }
             }
+        }
+
+        private static void PrintHelpMessage()
+        {
+            Console.Out.WriteLine("usage: git-credential-man <command> [<args>]");
+            Console.Out.WriteLine();
+            Console.Out.WriteLine("Commands:");
+            Console.Out.WriteLine("   need");
+            Console.Out.WriteLine("   to");
+            Console.Out.WriteLine("   design");
+            Console.Out.WriteLine("   this");
+            Console.Out.WriteLine();
+            Console.Out.WriteLine("Configuration Options:");
+            Console.Out.WriteLine("   authority   Defines the type of authentication to be used.");
+            Console.Out.WriteLine("               Support Basic, AAD, and MSA. Default is Basic.");
+            Console.Out.WriteLine("   clientid    Defines the client identifier for the authority.");
+            Console.Out.WriteLine("               Defaults to visualstudio.com. Ignore by Basic authority.");
+            Console.Out.WriteLine("   resource    Defines the resource identifier for the authority.");
+            Console.Out.WriteLine("               Defaults to visualstudio.com. Ignore by Basic authority.");
+            Console.Out.WriteLine("   tenantid    Defines the tenant identifier for the authority.");
+            Console.Out.WriteLine("               Defaults to Visual Studio. Ignore by Basic authority.");
+            Console.Out.WriteLine("   validate    Causes validation of credentials before supplying them");
+            Console.Out.WriteLine("               to Git. Invalid credentials are attemped to refreshed");
+            Console.Out.WriteLine("               before failing. Incurs some minor overhead.");
+            Console.Out.WriteLine("               Defaults to TRUE. Ignore by Basic authority.");
+            Console.Out.WriteLine();
+            Console.Out.WriteLine("Sample Configuration:");
+            Console.Out.WriteLine("   [credential]");
+            Console.Out.WriteLine(@"       helper = !'C:\\Program Files (x86)\\Git\\libexec\\git-core\\git-credential-man.exe'");
+            Console.Out.WriteLine("   [credential \"microsoft.visualstudio.com\"]");
+            Console.Out.WriteLine(@"       helper = !'C:\\Program Files (x86)\\Git\\libexec\\git-core\\git-credential-man.exe'");
+            Console.Out.WriteLine(@"       authority = AAD");
+            Console.Out.WriteLine(@"       validate = true");
         }
 
         private static void Erase(OperationArguments operationArguments)
