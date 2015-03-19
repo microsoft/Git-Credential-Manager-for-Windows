@@ -2,12 +2,11 @@
 using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
-using System.Globalization;
+using System.Diagnostics;
 using System.Net;
 using System.Net.Http;
 using System.Text;
 using System.Threading.Tasks;
-using Debug = System.Diagnostics.Debug;
 
 namespace Microsoft.TeamFoundation.Git.Helpers.Authentication
 {
@@ -76,6 +75,8 @@ namespace Microsoft.TeamFoundation.Git.Helpers.Authentication
             Debug.Assert(targetUri != null, "The targetUri parameter is null");
             Debug.Assert(authResult != null, "The authResult parameter is null");
 
+            Trace.TraceInformation("Generationg Personal Access Token for {0}", targetUri);
+
             try
             {
                 using (HttpClient httpClient = new HttpClient())
@@ -110,6 +111,8 @@ namespace Microsoft.TeamFoundation.Git.Helpers.Authentication
         {
             Debug.Assert(targetUri != null, "The targetUri parameter is null");
             Debug.Assert(authResult != null, "The authResult parameter is null");
+
+            Trace.TraceInformation("Storing refresh token: {0}", authResult.RefreshToken);
 
             Token refreshToken = new Token(authResult.RefreshToken);
             this.AdaRefreshTokenStore.WriteToken(targetUri, refreshToken);

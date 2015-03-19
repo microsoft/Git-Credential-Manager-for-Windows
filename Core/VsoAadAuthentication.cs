@@ -1,8 +1,8 @@
 ﻿using Microsoft.IdentityModel.Clients.ActiveDirectory;
 using System;
+using System.Diagnostics;
 using System.Globalization;
 using System.Threading.Tasks;
-using Debug = System.Diagnostics.Debug;
 
 namespace Microsoft.TeamFoundation.Git.Helpers.Authentication
 {
@@ -35,6 +35,8 @@ namespace Microsoft.TeamFoundation.Git.Helpers.Authentication
             BaseCredentialStore.ValidateTargetUri(targetUri);
             BaseCredentialStore.ValidateCredentials(credentials);
 
+            Trace.TraceInformation("Begin InteractiveLogon for {0}", targetUri);
+
             try
             {
                 string clientId = this.ClientId.ToString("D");
@@ -54,6 +56,7 @@ namespace Microsoft.TeamFoundation.Git.Helpers.Authentication
                 Debug.Write(exception);
             }
 
+            Trace.TraceInformation("InteractiveLogon failed");
             return false;
         }
 

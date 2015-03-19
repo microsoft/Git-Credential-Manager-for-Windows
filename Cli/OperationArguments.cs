@@ -14,7 +14,6 @@ namespace Microsoft.TeamFoundation.Git.Helpers.Authentication
             string line;
             while (!String.IsNullOrWhiteSpace((line = Console.In.ReadLine())))
             {
-                Trace.TraceInformation("stdin >> {0}", line);
                 string[] pair = line.Split(new[] { '=' }, 2);
 
                 if (pair.Length == 2)
@@ -23,15 +22,19 @@ namespace Microsoft.TeamFoundation.Git.Helpers.Authentication
                     {
                         case "protocol":
                             this.Protocol = pair[1];
+                            Trace.TraceInformation("Protocol = {0}", this.Protocol);
                             break;
                         case "host":
                             this.Host = pair[1];
+                            Trace.TraceInformation("Host = {0}", this.Host);
                             break;
                         case "path":
                             this.Path = pair[1];
+                            Trace.TraceInformation("Path = {0}", this.Path);
                             break;
                         case "username":
                             this.Username = pair[1];
+                            Trace.TraceInformation("Username = {0}", this.Username);
                             break;
                         case "password":
                             this.Password = pair[1];
@@ -122,9 +125,7 @@ namespace Microsoft.TeamFoundation.Git.Helpers.Authentication
                        .Append("\n");
             }
 
-            string value = builder.ToString();
-            Trace.TraceInformation("stdout << {0}", value);
-            return value;
+            return builder.ToString();
         }
     }
 }

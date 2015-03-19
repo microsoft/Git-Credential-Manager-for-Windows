@@ -121,12 +121,19 @@ namespace Microsoft.TeamFoundation.Git.Helpers.Authentication
                         credentials = new Credentials(dialog.Username, dialog.Password);
                         Task.Run(async () =>
                         {
-                            // logon to the service via the credentials provided and return the personal access token
-                            if (await (authentication as BaseVsoAuthentication).InteractiveLogon(operationArguments.TargetUri, credentials)
-                                && authentication.GetCredentials(operationArguments.TargetUri, out credentials))
+                            try
                             {
-                                Trace.TraceInformation("credentials captured and stored");
-                                operationArguments.SetCredentials(credentials);
+                                // logon to the service via the credentials provided and return the personal access token
+                                if (await (authentication as BaseVsoAuthentication).InteractiveLogon(operationArguments.TargetUri, credentials)
+                                    && authentication.GetCredentials(operationArguments.TargetUri, out credentials))
+                                {
+                                    Trace.TraceInformation("credentials captured and stored");
+                                    operationArguments.SetCredentials(credentials);
+                                }
+                            }
+                            catch (Exception exception)
+                            {
+                                Trace.TraceError(exception.ToString());
                             }
                         })
                         .Wait();

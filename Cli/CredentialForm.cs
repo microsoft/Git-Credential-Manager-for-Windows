@@ -30,7 +30,7 @@ namespace Microsoft.TeamFoundation.Git.Helpers.Authentication
         private void OkButton_Click(object sender, EventArgs e)
         {
             this.Password = _passwordTextbox.Text;
-            this.Username = _usernameLabel.Text;
+            this.Username = _usernameTextbox.Text;
             this.Close();
         }
     }
