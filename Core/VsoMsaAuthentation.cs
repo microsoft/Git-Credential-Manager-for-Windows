@@ -52,6 +52,11 @@ namespace Microsoft.TeamFoundation.Git.Helpers.Authentication
             return false;
         }
 
+        public override Task<bool> RefreshCredentials(Uri targetUri)
+        {
+            throw new NotImplementedException();
+        }
+
         public override bool SetCredentials(Uri targetUri, Credentials credentials)
         {
             BaseCredentialStore.ValidateTargetUri(targetUri);

@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Diagnostics;
 using System.IO;
 using System.Text;
 
@@ -9,6 +10,7 @@ namespace Microsoft.TeamFoundation.Git.Helpers.Authentication
         internal OperationArguments(TextReader stdin)
         {
             this.Authority = AuthorityType.Basic;
+            this.ValidateCredentials = true;
 
             string line;
             while (!String.IsNullOrWhiteSpace((line = Console.In.ReadLine())))
@@ -21,12 +23,22 @@ namespace Microsoft.TeamFoundation.Git.Helpers.Authentication
                     {
                         case "protocol":
                             this.Protocol = pair[1];
+                            Trace.TraceInformation("Protocol = {0}", this.Protocol);
                             break;
                         case "host":
                             this.Host = pair[1];
+                            Trace.TraceInformation("Host = {0}", this.Host);
                             break;
                         case "path":
                             this.Path = pair[1];
+                            Trace.TraceInformation("Path = {0}", this.Path);
+                            break;
+                        case "username":
+                            this.Username = pair[1];
+                            Trace.TraceInformation("Username = {0}", this.Username);
+                            break;
+                        case "password":
+                            this.Password = pair[1];
                             break;
                     }
                 }
@@ -48,6 +60,7 @@ namespace Microsoft.TeamFoundation.Git.Helpers.Authentication
         public string AuthorityClientId { get; set; }
         public string AuthorityResource { get; set; }
         public string AuthorityTenantId { get; set; }
+        public bool ValidateCredentials { get; set; }
 
         public void SetCredentials(Credentials credentials)
         {
@@ -76,42 +89,31 @@ namespace Microsoft.TeamFoundation.Git.Helpers.Authentication
             {
                 this.Authority = AuthorityType.Basic;
             }
+            Trace.TraceInformation("authoriy set to {0}", this.Authority);
         }
 
         public override string ToString()
         {
             StringBuilder builder = new StringBuilder();
 
-            if (this.Protocol != null)
-            {
-                builder.Append("protocol=")
-                       .Append(this.Protocol)
-                       .Append("\n");
-            }
-            if (this.Host != null)
-            {
-                builder.Append("host=")
-                       .Append(this.Host)
-                       .Append("\n");
-            }
+            builder.Append("protocol=")
+                   .Append(this.Protocol ?? String.Empty)
+                   .Append("\n");
+            builder.Append("host=")
+                   .Append(this.Host ?? String.Empty)
+                   .Append("\n");
             if (this.Path != null)
             {
                 builder.Append("path=")
                        .Append(this.Path)
                        .Append("\n");
             }
-            if (this.Username != null)
-            {
-                builder.Append("username=")
-                       .Append(this.Username)
-                       .Append("\n");
-            }
-            if (this.Password != null)
-            {
-                builder.Append("password=")
-                       .Append(this.Password)
-                       .Append("\n");
-            }
+            builder.Append("username=")
+                   .Append(this.Username ?? String.Empty)
+                   .Append("\n");
+            builder.Append("password=")
+                   .Append(this.Password ?? String.Empty)
+                   .Append("\n");
 
             return builder.ToString();
         }

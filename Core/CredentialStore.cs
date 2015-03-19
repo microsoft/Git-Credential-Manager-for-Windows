@@ -5,7 +5,8 @@ namespace Microsoft.TeamFoundation.Git.Helpers.Authentication
 {
     public class CredentialStore : BaseCredentialStore, ICredentialStore
     {
-        internal CredentialStore(string prefix) {
+        internal CredentialStore(string prefix)
+        {
             Debug.Assert(!String.IsNullOrWhiteSpace(prefix), "The prefix parameter value is invalid");
 
             _prefix = prefix;
@@ -22,7 +23,14 @@ namespace Microsoft.TeamFoundation.Git.Helpers.Authentication
             BaseCredentialStore.ValidateTargetUri(targetUri);
 
             string targetName = this.GetTargetName(targetUri);
-            this.Delete(targetName);
+            try
+            {
+                this.Delete(targetName);
+            }
+            catch (Exception exception)
+            {
+                Debug.WriteLine(exception);
+            }
         }
         /// <summary>
         /// Reads credentials for a target URI from the credential store
