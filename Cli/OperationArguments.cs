@@ -94,36 +94,24 @@ namespace Microsoft.TeamFoundation.Git.Helpers.Authentication
         {
             StringBuilder builder = new StringBuilder();
 
-            if (this.Protocol != null)
-            {
-                builder.Append("protocol=")
-                       .Append(this.Protocol)
-                       .Append("\n");
-            }
-            if (this.Host != null)
-            {
-                builder.Append("host=")
-                       .Append(this.Host)
-                       .Append("\n");
-            }
+            builder.Append("protocol=")
+                   .Append(this.Protocol ?? String.Empty)
+                   .Append("\n");
+            builder.Append("host=")
+                   .Append(this.Host ?? String.Empty)
+                   .Append("\n");
             if (this.Path != null)
             {
                 builder.Append("path=")
                        .Append(this.Path)
                        .Append("\n");
             }
-            if (this.Username != null)
-            {
-                builder.Append("username=")
-                       .Append(this.Username)
-                       .Append("\n");
-            }
-            if (this.Password != null)
-            {
-                builder.Append("password=")
-                       .Append(this.Password)
-                       .Append("\n");
-            }
+            builder.Append("username=")
+                   .Append(this.Username ?? String.Empty)
+                   .Append("\n");
+            builder.Append("password=")
+                   .Append(this.Password ?? String.Empty)
+                   .Append("\n");
 
             return builder.ToString();
         }
