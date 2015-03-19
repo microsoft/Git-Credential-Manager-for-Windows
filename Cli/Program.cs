@@ -50,6 +50,15 @@ namespace Microsoft.TeamFoundation.Git.Helpers.Authentication
                     Trace.TraceInformation("tenantid = {0}", match.Value);
                     operationArguments.AuthorityTenantId = match.Value;
                 }
+                if ((match = GetConfig(repo, operationArguments, "validate")) != null)
+                {
+                    Trace.TraceInformation("validate = {0}", match.Value);
+                    bool validate = operationArguments.ValidateCredentials;
+                    if (Boolean.TryParse(match.Value, out validate))
+                    {
+                        operationArguments.ValidateCredentials = validate;
+                    }
+                }
             }
 
             foreach (string arg in args)
@@ -98,46 +107,82 @@ namespace Microsoft.TeamFoundation.Git.Helpers.Authentication
             if (authentication != null && authentication.GetCredentials(operationArguments.TargetUri, out credentials))
             {
                 Trace.TraceInformation("credentials found");
-                operationArguments.SetCredentials(credentials);
-            }
-            else
-            {
-                Trace.TraceInformation("credentials not found");
-                // if the authority supports VSO personal access tokens, the username + password promp git provides will be insufficient
-                // instead of relying on Git then failing, open a modal dialog and request credentials from the user
-                // and use those credentials to logon to the service and generate a personal access token
-                // then return the personal access token to the user
                 if (operationArguments.Authority == AuthorityType.AzureDirectory || operationArguments.Authority == AuthorityType.MicrosoftAccount)
                 {
-                    Trace.TraceInformation("authority is {0}, launching credential dialog", operationArguments.Authority);
-                    // ask for credentials
-                    var dialog = new CredentialForm(operationArguments.TargetUri);
-                    dialog.ShowDialog();
-
-                    if (dialog.DialogResult == DialogResult.OK)
+                    Trace.TraceInformation("authority is " + operationArguments.Authority);
+                    BaseVsoAuthentication vsoAuthentiaction = authentication as BaseVsoAuthentication;
+                    if (operationArguments.ValidateCredentials)
                     {
-                        Trace.TraceInformation("dialog = OK");
-                        Trace.TraceInformation("username = {0}, password = {1}", dialog.Username, dialog.Password == null ? String.Empty : "******");
-                        credentials = new Credentials(dialog.Username, dialog.Password);
+                        Trace.TraceInformation("credential validation requested");
                         Task.Run(async () =>
                         {
-                            try
+                            if (await vsoAuthentiaction.ValidateCredentials(credentials))
                             {
-                                // logon to the service via the credentials provided and return the personal access token
-                                if (await (authentication as BaseVsoAuthentication).InteractiveLogon(operationArguments.TargetUri, credentials)
-                                    && authentication.GetCredentials(operationArguments.TargetUri, out credentials))
+                                Trace.TraceInformation("credential validation success");
+                                operationArguments.SetCredentials(credentials);
+                            }
+                            else
+                            {
+                                Trace.TraceInformation("requesting token refresh");
+                                if (await vsoAuthentiaction.RefreshCredentials(operationArguments.TargetUri) && vsoAuthentiaction.GetCredentials(operationArguments.TargetUri, out credentials))
                                 {
-                                    Trace.TraceInformation("credentials captured and stored");
+                                    Trace.TraceInformation("token refesh successful");
                                     operationArguments.SetCredentials(credentials);
                                 }
+                                else
+                                {
+                                    Trace.TraceInformation("token refesh failure");
+                                    credentials = null;
+                                }
                             }
-                            catch (Exception exception)
-                            {
-                                Trace.TraceError(exception.ToString());
-                            }
-                        })
-                        .Wait();
+                        }).Wait();
                     }
+                    else
+                    {
+                        operationArguments.SetCredentials(credentials);
+                    }
+                }
+                else
+                {
+                    operationArguments.SetCredentials(credentials);
+                }
+            }
+
+            // if the authority supports VSO personal access tokens, the username + password promp git provides will be insufficient
+            // instead of relying on Git then failing, open a modal dialog and request credentials from the user
+            // and use those credentials to logon to the service and generate a personal access token
+            // then return the personal access token to the user
+            if (credentials == null
+                && (operationArguments.Authority == AuthorityType.AzureDirectory || operationArguments.Authority == AuthorityType.MicrosoftAccount))
+            {
+                Trace.TraceInformation("authority is {0}, launching credential dialog", operationArguments.Authority);
+                // ask for credentials
+                var dialog = new CredentialForm(operationArguments.TargetUri);
+                dialog.ShowDialog();
+
+                if (dialog.DialogResult == DialogResult.OK)
+                {
+                    Trace.TraceInformation("dialog = OK");
+                    Trace.TraceInformation("username = {0}, password = {1}", dialog.Username, dialog.Password == null ? String.Empty : "******");
+                    credentials = new Credentials(dialog.Username, dialog.Password);
+                    Task.Run(async () =>
+                    {
+                        try
+                        {
+                            // logon to the service via the credentials provided and return the personal access token
+                            if (await (authentication as BaseVsoAuthentication).InteractiveLogon(operationArguments.TargetUri, credentials)
+                            && authentication.GetCredentials(operationArguments.TargetUri, out credentials))
+                            {
+                                Trace.TraceInformation("credentials captured and stored");
+                                operationArguments.SetCredentials(credentials);
+                            }
+                        }
+                        catch (Exception exception)
+                        {
+                            Trace.TraceError(exception.ToString());
+                        }
+                    })
+                    .Wait();
                 }
             }
 
