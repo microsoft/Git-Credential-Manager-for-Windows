@@ -57,7 +57,6 @@
     <Compile Include="CredentialForm.Designer.cs">
       <DependentUpon>CredentialForm.cs</DependentUpon>
     </Compile>
-    <Compile Include="NativeMethods.cs" />
     <Compile Include="OperationArguments.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
