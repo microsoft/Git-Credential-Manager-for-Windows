@@ -1,5 +1,6 @@
 ﻿using System;
 using System.ComponentModel;
+using System.Diagnostics;
 using System.Runtime.InteropServices;
 using System.Text;
 
@@ -9,16 +10,24 @@ namespace Microsoft.TeamFoundation.Git.Helpers.Authentication
     {
         protected void Delete(string targetName)
         {
-            if (!NativeMethods.CredDelete(targetName, NativeMethods.CRED_TYPE.GENERIC, 0))
+            try
             {
-                int errorCode = Marshal.GetLastWin32Error();
-                switch (errorCode)
+                if (!NativeMethods.CredDelete(targetName, NativeMethods.CRED_TYPE.GENERIC, 0))
                 {
-                    case NativeMethods.CREDENTIAL_ERROR_NOT_FOUND:
-                        throw new Exception("Credentials not found");
-                    default:
-                        throw new Exception("Failed to delete credentials", new Win32Exception(errorCode));
+                    int errorCode = Marshal.GetLastWin32Error();
+                    switch (errorCode)
+                    {
+                        case NativeMethods.CREDENTIAL_ERROR_NOT_FOUND:
+                            Trace.TraceWarning("Credentials not found for " + targetName);
+                            break;
+                        default:
+                            throw new Exception("Failed to delete credentials for " + targetName, new Win32Exception(errorCode));
+                    }
                 }
+            }
+            catch (Exception exception)
+            {
+                Debug.WriteLine(exception);
             }
         }
 
