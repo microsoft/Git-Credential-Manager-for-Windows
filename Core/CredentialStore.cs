@@ -1,5 +1,8 @@
 ﻿using System;
+using System.ComponentModel;
 using System.Diagnostics;
+using System.Runtime.InteropServices;
+using System.Text;
 
 namespace Microsoft.TeamFoundation.Git.Helpers.Authentication
 {
@@ -31,6 +34,88 @@ namespace Microsoft.TeamFoundation.Git.Helpers.Authentication
             {
                 Debug.WriteLine(exception);
             }
+        }
+
+        public bool PromptUserCredentials(Uri targetUri, out Credentials credentials)
+        {
+            BaseCredentialStore.ValidateTargetUri(targetUri);
+
+            IntPtr inputBufferPtr = IntPtr.Zero;
+            uint inputBufferSize = 0;
+            IntPtr outputBufferPtr = IntPtr.Zero;
+            uint outputBufferSize = 0;
+
+            try
+            {
+                if (this.ReadCredentials(targetUri, out credentials))
+                {
+                    if (!NativeMethods.CredPackAuthenticationBuffer(NativeMethods.CRED_PACK.GENERIC_CREDENTIALS, credentials.Username, String.Empty, inputBufferPtr, ref inputBufferSize))
+                    {
+                        int errorcode = Marshal.GetLastWin32Error();
+                        throw new Exception("Error creating prompt", new Win32Exception(errorcode));
+                    }
+                }
+
+                NativeMethods.CREDUI_INFO credInfo = new NativeMethods.CREDUI_INFO()
+                {
+                    pszCaptionText = "Git Credentials",
+                    pszMessageText = "Enter your credentials for: " + targetUri.AbsoluteUri
+                };
+                credInfo.cbSize = Marshal.SizeOf(credInfo);
+
+                uint authPackage = 0;
+                bool save = false;
+
+                NativeMethods.CREDUI_ERROR result = NativeMethods.CredUIPromptForWindowsCredentials(ref credInfo, 0, ref authPackage, inputBufferPtr, inputBufferSize, out outputBufferPtr, out outputBufferSize, ref save, NativeMethods.CREDUIWIN.GENERIC);
+
+                switch (result)
+                {
+                    default:
+                    case NativeMethods.CREDUI_ERROR.ERROR_INSUFFICIENT_BUFFER:
+                    case NativeMethods.CREDUI_ERROR.ERROR_INVALID_ACCOUNT_NAME:
+                    case NativeMethods.CREDUI_ERROR.ERROR_INVALID_FLAGS:
+                    case NativeMethods.CREDUI_ERROR.ERROR_INVALID_PARAMETER:
+                    case NativeMethods.CREDUI_ERROR.ERROR_NOT_FOUND:
+                    case NativeMethods.CREDUI_ERROR.ERROR_NO_SUCH_LOGON_SESSION:
+                        int errorCode = Marshal.GetLastWin32Error();
+                        throw new Exception("Credential UX error", new Win32Exception(errorCode));
+                    case NativeMethods.CREDUI_ERROR.ERROR_CANCELLED:
+                        Trace.TraceWarning("credential collection cancelled");
+                        break;
+                    case NativeMethods.CREDUI_ERROR.NO_ERROR:
+                        break;
+                }
+
+                StringBuilder domainBuffer = new StringBuilder(255);
+                uint domainSize = 255;
+                StringBuilder passwordBuffer = new StringBuilder(255);
+                uint passwordSize = 255;
+                StringBuilder usernameBuffer = new StringBuilder(255);
+                uint usernameSize = 255;
+
+                if (!NativeMethods.CredUnPackAuthenticationBuffer(0, outputBufferPtr, outputBufferSize, usernameBuffer, ref usernameSize, domainBuffer, ref domainSize, passwordBuffer, ref passwordSize))
+                {
+                    int errorcode = Marshal.GetLastWin32Error();
+                    throw new Exception("Error reading credentials from prompt", new Win32Exception(errorcode));
+                }
+
+                credentials = new Credentials(usernameBuffer.ToString(), passwordBuffer.ToString());
+            }
+            finally
+            {
+                if (inputBufferPtr != IntPtr.Zero)
+                {
+                    Marshal.FreeHGlobal(inputBufferPtr);
+                }
+                if (outputBufferPtr != IntPtr.Zero)
+                {
+                    Marshal.FreeHGlobal(outputBufferPtr);
+                }
+            }
+
+            this.WriteCredentials(targetUri, credentials);
+
+            return credentials != null;
         }
         /// <summary>
         /// Reads credentials for a target URI from the credential store

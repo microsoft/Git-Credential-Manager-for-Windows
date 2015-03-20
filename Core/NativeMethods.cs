@@ -303,7 +303,7 @@ namespace Microsoft.TeamFoundation.Git.Helpers.Authentication
             public IntPtr hbmBanner;
         }
 
-        internal enum CREDUI_ERROR : int
+        internal enum CREDUI_ERROR : uint
         {
             NO_ERROR = 0,
             ERROR_CANCELLED = 1223,
@@ -313,6 +313,11 @@ namespace Microsoft.TeamFoundation.Git.Helpers.Authentication
             ERROR_INSUFFICIENT_BUFFER = 122,
             ERROR_INVALID_PARAMETER = 87,
             ERROR_INVALID_FLAGS = 1004
+        }
+
+        internal enum CRED_PACK : uint
+        {
+            GENERIC_CREDENTIALS = 4
         }
 
         /// <summary>
@@ -343,7 +348,7 @@ namespace Microsoft.TeamFoundation.Git.Helpers.Authentication
         /// </param>
         /// <param name="dwFlags">A value that specifies behavior for this function. </param>
         /// <returns>If the function succeeds, the function returns ERROR_SUCCESS. If the function is canceled by the user, it returns ERROR_CANCELLED. Any other return value indicates that the function failed to load.</returns>
-        [DllImport("credui.dll", CharSet = CharSet.Unicode, EntryPoint = "CredUIPromptForWindowsCredentials")]
+        [DllImport("credui.dll", CharSet = CharSet.Unicode, EntryPoint = "CredUIPromptForWindowsCredentials", SetLastError = true)]
         internal static extern CREDUI_ERROR CredUIPromptForWindowsCredentials(ref CREDUI_INFO uiInfo, uint dwAuthError, ref uint pulAuthPackage, IntPtr pvInAuthBuffer, uint ulInAuthBufferSize, out IntPtr ppvOutAuthBuffer, out uint pulOutAuthBufferSize, ref bool pfSave, CREDUIWIN dwFlags);
         /// <summary>
         /// The CredUnPackAuthenticationBuffer function converts an authentication buffer returned by a call to the CredUIPromptForWindowsCredentials function into a string user name and password.
@@ -383,7 +388,7 @@ namespace Microsoft.TeamFoundation.Git.Helpers.Authentication
         /// <param name="pcbPackedCredentials">A pointer to a DWORD value that specifies the size, in bytes, of the pPackedCredentials buffer. On output, if the buffer is not of sufficient size, specifies the required size, in bytes, of the pPackedCredentials buffer.</param>
         /// <returns>TRUE if the function succeeds; otherwise, FALSE.</returns>
         [DllImport("credui.dll", CharSet = CharSet.Unicode, EntryPoint = "CredPackAuthenticationBuffer", SetLastError = true)]
-        internal static extern bool CredPackAuthenticationBuffer(uint dwFlags, string pszUserName, string pszPassword, IntPtr pPackedCredentials, ref uint pcbPackedCredentials);
+        internal static extern bool CredPackAuthenticationBuffer(CRED_PACK dwFlags, string pszUserName, string pszPassword, IntPtr pPackedCredentials, ref uint pcbPackedCredentials);
         #endregion
     }
 }

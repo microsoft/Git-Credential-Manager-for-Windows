@@ -6,6 +6,7 @@ namespace Microsoft.TeamFoundation.Git.Helpers.Authentication
     {
         void DeleteCredentials(Uri targetUri);
         bool ReadCredentials(Uri targetUri, out Credentials credentials);
+        bool PromptUserCredentials(Uri targetUri, out Credentials credentials);
         void WriteCredentials(Uri targetUri, Credentials credentials);
     }
 }
