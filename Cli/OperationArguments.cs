@@ -10,6 +10,7 @@ namespace Microsoft.TeamFoundation.Git.Helpers.Authentication
         internal OperationArguments(TextReader stdin)
         {
             this.Authority = AuthorityType.Basic;
+            this.UseInteractiveFlows = true;
             this.ValidateCredentials = true;
 
             string line;
@@ -60,6 +61,7 @@ namespace Microsoft.TeamFoundation.Git.Helpers.Authentication
         public string AuthorityClientId { get; set; }
         public string AuthorityResource { get; set; }
         public string AuthorityTenantId { get; set; }
+        public bool UseInteractiveFlows { get; set; }
         public bool ValidateCredentials { get; set; }
 
         public void SetCredentials(Credentials credentials)
