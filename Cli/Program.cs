@@ -122,7 +122,7 @@ namespace Microsoft.TeamFoundation.Git.Helpers.Authentication
             Console.Out.WriteLine("   tenantid       Defines the tenant identifier for the authority.");
             Console.Out.WriteLine("                  Defaults to Visual Studio. Ignore by Basic authority.");
             Console.Out.WriteLine("   interactive    Specifies if user can be prompted for credentials or not.");
-            Console.Out.WriteLine("                  Supports Auto, Always, Never. Defaults to Auto.");
+            Console.Out.WriteLine("                  Supports Auto, Always, or Never. Defaults to Auto.");
             Console.Out.WriteLine("                  Ignore by Basic authority.");
             Console.Out.WriteLine("   validate       Causes validation of credentials before supplying them");
             Console.Out.WriteLine("                  to Git. Invalid credentials are attemped to refreshed");
@@ -218,6 +218,7 @@ namespace Microsoft.TeamFoundation.Git.Helpers.Authentication
 
                 case AuthorityType.MicrosoftAccount:
                     VsoMsaAuthentation msaAuth = authentication as VsoMsaAuthentation;
+                    throw new NotImplementedException();
                     break;
             }
 
