@@ -206,7 +206,8 @@ namespace Microsoft.TeamFoundation.Git.Helpers.Authentication
                         {
                             Trace.TraceInformation("attempting non-interactive logon with credential prompt fallback");
                             if ((operationArguments.Interactivity != Interactivity.Always
-                                && await aadAuth.NoninteractiveLogon(operationArguments.TargetUri))
+                                && await aadAuth.NoninteractiveLogon(operationArguments.TargetUri)
+                                && aadAuth.GetCredentials(operationArguments.TargetUri, out credentials))
                             || (operationArguments.Interactivity != Interactivity.Never
                                 && aadAuth.RequestUserCredentials(operationArguments.TargetUri, out credentials)
                                 && await aadAuth.InteractiveLogon(operationArguments.TargetUri, credentials)))
@@ -316,7 +317,7 @@ namespace Microsoft.TeamFoundation.Git.Helpers.Authentication
 
             // return match seeksing from most specific (credenial.<schema>://<uri>.<key>) to least specific (credential.<key>)
             var result = GetConfig(repo, "credential", String.Format("{0}://{1}", operationArguments.Protocol, operationArguments.Host), key);
-            if (result == null)
+            if (result == null && !String.IsNullOrWhiteSpace(operationArguments.Host))
             {
                 string[] fragments = operationArguments.Host.Split('.');
                 string host = null;
