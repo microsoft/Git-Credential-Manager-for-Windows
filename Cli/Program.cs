@@ -64,6 +64,15 @@ namespace Microsoft.TeamFoundation.Git.Helpers.Authentication
                         operationArguments.ValidateCredentials = validate;
                     }
                 }
+                if ((match = GetConfig(repo, operationArguments, "interactive")) != null)
+                {
+                    Trace.TraceInformation("interactive = {0}", match.Value);
+                    bool interactive = operationArguments.UseInteractiveFlows;
+                    if (Boolean.TryParse(match.Value, out interactive))
+                    {
+                        operationArguments.UseInteractiveFlows = interactive;
+                    }
+                }
                 if ((match = GetConfig(repo, operationArguments, "validate")) != null)
                 {
                     Trace.TraceInformation("validate = {0}", match.Value);
@@ -205,23 +214,48 @@ namespace Microsoft.TeamFoundation.Git.Helpers.Authentication
             if (credentials == null
                 && (operationArguments.Authority == AuthorityType.AzureDirectory || operationArguments.Authority == AuthorityType.MicrosoftAccount))
             {
-                Trace.TraceInformation("authority is {0}, launching credential dialog", operationArguments.Authority);
-                // ask for credentials
-                var dialog = new CredentialForm(operationArguments.TargetUri);
-                dialog.ShowDialog();
-
-                if (dialog.DialogResult == DialogResult.OK)
+                if (operationArguments.UseInteractiveFlows)
                 {
-                    Trace.TraceInformation("dialog = OK");
-                    Trace.TraceInformation("username = {0}, password = {1}", dialog.Username, dialog.Password == null ? String.Empty : "******");
-                    credentials = new Credentials(dialog.Username, dialog.Password);
+                    Trace.TraceInformation("authority is {0}, launching credential dialog", operationArguments.Authority);
+                    // ask for credentials
+                    var dialog = new CredentialForm(operationArguments.TargetUri);
+                    dialog.ShowDialog();
+
+                    if (dialog.DialogResult == DialogResult.OK)
+                    {
+                        Trace.TraceInformation("dialog = OK");
+                        Trace.TraceInformation("username = {0}, password = {1}", dialog.Username, dialog.Password == null ? String.Empty : "******");
+                        credentials = new Credentials(dialog.Username, dialog.Password);
+                        Task.Run(async () =>
+                        {
+                            try
+                            {
+                                // logon to the service via the credentials provided and return the personal access token
+                                if (await (authentication as BaseVsoAuthentication).InteractiveLogon(operationArguments.TargetUri, credentials)
+                                    && authentication.GetCredentials(operationArguments.TargetUri, out credentials))
+                                {
+                                    Trace.TraceInformation("credentials captured and stored");
+                                    operationArguments.SetCredentials(credentials);
+                                }
+                            }
+                            catch (Exception exception)
+                            {
+                                Trace.TraceError(exception.ToString());
+                            }
+                        })
+                        .Wait();
+                    }
+                }
+                else if (operationArguments.Authority == AuthorityType.AzureDirectory)
+                {
+                    Trace.TraceInformation("attempting non-interactive logon");
                     Task.Run(async () =>
                     {
                         try
                         {
-                            // logon to the service via the credentials provided and return the personal access token
-                            if (await (authentication as BaseVsoAuthentication).InteractiveLogon(operationArguments.TargetUri, credentials)
-                            && authentication.GetCredentials(operationArguments.TargetUri, out credentials))
+                            // logon to the service via non-interactive logon and return the personal access token
+                            if (await (authentication as VsoAadAuthentication).NoninteractiveLogon(operationArguments.TargetUri)
+                                && authentication.GetCredentials(operationArguments.TargetUri, out credentials))
                             {
                                 Trace.TraceInformation("credentials captured and stored");
                                 operationArguments.SetCredentials(credentials);
