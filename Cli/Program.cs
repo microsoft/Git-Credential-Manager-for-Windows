@@ -2,6 +2,7 @@
 using System;
 using System.Diagnostics;
 using System.Linq;
+using System.Text;
 using System.Threading.Tasks;
 using GitConfigValue = LibGit2Sharp.ConfigurationEntry<string>;
 
@@ -314,25 +315,41 @@ namespace Microsoft.TeamFoundation.Git.Helpers.Authentication
             Debug.Assert(key != null, "The key parameter is null");
 
             // return match seeksing from most specific (credenial.<schema>://<uri>.<key>) to least specific (credential.<key>)
-            return GetConfig(repo, String.Format("credential.{0}://{1}", operationArguments.Protocol, operationArguments.Host), key)
-                   ?? GetConfig(repo, String.Format("credential.{0}", operationArguments.Host), key)
-                   ?? GetConfig(repo, "credential", key);
+            var result = GetConfig(repo, "credential", String.Format("{0}://{1}", operationArguments.Protocol, operationArguments.Host), key);
+            if (result == null)
+            {
+                string[] fragments = operationArguments.Host.Split('.');
+                string host = null;
+
+                for (int i = 0; result == null && i < fragments.Length; i++)
+                {
+                    host = String.Join(".", fragments, i, fragments.Length - i);
+                    result = GetConfig(repo, "credential", host, key);
+                }
+            }
+
+            return result ?? GetConfig(repo, "credential", String.Empty, key);
         }
 
-        private static GitConfigValue GetConfig(Repository repo, string prefix, string suffix)
+        private static GitConfigValue GetConfig(Repository repo, string key, string prefix, string suffix)
         {
             Debug.Assert(repo != null, "The repo parameter is null");
             Debug.Assert(repo.Config != null, "The repo.Config parameter is null");
             Debug.Assert(prefix != null, "The prefix parameter is null");
             Debug.Assert(suffix != null, "The suffic parameter is null");
 
-            return repo.Config.Where((GitConfigValue entry) =>
-                                     {
-                                         return entry.Key.StartsWith(prefix, StringComparison.OrdinalIgnoreCase)
-                                             && entry.Key.EndsWith(suffix, StringComparison.OrdinalIgnoreCase);
-                                     })
-                              .OrderByDescending((GitConfigValue entry) => { return entry.Level; })
-                              .FirstOrDefault();
+            var result = repo.Config.Where((GitConfigValue entry) =>
+                                    {
+                                        return entry.Key.StartsWith(key, StringComparison.OrdinalIgnoreCase)
+                                            && entry.Key.EndsWith(prefix + "." + suffix, StringComparison.OrdinalIgnoreCase);
+                                    })
+                                    .OrderByDescending((GitConfigValue entry) => { return entry.Level; })
+                                    .FirstOrDefault();
+            if (result != null)
+            {
+                Trace.TraceInformation("matched: {0}.{1} = {2}", prefix, suffix, result.Key);
+            }
+            return result;
         }
 
         [Conditional("DEBUG")]
