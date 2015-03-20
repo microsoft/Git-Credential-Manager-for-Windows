@@ -64,6 +64,15 @@ namespace Microsoft.TeamFoundation.Git.Helpers.Authentication
                         operationArguments.ValidateCredentials = validate;
                     }
                 }
+                if ((match = GetConfig(repo, operationArguments, "validate")) != null)
+                {
+                    Trace.TraceInformation("validate = {0}", match.Value);
+                    bool validate = operationArguments.ValidateCredentials;
+                    if (Boolean.TryParse(match.Value, out validate))
+                    {
+                        operationArguments.ValidateCredentials = validate;
+                    }
+                }
             }
 
             foreach (string arg in args)
@@ -95,18 +104,21 @@ namespace Microsoft.TeamFoundation.Git.Helpers.Authentication
             Console.Out.WriteLine("   this");
             Console.Out.WriteLine();
             Console.Out.WriteLine("Configuration Options:");
-            Console.Out.WriteLine("   authority   Defines the type of authentication to be used.");
-            Console.Out.WriteLine("               Support Basic, AAD, and MSA. Default is Basic.");
-            Console.Out.WriteLine("   clientid    Defines the client identifier for the authority.");
-            Console.Out.WriteLine("               Defaults to visualstudio.com. Ignore by Basic authority.");
-            Console.Out.WriteLine("   resource    Defines the resource identifier for the authority.");
-            Console.Out.WriteLine("               Defaults to visualstudio.com. Ignore by Basic authority.");
-            Console.Out.WriteLine("   tenantid    Defines the tenant identifier for the authority.");
-            Console.Out.WriteLine("               Defaults to Visual Studio. Ignore by Basic authority.");
-            Console.Out.WriteLine("   validate    Causes validation of credentials before supplying them");
-            Console.Out.WriteLine("               to Git. Invalid credentials are attemped to refreshed");
-            Console.Out.WriteLine("               before failing. Incurs some minor overhead.");
-            Console.Out.WriteLine("               Defaults to TRUE. Ignore by Basic authority.");
+            Console.Out.WriteLine("   authority      Defines the type of authentication to be used.");
+            Console.Out.WriteLine("                  Support Basic, AAD, and MSA. Default is Basic.");
+            Console.Out.WriteLine("   clientid       Defines the client identifier for the authority.");
+            Console.Out.WriteLine("                  Defaults to visualstudio.com. Ignore by Basic authority.");
+            Console.Out.WriteLine("   resource       Defines the resource identifier for the authority.");
+            Console.Out.WriteLine("                  Defaults to visualstudio.com. Ignore by Basic authority.");
+            Console.Out.WriteLine("   tenantid       Defines the tenant identifier for the authority.");
+            Console.Out.WriteLine("                  Defaults to Visual Studio. Ignore by Basic authority.");
+            Console.Out.WriteLine("   interactive    Forces the helper to only authenticte interactive.");
+            Console.Out.WriteLine("                  or non-interative flows. Defaulst to TRUE.");
+            Console.Out.WriteLine("                  Ignore by Basic authority.");
+            Console.Out.WriteLine("   validate       Causes validation of credentials before supplying them");
+            Console.Out.WriteLine("                  to Git. Invalid credentials are attemped to refreshed");
+            Console.Out.WriteLine("                  before failing. Incurs some minor overhead.");
+            Console.Out.WriteLine("                  Defaults to TRUE. Ignore by Basic authority.");
             Console.Out.WriteLine();
             Console.Out.WriteLine("Sample Configuration:");
             Console.Out.WriteLine("   [credential]");
