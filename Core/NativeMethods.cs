@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Diagnostics.CodeAnalysis;
 using System.Runtime.InteropServices;
 using System.Text;
 
@@ -114,6 +115,7 @@ namespace Microsoft.TeamFoundation.Git.Helpers.Authentication
             CRED_TYPE_MAXIMUM_EX = CRED_TYPE_MAXIMUM + 1000
         }
 
+        [SuppressMessage("Microsoft.Design", "CA1049:TypesThatOwnNativeResourcesShouldBeDisposable")]
         [StructLayout(LayoutKind.Sequential, CharSet = CharSet.Unicode)]
         internal struct CREDENTIAL
         {
@@ -375,7 +377,7 @@ namespace Microsoft.TeamFoundation.Git.Helpers.Authentication
         /// <param name="pszPassword">A pointer to a null-terminated string that receives the password.</param>
         /// <param name="pcchMaxPassword">A pointer to a DWORD value that specifies the size, in characters, of the pszPassword buffer. On output, if the buffer is not of sufficient size, specifies the required size, in characters, of the pszPassword buffer. The size includes the terminating null character.</param>
         /// <returns>TRUE if the function succeeds; otherwise, FALSE.</returns>
-        [DllImport("credui.dll", CharSet = CharSet.Auto, EntryPoint = "CredUnPackAuthenticationBuffer", SetLastError = true)]
+        [DllImport("credui.dll", CharSet = CharSet.Unicode, EntryPoint = "CredUnPackAuthenticationBuffer", SetLastError = true)]
         internal static extern bool CredUnPackAuthenticationBuffer(uint dwFlags, IntPtr pAuthBuffer, uint cbAuthBuffer, StringBuilder pszUserName, ref uint pcchMaxUserName, StringBuilder pszDomainName, ref uint pcchMaxDomainame, StringBuilder pszPassword, ref uint pcchMaxPassword);
         /// <summary>
         /// The CredPackAuthenticationBuffer function converts a string user name and password into an authentication buffer.
