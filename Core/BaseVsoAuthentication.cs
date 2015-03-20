@@ -3,7 +3,6 @@ using System;
 using System.Diagnostics;
 using System.Net;
 using System.Net.Http;
-using System.Net.Http.Headers;
 using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
@@ -20,6 +19,9 @@ namespace Microsoft.TeamFoundation.Git.Helpers.Authentication
 
         protected BaseVsoAuthentication(string authorityHostUrl)
         {
+            AdalTrace.TraceSource.Switch.Level = SourceLevels.Off;
+            AdalTrace.LegacyTraceSwitch.Level = TraceLevel.Off;
+
             this.AuthorityHostUrl = authorityHostUrl;
             this.ClientId = DefaultClientId;
             this.Resource = DefaultResource;
@@ -70,16 +72,26 @@ namespace Microsoft.TeamFoundation.Git.Helpers.Authentication
 
         public abstract Task<bool> RefreshCredentials(Uri targetUri);
 
+        public bool RequestUserCredentials(Uri targetUri, out Credentials credentials)
+        {
+            BaseCredentialStore.ValidateTargetUri(targetUri);
+
+            return this.UserCredentialStore.PromptUserCredentials(targetUri, out credentials);
+        }
+
         public async Task<bool> ValidateCredentials(Credentials credentials)
         {
             const string VsoValidationUrl = "https://app.vssps.visualstudio.com/_apis/profile/profiles/me?api-version=1.0";
 
+            BaseCredentialStore.ValidateCredentials(credentials);
+
             try
             {
-                string basicAuthHeader = Convert.ToBase64String(ASCIIEncoding.ASCII.GetBytes(String.Format("{0}:{1}", credentials.Username, credentials.Password)));
+                string basicAuthHeader = "Basic " + Convert.ToBase64String(ASCIIEncoding.ASCII.GetBytes(String.Format("{0}:{1}", credentials.Username, credentials.Password)));
                 HttpWebRequest request = WebRequest.CreateHttp(VsoValidationUrl);
                 request.Headers.Add(HttpRequestHeader.Authorization, basicAuthHeader);
                 HttpWebResponse response = await request.GetResponseAsync() as HttpWebResponse;
+                Trace.TraceInformation("validation status code: {0}", response.StatusCode);
                 return response.StatusCode == HttpStatusCode.OK;
             }
             catch (Exception exception)

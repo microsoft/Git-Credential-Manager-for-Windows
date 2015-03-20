@@ -54,12 +54,6 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="AuthorityType.cs" />
-    <Compile Include="CredentialForm.cs">
-      <SubType>Form</SubType>
-    </Compile>
-    <Compile Include="CredentialForm.Designer.cs">
-      <DependentUpon>CredentialForm.cs</DependentUpon>
-    </Compile>
     <Compile Include="OperationArguments.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
@@ -73,11 +67,6 @@
       <Project>{c1daabc1-b493-459d-bb4f-04fbefb1ba13}</Project>
       <Name>Core</Name>
     </ProjectReference>
-  </ItemGroup>
-  <ItemGroup>
-    <EmbeddedResource Include="CredentialForm.resx">
-      <DependentUpon>CredentialForm.cs</DependentUpon>
-    </EmbeddedResource>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <Target Name="EnsureNuGetPackageBuildImports" BeforeTargets="PrepareForBuild">
