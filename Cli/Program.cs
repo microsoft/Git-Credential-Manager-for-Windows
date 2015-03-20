@@ -10,15 +10,9 @@ namespace Microsoft.TeamFoundation.Git.Helpers.Authentication
 {
     class Program
     {
-        [STAThread]
         static void Main(string[] args)
         {
-            // setup the application to launch dialogs if nessiary
-            Application.EnableVisualStyles();
-            Application.SetCompatibleTextRenderingDefault(true);
-
             EnableDebugTrace();
-
 
             if (args.Length == 0 || args[0].Contains('?'))
             {
@@ -218,33 +212,18 @@ namespace Microsoft.TeamFoundation.Git.Helpers.Authentication
                 if (operationArguments.UseInteractiveFlows)
                 {
                     Trace.TraceInformation("authority is {0}, launching credential dialog", operationArguments.Authority);
-                    // ask for credentials
-                    var dialog = new CredentialForm(operationArguments.TargetUri);
-                    dialog.ShowDialog();
-
-                    if (dialog.DialogResult == DialogResult.OK)
+                    if ((authentication as BaseVsoAuthentication).RequestUserCredentials(operationArguments.TargetUri, out credentials))
                     {
-                        Trace.TraceInformation("dialog = OK");
-                        Trace.TraceInformation("username = {0}, password = {1}", dialog.Username, dialog.Password == null ? String.Empty : "******");
-                        credentials = new Credentials(dialog.Username, dialog.Password);
+                        Trace.TraceInformation("credentials collected from user");
                         Task.Run(async () =>
                         {
-                            try
+                            if (await (authentication as BaseVsoAuthentication).InteractiveLogon(operationArguments.TargetUri, credentials)
+                            && authentication.GetCredentials(operationArguments.TargetUri, out credentials))
                             {
-                                // logon to the service via the credentials provided and return the personal access token
-                                if (await (authentication as BaseVsoAuthentication).InteractiveLogon(operationArguments.TargetUri, credentials)
-                                    && authentication.GetCredentials(operationArguments.TargetUri, out credentials))
-                                {
-                                    Trace.TraceInformation("credentials captured and stored");
-                                    operationArguments.SetCredentials(credentials);
-                                }
+                                Trace.TraceInformation("credentials captured and stored");
+                                operationArguments.SetCredentials(credentials);
                             }
-                            catch (Exception exception)
-                            {
-                                Trace.TraceError(exception.ToString());
-                            }
-                        })
-                        .Wait();
+                        }).Wait();
                     }
                 }
                 else if (operationArguments.Authority == AuthorityType.AzureDirectory)
