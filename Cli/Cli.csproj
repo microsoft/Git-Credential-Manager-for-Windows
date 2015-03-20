@@ -54,6 +54,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="AuthorityType.cs" />
+    <Compile Include="Interactivity.cs" />
     <Compile Include="OperationArguments.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
