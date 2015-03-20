@@ -79,10 +79,11 @@ namespace Microsoft.TeamFoundation.Git.Helpers.Authentication
 
             try
             {
-                string basicAuthHeader = Convert.ToBase64String(ASCIIEncoding.ASCII.GetBytes(String.Format("{0}:{1}", credentials.Username, credentials.Password)));
+                string basicAuthHeader = "Basic " + Convert.ToBase64String(ASCIIEncoding.ASCII.GetBytes(String.Format("{0}:{1}", credentials.Username, credentials.Password)));
                 HttpWebRequest request = WebRequest.CreateHttp(VsoValidationUrl);
                 request.Headers.Add(HttpRequestHeader.Authorization, basicAuthHeader);
                 HttpWebResponse response = await request.GetResponseAsync() as HttpWebResponse;
+                Trace.TraceInformation("validation status code: {0}", response.StatusCode);
                 return response.StatusCode == HttpStatusCode.OK;
             }
             catch (Exception exception)

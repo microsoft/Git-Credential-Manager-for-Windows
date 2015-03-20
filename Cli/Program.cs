@@ -19,6 +19,7 @@ namespace Microsoft.TeamFoundation.Git.Helpers.Authentication
 
             EnableDebugTrace();
 
+
             if (args.Length == 0 || args[0].Contains('?'))
             {
                 PrintHelpMessage();
