@@ -3,7 +3,6 @@ using System;
 using System.Diagnostics;
 using System.Linq;
 using System.Threading.Tasks;
-using System.Windows.Forms;
 using GitConfigValue = LibGit2Sharp.ConfigurationEntry<string>;
 
 namespace Microsoft.TeamFoundation.Git.Helpers.Authentication
@@ -62,10 +61,16 @@ namespace Microsoft.TeamFoundation.Git.Helpers.Authentication
                 if ((match = GetConfig(repo, operationArguments, "interactive")) != null)
                 {
                     Trace.TraceInformation("interactive = {0}", match.Value);
-                    bool interactive = operationArguments.UseInteractiveFlows;
-                    if (Boolean.TryParse(match.Value, out interactive))
+                    if (String.Equals("always", match.Value, StringComparison.OrdinalIgnoreCase)
+                        || String.Equals("true", match.Value, StringComparison.OrdinalIgnoreCase)
+                        || String.Equals("force", match.Value, StringComparison.OrdinalIgnoreCase))
                     {
-                        operationArguments.UseInteractiveFlows = interactive;
+                        operationArguments.Interactivity = Interactivity.Always;
+                    }
+                    else if (String.Equals("never", match.Value, StringComparison.OrdinalIgnoreCase)
+                       || String.Equals("false", match.Value, StringComparison.OrdinalIgnoreCase))
+                    {
+                        operationArguments.Interactivity = Interactivity.Never;
                     }
                 }
                 if ((match = GetConfig(repo, operationArguments, "validate")) != null)
@@ -109,15 +114,15 @@ namespace Microsoft.TeamFoundation.Git.Helpers.Authentication
             Console.Out.WriteLine();
             Console.Out.WriteLine("Configuration Options:");
             Console.Out.WriteLine("   authority      Defines the type of authentication to be used.");
-            Console.Out.WriteLine("                  Support Basic, AAD, and MSA. Default is Basic.");
+            Console.Out.WriteLine("                  Supportd Basic, AAD, and MSA. Default is Basic.");
             Console.Out.WriteLine("   clientid       Defines the client identifier for the authority.");
             Console.Out.WriteLine("                  Defaults to visualstudio.com. Ignore by Basic authority.");
             Console.Out.WriteLine("   resource       Defines the resource identifier for the authority.");
             Console.Out.WriteLine("                  Defaults to visualstudio.com. Ignore by Basic authority.");
             Console.Out.WriteLine("   tenantid       Defines the tenant identifier for the authority.");
             Console.Out.WriteLine("                  Defaults to Visual Studio. Ignore by Basic authority.");
-            Console.Out.WriteLine("   interactive    Forces the helper to only authenticte interactive.");
-            Console.Out.WriteLine("                  or non-interative flows. Defaulst to TRUE.");
+            Console.Out.WriteLine("   interactive    Specifies if user can be prompted for credentials or not.");
+            Console.Out.WriteLine("                  Supports Auto, Always, Never. Defaults to Auto.");
             Console.Out.WriteLine("                  Ignore by Basic authority.");
             Console.Out.WriteLine("   validate       Causes validation of credentials before supplying them");
             Console.Out.WriteLine("                  to Git. Invalid credentials are attemped to refreshed");
@@ -158,96 +163,62 @@ namespace Microsoft.TeamFoundation.Git.Helpers.Authentication
             BaseAuthentication authentication = CreateAuthentication(operationArguments);
             Credentials credentials = null;
 
-            if (authentication != null && authentication.GetCredentials(operationArguments.TargetUri, out credentials))
+            Trace.TraceInformation("authority is " + operationArguments.Authority);
+            switch (operationArguments.Authority)
             {
-                Trace.TraceInformation("credentials found");
-                if (operationArguments.Authority == AuthorityType.AzureDirectory || operationArguments.Authority == AuthorityType.MicrosoftAccount)
-                {
-                    Trace.TraceInformation("authority is " + operationArguments.Authority);
-                    BaseVsoAuthentication vsoAuthentiaction = authentication as BaseVsoAuthentication;
-                    if (operationArguments.ValidateCredentials)
+                default:
+                case AuthorityType.Basic:
+                    if (authentication.GetCredentials(operationArguments.TargetUri, out credentials))
                     {
-                        Trace.TraceInformation("credential validation requested");
-                        Task.Run(async () =>
+                        Trace.TraceInformation("credentials found");
+                        operationArguments.SetCredentials(credentials);
+                    }
+                    break;
+
+                case AuthorityType.AzureDirectory:
+                    VsoAadAuthentication aadAuth = authentication as VsoAadAuthentication;
+                    if (authentication.GetCredentials(operationArguments.TargetUri, out credentials))
+                    {
+                        Trace.TraceInformation("credentials found");
+                        if (operationArguments.ValidateCredentials)
                         {
-                            if (await vsoAuthentiaction.ValidateCredentials(credentials))
+                            Trace.TraceInformation("validation requested");
+                            Task.Run(async () =>
                             {
-                                Trace.TraceInformation("credential validation success");
-                                operationArguments.SetCredentials(credentials);
-                            }
-                            else
-                            {
-                                Trace.TraceInformation("requesting token refresh");
-                                if (await vsoAuthentiaction.RefreshCredentials(operationArguments.TargetUri) && vsoAuthentiaction.GetCredentials(operationArguments.TargetUri, out credentials))
+                                if (await aadAuth.ValidateCredentials(credentials)
+                                    || await aadAuth.RefreshCredentials(operationArguments.TargetUri)
+                                    || aadAuth.RequestUserCredentials(operationArguments.TargetUri, out credentials))
                                 {
-                                    Trace.TraceInformation("token refesh successful");
+                                    Trace.TraceInformation("credentials validated");
                                     operationArguments.SetCredentials(credentials);
                                 }
-                                else
-                                {
-                                    Trace.TraceInformation("token refesh failure");
-                                    credentials = null;
-                                }
-                            }
-                        }).Wait();
+                            }).Wait();
+                        }
+                        else
+                        {
+                            operationArguments.SetCredentials(credentials);
+                        }
                     }
                     else
                     {
-                        operationArguments.SetCredentials(credentials);
-                    }
-                }
-                else
-                {
-                    operationArguments.SetCredentials(credentials);
-                }
-            }
-
-            // if the authority supports VSO personal access tokens, the username + password promp git provides will be insufficient
-            // instead of relying on Git then failing, open a modal dialog and request credentials from the user
-            // and use those credentials to logon to the service and generate a personal access token
-            // then return the personal access token to the user
-            if (credentials == null
-                && (operationArguments.Authority == AuthorityType.AzureDirectory || operationArguments.Authority == AuthorityType.MicrosoftAccount))
-            {
-                if (operationArguments.UseInteractiveFlows)
-                {
-                    Trace.TraceInformation("authority is {0}, launching credential dialog", operationArguments.Authority);
-                    if ((authentication as BaseVsoAuthentication).RequestUserCredentials(operationArguments.TargetUri, out credentials))
-                    {
-                        Trace.TraceInformation("credentials collected from user");
                         Task.Run(async () =>
                         {
-                            if (await (authentication as BaseVsoAuthentication).InteractiveLogon(operationArguments.TargetUri, credentials)
-                            && authentication.GetCredentials(operationArguments.TargetUri, out credentials))
+                            Trace.TraceInformation("attempting non-interactive logon with credential prompt fallback");
+                            if ((operationArguments.Interactivity != Interactivity.Always
+                                && await aadAuth.NoninteractiveLogon(operationArguments.TargetUri))
+                            || (operationArguments.Interactivity != Interactivity.Never
+                                && aadAuth.RequestUserCredentials(operationArguments.TargetUri, out credentials)
+                                && await aadAuth.InteractiveLogon(operationArguments.TargetUri, credentials)))
                             {
-                                Trace.TraceInformation("credentials captured and stored");
                                 operationArguments.SetCredentials(credentials);
                             }
                         }).Wait();
                     }
-                }
-                else if (operationArguments.Authority == AuthorityType.AzureDirectory)
-                {
-                    Trace.TraceInformation("attempting non-interactive logon");
-                    Task.Run(async () =>
-                    {
-                        try
-                        {
-                            // logon to the service via non-interactive logon and return the personal access token
-                            if (await (authentication as VsoAadAuthentication).NoninteractiveLogon(operationArguments.TargetUri)
-                                && authentication.GetCredentials(operationArguments.TargetUri, out credentials))
-                            {
-                                Trace.TraceInformation("credentials captured and stored");
-                                operationArguments.SetCredentials(credentials);
-                            }
-                        }
-                        catch (Exception exception)
-                        {
-                            Trace.TraceError(exception.ToString());
-                        }
-                    })
-                    .Wait();
-                }
+                    break;
+
+                case AuthorityType.MicrosoftAccount:
+                    VsoMsaAuthentation msaAuth = authentication as VsoMsaAuthentation;
+                    break;
             }
 
             Console.Out.Write(operationArguments);
