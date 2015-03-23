@@ -56,9 +56,20 @@ namespace Microsoft.TeamFoundation.Git.Helpers.Authentication
         {
             BaseCredentialStore.ValidateTargetUri(targetUri);
 
-            this.PersonalAccessTokenStore.DeleteCredentials(targetUri);
-            this.UserCredentialStore.DeleteCredentials(targetUri);
-            this.AdaRefreshTokenStore.DeleteToken(targetUri);
+            Credentials credentials = null;
+            Token token = null;
+            if (this.PersonalAccessTokenStore.ReadCredentials(targetUri, out credentials))
+            {
+                this.PersonalAccessTokenStore.DeleteCredentials(targetUri);
+            }
+            else if (this.AdaRefreshTokenStore.ReadToken(targetUri, out token))
+            {
+                this.AdaRefreshTokenStore.DeleteToken(targetUri);
+            }
+            else if (this.UserCredentialStore.ReadCredentials(targetUri, out credentials))
+            {
+                this.UserCredentialStore.DeleteCredentials(targetUri);
+            }
         }
 
         public override bool GetCredentials(Uri targetUri, out Credentials credentials)
