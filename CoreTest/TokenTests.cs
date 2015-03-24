@@ -11,24 +11,24 @@ namespace Microsoft.TeamFoundation.Git.Helpers.Authentication
         [TestMethod]
         public void TokenStoreUrl()
         {
-            ITokenStoreTest(new TokenStore("token-test"), "http://dummy.url/for/testing", TokenString);
+            ITokenStoreTest(new TokenStore("test-token"), "http://dummy.url/for/testing", TokenString, DateTimeOffset.Now);
         }
         [TestMethod]
         public void TokenStoreUrlWithParams()
         {
-            ITokenStoreTest(new TokenStore("token-test"), "http://dummy.url/for/testing?with=params", TokenString);
+            ITokenStoreTest(new TokenStore("test-token"), "http://dummy.url/for/testing?with=params", TokenString, DateTimeOffset.Now);
         }
         [TestMethod]
         public void TokenStoreUnc()
         {
-            ITokenStoreTest(new TokenStore("token-test"), @"\\unc\share\test", TokenString);
+            ITokenStoreTest(new TokenStore("test-token"), @"\\unc\share\test", TokenString, DateTimeOffset.Now);
         }
         [TestMethod]
         public void TokenStoreValueNullRejection()
         {
             try
             {
-                ITokenStoreTest(new TokenStore("token-test"), "http://dummy.url/for/testing", null);
+                ITokenStoreTest(new TokenStore("test-token"), "http://dummy.url/for/testing", null, DateTimeOffset.Now);
                 Assert.Fail("Null token was accepted");
             }
             catch { }
@@ -39,7 +39,7 @@ namespace Microsoft.TeamFoundation.Git.Helpers.Authentication
         {
             try
             {
-                ITokenStoreTest(new TokenStore("token-test"), "http://dummy.url/for/testing", "");
+                ITokenStoreTest(new TokenStore("test-token"), "http://dummy.url/for/testing", "", DateTimeOffset.Now);
                 Assert.Fail("Empty token was accepted");
             }
             catch { }
@@ -48,24 +48,24 @@ namespace Microsoft.TeamFoundation.Git.Helpers.Authentication
         [TestMethod]
         public void TokenCacheUrl()
         {
-            ITokenStoreTest(new TokenCache("token-test"), "http://dummy.url/for/testing", TokenString);
+            ITokenStoreTest(new TokenCache("test-token"), "http://dummy.url/for/testing", TokenString, DateTimeOffset.Now);
         }
         [TestMethod]
         public void TokenCacheUrlWithParams()
         {
-            ITokenStoreTest(new TokenCache("token-test"), "http://dummy.url/for/testing?with=params", TokenString);
+            ITokenStoreTest(new TokenCache("test-token"), "http://dummy.url/for/testing?with=params", TokenString, DateTimeOffset.Now);
         }
         [TestMethod]
         public void TokenCacheUnc()
         {
-            ITokenStoreTest(new TokenCache("token-test"), @"\\unc\share\test", TokenString);
+            ITokenStoreTest(new TokenCache("test-token"), @"\\unc\share\test", TokenString, DateTimeOffset.Now);
         }
         [TestMethod]
         public void TokenCacheValueNullRejection()
         {
             try
             {
-                ITokenStoreTest(new TokenCache("token-test"), "http://dummy.url/for/testing", null);
+                ITokenStoreTest(new TokenCache("test-token"), "http://dummy.url/for/testing", null, DateTimeOffset.Now);
                 Assert.Fail("Null token was accepted");
             }
             catch { }
@@ -76,26 +76,27 @@ namespace Microsoft.TeamFoundation.Git.Helpers.Authentication
         {
             try
             {
-                ITokenStoreTest(new TokenCache("token-test"), "http://dummy.url/for/testing", "");
+                ITokenStoreTest(new TokenCache("test-token"), "http://dummy.url/for/testing", "", DateTimeOffset.Now);
                 Assert.Fail("Empty token was accepted");
             }
             catch { }
         }
 
-        private void ITokenStoreTest(ITokenStore tokenStore, string url, string token)
+        private void ITokenStoreTest(ITokenStore tokenStore, string url, string token, DateTimeOffset expires)
         {
             try
             {
                 Uri uri = new Uri(url, UriKind.Absolute);
 
-                Token writeToken = new Token(token);
+                Token writeToken = new Token(token, expires);
                 Token readToken = null;
 
                 tokenStore.WriteToken(uri, writeToken);
 
                 if (tokenStore.ReadToken(uri, out readToken))
                 {
-                    Assert.AreEqual(writeToken.Value, readToken.Value, "Tokens did not match between written and read");
+                    Assert.AreEqual(writeToken.Value, readToken.Value, "Token values did not match between written and read");
+                    Assert.AreEqual(writeToken.Expires, readToken.Expires, "Token expires did not match between written and read");
                 }
                 else
                 {

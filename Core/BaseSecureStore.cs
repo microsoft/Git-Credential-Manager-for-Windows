@@ -32,7 +32,7 @@ namespace Microsoft.TeamFoundation.Git.Helpers.Authentication
                 string targetName = this.GetTargetName(targetUri);
 
                 // read credentials from the store if they exist
-                if ((credentials = this.Read(targetName)) != null)
+                if ((credentials = this.ReadCredentials(targetName)) != null)
                 {
                     // pack them into the input buffer for display back to the user
                     if (!NativeMethods.CredPackAuthenticationBuffer(NativeMethods.CRED_PACK.GENERIC_CREDENTIALS, credentials.Username, String.Empty, inputBufferPtr, ref inputBufferSize))
@@ -72,7 +72,7 @@ namespace Microsoft.TeamFoundation.Git.Helpers.Authentication
                     credentials = new Credential(usernameBuffer.ToString(), passwordBuffer.ToString());
                     Credential.Validate(credentials);
                     // write the credentials to the credential store
-                    this.Write(targetName, credentials);
+                    this.WriteCredential(targetName, credentials);
                 }
                 else
                 {
@@ -133,7 +133,7 @@ namespace Microsoft.TeamFoundation.Git.Helpers.Authentication
 
         protected abstract string GetTargetName(Uri targetUri);
 
-        protected Credential Read(string targetName)
+        protected Credential ReadCredentials(string targetName)
         {
             Credential credentials = null;
             IntPtr credPtr = IntPtr.Zero;
@@ -164,7 +164,35 @@ namespace Microsoft.TeamFoundation.Git.Helpers.Authentication
             return credentials;
         }
 
-        protected void Write(string targetName, Credential credentials)
+        protected Token ReadToken(string targetName)
+        {
+            Token token = null;
+            IntPtr credPtr = IntPtr.Zero;
+
+            try
+            {
+                if (NativeMethods.CredRead(targetName, NativeMethods.CRED_TYPE.GENERIC, 0, out credPtr))
+                {
+                    NativeMethods.CREDENTIAL credStruct = (NativeMethods.CREDENTIAL)Marshal.PtrToStructure(credPtr, typeof(NativeMethods.CREDENTIAL));
+                    int size = (int)credStruct.CredentialBlobSize;
+                    byte[] bytes = new byte[size];
+                    Marshal.Copy(credStruct.CredentialBlob, bytes, 0, size);
+
+                    Token.Deserialize(bytes, out token);
+                }
+            }
+            finally
+            {
+                if (credPtr != IntPtr.Zero)
+                {
+                    NativeMethods.CredFree(credPtr);
+                }
+            }
+
+            return token;
+        }
+
+        protected void WriteCredential(string targetName, Credential credentials)
         {
             NativeMethods.CREDENTIAL credential = new NativeMethods.CREDENTIAL()
             {
@@ -176,14 +204,56 @@ namespace Microsoft.TeamFoundation.Git.Helpers.Authentication
                 AttributeCount = 0,
                 UserName = credentials.Username,
             };
-
-            if (!NativeMethods.CredWrite(ref credential, 0))
+            try
             {
-                int errorCode = Marshal.GetLastWin32Error();
-                throw new Exception("Failed to write credentials", new Win32Exception(errorCode));
+                if (!NativeMethods.CredWrite(ref credential, 0))
+                {
+                    int errorCode = Marshal.GetLastWin32Error();
+                    throw new Exception("Failed to write credentials", new Win32Exception(errorCode));
+                }
             }
+            finally
+            {
+                if (credential.CredentialBlob != IntPtr.Zero)
+                {
+                    Marshal.FreeCoTaskMem(credential.CredentialBlob);
+                }
+            }
+        }
 
-            Marshal.FreeCoTaskMem(credential.CredentialBlob);
+        protected void WriteToken(string targetName, Token token, string name)
+        {
+            byte[] bytes = null;
+            if (Token.Serialize(token, out bytes))
+            {
+                NativeMethods.CREDENTIAL credential = new NativeMethods.CREDENTIAL()
+                {
+                    Type = NativeMethods.CRED_TYPE.GENERIC,
+                    TargetName = targetName,
+                    CredentialBlobSize = (uint)bytes.Length,
+                    Persist = NativeMethods.CRED_PERSIST.LOCAL_MACHINE,
+                    AttributeCount = 0,
+                    UserName = name,
+                };
+                try
+                {
+                    credential.CredentialBlob = Marshal.AllocCoTaskMem(bytes.Length);
+                    Marshal.Copy(bytes, 0, credential.CredentialBlob, bytes.Length);
+
+                    if (!NativeMethods.CredWrite(ref credential, 0))
+                    {
+                        int errorCode = Marshal.GetLastWin32Error();
+                        throw new Exception("Failed to write credentials", new Win32Exception(errorCode));
+                    }
+                }
+                finally
+                {
+                    if (credential.CredentialBlob != IntPtr.Zero)
+                    {
+                        Marshal.FreeCoTaskMem(credential.CredentialBlob);
+                    }
+                }
+            }
         }
 
         internal static void ValidateTargetUri(Uri targetUri)

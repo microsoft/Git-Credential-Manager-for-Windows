@@ -161,7 +161,7 @@ namespace Microsoft.TeamFoundation.Git.Helpers.Authentication
 
             Trace.TraceInformation("Storing refresh token: {0}", authResult.RefreshToken);
 
-            Token refreshToken = new Token(authResult.RefreshToken);
+            Token refreshToken = new Token(authResult.RefreshToken, authResult.ExpiresOn);
             this.AdaRefreshTokenStore.WriteToken(targetUri, refreshToken);
         }
     }

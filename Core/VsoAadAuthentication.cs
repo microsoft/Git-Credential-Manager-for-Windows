@@ -95,7 +95,8 @@ namespace Microsoft.TeamFoundation.Git.Helpers.Authentication
                 string resource = this.Resource;
 
                 Token refreshToken = null;
-                if (this.AdaRefreshTokenStore.ReadToken(targetUri, out refreshToken))
+                if (this.AdaRefreshTokenStore.ReadToken(targetUri, out refreshToken)
+                    && refreshToken.Expires > DateTimeOffset.Now.AddMinutes(5))
                 {
                     AuthenticationContext authCtx = new AuthenticationContext(this.AuthorityHostUrl, IdentityModel.Clients.ActiveDirectory.TokenCache.DefaultShared);
                     AuthenticationResult authResult = await authCtx.AcquireTokenByRefreshTokenAsync(refreshToken.Value, clientId, resource);

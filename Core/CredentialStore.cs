@@ -50,7 +50,7 @@ namespace Microsoft.TeamFoundation.Git.Helpers.Authentication
             BaseSecureStore.ValidateTargetUri(targetUri);
 
             string targetName = this.GetTargetName(targetUri);
-            credentials = this.Read(targetName);
+            credentials = this.ReadCredentials(targetName);
 
             return credentials != null;
         }
@@ -65,7 +65,7 @@ namespace Microsoft.TeamFoundation.Git.Helpers.Authentication
             Credential.Validate(credentials);
 
             string targetName = this.GetTargetName(targetUri);
-            this.Write(targetName, credentials);
+            this.WriteCredential(targetName, credentials);
         }
         /// <summary>
         /// Formats a TargetName string based on the TargetUri base on the format started by git-credential-winstore
