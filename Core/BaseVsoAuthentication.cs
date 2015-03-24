@@ -28,6 +28,7 @@ namespace Microsoft.TeamFoundation.Git.Helpers.Authentication
             this.PersonalAccessTokenStore = new CredentialStore(PrimaryCredentialPrefix);
             this.UserCredentialStore = new CredentialStore(SecondaryCredentialPrefix);
             this.AdaRefreshTokenStore = new TokenStore(TokenPrefix);
+            this.PersonalAccessTokenCache = new CredentialCache(PrimaryCredentialPrefix);
         }
         protected BaseVsoAuthentication(string authorityHostUrl, string resource, Guid clientId)
             : this(authorityHostUrl)
@@ -51,6 +52,7 @@ namespace Microsoft.TeamFoundation.Git.Helpers.Authentication
         protected ICredentialStore PersonalAccessTokenStore { get; set; }
         protected ICredentialStore UserCredentialStore { get; set; }
         protected ITokenStore AdaRefreshTokenStore { get; set; }
+        protected ICredentialStore PersonalAccessTokenCache { get; set; }
 
         public override void DeleteCredentials(Uri targetUri)
         {
@@ -60,6 +62,7 @@ namespace Microsoft.TeamFoundation.Git.Helpers.Authentication
             Token token = null;
             if (this.PersonalAccessTokenStore.ReadCredentials(targetUri, out credentials))
             {
+                this.PersonalAccessTokenCache.DeleteCredentials(targetUri);
                 this.PersonalAccessTokenStore.DeleteCredentials(targetUri);
             }
             else if (this.AdaRefreshTokenStore.ReadToken(targetUri, out token))
@@ -76,7 +79,18 @@ namespace Microsoft.TeamFoundation.Git.Helpers.Authentication
         {
             BaseSecureStore.ValidateTargetUri(targetUri);
 
-            return this.PersonalAccessTokenStore.ReadCredentials(targetUri, out credentials);
+            // check the in-memory cache first
+            if (!this.PersonalAccessTokenCache.ReadCredentials(targetUri, out credentials))
+            {
+                // fall-back to the on disk cache
+                if (this.PersonalAccessTokenStore.ReadCredentials(targetUri, out credentials))
+                {
+                    // update the in-memory cache for faster future look-ups
+                    this.PersonalAccessTokenCache.WriteCredentials(targetUri, credentials);
+                }
+            }
+
+            return credentials != null;
         }
 
         public abstract Task<bool> InteractiveLogon(Uri targetUri, Credential credentials);
@@ -141,6 +155,7 @@ namespace Microsoft.TeamFoundation.Git.Helpers.Authentication
                             string token = tokenMatch.Groups[1].Value;
                             Credential personalAccessToken = new Credential(token, String.Empty);
                             this.PersonalAccessTokenStore.WriteCredentials(targetUri, personalAccessToken);
+                            this.PersonalAccessTokenCache.WriteCredentials(targetUri, personalAccessToken);
                             return true;
                         }
                     }

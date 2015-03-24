@@ -100,7 +100,7 @@ namespace Microsoft.TeamFoundation.Git.Helpers.Authentication
                 }
                 else
                 {
-                    Assert.Fail("Failed to read credentials");
+                    Assert.Fail("Failed to read token");
                 }
 
                 tokenStore.DeleteToken(uri);
