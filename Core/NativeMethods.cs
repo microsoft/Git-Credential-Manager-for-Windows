@@ -10,6 +10,7 @@ namespace Microsoft.TeamFoundation.Git.Helpers.Authentication
         #region advapi.dll
         internal const int CREDENTIAL_ERROR_NOT_FOUND = 1168;
         internal const int CREDENTIAL_USERNAME_MAXLEN = 513;
+        internal const int CREDENTIAL_PASSWORD_MAXLEN = 2047;
 
         [Flags]
         internal enum CRED_FLAGS : uint

@@ -94,7 +94,7 @@ namespace Microsoft.TeamFoundation.Git.Helpers.Authentication
         {
             const string VsoValidationUrl = "https://app.vssps.visualstudio.com/_apis/profile/profiles/me?api-version=1.0";
 
-            BaseSecureStore.ValidateCredentials(credentials);
+            Credential.Validate(credentials);
 
             try
             {

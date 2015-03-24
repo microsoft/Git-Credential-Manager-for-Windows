@@ -56,7 +56,7 @@ namespace Microsoft.TeamFoundation.Git.Helpers.Authentication
         public void WriteCredentials(Uri targetUri, Credential credentials)
         {
             BaseSecureStore.ValidateTargetUri(targetUri);
-            BaseSecureStore.ValidateCredentials(credentials);
+            Credential.Validate(credentials);
 
             string targetName = this.GetTargetName(targetUri);
             this.Write(targetName, credentials);

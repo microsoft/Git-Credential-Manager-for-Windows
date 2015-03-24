@@ -42,6 +42,8 @@ namespace Microsoft.TeamFoundation.Git.Helpers.Authentication
         public void WriteToken(Uri targetUri, Token token)
         {
             BaseSecureStore.ValidateTargetUri(targetUri);
+            Token.Validate(token);
+
             string targetName = this.GetTargetName(targetUri);
 
             _cache[targetName] = token;

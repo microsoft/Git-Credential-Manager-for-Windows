@@ -70,7 +70,7 @@ namespace Microsoft.TeamFoundation.Git.Helpers.Authentication
                     }
                     // convert the username and password buffers into a credential object
                     credentials = new Credential(usernameBuffer.ToString(), passwordBuffer.ToString());
-                    BaseSecureStore.ValidateCredentials(credentials);
+                    Credential.Validate(credentials);
                     // write the credentials to the credential store
                     this.Write(targetName, credentials);
                 }
@@ -184,18 +184,6 @@ namespace Microsoft.TeamFoundation.Git.Helpers.Authentication
             }
 
             Marshal.FreeCoTaskMem(credential.CredentialBlob);
-        }
-
-        internal static void ValidateCredentials(Credential credentials)
-        {
-            if (credentials == null)
-                throw new ArgumentNullException("credentials");
-            if (credentials.Password == null)
-                throw new ArgumentException("The Password field of the Credentials object cannot be null", "credentials");
-            if (String.IsNullOrEmpty(credentials.Username))
-                throw new ArgumentException("The Username field of the Credentials object cannot be null or empty", "credentials");
-            if (credentials.Username.Length > NativeMethods.CREDENTIAL_USERNAME_MAXLEN)
-                throw new ArgumentOutOfRangeException("credentials", "The Username field of the Credentials object cannot be longer than 513 characters");
         }
 
         internal static void ValidateTargetUri(Uri targetUri)

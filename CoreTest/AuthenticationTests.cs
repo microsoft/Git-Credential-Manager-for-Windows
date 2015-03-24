@@ -10,7 +10,8 @@ namespace Microsoft.TeamFoundation.Git.Helpers.Authentication
         [TestMethod]
         public void AuthenticationVsoAadTests()
         {
-            VsoAadAuthentication vsoAad = new VsoAadAuthentication();
+            VsoAadAuthentication vsoAad = new VsoAadAuthentication(new CredentialCache("pat"), new CredentialCache("user"), new TokenCache("adal"));
+            
         }
 
         [TestMethod]
