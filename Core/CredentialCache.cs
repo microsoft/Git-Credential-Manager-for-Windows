@@ -4,7 +4,7 @@ using System.Diagnostics;
 
 namespace Microsoft.TeamFoundation.Git.Helpers.Authentication
 {
-    class CredentialCache : BaseCredentialStore, ICredentialStore
+    class CredentialCache : BaseSecureStore, ICredentialStore
     {
         internal CredentialCache()
         {
@@ -15,7 +15,7 @@ namespace Microsoft.TeamFoundation.Git.Helpers.Authentication
 
         public void DeleteCredentials(Uri targetUri)
         {
-            BaseCredentialStore.ValidateTargetUri(targetUri);
+            BaseSecureStore.ValidateTargetUri(targetUri);
             string targetName = this.GetTargetName(targetUri);
 
             Credential credentials = null;
@@ -23,7 +23,7 @@ namespace Microsoft.TeamFoundation.Git.Helpers.Authentication
         }
         public bool ReadCredentials(Uri targetUri, out Credential credentials)
         {
-            BaseCredentialStore.ValidateTargetUri(targetUri);
+            BaseSecureStore.ValidateTargetUri(targetUri);
             string targetName = this.GetTargetName(targetUri);
 
             return _store.TryGetValue(targetName, out credentials);
@@ -31,7 +31,7 @@ namespace Microsoft.TeamFoundation.Git.Helpers.Authentication
 
         public void WriteCredentials(Uri targetUri, Credential credentials)
         {
-            BaseCredentialStore.ValidateTargetUri(targetUri);
+            BaseSecureStore.ValidateTargetUri(targetUri);
             string targetName = this.GetTargetName(targetUri);
 
             _store[targetName] = credentials;

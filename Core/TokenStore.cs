@@ -3,7 +3,7 @@ using System.Diagnostics;
 
 namespace Microsoft.TeamFoundation.Git.Helpers.Authentication
 {
-    public class TokenStore : BaseCredentialStore, ITokenStore
+    public class TokenStore : BaseSecureStore, ITokenStore
     {
         internal TokenStore(string prefix)
         {
@@ -20,7 +20,7 @@ namespace Microsoft.TeamFoundation.Git.Helpers.Authentication
         /// <param name="targetUri">The URI of the target for which credentials are being deleted</param>
         public void DeleteToken(Uri targetUri)
         {
-            BaseCredentialStore.ValidateTargetUri(targetUri);
+            BaseSecureStore.ValidateTargetUri(targetUri);
 
             string targetName = this.GetTargetName(targetUri);
             this.Delete(targetName);
@@ -33,7 +33,7 @@ namespace Microsoft.TeamFoundation.Git.Helpers.Authentication
         /// <returns>True if success; false if failure</returns>
         public bool ReadToken(Uri targetUri, out Token token)
         {
-            BaseCredentialStore.ValidateTargetUri(targetUri);
+            BaseSecureStore.ValidateTargetUri(targetUri);
 
             token = null;
 
@@ -54,7 +54,7 @@ namespace Microsoft.TeamFoundation.Git.Helpers.Authentication
         /// <param name="token">The token to be stored</param>
         public void WriteToken(Uri targetUri, Token token)
         {
-            BaseCredentialStore.ValidateTargetUri(targetUri);
+            BaseSecureStore.ValidateTargetUri(targetUri);
             if (token == null)
                 throw new ArgumentNullException("token", "The token parameter is null");
             if (String.IsNullOrWhiteSpace(token.Value))

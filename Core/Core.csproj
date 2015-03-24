@@ -52,7 +52,7 @@
     <Compile Include="VsoAadAuthentication.cs" />
     <Compile Include="BaseVsoAuthentication.cs" />
     <Compile Include="BaseAuthentication.cs" />
-    <Compile Include="BaseCredentialStore.cs" />
+    <Compile Include="BaseSecureStore.cs" />
     <Compile Include="BasicAuthentication.cs" />
     <Compile Include="Credential.cs" />
     <Compile Include="IAuthentication.cs" />

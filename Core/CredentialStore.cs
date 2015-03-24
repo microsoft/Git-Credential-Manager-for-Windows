@@ -3,7 +3,7 @@ using System.Diagnostics;
 
 namespace Microsoft.TeamFoundation.Git.Helpers.Authentication
 {
-    public class CredentialStore : BaseCredentialStore, ICredentialStore
+    public class CredentialStore : BaseSecureStore, ICredentialStore
     {
         internal CredentialStore(string prefix)
         {
@@ -20,7 +20,7 @@ namespace Microsoft.TeamFoundation.Git.Helpers.Authentication
         /// <param name="targetUri">The URI of the target for which credentials are being deleted</param>
         public void DeleteCredentials(Uri targetUri)
         {
-            BaseCredentialStore.ValidateTargetUri(targetUri);
+            BaseSecureStore.ValidateTargetUri(targetUri);
 
             string targetName = this.GetTargetName(targetUri);
             try
@@ -41,7 +41,7 @@ namespace Microsoft.TeamFoundation.Git.Helpers.Authentication
         /// <returns>True if success; false if failure</returns>
         public bool ReadCredentials(Uri targetUri, out Credential credentials)
         {
-            BaseCredentialStore.ValidateTargetUri(targetUri);
+            BaseSecureStore.ValidateTargetUri(targetUri);
 
             string targetName = this.GetTargetName(targetUri);
             credentials = this.Read(targetName);
@@ -55,8 +55,8 @@ namespace Microsoft.TeamFoundation.Git.Helpers.Authentication
         /// <param name="credentials">The credentials to be stored</param>
         public void WriteCredentials(Uri targetUri, Credential credentials)
         {
-            BaseCredentialStore.ValidateTargetUri(targetUri);
-            BaseCredentialStore.ValidateCredentials(credentials);
+            BaseSecureStore.ValidateTargetUri(targetUri);
+            BaseSecureStore.ValidateCredentials(credentials);
 
             string targetName = this.GetTargetName(targetUri);
             this.Write(targetName, credentials);

@@ -54,7 +54,7 @@ namespace Microsoft.TeamFoundation.Git.Helpers.Authentication
 
         public override void DeleteCredentials(Uri targetUri)
         {
-            BaseCredentialStore.ValidateTargetUri(targetUri);
+            BaseSecureStore.ValidateTargetUri(targetUri);
 
             Credential credentials = null;
             Token token = null;
@@ -74,7 +74,7 @@ namespace Microsoft.TeamFoundation.Git.Helpers.Authentication
 
         public override bool GetCredentials(Uri targetUri, out Credential credentials)
         {
-            BaseCredentialStore.ValidateTargetUri(targetUri);
+            BaseSecureStore.ValidateTargetUri(targetUri);
 
             return this.PersonalAccessTokenStore.ReadCredentials(targetUri, out credentials);
         }
@@ -85,7 +85,7 @@ namespace Microsoft.TeamFoundation.Git.Helpers.Authentication
 
         public bool RequestUserCredentials(Uri targetUri, out Credential credentials)
         {
-            BaseCredentialStore.ValidateTargetUri(targetUri);
+            BaseSecureStore.ValidateTargetUri(targetUri);
 
             return this.UserCredentialStore.PromptUserCredentials(targetUri, out credentials);
         }
@@ -94,7 +94,7 @@ namespace Microsoft.TeamFoundation.Git.Helpers.Authentication
         {
             const string VsoValidationUrl = "https://app.vssps.visualstudio.com/_apis/profile/profiles/me?api-version=1.0";
 
-            BaseCredentialStore.ValidateCredentials(credentials);
+            BaseSecureStore.ValidateCredentials(credentials);
 
             try
             {

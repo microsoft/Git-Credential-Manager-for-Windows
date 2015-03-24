@@ -7,7 +7,7 @@ using System.Text;
 
 namespace Microsoft.TeamFoundation.Git.Helpers.Authentication
 {
-    public abstract class BaseCredentialStore
+    public abstract class BaseSecureStore
     {
         /// <summary>
         /// Prompts the user for credentials (username & password) and stores the results
@@ -18,7 +18,7 @@ namespace Microsoft.TeamFoundation.Git.Helpers.Authentication
         [SuppressMessage("Microsoft.Interoperability", "CA1404:CallGetLastErrorImmediatelyAfterPInvoke")]
         public bool PromptUserCredentials(Uri targetUri, out Credential credentials)
         {
-            BaseCredentialStore.ValidateTargetUri(targetUri);
+            BaseSecureStore.ValidateTargetUri(targetUri);
 
             credentials = null;
 
@@ -70,7 +70,7 @@ namespace Microsoft.TeamFoundation.Git.Helpers.Authentication
                     }
                     // convert the username and password buffers into a credential object
                     credentials = new Credential(usernameBuffer.ToString(), passwordBuffer.ToString());
-                    BaseCredentialStore.ValidateCredentials(credentials);
+                    BaseSecureStore.ValidateCredentials(credentials);
                     // write the credentials to the credential store
                     this.Write(targetName, credentials);
                 }

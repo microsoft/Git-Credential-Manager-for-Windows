@@ -27,8 +27,8 @@ namespace Microsoft.TeamFoundation.Git.Helpers.Authentication
 
         public override async Task<bool> InteractiveLogon(Uri targetUri, Credential credentials)
         {
-            BaseCredentialStore.ValidateTargetUri(targetUri);
-            BaseCredentialStore.ValidateCredentials(credentials);
+            BaseSecureStore.ValidateTargetUri(targetUri);
+            BaseSecureStore.ValidateCredentials(credentials);
 
             try
             {
@@ -59,8 +59,8 @@ namespace Microsoft.TeamFoundation.Git.Helpers.Authentication
 
         public override bool SetCredentials(Uri targetUri, Credential credentials)
         {
-            BaseCredentialStore.ValidateTargetUri(targetUri);
-            BaseCredentialStore.ValidateCredentials(credentials);
+            BaseSecureStore.ValidateTargetUri(targetUri);
+            BaseSecureStore.ValidateCredentials(credentials);
 
             var task = Task.Run<bool>(async () => { return await this.InteractiveLogon(targetUri, credentials); });
             task.Wait();
