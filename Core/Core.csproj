@@ -47,6 +47,7 @@
     <Reference Include="System.Net.Http" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="CredentialCache.cs" />
     <Compile Include="VsoAadAuthentication.cs" />
     <Compile Include="BaseVsoAuthentication.cs" />
     <Compile Include="BaseAuthentication.cs" />
