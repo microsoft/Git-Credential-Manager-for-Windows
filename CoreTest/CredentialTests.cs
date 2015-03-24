@@ -6,27 +6,46 @@ namespace Microsoft.TeamFoundation.Git.Helpers.Authentication.Test
     [TestClass]
     public class CredentialTests
     {
+        const string TokenString = "The Azure AD Authentication Library (ADAL) for .NET enables client application developers to easily authenticate users to cloud or on-premises Active Directory (AD), and then obtain access tokens for securing API calls. ADAL for .NET has many features that make authentication easier for developers, such as asynchronous support, a configurable token cache that stores access tokens and refresh tokens, automatic token refresh when an access token expires and a refresh token is available, and more. By handling most of the complexity, ADAL can help a developer focus on business logic in their application and easily secure resources without being an expert on security.";
+
         [TestMethod]
-        public void CredentialStoreTests()
+        public void CredentialStoreUrl()
         {
             CredentialStoreTest("http://dummy.url/for/testing", "username", "password");
-            CredentialStoreTest(@"\\unc\share\test", "username", "password");
-            CredentialStoreTest("https://dummy.url/for/testing", "username", "password");
+        }
+        [TestMethod]
+        public void CredentialStoreUrlWithParams()
+        {
             CredentialStoreTest("http://dummy.url/for/testing?with=params", "username", "password");
-            CredentialStoreTest("http://dummy.url/for/testing", "u", "password_that_is_kind_of_long");
-            CredentialStoreTest("http://dummy.url/for/testing", "username", "");
+        }
+        [TestMethod]
+        public void CredentialStoreUnc()
+        {
+            CredentialStoreTest(@"\\unc\share\test", "username", "password");
+        }
+        [TestMethod]
+        public void CredentialStoreUsernameNullReject()
+        {
             try
             {
                 CredentialStoreTest("http://dummy.url/for/testing", null, "null_usernames_are_illegal");
                 Assert.Fail("Null username was accepted");
             }
             catch { }
+        }
+        [TestMethod]
+        public void CredentialStoreUsernameBlankReject()
+        {
             try
             {
                 CredentialStoreTest("http://dummy.url/for/testing", "", "blank_usernames_are_illegal");
                 Assert.Fail("Empty username was accepted");
             }
             catch { }
+        }
+        [TestMethod]
+        public void CredentialStorePasswordNullReject()
+        {
             try
             {
                 CredentialStoreTest("http://dummy.url/for/testing", "null_passwords_are_illegal", null);
@@ -36,20 +55,34 @@ namespace Microsoft.TeamFoundation.Git.Helpers.Authentication.Test
         }
 
         [TestMethod]
-        public void TokenStoreTests()
+        public void TokenStoreUrl()
         {
-            const string tokenString = "The Azure AD Authentication Library (ADAL) for .NET enables client application developers to easily authenticate users to cloud or on-premises Active Directory (AD), and then obtain access tokens for securing API calls. ADAL for .NET has many features that make authentication easier for developers, such as asynchronous support, a configurable token cache that stores access tokens and refresh tokens, automatic token refresh when an access token expires and a refresh token is available, and more. By handling most of the complexity, ADAL can help a developer focus on business logic in their application and easily secure resources without being an expert on security.";
-
-            TokenStoreTest("http://dummy.url/for/testing", tokenString);
-            TokenStoreTest(@"\\unc\share\test", tokenString);
-            TokenStoreTest("https://dummy.url/for/testing", tokenString);
-            TokenStoreTest("http://dummy.url/for/testing?with=params", tokenString);
+            TokenStoreTest("http://dummy.url/for/testing", TokenString);
+        }
+        [TestMethod]
+        public void TokenStoreUrlWithParams()
+        {
+            TokenStoreTest("http://dummy.url/for/testing?with=params", TokenString);
+        }
+        [TestMethod]
+        public void TokenStoreUnc()
+        {
+            TokenStoreTest(@"\\unc\share\test", TokenString);
+        }
+        [TestMethod]
+        public void TokenStoreValueNullRejection()
+        {
             try
             {
                 TokenStoreTest("http://dummy.url/for/testing", null);
                 Assert.Fail("Null token was accepted");
             }
             catch { }
+        }
+
+        [TestMethod]
+        public void TokenStoreValueEmptyRejection()
+        {
             try
             {
                 TokenStoreTest("http://dummy.url/for/testing", "");
@@ -57,6 +90,7 @@ namespace Microsoft.TeamFoundation.Git.Helpers.Authentication.Test
             }
             catch { }
         }
+        
 
         private void CredentialStoreTest(string url, string username, string password)
         {
