@@ -5,7 +5,7 @@ using Debug = System.Diagnostics.Debug;
 
 namespace Microsoft.TeamFoundation.Git.Helpers.Authentication
 {
-    public class VsoMsaAuthentation : BaseVsoAuthentication, IVsoAuthentication
+    public sealed class VsoMsaAuthentation : BaseVsoAuthentication, IVsoAuthentication
     {
         public const string DefaultAuthorityHost = "https://login.live.com/";
 
@@ -25,10 +25,10 @@ namespace Microsoft.TeamFoundation.Git.Helpers.Authentication
             : base(DefaultAuthorityHost, personalAccessToken, userCredential, adaRefresh)
         { }
 
-        public override async Task<bool> InteractiveLogon(Uri targetUri, Credentials credentials)
+        public override async Task<bool> InteractiveLogon(Uri targetUri, Credential credentials)
         {
-            BaseCredentialStore.ValidateTargetUri(targetUri);
-            BaseCredentialStore.ValidateCredentials(credentials);
+            BaseSecureStore.ValidateTargetUri(targetUri);
+            Credential.Validate(credentials);
 
             try
             {
@@ -36,7 +36,7 @@ namespace Microsoft.TeamFoundation.Git.Helpers.Authentication
                 string resource = this.Resource;
 
                 UserCredential userCredential = new UserCredential(credentials.Username, credentials.Password);
-                AuthenticationContext authCtx = new AuthenticationContext(this.AuthorityHostUrl, TokenCache.DefaultShared);
+                AuthenticationContext authCtx = new AuthenticationContext(this.AuthorityHostUrl, IdentityModel.Clients.ActiveDirectory.TokenCache.DefaultShared);
                 AuthenticationResult authResult = await authCtx.AcquireTokenAsync(resource, clientId, userCredential);
 
                 this.StoreRefreshToken(targetUri, authResult);
@@ -57,10 +57,10 @@ namespace Microsoft.TeamFoundation.Git.Helpers.Authentication
             throw new NotImplementedException();
         }
 
-        public override bool SetCredentials(Uri targetUri, Credentials credentials)
+        public override bool SetCredentials(Uri targetUri, Credential credentials)
         {
-            BaseCredentialStore.ValidateTargetUri(targetUri);
-            BaseCredentialStore.ValidateCredentials(credentials);
+            BaseSecureStore.ValidateTargetUri(targetUri);
+            Credential.Validate(credentials);
 
             var task = Task.Run<bool>(async () => { return await this.InteractiveLogon(targetUri, credentials); });
             task.Wait();

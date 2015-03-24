@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace Microsoft.TeamFoundation.Git.Helpers.Authentication
 {
-    public class VsoAadAuthentication : BaseVsoAuthentication, IVsoAadAuthentication
+    public sealed class VsoAadAuthentication : BaseVsoAuthentication, IVsoAadAuthentication
     {
         public const string DefaultAuthorityHost = "https://login.windows.net/common";
         private const string AuthorityHostFormat = "https://login.windows.net/{0:D}";
@@ -30,10 +30,10 @@ namespace Microsoft.TeamFoundation.Git.Helpers.Authentication
             : base(DefaultAuthorityHost, personalAccessToken, userCredential, adaRefresh)
         { }
 
-        public override async Task<bool> InteractiveLogon(Uri targetUri, Credentials credentials)
+        public override async Task<bool> InteractiveLogon(Uri targetUri, Credential credentials)
         {
-            BaseCredentialStore.ValidateTargetUri(targetUri);
-            BaseCredentialStore.ValidateCredentials(credentials);
+            BaseSecureStore.ValidateTargetUri(targetUri);
+            Credential.Validate(credentials);
 
             Trace.TraceInformation("Begin InteractiveLogon for {0}", targetUri);
 
@@ -43,7 +43,7 @@ namespace Microsoft.TeamFoundation.Git.Helpers.Authentication
                 string resource = this.Resource;
 
                 UserCredential userCredential = new UserCredential(credentials.Username, credentials.Password);
-                AuthenticationContext authCtx = new AuthenticationContext(this.AuthorityHostUrl, TokenCache.DefaultShared);
+                AuthenticationContext authCtx = new AuthenticationContext(this.AuthorityHostUrl, IdentityModel.Clients.ActiveDirectory.TokenCache.DefaultShared);
                 AuthenticationResult authResult = await authCtx.AcquireTokenAsync(resource, clientId, userCredential);
 
                 this.StoreRefreshToken(targetUri, authResult);
@@ -62,7 +62,7 @@ namespace Microsoft.TeamFoundation.Git.Helpers.Authentication
 
         public async Task<bool> NoninteractiveLogon(Uri targetUri)
         {
-            BaseCredentialStore.ValidateTargetUri(targetUri);
+            BaseSecureStore.ValidateTargetUri(targetUri);
 
             try
             {
@@ -70,7 +70,7 @@ namespace Microsoft.TeamFoundation.Git.Helpers.Authentication
                 string resource = this.Resource;
 
                 UserCredential userCredential = new UserCredential();
-                AuthenticationContext authCtx = new AuthenticationContext(this.AuthorityHostUrl, TokenCache.DefaultShared);
+                AuthenticationContext authCtx = new AuthenticationContext(this.AuthorityHostUrl, IdentityModel.Clients.ActiveDirectory.TokenCache.DefaultShared);
                 AuthenticationResult authResult = await authCtx.AcquireTokenAsync(resource, clientId, userCredential);
 
                 this.StoreRefreshToken(targetUri, authResult);
@@ -87,7 +87,7 @@ namespace Microsoft.TeamFoundation.Git.Helpers.Authentication
 
         public override async Task<bool> RefreshCredentials(Uri targetUri)
         {
-            BaseCredentialStore.ValidateTargetUri(targetUri);
+            BaseSecureStore.ValidateTargetUri(targetUri);
 
             try
             {
@@ -95,16 +95,17 @@ namespace Microsoft.TeamFoundation.Git.Helpers.Authentication
                 string resource = this.Resource;
 
                 Token refreshToken = null;
-                if (this.AdaRefreshTokenStore.ReadToken(targetUri, out refreshToken))
+                if (this.AdaRefreshTokenStore.ReadToken(targetUri, out refreshToken)
+                    && refreshToken.Expires > DateTimeOffset.Now.AddMinutes(5))
                 {
-                    AuthenticationContext authCtx = new AuthenticationContext(this.AuthorityHostUrl, TokenCache.DefaultShared);
+                    AuthenticationContext authCtx = new AuthenticationContext(this.AuthorityHostUrl, IdentityModel.Clients.ActiveDirectory.TokenCache.DefaultShared);
                     AuthenticationResult authResult = await authCtx.AcquireTokenByRefreshTokenAsync(refreshToken.Value, clientId, resource);
 
                     return await this.GeneratePersonalAccessToken(targetUri, authResult);
                 }
                 else
                 {
-                    Credentials credentials = null;
+                    Credential credentials = null;
                     if (this.UserCredentialStore.ReadCredentials(targetUri, out credentials))
                     {
                         return await this.InteractiveLogon(targetUri, credentials);
@@ -119,10 +120,10 @@ namespace Microsoft.TeamFoundation.Git.Helpers.Authentication
             return true;
         }
 
-        public override bool SetCredentials(Uri targetUri, Credentials credentials)
+        public override bool SetCredentials(Uri targetUri, Credential credentials)
         {
-            BaseCredentialStore.ValidateTargetUri(targetUri);
-            BaseCredentialStore.ValidateCredentials(credentials);
+            BaseSecureStore.ValidateTargetUri(targetUri);
+            Credential.Validate(credentials);
 
             var task = Task.Run<bool>(async () => { return await this.InteractiveLogon(targetUri, credentials); });
             task.Wait();

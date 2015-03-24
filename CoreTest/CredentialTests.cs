@@ -1,34 +1,32 @@
-﻿using System;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
+﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
+using System;
 
 namespace Microsoft.TeamFoundation.Git.Helpers.Authentication.Test
 {
     [TestClass]
     public class CredentialTests
     {
-        const string TokenString = "The Azure AD Authentication Library (ADAL) for .NET enables client application developers to easily authenticate users to cloud or on-premises Active Directory (AD), and then obtain access tokens for securing API calls. ADAL for .NET has many features that make authentication easier for developers, such as asynchronous support, a configurable token cache that stores access tokens and refresh tokens, automatic token refresh when an access token expires and a refresh token is available, and more. By handling most of the complexity, ADAL can help a developer focus on business logic in their application and easily secure resources without being an expert on security.";
-
         [TestMethod]
         public void CredentialStoreUrl()
         {
-            CredentialStoreTest("http://dummy.url/for/testing", "username", "password");
+            ICredentialStoreTest(new CredentialStore("test"), "http://dummy.url/for/testing", "username", "password");
         }
         [TestMethod]
         public void CredentialStoreUrlWithParams()
         {
-            CredentialStoreTest("http://dummy.url/for/testing?with=params", "username", "password");
+            ICredentialStoreTest(new CredentialStore("test"), "http://dummy.url/for/testing?with=params", "username", "password");
         }
         [TestMethod]
         public void CredentialStoreUnc()
         {
-            CredentialStoreTest(@"\\unc\share\test", "username", "password");
+            ICredentialStoreTest(new CredentialStore("test"), @"\\unc\share\test", "username", "password");
         }
         [TestMethod]
         public void CredentialStoreUsernameNullReject()
         {
             try
             {
-                CredentialStoreTest("http://dummy.url/for/testing", null, "null_usernames_are_illegal");
+                ICredentialStoreTest(new CredentialStore("test"), "http://dummy.url/for/testing", null, "null_usernames_are_illegal");
                 Assert.Fail("Null username was accepted");
             }
             catch { }
@@ -38,7 +36,7 @@ namespace Microsoft.TeamFoundation.Git.Helpers.Authentication.Test
         {
             try
             {
-                CredentialStoreTest("http://dummy.url/for/testing", "", "blank_usernames_are_illegal");
+                ICredentialStoreTest(new CredentialStore("test"), "http://dummy.url/for/testing", "", "blank_usernames_are_illegal");
                 Assert.Fail("Empty username was accepted");
             }
             catch { }
@@ -48,63 +46,69 @@ namespace Microsoft.TeamFoundation.Git.Helpers.Authentication.Test
         {
             try
             {
-                CredentialStoreTest("http://dummy.url/for/testing", "null_passwords_are_illegal", null);
+                ICredentialStoreTest(new CredentialStore("test"), "http://dummy.url/for/testing", "null_passwords_are_illegal", null);
                 Assert.Fail("Null password was accepted");
             }
             catch { }
         }
 
         [TestMethod]
-        public void TokenStoreUrl()
+        public void CredentialCacheUrl()
         {
-            TokenStoreTest("http://dummy.url/for/testing", TokenString);
+            ICredentialStoreTest(new CredentialCache("test-cache"), "http://dummy.url/for/testing", "username", "password");
         }
         [TestMethod]
-        public void TokenStoreUrlWithParams()
+        public void CredentialCacheUrlWithParams()
         {
-            TokenStoreTest("http://dummy.url/for/testing?with=params", TokenString);
+            ICredentialStoreTest(new CredentialCache("test-cache"), "http://dummy.url/for/testing?with=params", "username", "password");
         }
         [TestMethod]
-        public void TokenStoreUnc()
+        public void CredentialCacheUnc()
         {
-            TokenStoreTest(@"\\unc\share\test", TokenString);
+            ICredentialStoreTest(new CredentialCache("test-cache"), @"\\unc\share\test", "username", "password");
         }
         [TestMethod]
-        public void TokenStoreValueNullRejection()
+        public void CredentialCacheUsernameNullReject()
         {
             try
             {
-                TokenStoreTest("http://dummy.url/for/testing", null);
-                Assert.Fail("Null token was accepted");
+                ICredentialStoreTest(new CredentialCache("test-cache"), "http://dummy.url/for/testing", null, "null_usernames_are_illegal");
+                Assert.Fail("Null username was accepted");
             }
             catch { }
         }
-
         [TestMethod]
-        public void TokenStoreValueEmptyRejection()
+        public void CredentialCacheUsernameBlankReject()
         {
             try
             {
-                TokenStoreTest("http://dummy.url/for/testing", "");
-                Assert.Fail("Empty token was accepted");
+                ICredentialStoreTest(new CredentialCache("test-cache"), "http://dummy.url/for/testing", "", "blank_usernames_are_illegal");
+                Assert.Fail("Empty username was accepted");
             }
             catch { }
         }
-        
+        [TestMethod]
+        public void CredentialCachePasswordNullReject()
+        {
+            try
+            {
+                ICredentialStoreTest(new CredentialCache("test-cache"), "http://dummy.url/for/testing", "null_passwords_are_illegal", null);
+                Assert.Fail("Null password was accepted");
+            }
+            catch { }
+        }        
 
-        private void CredentialStoreTest(string url, string username, string password)
+        private void ICredentialStoreTest(ICredentialStore credentialStore, string url, string username, string password)
         {
             try
             {
                 Uri uri = new Uri(url, UriKind.Absolute);
-                Credentials writeCreds = new Credentials(username, password);
-                Credentials readCreds = null;
+                Credential writeCreds = new Credential(username, password);
+                Credential readCreds = null;
 
-                ICredentialStore priamryStore = new CredentialStore("prime-test");
+                credentialStore.WriteCredentials(uri, writeCreds);
 
-                priamryStore.WriteCredentials(uri, writeCreds);
-
-                if (priamryStore.ReadCredentials(uri, out readCreds))
+                if (credentialStore.ReadCredentials(uri, out readCreds))
                 {
                     Assert.AreEqual(writeCreds.Password, readCreds.Password, "Passwords did not match between written and read credentials");
                     Assert.AreEqual(writeCreds.Username, readCreds.Username, "Usernames did not match between written and read credentials");
@@ -114,40 +118,9 @@ namespace Microsoft.TeamFoundation.Git.Helpers.Authentication.Test
                     Assert.Fail("Failed to read credentials");
                 }
 
-                priamryStore.DeleteCredentials(uri);
+                credentialStore.DeleteCredentials(uri);
 
-                Assert.IsFalse(priamryStore.ReadCredentials(uri, out readCreds), "Deleted credentials were read back");
-            }
-            catch (Exception exception)
-            {
-                Assert.Fail(exception.Message);
-            }
-        }
-
-        private void TokenStoreTest(string url, string token)
-        {
-            try
-            {
-                Uri uri = new Uri(url, UriKind.Absolute);
-
-                ITokenStore tokenStore = new TokenStore("token-test");
-                Token writeToken = new Token(token);
-                Token readToken = null;
-
-                tokenStore.WriteToken(uri, writeToken);
-
-                if (tokenStore.ReadToken(uri, out readToken))
-                {
-                    Assert.AreEqual(writeToken.Value, readToken.Value, "Tokens did not match between written and read");
-                }
-                else
-                {
-                    Assert.Fail("Failed to read credentials");
-                }
-
-                tokenStore.DeleteToken(uri);
-
-                Assert.IsFalse(tokenStore.ReadToken(uri, out readToken), "Deleted token was read back");
+                Assert.IsFalse(credentialStore.ReadCredentials(uri, out readCreds), "Deleted credentials were read back");
             }
             catch (Exception exception)
             {

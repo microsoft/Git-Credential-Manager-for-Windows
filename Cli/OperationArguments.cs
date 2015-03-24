@@ -64,7 +64,7 @@ namespace Microsoft.TeamFoundation.Git.Helpers.Authentication
         public Interactivity Interactivity { get; set; }
         public bool ValidateCredentials { get; set; }
 
-        public void SetCredentials(Credentials credentials)
+        public void SetCredentials(Credential credentials)
         {
             this.Username = credentials.Username;
             this.Password = credentials.Password;

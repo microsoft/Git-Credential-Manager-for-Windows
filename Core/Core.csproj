@@ -22,14 +22,17 @@
     <DefineConstants>DEBUG;TRACE</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
     <DebugType>pdbonly</DebugType>
     <Optimize>true</Optimize>
     <OutputPath>bin\Release\</OutputPath>
-    <DefineConstants>TRACE</DefineConstants>
+    <DefineConstants>
+    </DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="Microsoft.IdentityModel.Clients.ActiveDirectory, Version=2.14.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
@@ -47,12 +50,14 @@
     <Reference Include="System.Net.Http" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="CredentialCache.cs" />
+    <Compile Include="TokenCache.cs" />
     <Compile Include="VsoAadAuthentication.cs" />
     <Compile Include="BaseVsoAuthentication.cs" />
     <Compile Include="BaseAuthentication.cs" />
-    <Compile Include="BaseCredentialStore.cs" />
+    <Compile Include="BaseSecureStore.cs" />
     <Compile Include="BasicAuthentication.cs" />
-    <Compile Include="Credentials.cs" />
+    <Compile Include="Credential.cs" />
     <Compile Include="IAuthentication.cs" />
     <Compile Include="IVsoAadAuthentication.cs" />
     <Compile Include="ICredentialStore.cs" />

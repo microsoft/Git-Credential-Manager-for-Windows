@@ -1,16 +1,31 @@
 ﻿using System;
+using System.Collections.Concurrent;
 using System.Diagnostics;
 
 namespace Microsoft.TeamFoundation.Git.Helpers.Authentication
 {
-    public sealed class TokenStore : BaseSecureStore, ITokenStore
+    /// <summary>
+    /// Stores credentials relative to target URIs. In-memory, thread-safe.
+    /// </summary>
+    public sealed class CredentialCache : BaseSecureStore, ICredentialStore
     {
-        internal TokenStore(string prefix)
+        static CredentialCache()
+        {
+            _cache = new ConcurrentDictionary<string, Credential>(StringComparer.OrdinalIgnoreCase);
+        }
+
+        /// <summary>
+        /// Creates a new CredentialCache
+        /// </summary>
+        /// <param name="prefix">The namespace of the credential set accessed by this instance</param>
+        internal CredentialCache(string prefix)
         {
             Debug.Assert(!String.IsNullOrWhiteSpace(prefix), "The prefix parameter value is invalid");
 
             _prefix = prefix;
         }
+
+        private static readonly ConcurrentDictionary<string, Credential> _cache;
 
         private readonly string _prefix;
 
@@ -18,45 +33,38 @@ namespace Microsoft.TeamFoundation.Git.Helpers.Authentication
         /// Deleted credentials for target URI from the credential store
         /// </summary>
         /// <param name="targetUri">The URI of the target for which credentials are being deleted</param>
-        public void DeleteToken(Uri targetUri)
+        public void DeleteCredentials(Uri targetUri)
         {
             BaseSecureStore.ValidateTargetUri(targetUri);
-
             string targetName = this.GetTargetName(targetUri);
-            this.Delete(targetName);
+
+            Credential credentials = null;
+            _cache.TryRemove(targetName, out credentials);
         }
         /// <summary>
         /// Reads credentials for a target URI from the credential store
         /// </summary>
         /// <param name="targetUri">The URI of the target for which credentials are being read</param>
-        /// <param name="token">The token from the store; null if failure</param>
+        /// <param name="credentials">The credentials from the store; null if failure</param>
         /// <returns>True if success; false if failure</returns>
-        public bool ReadToken(Uri targetUri, out Token token)
+        public bool ReadCredentials(Uri targetUri, out Credential credentials)
         {
             BaseSecureStore.ValidateTargetUri(targetUri);
-
-            token = null;
-
             string targetName = this.GetTargetName(targetUri);
-            token = base.ReadToken(targetName);
 
-            return token != null;
+            return _cache.TryGetValue(targetName, out credentials);
         }
         /// <summary>
         /// Writes credentials for a target URI to the credential store
         /// </summary>
         /// <param name="targetUri">The URI of the target for which credentials are being stored</param>
-        /// <param name="token">The token to be stored</param>
-        public void WriteToken(Uri targetUri, Token token)
+        /// <param name="credentials">The credentials to be stored</param>
+        public void WriteCredentials(Uri targetUri, Credential credentials)
         {
             BaseSecureStore.ValidateTargetUri(targetUri);
-            if (token == null)
-                throw new ArgumentNullException("token", "The token parameter is null");
-            if (String.IsNullOrWhiteSpace(token.Value))
-                throw new ArgumentException("The token parameter is invlaid", "token");
-
             string targetName = this.GetTargetName(targetUri);
-            this.WriteToken(targetName, token, "Azure Directory Refresh Token");
+
+            _cache[targetName] = credentials;
         }
         /// <summary>
         /// Formats a TargetName string based on the TargetUri base on the format started by git-credential-winstore
@@ -65,15 +73,16 @@ namespace Microsoft.TeamFoundation.Git.Helpers.Authentication
         /// <returns>Properly formatted TargetName string</returns>
         protected override string GetTargetName(Uri targetUri)
         {
-            const string TokenNameFormat = "{0}:{1}://{2}";
+            const string PrimaryNameFormat = "{0}{1}://{2}";
 
-            System.Diagnostics.Debug.Assert(targetUri != null, "The targetUri parameter is null");
+            Debug.Assert(targetUri != null, "The targetUri parameter is null");
+            Debug.Assert(targetUri.IsAbsoluteUri, "The targetUri parameter is not absolute");
 
             // trim any trailing slashes and/or whitespace for compat with git-credential-winstore
             string trimmedHostUrl = targetUri.Host
                                              .TrimEnd('/', '\\')
                                              .TrimEnd();
-            string targetName = String.Format(TokenNameFormat, _prefix, targetUri.Scheme, trimmedHostUrl);
+            string targetName = String.Format(PrimaryNameFormat, _prefix, targetUri.Scheme, trimmedHostUrl);
             return targetName;
         }
     }

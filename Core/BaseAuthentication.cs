@@ -8,8 +8,8 @@ namespace Microsoft.TeamFoundation.Git.Helpers.Authentication
 
         public abstract void DeleteCredentials(Uri targetUri);
 
-        public abstract bool GetCredentials(Uri targetUri, out Credentials credentials);
+        public abstract bool GetCredentials(Uri targetUri, out Credential credentials);
 
-        public abstract bool SetCredentials(Uri targetUri, Credentials credentials);
+        public abstract bool SetCredentials(Uri targetUri, Credential credentials);
     }
 }
