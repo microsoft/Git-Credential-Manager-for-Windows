@@ -103,8 +103,8 @@ namespace Microsoft.TeamFoundation.Git.Helpers.Authentication.Test
             try
             {
                 Uri uri = new Uri(url, UriKind.Absolute);
-                Credentials writeCreds = new Credentials(username, password);
-                Credentials readCreds = null;
+                Credential writeCreds = new Credential(username, password);
+                Credential readCreds = null;
 
                 credentialStore.WriteCredentials(uri, writeCreds);
 

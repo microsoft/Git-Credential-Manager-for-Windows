@@ -25,12 +25,12 @@ namespace Microsoft.TeamFoundation.Git.Helpers.Authentication
             this.CredentialStore.DeleteCredentials(targetUri);
         }
 
-        public override bool GetCredentials(Uri targetUri, out Credentials credentials)
+        public override bool GetCredentials(Uri targetUri, out Credential credentials)
         {
             return this.CredentialStore.ReadCredentials(targetUri, out credentials);
         }
 
-        public override bool SetCredentials(Uri targetUri, Credentials credentials)
+        public override bool SetCredentials(Uri targetUri, Credential credentials)
         {
             this.CredentialStore.WriteCredentials(targetUri, credentials);
             return true;

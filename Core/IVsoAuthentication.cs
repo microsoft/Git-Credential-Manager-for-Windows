@@ -5,6 +5,6 @@ namespace Microsoft.TeamFoundation.Git.Helpers.Authentication
 {
     public interface IVsoAuthentication:IAuthentication
     {
-        Task<bool> InteractiveLogon(Uri targetUri, Credentials credentials);
+        Task<bool> InteractiveLogon(Uri targetUri, Credential credentials);
     }
 }

@@ -39,7 +39,7 @@ namespace Microsoft.TeamFoundation.Git.Helpers.Authentication
         /// <param name="targetUri">The URI of the target for which credentials are being read</param>
         /// <param name="credentials">The credentials from the store; null if failure</param>
         /// <returns>True if success; false if failure</returns>
-        public bool ReadCredentials(Uri targetUri, out Credentials credentials)
+        public bool ReadCredentials(Uri targetUri, out Credential credentials)
         {
             BaseCredentialStore.ValidateTargetUri(targetUri);
 
@@ -53,7 +53,7 @@ namespace Microsoft.TeamFoundation.Git.Helpers.Authentication
         /// </summary>
         /// <param name="targetUri">The URI of the target for which credentials are being stored</param>
         /// <param name="credentials">The credentials to be stored</param>
-        public void WriteCredentials(Uri targetUri, Credentials credentials)
+        public void WriteCredentials(Uri targetUri, Credential credentials)
         {
             BaseCredentialStore.ValidateTargetUri(targetUri);
             BaseCredentialStore.ValidateCredentials(credentials);

@@ -16,7 +16,7 @@ namespace Microsoft.TeamFoundation.Git.Helpers.Authentication
         /// <param name="credentials">The credentials from the store; null if failure</param>
         /// <returns>True if success; false if failure</returns>
         [SuppressMessage("Microsoft.Interoperability", "CA1404:CallGetLastErrorImmediatelyAfterPInvoke")]
-        public bool PromptUserCredentials(Uri targetUri, out Credentials credentials)
+        public bool PromptUserCredentials(Uri targetUri, out Credential credentials)
         {
             BaseCredentialStore.ValidateTargetUri(targetUri);
 
@@ -69,7 +69,7 @@ namespace Microsoft.TeamFoundation.Git.Helpers.Authentication
                         throw new Exception("Error reading credentials from prompt", new Win32Exception(errorcode));
                     }
                     // convert the username and password buffers into a credential object
-                    credentials = new Credentials(usernameBuffer.ToString(), passwordBuffer.ToString());
+                    credentials = new Credential(usernameBuffer.ToString(), passwordBuffer.ToString());
                     BaseCredentialStore.ValidateCredentials(credentials);
                     // write the credentials to the credential store
                     this.Write(targetName, credentials);
@@ -133,9 +133,9 @@ namespace Microsoft.TeamFoundation.Git.Helpers.Authentication
 
         protected abstract string GetTargetName(Uri targetUri);
 
-        protected Credentials Read(string targetName)
+        protected Credential Read(string targetName)
         {
-            Credentials credentials = null;
+            Credential credentials = null;
             IntPtr credPtr = IntPtr.Zero;
 
             try
@@ -150,7 +150,7 @@ namespace Microsoft.TeamFoundation.Git.Helpers.Authentication
                                     : String.Empty;
                     string username = credStruct.UserName;
 
-                    credentials = new Credentials(username, password);
+                    credentials = new Credential(username, password);
                 }
             }
             finally
@@ -164,7 +164,7 @@ namespace Microsoft.TeamFoundation.Git.Helpers.Authentication
             return credentials;
         }
 
-        protected void Write(string targetName, Credentials credentials)
+        protected void Write(string targetName, Credential credentials)
         {
             NativeMethods.CREDENTIAL credential = new NativeMethods.CREDENTIAL()
             {
@@ -186,7 +186,7 @@ namespace Microsoft.TeamFoundation.Git.Helpers.Authentication
             Marshal.FreeCoTaskMem(credential.CredentialBlob);
         }
 
-        internal static void ValidateCredentials(Credentials credentials)
+        internal static void ValidateCredentials(Credential credentials)
         {
             if (credentials == null)
                 throw new ArgumentNullException("credentials");

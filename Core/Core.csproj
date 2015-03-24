@@ -53,7 +53,7 @@
     <Compile Include="BaseAuthentication.cs" />
     <Compile Include="BaseCredentialStore.cs" />
     <Compile Include="BasicAuthentication.cs" />
-    <Compile Include="Credentials.cs" />
+    <Compile Include="Credential.cs" />
     <Compile Include="IAuthentication.cs" />
     <Compile Include="IVsoAadAuthentication.cs" />
     <Compile Include="ICredentialStore.cs" />

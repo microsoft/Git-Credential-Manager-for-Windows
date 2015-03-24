@@ -38,7 +38,7 @@ namespace Microsoft.TeamFoundation.Git.Helpers.Authentication
             token = null;
 
             string targetName = this.GetTargetName(targetUri);
-            Credentials credentials = this.Read(targetName);
+            Credential credentials = this.Read(targetName);
 
             if (credentials != null)
             {
@@ -61,7 +61,7 @@ namespace Microsoft.TeamFoundation.Git.Helpers.Authentication
                 throw new ArgumentException("The token parameter is invlaid", "token");
 
             string targetName = this.GetTargetName(targetUri);
-            Credentials credentials = new Credentials("Azure Directory Refresh Token", token.Value);
+            Credential credentials = new Credential("Azure Directory Refresh Token", token.Value);
 
             this.Write(targetName, credentials);
         }

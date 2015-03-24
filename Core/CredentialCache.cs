@@ -8,20 +8,20 @@ namespace Microsoft.TeamFoundation.Git.Helpers.Authentication
     {
         internal CredentialCache()
         {
-            _store = new ConcurrentDictionary<string, Credentials>(StringComparer.OrdinalIgnoreCase);
+            _store = new ConcurrentDictionary<string, Credential>(StringComparer.OrdinalIgnoreCase);
         }
 
-        private ConcurrentDictionary<string, Credentials> _store;
+        private ConcurrentDictionary<string, Credential> _store;
 
         public void DeleteCredentials(Uri targetUri)
         {
             BaseCredentialStore.ValidateTargetUri(targetUri);
             string targetName = this.GetTargetName(targetUri);
 
-            Credentials credentials = null;
+            Credential credentials = null;
             _store.TryRemove(targetName, out credentials);
         }
-        public bool ReadCredentials(Uri targetUri, out Credentials credentials)
+        public bool ReadCredentials(Uri targetUri, out Credential credentials)
         {
             BaseCredentialStore.ValidateTargetUri(targetUri);
             string targetName = this.GetTargetName(targetUri);
@@ -29,7 +29,7 @@ namespace Microsoft.TeamFoundation.Git.Helpers.Authentication
             return _store.TryGetValue(targetName, out credentials);
         }
 
-        public void WriteCredentials(Uri targetUri, Credentials credentials)
+        public void WriteCredentials(Uri targetUri, Credential credentials)
         {
             BaseCredentialStore.ValidateTargetUri(targetUri);
             string targetName = this.GetTargetName(targetUri);

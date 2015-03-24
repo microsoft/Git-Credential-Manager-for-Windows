@@ -25,7 +25,7 @@ namespace Microsoft.TeamFoundation.Git.Helpers.Authentication
             : base(DefaultAuthorityHost, personalAccessToken, userCredential, adaRefresh)
         { }
 
-        public override async Task<bool> InteractiveLogon(Uri targetUri, Credentials credentials)
+        public override async Task<bool> InteractiveLogon(Uri targetUri, Credential credentials)
         {
             BaseCredentialStore.ValidateTargetUri(targetUri);
             BaseCredentialStore.ValidateCredentials(credentials);
@@ -57,7 +57,7 @@ namespace Microsoft.TeamFoundation.Git.Helpers.Authentication
             throw new NotImplementedException();
         }
 
-        public override bool SetCredentials(Uri targetUri, Credentials credentials)
+        public override bool SetCredentials(Uri targetUri, Credential credentials)
         {
             BaseCredentialStore.ValidateTargetUri(targetUri);
             BaseCredentialStore.ValidateCredentials(credentials);

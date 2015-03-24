@@ -162,7 +162,7 @@ namespace Microsoft.TeamFoundation.Git.Helpers.Authentication
             Trace.TraceInformation("targetUri = {0}", operationArguments.TargetUri);
 
             BaseAuthentication authentication = CreateAuthentication(operationArguments);
-            Credentials credentials = null;
+            Credential credentials = null;
 
             Trace.TraceInformation("authority is " + operationArguments.Authority);
             switch (operationArguments.Authority)
@@ -240,7 +240,7 @@ namespace Microsoft.TeamFoundation.Git.Helpers.Authentication
                 Trace.WriteLine("writing basic authentication values");
 
                 BaseAuthentication authentication = CreateAuthentication(operationArguments);
-                Credentials credentials = new Credentials(operationArguments.Username, operationArguments.Password ?? String.Empty);
+                Credential credentials = new Credential(operationArguments.Username, operationArguments.Password ?? String.Empty);
 
                 authentication.SetCredentials(operationArguments.TargetUri, credentials);
             }

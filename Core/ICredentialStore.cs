@@ -5,8 +5,8 @@ namespace Microsoft.TeamFoundation.Git.Helpers.Authentication
     public interface ICredentialStore
     {
         void DeleteCredentials(Uri targetUri);
-        bool ReadCredentials(Uri targetUri, out Credentials credentials);
-        bool PromptUserCredentials(Uri targetUri, out Credentials credentials);
-        void WriteCredentials(Uri targetUri, Credentials credentials);
+        bool ReadCredentials(Uri targetUri, out Credential credentials);
+        bool PromptUserCredentials(Uri targetUri, out Credential credentials);
+        void WriteCredentials(Uri targetUri, Credential credentials);
     }
 }

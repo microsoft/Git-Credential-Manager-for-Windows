@@ -5,19 +5,19 @@ namespace Microsoft.TeamFoundation.Git.Helpers.Authentication
     /// <summary>
     /// Credentials for user authentication.
     /// </summary>
-    public sealed class Credentials
+    public sealed class Credential
     {
-        public Credentials()
+        public Credential()
         {
             this.Password = String.Empty;
             this.Username = String.Empty;
         }
-        public Credentials(string username)
+        public Credential(string username)
             : this()
         {
             this.Username = username;
         }
-        public Credentials(string username, string password)
+        public Credential(string username, string password)
             : this()
         {
             this.Username = username;

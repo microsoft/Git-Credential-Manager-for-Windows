@@ -17,7 +17,7 @@ namespace Microsoft.TeamFoundation.Git.Helpers.Authentication
         public void AuthenticationVsoMsaTests()
         {
             Uri targetUri = new Uri("https://mseng.microsoft.com");
-            Credentials credentials = new Credentials("jwyman@microsoft.com", "0thLight?");
+            Credential credentials = new Credential("jwyman@microsoft.com", "0thLight?");
 
             VsoMsaAuthentation vsoMsa = new VsoMsaAuthentation();
             Task.Run(async () =>

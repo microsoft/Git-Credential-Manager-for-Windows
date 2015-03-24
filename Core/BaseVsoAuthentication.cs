@@ -56,7 +56,7 @@ namespace Microsoft.TeamFoundation.Git.Helpers.Authentication
         {
             BaseCredentialStore.ValidateTargetUri(targetUri);
 
-            Credentials credentials = null;
+            Credential credentials = null;
             Token token = null;
             if (this.PersonalAccessTokenStore.ReadCredentials(targetUri, out credentials))
             {
@@ -72,25 +72,25 @@ namespace Microsoft.TeamFoundation.Git.Helpers.Authentication
             }
         }
 
-        public override bool GetCredentials(Uri targetUri, out Credentials credentials)
+        public override bool GetCredentials(Uri targetUri, out Credential credentials)
         {
             BaseCredentialStore.ValidateTargetUri(targetUri);
 
             return this.PersonalAccessTokenStore.ReadCredentials(targetUri, out credentials);
         }
 
-        public abstract Task<bool> InteractiveLogon(Uri targetUri, Credentials credentials);
+        public abstract Task<bool> InteractiveLogon(Uri targetUri, Credential credentials);
 
         public abstract Task<bool> RefreshCredentials(Uri targetUri);
 
-        public bool RequestUserCredentials(Uri targetUri, out Credentials credentials)
+        public bool RequestUserCredentials(Uri targetUri, out Credential credentials)
         {
             BaseCredentialStore.ValidateTargetUri(targetUri);
 
             return this.UserCredentialStore.PromptUserCredentials(targetUri, out credentials);
         }
 
-        public async Task<bool> ValidateCredentials(Credentials credentials)
+        public async Task<bool> ValidateCredentials(Credential credentials)
         {
             const string VsoValidationUrl = "https://app.vssps.visualstudio.com/_apis/profile/profiles/me?api-version=1.0";
 
@@ -139,7 +139,7 @@ namespace Microsoft.TeamFoundation.Git.Helpers.Authentication
                         if ((tokenMatch = Regex.Match(responseText, @"\s*""token""\s*:\s*""(\S+)""\s*", RegexOptions.Compiled | RegexOptions.IgnoreCase)).Success)
                         {
                             string token = tokenMatch.Groups[1].Value;
-                            Credentials personalAccessToken = new Credentials(token, String.Empty);
+                            Credential personalAccessToken = new Credential(token, String.Empty);
                             this.PersonalAccessTokenStore.WriteCredentials(targetUri, personalAccessToken);
                             return true;
                         }
