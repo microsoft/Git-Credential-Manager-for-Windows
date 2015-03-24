@@ -55,24 +55,24 @@ namespace Microsoft.TeamFoundation.Git.Helpers.Authentication.Test
         [TestMethod]
         public void CredentialCacheUrl()
         {
-            ICredentialStoreTest(new CredentialCache(), "http://dummy.url/for/testing", "username", "password");
+            ICredentialStoreTest(new CredentialCache("test-cache"), "http://dummy.url/for/testing", "username", "password");
         }
         [TestMethod]
         public void CredentialCacheUrlWithParams()
         {
-            ICredentialStoreTest(new CredentialCache(), "http://dummy.url/for/testing?with=params", "username", "password");
+            ICredentialStoreTest(new CredentialCache("test-cache"), "http://dummy.url/for/testing?with=params", "username", "password");
         }
         [TestMethod]
         public void CredentialCacheUnc()
         {
-            ICredentialStoreTest(new CredentialCache(), @"\\unc\share\test", "username", "password");
+            ICredentialStoreTest(new CredentialCache("test-cache"), @"\\unc\share\test", "username", "password");
         }
         [TestMethod]
         public void CredentialCacheUsernameNullReject()
         {
             try
             {
-                ICredentialStoreTest(new CredentialCache(), "http://dummy.url/for/testing", null, "null_usernames_are_illegal");
+                ICredentialStoreTest(new CredentialCache("test-cache"), "http://dummy.url/for/testing", null, "null_usernames_are_illegal");
                 Assert.Fail("Null username was accepted");
             }
             catch { }
@@ -82,7 +82,7 @@ namespace Microsoft.TeamFoundation.Git.Helpers.Authentication.Test
         {
             try
             {
-                ICredentialStoreTest(new CredentialCache(), "http://dummy.url/for/testing", "", "blank_usernames_are_illegal");
+                ICredentialStoreTest(new CredentialCache("test-cache"), "http://dummy.url/for/testing", "", "blank_usernames_are_illegal");
                 Assert.Fail("Empty username was accepted");
             }
             catch { }
@@ -92,7 +92,7 @@ namespace Microsoft.TeamFoundation.Git.Helpers.Authentication.Test
         {
             try
             {
-                ICredentialStoreTest(new CredentialCache(), "http://dummy.url/for/testing", "null_passwords_are_illegal", null);
+                ICredentialStoreTest(new CredentialCache("test-cache"), "http://dummy.url/for/testing", "null_passwords_are_illegal", null);
                 Assert.Fail("Null password was accepted");
             }
             catch { }

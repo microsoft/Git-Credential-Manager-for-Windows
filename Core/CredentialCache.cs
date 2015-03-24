@@ -6,12 +6,21 @@ namespace Microsoft.TeamFoundation.Git.Helpers.Authentication
 {
     class CredentialCache : BaseSecureStore, ICredentialStore
     {
-        internal CredentialCache()
+        static CredentialCache()
         {
-            _store = new ConcurrentDictionary<string, Credential>(StringComparer.OrdinalIgnoreCase);
+            _cache = new ConcurrentDictionary<string, Credential>(StringComparer.OrdinalIgnoreCase);
         }
 
-        private ConcurrentDictionary<string, Credential> _store;
+        internal CredentialCache(string prefix)
+        {
+            Debug.Assert(!String.IsNullOrWhiteSpace(prefix), "The prefix parameter value is invalid");
+
+            _prefix = prefix;
+        }
+
+        private static readonly ConcurrentDictionary<string, Credential> _cache;
+
+        private readonly string _prefix;
 
         public void DeleteCredentials(Uri targetUri)
         {
@@ -19,14 +28,14 @@ namespace Microsoft.TeamFoundation.Git.Helpers.Authentication
             string targetName = this.GetTargetName(targetUri);
 
             Credential credentials = null;
-            _store.TryRemove(targetName, out credentials);
+            _cache.TryRemove(targetName, out credentials);
         }
         public bool ReadCredentials(Uri targetUri, out Credential credentials)
         {
             BaseSecureStore.ValidateTargetUri(targetUri);
             string targetName = this.GetTargetName(targetUri);
 
-            return _store.TryGetValue(targetName, out credentials);
+            return _cache.TryGetValue(targetName, out credentials);
         }
 
         public void WriteCredentials(Uri targetUri, Credential credentials)
@@ -34,12 +43,12 @@ namespace Microsoft.TeamFoundation.Git.Helpers.Authentication
             BaseSecureStore.ValidateTargetUri(targetUri);
             string targetName = this.GetTargetName(targetUri);
 
-            _store[targetName] = credentials;
+            _cache[targetName] = credentials;
         }
 
         protected override string GetTargetName(Uri targetUri)
         {
-            const string PrimaryNameFormat = "{0}://{1}";
+            const string PrimaryNameFormat = "{0}{1}://{2}";
 
             Debug.Assert(targetUri != null, "The targetUri parameter is null");
             Debug.Assert(targetUri.IsAbsoluteUri, "The targetUri parameter is not absolute");
@@ -48,7 +57,7 @@ namespace Microsoft.TeamFoundation.Git.Helpers.Authentication
             string trimmedHostUrl = targetUri.Host
                                              .TrimEnd('/', '\\')
                                              .TrimEnd();
-            string targetName = String.Format(PrimaryNameFormat, targetUri.Scheme, trimmedHostUrl);
+            string targetName = String.Format(PrimaryNameFormat, _prefix, targetUri.Scheme, trimmedHostUrl);
             return targetName;
         }
     }
