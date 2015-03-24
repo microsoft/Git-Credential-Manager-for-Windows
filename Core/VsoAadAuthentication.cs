@@ -43,7 +43,7 @@ namespace Microsoft.TeamFoundation.Git.Helpers.Authentication
                 string resource = this.Resource;
 
                 UserCredential userCredential = new UserCredential(credentials.Username, credentials.Password);
-                AuthenticationContext authCtx = new AuthenticationContext(this.AuthorityHostUrl, TokenCache.DefaultShared);
+                AuthenticationContext authCtx = new AuthenticationContext(this.AuthorityHostUrl, IdentityModel.Clients.ActiveDirectory.TokenCache.DefaultShared);
                 AuthenticationResult authResult = await authCtx.AcquireTokenAsync(resource, clientId, userCredential);
 
                 this.StoreRefreshToken(targetUri, authResult);
@@ -70,7 +70,7 @@ namespace Microsoft.TeamFoundation.Git.Helpers.Authentication
                 string resource = this.Resource;
 
                 UserCredential userCredential = new UserCredential();
-                AuthenticationContext authCtx = new AuthenticationContext(this.AuthorityHostUrl, TokenCache.DefaultShared);
+                AuthenticationContext authCtx = new AuthenticationContext(this.AuthorityHostUrl, IdentityModel.Clients.ActiveDirectory.TokenCache.DefaultShared);
                 AuthenticationResult authResult = await authCtx.AcquireTokenAsync(resource, clientId, userCredential);
 
                 this.StoreRefreshToken(targetUri, authResult);
@@ -97,7 +97,7 @@ namespace Microsoft.TeamFoundation.Git.Helpers.Authentication
                 Token refreshToken = null;
                 if (this.AdaRefreshTokenStore.ReadToken(targetUri, out refreshToken))
                 {
-                    AuthenticationContext authCtx = new AuthenticationContext(this.AuthorityHostUrl, TokenCache.DefaultShared);
+                    AuthenticationContext authCtx = new AuthenticationContext(this.AuthorityHostUrl, IdentityModel.Clients.ActiveDirectory.TokenCache.DefaultShared);
                     AuthenticationResult authResult = await authCtx.AcquireTokenByRefreshTokenAsync(refreshToken.Value, clientId, resource);
 
                     return await this.GeneratePersonalAccessToken(targetUri, authResult);
