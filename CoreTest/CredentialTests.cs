@@ -11,24 +11,24 @@ namespace Microsoft.TeamFoundation.Git.Helpers.Authentication.Test
         [TestMethod]
         public void CredentialStoreUrl()
         {
-            CredentialStoreTest("http://dummy.url/for/testing", "username", "password");
+            CredentialStoreTest(new CredentialStore("test"), "http://dummy.url/for/testing", "username", "password");
         }
         [TestMethod]
         public void CredentialStoreUrlWithParams()
         {
-            CredentialStoreTest("http://dummy.url/for/testing?with=params", "username", "password");
+            CredentialStoreTest(new CredentialStore("test"), "http://dummy.url/for/testing?with=params", "username", "password");
         }
         [TestMethod]
         public void CredentialStoreUnc()
         {
-            CredentialStoreTest(@"\\unc\share\test", "username", "password");
+            CredentialStoreTest(new CredentialStore("test"), @"\\unc\share\test", "username", "password");
         }
         [TestMethod]
         public void CredentialStoreUsernameNullReject()
         {
             try
             {
-                CredentialStoreTest("http://dummy.url/for/testing", null, "null_usernames_are_illegal");
+                CredentialStoreTest(new CredentialStore("test"), "http://dummy.url/for/testing", null, "null_usernames_are_illegal");
                 Assert.Fail("Null username was accepted");
             }
             catch { }
@@ -38,7 +38,7 @@ namespace Microsoft.TeamFoundation.Git.Helpers.Authentication.Test
         {
             try
             {
-                CredentialStoreTest("http://dummy.url/for/testing", "", "blank_usernames_are_illegal");
+                CredentialStoreTest(new CredentialStore("test"), "http://dummy.url/for/testing", "", "blank_usernames_are_illegal");
                 Assert.Fail("Empty username was accepted");
             }
             catch { }
@@ -48,7 +48,7 @@ namespace Microsoft.TeamFoundation.Git.Helpers.Authentication.Test
         {
             try
             {
-                CredentialStoreTest("http://dummy.url/for/testing", "null_passwords_are_illegal", null);
+                CredentialStoreTest(new CredentialStore("test"), "http://dummy.url/for/testing", "null_passwords_are_illegal", null);
                 Assert.Fail("Null password was accepted");
             }
             catch { }
@@ -92,7 +92,7 @@ namespace Microsoft.TeamFoundation.Git.Helpers.Authentication.Test
         }
         
 
-        private void CredentialStoreTest(string url, string username, string password)
+        private void CredentialStoreTest(CredentialStore credentialStore, string url, string username, string password)
         {
             try
             {
@@ -100,11 +100,11 @@ namespace Microsoft.TeamFoundation.Git.Helpers.Authentication.Test
                 Credentials writeCreds = new Credentials(username, password);
                 Credentials readCreds = null;
 
-                ICredentialStore priamryStore = new CredentialStore("prime-test");
+                ICredentialStore credStore = credentialStore;
 
-                priamryStore.WriteCredentials(uri, writeCreds);
+                credStore.WriteCredentials(uri, writeCreds);
 
-                if (priamryStore.ReadCredentials(uri, out readCreds))
+                if (credStore.ReadCredentials(uri, out readCreds))
                 {
                     Assert.AreEqual(writeCreds.Password, readCreds.Password, "Passwords did not match between written and read credentials");
                     Assert.AreEqual(writeCreds.Username, readCreds.Username, "Usernames did not match between written and read credentials");
@@ -114,9 +114,9 @@ namespace Microsoft.TeamFoundation.Git.Helpers.Authentication.Test
                     Assert.Fail("Failed to read credentials");
                 }
 
-                priamryStore.DeleteCredentials(uri);
+                credStore.DeleteCredentials(uri);
 
-                Assert.IsFalse(priamryStore.ReadCredentials(uri, out readCreds), "Deleted credentials were read back");
+                Assert.IsFalse(credStore.ReadCredentials(uri, out readCreds), "Deleted credentials were read back");
             }
             catch (Exception exception)
             {
