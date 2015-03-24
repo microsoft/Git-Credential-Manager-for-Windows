@@ -11,24 +11,24 @@ namespace Microsoft.TeamFoundation.Git.Helpers.Authentication.Test
         [TestMethod]
         public void CredentialStoreUrl()
         {
-            CredentialStoreTest(new CredentialStore("test"), "http://dummy.url/for/testing", "username", "password");
+            ICredentialStoreTest(new CredentialStore("test"), "http://dummy.url/for/testing", "username", "password");
         }
         [TestMethod]
         public void CredentialStoreUrlWithParams()
         {
-            CredentialStoreTest(new CredentialStore("test"), "http://dummy.url/for/testing?with=params", "username", "password");
+            ICredentialStoreTest(new CredentialStore("test"), "http://dummy.url/for/testing?with=params", "username", "password");
         }
         [TestMethod]
         public void CredentialStoreUnc()
         {
-            CredentialStoreTest(new CredentialStore("test"), @"\\unc\share\test", "username", "password");
+            ICredentialStoreTest(new CredentialStore("test"), @"\\unc\share\test", "username", "password");
         }
         [TestMethod]
         public void CredentialStoreUsernameNullReject()
         {
             try
             {
-                CredentialStoreTest(new CredentialStore("test"), "http://dummy.url/for/testing", null, "null_usernames_are_illegal");
+                ICredentialStoreTest(new CredentialStore("test"), "http://dummy.url/for/testing", null, "null_usernames_are_illegal");
                 Assert.Fail("Null username was accepted");
             }
             catch { }
@@ -38,7 +38,7 @@ namespace Microsoft.TeamFoundation.Git.Helpers.Authentication.Test
         {
             try
             {
-                CredentialStoreTest(new CredentialStore("test"), "http://dummy.url/for/testing", "", "blank_usernames_are_illegal");
+                ICredentialStoreTest(new CredentialStore("test"), "http://dummy.url/for/testing", "", "blank_usernames_are_illegal");
                 Assert.Fail("Empty username was accepted");
             }
             catch { }
@@ -48,7 +48,53 @@ namespace Microsoft.TeamFoundation.Git.Helpers.Authentication.Test
         {
             try
             {
-                CredentialStoreTest(new CredentialStore("test"), "http://dummy.url/for/testing", "null_passwords_are_illegal", null);
+                ICredentialStoreTest(new CredentialStore("test"), "http://dummy.url/for/testing", "null_passwords_are_illegal", null);
+                Assert.Fail("Null password was accepted");
+            }
+            catch { }
+        }
+
+        [TestMethod]
+        public void CredentialCacheUrl()
+        {
+            ICredentialStoreTest(new CredentialCache(), "http://dummy.url/for/testing", "username", "password");
+        }
+        [TestMethod]
+        public void CredentialCacheUrlWithParams()
+        {
+            ICredentialStoreTest(new CredentialCache(), "http://dummy.url/for/testing?with=params", "username", "password");
+        }
+        [TestMethod]
+        public void CredentialCacheUnc()
+        {
+            ICredentialStoreTest(new CredentialCache(), @"\\unc\share\test", "username", "password");
+        }
+        [TestMethod]
+        public void CredentialCacheUsernameNullReject()
+        {
+            try
+            {
+                ICredentialStoreTest(new CredentialCache(), "http://dummy.url/for/testing", null, "null_usernames_are_illegal");
+                Assert.Fail("Null username was accepted");
+            }
+            catch { }
+        }
+        [TestMethod]
+        public void CredentialCacheUsernameBlankReject()
+        {
+            try
+            {
+                ICredentialStoreTest(new CredentialCache(), "http://dummy.url/for/testing", "", "blank_usernames_are_illegal");
+                Assert.Fail("Empty username was accepted");
+            }
+            catch { }
+        }
+        [TestMethod]
+        public void CredentialCachePasswordNullReject()
+        {
+            try
+            {
+                ICredentialStoreTest(new CredentialCache(), "http://dummy.url/for/testing", "null_passwords_are_illegal", null);
                 Assert.Fail("Null password was accepted");
             }
             catch { }
@@ -92,7 +138,7 @@ namespace Microsoft.TeamFoundation.Git.Helpers.Authentication.Test
         }
         
 
-        private void CredentialStoreTest(CredentialStore credentialStore, string url, string username, string password)
+        private void ICredentialStoreTest(ICredentialStore credentialStore, string url, string username, string password)
         {
             try
             {
@@ -100,11 +146,9 @@ namespace Microsoft.TeamFoundation.Git.Helpers.Authentication.Test
                 Credentials writeCreds = new Credentials(username, password);
                 Credentials readCreds = null;
 
-                ICredentialStore credStore = credentialStore;
+                credentialStore.WriteCredentials(uri, writeCreds);
 
-                credStore.WriteCredentials(uri, writeCreds);
-
-                if (credStore.ReadCredentials(uri, out readCreds))
+                if (credentialStore.ReadCredentials(uri, out readCreds))
                 {
                     Assert.AreEqual(writeCreds.Password, readCreds.Password, "Passwords did not match between written and read credentials");
                     Assert.AreEqual(writeCreds.Username, readCreds.Username, "Usernames did not match between written and read credentials");
@@ -114,9 +158,9 @@ namespace Microsoft.TeamFoundation.Git.Helpers.Authentication.Test
                     Assert.Fail("Failed to read credentials");
                 }
 
-                credStore.DeleteCredentials(uri);
+                credentialStore.DeleteCredentials(uri);
 
-                Assert.IsFalse(credStore.ReadCredentials(uri, out readCreds), "Deleted credentials were read back");
+                Assert.IsFalse(credentialStore.ReadCredentials(uri, out readCreds), "Deleted credentials were read back");
             }
             catch (Exception exception)
             {
