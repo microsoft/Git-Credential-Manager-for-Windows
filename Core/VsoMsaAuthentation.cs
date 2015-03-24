@@ -5,7 +5,7 @@ using Debug = System.Diagnostics.Debug;
 
 namespace Microsoft.TeamFoundation.Git.Helpers.Authentication
 {
-    public class VsoMsaAuthentation : BaseVsoAuthentication, IVsoAuthentication
+    public sealed class VsoMsaAuthentation : BaseVsoAuthentication, IVsoAuthentication
     {
         public const string DefaultAuthorityHost = "https://login.live.com/";
 

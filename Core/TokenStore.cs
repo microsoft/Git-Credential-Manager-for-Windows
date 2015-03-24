@@ -3,7 +3,7 @@ using System.Diagnostics;
 
 namespace Microsoft.TeamFoundation.Git.Helpers.Authentication
 {
-    public class TokenStore : BaseSecureStore, ITokenStore
+    public sealed class TokenStore : BaseSecureStore, ITokenStore
     {
         internal TokenStore(string prefix)
         {

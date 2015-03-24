@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace Microsoft.TeamFoundation.Git.Helpers.Authentication
 {
-    public class VsoAadAuthentication : BaseVsoAuthentication, IVsoAadAuthentication
+    public sealed class VsoAadAuthentication : BaseVsoAuthentication, IVsoAadAuthentication
     {
         public const string DefaultAuthorityHost = "https://login.windows.net/common";
         private const string AuthorityHostFormat = "https://login.windows.net/{0:D}";

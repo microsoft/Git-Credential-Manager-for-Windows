@@ -7,7 +7,7 @@ namespace Microsoft.TeamFoundation.Git.Helpers.Authentication
     /// <summary>
     /// Stores credentials relative to target URIs. In-memory, thread-safe.
     /// </summary>
-    class CredentialCache : BaseSecureStore, ICredentialStore
+    public sealed class CredentialCache : BaseSecureStore, ICredentialStore
     {
         static CredentialCache()
         {

@@ -4,7 +4,7 @@ using System.Diagnostics;
 
 namespace Microsoft.TeamFoundation.Git.Helpers.Authentication
 {
-    public class TokenCache : BaseSecureStore, ITokenStore
+    public sealed class TokenCache : BaseSecureStore, ITokenStore
     {
         static TokenCache()
         {
