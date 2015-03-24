@@ -4,6 +4,9 @@ using System.Diagnostics;
 
 namespace Microsoft.TeamFoundation.Git.Helpers.Authentication
 {
+    /// <summary>
+    /// Stores credentials relative to target URIs. In-memory, thread-safe.
+    /// </summary>
     class CredentialCache : BaseSecureStore, ICredentialStore
     {
         static CredentialCache()
@@ -11,6 +14,10 @@ namespace Microsoft.TeamFoundation.Git.Helpers.Authentication
             _cache = new ConcurrentDictionary<string, Credential>(StringComparer.OrdinalIgnoreCase);
         }
 
+        /// <summary>
+        /// Creates a new CredentialCache
+        /// </summary>
+        /// <param name="prefix">The namespace of the credential set accessed by this instance</param>
         internal CredentialCache(string prefix)
         {
             Debug.Assert(!String.IsNullOrWhiteSpace(prefix), "The prefix parameter value is invalid");
@@ -22,6 +29,10 @@ namespace Microsoft.TeamFoundation.Git.Helpers.Authentication
 
         private readonly string _prefix;
 
+        /// <summary>
+        /// Deleted credentials for target URI from the credential store
+        /// </summary>
+        /// <param name="targetUri">The URI of the target for which credentials are being deleted</param>
         public void DeleteCredentials(Uri targetUri)
         {
             BaseSecureStore.ValidateTargetUri(targetUri);
@@ -30,6 +41,12 @@ namespace Microsoft.TeamFoundation.Git.Helpers.Authentication
             Credential credentials = null;
             _cache.TryRemove(targetName, out credentials);
         }
+        /// <summary>
+        /// Reads credentials for a target URI from the credential store
+        /// </summary>
+        /// <param name="targetUri">The URI of the target for which credentials are being read</param>
+        /// <param name="credentials">The credentials from the store; null if failure</param>
+        /// <returns>True if success; false if failure</returns>
         public bool ReadCredentials(Uri targetUri, out Credential credentials)
         {
             BaseSecureStore.ValidateTargetUri(targetUri);
@@ -37,7 +54,11 @@ namespace Microsoft.TeamFoundation.Git.Helpers.Authentication
 
             return _cache.TryGetValue(targetName, out credentials);
         }
-
+        /// <summary>
+        /// Writes credentials for a target URI to the credential store
+        /// </summary>
+        /// <param name="targetUri">The URI of the target for which credentials are being stored</param>
+        /// <param name="credentials">The credentials to be stored</param>
         public void WriteCredentials(Uri targetUri, Credential credentials)
         {
             BaseSecureStore.ValidateTargetUri(targetUri);
@@ -45,7 +66,11 @@ namespace Microsoft.TeamFoundation.Git.Helpers.Authentication
 
             _cache[targetName] = credentials;
         }
-
+        /// <summary>
+        /// Formats a TargetName string based on the TargetUri base on the format started by git-credential-winstore
+        /// </summary>
+        /// <param name="targetUri">Uri of the target</param>
+        /// <returns>Properly formatted TargetName string</returns>
         protected override string GetTargetName(Uri targetUri)
         {
             const string PrimaryNameFormat = "{0}{1}://{2}";

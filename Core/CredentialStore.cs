@@ -3,8 +3,15 @@ using System.Diagnostics;
 
 namespace Microsoft.TeamFoundation.Git.Helpers.Authentication
 {
+    /// <summary>
+    /// Stores credentials relative to target URIs. In-memory, thread-safe.
+    /// </summary>
     public class CredentialStore : BaseSecureStore, ICredentialStore
     {
+        /// <summary>
+        /// Creates a new credential store
+        /// </summary>
+        /// <param name="prefix">The namespace of the credential set accessed by this instance</param>
         internal CredentialStore(string prefix)
         {
             Debug.Assert(!String.IsNullOrWhiteSpace(prefix), "The prefix parameter value is invalid");
@@ -31,8 +38,7 @@ namespace Microsoft.TeamFoundation.Git.Helpers.Authentication
             {
                 Debug.WriteLine(exception);
             }
-        }
-        
+        }        
         /// <summary>
         /// Reads credentials for a target URI from the credential store
         /// </summary>
