@@ -133,26 +133,26 @@ namespace Microsoft.TeamFoundation.Git.Helpers.Authentication
             Console.Out.WriteLine("   authority      Defines the type of authentication to be used.");
             Console.Out.WriteLine("                  Supportd Basic, AAD, and MSA. Default is Basic.");
             Console.Out.WriteLine("   clientid       Defines the client identifier for the authority.");
-            Console.Out.WriteLine("                  Defaults to visualstudio.com. Ignore by Basic authority.");
+            Console.Out.WriteLine("                  Defaults to visualstudio.com. Only used by AAD authority.");
             Console.Out.WriteLine("   resource       Defines the resource identifier for the authority.");
-            Console.Out.WriteLine("                  Defaults to visualstudio.com. Ignore by Basic authority.");
+            Console.Out.WriteLine("                  Defaults to visualstudio.com. Only used by AAD authority.");
             Console.Out.WriteLine("   tenantid       Defines the tenant identifier for the authority.");
-            Console.Out.WriteLine("                  Defaults to Visual Studio. Ignore by Basic authority.");
+            Console.Out.WriteLine("                  Defaults to Visual Studio. Only used by AAD authority.");
             Console.Out.WriteLine("   interactive    Specifies if user can be prompted for credentials or not.");
             Console.Out.WriteLine("                  Supports Auto, Always, or Never. Defaults to Auto.");
-            Console.Out.WriteLine("                  Ignore by Basic authority.");
+            Console.Out.WriteLine("                  Only used by AAD authority.");
             Console.Out.WriteLine("   validate       Causes validation of credentials before supplying them");
             Console.Out.WriteLine("                  to Git. Invalid credentials are attemped to refreshed");
             Console.Out.WriteLine("                  before failing. Incurs some minor overhead.");
             Console.Out.WriteLine("                  Defaults to TRUE. Ignore by Basic authority.");
             Console.Out.WriteLine();
             Console.Out.WriteLine("Sample Configuration:");
-            Console.Out.WriteLine("   [credential]");
-            Console.Out.WriteLine(@"       helper = !'C:\\Program Files (x86)\\Git\\libexec\\git-core\\git-credential-man.exe'");
-            Console.Out.WriteLine("   [credential \"microsoft.visualstudio.com\"]");
-            Console.Out.WriteLine(@"       helper = !'C:\\Program Files (x86)\\Git\\libexec\\git-core\\git-credential-man.exe'");
+            Console.Out.WriteLine(@"   [credential ""microsoft.visualstudio.com""]");
             Console.Out.WriteLine(@"       authority = AAD");
-            Console.Out.WriteLine(@"       validate = true");
+            Console.Out.WriteLine(@"   [credential ""visualstudio.com""]");
+            Console.Out.WriteLine(@"       authority = MSA");
+            Console.Out.WriteLine(@"   [credential]");
+            Console.Out.WriteLine(@"       helper = !'C:\\Program Files (x86)\\Git\\libexec\\git-core\\git-credential-man.exe'");
         }
 
         private static void Erase(OperationArguments operationArguments)
@@ -296,14 +296,22 @@ namespace Microsoft.TeamFoundation.Git.Helpers.Authentication
             Debug.Assert(operationArguments.Username != null, "The operaionArgument.Username is null");
             Debug.Assert(operationArguments.TargetUri != null, "The operationArgument.TargetUri is null");
 
-            if (operationArguments.Authority == AuthorityType.Basic)
+            switch(operationArguments.Authority)
             {
-                Trace.WriteLine("writing basic authentication values");
+                default:
+                case AuthorityType.Basic:
+                    Trace.WriteLine("writing basic authentication values");
 
-                BaseAuthentication authentication = CreateAuthentication(operationArguments);
-                Credential credentials = new Credential(operationArguments.Username, operationArguments.Password ?? String.Empty);
+                    BaseAuthentication authentication = CreateAuthentication(operationArguments);
+                    Credential credentials = new Credential(operationArguments.Username, operationArguments.Password ?? String.Empty);
 
-                authentication.SetCredentials(operationArguments.TargetUri, credentials);
+                    authentication.SetCredentials(operationArguments.TargetUri, credentials);
+                    break;
+
+                case AuthorityType.AzureDirectory:
+                case AuthorityType.MicrosoftAccount:
+                    // not supported
+                    break;
             }
         }
 
@@ -375,7 +383,7 @@ namespace Microsoft.TeamFoundation.Git.Helpers.Authentication
             Debug.Assert(operationArguments.Host != null, "The operationArguments.Host parameter is null");
             Debug.Assert(key != null, "The key parameter is null");
 
-            // return match seeksing from most specific (credenial.<schema>://<uri>.<key>) to least specific (credential.<key>)
+            // return match seeking from most specific (credenial.<schema>://<uri>.<key>) to least specific (credential.<key>)
             var result = GetConfig(config, "credential", String.Format("{0}://{1}", operationArguments.Protocol, operationArguments.Host), key);
             if (result == null && !String.IsNullOrWhiteSpace(operationArguments.Host))
             {
@@ -399,10 +407,10 @@ namespace Microsoft.TeamFoundation.Git.Helpers.Authentication
             Debug.Assert(suffix != null, "The suffic parameter is null");
 
             var result = config.Where((GitConfigValue entry) =>
-                               {
-                                   return entry.Key.StartsWith(key, StringComparison.OrdinalIgnoreCase)
-                                       && entry.Key.EndsWith(prefix + "." + suffix, StringComparison.OrdinalIgnoreCase);
-                               })
+                                {
+                                    return entry.Key.StartsWith(key, StringComparison.OrdinalIgnoreCase)
+                                        && entry.Key.EndsWith(prefix + "." + suffix, StringComparison.OrdinalIgnoreCase);
+                                })
                                .OrderByDescending((GitConfigValue entry) => { return entry.Level; })
                                .FirstOrDefault();
             if (result != null)
