@@ -25,63 +25,20 @@ namespace Microsoft.TeamFoundation.Git.Helpers.Authentication
             // see: https://www.kernel.org/pub/software/scm/git/docs/git-credential.html
             OperationArguments operationArguments = new OperationArguments(Console.In);
 
-            // parse the git config for related values
-            using (Repository repo = new Repository(Environment.CurrentDirectory))
+            string repoPath = null;
+            if ((repoPath = Repository.Discover(Environment.CurrentDirectory)) != null)
             {
-                GitConfigValue match = null;
-
-                if ((match = GetConfig(repo, operationArguments, "authority")) != null)
+                // parse the git config for related values
+                using (Repository repo = new Repository(repoPath))
                 {
-                    Trace.TraceInformation("authority = {0}", match.Value);
-                    operationArguments.SetScheme(match.Value);
+                    ParseConfiguration(repo.Config, operationArguments);
                 }
-                if ((match = GetConfig(repo, operationArguments, "clientid")) != null)
+            }
+            else
+            {
+                using (Configuration configuration = new Configuration())
                 {
-                    Trace.TraceInformation("clientid = {0}", match.Value);
-                    operationArguments.AuthorityClientId = match.Value;
-                }
-                if ((match = GetConfig(repo, operationArguments, "resource")) != null)
-                {
-                    Trace.TraceInformation("resource = {0}", match.Value);
-                    operationArguments.AuthorityResource = match.Value;
-                }
-                if ((match = GetConfig(repo, operationArguments, "tenantid")) != null)
-                {
-                    Trace.TraceInformation("tenantid = {0}", match.Value);
-                    operationArguments.AuthorityTenantId = match.Value;
-                }
-                if ((match = GetConfig(repo, operationArguments, "validate")) != null)
-                {
-                    Trace.TraceInformation("validate = {0}", match.Value);
-                    bool validate = operationArguments.ValidateCredentials;
-                    if (Boolean.TryParse(match.Value, out validate))
-                    {
-                        operationArguments.ValidateCredentials = validate;
-                    }
-                }
-                if ((match = GetConfig(repo, operationArguments, "interactive")) != null)
-                {
-                    Trace.TraceInformation("interactive = {0}", match.Value);
-                    if (String.Equals("always", match.Value, StringComparison.OrdinalIgnoreCase)
-                        || String.Equals("true", match.Value, StringComparison.OrdinalIgnoreCase)
-                        || String.Equals("force", match.Value, StringComparison.OrdinalIgnoreCase))
-                    {
-                        operationArguments.Interactivity = Interactivity.Always;
-                    }
-                    else if (String.Equals("never", match.Value, StringComparison.OrdinalIgnoreCase)
-                       || String.Equals("false", match.Value, StringComparison.OrdinalIgnoreCase))
-                    {
-                        operationArguments.Interactivity = Interactivity.Never;
-                    }
-                }
-                if ((match = GetConfig(repo, operationArguments, "validate")) != null)
-                {
-                    Trace.TraceInformation("validate = {0}", match.Value);
-                    bool validate = operationArguments.ValidateCredentials;
-                    if (Boolean.TryParse(match.Value, out validate))
-                    {
-                        operationArguments.ValidateCredentials = validate;
-                    }
+                    ParseConfiguration(configuration, operationArguments);
                 }
             }
 
@@ -99,6 +56,65 @@ namespace Microsoft.TeamFoundation.Git.Helpers.Authentication
                     case "store":
                         Store(operationArguments);
                         break;
+                }
+            }
+        }
+
+        private static void ParseConfiguration(Configuration config, OperationArguments operationArguments)
+        {
+            GitConfigValue match = null;
+
+            if ((match = GetConfig(config, operationArguments, "authority")) != null)
+            {
+                Trace.TraceInformation("authority = {0}", match.Value);
+                operationArguments.SetScheme(match.Value);
+            }
+            if ((match = GetConfig(config, operationArguments, "clientid")) != null)
+            {
+                Trace.TraceInformation("clientid = {0}", match.Value);
+                operationArguments.AuthorityClientId = match.Value;
+            }
+            if ((match = GetConfig(config, operationArguments, "resource")) != null)
+            {
+                Trace.TraceInformation("resource = {0}", match.Value);
+                operationArguments.AuthorityResource = match.Value;
+            }
+            if ((match = GetConfig(config, operationArguments, "tenantid")) != null)
+            {
+                Trace.TraceInformation("tenantid = {0}", match.Value);
+                operationArguments.AuthorityTenantId = match.Value;
+            }
+            if ((match = GetConfig(config, operationArguments, "validate")) != null)
+            {
+                Trace.TraceInformation("validate = {0}", match.Value);
+                bool validate = operationArguments.ValidateCredentials;
+                if (Boolean.TryParse(match.Value, out validate))
+                {
+                    operationArguments.ValidateCredentials = validate;
+                }
+            }
+            if ((match = GetConfig(config, operationArguments, "interactive")) != null)
+            {
+                Trace.TraceInformation("interactive = {0}", match.Value);
+                if (String.Equals("always", match.Value, StringComparison.OrdinalIgnoreCase)
+                    || String.Equals("true", match.Value, StringComparison.OrdinalIgnoreCase)
+                    || String.Equals("force", match.Value, StringComparison.OrdinalIgnoreCase))
+                {
+                    operationArguments.Interactivity = Interactivity.Always;
+                }
+                else if (String.Equals("never", match.Value, StringComparison.OrdinalIgnoreCase)
+                   || String.Equals("false", match.Value, StringComparison.OrdinalIgnoreCase))
+                {
+                    operationArguments.Interactivity = Interactivity.Never;
+                }
+            }
+            if ((match = GetConfig(config, operationArguments, "validate")) != null)
+            {
+                Trace.TraceInformation("validate = {0}", match.Value);
+                bool validate = operationArguments.ValidateCredentials;
+                if (Boolean.TryParse(match.Value, out validate))
+                {
+                    operationArguments.ValidateCredentials = validate;
                 }
             }
         }
@@ -149,7 +165,23 @@ namespace Microsoft.TeamFoundation.Git.Helpers.Authentication
             Trace.TraceInformation("targetUri = {0}", operationArguments.TargetUri);
 
             BaseAuthentication authentication = CreateAuthentication(operationArguments);
-            authentication.DeleteCredentials(operationArguments.TargetUri);
+
+            switch (operationArguments.Authority)
+            {
+                default:
+                case AuthorityType.Basic:
+                    authentication.DeleteCredentials(operationArguments.TargetUri);
+                    break;
+
+                case AuthorityType.AzureDirectory:
+                    VsoAadAuthentication aadAuth = authentication as VsoAadAuthentication;
+                    aadAuth.DeleteCredentials(operationArguments.TargetUri);
+                    break;
+
+                case AuthorityType.MicrosoftAccount:
+                    // not supported
+                    break;
+            }
         }
 
         private static void Get(OperationArguments operationArguments)
@@ -178,7 +210,7 @@ namespace Microsoft.TeamFoundation.Git.Helpers.Authentication
 
                 case AuthorityType.AzureDirectory:
                     VsoAadAuthentication aadAuth = authentication as VsoAadAuthentication;
-                    if (authentication.GetCredentials(operationArguments.TargetUri, out credentials))
+                    if (aadAuth.GetCredentials(operationArguments.TargetUri, out credentials))
                     {
                         Trace.TraceInformation("credentials found");
                         if (operationArguments.ValidateCredentials)
@@ -220,7 +252,36 @@ namespace Microsoft.TeamFoundation.Git.Helpers.Authentication
 
                 case AuthorityType.MicrosoftAccount:
                     VsoMsaAuthentation msaAuth = authentication as VsoMsaAuthentation;
-                    throw new NotImplementedException();
+                    if (msaAuth.GetCredentials(operationArguments.TargetUri, out credentials))
+                    {
+                        Trace.TraceInformation("credentials found");
+                        if (operationArguments.ValidateCredentials)
+                        {
+                            Trace.TraceInformation("validation requested");
+                            Task.Run(async () =>
+                            {
+                                if (await msaAuth.ValidateCredentials(credentials)
+                                    || await msaAuth.RefreshCredentials(operationArguments.TargetUri)
+                                    || msaAuth.PromptLogon(operationArguments.TargetUri))
+                                {
+                                    operationArguments.SetCredentials(credentials);
+                                }
+                            }).Wait();
+                        }
+                        else
+                        {
+                            operationArguments.SetCredentials(credentials);
+                        }
+                    }
+                    else
+                    {
+                        Trace.TraceInformation("attempting prompted logon");
+                        if (msaAuth.PromptLogon(operationArguments.TargetUri)
+                            && msaAuth.GetCredentials(operationArguments.TargetUri, out credentials))
+                        {
+                            operationArguments.SetCredentials(credentials);
+                        }
+                    }
                     break;
             }
 
@@ -306,17 +367,16 @@ namespace Microsoft.TeamFoundation.Git.Helpers.Authentication
             }
         }
 
-        private static GitConfigValue GetConfig(Repository repo, OperationArguments operationArguments, string key)
+        private static GitConfigValue GetConfig(Configuration config, OperationArguments operationArguments, string key)
         {
-            Debug.Assert(repo != null, "The repo parameter is null");
-            Debug.Assert(repo.Config != null, "The repo.Config parameter is null");
+            Debug.Assert(config != null, "The config parameter is null");
             Debug.Assert(operationArguments != null, "The operationArguments parameter is null");
             Debug.Assert(operationArguments.Protocol != null, "The operationArguments.Protocol parameter is null");
             Debug.Assert(operationArguments.Host != null, "The operationArguments.Host parameter is null");
             Debug.Assert(key != null, "The key parameter is null");
 
             // return match seeksing from most specific (credenial.<schema>://<uri>.<key>) to least specific (credential.<key>)
-            var result = GetConfig(repo, "credential", String.Format("{0}://{1}", operationArguments.Protocol, operationArguments.Host), key);
+            var result = GetConfig(config, "credential", String.Format("{0}://{1}", operationArguments.Protocol, operationArguments.Host), key);
             if (result == null && !String.IsNullOrWhiteSpace(operationArguments.Host))
             {
                 string[] fragments = operationArguments.Host.Split('.');
@@ -325,27 +385,26 @@ namespace Microsoft.TeamFoundation.Git.Helpers.Authentication
                 for (int i = 0; result == null && i < fragments.Length; i++)
                 {
                     host = String.Join(".", fragments, i, fragments.Length - i);
-                    result = GetConfig(repo, "credential", host, key);
+                    result = GetConfig(config, "credential", host, key);
                 }
             }
 
-            return result ?? GetConfig(repo, "credential", String.Empty, key);
+            return result ?? GetConfig(config, "credential", String.Empty, key);
         }
 
-        private static GitConfigValue GetConfig(Repository repo, string key, string prefix, string suffix)
+        private static GitConfigValue GetConfig(Configuration config, string key, string prefix, string suffix)
         {
-            Debug.Assert(repo != null, "The repo parameter is null");
-            Debug.Assert(repo.Config != null, "The repo.Config parameter is null");
+            Debug.Assert(config != null, "The config parameter is null");
             Debug.Assert(prefix != null, "The prefix parameter is null");
             Debug.Assert(suffix != null, "The suffic parameter is null");
 
-            var result = repo.Config.Where((GitConfigValue entry) =>
-                                    {
-                                        return entry.Key.StartsWith(key, StringComparison.OrdinalIgnoreCase)
-                                            && entry.Key.EndsWith(prefix + "." + suffix, StringComparison.OrdinalIgnoreCase);
-                                    })
-                                    .OrderByDescending((GitConfigValue entry) => { return entry.Level; })
-                                    .FirstOrDefault();
+            var result = config.Where((GitConfigValue entry) =>
+                               {
+                                   return entry.Key.StartsWith(key, StringComparison.OrdinalIgnoreCase)
+                                       && entry.Key.EndsWith(prefix + "." + suffix, StringComparison.OrdinalIgnoreCase);
+                               })
+                               .OrderByDescending((GitConfigValue entry) => { return entry.Level; })
+                               .FirstOrDefault();
             if (result != null)
             {
                 Trace.TraceInformation("matched: {0}.{1} = {2}", prefix, suffix, result.Key);

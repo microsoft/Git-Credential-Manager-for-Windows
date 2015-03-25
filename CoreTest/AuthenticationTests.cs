@@ -21,11 +21,7 @@ namespace Microsoft.TeamFoundation.Git.Helpers.Authentication
             Credential credentials = new Credential("jwyman@microsoft.com", "0thLight?");
 
             VsoMsaAuthentation vsoMsa = new VsoMsaAuthentation();
-            Task.Run(async () =>
-            {
-                Assert.IsTrue(await vsoMsa.InteractiveLogon(targetUri, credentials), "Interactive logon failed");
-            });
-
+            Assert.IsTrue(vsoMsa.PromptLogon(targetUri), "Promp logon failed");
         }
     }
 }

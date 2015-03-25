@@ -5,9 +5,10 @@ using Debug = System.Diagnostics.Debug;
 
 namespace Microsoft.TeamFoundation.Git.Helpers.Authentication
 {
-    public sealed class VsoMsaAuthentation : BaseVsoAuthentication, IVsoAuthentication
+    public sealed class VsoMsaAuthentation : BaseVsoAuthentication, IVsoMsaAuthentication
     {
-        public const string DefaultAuthorityHost = "https://login.live.com/";
+        public const string DefaultAuthorityHost = "https://login.windows.net/live.com";
+        public const string RedirectUrl = "urn:ietf:wg:oauth:2.0:oob";
 
         public VsoMsaAuthentation()
             : base(DefaultAuthorityHost)
@@ -25,24 +26,21 @@ namespace Microsoft.TeamFoundation.Git.Helpers.Authentication
             : base(DefaultAuthorityHost, personalAccessToken, userCredential, adaRefresh)
         { }
 
-        public override async Task<bool> InteractiveLogon(Uri targetUri, Credential credentials)
+        public bool PromptLogon(Uri targetUri)
         {
             BaseSecureStore.ValidateTargetUri(targetUri);
-            Credential.Validate(credentials);
 
             try
             {
                 string clientId = this.ClientId.ToString("D");
                 string resource = this.Resource;
 
-                UserCredential userCredential = new UserCredential(credentials.Username, credentials.Password);
                 AuthenticationContext authCtx = new AuthenticationContext(this.AuthorityHostUrl, IdentityModel.Clients.ActiveDirectory.TokenCache.DefaultShared);
-                AuthenticationResult authResult = await authCtx.AcquireTokenAsync(resource, clientId, userCredential);
+                AuthenticationResult authResult = authCtx.AcquireToken(resource, clientId, new Uri(RedirectUrl), PromptBehavior.Always, UserIdentifier.AnyUser, "domain_hint=live.com&display=popup");
 
                 this.StoreRefreshToken(targetUri, authResult);
-                this.UserCredentialStore.WriteCredentials(targetUri, credentials);
 
-                return await this.GeneratePersonalAccessToken(targetUri, authResult);
+                return Task.Run(async () => { return await this.GeneratePersonalAccessToken(targetUri, authResult); }).Result;
             }
             catch (AdalException exception)
             {
@@ -52,23 +50,35 @@ namespace Microsoft.TeamFoundation.Git.Helpers.Authentication
             return false;
         }
 
-        public override Task<bool> RefreshCredentials(Uri targetUri)
+        public override async Task<bool> RefreshCredentials(Uri targetUri)
         {
-            throw new NotImplementedException();
+            BaseSecureStore.ValidateTargetUri(targetUri);
+
+            try
+            {
+                string clientId = this.ClientId.ToString("D");
+                string resource = this.Resource;
+
+                Token refreshToken = null;
+                if (this.AdaRefreshTokenStore.ReadToken(targetUri, out refreshToken))
+                {
+                    AuthenticationContext authCtx = new AuthenticationContext(this.AuthorityHostUrl, IdentityModel.Clients.ActiveDirectory.TokenCache.DefaultShared);
+                    AuthenticationResult authResult = await authCtx.AcquireTokenByRefreshTokenAsync(refreshToken.Value, clientId, resource);
+
+                    return await this.GeneratePersonalAccessToken(targetUri, authResult);
+                }
+            }
+            catch (Exception exception)
+            {
+                Debug.WriteLine(exception);
+            }
+
+            return false;
         }
 
         public override bool SetCredentials(Uri targetUri, Credential credentials)
         {
-            BaseSecureStore.ValidateTargetUri(targetUri);
-            Credential.Validate(credentials);
-
-            var task = Task.Run<bool>(async () => { return await this.InteractiveLogon(targetUri, credentials); });
-            task.Wait();
-
-            if (task.IsFaulted)
-                throw task.Exception;
-
-            return task.Result;
+            throw new NotSupportedException();
         }
     }
 }

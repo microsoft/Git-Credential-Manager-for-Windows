@@ -9,7 +9,7 @@ using System.Threading.Tasks;
 
 namespace Microsoft.TeamFoundation.Git.Helpers.Authentication
 {
-    public abstract class BaseVsoAuthentication : BaseAuthentication, IVsoAuthentication
+    public abstract class BaseVsoAuthentication : BaseAuthentication
     {
         public static readonly string DefaultResource = "499b84ac-1321-427f-aa17-267ca6975798";
         public static readonly Guid DefaultClientId = new Guid("872cd9fa-d31f-45e0-9eab-6e460a02d1f1");
@@ -92,8 +92,6 @@ namespace Microsoft.TeamFoundation.Git.Helpers.Authentication
 
             return credentials != null;
         }
-
-        public abstract Task<bool> InteractiveLogon(Uri targetUri, Credential credentials);
 
         public abstract Task<bool> RefreshCredentials(Uri targetUri);
 
