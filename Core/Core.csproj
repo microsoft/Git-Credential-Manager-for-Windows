@@ -51,6 +51,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="CredentialCache.cs" />
+    <Compile Include="IVsoMsaAuthentication.cs" />
     <Compile Include="TokenCache.cs" />
     <Compile Include="VsoAadAuthentication.cs" />
     <Compile Include="BaseVsoAuthentication.cs" />
@@ -61,7 +62,6 @@
     <Compile Include="IAuthentication.cs" />
     <Compile Include="IVsoAadAuthentication.cs" />
     <Compile Include="ICredentialStore.cs" />
-    <Compile Include="IVsoAuthentication.cs" />
     <Compile Include="ITokenStore.cs" />
     <Compile Include="VsoMsaAuthentation.cs" />
     <Compile Include="CredentialStore.cs" />

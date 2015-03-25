@@ -30,7 +30,7 @@ namespace Microsoft.TeamFoundation.Git.Helpers.Authentication
             : base(DefaultAuthorityHost, personalAccessToken, userCredential, adaRefresh)
         { }
 
-        public override async Task<bool> InteractiveLogon(Uri targetUri, Credential credentials)
+        public async Task<bool> InteractiveLogon(Uri targetUri, Credential credentials)
         {
             BaseSecureStore.ValidateTargetUri(targetUri);
             Credential.Validate(credentials);
@@ -117,7 +117,7 @@ namespace Microsoft.TeamFoundation.Git.Helpers.Authentication
                 Debug.WriteLine(exception);
             }
 
-            return true;
+            return false;
         }
 
         public override bool SetCredentials(Uri targetUri, Credential credentials)
