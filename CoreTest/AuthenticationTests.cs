@@ -21,7 +21,7 @@ namespace Microsoft.TeamFoundation.Git.Helpers.Authentication
             Credential credentials = new Credential("jwyman@microsoft.com", "0thLight?");
 
             VsoMsaAuthentation vsoMsa = new VsoMsaAuthentation();
-            Assert.IsTrue(vsoMsa.PromptLogon(targetUri), "Promp logon failed");
+            Assert.IsTrue(vsoMsa.InteractiveLogon(targetUri), "Promp logon failed");
         }
     }
 }

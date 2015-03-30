@@ -30,7 +30,33 @@ namespace Microsoft.TeamFoundation.Git.Helpers.Authentication
             : base(DefaultAuthorityHost, personalAccessToken, userCredential, adaRefresh)
         { }
 
-        public async Task<bool> InteractiveLogon(Uri targetUri, Credential credentials)
+        public bool InteractiveLogon(Uri targetUri)
+        {
+            BaseSecureStore.ValidateTargetUri(targetUri);
+
+            Trace.TraceInformation("launching interactive UX");
+
+            try
+            {
+                string clientId = this.ClientId.ToString("D");
+                string resource = this.Resource;
+
+                AuthenticationContext authCtx = new AuthenticationContext(this.AuthorityHostUrl, IdentityModel.Clients.ActiveDirectory.TokenCache.DefaultShared);
+                AuthenticationResult authResult = authCtx.AcquireToken(resource, clientId, new Uri(RedirectUrl), PromptBehavior.Always, UserIdentifier.AnyUser);
+
+                this.StoreRefreshToken(targetUri, authResult);
+
+                return Task.Run(async () => { return await this.GeneratePersonalAccessToken(targetUri, authResult); }).Result;
+            }
+            catch (AdalException exception)
+            {
+                Debug.Write(exception);
+            }
+
+            return false;
+        }
+
+        public async Task<bool> NoninteractiveLogonWithCredentials(Uri targetUri, Credential credentials)
         {
             BaseSecureStore.ValidateTargetUri(targetUri);
             Credential.Validate(credentials);
@@ -64,6 +90,8 @@ namespace Microsoft.TeamFoundation.Git.Helpers.Authentication
         {
             BaseSecureStore.ValidateTargetUri(targetUri);
 
+            Trace.TraceInformation("attempting non-interactive logon");
+
             try
             {
                 string clientId = this.ClientId.ToString("D");
@@ -77,13 +105,14 @@ namespace Microsoft.TeamFoundation.Git.Helpers.Authentication
 
                 return await this.GeneratePersonalAccessToken(targetUri, authResult);
             }
-            catch (AdalServiceException exception)
+            catch (AdalException exception)
             {
                 Debug.WriteLine(exception);
+                Trace.TraceError("Non-interactive logon failed");
             }
 
             return false;
-        }
+        }        
 
         public override async Task<bool> RefreshCredentials(Uri targetUri)
         {
@@ -108,7 +137,7 @@ namespace Microsoft.TeamFoundation.Git.Helpers.Authentication
                     Credential credentials = null;
                     if (this.UserCredentialStore.ReadCredentials(targetUri, out credentials))
                     {
-                        return await this.InteractiveLogon(targetUri, credentials);
+                        return await this.NoninteractiveLogonWithCredentials(targetUri, credentials);
                     }
                 }
             }
@@ -125,7 +154,7 @@ namespace Microsoft.TeamFoundation.Git.Helpers.Authentication
             BaseSecureStore.ValidateTargetUri(targetUri);
             Credential.Validate(credentials);
 
-            var task = Task.Run<bool>(async () => { return await this.InteractiveLogon(targetUri, credentials); });
+            var task = Task.Run<bool>(async () => { return await this.NoninteractiveLogonWithCredentials(targetUri, credentials); });
             task.Wait();
 
             if (task.IsFaulted)

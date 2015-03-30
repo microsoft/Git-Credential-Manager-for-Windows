@@ -8,7 +8,6 @@ namespace Microsoft.TeamFoundation.Git.Helpers.Authentication
     public sealed class VsoMsaAuthentation : BaseVsoAuthentication, IVsoMsaAuthentication
     {
         public const string DefaultAuthorityHost = "https://login.windows.net/live.com";
-        public const string RedirectUrl = "urn:ietf:wg:oauth:2.0:oob";
 
         public VsoMsaAuthentation()
             : base(DefaultAuthorityHost)
@@ -26,7 +25,7 @@ namespace Microsoft.TeamFoundation.Git.Helpers.Authentication
             : base(DefaultAuthorityHost, personalAccessToken, userCredential, adaRefresh)
         { }
 
-        public bool PromptLogon(Uri targetUri)
+        public bool InteractiveLogon(Uri targetUri)
         {
             BaseSecureStore.ValidateTargetUri(targetUri);
 
