@@ -5,6 +5,6 @@ namespace Microsoft.TeamFoundation.Git.Helpers.Authentication
 {
     public interface IVsoMsaAuthentication
     {
-        bool PromptLogon(Uri targetUri);
+        bool InteractiveLogon(Uri targetUri);
     }
 }

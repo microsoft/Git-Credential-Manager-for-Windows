@@ -241,8 +241,8 @@ namespace Microsoft.TeamFoundation.Git.Helpers.Authentication
                                 && await aadAuth.NoninteractiveLogon(operationArguments.TargetUri)
                                 && aadAuth.GetCredentials(operationArguments.TargetUri, out credentials))
                             || (operationArguments.Interactivity != Interactivity.Never
-                                && aadAuth.RequestUserCredentials(operationArguments.TargetUri, out credentials)
-                                && await aadAuth.InteractiveLogon(operationArguments.TargetUri, credentials)))
+                                && aadAuth.InteractiveLogon(operationArguments.TargetUri)
+                                && aadAuth.GetCredentials(operationArguments.TargetUri, out credentials)))
                             {
                                 operationArguments.SetCredentials(credentials);
                             }
@@ -262,7 +262,7 @@ namespace Microsoft.TeamFoundation.Git.Helpers.Authentication
                             {
                                 if (await msaAuth.ValidateCredentials(credentials)
                                     || await msaAuth.RefreshCredentials(operationArguments.TargetUri)
-                                    || msaAuth.PromptLogon(operationArguments.TargetUri))
+                                    || msaAuth.InteractiveLogon(operationArguments.TargetUri))
                                 {
                                     operationArguments.SetCredentials(credentials);
                                 }
@@ -276,7 +276,7 @@ namespace Microsoft.TeamFoundation.Git.Helpers.Authentication
                     else
                     {
                         Trace.TraceInformation("attempting prompted logon");
-                        if (msaAuth.PromptLogon(operationArguments.TargetUri)
+                        if (msaAuth.InteractiveLogon(operationArguments.TargetUri)
                             && msaAuth.GetCredentials(operationArguments.TargetUri, out credentials))
                         {
                             operationArguments.SetCredentials(credentials);

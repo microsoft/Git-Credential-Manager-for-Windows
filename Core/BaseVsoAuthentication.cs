@@ -13,14 +13,15 @@ namespace Microsoft.TeamFoundation.Git.Helpers.Authentication
     {
         public static readonly string DefaultResource = "499b84ac-1321-427f-aa17-267ca6975798";
         public static readonly Guid DefaultClientId = new Guid("872cd9fa-d31f-45e0-9eab-6e460a02d1f1");
+        public const string RedirectUrl = "urn:ietf:wg:oauth:2.0:oob";
 
         protected const string SecondaryCredentialPrefix = "alt-git";
         protected const string TokenPrefix = "adal-refresh";
 
         protected BaseVsoAuthentication(string authorityHostUrl)
         {
-            AdalTrace.TraceSource.Switch.Level = SourceLevels.Off;
-            AdalTrace.LegacyTraceSwitch.Level = TraceLevel.Off;
+            //AdalTrace.TraceSource.Switch.Level = SourceLevels.Off;
+            //AdalTrace.LegacyTraceSwitch.Level = TraceLevel.Off;
 
             this.AuthorityHostUrl = authorityHostUrl;
             this.ClientId = DefaultClientId;
@@ -79,12 +80,18 @@ namespace Microsoft.TeamFoundation.Git.Helpers.Authentication
         {
             BaseSecureStore.ValidateTargetUri(targetUri);
 
+            Trace.TraceInformation("Attempting to retrieve cached credentials");
+
             // check the in-memory cache first
             if (!this.PersonalAccessTokenCache.ReadCredentials(targetUri, out credentials))
             {
+                Trace.TraceInformation("Unable to retrieve cached credentials, attempting stored credentials retrieval.");
+
                 // fall-back to the on disk cache
                 if (this.PersonalAccessTokenStore.ReadCredentials(targetUri, out credentials))
                 {
+                    Trace.TraceInformation("Successfully retrieved stored credentials, updating credential cache");
+
                     // update the in-memory cache for faster future look-ups
                     this.PersonalAccessTokenCache.WriteCredentials(targetUri, credentials);
                 }
