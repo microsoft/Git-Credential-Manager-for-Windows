@@ -120,6 +120,11 @@ namespace Microsoft.TeamFoundation.Git.Helpers.Authentication
                             return personalAccessToken;
                         }
                     }
+                    else
+                    {
+                        Trace.TraceWarning("PAT server response: {0}", response.StatusCode);
+                        Trace.TraceError("Personal Access Token generation failed.");
+                    }
                 }
             }
             catch (Exception exception)
