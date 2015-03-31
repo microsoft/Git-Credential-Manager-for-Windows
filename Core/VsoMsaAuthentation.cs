@@ -9,37 +9,40 @@ namespace Microsoft.TeamFoundation.Git.Helpers.Authentication
     {
         public const string DefaultAuthorityHost = "https://login.windows.net/live.com";
 
-        public VsoMsaAuthentation()
-            : base(DefaultAuthorityHost)
-        { }
-        public VsoMsaAuthentation(string resource, Guid clientId)
-            : base(DefaultAuthorityHost, resource, clientId)
-        { }
+        public VsoMsaAuthentation(string resource = null, string clientId = null)
+            : base(resource, clientId)
+        {
+            this.LiveAuthority = new AzureAuthority();
+        }
         /// <summary>
         /// Test constructor which allows for using fake credential stores
         /// </summary>
         /// <param name="personalAccessToken"></param>
         /// <param name="userCredential"></param>
         /// <param name="adaRefresh"></param>
-        internal VsoMsaAuthentation(ICredentialStore personalAccessToken, ICredentialStore userCredential, ITokenStore adaRefresh)
-            : base(DefaultAuthorityHost, personalAccessToken, userCredential, adaRefresh)
-        { }
+        internal VsoMsaAuthentation(ICredentialStore personalAccessToken, ICredentialStore userCredential, ITokenStore adaRefresh, ILiveAuthority liveAuthority, IVsoAuthority vsoAuthority)
+            : base(personalAccessToken, userCredential, adaRefresh, vsoAuthority)
+        {
+            this.LiveAuthority = liveAuthority;
+        }
+
+        internal ILiveAuthority LiveAuthority { get; set; }
 
         public bool InteractiveLogon(Uri targetUri)
         {
+            const string QueryParameterDomainHints = "domain_hint=live.com&display=popup";
+
             BaseSecureStore.ValidateTargetUri(targetUri);
 
             try
             {
-                string clientId = this.ClientId.ToString("D");
-                string resource = this.Resource;
+                Tokens tokens;
+                if ((tokens = this.LiveAuthority.AcquireToken(this.ClientId, this.Resource, new Uri(RedirectUrl), QueryParameterDomainHints)) != null)
+                {
+                    this.StoreRefreshToken(targetUri, tokens.RefeshToken);
 
-                AuthenticationContext authCtx = new AuthenticationContext(this.AuthorityHostUrl, IdentityModel.Clients.ActiveDirectory.TokenCache.DefaultShared);
-                AuthenticationResult authResult = authCtx.AcquireToken(resource, clientId, new Uri(RedirectUrl), PromptBehavior.Always, UserIdentifier.AnyUser, "domain_hint=live.com&display=popup");
-
-                this.StoreRefreshToken(targetUri, authResult);
-
-                return Task.Run(async () => { return await this.GeneratePersonalAccessToken(targetUri, authResult); }).Result;
+                    return Task.Run(async () => { return await this.GeneratePersonalAccessToken(targetUri, tokens.AccessToken); }).Result;
+                }
             }
             catch (AdalException exception)
             {
@@ -55,16 +58,14 @@ namespace Microsoft.TeamFoundation.Git.Helpers.Authentication
 
             try
             {
-                string clientId = this.ClientId.ToString("D");
-                string resource = this.Resource;
-
                 Token refreshToken = null;
+                Tokens tokens = null;
                 if (this.AdaRefreshTokenStore.ReadToken(targetUri, out refreshToken))
                 {
-                    AuthenticationContext authCtx = new AuthenticationContext(this.AuthorityHostUrl, IdentityModel.Clients.ActiveDirectory.TokenCache.DefaultShared);
-                    AuthenticationResult authResult = await authCtx.AcquireTokenByRefreshTokenAsync(refreshToken.Value, clientId, resource);
-
-                    return await this.GeneratePersonalAccessToken(targetUri, authResult);
+                    if ((tokens = await this.LiveAuthority.AcquireTokenByRefreshTokenAsync(this.ClientId, this.Resource, refreshToken)) != null)
+                    {
+                        return await this.GeneratePersonalAccessToken(targetUri, tokens.AccessToken);
+                    }
                 }
             }
             catch (Exception exception)

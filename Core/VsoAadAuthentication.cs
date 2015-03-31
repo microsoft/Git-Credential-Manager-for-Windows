@@ -8,27 +8,24 @@ namespace Microsoft.TeamFoundation.Git.Helpers.Authentication
 {
     public sealed class VsoAadAuthentication : BaseVsoAuthentication, IVsoAadAuthentication
     {
-        public const string DefaultAuthorityHost = "https://login.windows.net/common";
-        private const string AuthorityHostFormat = "https://login.windows.net/{0:D}";
-
-        public VsoAadAuthentication()
-            : base(DefaultAuthorityHost)
-        { }
-        public VsoAadAuthentication(Guid tenantId, string resource, Guid clientId)
-            : base(String.Format(CultureInfo.InvariantCulture, AuthorityHostFormat, tenantId), resource, clientId)
-        { }
-        public VsoAadAuthentication(string resource, Guid clientId)
-            : base(DefaultAuthorityHost, resource, clientId)
-        { }
+        public VsoAadAuthentication(string resource = null, string clientId = null)
+            : base(resource, clientId)
+        {
+            this.AzureAuthority = new AzureAuthority();
+        }
         /// <summary>
         /// Test constructor which allows for using fake credential stores
         /// </summary>
         /// <param name="personalAccessToken"></param>
         /// <param name="userCredential"></param>
         /// <param name="adaRefresh"></param>
-        internal VsoAadAuthentication(ICredentialStore personalAccessToken, ICredentialStore userCredential, ITokenStore adaRefresh)
-            : base(DefaultAuthorityHost, personalAccessToken, userCredential, adaRefresh)
-        { }
+        internal VsoAadAuthentication(ICredentialStore personalAccessToken, ICredentialStore userCredential, ITokenStore adaRefresh, IAzureAuthority azureAuthority, IVsoAuthority vsoAuthority)
+            : base(personalAccessToken, userCredential, adaRefresh, vsoAuthority)
+        {
+            this.AzureAuthority = azureAuthority;
+        }
+
+        internal IAzureAuthority AzureAuthority { get; set; }
 
         public bool InteractiveLogon(Uri targetUri)
         {
@@ -38,15 +35,13 @@ namespace Microsoft.TeamFoundation.Git.Helpers.Authentication
 
             try
             {
-                string clientId = this.ClientId.ToString("D");
-                string resource = this.Resource;
+                Tokens tokens;
+                if((tokens = this.AzureAuthority.AcquireToken(this.ClientId, this.Resource, new Uri(RedirectUrl), null)) != null)
+                {
+                    this.StoreRefreshToken(targetUri, tokens.RefeshToken);
 
-                AuthenticationContext authCtx = new AuthenticationContext(this.AuthorityHostUrl, IdentityModel.Clients.ActiveDirectory.TokenCache.DefaultShared);
-                AuthenticationResult authResult = authCtx.AcquireToken(resource, clientId, new Uri(RedirectUrl), PromptBehavior.Always, UserIdentifier.AnyUser);
-
-                this.StoreRefreshToken(targetUri, authResult);
-
-                return Task.Run(async () => { return await this.GeneratePersonalAccessToken(targetUri, authResult); }).Result;
+                    return Task.Run(async () => { return await this.GeneratePersonalAccessToken(targetUri, tokens.AccessToken); }).Result;
+                }                
             }
             catch (AdalException exception)
             {
@@ -65,17 +60,15 @@ namespace Microsoft.TeamFoundation.Git.Helpers.Authentication
 
             try
             {
-                string clientId = this.ClientId.ToString("D");
-                string resource = this.Resource;
+                Tokens tokens;
+                if ((tokens = await this.AzureAuthority.AcquireTokenAsync(this.ClientId, this.Resource, credentials)) != null)
+                {
 
-                UserCredential userCredential = new UserCredential(credentials.Username, credentials.Password);
-                AuthenticationContext authCtx = new AuthenticationContext(this.AuthorityHostUrl, IdentityModel.Clients.ActiveDirectory.TokenCache.DefaultShared);
-                AuthenticationResult authResult = await authCtx.AcquireTokenAsync(resource, clientId, userCredential);
+                    this.StoreRefreshToken(targetUri, tokens.RefeshToken);
+                    this.UserCredentialStore.WriteCredentials(targetUri, credentials);
 
-                this.StoreRefreshToken(targetUri, authResult);
-                this.UserCredentialStore.WriteCredentials(targetUri, credentials);
-
-                return await this.GeneratePersonalAccessToken(targetUri, authResult);
+                    return await this.GeneratePersonalAccessToken(targetUri, tokens.AccessToken);
+                }
             }
             catch (AdalException exception)
             {
@@ -94,16 +87,13 @@ namespace Microsoft.TeamFoundation.Git.Helpers.Authentication
 
             try
             {
-                string clientId = this.ClientId.ToString("D");
-                string resource = this.Resource;
+                Tokens tokens;
+                if ((tokens = await this.AzureAuthority.AcquireTokenAsync(this.ClientId, this.Resource)) != null)
+                {
+                    this.StoreRefreshToken(targetUri, tokens.RefeshToken);
 
-                UserCredential userCredential = new UserCredential();
-                AuthenticationContext authCtx = new AuthenticationContext(this.AuthorityHostUrl, IdentityModel.Clients.ActiveDirectory.TokenCache.DefaultShared);
-                AuthenticationResult authResult = await authCtx.AcquireTokenAsync(resource, clientId, userCredential);
-
-                this.StoreRefreshToken(targetUri, authResult);
-
-                return await this.GeneratePersonalAccessToken(targetUri, authResult);
+                    return await this.GeneratePersonalAccessToken(targetUri, tokens.AccessToken);
+                }
             }
             catch (AdalException exception)
             {
@@ -112,7 +102,7 @@ namespace Microsoft.TeamFoundation.Git.Helpers.Authentication
             }
 
             return false;
-        }        
+        }
 
         public override async Task<bool> RefreshCredentials(Uri targetUri)
         {
@@ -120,17 +110,12 @@ namespace Microsoft.TeamFoundation.Git.Helpers.Authentication
 
             try
             {
-                string clientId = this.ClientId.ToString("D");
-                string resource = this.Resource;
-
                 Token refreshToken = null;
-                if (this.AdaRefreshTokenStore.ReadToken(targetUri, out refreshToken)
-                    && refreshToken.Expires > DateTimeOffset.Now.AddMinutes(5))
+                if (this.AdaRefreshTokenStore.ReadToken(targetUri, out refreshToken))
                 {
-                    AuthenticationContext authCtx = new AuthenticationContext(this.AuthorityHostUrl, IdentityModel.Clients.ActiveDirectory.TokenCache.DefaultShared);
-                    AuthenticationResult authResult = await authCtx.AcquireTokenByRefreshTokenAsync(refreshToken.Value, clientId, resource);
-
-                    return await this.GeneratePersonalAccessToken(targetUri, authResult);
+                    Tokens tokens;
+                    return ((tokens = await this.AzureAuthority.AcquireTokenByRefreshTokenAsync(this.ClientId, this.Resource, refreshToken)) != null
+                        && await this.GeneratePersonalAccessToken(targetUri, tokens.AccessToken));
                 }
                 else
                 {

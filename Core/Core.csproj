@@ -8,7 +8,7 @@
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
     <RootNamespace>Microsoft.TeamFoundation.Git.Helpers.Authentication</RootNamespace>
-    <AssemblyName>Core</AssemblyName>
+    <AssemblyName>Microsoft.TeamFoundation.Git</AssemblyName>
     <TargetFrameworkVersion>v4.5.1</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <TargetFrameworkProfile />
@@ -50,9 +50,15 @@
     <Reference Include="System.Net.Http" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="AzureAuthority.cs" />
     <Compile Include="CredentialCache.cs" />
+    <Compile Include="IAzureAuthority.cs" />
+    <Compile Include="ILiveAuthority.cs" />
+    <Compile Include="IVsoAuthority.cs" />
     <Compile Include="IVsoMsaAuthentication.cs" />
     <Compile Include="TokenCache.cs" />
+    <Compile Include="Tokens.cs" />
+    <Compile Include="TokenType.cs" />
     <Compile Include="VsoAadAuthentication.cs" />
     <Compile Include="BaseVsoAuthentication.cs" />
     <Compile Include="BaseAuthentication.cs" />

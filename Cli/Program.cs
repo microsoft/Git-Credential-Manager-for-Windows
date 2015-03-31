@@ -79,11 +79,6 @@ namespace Microsoft.TeamFoundation.Git.Helpers.Authentication
                 Trace.TraceInformation("resource = {0}", match.Value);
                 operationArguments.AuthorityResource = match.Value;
             }
-            if ((match = GetConfig(config, operationArguments, "tenantid")) != null)
-            {
-                Trace.TraceInformation("tenantid = {0}", match.Value);
-                operationArguments.AuthorityTenantId = match.Value;
-            }
             if ((match = GetConfig(config, operationArguments, "validate")) != null)
             {
                 Trace.TraceInformation("validate = {0}", match.Value);
@@ -136,8 +131,6 @@ namespace Microsoft.TeamFoundation.Git.Helpers.Authentication
             Console.Out.WriteLine("                  Defaults to visualstudio.com. Only used by AAD authority.");
             Console.Out.WriteLine("   resource       Defines the resource identifier for the authority.");
             Console.Out.WriteLine("                  Defaults to visualstudio.com. Only used by AAD authority.");
-            Console.Out.WriteLine("   tenantid       Defines the tenant identifier for the authority.");
-            Console.Out.WriteLine("                  Defaults to Visual Studio. Only used by AAD authority.");
             Console.Out.WriteLine("   interactive    Specifies if user can be prompted for credentials or not.");
             Console.Out.WriteLine("                  Supports Auto, Always, or Never. Defaults to Auto.");
             Console.Out.WriteLine("                  Only used by AAD authority.");
@@ -296,7 +289,7 @@ namespace Microsoft.TeamFoundation.Git.Helpers.Authentication
             Debug.Assert(operationArguments.Username != null, "The operaionArgument.Username is null");
             Debug.Assert(operationArguments.TargetUri != null, "The operationArgument.TargetUri is null");
 
-            switch(operationArguments.Authority)
+            switch (operationArguments.Authority)
             {
                 default:
                 case AuthorityType.Basic:
@@ -327,27 +320,11 @@ namespace Microsoft.TeamFoundation.Git.Helpers.Authentication
                     // if the clientId and resource values exist, use them
                     if (!String.IsNullOrWhiteSpace(operationArguments.AuthorityClientId) && !String.IsNullOrWhiteSpace(operationArguments.AuthorityResource))
                     {
-                        Guid clientId = Guid.Empty;
+                        string clientId = operationArguments.AuthorityClientId;
                         string resource = operationArguments.AuthorityResource;
 
-                        if (Guid.TryParse(operationArguments.AuthorityClientId, out clientId))
-                        {
-                            // if the tenant value use it
-                            if (!String.IsNullOrWhiteSpace(operationArguments.AuthorityTenantId))
-                            {
-                                Guid tenantId = Guid.Empty;
-
-                                if (Guid.TryParse(operationArguments.AuthorityTenantId, out tenantId))
-                                {
-                                    // return a custom AAD backed VSO authentication objects
-                                    Trace.TraceInformation("resource = {0}, clientId = {1}, tenantId = {2}", resource, clientId, tenantId);
-                                    return new VsoAadAuthentication(tenantId, resource, clientId);
-                                }
-                            }
-                            // return a common tenant AAD backed VSO authentication object
-                            Trace.TraceInformation("resource = {0}, clientId = {1}", resource, clientId);
-                            return new VsoAadAuthentication(resource, clientId);
-                        }
+                        Trace.TraceInformation("resource = {0}, clientId = {1}", resource, clientId);
+                        return new VsoAadAuthentication(resource, clientId);
                     }
                     // return a generic AAD backed VSO authentication object
                     return new VsoAadAuthentication();
@@ -360,15 +337,11 @@ namespace Microsoft.TeamFoundation.Git.Helpers.Authentication
                     // if the clientId and resource values exist, use them
                     if (!String.IsNullOrWhiteSpace(operationArguments.AuthorityClientId) && !String.IsNullOrWhiteSpace(operationArguments.AuthorityResource))
                     {
-                        Guid clientId = Guid.Empty;
+                        string clientId = operationArguments.AuthorityClientId;
                         string resource = operationArguments.AuthorityResource;
 
-                        if (Guid.TryParse(operationArguments.AuthorityClientId, out clientId))
-                        {
-                            // return a common tenant MSA backed VSO authentication object
-                            Trace.TraceInformation("resource = {0}, clientId = {1}", resource, clientId);
-                            return new VsoMsaAuthentation(resource, clientId);
-                        }
+                        Trace.TraceInformation("resource = {0}, clientId = {1}", resource, clientId);
+                        return new VsoMsaAuthentation(resource, clientId);
                     }
                     // return a generic MSA backed VSO authentication object
                     return new VsoMsaAuthentation();

@@ -88,7 +88,7 @@ namespace Microsoft.TeamFoundation.Git.Helpers.Authentication
             {
                 Uri uri = new Uri(url, UriKind.Absolute);
 
-                Token writeToken = new Token(token, expires);
+                Token writeToken = new Token(token, TokenType.Test);
                 Token readToken = null;
 
                 tokenStore.WriteToken(uri, writeToken);
@@ -96,7 +96,7 @@ namespace Microsoft.TeamFoundation.Git.Helpers.Authentication
                 if (tokenStore.ReadToken(uri, out readToken))
                 {
                     Assert.AreEqual(writeToken.Value, readToken.Value, "Token values did not match between written and read");
-                    Assert.AreEqual(writeToken.Expires, readToken.Expires, "Token expires did not match between written and read");
+                    Assert.AreEqual(writeToken.Type, readToken.Type, "Token types did not mathc between written and read");
                 }
                 else
                 {

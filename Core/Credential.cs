@@ -7,7 +7,9 @@ namespace Microsoft.TeamFoundation.Git.Helpers.Authentication
     /// </summary>
     public sealed class Credential
     {
-        public Credential()
+        public static readonly Credential Empty = new Credential();
+
+        private Credential()
         {
             this.Password = String.Empty;
             this.Username = String.Empty;

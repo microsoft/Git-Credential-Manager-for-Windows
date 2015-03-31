@@ -11,49 +11,50 @@ namespace Microsoft.TeamFoundation.Git.Helpers.Authentication
 {
     public abstract class BaseVsoAuthentication : BaseAuthentication
     {
-        public static readonly string DefaultResource = "499b84ac-1321-427f-aa17-267ca6975798";
-        public static readonly Guid DefaultClientId = new Guid("872cd9fa-d31f-45e0-9eab-6e460a02d1f1");
+        public const string DefaultResource = "499b84ac-1321-427f-aa17-267ca6975798";
+        public const string DefaultClientId = "872cd9fa-d31f-45e0-9eab-6e460a02d1f1";
         public const string RedirectUrl = "urn:ietf:wg:oauth:2.0:oob";
 
         protected const string SecondaryCredentialPrefix = "alt-git";
         protected const string TokenPrefix = "adal-refresh";
 
-        protected BaseVsoAuthentication(string authorityHostUrl)
+        protected BaseVsoAuthentication()
         {
-            //AdalTrace.TraceSource.Switch.Level = SourceLevels.Off;
-            //AdalTrace.LegacyTraceSwitch.Level = TraceLevel.Off;
+            AdalTrace.TraceSource.Switch.Level = SourceLevels.Off;
+            AdalTrace.LegacyTraceSwitch.Level = TraceLevel.Off;
 
-            this.AuthorityHostUrl = authorityHostUrl;
             this.ClientId = DefaultClientId;
             this.Resource = DefaultResource;
             this.PersonalAccessTokenStore = new CredentialStore(PrimaryCredentialPrefix);
             this.UserCredentialStore = new CredentialStore(SecondaryCredentialPrefix);
             this.AdaRefreshTokenStore = new TokenStore(TokenPrefix);
             this.PersonalAccessTokenCache = new CredentialCache(PrimaryCredentialPrefix);
+            this.VsoAuthority = new AzureAuthority();
         }
-        protected BaseVsoAuthentication(string authorityHostUrl, string resource, Guid clientId)
-            : this(authorityHostUrl)
+        protected BaseVsoAuthentication(string resource, string clientId)
+            : this()
         {
-
-            this.ClientId = clientId;
-            this.Resource = resource;
+            this.ClientId = clientId ?? this.ClientId;
+            this.Resource = resource ?? this.Resource;
         }
-        internal BaseVsoAuthentication(string authorityHostUrl, ICredentialStore personalAccessToken, ICredentialStore userCredential, ITokenStore adaRefresh)
-            : this(authorityHostUrl)
+        internal BaseVsoAuthentication(ICredentialStore personalAccessToken, ICredentialStore userCredential, ITokenStore adaRefresh, IVsoAuthority vsoAuthority)
+            : this()
         {
             this.PersonalAccessTokenStore = personalAccessToken;
             this.UserCredentialStore = userCredential;
             this.AdaRefreshTokenStore = adaRefresh;
+            this.VsoAuthority = vsoAuthority;
         }
 
-        public readonly string AuthorityHostUrl;
-        public readonly Guid ClientId;
+        public readonly string ClientId;
         public readonly string Resource;
 
         protected ICredentialStore PersonalAccessTokenStore { get; set; }
         protected ICredentialStore UserCredentialStore { get; set; }
         protected ITokenStore AdaRefreshTokenStore { get; set; }
         protected ICredentialStore PersonalAccessTokenCache { get; set; }
+
+        internal IVsoAuthority VsoAuthority { get; set; }
 
         public override void DeleteCredentials(Uri targetUri)
         {
@@ -111,77 +112,29 @@ namespace Microsoft.TeamFoundation.Git.Helpers.Authentication
 
         public async Task<bool> ValidateCredentials(Credential credentials)
         {
-            const string VsoValidationUrl = "https://app.vssps.visualstudio.com/_apis/profile/profiles/me?api-version=1.0";
-
-            Credential.Validate(credentials);
-
-            try
-            {
-                string basicAuthHeader = "Basic " + Convert.ToBase64String(ASCIIEncoding.ASCII.GetBytes(String.Format("{0}:{1}", credentials.Username, credentials.Password)));
-                HttpWebRequest request = WebRequest.CreateHttp(VsoValidationUrl);
-                request.Headers.Add(HttpRequestHeader.Authorization, basicAuthHeader);
-                HttpWebResponse response = await request.GetResponseAsync() as HttpWebResponse;
-                Trace.TraceInformation("validation status code: {0}", response.StatusCode);
-                return response.StatusCode == HttpStatusCode.OK;
-            }
-            catch (Exception exception)
-            {
-                Debug.WriteLine(exception);
-            }
-
-            return false;
+            return await this.VsoAuthority.ValidateCredentials(credentials);
         }
 
-        protected async Task<bool> GeneratePersonalAccessToken(Uri targetUri, AuthenticationResult authResult)
+        protected async Task<bool> GeneratePersonalAccessToken(Uri targetUri, Token accessToken)
         {
-            const string VsspEndPointUrl = "https://app.vssps.visualstudio.com/_apis/token/sessiontokens?api-version=1.0&tokentype=compact";
-
             Debug.Assert(targetUri != null, "The targetUri parameter is null");
-            Debug.Assert(authResult != null, "The authResult parameter is null");
+            Debug.Assert(accessToken != null, "The accessToken parameter is null");
+            Debug.Assert(accessToken.Type == TokenType.Access, "The value of the accessToken parameter is not an access token");
 
-            Trace.TraceInformation("Generationg Personal Access Token for {0}", targetUri);
-
-            try
+            Credential personalAccessToken;
+            if ((personalAccessToken = await this.VsoAuthority.GeneratePersonalAccessToken(targetUri, accessToken)) != null)
             {
-                using (HttpClient httpClient = new HttpClient())
-                {
-                    StringContent content = new StringContent(String.Empty, Encoding.UTF8, "application/json");
-                    httpClient.DefaultRequestHeaders.Authorization = new System.Net.Http.Headers.AuthenticationHeaderValue(authResult.AccessTokenType, authResult.AccessToken);
-
-                    HttpResponseMessage response = await httpClient.PostAsync(VsspEndPointUrl, content);
-                    if (response.StatusCode == HttpStatusCode.OK)
-                    {
-                        string responseText = await response.Content.ReadAsStringAsync();
-                        Trace.TraceInformation("PAT Server response:\n{0}", responseText);
-
-                        Match tokenMatch = null;
-                        if ((tokenMatch = Regex.Match(responseText, @"\s*""token""\s*:\s*""(\S+)""\s*", RegexOptions.Compiled | RegexOptions.IgnoreCase)).Success)
-                        {
-                            string token = tokenMatch.Groups[1].Value;
-                            Credential personalAccessToken = new Credential(token, String.Empty);
-                            this.PersonalAccessTokenStore.WriteCredentials(targetUri, personalAccessToken);
-                            this.PersonalAccessTokenCache.WriteCredentials(targetUri, personalAccessToken);
-                            return true;
-                        }
-                    }
-                }
-            }
-            catch (Exception exception)
-            {
-                Debug.WriteLine(exception);
+                this.PersonalAccessTokenCache.WriteCredentials(targetUri, personalAccessToken);
             }
 
-            return false;
+            return personalAccessToken != null;
         }
 
-        protected void StoreRefreshToken(Uri targetUri, AuthenticationResult authResult)
+        protected void StoreRefreshToken(Uri targetUri, Token refreshToken)
         {
             Debug.Assert(targetUri != null, "The targetUri parameter is null");
-            Debug.Assert(authResult != null, "The authResult parameter is null");
+            Debug.Assert(refreshToken != null, "The refreshToken parameter is null");
 
-            Trace.TraceInformation("Storing refresh token: {0}", authResult.RefreshToken);
-
-            Token refreshToken = new Token(authResult.RefreshToken, authResult.ExpiresOn);
             this.AdaRefreshTokenStore.WriteToken(targetUri, refreshToken);
         }
     }
