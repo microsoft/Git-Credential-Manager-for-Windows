@@ -1,10 +1,6 @@
 ﻿using Microsoft.IdentityModel.Clients.ActiveDirectory;
 using System;
 using System.Diagnostics;
-using System.Net;
-using System.Net.Http;
-using System.Text;
-using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 
 namespace Microsoft.TeamFoundation.Git.Helpers.Authentication

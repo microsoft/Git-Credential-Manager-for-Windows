@@ -2,7 +2,6 @@
 using System;
 using System.Diagnostics;
 using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
 using GitConfigValue = LibGit2Sharp.ConfigurationEntry<string>;
 

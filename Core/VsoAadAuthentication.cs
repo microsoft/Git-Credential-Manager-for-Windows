@@ -1,7 +1,6 @@
 ﻿using Microsoft.IdentityModel.Clients.ActiveDirectory;
 using System;
 using System.Diagnostics;
-using System.Globalization;
 using System.Threading.Tasks;
 
 namespace Microsoft.TeamFoundation.Git.Helpers.Authentication

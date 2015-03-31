@@ -3,6 +3,7 @@ using System;
 using System.Diagnostics;
 using System.Net;
 using System.Net.Http;
+using System.Net.Http.Headers;
 using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
@@ -104,13 +105,14 @@ namespace Microsoft.TeamFoundation.Git.Helpers.Authentication
                 using (HttpClient httpClient = new HttpClient())
                 {
                     StringContent content = new StringContent(String.Empty, Encoding.UTF8, "application/json");
-                    httpClient.DefaultRequestHeaders.Authorization = new System.Net.Http.Headers.AuthenticationHeaderValue(accessToken.Value, "bearer");
+                    httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", accessToken.Value);
 
                     HttpResponseMessage response = await httpClient.PostAsync(VsspEndPointUrl, content);
                     if (response.StatusCode == HttpStatusCode.OK)
                     {
                         string responseText = await response.Content.ReadAsStringAsync();
-                        Trace.TraceInformation("PAT Server response:\n{0}", responseText);
+
+                        Trace.TraceInformation("Personal Access Token generation success.");
 
                         Match tokenMatch = null;
                         if ((tokenMatch = Regex.Match(responseText, @"\s*""token""\s*:\s*""(\S+)""\s*", RegexOptions.Compiled | RegexOptions.IgnoreCase)).Success)
@@ -122,8 +124,9 @@ namespace Microsoft.TeamFoundation.Git.Helpers.Authentication
                     }
                     else
                     {
-                        Trace.TraceWarning("PAT server response: {0}", response.StatusCode);
                         Trace.TraceError("Personal Access Token generation failed.");
+
+                        Console.Error.WriteLine("Received {0} from Visual Studio Online authority. Unable to generate personal access token.", response.ReasonPhrase);
                     }
                 }
             }
