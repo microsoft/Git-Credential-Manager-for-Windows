@@ -379,7 +379,8 @@ namespace Microsoft.TeamFoundation.Git.Helpers.Authentication
             Debug.Assert(prefix != null, "The prefix parameter is null");
             Debug.Assert(suffix != null, "The suffic parameter is null");
 
-            var result = config.Where((GitConfigValue entry) =>
+            var result = config.OrderBy((GitConfigValue entry)=> { return entry.Key.Length; })
+                               .Where((GitConfigValue entry) =>
                                 {
                                     return entry.Key.StartsWith(key, StringComparison.OrdinalIgnoreCase)
                                         && entry.Key.EndsWith(prefix + "." + suffix, StringComparison.OrdinalIgnoreCase);
