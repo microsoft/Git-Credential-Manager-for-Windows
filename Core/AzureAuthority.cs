@@ -111,8 +111,7 @@ namespace Microsoft.TeamFoundation.Git.Helpers.Authentication
                 using (HttpClient httpClient = new HttpClient())
                 {
                     StringContent content = new StringContent(String.Empty, Encoding.UTF8, "application/json");
-                    httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Authorization", "Bearer" + accessToken.Value);
-                    httpClient.DefaultRequestHeaders.Add("X-TFS-FedAuthRedirect", "Suppress");
+                    httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", accessToken.Value);
 
                     HttpResponseMessage response = await httpClient.PostAsync(VsspEndPointUrl, content);
                     if (response.StatusCode == HttpStatusCode.OK)

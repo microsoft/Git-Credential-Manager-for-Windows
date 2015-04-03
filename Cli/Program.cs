@@ -208,19 +208,21 @@ namespace Microsoft.TeamFoundation.Git.Helpers.Authentication
                         }
                         else
                         {
+                            Trace.TraceWarning("credentials are invalid");
                             credentials = null;
                         }
                     }
                     else
                     {
+                        Trace.TraceWarning("credentials not found");
                         credentials = null;
                     }
 
                     if (credentials == null)
                     {
+                        Trace.TraceInformation("attempting non-interactive logon with credential prompt fallback");
                         Task.Run(async () =>
                         {
-                            Trace.TraceInformation("attempting non-interactive logon with credential prompt fallback");
                             if ((operationArguments.Interactivity != Interactivity.Always
                                 && await aadAuth.NoninteractiveLogon(operationArguments.TargetUri)
                                 && aadAuth.GetCredentials(operationArguments.TargetUri, out credentials))
