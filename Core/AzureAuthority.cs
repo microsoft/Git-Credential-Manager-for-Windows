@@ -26,13 +26,15 @@ namespace Microsoft.TeamFoundation.Git.Helpers.Authentication
 
             try
             {
-                AuthenticationContext authCtx = new AuthenticationContext(AuthorityHostUrl, IdentityModel.Clients.ActiveDirectory.TokenCache.DefaultShared);
+                AuthenticationContext authCtx = new AuthenticationContext(AuthorityHostUrl);
                 AuthenticationResult authResult = authCtx.AcquireToken(resource, clientId, redirectUri, PromptBehavior.Always, UserIdentifier.AnyUser, queryParameters);
                 tokens = new Tokens(authResult);
+
+                Trace.TraceInformation("AzureAuthority::AcquireToken succeeded.");
             }
             catch (AdalException exception)
             {
-                Trace.TraceError("Authenitcation failed.");
+                Trace.TraceError("AzureAuthority::AcquireToken failed.");
                 Trace.TraceError(exception.Message);
                 Debug.Write(exception);
             }
@@ -53,10 +55,12 @@ namespace Microsoft.TeamFoundation.Git.Helpers.Authentication
                 AuthenticationContext authCtx = new AuthenticationContext(AuthorityHostUrl, IdentityModel.Clients.ActiveDirectory.TokenCache.DefaultShared);
                 AuthenticationResult authResult = await authCtx.AcquireTokenAsync(resource, clientId, userCredential);
                 tokens = new Tokens(authResult);
+
+                Trace.TraceInformation("AzureAuthority::AcquireTokenAsync succeeded.");
             }
             catch (AdalException exception)
             {
-                Trace.TraceError("Authenitcation failed.");
+                Trace.TraceError("AzureAuthority::AcquireTokenAsync failed.");
                 Trace.TraceError(exception.Message);
                 Debug.WriteLine(exception);
             }
@@ -79,10 +83,12 @@ namespace Microsoft.TeamFoundation.Git.Helpers.Authentication
                 AuthenticationContext authCtx = new AuthenticationContext(AuthorityHostUrl, IdentityModel.Clients.ActiveDirectory.TokenCache.DefaultShared);
                 AuthenticationResult authResult = await authCtx.AcquireTokenByRefreshTokenAsync(refreshToken.Value, clientId, resource);
                 tokens = new Tokens(authResult);
+
+                Trace.TraceInformation("AzureAuthority::AcquireTokenByRefreshTokenAsync succeeded.");
             }
             catch (AdalException exception)
             {
-                Trace.TraceError("Token refresh failed.");
+                Trace.TraceError("AzureAuthority::AcquireTokenByRefreshTokenAsync failed.");
                 Trace.TraceError(exception.Message);
                 Debug.WriteLine(exception);
             }
@@ -98,14 +104,15 @@ namespace Microsoft.TeamFoundation.Git.Helpers.Authentication
             Debug.Assert(accessToken != null, "The accessToken parameter is null");
             Debug.Assert(accessToken.Type == TokenType.Access, "The value of the accessToken parameter is not an access token");
 
-            Trace.TraceInformation("Generationg Personal Access Token for {0}", targetUri);
+            Trace.TraceInformation("Generating Personal Access Token for {0}", targetUri);
 
             try
             {
                 using (HttpClient httpClient = new HttpClient())
                 {
                     StringContent content = new StringContent(String.Empty, Encoding.UTF8, "application/json");
-                    httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", accessToken.Value);
+                    httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Authorization", "Bearer" + accessToken.Value);
+                    httpClient.DefaultRequestHeaders.Add("X-TFS-FedAuthRedirect", "Suppress");
 
                     HttpResponseMessage response = await httpClient.PostAsync(VsspEndPointUrl, content);
                     if (response.StatusCode == HttpStatusCode.OK)
@@ -119,12 +126,15 @@ namespace Microsoft.TeamFoundation.Git.Helpers.Authentication
                         {
                             string token = tokenMatch.Groups[1].Value;
                             Credential personalAccessToken = new Credential(token, String.Empty);
+
+                            Trace.TraceInformation("AzureAuthority::GeneratePersonalAccessToken succeeded.");
+
                             return personalAccessToken;
                         }
                     }
                     else
                     {
-                        Trace.TraceError("Personal Access Token generation failed.");
+                        Trace.TraceError("AzureAuthority::GeneratePersonalAccessToken failed (1).");
 
                         Console.Error.WriteLine("Received {0} from Visual Studio Online authority. Unable to generate personal access token.", response.ReasonPhrase);
                     }
@@ -132,7 +142,7 @@ namespace Microsoft.TeamFoundation.Git.Helpers.Authentication
             }
             catch (Exception exception)
             {
-                Trace.TraceError("Personal Access Token generation failed");
+                Trace.TraceError("AzureAuthority::GeneratePersonalAccessToken failed (2).");
                 Debug.WriteLine(exception);
             }
 
