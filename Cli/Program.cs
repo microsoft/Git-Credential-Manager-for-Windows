@@ -166,12 +166,9 @@ namespace Microsoft.TeamFoundation.Git.Helpers.Authentication
                     break;
 
                 case AuthorityType.AzureDirectory:
-                    VsoAadAuthentication aadAuth = authentication as VsoAadAuthentication;
-                    aadAuth.DeleteCredentials(operationArguments.TargetUri);
-                    break;
-
                 case AuthorityType.MicrosoftAccount:
-                    // not supported
+                    BaseVsoAuthentication vsoAuth = authentication as BaseVsoAuthentication;
+                    vsoAuth.DeleteCredentials(operationArguments.TargetUri);
                     break;
             }
         }
