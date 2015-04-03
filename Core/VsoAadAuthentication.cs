@@ -15,11 +15,11 @@ namespace Microsoft.TeamFoundation.Git.Helpers.Authentication
         /// <summary>
         /// Test constructor which allows for using fake credential stores
         /// </summary>
-        /// <param name="personalAccessToken"></param>
+        /// <param name="personalAccessTokenStore"></param>
         /// <param name="userCredential"></param>
-        /// <param name="adaRefresh"></param>
-        internal VsoAadAuthentication(ICredentialStore personalAccessToken, ICredentialStore userCredential, ITokenStore adaRefresh, IAzureAuthority azureAuthority, IVsoAuthority vsoAuthority)
-            : base(personalAccessToken, userCredential, adaRefresh, vsoAuthority)
+        /// <param name="adaRefreshTokenStore"></param>
+        internal VsoAadAuthentication(ICredentialStore personalAccessTokenStore, ICredentialStore personalAccessTokenCache, ITokenStore adaRefreshTokenStore, IAzureAuthority azureAuthority, IVsoAuthority vsoAuthority)
+            : base(personalAccessTokenStore, personalAccessTokenCache, adaRefreshTokenStore, vsoAuthority)
         {
             this.AzureAuthority = azureAuthority;
         }
@@ -62,9 +62,7 @@ namespace Microsoft.TeamFoundation.Git.Helpers.Authentication
                 Tokens tokens;
                 if ((tokens = await this.AzureAuthority.AcquireTokenAsync(this.ClientId, this.Resource, credentials)) != null)
                 {
-
                     this.StoreRefreshToken(targetUri, tokens.RefeshToken);
-                    this.UserCredentialStore.WriteCredentials(targetUri, credentials);
 
                     return await this.GeneratePersonalAccessToken(targetUri, tokens.AccessToken);
                 }
@@ -115,14 +113,6 @@ namespace Microsoft.TeamFoundation.Git.Helpers.Authentication
                     Tokens tokens;
                     return ((tokens = await this.AzureAuthority.AcquireTokenByRefreshTokenAsync(this.ClientId, this.Resource, refreshToken)) != null
                         && await this.GeneratePersonalAccessToken(targetUri, tokens.AccessToken));
-                }
-                else
-                {
-                    Credential credentials = null;
-                    if (this.UserCredentialStore.ReadCredentials(targetUri, out credentials))
-                    {
-                        return await this.NoninteractiveLogonWithCredentials(targetUri, credentials);
-                    }
                 }
             }
             catch (AdalException exception)

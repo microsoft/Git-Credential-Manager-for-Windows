@@ -13,14 +13,15 @@ namespace Microsoft.TeamFoundation.Git.Helpers.Authentication
             this.CredentialStore = new CredentialStore(PrimaryCredentialPrefix);
             this.CredentialCache = new CredentialCache(PrimaryCredentialPrefix);
         }
-        internal BasicAuthentication(ICredentialStore testStore)
+        internal BasicAuthentication(ICredentialStore credentialStore, ICredentialStore credentialCache)
             : this()
         {
-            this.CredentialStore = testStore;
+            this.CredentialStore = credentialStore;
+            this.CredentialCache = credentialCache;
         }
 
-        private ICredentialStore CredentialStore { get; set; }
-        private ICredentialStore CredentialCache { get; set; }
+        internal ICredentialStore CredentialStore { get; set; }
+        internal ICredentialStore CredentialCache { get; set; }
 
         public override void DeleteCredentials(Uri targetUri)
         {

@@ -11,7 +11,6 @@ namespace Microsoft.TeamFoundation.Git.Helpers.Authentication
         public const string DefaultClientId = "872cd9fa-d31f-45e0-9eab-6e460a02d1f1";
         public const string RedirectUrl = "urn:ietf:wg:oauth:2.0:oob";
 
-        protected const string SecondaryCredentialPrefix = "alt-git";
         protected const string TokenPrefix = "adal-refresh";
 
         protected BaseVsoAuthentication()
@@ -22,7 +21,6 @@ namespace Microsoft.TeamFoundation.Git.Helpers.Authentication
             this.ClientId = DefaultClientId;
             this.Resource = DefaultResource;
             this.PersonalAccessTokenStore = new CredentialStore(PrimaryCredentialPrefix);
-            this.UserCredentialStore = new CredentialStore(SecondaryCredentialPrefix);
             this.AdaRefreshTokenStore = new TokenStore(TokenPrefix);
             this.PersonalAccessTokenCache = new CredentialCache(PrimaryCredentialPrefix);
             this.VsoAuthority = new AzureAuthority();
@@ -33,22 +31,21 @@ namespace Microsoft.TeamFoundation.Git.Helpers.Authentication
             this.ClientId = clientId ?? this.ClientId;
             this.Resource = resource ?? this.Resource;
         }
-        internal BaseVsoAuthentication(ICredentialStore personalAccessToken, ICredentialStore userCredential, ITokenStore adaRefresh, IVsoAuthority vsoAuthority)
+        internal BaseVsoAuthentication(ICredentialStore personalAccessTokenStore, ICredentialStore personalAccessTokenCache, ITokenStore adaRefreshTokenStore, IVsoAuthority vsoAuthority)
             : this()
         {
-            this.PersonalAccessTokenStore = personalAccessToken;
-            this.UserCredentialStore = userCredential;
-            this.AdaRefreshTokenStore = adaRefresh;
+            this.PersonalAccessTokenStore = personalAccessTokenStore;
+            this.PersonalAccessTokenCache = personalAccessTokenCache;
+            this.AdaRefreshTokenStore = adaRefreshTokenStore;
             this.VsoAuthority = vsoAuthority;
         }
 
         public readonly string ClientId;
         public readonly string Resource;
 
-        protected ICredentialStore PersonalAccessTokenStore { get; set; }
-        protected ICredentialStore UserCredentialStore { get; set; }
-        protected ITokenStore AdaRefreshTokenStore { get; set; }
-        protected ICredentialStore PersonalAccessTokenCache { get; set; }
+        internal ICredentialStore PersonalAccessTokenStore { get; set; }
+        internal ITokenStore AdaRefreshTokenStore { get; set; }
+        internal ICredentialStore PersonalAccessTokenCache { get; set; }
 
         internal IVsoAuthority VsoAuthority { get; set; }
 
@@ -66,10 +63,6 @@ namespace Microsoft.TeamFoundation.Git.Helpers.Authentication
             else if (this.AdaRefreshTokenStore.ReadToken(targetUri, out token))
             {
                 this.AdaRefreshTokenStore.DeleteToken(targetUri);
-            }
-            else if (this.UserCredentialStore.ReadCredentials(targetUri, out credentials))
-            {
-                this.UserCredentialStore.DeleteCredentials(targetUri);
             }
         }
 
@@ -99,13 +92,6 @@ namespace Microsoft.TeamFoundation.Git.Helpers.Authentication
 
         public abstract Task<bool> RefreshCredentials(Uri targetUri);
 
-        public bool RequestUserCredentials(Uri targetUri, out Credential credentials)
-        {
-            BaseSecureStore.ValidateTargetUri(targetUri);
-
-            return this.UserCredentialStore.PromptUserCredentials(targetUri, out credentials);
-        }
-
         public async Task<bool> ValidateCredentials(Credential credentials)
         {
             return await this.VsoAuthority.ValidateCredentials(credentials);
@@ -121,6 +107,7 @@ namespace Microsoft.TeamFoundation.Git.Helpers.Authentication
             if ((personalAccessToken = await this.VsoAuthority.GeneratePersonalAccessToken(targetUri, accessToken)) != null)
             {
                 this.PersonalAccessTokenCache.WriteCredentials(targetUri, personalAccessToken);
+                this.PersonalAccessTokenStore.WriteCredentials(targetUri, personalAccessToken);
             }
 
             return personalAccessToken != null;

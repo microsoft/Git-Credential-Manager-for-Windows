@@ -60,9 +60,12 @@
     </Otherwise>
   </Choose>
   <ItemGroup>
+    <Compile Include="AuthorityFake.cs" />
+    <Compile Include="BasicAuthTests.cs" />
     <Compile Include="CredentialTests.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="TokenTests.cs" />
+    <Compile Include="VsoAadTests.cs" />
     <Compile Include="VsoMsaTests.cs" />
   </ItemGroup>
   <ItemGroup>

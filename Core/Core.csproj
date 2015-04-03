@@ -69,7 +69,7 @@
     <Compile Include="IVsoAadAuthentication.cs" />
     <Compile Include="ICredentialStore.cs" />
     <Compile Include="ITokenStore.cs" />
-    <Compile Include="VsoMsaAuthentation.cs" />
+    <Compile Include="VsoMsaAuthentication.cs" />
     <Compile Include="CredentialStore.cs" />
     <Compile Include="TokenStore.cs" />
     <Compile Include="Token.cs" />

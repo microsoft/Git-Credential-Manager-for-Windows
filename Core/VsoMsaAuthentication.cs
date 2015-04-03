@@ -5,11 +5,11 @@ using Debug = System.Diagnostics.Debug;
 
 namespace Microsoft.TeamFoundation.Git.Helpers.Authentication
 {
-    public sealed class VsoMsaAuthentation : BaseVsoAuthentication, IVsoMsaAuthentication
+    public sealed class VsoMsaAuthentication : BaseVsoAuthentication, IVsoMsaAuthentication
     {
         public const string DefaultAuthorityHost = "https://login.windows.net/live.com";
 
-        public VsoMsaAuthentation(string resource = null, string clientId = null)
+        public VsoMsaAuthentication(string resource = null, string clientId = null)
             : base(resource, clientId)
         {
             this.LiveAuthority = new AzureAuthority();
@@ -17,11 +17,12 @@ namespace Microsoft.TeamFoundation.Git.Helpers.Authentication
         /// <summary>
         /// Test constructor which allows for using fake credential stores
         /// </summary>
-        /// <param name="personalAccessToken"></param>
-        /// <param name="userCredential"></param>
-        /// <param name="adaRefresh"></param>
-        internal VsoMsaAuthentation(ICredentialStore personalAccessToken, ICredentialStore userCredential, ITokenStore adaRefresh, ILiveAuthority liveAuthority, IVsoAuthority vsoAuthority)
-            : base(personalAccessToken, userCredential, adaRefresh, vsoAuthority)
+        /// <param name="personalAccessTokenStore"></param>
+        /// <param name="adaRefreshTokenStore"></param>
+        /// <param name="liveAuthority"></param>
+        /// <param name="vsoAuthority"></param>
+        internal VsoMsaAuthentication(ICredentialStore personalAccessTokenStore, ICredentialStore personalAccessTokenCache, ITokenStore adaRefreshTokenStore, ILiveAuthority liveAuthority, IVsoAuthority vsoAuthority)
+            : base(personalAccessTokenStore, personalAccessTokenCache, adaRefreshTokenStore, vsoAuthority)
         {
             this.LiveAuthority = liveAuthority;
         }

@@ -205,26 +205,21 @@ namespace Microsoft.TeamFoundation.Git.Helpers.Authentication
                     if (aadAuth.GetCredentials(operationArguments.TargetUri, out credentials))
                     {
                         Trace.TraceInformation("credentials found");
-                        if (operationArguments.ValidateCredentials)
-                        {
-                            Trace.TraceInformation("validation requested");
-                            Task.Run(async () =>
-                            {
-                                if (await aadAuth.ValidateCredentials(credentials)
-                                    || await aadAuth.RefreshCredentials(operationArguments.TargetUri)
-                                    || aadAuth.RequestUserCredentials(operationArguments.TargetUri, out credentials))
-                                {
-                                    Trace.TraceInformation("credentials validated");
-                                    operationArguments.SetCredentials(credentials);
-                                }
-                            }).Wait();
-                        }
-                        else
+                        if (!operationArguments.ValidateCredentials || Task.Run(async () => { return await aadAuth.ValidateCredentials(credentials); }).Result)
                         {
                             operationArguments.SetCredentials(credentials);
                         }
+                        else
+                        {
+                            credentials = null;
+                        }
                     }
                     else
+                    {
+                        credentials = null;
+                    }
+
+                    if (credentials == null)
                     {
                         Task.Run(async () =>
                         {
@@ -243,7 +238,7 @@ namespace Microsoft.TeamFoundation.Git.Helpers.Authentication
                     break;
 
                 case AuthorityType.MicrosoftAccount:
-                    VsoMsaAuthentation msaAuth = authentication as VsoMsaAuthentation;
+                    VsoMsaAuthentication msaAuth = authentication as VsoMsaAuthentication;
                     if (msaAuth.GetCredentials(operationArguments.TargetUri, out credentials))
                     {
                         Trace.TraceInformation("credentials found");
@@ -340,10 +335,10 @@ namespace Microsoft.TeamFoundation.Git.Helpers.Authentication
                         string resource = operationArguments.AuthorityResource;
 
                         Trace.TraceInformation("resource = {0}, clientId = {1}", resource, clientId);
-                        return new VsoMsaAuthentation(resource, clientId);
+                        return new VsoMsaAuthentication(resource, clientId);
                     }
                     // return a generic MSA backed VSO authentication object
-                    return new VsoMsaAuthentation();
+                    return new VsoMsaAuthentication();
             }
         }
 
@@ -378,7 +373,7 @@ namespace Microsoft.TeamFoundation.Git.Helpers.Authentication
             Debug.Assert(prefix != null, "The prefix parameter is null");
             Debug.Assert(suffix != null, "The suffic parameter is null");
 
-            var result = config.OrderBy((GitConfigValue entry)=> { return entry.Key.Length; })
+            var result = config.OrderBy((GitConfigValue entry) => { return entry.Key.Length; })
                                .Where((GitConfigValue entry) =>
                                 {
                                     return entry.Key.StartsWith(key, StringComparison.OrdinalIgnoreCase)
