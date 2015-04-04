@@ -118,8 +118,6 @@ namespace Microsoft.TeamFoundation.Git.Helpers.Authentication
                     {
                         string responseText = await response.Content.ReadAsStringAsync();
 
-                        Trace.TraceInformation("Personal Access Token generation success.");
-
                         Match tokenMatch = null;
                         if ((tokenMatch = Regex.Match(responseText, @"\s*""token""\s*:\s*""(\S+)""\s*", RegexOptions.Compiled | RegexOptions.IgnoreCase)).Success)
                         {
@@ -133,17 +131,17 @@ namespace Microsoft.TeamFoundation.Git.Helpers.Authentication
                     }
                     else
                     {
-                        Trace.TraceError("AzureAuthority::GeneratePersonalAccessToken failed (1).");
-
                         Console.Error.WriteLine("Received {0} from Visual Studio Online authority. Unable to generate personal access token.", response.ReasonPhrase);
                     }
                 }
             }
             catch (Exception exception)
             {
-                Trace.TraceError("AzureAuthority::GeneratePersonalAccessToken failed (2).");
                 Debug.WriteLine(exception);
             }
+
+            Trace.TraceError("AzureAuthority::GeneratePersonalAccessToken failed.");
+
 
             return null;
         }
