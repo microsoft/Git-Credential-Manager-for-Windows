@@ -341,6 +341,8 @@ namespace Microsoft.TeamFoundation.Git.Helpers.Authentication
             }
         }
 
+        static readonly char[] HostSplitCharacters = new char[] { '.' };
+
         private static GitConfigValue GetConfig(Configuration config, OperationArguments operationArguments, string key)
         {
             Debug.Assert(config != null, "The config parameter is null");
@@ -350,13 +352,16 @@ namespace Microsoft.TeamFoundation.Git.Helpers.Authentication
             Debug.Assert(key != null, "The key parameter is null");
 
             // return match seeking from most specific (credenial.<schema>://<uri>.<key>) to least specific (credential.<key>)
-            var result = GetConfig(config, "credential", String.Format("{0}://{1}", operationArguments.Protocol, operationArguments.Host), key);
+            var result = GetConfig(config, "credential", String.Format("{0}://{1}", operationArguments.Protocol, operationArguments.Host), key)
+                      ?? GetConfig(config, "credential", operationArguments.Host, key);
             if (result == null && !String.IsNullOrWhiteSpace(operationArguments.Host))
             {
-                string[] fragments = operationArguments.Host.Split('.');
+                string[] fragments = operationArguments.Host.Split(HostSplitCharacters, StringSplitOptions.RemoveEmptyEntries);
                 string host = null;
 
-                for (int i = 0; result == null && i < fragments.Length; i++)
+                // look for host matches stripping a single sub-domain at a time off
+                // don't match against a top-level domain (aka ".com")
+                for (int i = 1; result == null && i < fragments.Length - 1; i++)
                 {
                     host = String.Join(".", fragments, i, fragments.Length - i);
                     result = GetConfig(config, "credential", host, key);
@@ -366,18 +371,18 @@ namespace Microsoft.TeamFoundation.Git.Helpers.Authentication
             return result ?? GetConfig(config, "credential", String.Empty, key);
         }
 
-        private static GitConfigValue GetConfig(Configuration config, string key, string prefix, string suffix)
+        private static GitConfigValue GetConfig(Configuration config, string prefix, string key, string suffix)
         {
             Debug.Assert(config != null, "The config parameter is null");
             Debug.Assert(prefix != null, "The prefix parameter is null");
             Debug.Assert(suffix != null, "The suffic parameter is null");
 
-            var result = config.OrderBy((GitConfigValue entry) => { return entry.Key.Length; })
-                               .Where((GitConfigValue entry) =>
+            var result = config.Where((GitConfigValue entry) =>
                                 {
-                                    return entry.Key.StartsWith(key, StringComparison.OrdinalIgnoreCase)
-                                        && entry.Key.EndsWith(prefix + "." + suffix, StringComparison.OrdinalIgnoreCase);
+                                    string match = String.Format("{0}.{1}.{2}", prefix, key, suffix);
+                                    return String.Equals(entry.Key, match, StringComparison.OrdinalIgnoreCase);
                                 })
+                               .OrderBy((GitConfigValue entry) => { return entry.Key.Length; })
                                .OrderByDescending((GitConfigValue entry) => { return entry.Level; })
                                .FirstOrDefault();
             if (result != null)
