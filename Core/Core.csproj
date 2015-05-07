@@ -8,7 +8,7 @@
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
     <RootNamespace>Microsoft.TeamFoundation.Git.Helpers.Authentication</RootNamespace>
-    <AssemblyName>Core</AssemblyName>
+    <AssemblyName>Microsoft.TeamFoundation.Git</AssemblyName>
     <TargetFrameworkVersion>v4.5.1</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <TargetFrameworkProfile />
@@ -46,33 +46,47 @@
     <Reference Include="System" />
     <Reference Include="System.Core" />
     <Reference Include="Microsoft.CSharp" />
-    <Reference Include="System.Data" />
     <Reference Include="System.Net.Http" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="CredentialCache.cs" />
-    <Compile Include="IVsoMsaAuthentication.cs" />
-    <Compile Include="TokenCache.cs" />
-    <Compile Include="VsoAadAuthentication.cs" />
-    <Compile Include="BaseVsoAuthentication.cs" />
-    <Compile Include="BaseAuthentication.cs" />
-    <Compile Include="BaseSecureStore.cs" />
-    <Compile Include="BasicAuthentication.cs" />
-    <Compile Include="Credential.cs" />
-    <Compile Include="IAuthentication.cs" />
-    <Compile Include="IVsoAadAuthentication.cs" />
-    <Compile Include="ICredentialStore.cs" />
-    <Compile Include="ITokenStore.cs" />
-    <Compile Include="VsoMsaAuthentation.cs" />
-    <Compile Include="CredentialStore.cs" />
-    <Compile Include="TokenStore.cs" />
-    <Compile Include="Token.cs" />
-    <Compile Include="NativeMethods.cs" />
+    <Compile Include="Authentication\AzureAuthority.cs" />
+    <Compile Include="Authentication\CredentialCache.cs" />
+    <Compile Include="Authentication\IAzureAuthority.cs" />
+    <Compile Include="Authentication\ILiveAuthority.cs" />
+    <Compile Include="Authentication\IVsoAuthority.cs" />
+    <Compile Include="Authentication\IVsoMsaAuthentication.cs" />
+    <Compile Include="Authentication\TokenCache.cs" />
+    <Compile Include="Authentication\Tokens.cs" />
+    <Compile Include="Authentication\TokenType.cs" />
+    <Compile Include="Authentication\VsoAadAuthentication.cs" />
+    <Compile Include="Authentication\BaseVsoAuthentication.cs" />
+    <Compile Include="Authentication\BaseAuthentication.cs" />
+    <Compile Include="Authentication\BaseSecureStore.cs" />
+    <Compile Include="Authentication\BasicAuthentication.cs" />
+    <Compile Include="Authentication\Credential.cs" />
+    <Compile Include="Authentication\IAuthentication.cs" />
+    <Compile Include="Authentication\IVsoAadAuthentication.cs" />
+    <Compile Include="Authentication\ICredentialStore.cs" />
+    <Compile Include="Authentication\ITokenStore.cs" />
+    <Compile Include="Authentication\VsoMsaAuthentication.cs" />
+    <Compile Include="Authentication\CredentialStore.cs" />
+    <Compile Include="Authentication\TokenStore.cs" />
+    <Compile Include="Authentication\Token.cs" />
+    <Compile Include="Authentication\NativeMethods.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="app.config" />
     <None Include="packages.config" />
+  </ItemGroup>
+  <ItemGroup>
+    <Folder Include="Networking\" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\LibGit2Sharp\LibGit2Sharp\LibGit2Sharp.csproj">
+      <Project>{ee6ed99f-cb12-4683-b055-d28fc7357a34}</Project>
+      <Name>LibGit2Sharp</Name>
+    </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

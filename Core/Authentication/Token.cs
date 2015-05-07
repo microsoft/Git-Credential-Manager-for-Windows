@@ -6,13 +6,31 @@ namespace Microsoft.TeamFoundation.Git.Helpers.Authentication
 {
     public sealed class Token
     {
-        public Token(string value, DateTimeOffset expires)
+        internal Token(string value, TokenType type)
         {
-            this.Expires = expires;
+            this.Type = type;
             this.Value = value;
         }
+        internal Token(IdentityModel.Clients.ActiveDirectory.AuthenticationResult authResult, TokenType type)
+        {
+            switch (type)
+            {
+                case TokenType.Access:
+                    this.Value = authResult.AccessToken;
+                    break;
 
-        public readonly DateTimeOffset Expires;
+                case TokenType.Refresh:
+                    this.Value = authResult.RefreshToken;
+                    break;
+
+                default:
+                    throw new ArgumentException("Unexpected token type encountered", "type");
+            }
+
+            this.Type = type;
+        }
+
+        public readonly TokenType Type;
         public readonly string Value;
 
         internal static unsafe bool Deserialize(byte[] bytes, out Token token)
@@ -22,14 +40,16 @@ namespace Microsoft.TeamFoundation.Git.Helpers.Authentication
 
             token = null;
 
-            DateTimeOffset expires;
-            fixed (byte* p = bytes)
+            TokenType type;
+            fixed(byte* p = bytes)
             {
-                expires = *((DateTimeOffset*)p);
+                type = (TokenType)((int*)p)[0];
             }
 
-            string value = Encoding.UTF8.GetString(bytes, sizeof(DateTimeOffset), bytes.Length - sizeof(DateTimeOffset));
-            token = new Token(value, expires);
+            Debug.Assert(Enum.IsDefined(typeof(TokenType), type), "The value of type is not a known value of TokenType");
+
+            string value = Encoding.UTF8.GetString(bytes, sizeof(int), bytes.Length - sizeof(int));
+            token = new Token(value, type);
 
             return token != null;
         }
@@ -43,16 +63,14 @@ namespace Microsoft.TeamFoundation.Git.Helpers.Authentication
             try
             {
                 byte[] encoded = Encoding.UTF8.GetBytes(token.Value);
-                DateTimeOffset expires = token.Expires;
+                bytes = new byte[encoded.Length + sizeof(int)];
 
-                bytes = new byte[sizeof(DateTimeOffset) + encoded.Length];
-
-                fixed (byte* p = bytes)
+                fixed(byte* p = bytes)
                 {
-                    *(DateTimeOffset*)p = *(&expires);
+                    ((int*)p)[0] = (int)token.Type;
                 }
 
-                Array.Copy(encoded, 0, bytes, sizeof(DateTimeOffset), encoded.Length);
+                Array.Copy(encoded, 0, bytes, sizeof(int), encoded.Length);
             }
             catch (Exception exception)
             {

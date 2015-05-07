@@ -60,7 +60,6 @@ namespace Microsoft.TeamFoundation.Git.Helpers.Authentication
         public AuthorityType Authority { get; set; }
         public string AuthorityClientId { get; set; }
         public string AuthorityResource { get; set; }
-        public string AuthorityTenantId { get; set; }
         public Interactivity Interactivity { get; set; }
         public bool ValidateCredentials { get; set; }
 
@@ -110,12 +109,18 @@ namespace Microsoft.TeamFoundation.Git.Helpers.Authentication
                        .Append(this.Path)
                        .Append("\n");
             }
-            builder.Append("username=")
-                   .Append(this.Username ?? String.Empty)
-                   .Append("\n");
-            builder.Append("password=")
-                   .Append(this.Password ?? String.Empty)
-                   .Append("\n");
+            if (this.Username != null)
+            {
+                builder.Append("username=")
+                       .Append(this.Username)
+                       .Append("\n");
+            }
+            if (this.Password != null)
+            {
+                builder.Append("password=")
+                       .Append(this.Password)
+                       .Append("\n");
+            }
 
             return builder.ToString();
         }

@@ -2,7 +2,6 @@
 using System;
 using System.Diagnostics;
 using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
 using GitConfigValue = LibGit2Sharp.ConfigurationEntry<string>;
 
@@ -79,11 +78,6 @@ namespace Microsoft.TeamFoundation.Git.Helpers.Authentication
                 Trace.TraceInformation("resource = {0}", match.Value);
                 operationArguments.AuthorityResource = match.Value;
             }
-            if ((match = GetConfig(config, operationArguments, "tenantid")) != null)
-            {
-                Trace.TraceInformation("tenantid = {0}", match.Value);
-                operationArguments.AuthorityTenantId = match.Value;
-            }
             if ((match = GetConfig(config, operationArguments, "validate")) != null)
             {
                 Trace.TraceInformation("validate = {0}", match.Value);
@@ -136,8 +130,6 @@ namespace Microsoft.TeamFoundation.Git.Helpers.Authentication
             Console.Out.WriteLine("                  Defaults to visualstudio.com. Only used by AAD authority.");
             Console.Out.WriteLine("   resource       Defines the resource identifier for the authority.");
             Console.Out.WriteLine("                  Defaults to visualstudio.com. Only used by AAD authority.");
-            Console.Out.WriteLine("   tenantid       Defines the tenant identifier for the authority.");
-            Console.Out.WriteLine("                  Defaults to Visual Studio. Only used by AAD authority.");
             Console.Out.WriteLine("   interactive    Specifies if user can be prompted for credentials or not.");
             Console.Out.WriteLine("                  Supports Auto, Always, or Never. Defaults to Auto.");
             Console.Out.WriteLine("                  Only used by AAD authority.");
@@ -174,12 +166,9 @@ namespace Microsoft.TeamFoundation.Git.Helpers.Authentication
                     break;
 
                 case AuthorityType.AzureDirectory:
-                    VsoAadAuthentication aadAuth = authentication as VsoAadAuthentication;
-                    aadAuth.DeleteCredentials(operationArguments.TargetUri);
-                    break;
-
                 case AuthorityType.MicrosoftAccount:
-                    // not supported
+                    BaseVsoAuthentication vsoAuth = authentication as BaseVsoAuthentication;
+                    vsoAuth.DeleteCredentials(operationArguments.TargetUri);
                     break;
             }
         }
@@ -213,30 +202,27 @@ namespace Microsoft.TeamFoundation.Git.Helpers.Authentication
                     if (aadAuth.GetCredentials(operationArguments.TargetUri, out credentials))
                     {
                         Trace.TraceInformation("credentials found");
-                        if (operationArguments.ValidateCredentials)
+                        if (!operationArguments.ValidateCredentials || Task.Run(async () => { return await aadAuth.ValidateCredentials(credentials); }).Result)
                         {
-                            Trace.TraceInformation("validation requested");
-                            Task.Run(async () =>
-                            {
-                                if (await aadAuth.ValidateCredentials(credentials)
-                                    || await aadAuth.RefreshCredentials(operationArguments.TargetUri)
-                                    || aadAuth.RequestUserCredentials(operationArguments.TargetUri, out credentials))
-                                {
-                                    Trace.TraceInformation("credentials validated");
-                                    operationArguments.SetCredentials(credentials);
-                                }
-                            }).Wait();
+                            operationArguments.SetCredentials(credentials);
                         }
                         else
                         {
-                            operationArguments.SetCredentials(credentials);
+                            Trace.TraceWarning("credentials are invalid");
+                            credentials = null;
                         }
                     }
                     else
                     {
+                        Trace.TraceWarning("credentials not found");
+                        credentials = null;
+                    }
+
+                    if (credentials == null)
+                    {
+                        Trace.TraceInformation("attempting non-interactive logon with credential prompt fallback");
                         Task.Run(async () =>
                         {
-                            Trace.TraceInformation("attempting non-interactive logon with credential prompt fallback");
                             if ((operationArguments.Interactivity != Interactivity.Always
                                 && await aadAuth.NoninteractiveLogon(operationArguments.TargetUri)
                                 && aadAuth.GetCredentials(operationArguments.TargetUri, out credentials))
@@ -251,7 +237,7 @@ namespace Microsoft.TeamFoundation.Git.Helpers.Authentication
                     break;
 
                 case AuthorityType.MicrosoftAccount:
-                    VsoMsaAuthentation msaAuth = authentication as VsoMsaAuthentation;
+                    VsoMsaAuthentication msaAuth = authentication as VsoMsaAuthentication;
                     if (msaAuth.GetCredentials(operationArguments.TargetUri, out credentials))
                     {
                         Trace.TraceInformation("credentials found");
@@ -296,7 +282,7 @@ namespace Microsoft.TeamFoundation.Git.Helpers.Authentication
             Debug.Assert(operationArguments.Username != null, "The operaionArgument.Username is null");
             Debug.Assert(operationArguments.TargetUri != null, "The operationArgument.TargetUri is null");
 
-            switch(operationArguments.Authority)
+            switch (operationArguments.Authority)
             {
                 default:
                 case AuthorityType.Basic:
@@ -327,27 +313,11 @@ namespace Microsoft.TeamFoundation.Git.Helpers.Authentication
                     // if the clientId and resource values exist, use them
                     if (!String.IsNullOrWhiteSpace(operationArguments.AuthorityClientId) && !String.IsNullOrWhiteSpace(operationArguments.AuthorityResource))
                     {
-                        Guid clientId = Guid.Empty;
+                        string clientId = operationArguments.AuthorityClientId;
                         string resource = operationArguments.AuthorityResource;
 
-                        if (Guid.TryParse(operationArguments.AuthorityClientId, out clientId))
-                        {
-                            // if the tenant value use it
-                            if (!String.IsNullOrWhiteSpace(operationArguments.AuthorityTenantId))
-                            {
-                                Guid tenantId = Guid.Empty;
-
-                                if (Guid.TryParse(operationArguments.AuthorityTenantId, out tenantId))
-                                {
-                                    // return a custom AAD backed VSO authentication objects
-                                    Trace.TraceInformation("resource = {0}, clientId = {1}, tenantId = {2}", resource, clientId, tenantId);
-                                    return new VsoAadAuthentication(tenantId, resource, clientId);
-                                }
-                            }
-                            // return a common tenant AAD backed VSO authentication object
-                            Trace.TraceInformation("resource = {0}, clientId = {1}", resource, clientId);
-                            return new VsoAadAuthentication(resource, clientId);
-                        }
+                        Trace.TraceInformation("resource = {0}, clientId = {1}", resource, clientId);
+                        return new VsoAadAuthentication(resource, clientId);
                     }
                     // return a generic AAD backed VSO authentication object
                     return new VsoAadAuthentication();
@@ -360,20 +330,18 @@ namespace Microsoft.TeamFoundation.Git.Helpers.Authentication
                     // if the clientId and resource values exist, use them
                     if (!String.IsNullOrWhiteSpace(operationArguments.AuthorityClientId) && !String.IsNullOrWhiteSpace(operationArguments.AuthorityResource))
                     {
-                        Guid clientId = Guid.Empty;
+                        string clientId = operationArguments.AuthorityClientId;
                         string resource = operationArguments.AuthorityResource;
 
-                        if (Guid.TryParse(operationArguments.AuthorityClientId, out clientId))
-                        {
-                            // return a common tenant MSA backed VSO authentication object
-                            Trace.TraceInformation("resource = {0}, clientId = {1}", resource, clientId);
-                            return new VsoMsaAuthentation(resource, clientId);
-                        }
+                        Trace.TraceInformation("resource = {0}, clientId = {1}", resource, clientId);
+                        return new VsoMsaAuthentication(resource, clientId);
                     }
                     // return a generic MSA backed VSO authentication object
-                    return new VsoMsaAuthentation();
+                    return new VsoMsaAuthentication();
             }
         }
+
+        static readonly char[] HostSplitCharacters = new char[] { '.' };
 
         private static GitConfigValue GetConfig(Configuration config, OperationArguments operationArguments, string key)
         {
@@ -384,13 +352,16 @@ namespace Microsoft.TeamFoundation.Git.Helpers.Authentication
             Debug.Assert(key != null, "The key parameter is null");
 
             // return match seeking from most specific (credenial.<schema>://<uri>.<key>) to least specific (credential.<key>)
-            var result = GetConfig(config, "credential", String.Format("{0}://{1}", operationArguments.Protocol, operationArguments.Host), key);
+            var result = GetConfig(config, "credential", String.Format("{0}://{1}", operationArguments.Protocol, operationArguments.Host), key)
+                      ?? GetConfig(config, "credential", operationArguments.Host, key);
             if (result == null && !String.IsNullOrWhiteSpace(operationArguments.Host))
             {
-                string[] fragments = operationArguments.Host.Split('.');
+                string[] fragments = operationArguments.Host.Split(HostSplitCharacters, StringSplitOptions.RemoveEmptyEntries);
                 string host = null;
 
-                for (int i = 0; result == null && i < fragments.Length; i++)
+                // look for host matches stripping a single sub-domain at a time off
+                // don't match against a top-level domain (aka ".com")
+                for (int i = 1; result == null && i < fragments.Length - 1; i++)
                 {
                     host = String.Join(".", fragments, i, fragments.Length - i);
                     result = GetConfig(config, "credential", host, key);
@@ -400,7 +371,7 @@ namespace Microsoft.TeamFoundation.Git.Helpers.Authentication
             return result ?? GetConfig(config, "credential", String.Empty, key);
         }
 
-        private static GitConfigValue GetConfig(Configuration config, string key, string prefix, string suffix)
+        private static GitConfigValue GetConfig(Configuration config, string prefix, string key, string suffix)
         {
             Debug.Assert(config != null, "The config parameter is null");
             Debug.Assert(prefix != null, "The prefix parameter is null");
@@ -408,9 +379,10 @@ namespace Microsoft.TeamFoundation.Git.Helpers.Authentication
 
             var result = config.Where((GitConfigValue entry) =>
                                 {
-                                    return entry.Key.StartsWith(key, StringComparison.OrdinalIgnoreCase)
-                                        && entry.Key.EndsWith(prefix + "." + suffix, StringComparison.OrdinalIgnoreCase);
+                                    string match = String.Format("{0}.{1}.{2}", prefix, key, suffix);
+                                    return String.Equals(entry.Key, match, StringComparison.OrdinalIgnoreCase);
                                 })
+                               .OrderBy((GitConfigValue entry) => { return entry.Key.Length; })
                                .OrderByDescending((GitConfigValue entry) => { return entry.Level; })
                                .FirstOrDefault();
             if (result != null)
