@@ -13,7 +13,14 @@ namespace Microsoft.TeamFoundation.Git.Helpers.Authentication
 {
     internal class AzureAuthority : IAzureAuthority, ILiveAuthority, IVsoAuthority
     {
-        public const string AuthorityHostUrl = "https://login.windows.net/common";
+        public const string DefaultAuthorityHostUrl = "https://login.windows.net/common";
+
+        public AzureAuthority(string authorityHostUrl = DefaultAuthorityHostUrl)
+        {
+            AuthorityHostUrl = authorityHostUrl;
+        }
+
+        public string AuthorityHostUrl { get; }
 
         public Tokens AcquireToken(string clientId, string resource, Uri redirectUri, string queryParameters = null)
         {
@@ -53,7 +60,7 @@ namespace Microsoft.TeamFoundation.Git.Helpers.Authentication
             try
             {
                 UserCredential userCredential = credentials == null ? new UserCredential() : new UserCredential(credentials.Username, credentials.Password);
-                AuthenticationContext authCtx = new AuthenticationContext(AuthorityHostUrl, IdentityModel.Clients.ActiveDirectory.TokenCache.DefaultShared);
+                AuthenticationContext authCtx = new AuthenticationContext(DefaultAuthorityHostUrl, IdentityModel.Clients.ActiveDirectory.TokenCache.DefaultShared);
                 AuthenticationResult authResult = await authCtx.AcquireTokenAsync(resource, clientId, userCredential);
                 tokens = new Tokens(authResult);
 
@@ -81,7 +88,7 @@ namespace Microsoft.TeamFoundation.Git.Helpers.Authentication
 
             try
             {
-                AuthenticationContext authCtx = new AuthenticationContext(AuthorityHostUrl, IdentityModel.Clients.ActiveDirectory.TokenCache.DefaultShared);
+                AuthenticationContext authCtx = new AuthenticationContext(DefaultAuthorityHostUrl, IdentityModel.Clients.ActiveDirectory.TokenCache.DefaultShared);
                 AuthenticationResult authResult = await authCtx.AcquireTokenByRefreshTokenAsync(refreshToken.Value, clientId, resource);
                 tokens = new Tokens(authResult);
 
