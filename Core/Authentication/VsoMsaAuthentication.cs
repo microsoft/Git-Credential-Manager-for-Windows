@@ -7,12 +7,12 @@ namespace Microsoft.TeamFoundation.Git.Helpers.Authentication
 {
     public sealed class VsoMsaAuthentication : BaseVsoAuthentication, IVsoMsaAuthentication
     {
-        public const string DefaultAuthorityHost = "https://login.windows.net/live.com";
+        public const string DefaultAuthorityHost = "https://login.microsoftonline.com/live.com";
 
         public VsoMsaAuthentication(string resource = null, string clientId = null)
             : base(resource, clientId)
         {
-            this.LiveAuthority = new AzureAuthority();
+            this.LiveAuthority = new AzureAuthority(DefaultAuthorityHost);
         }
         /// <summary>
         /// Test constructor which allows for using fake credential stores
