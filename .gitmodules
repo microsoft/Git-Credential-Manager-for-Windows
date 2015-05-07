@@ -1,0 +1,4 @@
+[submodule "LibGit2Sharp"]
+	path = LibGit2Sharp
+	url = https://mseng.visualstudio.com/DefaultCollection/LibGit2/_git/LibGit2Sharp
+	branch = vs/master

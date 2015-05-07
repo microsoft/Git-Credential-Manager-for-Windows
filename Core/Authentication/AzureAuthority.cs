@@ -1,6 +1,7 @@
 ﻿using Microsoft.IdentityModel.Clients.ActiveDirectory;
 using System;
 using System.Diagnostics;
+using System.IO;
 using System.Net;
 using System.Net.Http;
 using System.Net.Http.Headers;
@@ -119,7 +120,7 @@ namespace Microsoft.TeamFoundation.Git.Helpers.Authentication
                         string responseText = await response.Content.ReadAsStringAsync();
 
                         Match tokenMatch = null;
-                        if ((tokenMatch = Regex.Match(responseText, @"\s*""token""\s*:\s*""(\S+)""\s*", RegexOptions.Compiled | RegexOptions.IgnoreCase)).Success)
+                        if ((tokenMatch = Regex.Match(responseText, @"\s*""token""\s*:\s*""([^\""]+)""\s*", RegexOptions.Compiled | RegexOptions.IgnoreCase)).Success)
                         {
                             string token = tokenMatch.Groups[1].Value;
                             Credential personalAccessToken = new Credential(token, String.Empty);
@@ -137,11 +138,11 @@ namespace Microsoft.TeamFoundation.Git.Helpers.Authentication
             }
             catch (Exception exception)
             {
-                Debug.WriteLine(exception);
+                Trace.TraceError("Personal access token generation failed unexpectedly.");
+                Trace.TraceError(exception.ToString());
             }
 
             Trace.TraceError("AzureAuthority::GeneratePersonalAccessToken failed.");
-
 
             return null;
         }
@@ -163,7 +164,8 @@ namespace Microsoft.TeamFoundation.Git.Helpers.Authentication
             }
             catch (Exception exception)
             {
-                Debug.WriteLine(exception);
+                Trace.TraceError("credential validation failed");
+                Trace.TraceError(exception.ToString());
             }
 
             return false;
