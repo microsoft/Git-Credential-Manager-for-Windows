@@ -144,7 +144,7 @@ namespace Microsoft.TeamFoundation.Git.Helpers.Authentication
             Console.Out.WriteLine(@"   [credential ""visualstudio.com""]");
             Console.Out.WriteLine(@"       authority = MSA");
             Console.Out.WriteLine(@"   [credential]");
-            Console.Out.WriteLine(@"       helper = !'C:\\Program Files (x86)\\Git\\libexec\\git-core\\git-credential-man.exe'");
+            Console.Out.WriteLine(@"       helper = !'C:\\Tools\\Git\\git-credential-man.exe'");
         }
 
         private static void Erase(OperationArguments operationArguments)
