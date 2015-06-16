@@ -74,6 +74,7 @@
     <Compile Include="Authentication\Token.cs" />
     <Compile Include="Authentication\NativeMethods.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Where.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="app.config" />

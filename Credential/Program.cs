@@ -24,18 +24,26 @@ namespace Microsoft.TeamFoundation.Git.Helpers.Authentication
             // see: https://www.kernel.org/pub/software/scm/git/docs/git-credential.html
             OperationArguments operationArguments = new OperationArguments(Console.In);
 
+            RepositoryOptions repoOptions = new RepositoryOptions();
+
+            string systemConfigPath = null;
+            if (Where.GitSystemConfig(out systemConfigPath))
+            {
+                repoOptions.SystemConfigurationLocation = systemConfigPath;
+            }
+
             string repoPath = null;
             if ((repoPath = Repository.Discover(Environment.CurrentDirectory)) != null)
             {
                 // parse the git config for related values
-                using (Repository repo = new Repository(repoPath))
+                using (Repository repo = new Repository(repoPath, repoOptions))
                 {
                     ParseConfiguration(repo.Config, operationArguments);
                 }
             }
             else
             {
-                using (Configuration configuration = new Configuration())
+                using (Configuration configuration = new Configuration(systemConfigurationFileLocation: systemConfigPath))
                 {
                     ParseConfiguration(configuration, operationArguments);
                 }
@@ -49,9 +57,11 @@ namespace Microsoft.TeamFoundation.Git.Helpers.Authentication
                     case "erase":
                         Erase(operationArguments);
                         break;
+
                     case "get":
                         Get(operationArguments);
                         break;
+
                     case "store":
                         Store(operationArguments);
                         break;
@@ -377,9 +387,14 @@ namespace Microsoft.TeamFoundation.Git.Helpers.Authentication
             Debug.Assert(prefix != null, "The prefix parameter is null");
             Debug.Assert(suffix != null, "The suffic parameter is null");
 
+            string match = String.IsNullOrEmpty(key)
+                ? String.Format("{0}.{1}", prefix, suffix)
+                : String.Format("{0}.{1}.{2}", prefix, key, suffix);
+
+            Trace.TraceInformation("seeking '{0}'", match);
+
             var result = config.Where((GitConfigValue entry) =>
-                                {
-                                    string match = String.Format("{0}.{1}.{2}", prefix, key, suffix);
+                                {                                    
                                     return String.Equals(entry.Key, match, StringComparison.OrdinalIgnoreCase);
                                 })
                                .OrderBy((GitConfigValue entry) => { return entry.Key.Length; })
