@@ -387,9 +387,14 @@ namespace Microsoft.TeamFoundation.Git.Helpers.Authentication
             Debug.Assert(prefix != null, "The prefix parameter is null");
             Debug.Assert(suffix != null, "The suffic parameter is null");
 
+            string match = String.IsNullOrEmpty(key)
+                ? String.Format("{0}.{1}", prefix, suffix)
+                : String.Format("{0}.{1}.{2}", prefix, key, suffix);
+
+            Trace.TraceInformation("seeking '{0}'", match);
+
             var result = config.Where((GitConfigValue entry) =>
-                                {
-                                    string match = String.Format("{0}.{1}.{2}", prefix, key, suffix);
+                                {                                    
                                     return String.Equals(entry.Key, match, StringComparison.OrdinalIgnoreCase);
                                 })
                                .OrderBy((GitConfigValue entry) => { return entry.Key.Length; })
