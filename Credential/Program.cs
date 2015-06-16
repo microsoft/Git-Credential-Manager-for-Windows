@@ -24,18 +24,26 @@ namespace Microsoft.TeamFoundation.Git.Helpers.Authentication
             // see: https://www.kernel.org/pub/software/scm/git/docs/git-credential.html
             OperationArguments operationArguments = new OperationArguments(Console.In);
 
+            RepositoryOptions repoOptions = new RepositoryOptions();
+
+            string systemConfigPath = null;
+            if (Where.GitSystemConfig(out systemConfigPath))
+            {
+                repoOptions.SystemConfigurationLocation = systemConfigPath;
+            }
+
             string repoPath = null;
             if ((repoPath = Repository.Discover(Environment.CurrentDirectory)) != null)
             {
                 // parse the git config for related values
-                using (Repository repo = new Repository(repoPath))
+                using (Repository repo = new Repository(repoPath, repoOptions))
                 {
                     ParseConfiguration(repo.Config, operationArguments);
                 }
             }
             else
             {
-                using (Configuration configuration = new Configuration())
+                using (Configuration configuration = new Configuration(systemConfigurationFileLocation: systemConfigPath))
                 {
                     ParseConfiguration(configuration, operationArguments);
                 }
@@ -49,9 +57,11 @@ namespace Microsoft.TeamFoundation.Git.Helpers.Authentication
                     case "erase":
                         Erase(operationArguments);
                         break;
+
                     case "get":
                         Get(operationArguments);
                         break;
+
                     case "store":
                         Store(operationArguments);
                         break;
