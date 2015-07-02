@@ -31,7 +31,11 @@ namespace Microsoft.TeamFoundation.Git.Helpers.Authentication
             this.ClientId = clientId ?? this.ClientId;
             this.Resource = resource ?? this.Resource;
         }
-        internal BaseVsoAuthentication(ITokenStore personalAccessTokenStore, ITokenStore personalAccessTokenCache, ITokenStore adaRefreshTokenStore, IVsoAuthority vsoAuthority)
+        internal BaseVsoAuthentication(
+            ITokenStore personalAccessTokenStore, 
+            ITokenStore personalAccessTokenCache, 
+            ITokenStore adaRefreshTokenStore, 
+            IVsoAuthority vsoAuthority)
             : this()
         {
             this.PersonalAccessTokenStore = personalAccessTokenStore;

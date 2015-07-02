@@ -18,8 +18,16 @@ namespace Microsoft.TeamFoundation.Git.Helpers.Authentication
         /// <param name="personalAccessTokenStore"></param>
         /// <param name="userCredential"></param>
         /// <param name="adaRefreshTokenStore"></param>
-        internal VsoAadAuthentication(ITokenStore personalAccessTokenStore, ITokenStore personalAccessTokenCache, ITokenStore adaRefreshTokenStore, IAzureAuthority azureAuthority, IVsoAuthority vsoAuthority)
-            : base(personalAccessTokenStore, personalAccessTokenCache, adaRefreshTokenStore, vsoAuthority)
+        internal VsoAadAuthentication(
+            ITokenStore personalAccessTokenStore,
+            ITokenStore personalAccessTokenCache,
+            ITokenStore adaRefreshTokenStore,
+            IAzureAuthority azureAuthority,
+            IVsoAuthority vsoAuthority)
+            : base(personalAccessTokenStore,
+                   personalAccessTokenCache,
+                   adaRefreshTokenStore,
+                   vsoAuthority)
         {
             this.AzureAuthority = azureAuthority;
         }
@@ -35,12 +43,12 @@ namespace Microsoft.TeamFoundation.Git.Helpers.Authentication
             try
             {
                 Tokens tokens;
-                if((tokens = this.AzureAuthority.AcquireToken(this.ClientId, this.Resource, new Uri(RedirectUrl), null)) != null)
+                if ((tokens = this.AzureAuthority.AcquireToken(this.ClientId, this.Resource, new Uri(RedirectUrl), null)) != null)
                 {
                     this.StoreRefreshToken(targetUri, tokens.RefeshToken);
 
                     return Task.Run(async () => { return await this.GeneratePersonalAccessToken(targetUri, tokens.AccessToken); }).Result;
-                }                
+                }
             }
             catch (AdalException exception)
             {

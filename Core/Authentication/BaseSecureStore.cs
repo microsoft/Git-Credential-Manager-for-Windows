@@ -18,7 +18,7 @@ namespace Microsoft.TeamFoundation.Git.Helpers.Authentication
         [SuppressMessage("Microsoft.Interoperability", "CA1404:CallGetLastErrorImmediatelyAfterPInvoke")]
         public bool PromptUserCredentials(Uri targetUri, out Credential credentials)
         {
-            BaseSecureStore.ValidateTargetUri(targetUri);
+            ValidateTargetUri(targetUri);
 
             credentials = null;
 
