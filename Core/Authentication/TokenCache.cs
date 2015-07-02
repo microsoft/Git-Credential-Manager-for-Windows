@@ -6,25 +6,21 @@ namespace Microsoft.TeamFoundation.Git.Helpers.Authentication
 {
     public sealed class TokenCache : BaseSecureStore, ITokenStore
     {
-        static TokenCache()
-        {
-            _cache = new ConcurrentDictionary<string, Token>(StringComparer.OrdinalIgnoreCase);
-        }
-
         internal TokenCache(string prefix)
         {
             Debug.Assert(!String.IsNullOrWhiteSpace(prefix), "The prefix parameter value is invalid");
 
+            _cache = new ConcurrentDictionary<string, Token>(StringComparer.OrdinalIgnoreCase);
             _prefix = prefix;
         }
 
-        static readonly ConcurrentDictionary<string, Token> _cache;
+        private readonly ConcurrentDictionary<string, Token> _cache;
 
         private readonly string _prefix;
 
         public void DeleteToken(Uri targetUri)
         {
-            BaseSecureStore.ValidateTargetUri(targetUri);
+            ValidateTargetUri(targetUri);
             string targetName = this.GetTargetName(targetUri);
 
             Token token = null;
@@ -33,7 +29,7 @@ namespace Microsoft.TeamFoundation.Git.Helpers.Authentication
 
         public bool ReadToken(Uri targetUri, out Token token)
         {
-            BaseSecureStore.ValidateTargetUri(targetUri);
+            ValidateTargetUri(targetUri);
             string targetName = this.GetTargetName(targetUri);
 
             return _cache.TryGetValue(targetName, out token);
@@ -41,7 +37,7 @@ namespace Microsoft.TeamFoundation.Git.Helpers.Authentication
 
         public void WriteToken(Uri targetUri, Token token)
         {
-            BaseSecureStore.ValidateTargetUri(targetUri);
+            ValidateTargetUri(targetUri);
             Token.Validate(token);
 
             string targetName = this.GetTargetName(targetUri);

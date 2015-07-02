@@ -21,9 +21,9 @@ namespace Microsoft.TeamFoundation.Git.Helpers.Authentication
             return await Task.Run(() => { return new Tokens("token-access", "token-refresh"); });
         }
 
-        public async Task<Credential> GeneratePersonalAccessToken(Uri targetUri, Token accessToken)
+        public async Task<Token> GeneratePersonalAccessToken(Uri targetUri, Token accessToken)
         {
-            return await Task.Run(() => { return new Credential("username"); });
+            return await Task.Run(() => { return new Token("personal-access-token", TokenType.VsoPat); });
         }
 
         public async Task<bool> ValidateCredentials(Credential credentials)

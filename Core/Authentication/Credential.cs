@@ -38,11 +38,9 @@ namespace Microsoft.TeamFoundation.Git.Helpers.Authentication
         internal static void Validate(Credential credentials)
         {
             if (credentials == null)
-                throw new ArgumentNullException("credentials");
+                throw new ArgumentNullException("credentials", "The username field of the Credentials object cannot be null");
             if (credentials.Password == null)
-                throw new ArgumentException("The Password field of the Credentials object cannot be null", "credentials");
-            if (String.IsNullOrEmpty(credentials.Username))
-                throw new ArgumentException("The Username field of the Credentials object cannot be null or empty", "credentials");
+                throw new ArgumentNullException("credentials", "The password field of the Credentials object cannot be null");
             if (credentials.Password.Length > NativeMethods.CREDENTIAL_PASSWORD_MAXLEN)
                 throw new ArgumentOutOfRangeException("credentials", string.Format("The Password field of the Credentials object cannot be longer than {0} characters", NativeMethods.CREDENTIAL_USERNAME_MAXLEN));
             if (credentials.Username.Length > NativeMethods.CREDENTIAL_USERNAME_MAXLEN)

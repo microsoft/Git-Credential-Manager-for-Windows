@@ -21,8 +21,16 @@ namespace Microsoft.TeamFoundation.Git.Helpers.Authentication
         /// <param name="adaRefreshTokenStore"></param>
         /// <param name="liveAuthority"></param>
         /// <param name="vsoAuthority"></param>
-        internal VsoMsaAuthentication(ICredentialStore personalAccessTokenStore, ICredentialStore personalAccessTokenCache, ITokenStore adaRefreshTokenStore, ILiveAuthority liveAuthority, IVsoAuthority vsoAuthority)
-            : base(personalAccessTokenStore, personalAccessTokenCache, adaRefreshTokenStore, vsoAuthority)
+        internal VsoMsaAuthentication(
+            ITokenStore personalAccessTokenStore,
+            ITokenStore personalAccessTokenCache,
+            ITokenStore adaRefreshTokenStore,
+            ILiveAuthority liveAuthority,
+            IVsoAuthority vsoAuthority)
+            : base(personalAccessTokenStore,
+                   personalAccessTokenCache,
+                   adaRefreshTokenStore,
+                   vsoAuthority)
         {
             this.LiveAuthority = liveAuthority;
         }

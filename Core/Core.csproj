@@ -80,9 +80,7 @@
     <None Include="app.config" />
     <None Include="packages.config" />
   </ItemGroup>
-  <ItemGroup>
-    <Folder Include="Networking\" />
-  </ItemGroup>
+  <ItemGroup />
   <ItemGroup>
     <ProjectReference Include="..\LibGit2Sharp\LibGit2Sharp\LibGit2Sharp.csproj">
       <Project>{ee6ed99f-cb12-4683-b055-d28fc7357a34}</Project>

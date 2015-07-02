@@ -1,13 +1,12 @@
-﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
-using System;
+﻿using System;
 using System.Diagnostics;
-using System.Threading;
 using System.Threading.Tasks;
+using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 namespace Microsoft.TeamFoundation.Git.Helpers.Authentication
 {
     [TestClass]
-    public class VsoMsaTests
+    public class VsoMsaTests : AuthenticationTests
     {
         public VsoMsaTests()
         {
@@ -20,19 +19,19 @@ namespace Microsoft.TeamFoundation.Git.Helpers.Authentication
             Uri targetUri = new Uri("http://localhost");
             VsoMsaAuthentication msaAuthority = GetVsoMsaAuthentication("msa-delete");
 
-            msaAuthority.PersonalAccessTokenStore.WriteCredentials(targetUri, new Credential("username", "password"));
-            msaAuthority.AdaRefreshTokenStore.WriteToken(targetUri, new Token("token-value", TokenType.Test));
+            msaAuthority.PersonalAccessTokenStore.WriteToken(targetUri, DefaultPersonalAccessToken);
+            msaAuthority.AdaRefreshTokenStore.WriteToken(targetUri, DefaultAzureRefreshToken);
 
-            Credential credentials;
-            Token token;
-
-            msaAuthority.DeleteCredentials(targetUri);
-            Assert.IsFalse(msaAuthority.PersonalAccessTokenStore.ReadCredentials(targetUri, out credentials), "Personal Access Tokens were not deleted as expected"); ;
-            Assert.IsTrue(msaAuthority.AdaRefreshTokenStore.ReadToken(targetUri, out token), "Refresh Token wasn't read as expected.");
+            Token personalAccessToken;
+            Token azureToken;
 
             msaAuthority.DeleteCredentials(targetUri);
-            Assert.IsFalse(msaAuthority.PersonalAccessTokenStore.ReadCredentials(targetUri, out credentials), "Personal Access Tokens were not deleted as expected"); ;
-            Assert.IsFalse(msaAuthority.AdaRefreshTokenStore.ReadToken(targetUri, out token), "Refresh Token were not deleted as expected.");
+            Assert.IsFalse(msaAuthority.PersonalAccessTokenStore.ReadToken(targetUri, out personalAccessToken), "Personal Access Tokens were not deleted as expected"); ;
+            Assert.IsTrue(msaAuthority.AdaRefreshTokenStore.ReadToken(targetUri, out azureToken), "Refresh Token wasn't read as expected.");
+
+            msaAuthority.DeleteCredentials(targetUri);
+            Assert.IsFalse(msaAuthority.PersonalAccessTokenStore.ReadToken(targetUri, out personalAccessToken), "Personal Access Tokens were not deleted as expected"); ;
+            Assert.IsFalse(msaAuthority.AdaRefreshTokenStore.ReadToken(targetUri, out azureToken), "Refresh Token were not deleted as expected.");
         }
 
         [TestMethod]
@@ -44,8 +43,8 @@ namespace Microsoft.TeamFoundation.Git.Helpers.Authentication
 
             Assert.IsFalse(msaAuthority.GetCredentials(targetUri, out credentials), "Credentials were retrieved unexpectedly.");
 
-            msaAuthority.PersonalAccessTokenStore.WriteCredentials(targetUri, new Credential("username", "password"));
-            msaAuthority.AdaRefreshTokenStore.WriteToken(targetUri, new Token("token-value", TokenType.Test));
+            msaAuthority.PersonalAccessTokenStore.WriteToken(targetUri, DefaultPersonalAccessToken);
+            msaAuthority.AdaRefreshTokenStore.WriteToken(targetUri, DefaultAzureRefreshToken);
 
             Assert.IsTrue(msaAuthority.GetCredentials(targetUri, out credentials), "Credentials were not retrieved as expected.");
         }
@@ -56,18 +55,18 @@ namespace Microsoft.TeamFoundation.Git.Helpers.Authentication
             Uri targetUri = new Uri("http://localhost");
             VsoMsaAuthentication msaAuthority = GetVsoMsaAuthentication("msa-logon");
 
-            Credential credentials;
-            Token token;
+            Token personalAccessToken;
+            Token azureToken;
 
-            Assert.IsFalse(msaAuthority.PersonalAccessTokenCache.ReadCredentials(targetUri, out credentials), "Personal Access Token found in cache unexpectedly.");
-            Assert.IsFalse(msaAuthority.PersonalAccessTokenStore.ReadCredentials(targetUri, out credentials), "Personal Access Token found in store unexpectedly.");
-            Assert.IsFalse(msaAuthority.AdaRefreshTokenStore.ReadToken(targetUri, out token), "ADA Refresh Token found in store unexpectedly.");
+            Assert.IsFalse(msaAuthority.PersonalAccessTokenCache.ReadToken(targetUri, out personalAccessToken), "Personal Access Token found in cache unexpectedly.");
+            Assert.IsFalse(msaAuthority.PersonalAccessTokenStore.ReadToken(targetUri, out personalAccessToken), "Personal Access Token found in store unexpectedly.");
+            Assert.IsFalse(msaAuthority.AdaRefreshTokenStore.ReadToken(targetUri, out azureToken), "ADA Refresh Token found in store unexpectedly.");
 
             Assert.IsTrue(msaAuthority.InteractiveLogon(targetUri), "Interactive logon failed unexpectedly.");
 
-            Assert.IsTrue(msaAuthority.PersonalAccessTokenCache.ReadCredentials(targetUri, out credentials), "Personal Access Token not found in cache as expected.");
-            Assert.IsTrue(msaAuthority.PersonalAccessTokenStore.ReadCredentials(targetUri, out credentials), "Personal Access Token not found in store as expected.");
-            Assert.IsTrue(msaAuthority.AdaRefreshTokenStore.ReadToken(targetUri, out token) && token.Value == "token-refresh", "ADA Refresh Token not found in store as expected.");
+            Assert.IsTrue(msaAuthority.PersonalAccessTokenCache.ReadToken(targetUri, out personalAccessToken), "Personal Access Token not found in cache as expected.");
+            Assert.IsTrue(msaAuthority.PersonalAccessTokenStore.ReadToken(targetUri, out personalAccessToken), "Personal Access Token not found in store as expected.");
+            Assert.IsTrue(msaAuthority.AdaRefreshTokenStore.ReadToken(targetUri, out azureToken) && azureToken.Value == "token-refresh", "ADA Refresh Token not found in store as expected.");
         }
 
         [TestMethod]
@@ -77,18 +76,18 @@ namespace Microsoft.TeamFoundation.Git.Helpers.Authentication
             Uri errorUri = new Uri("http://incorrect");
             VsoMsaAuthentication msaAuthority = GetVsoMsaAuthentication("msa-refresh");
 
-            msaAuthority.AdaRefreshTokenStore.WriteToken(targetUri, new Token("token-refesh", TokenType.Refresh));
+            msaAuthority.AdaRefreshTokenStore.WriteToken(targetUri, DefaultAzureRefreshToken);
 
-            Credential credentials;
+            Token personalAccessToken;
 
-            Assert.IsFalse(msaAuthority.PersonalAccessTokenCache.ReadCredentials(targetUri, out credentials), "Personal Access Token unexpectedly found in cache.");
-            Assert.IsFalse(msaAuthority.PersonalAccessTokenStore.ReadCredentials(targetUri, out credentials), "Personal Access Token unexpectedly found in store.");
+            Assert.IsFalse(msaAuthority.PersonalAccessTokenCache.ReadToken(targetUri, out personalAccessToken), "Personal Access Token unexpectedly found in cache.");
+            Assert.IsFalse(msaAuthority.PersonalAccessTokenStore.ReadToken(targetUri, out personalAccessToken), "Personal Access Token unexpectedly found in store.");
 
             Assert.IsTrue(Task.Run(async () => { return await msaAuthority.RefreshCredentials(targetUri); }).Result, "Credentials refresh failed unexpectedly.");
             Assert.IsFalse(Task.Run(async () => { return await msaAuthority.RefreshCredentials(errorUri); }).Result, "Credentials refresh succeeded unexpectedly.");
 
-            Assert.IsTrue(msaAuthority.PersonalAccessTokenCache.ReadCredentials(targetUri, out credentials), "Personal Access Token not found in cache as expected.");
-            Assert.IsTrue(msaAuthority.PersonalAccessTokenStore.ReadCredentials(targetUri, out credentials), "Personal Access Token not found in store as expected.");
+            Assert.IsTrue(msaAuthority.PersonalAccessTokenCache.ReadToken(targetUri, out personalAccessToken), "Personal Access Token not found in cache as expected.");
+            Assert.IsTrue(msaAuthority.PersonalAccessTokenStore.ReadToken(targetUri, out personalAccessToken), "Personal Access Token not found in store as expected.");
         }
 
         [TestMethod]
@@ -96,19 +95,19 @@ namespace Microsoft.TeamFoundation.Git.Helpers.Authentication
         {
             Uri targetUri = new Uri("http://localhost");
             VsoMsaAuthentication msaAuthority = GetVsoMsaAuthentication("msa-set");
-            Credential credentials;
-            Token token;
+            Token personalAccessToken;
+            Token azureToken;
 
             try
             {
-                msaAuthority.SetCredentials(targetUri, new Credential("username", "password"));
+                msaAuthority.SetCredentials(targetUri, DefaultCredentials);
                 Assert.Fail("Credentials were unexpectedly set.");
             }
             catch { }
 
-            Assert.IsFalse(msaAuthority.PersonalAccessTokenCache.ReadCredentials(targetUri, out credentials), "Personal Access Token unexpectedly found in cache.");
-            Assert.IsFalse(msaAuthority.PersonalAccessTokenStore.ReadCredentials(targetUri, out credentials), "Personal Access Token unexpectedly found in store.");
-            Assert.IsFalse(msaAuthority.AdaRefreshTokenStore.ReadToken(targetUri, out token), "ADA Refresh Token unexpectedly found in store.");
+            Assert.IsFalse(msaAuthority.PersonalAccessTokenCache.ReadToken(targetUri, out personalAccessToken), "Personal Access Token unexpectedly found in cache.");
+            Assert.IsFalse(msaAuthority.PersonalAccessTokenStore.ReadToken(targetUri, out personalAccessToken), "Personal Access Token unexpectedly found in store.");
+            Assert.IsFalse(msaAuthority.AdaRefreshTokenStore.ReadToken(targetUri, out azureToken), "ADA Refresh Token unexpectedly found in store.");
         }
 
         [TestMethod]
@@ -119,15 +118,15 @@ namespace Microsoft.TeamFoundation.Git.Helpers.Authentication
 
             Assert.IsFalse(Task.Run(async () => { return await msaAuthority.ValidateCredentials(credentials); }).Result, "Credential validation unexpectedly failed.");
 
-            credentials = new Credential("username", "password");
+            credentials = DefaultCredentials;
 
             Assert.IsTrue(Task.Run(async () => { return await msaAuthority.ValidateCredentials(credentials); }).Result, "Credential validation unexpectedly failed.");
         }
 
         private VsoMsaAuthentication GetVsoMsaAuthentication(string prefix)
         {
-            ICredentialStore patStore = new CredentialCache(prefix);
-            ICredentialStore patCache = new CredentialCache(prefix);
+            ITokenStore patStore = new TokenCache(prefix);
+            ITokenStore patCache = new TokenCache(prefix);
             ITokenStore tokenStore = new TokenCache(prefix);
             ILiveAuthority liveAuthority = new AuthorityFake();
             IVsoAuthority vsoAuthority = new AuthorityFake();

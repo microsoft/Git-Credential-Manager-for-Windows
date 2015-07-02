@@ -20,9 +20,9 @@ namespace Microsoft.TeamFoundation.Git.Helpers.Authentication
 
             this.ClientId = DefaultClientId;
             this.Resource = DefaultResource;
-            this.PersonalAccessTokenStore = new CredentialStore(PrimaryCredentialPrefix);
+            this.PersonalAccessTokenStore = new TokenStore(PrimaryCredentialPrefix);
             this.AdaRefreshTokenStore = new TokenStore(TokenPrefix);
-            this.PersonalAccessTokenCache = new CredentialCache(PrimaryCredentialPrefix);
+            this.PersonalAccessTokenCache = new TokenStore(PrimaryCredentialPrefix);
             this.VsoAuthority = new AzureAuthority();
         }
         protected BaseVsoAuthentication(string resource, string clientId)
@@ -31,7 +31,11 @@ namespace Microsoft.TeamFoundation.Git.Helpers.Authentication
             this.ClientId = clientId ?? this.ClientId;
             this.Resource = resource ?? this.Resource;
         }
-        internal BaseVsoAuthentication(ICredentialStore personalAccessTokenStore, ICredentialStore personalAccessTokenCache, ITokenStore adaRefreshTokenStore, IVsoAuthority vsoAuthority)
+        internal BaseVsoAuthentication(
+            ITokenStore personalAccessTokenStore, 
+            ITokenStore personalAccessTokenCache, 
+            ITokenStore adaRefreshTokenStore, 
+            IVsoAuthority vsoAuthority)
             : this()
         {
             this.PersonalAccessTokenStore = personalAccessTokenStore;
@@ -43,9 +47,9 @@ namespace Microsoft.TeamFoundation.Git.Helpers.Authentication
         public readonly string ClientId;
         public readonly string Resource;
 
-        internal ICredentialStore PersonalAccessTokenStore { get; set; }
+        internal ITokenStore PersonalAccessTokenStore { get; set; }
         internal ITokenStore AdaRefreshTokenStore { get; set; }
-        internal ICredentialStore PersonalAccessTokenCache { get; set; }
+        internal ITokenStore PersonalAccessTokenCache { get; set; }
 
         internal IVsoAuthority VsoAuthority { get; set; }
 
@@ -53,12 +57,12 @@ namespace Microsoft.TeamFoundation.Git.Helpers.Authentication
         {
             BaseSecureStore.ValidateTargetUri(targetUri);
 
-            Credential credentials = null;
+            Token credentials = null;
             Token token = null;
-            if (this.PersonalAccessTokenStore.ReadCredentials(targetUri, out credentials))
+            if (this.PersonalAccessTokenStore.ReadToken(targetUri, out credentials))
             {
-                this.PersonalAccessTokenCache.DeleteCredentials(targetUri);
-                this.PersonalAccessTokenStore.DeleteCredentials(targetUri);
+                this.PersonalAccessTokenCache.DeleteToken(targetUri);
+                this.PersonalAccessTokenStore.DeleteToken(targetUri);
             }
             else if (this.AdaRefreshTokenStore.ReadToken(targetUri, out token))
             {
@@ -72,22 +76,32 @@ namespace Microsoft.TeamFoundation.Git.Helpers.Authentication
 
             Trace.TraceInformation("Attempting to retrieve cached credentials");
 
+            Token personalAccessToken;
             // check the in-memory cache first
-            if (!this.PersonalAccessTokenCache.ReadCredentials(targetUri, out credentials))
+            if (!this.PersonalAccessTokenCache.ReadToken(targetUri, out personalAccessToken))
             {
                 Trace.TraceInformation("Unable to retrieve cached credentials, attempting stored credentials retrieval.");
 
                 // fall-back to the on disk cache
-                if (this.PersonalAccessTokenStore.ReadCredentials(targetUri, out credentials))
+                if (this.PersonalAccessTokenStore.ReadToken(targetUri, out personalAccessToken))
                 {
                     Trace.TraceInformation("Successfully retrieved stored credentials, updating credential cache");
 
                     // update the in-memory cache for faster future look-ups
-                    this.PersonalAccessTokenCache.WriteCredentials(targetUri, credentials);
+                    this.PersonalAccessTokenCache.WriteToken(targetUri, personalAccessToken);
                 }
             }
 
-            return credentials != null;
+            if (personalAccessToken != null)
+            {
+                credentials = new Credential(String.Empty, personalAccessToken.Value);
+                return true;
+            }
+            else
+            {
+                credentials = null;
+                return false;
+            }
         }
 
         public abstract Task<bool> RefreshCredentials(Uri targetUri);
@@ -103,11 +117,11 @@ namespace Microsoft.TeamFoundation.Git.Helpers.Authentication
             Debug.Assert(accessToken != null, "The accessToken parameter is null");
             Debug.Assert(accessToken.Type == TokenType.Access, "The value of the accessToken parameter is not an access token");
 
-            Credential personalAccessToken;
+            Token personalAccessToken;
             if ((personalAccessToken = await this.VsoAuthority.GeneratePersonalAccessToken(targetUri, accessToken)) != null)
             {
-                this.PersonalAccessTokenCache.WriteCredentials(targetUri, personalAccessToken);
-                this.PersonalAccessTokenStore.WriteCredentials(targetUri, personalAccessToken);
+                this.PersonalAccessTokenCache.WriteToken(targetUri, personalAccessToken);
+                this.PersonalAccessTokenStore.WriteToken(targetUri, personalAccessToken);
             }
 
             return personalAccessToken != null;

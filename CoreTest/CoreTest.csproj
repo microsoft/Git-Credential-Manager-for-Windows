@@ -60,6 +60,7 @@
     </Otherwise>
   </Choose>
   <ItemGroup>
+    <Compile Include="AuthenticationTests.cs" />
     <Compile Include="AuthorityFake.cs" />
     <Compile Include="BasicAuthTests.cs" />
     <Compile Include="CredentialTests.cs" />
