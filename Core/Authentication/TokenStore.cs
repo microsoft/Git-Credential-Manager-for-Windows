@@ -56,7 +56,7 @@ namespace Microsoft.TeamFoundation.Git.Helpers.Authentication
                 throw new ArgumentException("The token parameter is invlaid", "token");
 
             string targetName = this.GetTargetName(targetUri);
-            this.WriteToken(targetName, token, "Azure Directory Refresh Token");
+            this.WriteToken(targetName, token, token.ToString());
         }
         /// <summary>
         /// Formats a TargetName string based on the TargetUri base on the format started by git-credential-winstore

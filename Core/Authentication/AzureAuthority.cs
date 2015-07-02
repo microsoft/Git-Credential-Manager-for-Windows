@@ -1,13 +1,12 @@
-﻿using Microsoft.IdentityModel.Clients.ActiveDirectory;
-using System;
+﻿using System;
 using System.Diagnostics;
-using System.IO;
 using System.Net;
 using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
+using Microsoft.IdentityModel.Clients.ActiveDirectory;
 
 namespace Microsoft.TeamFoundation.Git.Helpers.Authentication
 {
@@ -104,7 +103,7 @@ namespace Microsoft.TeamFoundation.Git.Helpers.Authentication
             return tokens;
         }
 
-        public async Task<Credential> GeneratePersonalAccessToken(Uri targetUri, Token accessToken)
+        public async Task<Token> GeneratePersonalAccessToken(Uri targetUri, Token accessToken)
         {
             const string VsspEndPointUrl = "https://app.vssps.visualstudio.com/_apis/token/sessiontokens?api-version=1.0&tokentype=compact";
 
@@ -130,7 +129,7 @@ namespace Microsoft.TeamFoundation.Git.Helpers.Authentication
                         if ((tokenMatch = Regex.Match(responseText, @"\s*""token""\s*:\s*""([^\""]+)""\s*", RegexOptions.Compiled | RegexOptions.IgnoreCase)).Success)
                         {
                             string token = tokenMatch.Groups[1].Value;
-                            Credential personalAccessToken = new Credential(token, String.Empty);
+                            Token personalAccessToken = new Token(token, TokenType.VsoPat);
 
                             Trace.TraceInformation("AzureAuthority::GeneratePersonalAccessToken succeeded.");
 

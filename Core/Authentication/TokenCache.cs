@@ -6,19 +6,15 @@ namespace Microsoft.TeamFoundation.Git.Helpers.Authentication
 {
     public sealed class TokenCache : BaseSecureStore, ITokenStore
     {
-        static TokenCache()
-        {
-            _cache = new ConcurrentDictionary<string, Token>(StringComparer.OrdinalIgnoreCase);
-        }
-
         internal TokenCache(string prefix)
         {
             Debug.Assert(!String.IsNullOrWhiteSpace(prefix), "The prefix parameter value is invalid");
 
+            _cache = new ConcurrentDictionary<string, Token>(StringComparer.OrdinalIgnoreCase);
             _prefix = prefix;
         }
 
-        static readonly ConcurrentDictionary<string, Token> _cache;
+        private readonly ConcurrentDictionary<string, Token> _cache;
 
         private readonly string _prefix;
 

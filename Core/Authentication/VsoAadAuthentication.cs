@@ -18,7 +18,7 @@ namespace Microsoft.TeamFoundation.Git.Helpers.Authentication
         /// <param name="personalAccessTokenStore"></param>
         /// <param name="userCredential"></param>
         /// <param name="adaRefreshTokenStore"></param>
-        internal VsoAadAuthentication(ICredentialStore personalAccessTokenStore, ICredentialStore personalAccessTokenCache, ITokenStore adaRefreshTokenStore, IAzureAuthority azureAuthority, IVsoAuthority vsoAuthority)
+        internal VsoAadAuthentication(ITokenStore personalAccessTokenStore, ITokenStore personalAccessTokenCache, ITokenStore adaRefreshTokenStore, IAzureAuthority azureAuthority, IVsoAuthority vsoAuthority)
             : base(personalAccessTokenStore, personalAccessTokenCache, adaRefreshTokenStore, vsoAuthority)
         {
             this.AzureAuthority = azureAuthority;

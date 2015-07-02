@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Diagnostics;
+using System.Linq;
 using System.Text;
 
 namespace Microsoft.TeamFoundation.Git.Helpers.Authentication
@@ -32,6 +33,15 @@ namespace Microsoft.TeamFoundation.Git.Helpers.Authentication
 
         public readonly TokenType Type;
         public readonly string Value;
+
+        public override string ToString()
+        {
+            System.ComponentModel.DescriptionAttribute attribute = Type.GetType()
+                                                                       .GetField(Type.ToString())
+                                                                       .GetCustomAttributes(typeof(System.ComponentModel.DescriptionAttribute), false)
+                                                                       .SingleOrDefault() as System.ComponentModel.DescriptionAttribute;
+            return attribute == null ? Type.ToString() : attribute.Description;
+        }
 
         internal static unsafe bool Deserialize(byte[] bytes, out Token token)
         {
