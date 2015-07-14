@@ -1,7 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 14
-VisualStudioVersion = 14.0.22710.0
+VisualStudioVersion = 14.0.23107.0
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Cli-CredentialHelper", "Credential\Cli-CredentialHelper.csproj", "{62F52119-63D4-40A8-A9DF-F1C4B473308A}"
 EndProject
@@ -17,6 +17,21 @@ EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Cli-RemoteHelper", "Remote\Cli-RemoteHelper.csproj", "{6EEFD1B1-EFC5-44D1-B381-A9C98E3F5472}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "LibGit2Sharp", "LibGit2Sharp\LibGit2Sharp\LibGit2Sharp.csproj", "{EE6ED99F-CB12-4683-B055-D28FC7357A34}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Dependencies", "Dependencies", "{8D98F627-7C86-4504-9686-CAB7F240CE2B}"
+	ProjectSection(SolutionItems) = preProject
+		Dependencies\Microsoft.IdentityModel.Clients.ActiveDirectory.dll = Dependencies\Microsoft.IdentityModel.Clients.ActiveDirectory.dll
+		Dependencies\Microsoft.IdentityModel.Clients.ActiveDirectory.WindowsForms.dll = Dependencies\Microsoft.IdentityModel.Clients.ActiveDirectory.WindowsForms.dll
+		Dependencies\Microsoft.ServiceBus.dll = Dependencies\Microsoft.ServiceBus.dll
+		Dependencies\Microsoft.TeamFoundation.Client.dll = Dependencies\Microsoft.TeamFoundation.Client.dll
+		Dependencies\Microsoft.TeamFoundation.Common.dll = Dependencies\Microsoft.TeamFoundation.Common.dll
+		Dependencies\Microsoft.VisualStudio.Services.Client.dll = Dependencies\Microsoft.VisualStudio.Services.Client.dll
+		Dependencies\Microsoft.VisualStudio.Services.Common.dll = Dependencies\Microsoft.VisualStudio.Services.Common.dll
+		Dependencies\Microsoft.VisualStudio.Services.WebApi.dll = Dependencies\Microsoft.VisualStudio.Services.WebApi.dll
+		Dependencies\Newtonsoft.Json.dll = Dependencies\Newtonsoft.Json.dll
+		Dependencies\System.Net.Http.Formatting.dll = Dependencies\System.Net.Http.Formatting.dll
+		Dependencies\System.Web.Http.dll = Dependencies\System.Web.Http.dll
+	EndProjectSection
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

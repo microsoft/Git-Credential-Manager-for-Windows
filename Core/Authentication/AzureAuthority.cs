@@ -32,7 +32,7 @@ namespace Microsoft.TeamFoundation.Git.Helpers.Authentication
             queryParameters = queryParameters ?? String.Empty;
 
             try
-            {
+            {               
                 AuthenticationContext authCtx = new AuthenticationContext(AuthorityHostUrl);
                 AuthenticationResult authResult = authCtx.AcquireToken(resource, clientId, redirectUri, PromptBehavior.Always, UserIdentifier.AnyUser, queryParameters);
                 tokens = new Tokens(authResult);
@@ -106,6 +106,9 @@ namespace Microsoft.TeamFoundation.Git.Helpers.Authentication
         public async Task<Token> GeneratePersonalAccessToken(Uri targetUri, Token accessToken)
         {
             const string VsspEndPointUrl = "https://app.vssps.visualstudio.com/_apis/token/sessiontokens?api-version=1.0&tokentype=compact";
+            const string TokenScopeJson = "{ \"scope\" = \"vso.code_write\" }";
+            const string HttpJsonContentType = "application/json";
+            const string AuthHeaderBearer = "Bearer";
 
             Debug.Assert(targetUri != null, "The targetUri parameter is null");
             Debug.Assert(accessToken != null, "The accessToken parameter is null");
@@ -117,8 +120,8 @@ namespace Microsoft.TeamFoundation.Git.Helpers.Authentication
             {
                 using (HttpClient httpClient = new HttpClient())
                 {
-                    StringContent content = new StringContent(String.Empty, Encoding.UTF8, "application/json");
-                    httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", accessToken.Value);
+                    StringContent content = new StringContent(TokenScopeJson, Encoding.UTF8, HttpJsonContentType);
+                    httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue(AuthHeaderBearer, accessToken.Value);
 
                     HttpResponseMessage response = await httpClient.PostAsync(VsspEndPointUrl, content);
                     if (response.StatusCode == HttpStatusCode.OK)
@@ -161,7 +164,7 @@ namespace Microsoft.TeamFoundation.Git.Helpers.Authentication
 
             try
             {
-                string basicAuthHeader = "Basic " + Convert.ToBase64String(ASCIIEncoding.ASCII.GetBytes(String.Format("{0}:{1}", credentials.Username, credentials.Password)));
+                string basicAuthHeader = "Basic " + Convert.ToBase64String(Encoding.ASCII.GetBytes(String.Format("{0}:{1}", credentials.Username, credentials.Password)));
                 HttpWebRequest request = WebRequest.CreateHttp(VsoValidationUrl);
                 request.Headers.Add(HttpRequestHeader.Authorization, basicAuthHeader);
                 HttpWebResponse response = await request.GetResponseAsync() as HttpWebResponse;

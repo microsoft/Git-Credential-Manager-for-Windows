@@ -108,7 +108,7 @@ namespace Microsoft.TeamFoundation.Git.Helpers.Authentication
         [TestMethod]
         public void VsoAadRefreshCredentialsTest()
         {
-            Uri targetUri = new Uri("http://localhost");
+            Uri targetUri = new Uri("http://microsoft.visualstudio.com/foo/bar.baz?bin=raz");
             Uri errorUri = new Uri("http://incorrect");
             VsoAadAuthentication aadAuthentication = GetVsoAadAuthentication("aad-refresh");
 
@@ -157,7 +157,7 @@ namespace Microsoft.TeamFoundation.Git.Helpers.Authentication
         {
             ITokenStore patStore = new TokenCache(prefix);
             ITokenStore patCache = new TokenCache(prefix);
-            ITokenStore tokenStore = new TokenCache(prefix);
+            ITokenStore tokenStore = new TokenRegistry();
             IAzureAuthority azureAuthority = new AuthorityFake();
             IVsoAuthority vsoAuthority = new AuthorityFake();
             return new VsoAadAuthentication(patStore, patCache, tokenStore, azureAuthority, vsoAuthority);

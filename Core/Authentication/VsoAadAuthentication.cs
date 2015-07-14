@@ -1,12 +1,14 @@
-﻿using Microsoft.IdentityModel.Clients.ActiveDirectory;
-using System;
+﻿using System;
 using System.Diagnostics;
 using System.Threading.Tasks;
+using Microsoft.IdentityModel.Clients.ActiveDirectory;
 
 namespace Microsoft.TeamFoundation.Git.Helpers.Authentication
 {
     public sealed class VsoAadAuthentication : BaseVsoAuthentication, IVsoAadAuthentication
     {
+        private const string VsspsAuthUrl = "https://app.vssps.visualstudio.com";
+
         public VsoAadAuthentication(string resource = null, string clientId = null)
             : base(resource, clientId)
         {
@@ -116,7 +118,7 @@ namespace Microsoft.TeamFoundation.Git.Helpers.Authentication
             try
             {
                 Token refreshToken = null;
-                if (this.AdaRefreshTokenStore.ReadToken(targetUri, out refreshToken))
+                if (this.AdaRefreshTokenStore.ReadToken(new Uri(VsspsAuthUrl, UriKind.Absolute), out refreshToken))
                 {
                     Tokens tokens;
                     return ((tokens = await this.AzureAuthority.AcquireTokenByRefreshTokenAsync(this.ClientId, this.Resource, refreshToken)) != null
