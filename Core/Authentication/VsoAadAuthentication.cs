@@ -34,8 +34,6 @@ namespace Microsoft.TeamFoundation.Git.Helpers.Authentication
 
         internal IAzureAuthority AzureAuthority { get; set; }
 
-        private readonly VsoAdalTokenCache _vsideCache = new VsoAdalTokenCache();
-
         public bool InteractiveLogon(Uri targetUri, bool requestCompactToken)
         {
             BaseSecureStore.ValidateTargetUri(targetUri);
@@ -106,48 +104,6 @@ namespace Microsoft.TeamFoundation.Git.Helpers.Authentication
             {
                 Debug.WriteLine(exception);
                 Trace.TraceError("Non-interactive logon failed");
-            }
-
-            return false;
-        }
-
-        public override async Task<bool> RefreshCredentials(Uri targetUri, bool requestCompactToken)
-        {
-            BaseSecureStore.ValidateTargetUri(targetUri);
-
-            try
-            {
-                Token refreshToken = null;
-                if (this.AdaRefreshTokenStore.ReadToken(targetUri, out refreshToken))
-                {
-                    Tokens tokens;
-                    return ((tokens = await this.AzureAuthority.AcquireTokenByRefreshTokenAsync(this.ClientId, this.Resource, refreshToken)) != null
-                        && await this.GeneratePersonalAccessToken(targetUri, tokens.AccessToken, requestCompactToken));
-                }
-                else
-                {
-                    Trace.TraceWarning("Failed to discover cached credentials. Fallback to VS IDE cached ADAL tokens.");
-
-                    foreach (var item in _vsideCache.ReadItems())
-                    {
-                        refreshToken = new Token(item.RefreshToken, TokenType.Refresh);
-
-                        Tokens tokens;
-                        if ((tokens = await this.AzureAuthority.AcquireTokenByRefreshTokenAsync(this.ClientId, this.Resource, refreshToken)) != null
-                            && await this.GeneratePersonalAccessToken(targetUri, tokens.AccessToken, requestCompactToken))
-                        {
-                            Trace.TraceInformation("VS IDE cached ADAL token used for Access Token Generation.");
-
-                            this.AdaRefreshTokenStore.WriteToken(targetUri, refreshToken);
-
-                            return true;
-                        }
-                    }
-                }
-            }
-            catch (AdalException exception)
-            {
-                Debug.WriteLine(exception);
             }
 
             return false;

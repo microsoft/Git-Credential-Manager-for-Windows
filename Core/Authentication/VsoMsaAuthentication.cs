@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Diagnostics;
 using System.Threading.Tasks;
 using Microsoft.IdentityModel.Clients.ActiveDirectory;
 using Debug = System.Diagnostics.Debug;
@@ -60,30 +61,6 @@ namespace Microsoft.TeamFoundation.Git.Helpers.Authentication
             catch (AdalException exception)
             {
                 Debug.Write(exception);
-            }
-
-            return false;
-        }
-
-        public override async Task<bool> RefreshCredentials(Uri targetUri, bool requireCompactToken)
-        {
-            BaseSecureStore.ValidateTargetUri(targetUri);
-
-            try
-            {
-                Token refreshToken = null;
-                Tokens tokens = null;
-                if (this.AdaRefreshTokenStore.ReadToken(targetUri, out refreshToken))
-                {
-                    if ((tokens = await this.LiveAuthority.AcquireTokenByRefreshTokenAsync(this.ClientId, this.Resource, refreshToken)) != null)
-                    {
-                        return await this.GeneratePersonalAccessToken(targetUri, tokens.AccessToken, requireCompactToken);
-                    }
-                }
-            }
-            catch (Exception exception)
-            {
-                Debug.WriteLine(exception);
             }
 
             return false;

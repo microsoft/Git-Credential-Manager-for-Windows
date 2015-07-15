@@ -131,14 +131,17 @@ namespace Microsoft.TeamFoundation.Git.Helpers.Authentication
         {
             Uri targetUri = new Uri("http://localhost");
             VsoAadAuthentication aadAuthentication = GetVsoAadAuthentication("aad-set");
+            Credential credentials = DefaultCredentials;
 
             Token personalAccessToken;
             Token azureToken;
 
-            Assert.IsTrue(aadAuthentication.SetCredentials(targetUri, DefaultCredentials), "Setting credentials unexpectedly failed.");
-            Assert.IsTrue(aadAuthentication.PersonalAccessTokenCache.ReadToken(targetUri, out personalAccessToken), "Personal Access Token unexpectedly not found in cache.");
-            Assert.IsTrue(aadAuthentication.PersonalAccessTokenStore.ReadToken(targetUri, out personalAccessToken), "Personal Access Token unexpectedly not found in store.");
-            Assert.IsTrue(aadAuthentication.AdaRefreshTokenStore.ReadToken(targetUri, out azureToken), "ADA Refresh Token unexpectedly not found in store.");
+            Assert.IsFalse(aadAuthentication.SetCredentials(targetUri, credentials), "Credentials were unexpectedly set.");
+
+            Assert.IsFalse(aadAuthentication.PersonalAccessTokenCache.ReadToken(targetUri, out personalAccessToken), "Personal Access Token unexpectedly found in cache.");
+            Assert.IsFalse(aadAuthentication.PersonalAccessTokenStore.ReadToken(targetUri, out personalAccessToken), "Personal Access Token unexpectedly found in store.");
+            Assert.IsFalse(aadAuthentication.AdaRefreshTokenStore.ReadToken(targetUri, out azureToken), "ADA Refresh Token unexpectedly found in store.");
+            Assert.IsFalse(aadAuthentication.GetCredentials(targetUri, out credentials), "Credentials were retrieved unexpectedly.");
         }
 
         public void VsoAadValidateCredentialsTest()
@@ -157,7 +160,7 @@ namespace Microsoft.TeamFoundation.Git.Helpers.Authentication
         {
             ITokenStore patStore = new TokenCache(prefix);
             ITokenStore patCache = new TokenCache(prefix);
-            ITokenStore tokenStore = new TokenRegistry();
+            ITokenStore tokenStore = new TokenCache(prefix);
             IAzureAuthority azureAuthority = new AuthorityFake();
             IVsoAuthority vsoAuthority = new AuthorityFake();
             return new VsoAadAuthentication(patStore, patCache, tokenStore, azureAuthority, vsoAuthority);

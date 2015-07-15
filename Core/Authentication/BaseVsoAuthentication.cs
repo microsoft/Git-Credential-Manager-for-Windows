@@ -24,20 +24,18 @@ namespace Microsoft.TeamFoundation.Git.Helpers.Authentication
             this.AdaRefreshTokenStore = new TokenStore(AdalRefreshPrefx);
             this.VsoAuthority = new AzureAuthority();
         }
-        protected BaseVsoAuthentication(string credentialPrefix)
+        protected BaseVsoAuthentication(string credentialPrefix, VsoTokenScope scope, string resource, string clientId)
             : this()
         {
             this.PersonalAccessTokenCache = new TokenStore(credentialPrefix);
             this.PersonalAccessTokenStore = new TokenStore(credentialPrefix);
-        }
-        protected BaseVsoAuthentication(string credentialPrefix, VsoTokenScope scope, string resource, string clientId)
-            : this(credentialPrefix)
-        {
             this.ClientId = clientId ?? this.ClientId;
             this.Resource = resource ?? this.Resource;
             this.TokenScope = scope ?? this.TokenScope;
+            this.VsoAdalTokenCache = new VsoAdalTokenCache();
         }
-        internal BaseVsoAuthentication(ITokenStore personalAccessTokenStore,
+        internal BaseVsoAuthentication(
+            ITokenStore personalAccessTokenStore,
             ITokenStore personalAccessTokenCache,
             ITokenStore adaRefreshTokenStore,
             IVsoAuthority vsoAuthority)
@@ -47,11 +45,14 @@ namespace Microsoft.TeamFoundation.Git.Helpers.Authentication
             this.PersonalAccessTokenCache = personalAccessTokenCache;
             this.AdaRefreshTokenStore = adaRefreshTokenStore;
             this.VsoAuthority = vsoAuthority;
+            this.VsoAdalTokenCache = IdentityModel.Clients.ActiveDirectory.TokenCache.DefaultShared;
         }
 
         public readonly string ClientId;
         public readonly string Resource;
         public readonly VsoTokenScope TokenScope;
+
+        protected readonly IdentityModel.Clients.ActiveDirectory.TokenCache VsoAdalTokenCache;
 
         internal ITokenStore PersonalAccessTokenStore { get; set; }
         internal ITokenStore AdaRefreshTokenStore { get; set; }
@@ -110,7 +111,48 @@ namespace Microsoft.TeamFoundation.Git.Helpers.Authentication
             }
         }
 
-        public abstract Task<bool> RefreshCredentials(Uri targetUri, bool requireCompactToken);
+        public async Task<bool> RefreshCredentials(Uri targetUri, bool requireCompactToken)
+        {
+            BaseSecureStore.ValidateTargetUri(targetUri);
+
+            try
+            {
+                Token refreshToken = null;
+                Tokens tokens = null;
+                if (this.AdaRefreshTokenStore.ReadToken(targetUri, out refreshToken))
+                {
+                    if ((tokens = await this.VsoAuthority.AcquireTokenByRefreshTokenAsync(this.ClientId, this.Resource, refreshToken)) != null)
+                    {
+                        return await this.GeneratePersonalAccessToken(targetUri, tokens.AccessToken, requireCompactToken);
+                    }
+                }
+                else
+                {
+                    Trace.TraceWarning("Failed to discover cached credentials. Fallback to VS IDE cached ADAL tokens.");
+
+                    foreach (var item in VsoAdalTokenCache.ReadItems())
+                    {
+                        refreshToken = new Token(item.RefreshToken, TokenType.Refresh);
+
+                        if ((tokens = await this.VsoAuthority.AcquireTokenByRefreshTokenAsync(this.ClientId, this.Resource, refreshToken)) != null
+                            && await this.GeneratePersonalAccessToken(targetUri, tokens.AccessToken, requireCompactToken))
+                        {
+                            Trace.TraceInformation("VS IDE cached ADAL token used for access token generation.");
+
+                            this.AdaRefreshTokenStore.WriteToken(targetUri, refreshToken);
+
+                            return true;
+                        }
+                    }
+                }
+            }
+            catch (Exception exception)
+            {
+                Debug.WriteLine(exception);
+            }
+
+            return false;
+        }
 
         public async Task<bool> ValidateCredentials(Credential credentials)
         {

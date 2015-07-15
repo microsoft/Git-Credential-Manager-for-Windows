@@ -32,11 +32,11 @@ namespace Microsoft.TeamFoundation.Git.Helpers.Authentication.Test
             catch { }
         }
         [TestMethod]
-        public void CredentialStoreUsernameBlankReject()
+        public void CredentialStoreUsernameBlank()
         {
             try
             {
-                ICredentialStoreTest(new CredentialStore("test"), "http://dummy.url/for/testing", "", "blank_usernames_are_illegal");
+                ICredentialStoreTest(new CredentialStore("test"), "http://dummy.url/for/testing", "", "blank_usernames_are_legal");
                 Assert.Fail("Empty username was accepted");
             }
             catch { }
@@ -48,6 +48,17 @@ namespace Microsoft.TeamFoundation.Git.Helpers.Authentication.Test
             {
                 ICredentialStoreTest(new CredentialStore("test"), "http://dummy.url/for/testing", "null_passwords_are_illegal", null);
                 Assert.Fail("Null password was accepted");
+            }
+            catch { }
+        }
+
+        [TestMethod]
+        public void CredentialStorePassswordBlank()
+        {
+            try
+            {
+                ICredentialStoreTest(new CredentialStore("test"), "http://dummy.url/for/testing", "blank_passwords_are_legal", "");
+                Assert.Fail("Empty username was accepted");
             }
             catch { }
         }

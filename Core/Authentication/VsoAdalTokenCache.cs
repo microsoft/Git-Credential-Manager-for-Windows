@@ -6,7 +6,7 @@ using Microsoft.IdentityModel.Clients.ActiveDirectory;
 
 namespace Microsoft.TeamFoundation.Git.Helpers.Authentication
 {
-    internal class VsoAdalTokenCache : Microsoft.IdentityModel.Clients.ActiveDirectory.TokenCache
+    internal class VsoAdalTokenCache : IdentityModel.Clients.ActiveDirectory.TokenCache
     {
         private const string AdalCachePath = @"Microsoft\VSCommon\VSAccountManagement";
         private const string AdalCacheFile = @"AdalCache.cache";
