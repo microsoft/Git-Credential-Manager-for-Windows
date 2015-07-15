@@ -1,6 +1,7 @@
 ﻿using System;
-using System.Collections;
 using System.Collections.Generic;
+using System.Security.Cryptography;
+using System.Text;
 using Microsoft.Win32;
 
 namespace Microsoft.TeamFoundation.Git.Helpers.Authentication
@@ -12,29 +13,14 @@ namespace Microsoft.TeamFoundation.Git.Helpers.Authentication
         private const string RegistryUrlKey = "Url";
         private const string RegistryTypeValid = "Federated";
         private const string RegistryPathFormat = @"Software\Microsoft\VSCommon\{0}\ClientServices\TokenStorage\VisualStudio";
-        private static readonly string[] Versions = new[] { "14.0", "12.0" };
+        private static readonly string[] Versions = new[] { "14.0" };
 
         public TokenRegistry()
         { }
 
         public void DeleteToken(Uri targetUri)
         {
-            foreach (var key in EnumerateKeys(false))
-            {
-                string url;
-                string type;
-                string value;
-
-                if (KeyIsValid(key, out url, out type, out value))
-                {
-                    Uri tokenUri = new Uri(url);
-                    if (tokenUri.IsBaseOf(targetUri))
-                    {
-                        key.DeleteValue(RegistryTokenKey);
-                        break;
-                    }
-                }
-            }
+            throw new NotSupportedException();
         }
 
         public bool ReadToken(Uri targetUri, out Token token)
@@ -50,7 +36,14 @@ namespace Microsoft.TeamFoundation.Git.Helpers.Authentication
                     Uri tokenUri = new Uri(url);
                     if (tokenUri.IsBaseOf(targetUri))
                     {
+                        byte[] data = Convert.FromBase64String(value);
+
+                        data = ProtectedData.Unprotect(data, null, DataProtectionScope.CurrentUser);
+
+                        value = Encoding.UTF8.GetString(data);
+
                         token = new Token(value, TokenType.Refresh);
+
                         return true;
                     }
                 }
@@ -62,34 +55,7 @@ namespace Microsoft.TeamFoundation.Git.Helpers.Authentication
 
         public void WriteToken(Uri targetUri, Token token)
         {
-            bool written = false;
-
-
-            foreach (var key in EnumerateKeys(false))
-            {
-                string url;
-                string type;
-                string value;
-
-                if (KeyIsValid(key, out url, out type, out value))
-                {
-                    Uri tokenUri = new Uri(url);
-                    if (tokenUri.IsBaseOf(targetUri))
-                    {
-                        key.SetValue(RegistryTokenKey, token.Value);
-                        key.SetValue(RegistryTypeKey, RegistryTypeValid);
-                        key.SetValue(RegistryUrlKey, targetUri.AbsoluteUri);
-
-                        written = true;
-                        break;
-                    }
-                }
-            }
-
-            if (!written)
-            {
-                // what to do?!
-            }
+            throw new NotSupportedException();
         }
 
         private IEnumerable<RegistryKey> EnumerateKeys(bool writeable)

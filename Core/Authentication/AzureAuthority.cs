@@ -12,12 +12,16 @@ namespace Microsoft.TeamFoundation.Git.Helpers.Authentication
 {
     internal class AzureAuthority : IAzureAuthority, ILiveAuthority, IVsoAuthority
     {
-        public const string DefaultAuthorityHostUrl = "https://login.windows.net/common";
+        public const string AuthorityHostUrlBase = "https://login.microsoftonline.com";
+        public const string DefaultAuthorityHostUrl = AuthorityHostUrlBase + "/common";
 
         public AzureAuthority(string authorityHostUrl = DefaultAuthorityHostUrl)
         {
             AuthorityHostUrl = authorityHostUrl;
+            _adalTokenCache = new VsoAdalTokenCache();
         }
+
+        private readonly VsoAdalTokenCache _adalTokenCache;
 
         public string AuthorityHostUrl { get; }
 
@@ -32,8 +36,8 @@ namespace Microsoft.TeamFoundation.Git.Helpers.Authentication
             queryParameters = queryParameters ?? String.Empty;
 
             try
-            {               
-                AuthenticationContext authCtx = new AuthenticationContext(AuthorityHostUrl);
+            {
+                AuthenticationContext authCtx = new AuthenticationContext(AuthorityHostUrl, _adalTokenCache);
                 AuthenticationResult authResult = authCtx.AcquireToken(resource, clientId, redirectUri, PromptBehavior.Always, UserIdentifier.AnyUser, queryParameters);
                 tokens = new Tokens(authResult);
 
@@ -59,7 +63,7 @@ namespace Microsoft.TeamFoundation.Git.Helpers.Authentication
             try
             {
                 UserCredential userCredential = credentials == null ? new UserCredential() : new UserCredential(credentials.Username, credentials.Password);
-                AuthenticationContext authCtx = new AuthenticationContext(DefaultAuthorityHostUrl, IdentityModel.Clients.ActiveDirectory.TokenCache.DefaultShared);
+                AuthenticationContext authCtx = new AuthenticationContext(DefaultAuthorityHostUrl, _adalTokenCache);
                 AuthenticationResult authResult = await authCtx.AcquireTokenAsync(resource, clientId, userCredential);
                 tokens = new Tokens(authResult);
 
@@ -87,7 +91,7 @@ namespace Microsoft.TeamFoundation.Git.Helpers.Authentication
 
             try
             {
-                AuthenticationContext authCtx = new AuthenticationContext(DefaultAuthorityHostUrl, IdentityModel.Clients.ActiveDirectory.TokenCache.DefaultShared);
+                AuthenticationContext authCtx = new AuthenticationContext(DefaultAuthorityHostUrl, _adalTokenCache);
                 AuthenticationResult authResult = await authCtx.AcquireTokenByRefreshTokenAsync(refreshToken.Value, clientId, resource);
                 tokens = new Tokens(authResult);
 

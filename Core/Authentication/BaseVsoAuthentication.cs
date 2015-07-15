@@ -11,6 +11,8 @@ namespace Microsoft.TeamFoundation.Git.Helpers.Authentication
         public const string DefaultClientId = "872cd9fa-d31f-45e0-9eab-6e460a02d1f1";
         public const string RedirectUrl = "urn:ietf:wg:oauth:2.0:oob";
 
+        protected const string TokenPrefix = "adal-refresh";
+
         protected BaseVsoAuthentication()
         {
             AdalTrace.TraceSource.Switch.Level = SourceLevels.Off;
@@ -18,9 +20,9 @@ namespace Microsoft.TeamFoundation.Git.Helpers.Authentication
 
             this.ClientId = DefaultClientId;
             this.Resource = DefaultResource;
-            this.PersonalAccessTokenStore = new TokenStore(PrimaryCredentialPrefix);
-            this.AdaRefreshTokenStore = new TokenRegistry();
+            this.AdaRefreshTokenStore = new TokenStore(TokenPrefix);
             this.PersonalAccessTokenCache = new TokenStore(PrimaryCredentialPrefix);
+            this.PersonalAccessTokenStore = new TokenStore(PrimaryCredentialPrefix);
             this.VsoAuthority = new AzureAuthority();
         }
         protected BaseVsoAuthentication(string resource, string clientId)
@@ -30,9 +32,9 @@ namespace Microsoft.TeamFoundation.Git.Helpers.Authentication
             this.Resource = resource ?? this.Resource;
         }
         internal BaseVsoAuthentication(
-            ITokenStore personalAccessTokenStore, 
-            ITokenStore personalAccessTokenCache, 
-            ITokenStore adaRefreshTokenStore, 
+            ITokenStore personalAccessTokenStore,
+            ITokenStore personalAccessTokenCache,
+            ITokenStore adaRefreshTokenStore,
             IVsoAuthority vsoAuthority)
             : this()
         {

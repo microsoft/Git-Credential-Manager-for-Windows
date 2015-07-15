@@ -7,8 +7,6 @@ namespace Microsoft.TeamFoundation.Git.Helpers.Authentication
 {
     public sealed class VsoAadAuthentication : BaseVsoAuthentication, IVsoAadAuthentication
     {
-        private const string VsspsAuthUrl = "https://app.vssps.visualstudio.com";
-
         public VsoAadAuthentication(string resource = null, string clientId = null)
             : base(resource, clientId)
         {
@@ -35,6 +33,8 @@ namespace Microsoft.TeamFoundation.Git.Helpers.Authentication
         }
 
         internal IAzureAuthority AzureAuthority { get; set; }
+
+        private readonly VsoAdalTokenCache _vsideCache = new VsoAdalTokenCache();
 
         public bool InteractiveLogon(Uri targetUri)
         {
@@ -118,11 +118,27 @@ namespace Microsoft.TeamFoundation.Git.Helpers.Authentication
             try
             {
                 Token refreshToken = null;
-                if (this.AdaRefreshTokenStore.ReadToken(new Uri(VsspsAuthUrl, UriKind.Absolute), out refreshToken))
+                if (this.AdaRefreshTokenStore.ReadToken(targetUri, out refreshToken))
                 {
                     Tokens tokens;
                     return ((tokens = await this.AzureAuthority.AcquireTokenByRefreshTokenAsync(this.ClientId, this.Resource, refreshToken)) != null
                         && await this.GeneratePersonalAccessToken(targetUri, tokens.AccessToken));
+                }
+                else
+                {
+                    foreach (var item in _vsideCache.ReadItems())
+                    {
+                        refreshToken = new Token(item.RefreshToken, TokenType.Refresh);
+
+                        Tokens tokens;
+                        if ((tokens = await this.AzureAuthority.AcquireTokenByRefreshTokenAsync(this.ClientId, this.Resource, refreshToken)) != null
+                            && await this.GeneratePersonalAccessToken(targetUri, tokens.AccessToken))
+                        {
+                            this.AdaRefreshTokenStore.WriteToken(targetUri, refreshToken);
+
+                            return true;
+                        }
+                    }
                 }
             }
             catch (AdalException exception)
