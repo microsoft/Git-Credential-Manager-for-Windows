@@ -7,8 +7,8 @@ namespace Microsoft.TeamFoundation.Git.Helpers.Authentication
 {
     public sealed class VsoAadAuthentication : BaseVsoAuthentication, IVsoAadAuthentication
     {
-        public VsoAadAuthentication(string resource = null, string clientId = null)
-            : base(resource, clientId)
+        public VsoAadAuthentication(VsoTokenScope scope, string resource = null, string clientId = null)
+            : base(scope, resource, clientId)
         {
             this.AzureAuthority = new AzureAuthority();
         }
@@ -36,7 +36,7 @@ namespace Microsoft.TeamFoundation.Git.Helpers.Authentication
 
         private readonly VsoAdalTokenCache _vsideCache = new VsoAdalTokenCache();
 
-        public bool InteractiveLogon(Uri targetUri)
+        public bool InteractiveLogon(Uri targetUri, bool requestCompactToken)
         {
             BaseSecureStore.ValidateTargetUri(targetUri);
 
@@ -49,7 +49,7 @@ namespace Microsoft.TeamFoundation.Git.Helpers.Authentication
                 {
                     this.StoreRefreshToken(targetUri, tokens.RefeshToken);
 
-                    return Task.Run(async () => { return await this.GeneratePersonalAccessToken(targetUri, tokens.AccessToken); }).Result;
+                    return Task.Run(async () => { return await this.GeneratePersonalAccessToken(targetUri, tokens.AccessToken, requestCompactToken); }).Result;
                 }
             }
             catch (AdalException exception)
@@ -60,7 +60,7 @@ namespace Microsoft.TeamFoundation.Git.Helpers.Authentication
             return false;
         }
 
-        public async Task<bool> NoninteractiveLogonWithCredentials(Uri targetUri, Credential credentials)
+        public async Task<bool> NoninteractiveLogonWithCredentials(Uri targetUri, Credential credentials, bool requestCompactToken)
         {
             BaseSecureStore.ValidateTargetUri(targetUri);
             Credential.Validate(credentials);
@@ -74,7 +74,7 @@ namespace Microsoft.TeamFoundation.Git.Helpers.Authentication
                 {
                     this.StoreRefreshToken(targetUri, tokens.RefeshToken);
 
-                    return await this.GeneratePersonalAccessToken(targetUri, tokens.AccessToken);
+                    return await this.GeneratePersonalAccessToken(targetUri, tokens.AccessToken, requestCompactToken);
                 }
             }
             catch (AdalException exception)
@@ -86,7 +86,7 @@ namespace Microsoft.TeamFoundation.Git.Helpers.Authentication
             return false;
         }
 
-        public async Task<bool> NoninteractiveLogon(Uri targetUri)
+        public async Task<bool> NoninteractiveLogon(Uri targetUri, bool requestCompactToken)
         {
             BaseSecureStore.ValidateTargetUri(targetUri);
 
@@ -99,7 +99,7 @@ namespace Microsoft.TeamFoundation.Git.Helpers.Authentication
                 {
                     this.StoreRefreshToken(targetUri, tokens.RefeshToken);
 
-                    return await this.GeneratePersonalAccessToken(targetUri, tokens.AccessToken);
+                    return await this.GeneratePersonalAccessToken(targetUri, tokens.AccessToken, requestCompactToken);
                 }
             }
             catch (AdalException exception)
@@ -111,7 +111,7 @@ namespace Microsoft.TeamFoundation.Git.Helpers.Authentication
             return false;
         }
 
-        public override async Task<bool> RefreshCredentials(Uri targetUri)
+        public override async Task<bool> RefreshCredentials(Uri targetUri, bool requestCompactToken)
         {
             BaseSecureStore.ValidateTargetUri(targetUri);
 
@@ -122,18 +122,22 @@ namespace Microsoft.TeamFoundation.Git.Helpers.Authentication
                 {
                     Tokens tokens;
                     return ((tokens = await this.AzureAuthority.AcquireTokenByRefreshTokenAsync(this.ClientId, this.Resource, refreshToken)) != null
-                        && await this.GeneratePersonalAccessToken(targetUri, tokens.AccessToken));
+                        && await this.GeneratePersonalAccessToken(targetUri, tokens.AccessToken, requestCompactToken));
                 }
                 else
                 {
+                    Trace.TraceWarning("Failed to discover cached credentials. Fallback to VS IDE cached ADAL tokens.");
+
                     foreach (var item in _vsideCache.ReadItems())
                     {
                         refreshToken = new Token(item.RefreshToken, TokenType.Refresh);
 
                         Tokens tokens;
                         if ((tokens = await this.AzureAuthority.AcquireTokenByRefreshTokenAsync(this.ClientId, this.Resource, refreshToken)) != null
-                            && await this.GeneratePersonalAccessToken(targetUri, tokens.AccessToken))
+                            && await this.GeneratePersonalAccessToken(targetUri, tokens.AccessToken, requestCompactToken))
                         {
+                            Trace.TraceInformation("VS IDE cached ADAL token used for Access Token Generation.");
+
                             this.AdaRefreshTokenStore.WriteToken(targetUri, refreshToken);
 
                             return true;
@@ -151,16 +155,8 @@ namespace Microsoft.TeamFoundation.Git.Helpers.Authentication
 
         public override bool SetCredentials(Uri targetUri, Credential credentials)
         {
-            BaseSecureStore.ValidateTargetUri(targetUri);
-            Credential.Validate(credentials);
-
-            var task = Task.Run<bool>(async () => { return await this.NoninteractiveLogonWithCredentials(targetUri, credentials); });
-            task.Wait();
-
-            if (task.IsFaulted)
-                throw task.Exception;
-
-            return task.Result;
+            // does nothing with VSO AAD backed accounts
+            return false;
         }
     }
 }

@@ -62,7 +62,7 @@ namespace Microsoft.TeamFoundation.Git.Helpers.Authentication
             Assert.IsFalse(msaAuthority.PersonalAccessTokenStore.ReadToken(targetUri, out personalAccessToken), "Personal Access Token found in store unexpectedly.");
             Assert.IsFalse(msaAuthority.AdaRefreshTokenStore.ReadToken(targetUri, out azureToken), "ADA Refresh Token found in store unexpectedly.");
 
-            Assert.IsTrue(msaAuthority.InteractiveLogon(targetUri), "Interactive logon failed unexpectedly.");
+            Assert.IsTrue(msaAuthority.InteractiveLogon(targetUri, false), "Interactive logon failed unexpectedly.");
 
             Assert.IsTrue(msaAuthority.PersonalAccessTokenCache.ReadToken(targetUri, out personalAccessToken), "Personal Access Token not found in cache as expected.");
             Assert.IsTrue(msaAuthority.PersonalAccessTokenStore.ReadToken(targetUri, out personalAccessToken), "Personal Access Token not found in store as expected.");
@@ -83,8 +83,8 @@ namespace Microsoft.TeamFoundation.Git.Helpers.Authentication
             Assert.IsFalse(msaAuthority.PersonalAccessTokenCache.ReadToken(targetUri, out personalAccessToken), "Personal Access Token unexpectedly found in cache.");
             Assert.IsFalse(msaAuthority.PersonalAccessTokenStore.ReadToken(targetUri, out personalAccessToken), "Personal Access Token unexpectedly found in store.");
 
-            Assert.IsTrue(Task.Run(async () => { return await msaAuthority.RefreshCredentials(targetUri); }).Result, "Credentials refresh failed unexpectedly.");
-            Assert.IsFalse(Task.Run(async () => { return await msaAuthority.RefreshCredentials(errorUri); }).Result, "Credentials refresh succeeded unexpectedly.");
+            Assert.IsTrue(Task.Run(async () => { return await msaAuthority.RefreshCredentials(targetUri, false); }).Result, "Credentials refresh failed unexpectedly.");
+            Assert.IsFalse(Task.Run(async () => { return await msaAuthority.RefreshCredentials(errorUri, false); }).Result, "Credentials refresh succeeded unexpectedly.");
 
             Assert.IsTrue(msaAuthority.PersonalAccessTokenCache.ReadToken(targetUri, out personalAccessToken), "Personal Access Token not found in cache as expected.");
             Assert.IsTrue(msaAuthority.PersonalAccessTokenStore.ReadToken(targetUri, out personalAccessToken), "Personal Access Token not found in store as expected.");

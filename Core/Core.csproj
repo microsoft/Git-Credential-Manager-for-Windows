@@ -52,6 +52,7 @@
     <Reference Include="System.Security" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Authentication\VsoTokenScope.cs" />
     <Compile Include="Authentication\AzureAuthority.cs" />
     <Compile Include="Authentication\CredentialCache.cs" />
     <Compile Include="Authentication\IAzureAuthority.cs" />

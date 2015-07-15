@@ -107,16 +107,18 @@ namespace Microsoft.TeamFoundation.Git.Helpers.Authentication
             return tokens;
         }
 
-        public async Task<Token> GeneratePersonalAccessToken(Uri targetUri, Token accessToken)
+        public async Task<Token> GeneratePersonalAccessToken(Uri targetUri, Token accessToken, VsoTokenScope tokenScope, bool requireCompactToken)
         {
-            const string VsspEndPointUrl = "https://app.vssps.visualstudio.com/_apis/token/sessiontokens?api-version=1.0&tokentype=compact";
-            const string TokenScopeJson = "{ \"scope\" = \"vso.code_write\" }";
+            const string SessionTokenUrl = "https://app.vssps.visualstudio.com/_apis/token/sessiontokens?api-version=1.0";
+            const string CompactTokenUrl = SessionTokenUrl + "&tokentype=compact";
+            const string TokenScopeJsonFormat = "{{ \"scope\" = \"{0}\" }}";
             const string HttpJsonContentType = "application/json";
             const string AuthHeaderBearer = "Bearer";
 
             Debug.Assert(targetUri != null, "The targetUri parameter is null");
             Debug.Assert(accessToken != null, "The accessToken parameter is null");
             Debug.Assert(accessToken.Type == TokenType.Access, "The value of the accessToken parameter is not an access token");
+            Debug.Assert(tokenScope != null);
 
             Trace.TraceInformation("Generating Personal Access Token for {0}", targetUri);
 
@@ -124,10 +126,12 @@ namespace Microsoft.TeamFoundation.Git.Helpers.Authentication
             {
                 using (HttpClient httpClient = new HttpClient())
                 {
-                    StringContent content = new StringContent(TokenScopeJson, Encoding.UTF8, HttpJsonContentType);
+                    string jsonContent = String.Format(TokenScopeJsonFormat, tokenScope);
+                    StringContent content = new StringContent(jsonContent, Encoding.UTF8, HttpJsonContentType);
                     httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue(AuthHeaderBearer, accessToken.Value);
 
-                    HttpResponseMessage response = await httpClient.PostAsync(VsspEndPointUrl, content);
+                    HttpResponseMessage response = await httpClient.PostAsync(requireCompactToken ? CompactTokenUrl : SessionTokenUrl, 
+                                                                              content);
                     if (response.StatusCode == HttpStatusCode.OK)
                     {
                         string responseText = await response.Content.ReadAsStringAsync();
@@ -135,12 +139,12 @@ namespace Microsoft.TeamFoundation.Git.Helpers.Authentication
                         Match tokenMatch = null;
                         if ((tokenMatch = Regex.Match(responseText, @"\s*""token""\s*:\s*""([^\""]+)""\s*", RegexOptions.Compiled | RegexOptions.IgnoreCase)).Success)
                         {
-                            string token = tokenMatch.Groups[1].Value;
-                            Token personalAccessToken = new Token(token, TokenType.VsoPat);
+                            string tokenValue = tokenMatch.Groups[1].Value;
+                            Token token = new Token(tokenValue, TokenType.VsoPat);
 
                             Trace.TraceInformation("AzureAuthority::GeneratePersonalAccessToken succeeded.");
 
-                            return personalAccessToken;
+                            return token;
                         }
                     }
                     else

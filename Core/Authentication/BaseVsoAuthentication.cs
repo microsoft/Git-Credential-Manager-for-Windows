@@ -20,16 +20,18 @@ namespace Microsoft.TeamFoundation.Git.Helpers.Authentication
 
             this.ClientId = DefaultClientId;
             this.Resource = DefaultResource;
+            this.TokenScope = VsoTokenScope.CodeWrite;
             this.AdaRefreshTokenStore = new TokenStore(TokenPrefix);
             this.PersonalAccessTokenCache = new TokenStore(PrimaryCredentialPrefix);
             this.PersonalAccessTokenStore = new TokenStore(PrimaryCredentialPrefix);
             this.VsoAuthority = new AzureAuthority();
         }
-        protected BaseVsoAuthentication(string resource, string clientId)
+        protected BaseVsoAuthentication(VsoTokenScope scope, string resource, string clientId)
             : this()
         {
             this.ClientId = clientId ?? this.ClientId;
             this.Resource = resource ?? this.Resource;
+            this.TokenScope = scope ?? this.TokenScope;
         }
         internal BaseVsoAuthentication(
             ITokenStore personalAccessTokenStore,
@@ -46,6 +48,7 @@ namespace Microsoft.TeamFoundation.Git.Helpers.Authentication
 
         public readonly string ClientId;
         public readonly string Resource;
+        public readonly VsoTokenScope TokenScope;
 
         internal ITokenStore PersonalAccessTokenStore { get; set; }
         internal ITokenStore AdaRefreshTokenStore { get; set; }
@@ -104,21 +107,21 @@ namespace Microsoft.TeamFoundation.Git.Helpers.Authentication
             }
         }
 
-        public abstract Task<bool> RefreshCredentials(Uri targetUri);
+        public abstract Task<bool> RefreshCredentials(Uri targetUri, bool requireCompactToken);
 
         public async Task<bool> ValidateCredentials(Credential credentials)
         {
             return await this.VsoAuthority.ValidateCredentials(credentials);
         }
 
-        protected async Task<bool> GeneratePersonalAccessToken(Uri targetUri, Token accessToken)
+        protected async Task<bool> GeneratePersonalAccessToken(Uri targetUri, Token accessToken, bool requestCompactToken)
         {
             Debug.Assert(targetUri != null, "The targetUri parameter is null");
             Debug.Assert(accessToken != null, "The accessToken parameter is null");
             Debug.Assert(accessToken.Type == TokenType.Access, "The value of the accessToken parameter is not an access token");
 
             Token personalAccessToken;
-            if ((personalAccessToken = await this.VsoAuthority.GeneratePersonalAccessToken(targetUri, accessToken)) != null)
+            if ((personalAccessToken = await this.VsoAuthority.GeneratePersonalAccessToken(targetUri, accessToken, TokenScope, requestCompactToken)) != null)
             {
                 this.PersonalAccessTokenCache.WriteToken(targetUri, personalAccessToken);
                 this.PersonalAccessTokenStore.WriteToken(targetUri, personalAccessToken);

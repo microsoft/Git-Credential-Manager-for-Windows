@@ -9,8 +9,8 @@ namespace Microsoft.TeamFoundation.Git.Helpers.Authentication
     {
         public const string DefaultAuthorityHost = "https://login.microsoftonline.com/live.com";
 
-        public VsoMsaAuthentication(string resource = null, string clientId = null)
-            : base(resource, clientId)
+        public VsoMsaAuthentication(VsoTokenScope scope, string resource = null, string clientId = null)
+            : base(scope, resource, clientId)
         {
             this.LiveAuthority = new AzureAuthority(DefaultAuthorityHost);
         }
@@ -37,7 +37,7 @@ namespace Microsoft.TeamFoundation.Git.Helpers.Authentication
 
         internal ILiveAuthority LiveAuthority { get; set; }
 
-        public bool InteractiveLogon(Uri targetUri)
+        public bool InteractiveLogon(Uri targetUri, bool requireCompactToken)
         {
             const string QueryParameterDomainHints = "domain_hint=live.com&display=popup";
 
@@ -50,7 +50,7 @@ namespace Microsoft.TeamFoundation.Git.Helpers.Authentication
                 {
                     this.StoreRefreshToken(targetUri, tokens.RefeshToken);
 
-                    return Task.Run(async () => { return await this.GeneratePersonalAccessToken(targetUri, tokens.AccessToken); }).Result;
+                    return Task.Run(async () => { return await this.GeneratePersonalAccessToken(targetUri, tokens.AccessToken, requireCompactToken); }).Result;
                 }
             }
             catch (AdalException exception)
@@ -61,7 +61,7 @@ namespace Microsoft.TeamFoundation.Git.Helpers.Authentication
             return false;
         }
 
-        public override async Task<bool> RefreshCredentials(Uri targetUri)
+        public override async Task<bool> RefreshCredentials(Uri targetUri, bool requireCompactToken)
         {
             BaseSecureStore.ValidateTargetUri(targetUri);
 
@@ -73,7 +73,7 @@ namespace Microsoft.TeamFoundation.Git.Helpers.Authentication
                 {
                     if ((tokens = await this.LiveAuthority.AcquireTokenByRefreshTokenAsync(this.ClientId, this.Resource, refreshToken)) != null)
                     {
-                        return await this.GeneratePersonalAccessToken(targetUri, tokens.AccessToken);
+                        return await this.GeneratePersonalAccessToken(targetUri, tokens.AccessToken, requireCompactToken);
                     }
                 }
             }
@@ -87,7 +87,8 @@ namespace Microsoft.TeamFoundation.Git.Helpers.Authentication
 
         public override bool SetCredentials(Uri targetUri, Credential credentials)
         {
-            throw new NotSupportedException();
+            // does nothing with VSO AAD backed accounts
+            return false;
         }
     }
 }

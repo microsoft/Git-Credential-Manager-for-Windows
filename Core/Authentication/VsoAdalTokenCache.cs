@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Diagnostics;
 using System.IO;
 using System.Security.Cryptography;
 using Microsoft.IdentityModel.Clients.ActiveDirectory;
@@ -31,16 +32,7 @@ namespace Microsoft.TeamFoundation.Git.Helpers.Authentication
 
             _cacheFilePath = filePath;
 
-            lock (@lock)
-            {
-                byte[] data = File.Exists(_cacheFilePath)
-                            ? File.ReadAllBytes(_cacheFilePath)
-                            : null;
-
-                byte[] state = ProtectedData.Unprotect(data, null, DataProtectionScope.CurrentUser);
-
-                this.Deserialize(state);
-            }
+            BeforeAccessNotification(null);
         }
         /// <summary>
         /// Constructor receiving state of the cache.
@@ -49,7 +41,7 @@ namespace Microsoft.TeamFoundation.Git.Helpers.Authentication
         public VsoAdalTokenCache(byte[] state)
             : this()
         {
-            this.Deserialize(state);
+            throw new NotSupportedException();
         }
 
         private readonly string _cacheFilePath;
@@ -58,32 +50,50 @@ namespace Microsoft.TeamFoundation.Git.Helpers.Authentication
 
         public void AfterAccessNotification(TokenCacheNotificationArgs args)
         {
+            Trace.TraceInformation("VsoAdalTokenCache::AfterAccessNotification");
+
             lock (@lock)
             {
                 if (this.HasStateChanged)
                 {
-                    byte[] state = this.Serialize();
+                    try
+                    {
+                        byte[] state = this.Serialize();
 
-                    byte[] data = ProtectedData.Protect(state, null, DataProtectionScope.CurrentUser);
+                        byte[] data = ProtectedData.Protect(state, null, DataProtectionScope.CurrentUser);
 
-                    File.WriteAllBytes(_cacheFilePath, data);
+                        File.WriteAllBytes(_cacheFilePath, data);
 
-                    this.HasStateChanged = false;
+                        this.HasStateChanged = false;
+                    }
+                    catch (Exception exception)
+                    {
+                        Trace.TraceError(exception.ToString());
+                    }
                 }
             }
         }
 
         public void BeforeAccessNotification(TokenCacheNotificationArgs args)
         {
+            Trace.TraceInformation("VsoAdalTokenCache::BeforeAccessNotification");
+
             lock (@lock)
             {
-                byte[] data = File.Exists(_cacheFilePath)
-                            ? File.ReadAllBytes(_cacheFilePath)
-                            : null;
+                try
+                {
+                    byte[] data = File.Exists(_cacheFilePath)
+                                ? File.ReadAllBytes(_cacheFilePath)
+                                : null;
 
-                byte[] state = ProtectedData.Unprotect(data, null, DataProtectionScope.CurrentUser);
+                    byte[] state = ProtectedData.Unprotect(data, null, DataProtectionScope.CurrentUser);
 
-                this.Deserialize(state);
+                    this.Deserialize(state);
+                }
+                catch (Exception exception)
+                {
+                    Trace.TraceError(exception.ToString());
+                }
             }
         }
     }

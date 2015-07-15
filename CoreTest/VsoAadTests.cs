@@ -63,7 +63,7 @@ namespace Microsoft.TeamFoundation.Git.Helpers.Authentication
             Assert.IsFalse(aadAuthentication.PersonalAccessTokenStore.ReadToken(targetUri, out personalAccessToken), "Personal Access Token found in store unexpectedly.");
             Assert.IsFalse(aadAuthentication.AdaRefreshTokenStore.ReadToken(targetUri, out azureToken), "ADA Refresh Token found in store unexpectedly.");
 
-            Assert.IsTrue(aadAuthentication.InteractiveLogon(targetUri), "Interactive logon failed unexpectedly.");
+            Assert.IsTrue(aadAuthentication.InteractiveLogon(targetUri, false), "Interactive logon failed unexpectedly.");
 
             Assert.IsTrue(aadAuthentication.PersonalAccessTokenCache.ReadToken(targetUri, out personalAccessToken), "Personal Access Token not found in cache as expected.");
             Assert.IsTrue(aadAuthentication.PersonalAccessTokenStore.ReadToken(targetUri, out personalAccessToken), "Personal Access Token not found in store as expected.");
@@ -79,7 +79,7 @@ namespace Microsoft.TeamFoundation.Git.Helpers.Authentication
             Token personalAccessToken;
             Token azureToken;
 
-            Assert.IsTrue(Task.Run(async () => { return await aadAuthentication.NoninteractiveLogon(targetUri); }).Result, "Non-interactive logon unexpectedly failed.");
+            Assert.IsTrue(Task.Run(async () => { return await aadAuthentication.NoninteractiveLogon(targetUri, false); }).Result, "Non-interactive logon unexpectedly failed.");
 
             Assert.IsTrue(aadAuthentication.PersonalAccessTokenCache.ReadToken(targetUri, out personalAccessToken), "Personal Access Token not found in cache as expected.");
             Assert.IsTrue(aadAuthentication.PersonalAccessTokenStore.ReadToken(targetUri, out personalAccessToken), "Personal Access Token not found in store as expected.");
@@ -96,7 +96,7 @@ namespace Microsoft.TeamFoundation.Git.Helpers.Authentication
             Token personalAccessToken;
             Token azureToken;
 
-            Assert.IsTrue(Task.Run(async () => { return await aadAuthentication.NoninteractiveLogonWithCredentials(targetUri, originCreds); }).Result, "Non-interactive logon unexpectedly failed.");
+            Assert.IsTrue(Task.Run(async () => { return await aadAuthentication.NoninteractiveLogonWithCredentials(targetUri, originCreds, false); }).Result, "Non-interactive logon unexpectedly failed.");
 
             Assert.IsTrue(aadAuthentication.PersonalAccessTokenCache.ReadToken(targetUri, out personalAccessToken), "Personal Access Token not found in cache as expected.");
             Assert.IsTrue(aadAuthentication.PersonalAccessTokenStore.ReadToken(targetUri, out personalAccessToken), "Personal Access Token not found in store as expected.");
@@ -119,8 +119,8 @@ namespace Microsoft.TeamFoundation.Git.Helpers.Authentication
             Assert.IsFalse(aadAuthentication.PersonalAccessTokenCache.ReadToken(targetUri, out personalAccessToken), "Personal Access Token unexpectedly found in cache.");
             Assert.IsFalse(aadAuthentication.PersonalAccessTokenStore.ReadToken(targetUri, out personalAccessToken), "Personal Access Token unexpectedly found in store.");
 
-            Assert.IsTrue(Task.Run(async () => { return await aadAuthentication.RefreshCredentials(targetUri); }).Result, "Credentials refresh failed unexpectedly.");
-            Assert.IsFalse(Task.Run(async () => { return await aadAuthentication.RefreshCredentials(errorUri); }).Result, "Credentials refresh succeeded unexpectedly.");
+            Assert.IsTrue(Task.Run(async () => { return await aadAuthentication.RefreshCredentials(targetUri, false); }).Result, "Credentials refresh failed unexpectedly.");
+            Assert.IsFalse(Task.Run(async () => { return await aadAuthentication.RefreshCredentials(errorUri, false); }).Result, "Credentials refresh succeeded unexpectedly.");
 
             Assert.IsTrue(aadAuthentication.PersonalAccessTokenCache.ReadToken(targetUri, out personalAccessToken), "Personal Access Token not found in cache as expected.");
             Assert.IsTrue(aadAuthentication.PersonalAccessTokenStore.ReadToken(targetUri, out personalAccessToken), "Personal Access Token not found in store as expected.");

@@ -234,10 +234,10 @@ namespace Microsoft.TeamFoundation.Git.Helpers.Authentication
                         Task.Run(async () =>
                         {
                             if ((operationArguments.Interactivity != Interactivity.Always
-                                && await aadAuth.NoninteractiveLogon(operationArguments.TargetUri)
+                                && await aadAuth.NoninteractiveLogon(operationArguments.TargetUri, true)
                                 && aadAuth.GetCredentials(operationArguments.TargetUri, out credentials))
                             || (operationArguments.Interactivity != Interactivity.Never
-                                && aadAuth.InteractiveLogon(operationArguments.TargetUri)
+                                && aadAuth.InteractiveLogon(operationArguments.TargetUri, true)
                                 && aadAuth.GetCredentials(operationArguments.TargetUri, out credentials)))
                             {
                                 operationArguments.SetCredentials(credentials);
@@ -257,8 +257,8 @@ namespace Microsoft.TeamFoundation.Git.Helpers.Authentication
                             Task.Run(async () =>
                             {
                                 if (await msaAuth.ValidateCredentials(credentials)
-                                    || await msaAuth.RefreshCredentials(operationArguments.TargetUri)
-                                    || msaAuth.InteractiveLogon(operationArguments.TargetUri))
+                                    || await msaAuth.RefreshCredentials(operationArguments.TargetUri, true)
+                                    || msaAuth.InteractiveLogon(operationArguments.TargetUri, true))
                                 {
                                     operationArguments.SetCredentials(credentials);
                                 }
@@ -272,7 +272,7 @@ namespace Microsoft.TeamFoundation.Git.Helpers.Authentication
                     else
                     {
                         Trace.TraceInformation("attempting prompted logon");
-                        if (msaAuth.InteractiveLogon(operationArguments.TargetUri)
+                        if (msaAuth.InteractiveLogon(operationArguments.TargetUri, true)
                             && msaAuth.GetCredentials(operationArguments.TargetUri, out credentials))
                         {
                             operationArguments.SetCredentials(credentials);
@@ -327,10 +327,10 @@ namespace Microsoft.TeamFoundation.Git.Helpers.Authentication
                         string resource = operationArguments.AuthorityResource;
 
                         Trace.TraceInformation("resource = {0}, clientId = {1}", resource, clientId);
-                        return new VsoAadAuthentication(resource, clientId);
+                        return new VsoAadAuthentication(VsoTokenScope.CodeWrite, resource, clientId);
                     }
                     // return a generic AAD backed VSO authentication object
-                    return new VsoAadAuthentication();
+                    return new VsoAadAuthentication(VsoTokenScope.CodeWrite);
 
                 case AuthorityType.Basic:
                 default:
@@ -344,10 +344,10 @@ namespace Microsoft.TeamFoundation.Git.Helpers.Authentication
                         string resource = operationArguments.AuthorityResource;
 
                         Trace.TraceInformation("resource = {0}, clientId = {1}", resource, clientId);
-                        return new VsoMsaAuthentication(resource, clientId);
+                        return new VsoMsaAuthentication(VsoTokenScope.CodeWrite, resource, clientId);
                     }
                     // return a generic MSA backed VSO authentication object
-                    return new VsoMsaAuthentication();
+                    return new VsoMsaAuthentication(VsoTokenScope.CodeWrite);
             }
         }
 
