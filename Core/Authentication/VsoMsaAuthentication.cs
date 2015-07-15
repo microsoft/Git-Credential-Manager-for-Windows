@@ -1,6 +1,6 @@
-﻿using Microsoft.IdentityModel.Clients.ActiveDirectory;
-using System;
+﻿using System;
 using System.Threading.Tasks;
+using Microsoft.IdentityModel.Clients.ActiveDirectory;
 using Debug = System.Diagnostics.Debug;
 
 namespace Microsoft.TeamFoundation.Git.Helpers.Authentication
@@ -9,8 +9,12 @@ namespace Microsoft.TeamFoundation.Git.Helpers.Authentication
     {
         public const string DefaultAuthorityHost = "https://login.microsoftonline.com/live.com";
 
-        public VsoMsaAuthentication(VsoTokenScope scope, string resource = null, string clientId = null)
-            : base(scope, resource, clientId)
+        public VsoMsaAuthentication(
+            string credentialPrefix,
+            VsoTokenScope scope,
+            string resource = null,
+            string clientId = null)
+            : base(credentialPrefix, scope, resource, clientId)
         {
             this.LiveAuthority = new AzureAuthority(DefaultAuthorityHost);
         }

@@ -9,6 +9,9 @@ namespace Microsoft.TeamFoundation.Git.Helpers.Authentication
 {
     class Program
     {
+        private const string CredentialPrefix = "git";
+        private static readonly VsoTokenScope CredentialScope = VsoTokenScope.CodeWrite;
+
         static void Main(string[] args)
         {
             EnableDebugTrace();
@@ -327,14 +330,14 @@ namespace Microsoft.TeamFoundation.Git.Helpers.Authentication
                         string resource = operationArguments.AuthorityResource;
 
                         Trace.TraceInformation("resource = {0}, clientId = {1}", resource, clientId);
-                        return new VsoAadAuthentication(VsoTokenScope.CodeWrite, resource, clientId);
+                        return new VsoAadAuthentication(CredentialPrefix, CredentialScope, resource, clientId);
                     }
                     // return a generic AAD backed VSO authentication object
-                    return new VsoAadAuthentication(VsoTokenScope.CodeWrite);
+                    return new VsoAadAuthentication(CredentialPrefix, CredentialScope);
 
                 case AuthorityType.Basic:
                 default:
-                    return new BasicAuthentication();
+                    return new BasicAuthentication(CredentialPrefix);
 
                 case AuthorityType.MicrosoftAccount:
                     // if the clientId and resource values exist, use them
@@ -344,10 +347,10 @@ namespace Microsoft.TeamFoundation.Git.Helpers.Authentication
                         string resource = operationArguments.AuthorityResource;
 
                         Trace.TraceInformation("resource = {0}, clientId = {1}", resource, clientId);
-                        return new VsoMsaAuthentication(VsoTokenScope.CodeWrite, resource, clientId);
+                        return new VsoMsaAuthentication(CredentialPrefix, CredentialScope, resource, clientId);
                     }
                     // return a generic MSA backed VSO authentication object
-                    return new VsoMsaAuthentication(VsoTokenScope.CodeWrite);
+                    return new VsoMsaAuthentication(CredentialPrefix, CredentialScope);
             }
         }
 
@@ -394,7 +397,7 @@ namespace Microsoft.TeamFoundation.Git.Helpers.Authentication
             Trace.TraceInformation("seeking '{0}'", match);
 
             var result = config.Where((GitConfigValue entry) =>
-                                {                                    
+                                {
                                     return String.Equals(entry.Key, match, StringComparison.OrdinalIgnoreCase);
                                 })
                                .OrderBy((GitConfigValue entry) => { return entry.Key.Length; })

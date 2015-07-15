@@ -130,7 +130,7 @@ namespace Microsoft.TeamFoundation.Git.Helpers.Authentication
                     StringContent content = new StringContent(jsonContent, Encoding.UTF8, HttpJsonContentType);
                     httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue(AuthHeaderBearer, accessToken.Value);
 
-                    HttpResponseMessage response = await httpClient.PostAsync(requireCompactToken ? CompactTokenUrl : SessionTokenUrl, 
+                    HttpResponseMessage response = await httpClient.PostAsync(requireCompactToken ? CompactTokenUrl : SessionTokenUrl,
                                                                               content);
                     if (response.StatusCode == HttpStatusCode.OK)
                     {

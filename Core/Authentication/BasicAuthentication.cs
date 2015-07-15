@@ -4,13 +4,12 @@ namespace Microsoft.TeamFoundation.Git.Helpers.Authentication
 {
     public sealed class BasicAuthentication : BaseAuthentication, IAuthentication
     {
-        public BasicAuthentication()
+        public BasicAuthentication(string credentialPrefix)
         {
-            this.CredentialStore = new CredentialStore(PrimaryCredentialPrefix);
-            this.CredentialCache = new CredentialCache(PrimaryCredentialPrefix);
+            this.CredentialStore = new CredentialStore(credentialPrefix);
+            this.CredentialCache = new CredentialCache(credentialPrefix);
         }
         internal BasicAuthentication(ICredentialStore credentialStore, ICredentialStore credentialCache)
-            : this()
         {
             this.CredentialStore = credentialStore;
             this.CredentialCache = credentialCache;

@@ -11,9 +11,9 @@ namespace Microsoft.TeamFoundation.Git.Helpers.Authentication
         public const string DefaultClientId = "872cd9fa-d31f-45e0-9eab-6e460a02d1f1";
         public const string RedirectUrl = "urn:ietf:wg:oauth:2.0:oob";
 
-        protected const string TokenPrefix = "adal-refresh";
+        protected const string AdalRefreshPrefx = "adal-refresh";
 
-        protected BaseVsoAuthentication()
+        private BaseVsoAuthentication()
         {
             AdalTrace.TraceSource.Switch.Level = SourceLevels.Off;
             AdalTrace.LegacyTraceSwitch.Level = TraceLevel.Off;
@@ -21,20 +21,23 @@ namespace Microsoft.TeamFoundation.Git.Helpers.Authentication
             this.ClientId = DefaultClientId;
             this.Resource = DefaultResource;
             this.TokenScope = VsoTokenScope.CodeWrite;
-            this.AdaRefreshTokenStore = new TokenStore(TokenPrefix);
-            this.PersonalAccessTokenCache = new TokenStore(PrimaryCredentialPrefix);
-            this.PersonalAccessTokenStore = new TokenStore(PrimaryCredentialPrefix);
+            this.AdaRefreshTokenStore = new TokenStore(AdalRefreshPrefx);
             this.VsoAuthority = new AzureAuthority();
         }
-        protected BaseVsoAuthentication(VsoTokenScope scope, string resource, string clientId)
+        protected BaseVsoAuthentication(string credentialPrefix)
             : this()
+        {
+            this.PersonalAccessTokenCache = new TokenStore(credentialPrefix);
+            this.PersonalAccessTokenStore = new TokenStore(credentialPrefix);
+        }
+        protected BaseVsoAuthentication(string credentialPrefix, VsoTokenScope scope, string resource, string clientId)
+            : this(credentialPrefix)
         {
             this.ClientId = clientId ?? this.ClientId;
             this.Resource = resource ?? this.Resource;
             this.TokenScope = scope ?? this.TokenScope;
         }
-        internal BaseVsoAuthentication(
-            ITokenStore personalAccessTokenStore,
+        internal BaseVsoAuthentication(ITokenStore personalAccessTokenStore,
             ITokenStore personalAccessTokenCache,
             ITokenStore adaRefreshTokenStore,
             IVsoAuthority vsoAuthority)

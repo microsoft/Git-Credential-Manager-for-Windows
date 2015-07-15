@@ -7,8 +7,8 @@ namespace Microsoft.TeamFoundation.Git.Helpers.Authentication
 {
     public sealed class VsoAadAuthentication : BaseVsoAuthentication, IVsoAadAuthentication
     {
-        public VsoAadAuthentication(VsoTokenScope scope, string resource = null, string clientId = null)
-            : base(scope, resource, clientId)
+        public VsoAadAuthentication(string credentialPrefix, VsoTokenScope tokenScope, string resource = null, string clientId = null)
+            : base(credentialPrefix, tokenScope, resource, clientId)
         {
             this.AzureAuthority = new AzureAuthority();
         }
