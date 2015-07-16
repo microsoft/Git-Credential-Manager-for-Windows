@@ -7,7 +7,7 @@ namespace Microsoft.TeamFoundation.Git.Helpers.Authentication
 {
     public sealed class VsoMsaAuthentication : BaseVsoAuthentication, IVsoMsaAuthentication
     {
-        public const string DefaultAuthorityHost = AzureAuthority.AuthorityHostUrlBase;// + "/live.com";
+        public const string DefaultAuthorityHost = AzureAuthority.AuthorityHostUrlBase + "/live.com";
 
         public VsoMsaAuthentication(
             string credentialPrefix,
@@ -16,7 +16,7 @@ namespace Microsoft.TeamFoundation.Git.Helpers.Authentication
             string clientId = null)
             : base(credentialPrefix, tokenScope, resource, clientId)
         {
-            this.LiveAuthority = new AzureAuthority(DefaultAuthorityHost);
+            this.VsoAuthority = new AzureAuthority(DefaultAuthorityHost);
         }
         /// <summary>
         /// Test constructor which allows for using fake credential stores
@@ -29,17 +29,14 @@ namespace Microsoft.TeamFoundation.Git.Helpers.Authentication
             ITokenStore personalAccessTokenStore,
             ITokenStore personalAccessTokenCache,
             ITokenStore adaRefreshTokenStore,
-            ILiveAuthority liveAuthority,
-            IVsoAuthority vsoAuthority)
+            ITokenStore vsoIdeTokenCache,
+            ILiveAuthority liveAuthority)
             : base(personalAccessTokenStore,
                    personalAccessTokenCache,
                    adaRefreshTokenStore,
-                   vsoAuthority)
-        {
-            this.LiveAuthority = liveAuthority;
-        }
-
-        internal ILiveAuthority LiveAuthority { get; set; }
+                   vsoIdeTokenCache,
+                   liveAuthority)
+        { }
 
         public bool InteractiveLogon(Uri targetUri, bool requireCompactToken)
         {
@@ -50,7 +47,7 @@ namespace Microsoft.TeamFoundation.Git.Helpers.Authentication
             try
             {
                 Tokens tokens;
-                if ((tokens = this.LiveAuthority.AcquireToken(targetUri, this.ClientId, this.Resource, new Uri(RedirectUrl), QueryParameterDomainHints)) != null)
+                if ((tokens = this.VsoAuthority.AcquireToken(targetUri, this.ClientId, this.Resource, new Uri(RedirectUrl), QueryParameterDomainHints)) != null)
                 {
                     this.StoreRefreshToken(targetUri, tokens.RefeshToken);
 

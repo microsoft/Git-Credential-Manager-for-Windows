@@ -12,7 +12,7 @@ namespace Microsoft.TeamFoundation.Git.Helpers.Authentication
         private const string RegistryTypeKey = "Type";
         private const string RegistryUrlKey = "Url";
         private const string RegistryTypeValid = "Federated";
-        private const string RegistryPathFormat = @"Software\Microsoft\VSCommon\{0}\ClientServices\TokenStorage\VisualStudio";
+        private const string RegistryPathFormat = @"Software\Microsoft\VSCommon\{0}\ClientServices\TokenStorage\VisualStudio\VssApp";
         private static readonly string[] Versions = new[] { "14.0" };
 
         public TokenRegistry()
@@ -42,7 +42,7 @@ namespace Microsoft.TeamFoundation.Git.Helpers.Authentication
 
                         value = Encoding.UTF8.GetString(data);
 
-                        token = new Token(value, TokenType.Refresh);
+                        token = new Token(value, TokenType.Federated);
 
                         return true;
                     }
@@ -55,17 +55,39 @@ namespace Microsoft.TeamFoundation.Git.Helpers.Authentication
 
         public void WriteToken(Uri targetUri, Token token)
         {
-            throw new NotSupportedException();
+            return;
+
+            //bool written = false;
+
+            //foreach (var key in EnumerateKeys(false))
+            //{
+            //    string url;
+            //    string type;
+            //    string value;
+
+            //    if (KeyIsValid(key, out url, out type, out value))
+            //    {
+            //        Uri tokenUri = new Uri(url);
+            //        if (tokenUri.IsBaseOf(targetUri))
+            //        {
+            //            key.SetValue(RegistryTokenKey, token.Value);
+            //        }
+            //    }
+            //}
+
+            //if (!written)
+            //{
+            //    foreach (var key in EnumerateKeys(false))
+            //    {
+            //        var subkey = key.CreateSubKey(Guid.NewGuid().ToString("N"));
+            //    }
+            //}
         }
 
         private IEnumerable<RegistryKey> EnumerateKeys(bool writeable)
         {
-            foreach (string version in Versions)
+            foreach (var rootKey in EnumerateRootKeys())
             {
-                string registryPath = String.Format(RegistryPathFormat, version);
-
-                RegistryKey rootKey = Registry.CurrentUser.OpenSubKey(registryPath, false);
-
                 if (rootKey != null)
                 {
                     foreach (var nodeName in rootKey.GetSubKeyNames())
@@ -74,15 +96,7 @@ namespace Microsoft.TeamFoundation.Git.Helpers.Authentication
 
                         if (nodeKey != null)
                         {
-                            foreach (var leafName in nodeKey.GetSubKeyNames())
-                            {
-                                var leafKey = nodeKey.OpenSubKey(leafName, writeable);
-
-                                if (leafKey != null)
-                                {
-                                    yield return leafKey;
-                                }
-                            }
+                            yield return nodeKey;
                         }
                     }
                 }
@@ -101,6 +115,16 @@ namespace Microsoft.TeamFoundation.Git.Helpers.Authentication
                 && !String.IsNullOrEmpty(value)
                 && String.Equals(type, RegistryTypeValid, StringComparison.OrdinalIgnoreCase)
                 && Uri.IsWellFormedUriString(url, UriKind.Absolute);
+        }
+
+        private IEnumerable<RegistryKey> EnumerateRootKeys()
+        {
+            foreach (string version in Versions)
+            {
+                string registryPath = String.Format(RegistryPathFormat, version);
+
+                yield return Registry.CurrentUser.OpenSubKey(registryPath, false);
+            }
         }
     }
 }

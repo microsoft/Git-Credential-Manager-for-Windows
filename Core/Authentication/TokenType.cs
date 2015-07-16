@@ -8,6 +8,8 @@
         Refresh,
         [System.ComponentModel.Description("Personal Access Token")]
         VsoPat,
+        [System.ComponentModel.Description("Federated Authentication Token")]
+        Federated,
         [System.ComponentModel.Description("Test-only Token")]
         Test
     }

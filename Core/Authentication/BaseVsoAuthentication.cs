@@ -33,12 +33,14 @@ namespace Microsoft.TeamFoundation.Git.Helpers.Authentication
             this.Resource = resource ?? this.Resource;
             this.TokenScope = tokenScope ?? this.TokenScope;
             this.VsoAdalTokenCache = new VsoAdalTokenCache();
+            this.VsoIdeTokenCache = new TokenRegistry();
         }
         internal BaseVsoAuthentication(
             ITokenStore personalAccessTokenStore,
             ITokenStore personalAccessTokenCache,
             ITokenStore adaRefreshTokenStore,
-            IVsoAuthority vsoAuthority)
+            ITokenStore vsoIdeTokenCache,
+            IAadAuthority vsoAuthority)
             : this()
         {
             this.PersonalAccessTokenStore = personalAccessTokenStore;
@@ -53,12 +55,13 @@ namespace Microsoft.TeamFoundation.Git.Helpers.Authentication
         public readonly VsoTokenScope TokenScope;
 
         protected readonly IdentityModel.Clients.ActiveDirectory.TokenCache VsoAdalTokenCache;
+        protected readonly ITokenStore VsoIdeTokenCache;
 
         internal ITokenStore PersonalAccessTokenStore { get; set; }
         internal ITokenStore AdaRefreshTokenStore { get; set; }
         internal ITokenStore PersonalAccessTokenCache { get; set; }
 
-        internal IVsoAuthority VsoAuthority { get; set; }
+        internal IAadAuthority VsoAuthority { get; set; }
 
         public override void DeleteCredentials(Uri targetUri)
         {
@@ -121,31 +124,44 @@ namespace Microsoft.TeamFoundation.Git.Helpers.Authentication
             {
                 Token refreshToken = null;
                 Tokens tokens = null;
+
+                // attempt to read from the local store
                 if (this.AdaRefreshTokenStore.ReadToken(targetUri, out refreshToken))
                 {
                     if ((tokens = await this.VsoAuthority.AcquireTokenByRefreshTokenAsync(targetUri, this.ClientId, this.Resource, refreshToken)) != null)
                     {
+                        Trace.TraceInformation("Azure token found in primary cache.");
+
                         return await this.GeneratePersonalAccessToken(targetUri, tokens.AccessToken, requireCompactToken);
                     }
                 }
-                else
+
+                // attempt to utilize any fedauth tokens captured by the IDE
+                if (this.VsoIdeTokenCache.ReadToken(targetUri, out refreshToken))
                 {
-                    //Trace.TraceWarning("Failed to discover cached credentials. Fallback to VS IDE cached ADAL tokens. {0} tokens available.", VsoAdalTokenCache.Count);
+                    Trace.TraceInformation("Federated auth token found in IDE cache.");
 
-                    //foreach (var item in VsoAdalTokenCache.ReadItems())
-                    //{
-                    //    refreshToken = new Token(item.RefreshToken, TokenType.Refresh);
+                    return await this.GeneratePersonalAccessToken(targetUri, refreshToken, requireCompactToken);
+                }
 
-                    //    if ((tokens = await this.VsoAuthority.AcquireTokenByRefreshTokenAsync(this.ClientId, this.Resource, refreshToken)) != null
-                    //        && await this.GeneratePersonalAccessToken(targetUri, tokens.AccessToken, requireCompactToken))
-                    //    {
-                    //        Trace.TraceInformation("VS IDE cached ADAL token used for access token generation.");
+                // attempt to utlize any azure auth tokens cached by the IDE
+                foreach (var item in this.VsoAdalTokenCache.ReadItems())
+                {
+                    tokens = new Tokens(item.AccessToken, item.RefreshToken);
 
-                    //        this.AdaRefreshTokenStore.WriteToken(targetUri, refreshToken);
+                    if (item.ExpiresOn > DateTimeOffset.UtcNow
+                        && (await this.VsoAuthority.ValidateToken(targetUri, tokens.AccessToken)
+                            || ((tokens = await this.VsoAuthority.AcquireTokenByRefreshTokenAsync(targetUri, this.ClientId, this.Resource, tokens.RefeshToken)) != null
+                                && await this.VsoAuthority.ValidateToken(targetUri, tokens.AccessToken))))
+                    {
+                        Trace.TraceInformation("Azure token found in IDE cache.");
 
-                    //        return true;
-                    //    }
-                    //}
+                        return await this.GeneratePersonalAccessToken(targetUri, tokens.AccessToken, requireCompactToken);
+                    }
+                    else
+                    {
+                        this.VsoAdalTokenCache.DeleteItem(item);
+                    }
                 }
             }
             catch (Exception exception)
@@ -165,7 +181,6 @@ namespace Microsoft.TeamFoundation.Git.Helpers.Authentication
         {
             Debug.Assert(targetUri != null, "The targetUri parameter is null");
             Debug.Assert(accessToken != null, "The accessToken parameter is null");
-            Debug.Assert(accessToken.Type == TokenType.Access, "The value of the accessToken parameter is not an access token");
 
             Token personalAccessToken;
             if ((personalAccessToken = await this.VsoAuthority.GeneratePersonalAccessToken(targetUri, accessToken, TokenScope, requestCompactToken)) != null)

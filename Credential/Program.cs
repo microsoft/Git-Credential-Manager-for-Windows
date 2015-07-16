@@ -1,8 +1,8 @@
-﻿using LibGit2Sharp;
-using System;
+﻿using System;
 using System.Diagnostics;
 using System.Linq;
 using System.Threading.Tasks;
+using LibGit2Sharp;
 using GitConfigValue = LibGit2Sharp.ConfigurationEntry<string>;
 
 namespace Microsoft.TeamFoundation.Git.Helpers.Authentication
@@ -236,6 +236,7 @@ namespace Microsoft.TeamFoundation.Git.Helpers.Authentication
                                 && (!operationArguments.ValidateCredentials
                                     || await aadAuth.ValidateCredentials(operationArguments.TargetUri, credentials))))
                         {
+                            Trace.TraceInformation("credentials found");
                             operationArguments.SetCredentials(credentials);
                         }
                     }).Wait();
@@ -262,13 +263,12 @@ namespace Microsoft.TeamFoundation.Git.Helpers.Authentication
                                 && (!operationArguments.ValidateCredentials
                                     || await msaAuth.ValidateCredentials(operationArguments.TargetUri, credentials))))
                         {
+                            Trace.TraceInformation("credentials found");
                             operationArguments.SetCredentials(credentials);
                         }
                     }).Wait();
                     break;
             }
-
-            Trace.TraceInformation(operationArguments.ToString());
 
             Console.Out.Write(operationArguments);
         }

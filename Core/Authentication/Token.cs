@@ -51,7 +51,7 @@ namespace Microsoft.TeamFoundation.Git.Helpers.Authentication
             token = null;
 
             TokenType type;
-            fixed(byte* p = bytes)
+            fixed (byte* p = bytes)
             {
                 type = (TokenType)((int*)p)[0];
             }
@@ -75,7 +75,7 @@ namespace Microsoft.TeamFoundation.Git.Helpers.Authentication
                 byte[] encoded = Encoding.UTF8.GetBytes(token.Value);
                 bytes = new byte[encoded.Length + sizeof(int)];
 
-                fixed(byte* p = bytes)
+                fixed (byte* p = bytes)
                 {
                     ((int*)p)[0] = (int)token.Type;
                 }
@@ -99,6 +99,14 @@ namespace Microsoft.TeamFoundation.Git.Helpers.Authentication
                 throw new ArgumentException("The value of the token cannot be null or empty", "token");
             if (token.Value.Length > NativeMethods.CREDENTIAL_PASSWORD_MAXLEN)
                 throw new ArgumentOutOfRangeException("token", String.Format("The value of the token cannot be longer than {0} characters", NativeMethods.CREDENTIAL_PASSWORD_MAXLEN));
+        }
+
+        public static explicit operator Credential(Token token)
+        {
+            if (token.Type != TokenType.VsoPat)
+                throw new InvalidCastException("Cannot cast " + token + " to credentials");
+
+            return new Credential(token.ToString(), token.Value);
         }
     }
 }

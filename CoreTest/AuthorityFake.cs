@@ -3,7 +3,7 @@ using System.Threading.Tasks;
 
 namespace Microsoft.TeamFoundation.Git.Helpers.Authentication
 {
-    internal class AuthorityFake : IAzureAuthority, ILiveAuthority, IVsoAuthority
+    internal class AuthorityFake : IAzureAuthority, ILiveAuthority, IAadAuthority
     {
         public Tokens AcquireToken(Uri targetUri, string clientId, string resource, Uri redirectUri, string queryParameters = null)
         {
@@ -32,6 +32,20 @@ namespace Microsoft.TeamFoundation.Git.Helpers.Authentication
                 try
                 {
                     Credential.Validate(credentials);
+                    return true;
+                }
+                catch { }
+                return false;
+            });
+        }
+
+        public async Task<bool> ValidateToken(Uri targetUri, Token token)
+        {
+            return await Task.Run(() =>
+            {
+                try
+                {
+                    Token.Validate(token);
                     return true;
                 }
                 catch { }

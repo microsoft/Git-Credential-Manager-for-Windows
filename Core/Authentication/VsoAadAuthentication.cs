@@ -12,7 +12,7 @@ namespace Microsoft.TeamFoundation.Git.Helpers.Authentication
         public VsoAadAuthentication(string credentialPrefix, VsoTokenScope tokenScope, string resource = null, string clientId = null)
             : base(credentialPrefix, tokenScope, resource, clientId)
         {
-            this.AzureAuthority = new AzureAuthority(DefaultAuthorityHost);
+            this.VsoAuthority = new AzureAuthority(DefaultAuthorityHost);
         }
         /// <summary>
         /// Test constructor which allows for using fake credential stores
@@ -24,17 +24,14 @@ namespace Microsoft.TeamFoundation.Git.Helpers.Authentication
             ITokenStore personalAccessTokenStore,
             ITokenStore personalAccessTokenCache,
             ITokenStore adaRefreshTokenStore,
-            IAzureAuthority azureAuthority,
-            IVsoAuthority vsoAuthority)
+            ITokenStore vsoIdeTokenCache,
+            IAadAuthority vsoAuthority)
             : base(personalAccessTokenStore,
                    personalAccessTokenCache,
                    adaRefreshTokenStore,
+                   vsoIdeTokenCache,
                    vsoAuthority)
-        {
-            this.AzureAuthority = azureAuthority;
-        }
-
-        internal IAzureAuthority AzureAuthority { get; set; }
+        { }
 
         public bool InteractiveLogon(Uri targetUri, bool requestCompactToken)
         {
@@ -45,7 +42,7 @@ namespace Microsoft.TeamFoundation.Git.Helpers.Authentication
             try
             {
                 Tokens tokens;
-                if ((tokens = this.AzureAuthority.AcquireToken(targetUri, this.ClientId, this.Resource, new Uri(RedirectUrl), null)) != null)
+                if ((tokens = this.VsoAuthority.AcquireToken(targetUri, this.ClientId, this.Resource, new Uri(RedirectUrl), null)) != null)
                 {
                     this.StoreRefreshToken(targetUri, tokens.RefeshToken);
 
@@ -70,7 +67,7 @@ namespace Microsoft.TeamFoundation.Git.Helpers.Authentication
             try
             {
                 Tokens tokens;
-                if ((tokens = await this.AzureAuthority.AcquireTokenAsync(targetUri, this.ClientId, this.Resource, credentials)) != null)
+                if ((tokens = await this.VsoAuthority.AcquireTokenAsync(targetUri, this.ClientId, this.Resource, credentials)) != null)
                 {
                     this.StoreRefreshToken(targetUri, tokens.RefeshToken);
 
@@ -95,7 +92,7 @@ namespace Microsoft.TeamFoundation.Git.Helpers.Authentication
             try
             {
                 Tokens tokens;
-                if ((tokens = await this.AzureAuthority.AcquireTokenAsync(targetUri, this.ClientId, this.Resource)) != null)
+                if ((tokens = await this.VsoAuthority.AcquireTokenAsync(targetUri, this.ClientId, this.Resource)) != null)
                 {
                     this.StoreRefreshToken(targetUri, tokens.RefeshToken);
 

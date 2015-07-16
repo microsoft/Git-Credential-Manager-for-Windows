@@ -161,9 +161,9 @@ namespace Microsoft.TeamFoundation.Git.Helpers.Authentication
             ITokenStore patStore = new TokenCache(prefix);
             ITokenStore patCache = new TokenCache(prefix);
             ITokenStore tokenStore = new TokenCache(prefix);
-            IAzureAuthority azureAuthority = new AuthorityFake();
-            IVsoAuthority vsoAuthority = new AuthorityFake();
-            return new VsoAadAuthentication(patStore, patCache, tokenStore, azureAuthority, vsoAuthority);
+            ITokenStore tokenCache = new TokenCache(prefix);
+            IAadAuthority vsoAuthority = new AuthorityFake();
+            return new VsoAadAuthentication(patStore, patCache, tokenStore, tokenCache, vsoAuthority);
         }
     }
 }

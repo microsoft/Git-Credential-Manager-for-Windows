@@ -57,7 +57,7 @@
     <Compile Include="Authentication\CredentialCache.cs" />
     <Compile Include="Authentication\IAzureAuthority.cs" />
     <Compile Include="Authentication\ILiveAuthority.cs" />
-    <Compile Include="Authentication\IVsoAuthority.cs" />
+    <Compile Include="Authentication\IAadAuthority.cs" />
     <Compile Include="Authentication\IVsoMsaAuthentication.cs" />
     <Compile Include="Authentication\TokenCache.cs" />
     <Compile Include="Authentication\Tokens.cs" />
