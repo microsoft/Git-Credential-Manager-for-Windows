@@ -7,10 +7,12 @@ namespace Microsoft.TeamFoundation.Git.Helpers.Authentication
 {
     public sealed class VsoAadAuthentication : BaseVsoAuthentication, IVsoAadAuthentication
     {
+        public const string DefaultAuthorityHost = " https://management.core.windows.net/";
+
         public VsoAadAuthentication(string credentialPrefix, VsoTokenScope tokenScope, string resource = null, string clientId = null)
             : base(credentialPrefix, tokenScope, resource, clientId)
         {
-            this.AzureAuthority = new AzureAuthority();
+            this.AzureAuthority = new AzureAuthority(DefaultAuthorityHost);
         }
         /// <summary>
         /// Test constructor which allows for using fake credential stores
@@ -43,7 +45,7 @@ namespace Microsoft.TeamFoundation.Git.Helpers.Authentication
             try
             {
                 Tokens tokens;
-                if ((tokens = this.AzureAuthority.AcquireToken(this.ClientId, this.Resource, new Uri(RedirectUrl), null)) != null)
+                if ((tokens = this.AzureAuthority.AcquireToken(targetUri, this.ClientId, this.Resource, new Uri(RedirectUrl), null)) != null)
                 {
                     this.StoreRefreshToken(targetUri, tokens.RefeshToken);
 
@@ -68,7 +70,7 @@ namespace Microsoft.TeamFoundation.Git.Helpers.Authentication
             try
             {
                 Tokens tokens;
-                if ((tokens = await this.AzureAuthority.AcquireTokenAsync(this.ClientId, this.Resource, credentials)) != null)
+                if ((tokens = await this.AzureAuthority.AcquireTokenAsync(targetUri, this.ClientId, this.Resource, credentials)) != null)
                 {
                     this.StoreRefreshToken(targetUri, tokens.RefeshToken);
 
@@ -93,7 +95,7 @@ namespace Microsoft.TeamFoundation.Git.Helpers.Authentication
             try
             {
                 Tokens tokens;
-                if ((tokens = await this.AzureAuthority.AcquireTokenAsync(this.ClientId, this.Resource)) != null)
+                if ((tokens = await this.AzureAuthority.AcquireTokenAsync(targetUri, this.ClientId, this.Resource)) != null)
                 {
                     this.StoreRefreshToken(targetUri, tokens.RefeshToken);
 

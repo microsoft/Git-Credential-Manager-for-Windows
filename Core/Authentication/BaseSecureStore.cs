@@ -148,7 +148,7 @@ namespace Microsoft.TeamFoundation.Git.Helpers.Authentication
                     string password = passwordLength > 0
                                     ? Marshal.PtrToStringUni(credStruct.CredentialBlob, passwordLength / sizeof(char))
                                     : String.Empty;
-                    string username = credStruct.UserName;
+                    string username = credStruct.UserName ?? String.Empty;
 
                     credentials = new Credential(username, password);
                 }

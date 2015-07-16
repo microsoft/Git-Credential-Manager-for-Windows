@@ -149,11 +149,11 @@ namespace Microsoft.TeamFoundation.Git.Helpers.Authentication
             VsoAadAuthentication aadAuthentication = GetVsoAadAuthentication("aad-validate");
             Credential credentials = null;
 
-            Assert.IsFalse(Task.Run(async () => { return await aadAuthentication.ValidateCredentials(credentials); }).Result, "Credential validation unexpectedly failed.");
+            Assert.IsFalse(Task.Run(async () => { return await aadAuthentication.ValidateCredentials(DefaultTargetUri, credentials); }).Result, "Credential validation unexpectedly failed.");
 
             credentials = DefaultCredentials;
 
-            Assert.IsTrue(Task.Run(async () => { return await aadAuthentication.ValidateCredentials(credentials); }).Result, "Credential validation unexpectedly failed.");
+            Assert.IsTrue(Task.Run(async () => { return await aadAuthentication.ValidateCredentials(DefaultTargetUri, credentials); }).Result, "Credential validation unexpectedly failed.");
         }
 
         private VsoAadAuthentication GetVsoAadAuthentication(string prefix)

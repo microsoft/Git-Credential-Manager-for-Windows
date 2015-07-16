@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Diagnostics;
 using System.Threading.Tasks;
 using Microsoft.IdentityModel.Clients.ActiveDirectory;
 using Debug = System.Diagnostics.Debug;
@@ -8,14 +7,14 @@ namespace Microsoft.TeamFoundation.Git.Helpers.Authentication
 {
     public sealed class VsoMsaAuthentication : BaseVsoAuthentication, IVsoMsaAuthentication
     {
-        public const string DefaultAuthorityHost = "https://login.microsoftonline.com/live.com";
+        public const string DefaultAuthorityHost = AzureAuthority.AuthorityHostUrlBase;// + "/live.com";
 
         public VsoMsaAuthentication(
             string credentialPrefix,
-            VsoTokenScope scope,
+            VsoTokenScope tokenScope,
             string resource = null,
             string clientId = null)
-            : base(credentialPrefix, scope, resource, clientId)
+            : base(credentialPrefix, tokenScope, resource, clientId)
         {
             this.LiveAuthority = new AzureAuthority(DefaultAuthorityHost);
         }
@@ -51,7 +50,7 @@ namespace Microsoft.TeamFoundation.Git.Helpers.Authentication
             try
             {
                 Tokens tokens;
-                if ((tokens = this.LiveAuthority.AcquireToken(this.ClientId, this.Resource, new Uri(RedirectUrl), QueryParameterDomainHints)) != null)
+                if ((tokens = this.LiveAuthority.AcquireToken(targetUri, this.ClientId, this.Resource, new Uri(RedirectUrl), QueryParameterDomainHints)) != null)
                 {
                     this.StoreRefreshToken(targetUri, tokens.RefeshToken);
 

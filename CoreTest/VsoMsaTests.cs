@@ -116,11 +116,11 @@ namespace Microsoft.TeamFoundation.Git.Helpers.Authentication
             VsoMsaAuthentication msaAuthority = GetVsoMsaAuthentication("msa-validate");
             Credential credentials = null;
 
-            Assert.IsFalse(Task.Run(async () => { return await msaAuthority.ValidateCredentials(credentials); }).Result, "Credential validation unexpectedly failed.");
+            Assert.IsFalse(Task.Run(async () => { return await msaAuthority.ValidateCredentials(DefaultTargetUri, credentials); }).Result, "Credential validation unexpectedly failed.");
 
             credentials = DefaultCredentials;
 
-            Assert.IsTrue(Task.Run(async () => { return await msaAuthority.ValidateCredentials(credentials); }).Result, "Credential validation unexpectedly failed.");
+            Assert.IsTrue(Task.Run(async () => { return await msaAuthority.ValidateCredentials(DefaultTargetUri, credentials); }).Result, "Credential validation unexpectedly failed.");
         }
 
         private VsoMsaAuthentication GetVsoMsaAuthentication(string prefix)

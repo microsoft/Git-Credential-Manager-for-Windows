@@ -17,13 +17,13 @@ namespace Microsoft.TeamFoundation.Git.Helpers.Authentication
         public Credential(string username)
             : this()
         {
-            this.Username = username;
+            this.Username = username ?? String.Empty;
         }
         public Credential(string username, string password)
             : this()
         {
-            this.Username = username;
-            this.Password = password;
+            this.Username = username ?? String.Empty;
+            this.Password = password ?? String.Empty;
         }
 
         /// <summary>
@@ -38,11 +38,7 @@ namespace Microsoft.TeamFoundation.Git.Helpers.Authentication
         internal static void Validate(Credential credentials)
         {
             if (credentials == null)
-                throw new ArgumentNullException("credentials", "The username field of the Credentials object cannot be null");
-            if (credentials.Password == null)
-                throw new ArgumentNullException("credentials", "The password field of the Credentials object cannot be null");
-            if (credentials.Username == null)
-                throw new ArgumentNullException("credentials", "The username field of the Credentials object cannot be null");
+                throw new ArgumentNullException("credentials", "The Credentials object cannot be null");
             if (credentials.Password.Length > NativeMethods.CREDENTIAL_PASSWORD_MAXLEN)
                 throw new ArgumentOutOfRangeException("credentials", string.Format("The Password field of the Credentials object cannot be longer than {0} characters", NativeMethods.CREDENTIAL_USERNAME_MAXLEN));
             if (credentials.Username.Length > NativeMethods.CREDENTIAL_USERNAME_MAXLEN)

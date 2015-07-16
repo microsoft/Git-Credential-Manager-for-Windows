@@ -50,12 +50,12 @@ namespace Microsoft.TeamFoundation.Git.Helpers.Authentication
 
         public void AfterAccessNotification(TokenCacheNotificationArgs args)
         {
-            Trace.TraceInformation("VsoAdalTokenCache::AfterAccessNotification");
-
             lock (@lock)
             {
                 if (this.HasStateChanged)
                 {
+                    Trace.TraceInformation("VsoAdalTokenCache::AfterAccessNotification");
+
                     try
                     {
                         byte[] state = this.Serialize();
@@ -76,23 +76,24 @@ namespace Microsoft.TeamFoundation.Git.Helpers.Authentication
 
         public void BeforeAccessNotification(TokenCacheNotificationArgs args)
         {
-            Trace.TraceInformation("VsoAdalTokenCache::BeforeAccessNotification");
-
             lock (@lock)
             {
-                try
-                {
-                    byte[] data = File.Exists(_cacheFilePath)
-                                ? File.ReadAllBytes(_cacheFilePath)
-                                : null;
+                Trace.TraceInformation("VsoAdalTokenCache::BeforeAccessNotification");
 
-                    byte[] state = ProtectedData.Unprotect(data, null, DataProtectionScope.CurrentUser);
-
-                    this.Deserialize(state);
-                }
-                catch (Exception exception)
+                if (File.Exists(_cacheFilePath))
                 {
-                    Trace.TraceError(exception.ToString());
+                    try
+                    {
+                        byte[] data = File.ReadAllBytes(_cacheFilePath);
+
+                        byte[] state = ProtectedData.Unprotect(data, null, DataProtectionScope.CurrentUser);
+
+                        this.Deserialize(state);
+                    }
+                    catch (Exception exception)
+                    {
+                        Trace.TraceError(exception.ToString());
+                    }
                 }
             }
         }

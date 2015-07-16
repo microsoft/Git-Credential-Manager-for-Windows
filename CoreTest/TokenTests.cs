@@ -26,23 +26,33 @@ namespace Microsoft.TeamFoundation.Git.Helpers.Authentication
         [TestMethod]
         public void TokenStoreValueNullRejection()
         {
+            bool threw = false;
             try
             {
                 ITokenStoreTest(new TokenStore("test-token"), "http://dummy.url/for/testing", null, DateTimeOffset.Now);
-                Assert.Fail("Null token was accepted");
             }
-            catch { }
+            catch
+            {
+                threw = true;
+            }
+
+            Assert.IsTrue(threw, "Null token was accepted");
         }
 
         [TestMethod]
         public void TokenStoreValueEmptyRejection()
         {
+            bool threw = false;
             try
             {
                 ITokenStoreTest(new TokenStore("test-token"), "http://dummy.url/for/testing", "", DateTimeOffset.Now);
-                Assert.Fail("Empty token was accepted");
             }
-            catch { }
+            catch
+            {
+                threw = true;
+            }
+
+            Assert.IsTrue(threw, "Empty token was accepted");
         }
 
         [TestMethod]
@@ -63,23 +73,31 @@ namespace Microsoft.TeamFoundation.Git.Helpers.Authentication
         [TestMethod]
         public void TokenCacheValueNullRejection()
         {
+            bool threw = false;
             try
             {
                 ITokenStoreTest(new TokenCache("test-token"), "http://dummy.url/for/testing", null, DateTimeOffset.Now);
-                Assert.Fail("Null token was accepted");
             }
-            catch { }
+            catch
+            {
+                threw = true;
+            }
+
+            Assert.IsTrue(threw, "Null token was accepted");
         }
 
         [TestMethod]
         public void TokenCacheValueEmptyRejection()
         {
+            bool threw = false;
             try
             {
                 ITokenStoreTest(new TokenCache("test-token"), "http://dummy.url/for/testing", "", DateTimeOffset.Now);
-                Assert.Fail("Empty token was accepted");
             }
-            catch { }
+            catch
+            {
+                threw = true;
+            }
         }
 
         private void ITokenStoreTest(ITokenStore tokenStore, string url, string token, DateTimeOffset expires)

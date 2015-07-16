@@ -20,18 +20,18 @@ namespace Microsoft.TeamFoundation.Git.Helpers.Authentication
 
             this.ClientId = DefaultClientId;
             this.Resource = DefaultResource;
-            this.TokenScope = VsoTokenScope.CodeWrite;
+            this.TokenScope = VsoTokenScope.ProfileRead;
             this.AdaRefreshTokenStore = new TokenStore(AdalRefreshPrefx);
             this.VsoAuthority = new AzureAuthority();
         }
-        protected BaseVsoAuthentication(string credentialPrefix, VsoTokenScope scope, string resource, string clientId)
+        protected BaseVsoAuthentication(string credentialPrefix, VsoTokenScope tokenScope, string resource, string clientId)
             : this()
         {
             this.PersonalAccessTokenCache = new TokenStore(credentialPrefix);
             this.PersonalAccessTokenStore = new TokenStore(credentialPrefix);
             this.ClientId = clientId ?? this.ClientId;
             this.Resource = resource ?? this.Resource;
-            this.TokenScope = scope ?? this.TokenScope;
+            this.TokenScope = tokenScope ?? this.TokenScope;
             this.VsoAdalTokenCache = new VsoAdalTokenCache();
         }
         internal BaseVsoAuthentication(
@@ -115,35 +115,37 @@ namespace Microsoft.TeamFoundation.Git.Helpers.Authentication
         {
             BaseSecureStore.ValidateTargetUri(targetUri);
 
+            Trace.TraceInformation("BaseVsoAuthentication::RefreshCredentials");
+
             try
             {
                 Token refreshToken = null;
                 Tokens tokens = null;
                 if (this.AdaRefreshTokenStore.ReadToken(targetUri, out refreshToken))
                 {
-                    if ((tokens = await this.VsoAuthority.AcquireTokenByRefreshTokenAsync(this.ClientId, this.Resource, refreshToken)) != null)
+                    if ((tokens = await this.VsoAuthority.AcquireTokenByRefreshTokenAsync(targetUri, this.ClientId, this.Resource, refreshToken)) != null)
                     {
                         return await this.GeneratePersonalAccessToken(targetUri, tokens.AccessToken, requireCompactToken);
                     }
                 }
                 else
                 {
-                    Trace.TraceWarning("Failed to discover cached credentials. Fallback to VS IDE cached ADAL tokens.");
+                    //Trace.TraceWarning("Failed to discover cached credentials. Fallback to VS IDE cached ADAL tokens. {0} tokens available.", VsoAdalTokenCache.Count);
 
-                    foreach (var item in VsoAdalTokenCache.ReadItems())
-                    {
-                        refreshToken = new Token(item.RefreshToken, TokenType.Refresh);
+                    //foreach (var item in VsoAdalTokenCache.ReadItems())
+                    //{
+                    //    refreshToken = new Token(item.RefreshToken, TokenType.Refresh);
 
-                        if ((tokens = await this.VsoAuthority.AcquireTokenByRefreshTokenAsync(this.ClientId, this.Resource, refreshToken)) != null
-                            && await this.GeneratePersonalAccessToken(targetUri, tokens.AccessToken, requireCompactToken))
-                        {
-                            Trace.TraceInformation("VS IDE cached ADAL token used for access token generation.");
+                    //    if ((tokens = await this.VsoAuthority.AcquireTokenByRefreshTokenAsync(this.ClientId, this.Resource, refreshToken)) != null
+                    //        && await this.GeneratePersonalAccessToken(targetUri, tokens.AccessToken, requireCompactToken))
+                    //    {
+                    //        Trace.TraceInformation("VS IDE cached ADAL token used for access token generation.");
 
-                            this.AdaRefreshTokenStore.WriteToken(targetUri, refreshToken);
+                    //        this.AdaRefreshTokenStore.WriteToken(targetUri, refreshToken);
 
-                            return true;
-                        }
-                    }
+                    //        return true;
+                    //    }
+                    //}
                 }
             }
             catch (Exception exception)
@@ -154,9 +156,9 @@ namespace Microsoft.TeamFoundation.Git.Helpers.Authentication
             return false;
         }
 
-        public async Task<bool> ValidateCredentials(Credential credentials)
+        public async Task<bool> ValidateCredentials(Uri targetUri, Credential credentials)
         {
-            return await this.VsoAuthority.ValidateCredentials(credentials);
+            return await this.VsoAuthority.ValidateCredentials(targetUri, credentials);
         }
 
         protected async Task<bool> GeneratePersonalAccessToken(Uri targetUri, Token accessToken, bool requestCompactToken)

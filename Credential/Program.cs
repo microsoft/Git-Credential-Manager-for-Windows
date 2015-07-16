@@ -10,7 +10,7 @@ namespace Microsoft.TeamFoundation.Git.Helpers.Authentication
     class Program
     {
         private const string CredentialPrefix = "git";
-        private static readonly VsoTokenScope CredentialScope = VsoTokenScope.CodeWrite;
+        private static readonly VsoTokenScope CredentialScope = VsoTokenScope.CodeWrite | VsoTokenScope.ProfileRead;
 
         static void Main(string[] args)
         {
@@ -145,7 +145,7 @@ namespace Microsoft.TeamFoundation.Git.Helpers.Authentication
             Console.Out.WriteLine("                  Defaults to visualstudio.com. Only used by AAD authority.");
             Console.Out.WriteLine("   interactive    Specifies if user can be prompted for credentials or not.");
             Console.Out.WriteLine("                  Supports Auto, Always, or Never. Defaults to Auto.");
-            Console.Out.WriteLine("                  Only used by AAD authority.");
+            Console.Out.WriteLine("                  Only used by AAD and MSA authority.");
             Console.Out.WriteLine("   validate       Causes validation of credentials before supplying them");
             Console.Out.WriteLine("                  to Git. Invalid credentials are attemped to refreshed");
             Console.Out.WriteLine("                  before failing. Incurs some minor overhead.");
@@ -212,77 +212,63 @@ namespace Microsoft.TeamFoundation.Git.Helpers.Authentication
 
                 case AuthorityType.AzureDirectory:
                     VsoAadAuthentication aadAuth = authentication as VsoAadAuthentication;
-                    if (aadAuth.GetCredentials(operationArguments.TargetUri, out credentials))
+
+                    Task.Run(async () =>
                     {
-                        Trace.TraceInformation("credentials found");
-                        if (!operationArguments.ValidateCredentials || Task.Run(async () => { return await aadAuth.ValidateCredentials(credentials); }).Result)
+                        // attmempt to get cached creds -> refresh creds -> non-interactive logon -> interactive logon
+                        if (((operationArguments.Interactivity != Interactivity.Always
+                                && aadAuth.GetCredentials(operationArguments.TargetUri, out credentials)
+                                && (!operationArguments.ValidateCredentials
+                                    || await aadAuth.ValidateCredentials(operationArguments.TargetUri, credentials)))
+                            || (operationArguments.Interactivity != Interactivity.Always
+                                && await aadAuth.RefreshCredentials(operationArguments.TargetUri, true)
+                                && aadAuth.GetCredentials(operationArguments.TargetUri, out credentials)
+                                && (!operationArguments.ValidateCredentials
+                                    || await aadAuth.ValidateCredentials(operationArguments.TargetUri, credentials)))
+                            || (operationArguments.Interactivity != Interactivity.Always
+                                && await aadAuth.NoninteractiveLogon(operationArguments.TargetUri, true)
+                                && aadAuth.GetCredentials(operationArguments.TargetUri, out credentials)
+                                && (!operationArguments.ValidateCredentials
+                                    || await aadAuth.ValidateCredentials(operationArguments.TargetUri, credentials)))
+                            || (operationArguments.Interactivity != Interactivity.Never
+                                && aadAuth.InteractiveLogon(operationArguments.TargetUri, true))
+                                && aadAuth.GetCredentials(operationArguments.TargetUri, out credentials)
+                                && (!operationArguments.ValidateCredentials
+                                    || await aadAuth.ValidateCredentials(operationArguments.TargetUri, credentials))))
                         {
                             operationArguments.SetCredentials(credentials);
                         }
-                        else
-                        {
-                            Trace.TraceWarning("credentials are invalid");
-                            credentials = null;
-                        }
-                    }
-                    else
-                    {
-                        Trace.TraceWarning("credentials not found");
-                        credentials = null;
-                    }
-
-                    if (credentials == null)
-                    {
-                        Trace.TraceInformation("attempting non-interactive logon with credential prompt fallback");
-                        Task.Run(async () =>
-                        {
-                            if ((operationArguments.Interactivity != Interactivity.Always
-                                && await aadAuth.NoninteractiveLogon(operationArguments.TargetUri, true)
-                                && aadAuth.GetCredentials(operationArguments.TargetUri, out credentials))
-                            || (operationArguments.Interactivity != Interactivity.Never
-                                && aadAuth.InteractiveLogon(operationArguments.TargetUri, true)
-                                && aadAuth.GetCredentials(operationArguments.TargetUri, out credentials)))
-                            {
-                                operationArguments.SetCredentials(credentials);
-                            }
-                        }).Wait();
-                    }
+                    }).Wait();
                     break;
 
                 case AuthorityType.MicrosoftAccount:
                     VsoMsaAuthentication msaAuth = authentication as VsoMsaAuthentication;
-                    if (msaAuth.GetCredentials(operationArguments.TargetUri, out credentials))
+
+                    Task.Run(async () =>
                     {
-                        Trace.TraceInformation("credentials found");
-                        if (operationArguments.ValidateCredentials)
-                        {
-                            Trace.TraceInformation("validation requested");
-                            Task.Run(async () =>
-                            {
-                                if (await msaAuth.ValidateCredentials(credentials)
-                                    || await msaAuth.RefreshCredentials(operationArguments.TargetUri, true)
-                                    || msaAuth.InteractiveLogon(operationArguments.TargetUri, true))
-                                {
-                                    operationArguments.SetCredentials(credentials);
-                                }
-                            }).Wait();
-                        }
-                        else
+                        // attmempt to get cached creds -> refresh creds -> interactive logon
+                        if (((operationArguments.Interactivity != Interactivity.Always
+                                && msaAuth.GetCredentials(operationArguments.TargetUri, out credentials)
+                                && (!operationArguments.ValidateCredentials
+                                    || await msaAuth.ValidateCredentials(operationArguments.TargetUri, credentials)))
+                            || (operationArguments.Interactivity != Interactivity.Always
+                                && await msaAuth.RefreshCredentials(operationArguments.TargetUri, true)
+                                && msaAuth.GetCredentials(operationArguments.TargetUri, out credentials)
+                                && (!operationArguments.ValidateCredentials
+                                    || await msaAuth.ValidateCredentials(operationArguments.TargetUri, credentials)))
+                            || (operationArguments.Interactivity != Interactivity.Never
+                                && msaAuth.InteractiveLogon(operationArguments.TargetUri, true))
+                                && msaAuth.GetCredentials(operationArguments.TargetUri, out credentials)
+                                && (!operationArguments.ValidateCredentials
+                                    || await msaAuth.ValidateCredentials(operationArguments.TargetUri, credentials))))
                         {
                             operationArguments.SetCredentials(credentials);
                         }
-                    }
-                    else
-                    {
-                        Trace.TraceInformation("attempting prompted logon");
-                        if (msaAuth.InteractiveLogon(operationArguments.TargetUri, true)
-                            && msaAuth.GetCredentials(operationArguments.TargetUri, out credentials))
-                        {
-                            operationArguments.SetCredentials(credentials);
-                        }
-                    }
+                    }).Wait();
                     break;
             }
+
+            Trace.TraceInformation(operationArguments.ToString());
 
             Console.Out.Write(operationArguments);
         }
@@ -394,7 +380,6 @@ namespace Microsoft.TeamFoundation.Git.Helpers.Authentication
                 ? String.Format("{0}.{1}", prefix, suffix)
                 : String.Format("{0}.{1}.{2}", prefix, key, suffix);
 
-            Trace.TraceInformation("seeking '{0}'", match);
 
             var result = config.Where((GitConfigValue entry) =>
                                 {
@@ -403,10 +388,7 @@ namespace Microsoft.TeamFoundation.Git.Helpers.Authentication
                                .OrderBy((GitConfigValue entry) => { return entry.Key.Length; })
                                .OrderByDescending((GitConfigValue entry) => { return entry.Level; })
                                .FirstOrDefault();
-            if (result != null)
-            {
-                Trace.TraceInformation("matched: {0}.{1} = {2}", prefix, suffix, result.Key);
-            }
+
             return result;
         }
 

@@ -25,8 +25,9 @@ namespace Microsoft.TeamFoundation.Git.Helpers.Authentication
 
         public string AuthorityHostUrl { get; }
 
-        public Tokens AcquireToken(string clientId, string resource, Uri redirectUri, string queryParameters = null)
+        public Tokens AcquireToken(Uri targetUri, string clientId, string resource, Uri redirectUri, string queryParameters = null)
         {
+            Debug.Assert(targetUri != null && targetUri.IsAbsoluteUri, "The targetUri parameter is null or invalid");
             Debug.Assert(!String.IsNullOrWhiteSpace(clientId), "The clientId parameter is null or empty");
             Debug.Assert(!String.IsNullOrWhiteSpace(resource), "The resource parameter is null or empty");
             Debug.Assert(redirectUri != null, "The redirectUri parameter is null");
@@ -37,7 +38,9 @@ namespace Microsoft.TeamFoundation.Git.Helpers.Authentication
 
             try
             {
-                AuthenticationContext authCtx = new AuthenticationContext(AuthorityHostUrl, _adalTokenCache);
+                string authorityUrl = String.Format("{0}/{1}", AuthorityHostUrl, targetUri.DnsSafeHost);
+
+                AuthenticationContext authCtx = new AuthenticationContext(authorityUrl, _adalTokenCache);
                 AuthenticationResult authResult = authCtx.AcquireToken(resource, clientId, redirectUri, PromptBehavior.Always, UserIdentifier.AnyUser, queryParameters);
                 tokens = new Tokens(authResult);
 
@@ -46,15 +49,15 @@ namespace Microsoft.TeamFoundation.Git.Helpers.Authentication
             catch (AdalException exception)
             {
                 Trace.TraceError("AzureAuthority::AcquireToken failed.");
-                Trace.TraceError(exception.Message);
                 Debug.Write(exception);
             }
 
             return tokens;
         }
 
-        public async Task<Tokens> AcquireTokenAsync(string clientId, string resource, Credential credentials = null)
+        public async Task<Tokens> AcquireTokenAsync(Uri targetUri, string clientId, string resource, Credential credentials = null)
         {
+            Debug.Assert(targetUri != null && targetUri.IsAbsoluteUri, "The targetUri parameter is null or invalid");
             Debug.Assert(!String.IsNullOrWhiteSpace(clientId), "The clientId parameter is null or empty");
             Debug.Assert(!String.IsNullOrWhiteSpace(resource), "The resource parameter is null or empty");
 
@@ -62,8 +65,10 @@ namespace Microsoft.TeamFoundation.Git.Helpers.Authentication
 
             try
             {
+                string authorityUrl = String.Format("{0}/{1}", AuthorityHostUrlBase, targetUri.Host);
+
                 UserCredential userCredential = credentials == null ? new UserCredential() : new UserCredential(credentials.Username, credentials.Password);
-                AuthenticationContext authCtx = new AuthenticationContext(DefaultAuthorityHostUrl, _adalTokenCache);
+                AuthenticationContext authCtx = new AuthenticationContext(authorityUrl, _adalTokenCache);
                 AuthenticationResult authResult = await authCtx.AcquireTokenAsync(resource, clientId, userCredential);
                 tokens = new Tokens(authResult);
 
@@ -72,15 +77,15 @@ namespace Microsoft.TeamFoundation.Git.Helpers.Authentication
             catch (AdalException exception)
             {
                 Trace.TraceError("AzureAuthority::AcquireTokenAsync failed.");
-                Trace.TraceError(exception.Message);
                 Debug.WriteLine(exception);
             }
 
             return tokens;
         }
 
-        public async Task<Tokens> AcquireTokenByRefreshTokenAsync(string clientId, string resource, Token refreshToken)
+        public async Task<Tokens> AcquireTokenByRefreshTokenAsync(Uri targetUri, string clientId, string resource, Token refreshToken)
         {
+            Debug.Assert(targetUri != null && targetUri.IsAbsoluteUri, "The targetUri parameter is null or invalid");
             Debug.Assert(!String.IsNullOrWhiteSpace(clientId), "The clientId parameter is null or empty");
             Debug.Assert(!String.IsNullOrWhiteSpace(resource), "The resource parameter is null or empty");
             Debug.Assert(refreshToken != null, "The refreshToken parameter is null");
@@ -91,7 +96,9 @@ namespace Microsoft.TeamFoundation.Git.Helpers.Authentication
 
             try
             {
-                AuthenticationContext authCtx = new AuthenticationContext(DefaultAuthorityHostUrl, _adalTokenCache);
+                string authorityUrl = String.Format("{0}/{1}", AuthorityHostUrlBase, targetUri.Host);
+
+                AuthenticationContext authCtx = new AuthenticationContext(authorityUrl, _adalTokenCache);
                 AuthenticationResult authResult = await authCtx.AcquireTokenByRefreshTokenAsync(refreshToken.Value, clientId, resource);
                 tokens = new Tokens(authResult);
 
@@ -100,7 +107,6 @@ namespace Microsoft.TeamFoundation.Git.Helpers.Authentication
             catch (AdalException exception)
             {
                 Trace.TraceError("AzureAuthority::AcquireTokenByRefreshTokenAsync failed.");
-                Trace.TraceError(exception.Message);
                 Debug.WriteLine(exception);
             }
 
@@ -111,7 +117,7 @@ namespace Microsoft.TeamFoundation.Git.Helpers.Authentication
         {
             const string SessionTokenUrl = "https://app.vssps.visualstudio.com/_apis/token/sessiontokens?api-version=1.0";
             const string CompactTokenUrl = SessionTokenUrl + "&tokentype=compact";
-            const string TokenScopeJsonFormat = "{{ \"scope\" = \"{0}\" }}";
+            const string TokenScopeJsonFormat = "{{ \"scope\" : \"{0}\" }}";
             const string HttpJsonContentType = "application/json";
             const string AuthHeaderBearer = "Bearer";
 
@@ -153,10 +159,9 @@ namespace Microsoft.TeamFoundation.Git.Helpers.Authentication
                     }
                 }
             }
-            catch (Exception exception)
+            catch
             {
                 Trace.TraceError("Personal access token generation failed unexpectedly.");
-                Trace.TraceError(exception.ToString());
             }
 
             Trace.TraceError("AzureAuthority::GeneratePersonalAccessToken failed.");
@@ -164,7 +169,7 @@ namespace Microsoft.TeamFoundation.Git.Helpers.Authentication
             return null;
         }
 
-        public async Task<bool> ValidateCredentials(Credential credentials)
+        public async Task<bool> ValidateCredentials(Uri targetUri, Credential credentials)
         {
             const string VsoValidationUrl = "https://app.vssps.visualstudio.com/_apis/profile/profiles/me?api-version=1.0";
 
@@ -179,10 +184,9 @@ namespace Microsoft.TeamFoundation.Git.Helpers.Authentication
                 Trace.TraceInformation("validation status code: {0}", response.StatusCode);
                 return response.StatusCode == HttpStatusCode.OK;
             }
-            catch (Exception exception)
+            catch
             {
                 Trace.TraceError("credential validation failed");
-                Trace.TraceError(exception.ToString());
             }
 
             return false;
