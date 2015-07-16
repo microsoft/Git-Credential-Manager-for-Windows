@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Diagnostics;
 using System.Threading.Tasks;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
@@ -9,14 +8,13 @@ namespace Microsoft.TeamFoundation.Git.Helpers.Authentication
     public class VsoAadTests : AuthenticationTests
     {
         public VsoAadTests()
-        {
-            Trace.Listeners.AddRange(Debug.Listeners);
-        }
+            :base()
+        { }
 
         [TestMethod]
         public void VsoAadDeleteCredentialsTest()
         {
-            Uri targetUri = new Uri("http://localhost");
+            Uri targetUri = DefaultTargetUri;
             VsoAadAuthentication aadAuthentication = GetVsoAadAuthentication("aad-delete");
 
             aadAuthentication.PersonalAccessTokenStore.WriteToken(targetUri, DefaultPersonalAccessToken);
@@ -37,7 +35,7 @@ namespace Microsoft.TeamFoundation.Git.Helpers.Authentication
         [TestMethod]
         public void VsoAadGetCredentialsTest()
         {
-            Uri targetUri = new Uri("http://localhost");
+            Uri targetUri = DefaultTargetUri;
             VsoAadAuthentication aadAuthentication = GetVsoAadAuthentication("aad-get");
 
             Credential credentials;
@@ -53,7 +51,7 @@ namespace Microsoft.TeamFoundation.Git.Helpers.Authentication
         [TestMethod]
         public void VsoAadInteractiveLogonTest()
         {
-            Uri targetUri = new Uri("http://localhost");
+            Uri targetUri = DefaultTargetUri;
             VsoAadAuthentication aadAuthentication = GetVsoAadAuthentication("aad-logon");
 
             Token personalAccessToken;
@@ -73,7 +71,7 @@ namespace Microsoft.TeamFoundation.Git.Helpers.Authentication
         [TestMethod]
         public void VsoAadNoninteractiveLogonTest()
         {
-            Uri targetUri = new Uri("http://localhost");
+            Uri targetUri = DefaultTargetUri;
             VsoAadAuthentication aadAuthentication = GetVsoAadAuthentication("aad-noninteractive");
 
             Token personalAccessToken;
@@ -89,7 +87,7 @@ namespace Microsoft.TeamFoundation.Git.Helpers.Authentication
         [TestMethod]
         public void VsoAadNoninteractiveLogonWithCredentialsTest()
         {
-            Uri targetUri = new Uri("http://localhost");
+            Uri targetUri = DefaultTargetUri;
             VsoAadAuthentication aadAuthentication = GetVsoAadAuthentication("aad-noninter-creds");
 
             Credential originCreds = DefaultCredentials;
@@ -108,8 +106,8 @@ namespace Microsoft.TeamFoundation.Git.Helpers.Authentication
         [TestMethod]
         public void VsoAadRefreshCredentialsTest()
         {
-            Uri targetUri = new Uri("http://microsoft.visualstudio.com/foo/bar.baz?bin=raz");
-            Uri errorUri = new Uri("http://incorrect");
+            Uri targetUri = DefaultTargetUri;
+            Uri invalidUri = InvalidTargetUri;
             VsoAadAuthentication aadAuthentication = GetVsoAadAuthentication("aad-refresh");
 
             aadAuthentication.AdaRefreshTokenStore.WriteToken(targetUri, DefaultAzureRefreshToken);
@@ -120,7 +118,7 @@ namespace Microsoft.TeamFoundation.Git.Helpers.Authentication
             Assert.IsFalse(aadAuthentication.PersonalAccessTokenStore.ReadToken(targetUri, out personalAccessToken), "Personal Access Token unexpectedly found in store.");
 
             Assert.IsTrue(Task.Run(async () => { return await aadAuthentication.RefreshCredentials(targetUri, false); }).Result, "Credentials refresh failed unexpectedly.");
-            Assert.IsFalse(Task.Run(async () => { return await aadAuthentication.RefreshCredentials(errorUri, false); }).Result, "Credentials refresh succeeded unexpectedly.");
+            Assert.IsFalse(Task.Run(async () => { return await aadAuthentication.RefreshCredentials(invalidUri, false); }).Result, "Credentials refresh succeeded unexpectedly.");
 
             Assert.IsTrue(aadAuthentication.PersonalAccessTokenCache.ReadToken(targetUri, out personalAccessToken), "Personal Access Token not found in cache as expected.");
             Assert.IsTrue(aadAuthentication.PersonalAccessTokenStore.ReadToken(targetUri, out personalAccessToken), "Personal Access Token not found in store as expected.");
@@ -129,7 +127,7 @@ namespace Microsoft.TeamFoundation.Git.Helpers.Authentication
         [TestMethod]
         public void VsoAadSetCredentialsTest()
         {
-            Uri targetUri = new Uri("http://localhost");
+            Uri targetUri = DefaultTargetUri;
             VsoAadAuthentication aadAuthentication = GetVsoAadAuthentication("aad-set");
             Credential credentials = DefaultCredentials;
 

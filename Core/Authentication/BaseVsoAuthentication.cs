@@ -46,6 +46,7 @@ namespace Microsoft.TeamFoundation.Git.Helpers.Authentication
             this.PersonalAccessTokenStore = personalAccessTokenStore;
             this.PersonalAccessTokenCache = personalAccessTokenCache;
             this.AdaRefreshTokenStore = adaRefreshTokenStore;
+            this.VsoIdeTokenCache = vsoIdeTokenCache;
             this.VsoAuthority = vsoAuthority;
             this.VsoAdalTokenCache = IdentityModel.Clients.ActiveDirectory.TokenCache.DefaultShared;
         }

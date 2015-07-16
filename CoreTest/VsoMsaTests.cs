@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Diagnostics;
 using System.Threading.Tasks;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
@@ -9,14 +8,13 @@ namespace Microsoft.TeamFoundation.Git.Helpers.Authentication
     public class VsoMsaTests : AuthenticationTests
     {
         public VsoMsaTests()
-        {
-            Trace.Listeners.AddRange(Debug.Listeners);
-        }
+            : base()
+        { }
 
         [TestMethod]
         public void VsoMsaDeleteCredentialsTest()
         {
-            Uri targetUri = new Uri("http://localhost");
+            Uri targetUri = DefaultTargetUri;
             VsoMsaAuthentication msaAuthority = GetVsoMsaAuthentication("msa-delete");
 
             msaAuthority.PersonalAccessTokenStore.WriteToken(targetUri, DefaultPersonalAccessToken);
@@ -37,7 +35,7 @@ namespace Microsoft.TeamFoundation.Git.Helpers.Authentication
         [TestMethod]
         public void VsoMsaGetCredentialsTest()
         {
-            Uri targetUri = new Uri("http://localhost");
+            Uri targetUri = DefaultTargetUri;
             VsoMsaAuthentication msaAuthority = GetVsoMsaAuthentication("msa-get");
             Credential credentials;
 
@@ -52,7 +50,7 @@ namespace Microsoft.TeamFoundation.Git.Helpers.Authentication
         [TestMethod]
         public void VsoMsaInteractiveLogonTest()
         {
-            Uri targetUri = new Uri("http://localhost");
+            Uri targetUri = DefaultTargetUri;
             VsoMsaAuthentication msaAuthority = GetVsoMsaAuthentication("msa-logon");
 
             Token personalAccessToken;
@@ -72,8 +70,8 @@ namespace Microsoft.TeamFoundation.Git.Helpers.Authentication
         [TestMethod]
         public void VsoMsaRefreshCredentialsTest()
         {
-            Uri targetUri = new Uri("http://localhost");
-            Uri errorUri = new Uri("http://incorrect");
+            Uri targetUri = DefaultTargetUri;
+            Uri invlaidUri = InvalidTargetUri;
             VsoMsaAuthentication msaAuthority = GetVsoMsaAuthentication("msa-refresh");
 
             msaAuthority.AdaRefreshTokenStore.WriteToken(targetUri, DefaultAzureRefreshToken);
@@ -84,7 +82,7 @@ namespace Microsoft.TeamFoundation.Git.Helpers.Authentication
             Assert.IsFalse(msaAuthority.PersonalAccessTokenStore.ReadToken(targetUri, out personalAccessToken), "Personal Access Token unexpectedly found in store.");
 
             Assert.IsTrue(Task.Run(async () => { return await msaAuthority.RefreshCredentials(targetUri, false); }).Result, "Credentials refresh failed unexpectedly.");
-            Assert.IsFalse(Task.Run(async () => { return await msaAuthority.RefreshCredentials(errorUri, false); }).Result, "Credentials refresh succeeded unexpectedly.");
+            Assert.IsFalse(Task.Run(async () => { return await msaAuthority.RefreshCredentials(invlaidUri, false); }).Result, "Credentials refresh succeeded unexpectedly.");
 
             Assert.IsTrue(msaAuthority.PersonalAccessTokenCache.ReadToken(targetUri, out personalAccessToken), "Personal Access Token not found in cache as expected.");
             Assert.IsTrue(msaAuthority.PersonalAccessTokenStore.ReadToken(targetUri, out personalAccessToken), "Personal Access Token not found in store as expected.");
@@ -93,7 +91,7 @@ namespace Microsoft.TeamFoundation.Git.Helpers.Authentication
         [TestMethod]
         public void VsoMsaSetCredentialsTest()
         {
-            Uri targetUri = new Uri("http://localhost");
+            Uri targetUri = DefaultTargetUri;
             VsoMsaAuthentication msaAuthority = GetVsoMsaAuthentication("msa-set");
             Token personalAccessToken;
             Token azureToken;

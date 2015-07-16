@@ -70,12 +70,13 @@ GOTO :END
 :: Pre-configure it for microsoft.visualstudio.com and mseng.visualstudio.com
 git config --global credential.helper !'%destination%\credential-helper-man.exe'
 git config --global credential.visualstudio.com.authority MSA
-git config --global credential.microsoft.visualstudio.com.authority MSA
-git config --global credential.mseng.visualstudio.com.authority MSA
+git config --global credential.microsoft.visualstudio.com.authority AAD
+git config --global credential.mseng.visualstudio.com.authority AAD
+git config --global credential.devdiv.visualstudio.com.authority AAD
 
 ECHO(
 ECHO Remote helper was installed!
-ECHO It was also configured for https://microsoft.visualstudio.com and https://mseng.visualstudio.com.
+ECHO It was also configured for https://microsoft.visualstudio.com, https://mseng.visualstudio.com, and https://devdiv.visualstudio.com
 ECHO(
 GOTO :END
 
