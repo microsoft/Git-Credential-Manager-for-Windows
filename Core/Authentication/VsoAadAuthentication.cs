@@ -5,14 +5,20 @@ using Microsoft.IdentityModel.Clients.ActiveDirectory;
 
 namespace Microsoft.TeamFoundation.Git.Helpers.Authentication
 {
+    /// <summary>
+    /// Facilitates Azure Directory authentication.
+    /// </summary>
     public sealed class VsoAadAuthentication : BaseVsoAuthentication, IVsoAadAuthentication
     {
+        /// <summary>
+        /// 
+        /// </summary>
         public const string DefaultAuthorityHost = " https://management.core.windows.net/";
 
         public VsoAadAuthentication(string credentialPrefix, VsoTokenScope tokenScope, string resource = null, string clientId = null)
             : base(credentialPrefix, tokenScope, resource, clientId)
         {
-            this.VsoAuthority = new AzureAuthority(DefaultAuthorityHost);
+            this.VsoAuthority = new VsoAzureAuthority();
         }
         /// <summary>
         /// Test constructor which allows for using fake credential stores
@@ -25,7 +31,7 @@ namespace Microsoft.TeamFoundation.Git.Helpers.Authentication
             ITokenStore personalAccessTokenCache,
             ITokenStore adaRefreshTokenStore,
             ITokenStore vsoIdeTokenCache,
-            IAadAuthority vsoAuthority)
+            IVsoAuthority vsoAuthority)
             : base(personalAccessTokenStore,
                    personalAccessTokenCache,
                    adaRefreshTokenStore,
@@ -37,11 +43,11 @@ namespace Microsoft.TeamFoundation.Git.Helpers.Authentication
         {
             BaseSecureStore.ValidateTargetUri(targetUri);
 
-            Trace.TraceInformation("launching interactive UX");
+            Trace.WriteLine("VsoAadAuthentication::InteractiveLogon");
 
             try
             {
-                Tokens tokens;
+                TokenPair tokens;
                 if ((tokens = this.VsoAuthority.AcquireToken(targetUri, this.ClientId, this.Resource, new Uri(RedirectUrl), null)) != null)
                 {
                     this.StoreRefreshToken(targetUri, tokens.RefeshToken);
@@ -51,9 +57,11 @@ namespace Microsoft.TeamFoundation.Git.Helpers.Authentication
             }
             catch (AdalException exception)
             {
+                Trace.WriteLine("\tFailed to aquire token from VsoAuthority.");
                 Debug.Write(exception);
             }
 
+            Trace.WriteLine("\tInteractive logon failed");
             return false;
         }
 
@@ -62,11 +70,11 @@ namespace Microsoft.TeamFoundation.Git.Helpers.Authentication
             BaseSecureStore.ValidateTargetUri(targetUri);
             Credential.Validate(credentials);
 
-            Trace.TraceInformation("Begin InteractiveLogon for {0}", targetUri);
+            Trace.WriteLine("VsoAadAuthentication::NoninteractiveLogonWithCredentials");
 
             try
             {
-                Tokens tokens;
+                TokenPair tokens;
                 if ((tokens = await this.VsoAuthority.AcquireTokenAsync(targetUri, this.ClientId, this.Resource, credentials)) != null)
                 {
                     this.StoreRefreshToken(targetUri, tokens.RefeshToken);
@@ -76,10 +84,11 @@ namespace Microsoft.TeamFoundation.Git.Helpers.Authentication
             }
             catch (AdalException exception)
             {
+                Trace.WriteLine("\tFailed to aquire token from VsoAuthority.");
                 Debug.Write(exception);
             }
 
-            Trace.TraceInformation("InteractiveLogon failed");
+            Trace.WriteLine("\tNon-interactive logon failed");
             return false;
         }
 
@@ -87,11 +96,11 @@ namespace Microsoft.TeamFoundation.Git.Helpers.Authentication
         {
             BaseSecureStore.ValidateTargetUri(targetUri);
 
-            Trace.TraceInformation("attempting non-interactive logon");
+            Trace.WriteLine("VsoAadAuthentication::NoninteractiveLogon");
 
             try
             {
-                Tokens tokens;
+                TokenPair tokens;
                 if ((tokens = await this.VsoAuthority.AcquireTokenAsync(targetUri, this.ClientId, this.Resource)) != null)
                 {
                     this.StoreRefreshToken(targetUri, tokens.RefeshToken);
@@ -101,10 +110,11 @@ namespace Microsoft.TeamFoundation.Git.Helpers.Authentication
             }
             catch (AdalException exception)
             {
+                Trace.WriteLine("\tFailed to aquire token from VsoAuthority.");
                 Debug.WriteLine(exception);
-                Trace.TraceError("Non-interactive logon failed");
             }
 
+            Trace.WriteLine("\tNon-interactive logon failed");
             return false;
         }
 

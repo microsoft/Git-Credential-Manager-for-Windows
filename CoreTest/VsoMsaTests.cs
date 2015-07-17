@@ -127,7 +127,7 @@ namespace Microsoft.TeamFoundation.Git.Helpers.Authentication
             ITokenStore patCache = new TokenCache(prefix);
             ITokenStore tokenStore = new TokenCache(prefix);
             ITokenStore tokenCache = new TokenCache(prefix);
-            ILiveAuthority liveAuthority = new AuthorityFake();
+            IVsoAuthority liveAuthority = new AuthorityFake();
             return new VsoMsaAuthentication(patStore, patCache, tokenStore, tokenCache, liveAuthority);
         }
     }

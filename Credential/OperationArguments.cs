@@ -9,6 +9,9 @@ namespace Microsoft.TeamFoundation.Git.Helpers.Authentication
     {
         internal OperationArguments(TextReader stdin)
         {
+            Debug.Assert(stdin != null, "The stdin parameter is null");
+
+
             this.Authority = AuthorityType.Basic;
             this.Interactivity = Interactivity.Auto;
             this.ValidateCredentials = true;
@@ -24,20 +27,20 @@ namespace Microsoft.TeamFoundation.Git.Helpers.Authentication
                     {
                         case "protocol":
                             this.Protocol = pair[1];
-                            Trace.TraceInformation("Protocol = {0}", this.Protocol);
                             break;
+
                         case "host":
                             this.Host = pair[1];
-                            Trace.TraceInformation("Host = {0}", this.Host);
                             break;
+
                         case "path":
                             this.Path = pair[1];
-                            Trace.TraceInformation("Path = {0}", this.Path);
                             break;
+
                         case "username":
                             this.Username = pair[1];
-                            Trace.TraceInformation("Username = {0}", this.Username);
                             break;
+
                         case "password":
                             this.Password = pair[1];
                             break;
@@ -90,7 +93,6 @@ namespace Microsoft.TeamFoundation.Git.Helpers.Authentication
             {
                 this.Authority = AuthorityType.Basic;
             }
-            Trace.TraceInformation("authoriy set to {0}", this.Authority);
         }
 
         public override string ToString()

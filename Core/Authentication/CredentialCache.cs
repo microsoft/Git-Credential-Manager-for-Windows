@@ -36,6 +36,9 @@ namespace Microsoft.TeamFoundation.Git.Helpers.Authentication
         public void DeleteCredentials(Uri targetUri)
         {
             ValidateTargetUri(targetUri);
+
+            Trace.WriteLine("CredentialCache::DeleteCredentials");
+
             string targetName = this.GetTargetName(targetUri);
 
             Credential credentials = null;
@@ -50,6 +53,9 @@ namespace Microsoft.TeamFoundation.Git.Helpers.Authentication
         public bool ReadCredentials(Uri targetUri, out Credential credentials)
         {
             ValidateTargetUri(targetUri);
+
+            Trace.WriteLine("CredentialCache::ReadCredentials");
+
             string targetName = this.GetTargetName(targetUri);
 
             return _cache.TryGetValue(targetName, out credentials);
@@ -62,6 +68,9 @@ namespace Microsoft.TeamFoundation.Git.Helpers.Authentication
         public void WriteCredentials(Uri targetUri, Credential credentials)
         {
             ValidateTargetUri(targetUri);
+
+            Trace.WriteLine("CredentialCache::WriteCredentials");
+
             string targetName = this.GetTargetName(targetUri);
 
             _cache[targetName] = credentials;
@@ -75,8 +84,9 @@ namespace Microsoft.TeamFoundation.Git.Helpers.Authentication
         {
             const string PrimaryNameFormat = "{0}{1}://{2}";
 
-            Debug.Assert(targetUri != null, "The targetUri parameter is null");
-            Debug.Assert(targetUri.IsAbsoluteUri, "The targetUri parameter is not absolute");
+            Debug.Assert(targetUri != null && targetUri.IsAbsoluteUri, "The targetUri parameter is null or invalid");
+
+            Trace.WriteLine("CredentialCache::GetTargetName");
 
             // trim any trailing slashes and/or whitespace for compat with git-credential-winstore
             string trimmedHostUrl = targetUri.Host

@@ -20,6 +20,8 @@ namespace Microsoft.TeamFoundation.Git.Helpers.Authentication
         {
             ValidateTargetUri(targetUri);
 
+            Trace.WriteLine("BaseSecureStore::PromptUserCredentials");
+
             credentials = null;
 
             IntPtr inputBufferPtr = IntPtr.Zero;
@@ -79,7 +81,7 @@ namespace Microsoft.TeamFoundation.Git.Helpers.Authentication
                     if (result == NativeMethods.CREDUI_ERROR.ERROR_CANCELLED)
                     {
                         // this is a non-error
-                        Trace.TraceWarning("credential collection cancelled");
+                        Trace.WriteLine("\tcredential collection cancelled");
                         credentials = null;
                     }
                     else
@@ -110,6 +112,8 @@ namespace Microsoft.TeamFoundation.Git.Helpers.Authentication
 
         protected void Delete(string targetName)
         {
+            Trace.WriteLine("BaseSecureStore::Delete");
+
             try
             {
                 if (!NativeMethods.CredDelete(targetName, NativeMethods.CRED_TYPE.GENERIC, 0))
@@ -118,7 +122,7 @@ namespace Microsoft.TeamFoundation.Git.Helpers.Authentication
                     switch (errorCode)
                     {
                         case NativeMethods.CREDENTIAL_ERROR_NOT_FOUND:
-                            Trace.TraceWarning("Credentials not found for " + targetName);
+                            Trace.WriteLine("\tcredentials not found for " + targetName);
                             break;
                         default:
                             throw new Exception("Failed to delete credentials for " + targetName, new Win32Exception(errorCode));
@@ -135,6 +139,8 @@ namespace Microsoft.TeamFoundation.Git.Helpers.Authentication
 
         protected Credential ReadCredentials(string targetName)
         {
+            Trace.WriteLine("BaseSecureStore::ReadCredentials");
+
             Credential credentials = null;
             IntPtr credPtr = IntPtr.Zero;
 
@@ -166,6 +172,8 @@ namespace Microsoft.TeamFoundation.Git.Helpers.Authentication
 
         protected Token ReadToken(string targetName)
         {
+            Trace.WriteLine("BaseSecureStore::ReadToken");
+
             Token token = null;
             IntPtr credPtr = IntPtr.Zero;
 
@@ -194,6 +202,8 @@ namespace Microsoft.TeamFoundation.Git.Helpers.Authentication
 
         protected void WriteCredential(string targetName, Credential credentials)
         {
+            Trace.WriteLine("BaseSecureStore::WriteCredential");
+
             NativeMethods.CREDENTIAL credential = new NativeMethods.CREDENTIAL()
             {
                 Type = NativeMethods.CRED_TYPE.GENERIC,
@@ -223,6 +233,8 @@ namespace Microsoft.TeamFoundation.Git.Helpers.Authentication
 
         protected void WriteToken(string targetName, Token token, string name)
         {
+            Trace.WriteLine("BaseSecureStore::WriteToken");
+
             byte[] bytes = null;
             if (Token.Serialize(token, out bytes))
             {
@@ -256,6 +268,7 @@ namespace Microsoft.TeamFoundation.Git.Helpers.Authentication
             }
         }
 
+        [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
         internal static void ValidateTargetUri(Uri targetUri)
         {
             if (targetUri == null)

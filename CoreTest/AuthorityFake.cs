@@ -3,26 +3,26 @@ using System.Threading.Tasks;
 
 namespace Microsoft.TeamFoundation.Git.Helpers.Authentication
 {
-    internal class AuthorityFake : IAzureAuthority, ILiveAuthority, IAadAuthority
+    internal class AuthorityFake : IVsoAuthority
     {
-        public Tokens AcquireToken(Uri targetUri, string clientId, string resource, Uri redirectUri, string queryParameters = null)
+        public TokenPair AcquireToken(Uri targetUri, string clientId, string resource, Uri redirectUri, string queryParameters = null)
         {
-            return new Tokens("token-access", "token-refresh");
+            return new TokenPair("token-access", "token-refresh");
         }
 
-        public async Task<Tokens> AcquireTokenAsync(Uri targetUri, string clientId, string resource, Credential credentials = null)
+        public async Task<TokenPair> AcquireTokenAsync(Uri targetUri, string clientId, string resource, Credential credentials = null)
         {
-            return await Task.Run(() => { return new Tokens("token-access", "token-refresh"); });
+            return await Task.Run(() => { return new TokenPair("token-access", "token-refresh"); });
         }
 
-        public async Task<Tokens> AcquireTokenByRefreshTokenAsync(Uri targetUri, string clientId, string resource, Token refreshToken)
+        public async Task<TokenPair> AcquireTokenByRefreshTokenAsync(Uri targetUri, string clientId, string resource, Token refreshToken)
         {
-            return await Task.Run(() => { return new Tokens("token-access", "token-refresh"); });
+            return await Task.Run(() => { return new TokenPair("token-access", "token-refresh"); });
         }
 
         public async Task<Token> GeneratePersonalAccessToken(Uri targetUri, Token accessToken, VsoTokenScope tokenScope, bool requireCompactToken)
         {
-            return await Task.Run(() => { return new Token("personal-access-token", TokenType.VsoPat); });
+            return await Task.Run(() => { return new Token("personal-access-token", TokenType.Personal); });
         }
 
         public async Task<bool> ValidateCredentials(Uri targetUri, Credential credentials)

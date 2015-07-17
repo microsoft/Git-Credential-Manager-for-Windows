@@ -16,7 +16,7 @@ namespace Microsoft.TeamFoundation.Git.Helpers.Authentication
             string clientId = null)
             : base(credentialPrefix, tokenScope, resource, clientId)
         {
-            this.VsoAuthority = new AzureAuthority(DefaultAuthorityHost);
+            this.VsoAuthority = new VsoAzureAuthority(DefaultAuthorityHost);
         }
         /// <summary>
         /// Test constructor which allows for using fake credential stores
@@ -30,7 +30,7 @@ namespace Microsoft.TeamFoundation.Git.Helpers.Authentication
             ITokenStore personalAccessTokenCache,
             ITokenStore adaRefreshTokenStore,
             ITokenStore vsoIdeTokenCache,
-            ILiveAuthority liveAuthority)
+            IVsoAuthority liveAuthority)
             : base(personalAccessTokenStore,
                    personalAccessTokenCache,
                    adaRefreshTokenStore,
@@ -46,7 +46,7 @@ namespace Microsoft.TeamFoundation.Git.Helpers.Authentication
 
             try
             {
-                Tokens tokens;
+                TokenPair tokens;
                 if ((tokens = this.VsoAuthority.AcquireToken(targetUri, this.ClientId, this.Resource, new Uri(RedirectUrl), QueryParameterDomainHints)) != null)
                 {
                     this.StoreRefreshToken(targetUri, tokens.RefeshToken);

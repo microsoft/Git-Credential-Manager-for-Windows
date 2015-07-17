@@ -54,7 +54,7 @@ namespace Microsoft.TeamFoundation.Git.Helpers.Authentication
             {
                 if (this.HasStateChanged)
                 {
-                    Trace.TraceInformation("VsoAdalTokenCache::AfterAccessNotification");
+                    Trace.WriteLine("VsoAdalTokenCache::AfterAccessNotification");
 
                     try
                     {
@@ -68,7 +68,7 @@ namespace Microsoft.TeamFoundation.Git.Helpers.Authentication
                     }
                     catch (Exception exception)
                     {
-                        Trace.TraceError(exception.ToString());
+                        Trace.WriteLine(exception.ToString());
                     }
                 }
             }
@@ -78,7 +78,7 @@ namespace Microsoft.TeamFoundation.Git.Helpers.Authentication
         {
             lock (@lock)
             {
-                Trace.TraceInformation("VsoAdalTokenCache::BeforeAccessNotification");
+                Trace.WriteLine("VsoAdalTokenCache::BeforeAccessNotification");
 
                 if (File.Exists(_cacheFilePath))
                 {
@@ -92,7 +92,7 @@ namespace Microsoft.TeamFoundation.Git.Helpers.Authentication
                     }
                     catch (Exception exception)
                     {
-                        Trace.TraceError(exception.ToString());
+                        Trace.WriteLine(exception.ToString());
                     }
                 }
             }

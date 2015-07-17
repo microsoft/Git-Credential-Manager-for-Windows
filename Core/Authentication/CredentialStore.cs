@@ -29,6 +29,8 @@ namespace Microsoft.TeamFoundation.Git.Helpers.Authentication
         {
             ValidateTargetUri(targetUri);
 
+            Trace.WriteLine("CredentialStore::DeleteCredentials");
+
             string targetName = this.GetTargetName(targetUri);
             try
             {
@@ -50,6 +52,9 @@ namespace Microsoft.TeamFoundation.Git.Helpers.Authentication
             ValidateTargetUri(targetUri);
 
             string targetName = this.GetTargetName(targetUri);
+
+            Trace.WriteLine("CredentialStore::ReadCredentials");
+
             credentials = this.ReadCredentials(targetName);
 
             return credentials != null;
@@ -63,6 +68,8 @@ namespace Microsoft.TeamFoundation.Git.Helpers.Authentication
         {
             ValidateTargetUri(targetUri);
             Credential.Validate(credentials);
+
+            Trace.WriteLine("CredentialStore::WriteCredentials");
 
             string targetName = this.GetTargetName(targetUri);
             this.WriteCredential(targetName, credentials);
@@ -78,8 +85,9 @@ namespace Microsoft.TeamFoundation.Git.Helpers.Authentication
             // see https://gitcredentialstore.codeplex.com/
             const string PrimaryNameFormat = "{0}:{1}://{2}";
 
-            Debug.Assert(targetUri != null, "The targetUri parameter is null");
-            Debug.Assert(targetUri.IsAbsoluteUri, "The targetUri parameter is not absolute");
+            Debug.Assert(targetUri != null && targetUri.IsAbsoluteUri, "The targetUri parameter is null or invalid");
+
+            Trace.WriteLine("CredentialStore::GetTargetName");
 
             // trim any trailing slashes and/or whitespace for compat with git-credential-winstore
             string trimmedHostUrl = targetUri.Host

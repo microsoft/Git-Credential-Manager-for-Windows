@@ -37,8 +37,78 @@ namespace Microsoft.TeamFoundation.Git.Helpers
             return false;
         }
 
+        public static bool GitGlobalConfig(out string path)
+        {
+            const string GlobalConfigFileName = ".gitconfig";
+
+            path = null;
+
+            var globalPath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.UserProfile), GlobalConfigFileName);
+
+            if (File.Exists(globalPath))
+            {
+                path = globalPath;
+            }
+
+            return path != null;
+        }
+
+        public static bool GitLocalConfig(string startingDirectory, out string path)
+        {
+            const string GitOdbFolderName = ".git";
+            const string LocalConfigFileName = "config";
+
+            path = null;
+
+            var dir = new DirectoryInfo(startingDirectory);
+            Func<DirectoryInfo, FileSystemInfo> hasOdb = (DirectoryInfo info) =>
+            {
+                return info.EnumerateFileSystemInfos()
+                           .Where((FileSystemInfo sub) =>
+                           {
+                               return String.Equals(sub.Name, GitOdbFolderName, StringComparison.OrdinalIgnoreCase);
+                           })
+                           .FirstOrDefault();
+            };
+
+            FileSystemInfo result = null;
+            while (dir.Exists && dir.Parent.Exists)
+            {
+                if ((result = hasOdb(dir)) != null)
+                    break;
+
+                dir = dir.Parent;
+            }
+
+            if (result !=null && result.Exists)
+            {
+                if (result is DirectoryInfo)
+                {
+                    var localPath = Path.Combine(result.FullName, LocalConfigFileName);
+                    if (File.Exists(localPath))
+                    {
+                        path = localPath;
+                    }
+                }
+                else
+                {
+                    var content = File.ReadAllText(result.FullName);
+
+                    // TODO: handle .git file redirect
+                }
+            }
+
+            return path != null;
+        }
+        public static bool GitLocalConfig(out string path)
+        {
+            return GitLocalConfig(Environment.CurrentDirectory, out path);
+        }
+
         public static bool GitSystemConfig(out string path)
         {
+            const string SystemConfigFileName = "gitconfig";
+
             if (App("git", out path))
             {
                 FileInfo gitInfo = new FileInfo(path);
@@ -48,7 +118,7 @@ namespace Microsoft.TeamFoundation.Git.Helpers
                     dir = dir.Parent;
                 }
 
-                var file = dir.EnumerateFiles("gitconfig", SearchOption.AllDirectories).FirstOrDefault();
+                var file = dir.EnumerateFiles(SystemConfigFileName, SearchOption.AllDirectories).FirstOrDefault();
                 if (file != null && file.Exists)
                 {
                     path = file.FullName;

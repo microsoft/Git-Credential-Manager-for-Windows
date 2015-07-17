@@ -5,7 +5,10 @@ using System.Text;
 
 namespace Microsoft.TeamFoundation.Git.Helpers.Authentication
 {
-    public sealed class Token
+    /// <summary>
+    /// A security token, usually aquired by some authentication and identity services.
+    /// </summary>
+    public class Token
     {
         internal Token(string value, TokenType type)
         {
@@ -31,9 +34,19 @@ namespace Microsoft.TeamFoundation.Git.Helpers.Authentication
             this.Type = type;
         }
 
+        /// <summary>
+        /// The type of the secuity token.
+        /// </summary>
         public readonly TokenType Type;
+        /// <summary>
+        /// The raw contents of the token.
+        /// </summary>
         public readonly string Value;
 
+        /// <summary>
+        /// Converts the token to a human friendly string.
+        /// </summary>
+        /// <returns>Humanish name of the token.</returns>
         public override string ToString()
         {
             System.ComponentModel.DescriptionAttribute attribute = Type.GetType()
@@ -101,9 +114,16 @@ namespace Microsoft.TeamFoundation.Git.Helpers.Authentication
                 throw new ArgumentOutOfRangeException("token", String.Format("The value of the token cannot be longer than {0} characters", NativeMethods.CREDENTIAL_PASSWORD_MAXLEN));
         }
 
+        /// <summary>
+        /// Explicity casts a personal access token token into a set of credentials
+        /// </summary>
+        /// <param name="token"></param>
+        /// <exception cref="InvalidCastException">
+        /// <paramref name="token">Throws if <see cref="Token.Type"/> is not <see cref="TokenType.Personal"/>.</paramref>
+        /// </exception>
         public static explicit operator Credential(Token token)
         {
-            if (token.Type != TokenType.VsoPat)
+            if (token.Type != TokenType.Personal)
                 throw new InvalidCastException("Cannot cast " + token + " to credentials");
 
             return new Credential(token.ToString(), token.Value);

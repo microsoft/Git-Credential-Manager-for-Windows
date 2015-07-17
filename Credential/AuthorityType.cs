@@ -1,5 +1,8 @@
 ﻿namespace Microsoft.TeamFoundation.Git.Helpers.Authentication
 {
+    /// <summary>
+    /// Type of authentication and identity authority expected.
+    /// </summary>
     internal enum AuthorityType
     {
         /// <summary>

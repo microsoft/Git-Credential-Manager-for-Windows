@@ -52,15 +52,14 @@
     <Reference Include="System.Security" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Authentication\VsoAzureAuthority.cs" />
     <Compile Include="Authentication\VsoTokenScope.cs" />
     <Compile Include="Authentication\AzureAuthority.cs" />
     <Compile Include="Authentication\CredentialCache.cs" />
     <Compile Include="Authentication\IAzureAuthority.cs" />
-    <Compile Include="Authentication\ILiveAuthority.cs" />
-    <Compile Include="Authentication\IAadAuthority.cs" />
     <Compile Include="Authentication\IVsoMsaAuthentication.cs" />
     <Compile Include="Authentication\TokenCache.cs" />
-    <Compile Include="Authentication\Tokens.cs" />
+    <Compile Include="Authentication\TokenPair.cs" />
     <Compile Include="Authentication\TokenType.cs" />
     <Compile Include="Authentication\VsoAadAuthentication.cs" />
     <Compile Include="Authentication\BaseVsoAuthentication.cs" />
@@ -78,6 +77,7 @@
     <Compile Include="Authentication\TokenStore.cs" />
     <Compile Include="Authentication\Token.cs" />
     <Compile Include="Authentication\NativeMethods.cs" />
+    <Compile Include="Authentication\IVsoAuthority.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Authentication\TokenRegistry.cs" />
     <Compile Include="Where.cs" />

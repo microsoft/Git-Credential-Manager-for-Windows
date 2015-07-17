@@ -1,28 +1,42 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Security.Cryptography;
 using System.Text;
 using Microsoft.Win32;
 
 namespace Microsoft.TeamFoundation.Git.Helpers.Authentication
 {
+    /// <summary>
+    /// A token storage object which interacts with thecurrent user's Visual Studio hive in the 
+    /// Windows Registry.
+    /// </summary>
     public sealed class TokenRegistry : ITokenStore
     {
         private const string RegistryTokenKey = "Token";
         private const string RegistryTypeKey = "Type";
         private const string RegistryUrlKey = "Url";
-        private const string RegistryTypeValid = "Federated";
         private const string RegistryPathFormat = @"Software\Microsoft\VSCommon\{0}\ClientServices\TokenStorage\VisualStudio\VssApp";
-        private static readonly string[] Versions = new[] { "14.0" };
+        private static readonly string[] Versions = new[] { "14.0" }; // only a single supported version today, latest version should be placed first
 
         public TokenRegistry()
         { }
 
+        /// <summary>
+        /// Not supported
+        /// </summary>
+        /// <param name="targetUri"></param>
         public void DeleteToken(Uri targetUri)
         {
-            throw new NotSupportedException();
+            // we've decided to not support registry delets until the rules are established
+            throw new NotSupportedException("Deletes from the registry are not supported by this library.");
         }
-
+        /// <summary>
+        /// Reads a token from the current user's Visual Studio hive in the Windows Registry.
+        /// </summary>
+        /// <param name="targetUri">Key used to select the token.</param>
+        /// <param name="token">If successful, the token from the registry; otherwise `null`.</param>
+        /// <returns>True if successful; otherwise false.</returns>
         public bool ReadToken(Uri targetUri, out Token token)
         {
             foreach (var key in EnumerateKeys(false))
@@ -42,7 +56,17 @@ namespace Microsoft.TeamFoundation.Git.Helpers.Authentication
 
                         value = Encoding.UTF8.GetString(data);
 
-                        token = new Token(value, TokenType.Federated);
+                        TokenType tokenType;
+                        if (String.Equals(type, "Federated", StringComparison.OrdinalIgnoreCase))
+                        {
+                            tokenType = TokenType.Federated;
+                        }
+                        else
+                        {
+                            throw new InvalidOperationException("Unexpected token type encountered");
+                        }
+
+                        token = new Token(value, tokenType);
 
                         return true;
                     }
@@ -52,36 +76,15 @@ namespace Microsoft.TeamFoundation.Git.Helpers.Authentication
             token = null;
             return false;
         }
-
+        /// <summary>
+        /// Not supported
+        /// </summary>
+        /// <param name="targetUri"></param>
+        /// <param name="token"></param>
         public void WriteToken(Uri targetUri, Token token)
         {
-            return;
-
-            //bool written = false;
-
-            //foreach (var key in EnumerateKeys(false))
-            //{
-            //    string url;
-            //    string type;
-            //    string value;
-
-            //    if (KeyIsValid(key, out url, out type, out value))
-            //    {
-            //        Uri tokenUri = new Uri(url);
-            //        if (tokenUri.IsBaseOf(targetUri))
-            //        {
-            //            key.SetValue(RegistryTokenKey, token.Value);
-            //        }
-            //    }
-            //}
-
-            //if (!written)
-            //{
-            //    foreach (var key in EnumerateKeys(false))
-            //    {
-            //        var subkey = key.CreateSubKey(Guid.NewGuid().ToString("N"));
-            //    }
-            //}
+            // we've decided to not support registry writes until the format is standardized
+            throw new NotSupportedException("Writes to the registry are not supported by this library.");
         }
 
         private IEnumerable<RegistryKey> EnumerateKeys(bool writeable)
@@ -113,7 +116,6 @@ namespace Microsoft.TeamFoundation.Git.Helpers.Authentication
 
             return !String.IsNullOrEmpty(url)
                 && !String.IsNullOrEmpty(value)
-                && String.Equals(type, RegistryTypeValid, StringComparison.OrdinalIgnoreCase)
                 && Uri.IsWellFormedUriString(url, UriKind.Absolute);
         }
 
@@ -121,9 +123,20 @@ namespace Microsoft.TeamFoundation.Git.Helpers.Authentication
         {
             foreach (string version in Versions)
             {
-                string registryPath = String.Format(RegistryPathFormat, version);
+                RegistryKey result = null;
 
-                yield return Registry.CurrentUser.OpenSubKey(registryPath, false);
+                try
+                {
+                    string registryPath = String.Format(RegistryPathFormat, version);
+
+                    result = Registry.CurrentUser.OpenSubKey(registryPath, false);
+                }
+                catch (Exception exception)
+                {
+                    Trace.WriteLine(exception.ToString());
+                }
+
+                yield return result;
             }
         }
     }
