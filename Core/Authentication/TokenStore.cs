@@ -3,6 +3,10 @@ using System.Diagnostics;
 
 namespace Microsoft.TeamFoundation.Git.Helpers.Authentication
 {
+    /// <summary>
+    /// Token storage which indexes values by target and utilizes the operating system key chain / 
+    /// secret vault.
+    /// </summary>
     public sealed class TokenStore : BaseSecureStore, ITokenStore
     {
         internal TokenStore(string prefix)

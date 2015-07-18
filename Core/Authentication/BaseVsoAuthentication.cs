@@ -93,12 +93,12 @@ namespace Microsoft.TeamFoundation.Git.Helpers.Authentication
             // check the in-memory cache first
             if (!this.PersonalAccessTokenCache.ReadToken(targetUri, out personalAccessToken))
             {
-                Trace.WriteLine("\tunable to retrieve cached credentials, attempting stored credentials retrieval.");
+                Trace.WriteLine("   unable to retrieve cached credentials, attempting stored credentials retrieval.");
 
                 // fall-back to the on disk cache
                 if (this.PersonalAccessTokenStore.ReadToken(targetUri, out personalAccessToken))
                 {
-                    Trace.WriteLine("\tsuccessfully retrieved stored credentials, updating credential cache");
+                    Trace.WriteLine("   successfully retrieved stored credentials, updating credential cache");
 
                     // update the in-memory cache for faster future look-ups
                     this.PersonalAccessTokenCache.WriteToken(targetUri, personalAccessToken);
@@ -133,7 +133,7 @@ namespace Microsoft.TeamFoundation.Git.Helpers.Authentication
                 {
                     if ((tokens = await this.VsoAuthority.AcquireTokenByRefreshTokenAsync(targetUri, this.ClientId, this.Resource, refreshToken)) != null)
                     {
-                        Trace.WriteLine("\tAzure token found in primary cache.");
+                        Trace.WriteLine("   Azure token found in primary cache.");
 
                         return await this.GeneratePersonalAccessToken(targetUri, tokens.AccessToken, requireCompactToken);
                     }
@@ -142,7 +142,7 @@ namespace Microsoft.TeamFoundation.Git.Helpers.Authentication
                 // attempt to utilize any fedauth tokens captured by the IDE
                 if (this.VsoIdeTokenCache.ReadToken(targetUri, out refreshToken))
                 {
-                    Trace.WriteLine("\tFederated auth token found in IDE cache.");
+                    Trace.WriteLine("   Federated auth token found in IDE cache.");
 
                     return await this.GeneratePersonalAccessToken(targetUri, refreshToken, requireCompactToken);
                 }
@@ -157,7 +157,7 @@ namespace Microsoft.TeamFoundation.Git.Helpers.Authentication
                             || ((tokens = await this.VsoAuthority.AcquireTokenByRefreshTokenAsync(targetUri, this.ClientId, this.Resource, tokens.RefeshToken)) != null
                                 && await this.VsoAuthority.ValidateToken(targetUri, tokens.AccessToken))))
                     {
-                        Trace.WriteLine("\tAzure token found in IDE cache.");
+                        Trace.WriteLine("   Azure token found in IDE cache.");
 
                         return await this.GeneratePersonalAccessToken(targetUri, tokens.AccessToken, requireCompactToken);
                     }
@@ -172,7 +172,7 @@ namespace Microsoft.TeamFoundation.Git.Helpers.Authentication
                 Debug.WriteLine(exception);
             }
 
-            Trace.WriteLine("\tfailed to refresh credentials.");
+            Trace.WriteLine("   failed to refresh credentials.");
             return false;
         }
 

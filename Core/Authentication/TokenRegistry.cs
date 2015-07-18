@@ -39,6 +39,10 @@ namespace Microsoft.TeamFoundation.Git.Helpers.Authentication
         /// <returns>True if successful; otherwise false.</returns>
         public bool ReadToken(Uri targetUri, out Token token)
         {
+            BaseSecureStore.ValidateTargetUri(targetUri);
+
+            Trace.WriteLine("TokenRegistry::ReadToken");
+
             foreach (var key in EnumerateKeys(false))
             {
                 string url;
@@ -89,13 +93,15 @@ namespace Microsoft.TeamFoundation.Git.Helpers.Authentication
 
         private IEnumerable<RegistryKey> EnumerateKeys(bool writeable)
         {
+            Trace.WriteLine("TokenRegistry::EnumerateKeys");
+
             foreach (var rootKey in EnumerateRootKeys())
             {
                 if (rootKey != null)
                 {
                     foreach (var nodeName in rootKey.GetSubKeyNames())
                     {
-                        var nodeKey = rootKey.OpenSubKey(nodeName, false);
+                        var nodeKey = rootKey.OpenSubKey(nodeName, writeable);
 
                         if (nodeKey != null)
                         {
@@ -110,6 +116,8 @@ namespace Microsoft.TeamFoundation.Git.Helpers.Authentication
 
         private bool KeyIsValid(RegistryKey registryKey, out string url, out string type, out string value)
         {
+            Debug.Assert(registryKey != null && !registryKey.Handle.IsInvalid, "The registryKey parameter is null or invalid.");
+
             url = registryKey.GetValue(RegistryUrlKey, null, RegistryValueOptions.DoNotExpandEnvironmentNames) as String;
             type = registryKey.GetValue(RegistryTypeKey, null, RegistryValueOptions.DoNotExpandEnvironmentNames) as String;
             value = registryKey.GetValue(RegistryTokenKey, null, RegistryValueOptions.DoNotExpandEnvironmentNames) as String;
@@ -121,6 +129,8 @@ namespace Microsoft.TeamFoundation.Git.Helpers.Authentication
 
         private IEnumerable<RegistryKey> EnumerateRootKeys()
         {
+            Trace.WriteLine("TokenRegistry::EnumerateRootKeys");
+
             foreach (string version in Versions)
             {
                 RegistryKey result = null;
@@ -133,7 +143,7 @@ namespace Microsoft.TeamFoundation.Git.Helpers.Authentication
                 }
                 catch (Exception exception)
                 {
-                    Trace.WriteLine(exception.ToString());
+                    Trace.WriteLine(exception, "Error");
                 }
 
                 yield return result;

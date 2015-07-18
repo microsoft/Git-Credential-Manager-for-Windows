@@ -4,7 +4,8 @@ using System.Diagnostics;
 namespace Microsoft.TeamFoundation.Git.Helpers.Authentication
 {
     /// <summary>
-    /// Stores credentials relative to target URIs. In-memory, thread-safe.
+    /// Credential storage which indexes values by target and utilizes the operating system key 
+    /// chain / secret vault.
     /// </summary>
     public class CredentialStore : BaseSecureStore, ICredentialStore
     {

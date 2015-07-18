@@ -36,16 +36,28 @@ namespace Microsoft.TeamFoundation.Git.Helpers.Authentication
         /// </summary>
         public readonly string Username;
 
+        /// <summary>
+        /// Compares an object to this <see cref="Credential"/> for equality.
+        /// </summary>
+        /// <param name="obj">The object to compare.</param>
+        /// <returns>True is equal; false otherwise.</returns>
         public override bool Equals(Object obj)
         {
             return this == obj as Credential;
         }
-
+        /// <summary>
+        /// Compares a <see cref="Credential"/> to this Credetials for equality.
+        /// </summary>
+        /// <param name="other">Credential to compared.</param>
+        /// <returns>True if equal; false if otherwise.</returns>
         public bool Equals(Credential other)
         {
             return this == other;
         }
-
+        /// <summary>
+        /// Gets a hash code based on the contents of the <see cref="Credential"/>.
+        /// </summary>
+        /// <returns>32-bit hash code.</returns>
         public override Int32 GetHashCode()
         {
             unchecked
@@ -54,6 +66,7 @@ namespace Microsoft.TeamFoundation.Git.Helpers.Authentication
             }
         }
 
+        [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
         internal static void Validate(Credential credentials)
         {
             if (credentials == null)
@@ -64,6 +77,12 @@ namespace Microsoft.TeamFoundation.Git.Helpers.Authentication
                 throw new ArgumentOutOfRangeException("credentials", string.Format("The Username field of the Credentials object cannot be longer than {0} characters", NativeMethods.CREDENTIAL_USERNAME_MAXLEN));
         }
 
+        /// <summary>
+        /// Compares two credentials for equality.
+        /// </summary>
+        /// <param name="credential1">Credential to compare.</param>
+        /// <param name="credential2">Credential to compare.</param>
+        /// <returns>True if equal; false otherwise.</returns>
         public static bool operator ==(Credential credential1, Credential credential2)
         {
             if (ReferenceEquals(credential1, credential2))
@@ -74,7 +93,12 @@ namespace Microsoft.TeamFoundation.Git.Helpers.Authentication
             return String.Equals(credential1.Username, credential2.Username, StringComparison.Ordinal)
                 && String.Equals(credential1.Password, credential2.Password, StringComparison.Ordinal);
         }
-
+        /// <summary>
+        /// Compares two credentials for inequality.
+        /// </summary>
+        /// <param name="credential1">Credential to compare.</param>
+        /// <param name="credential2">Credential to compare.</param>
+        /// <returns>False if equal; true otherwise.</returns>
         public static bool operator !=(Credential credential1, Credential credential2)
         {
             return !(credential1 == credential2);

@@ -62,10 +62,14 @@ namespace Microsoft.TeamFoundation.Git.Helpers.Authentication
                     switch (accessToken.Type)
                     {
                         case TokenType.Access:
+                            Trace.WriteLine("   using Azure access token to aquire personal access token");
+
                             httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue(AccessTokenHeader, accessToken.Value);
                             break;
 
                         case TokenType.Federated:
+                            Trace.WriteLine("   using federated authentication token to aquire personal access token");
+
                             string[] chunks = accessToken.Value.Split(';');
 
                             foreach (string chunk in chunks)
@@ -98,7 +102,7 @@ namespace Microsoft.TeamFoundation.Git.Helpers.Authentication
                             string tokenValue = tokenMatch.Groups[1].Value;
                             Token token = new Token(tokenValue, TokenType.Personal);
 
-                            Trace.WriteLine("\tpersonal access token generation succeeded.");
+                            Trace.WriteLine("   personal access token aquisition succeeded.");
 
                             return token;
                         }
@@ -111,10 +115,10 @@ namespace Microsoft.TeamFoundation.Git.Helpers.Authentication
             }
             catch
             {
-                Trace.WriteLine("\tan error occured error.");
+                Trace.WriteLine("   an error occured error.");
             }
 
-            Trace.WriteLine("\tpersonal access token generation failed.");
+            Trace.WriteLine("   personal access token aquisition failed.");
 
             return null;
         }
@@ -134,13 +138,16 @@ namespace Microsoft.TeamFoundation.Git.Helpers.Authentication
                 string basicAuthHeader = "Basic " + Convert.ToBase64String(Encoding.ASCII.GetBytes(String.Format("{0}:{1}", credentials.Username, credentials.Password)));
                 HttpWebRequest request = WebRequest.CreateHttp(validationUrl);
                 request.Headers.Add(HttpRequestHeader.Authorization, basicAuthHeader);
+
                 HttpWebResponse response = await request.GetResponseAsync() as HttpWebResponse;
-                Trace.WriteLine("\tvalidation status code: " + response.StatusCode);
+
+                Trace.WriteLine("   validation status code: " + response.StatusCode);
+
                 return response.StatusCode == HttpStatusCode.OK;
             }
             catch
             {
-                Trace.WriteLine("\tcredential validation failed");
+                Trace.WriteLine("   credential validation failed");
             }
 
             return false;
@@ -168,13 +175,16 @@ namespace Microsoft.TeamFoundation.Git.Helpers.Authentication
                 HttpWebRequest request = WebRequest.CreateHttp(validationUrl);
                 request.Headers.Add(HttpRequestHeader.Authorization, sessionAuthHeader);
                 request.Timeout = 15 * 1000;
+
                 HttpWebResponse response = await request.GetResponseAsync() as HttpWebResponse;
-                Trace.WriteLine("\tvalidation status code: " + response.StatusCode);
+
+                Trace.WriteLine("   validation status code: " + response.StatusCode);
+
                 return response.StatusCode == HttpStatusCode.OK;
             }
             catch
             {
-                Trace.WriteLine("\ttoken validation failed");
+                Trace.WriteLine("   token validation failed");
             }
 
             return false;

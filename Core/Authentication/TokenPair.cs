@@ -6,7 +6,7 @@ namespace Microsoft.TeamFoundation.Git.Helpers.Authentication
     /// <summary>
     /// Azure token pair: access and refresh.
     /// </summary>
-    internal sealed class TokenPair
+    internal sealed class TokenPair:IEquatable<TokenPair>
     {
         /// <summary>
         /// Creates a new <see cref="TokenPair"/> from raw access and refresh token data.
@@ -47,5 +47,63 @@ namespace Microsoft.TeamFoundation.Git.Helpers.Authentication
         /// Refresh token, used to grant new access tokens.
         /// </summary>
         public readonly Token RefeshToken;
+
+        /// <summary>
+        /// Compares an object to this.
+        /// </summary>
+        /// <param name="obj">The object to compare.</param>
+        /// <returns>True if equal; false otherwise.</returns>
+        public override bool Equals(Object obj)
+        {
+            return this.Equals(obj as TokenPair);
+        }
+        /// <summary>
+        /// Compares a <see cref="TokenPair"/> to this this.
+        /// </summary>
+        /// <param name="other">The <see cref="TokenPair"/> to compare.</param>
+        /// <returns>True if equal; otherwise false.</returns>
+        public bool Equals(TokenPair other)
+        {
+            return this == other;
+        }
+        /// <summary>
+        /// Gets a hash code based on the contents of the <see cref="TokenPair"/>.
+        /// </summary>
+        /// <returns>32-bit hash code.</returns>
+        public override Int32 GetHashCode()
+        {
+            unchecked
+            {
+                return AccessToken.GetHashCode() * RefeshToken.GetHashCode();
+            }
+        }
+
+
+        /// <summary>
+        /// Compares two <see cref="TokenPair"/> for equality.
+        /// </summary>
+        /// <param name="pair1"><see cref="TokenPair"/> to compare.</param>
+        /// <param name="pair2"><see cref="TokenPair"/> to compare.</param>
+        /// <returns>True if equal; false otherwise.</returns>
+        public static bool operator ==(TokenPair pair1, TokenPair pair2)
+        {
+            if (ReferenceEquals(pair1, pair2))
+                return true;
+            if (ReferenceEquals(pair1, null) || ReferenceEquals(null, pair2))
+                return false;
+
+            return pair1.AccessToken == pair2.AccessToken
+                && pair1.RefeshToken == pair2.RefeshToken;
+        }
+        /// <summary>
+        /// Compares two <see cref="TokenPair"/> for inequality.
+        /// </summary>
+        /// <param name="pair1"><see cref="TokenPair"/> to compare.</param>
+        /// <param name="pair2"><see cref="TokenPair"/> to compare.</param>
+        /// <returns>False if equal; true otherwise.</returns>
+        public static bool operator !=(TokenPair pair1, TokenPair pair2)
+        {
+            return !(pair1 == pair2);
+        }
     }
 }

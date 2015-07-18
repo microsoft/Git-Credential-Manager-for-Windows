@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Diagnostics;
 
 namespace Microsoft.TeamFoundation.Git.Helpers.Authentication
 {
@@ -38,6 +39,8 @@ namespace Microsoft.TeamFoundation.Git.Helpers.Authentication
         {
             BaseSecureStore.ValidateTargetUri(targetUri);
 
+            Trace.WriteLine("BasicAuthentication::DeleteCredentials");
+
             this.CredentialStore.DeleteCredentials(targetUri);
             this.CredentialCache.DeleteCredentials(targetUri);
         }
@@ -55,6 +58,8 @@ namespace Microsoft.TeamFoundation.Git.Helpers.Authentication
         public override bool GetCredentials(Uri targetUri, out Credential credentials)
         {
             BaseSecureStore.ValidateTargetUri(targetUri);
+
+            Trace.WriteLine("BasicAuthentication::GetCredentials");
 
             // check the in-memory cache first
             if (!this.CredentialCache.ReadCredentials(targetUri, out credentials))
@@ -81,6 +86,8 @@ namespace Microsoft.TeamFoundation.Git.Helpers.Authentication
         {
             BaseSecureStore.ValidateTargetUri(targetUri);
             Credential.Validate(credentials);
+
+            Trace.WriteLine("BasicAuthentication::SetCredentials");
 
             this.CredentialStore.WriteCredentials(targetUri, credentials);
             this.CredentialCache.WriteCredentials(targetUri, credentials);

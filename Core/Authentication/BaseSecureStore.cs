@@ -81,7 +81,7 @@ namespace Microsoft.TeamFoundation.Git.Helpers.Authentication
                     if (result == NativeMethods.CREDUI_ERROR.ERROR_CANCELLED)
                     {
                         // this is a non-error
-                        Trace.WriteLine("\tcredential collection cancelled");
+                        Trace.WriteLine("   credential collection cancelled");
                         credentials = null;
                     }
                     else
@@ -122,7 +122,7 @@ namespace Microsoft.TeamFoundation.Git.Helpers.Authentication
                     switch (errorCode)
                     {
                         case NativeMethods.CREDENTIAL_ERROR_NOT_FOUND:
-                            Trace.WriteLine("\tcredentials not found for " + targetName);
+                            Trace.WriteLine("   credentials not found for " + targetName);
                             break;
                         default:
                             throw new Exception("Failed to delete credentials for " + targetName, new Win32Exception(errorCode));

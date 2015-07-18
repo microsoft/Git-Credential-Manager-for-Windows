@@ -125,19 +125,19 @@ namespace Microsoft.TeamFoundation.Git.Helpers.Authentication
             Debug.Assert(operationArguments != null, "The operationArguments is null");
             Debug.Assert(operationArguments.TargetUri != null, "The operationArgument.TargetUri is null");
 
-            Trace.WriteLine("\ttargetUri = " + operationArguments.TargetUri);
+            Trace.WriteLine("   targetUri = " + operationArguments.TargetUri);
 
             BaseAuthentication authentication = CreateAuthentication(operationArguments);
             Credential credentials = null;
 
-            Trace.WriteLine("\tauthority = " + operationArguments.Authority);
+            Trace.WriteLine("   authority = " + operationArguments.Authority);
             switch (operationArguments.Authority)
             {
                 default:
                 case AuthorityType.Basic:
                     if (authentication.GetCredentials(operationArguments.TargetUri, out credentials))
                     {
-                        Trace.WriteLine("\tcredentials found");
+                        Trace.WriteLine("   credentials found");
                         operationArguments.SetCredentials(credentials);
                     }
                     break;
@@ -168,7 +168,7 @@ namespace Microsoft.TeamFoundation.Git.Helpers.Authentication
                                 && (!operationArguments.ValidateCredentials
                                     || await aadAuth.ValidateCredentials(operationArguments.TargetUri, credentials))))
                         {
-                            Trace.WriteLine("\tcredentials found");
+                            Trace.WriteLine("   credentials found");
                             operationArguments.SetCredentials(credentials);
                         }
                     }).Wait();
@@ -195,7 +195,7 @@ namespace Microsoft.TeamFoundation.Git.Helpers.Authentication
                                 && (!operationArguments.ValidateCredentials
                                     || await msaAuth.ValidateCredentials(operationArguments.TargetUri, credentials))))
                         {
-                            Trace.WriteLine("\tcredentials found");
+                            Trace.WriteLine("   credentials found");
                             operationArguments.SetCredentials(credentials);
                         }
                     }).Wait();
@@ -213,24 +213,9 @@ namespace Microsoft.TeamFoundation.Git.Helpers.Authentication
 
             Trace.WriteLine("Program::Store");
 
-            switch (operationArguments.Authority)
-            {
-                default:
-                case AuthorityType.Basic:
-                    Trace.WriteLine("\twriting basic authentication values");
-
-                    BaseAuthentication authentication = CreateAuthentication(operationArguments);
-                    Credential credentials = new Credential(operationArguments.Username, operationArguments.Password ?? String.Empty);
-
-                    authentication.SetCredentials(operationArguments.TargetUri, credentials);
-                    break;
-
-                case AuthorityType.AzureDirectory:
-                case AuthorityType.MicrosoftAccount:
-                    // not supported
-                    Trace.WriteLine("\tset opertation not supported for AAD and MSA accounts");
-                    break;
-            }
+            BaseAuthentication authentication = CreateAuthentication(operationArguments);
+            Credential credentials = new Credential(operationArguments.Username, operationArguments.Password ?? String.Empty);
+            authentication.SetCredentials(operationArguments.TargetUri, credentials);
         }
 
         private static BaseAuthentication CreateAuthentication(OperationArguments operationArguments)
@@ -238,7 +223,7 @@ namespace Microsoft.TeamFoundation.Git.Helpers.Authentication
             Debug.Assert(operationArguments != null, "The operationArguments is null");
 
             Trace.WriteLine("Program::CreateAuthentication");
-            Trace.WriteLine("\tauthority = " + operationArguments.Authority);
+            Trace.WriteLine("   authority = " + operationArguments.Authority);
 
             switch (operationArguments.Authority)
             {
@@ -266,7 +251,7 @@ namespace Microsoft.TeamFoundation.Git.Helpers.Authentication
                         string clientId = operationArguments.AuthorityClientId;
                         string resource = operationArguments.AuthorityResource;
 
-                        Trace.WriteLine(String.Format("\tresource = {0}, clientId = {1}", resource, clientId));
+                        Trace.WriteLine(String.Format("   resource = {0}, clientId = {1}", resource, clientId));
                         return new VsoMsaAuthentication(CredentialPrefix, CredentialScope, resource, clientId);
                     }
                     // return a generic MSA backed VSO authentication object
@@ -286,22 +271,22 @@ namespace Microsoft.TeamFoundation.Git.Helpers.Authentication
 
             if (GetGitConfigEntry(config, operationArguments, "authority", out entry))
             {
-                Trace.WriteLine("\tauthority = " + entry.Value);
+                Trace.WriteLine("   authority = " + entry.Value);
                 operationArguments.SetScheme(entry.Value);
             }
             if (GetGitConfigEntry(config, operationArguments, "clientid", out entry))
             {
-                Trace.WriteLine("\tclientid = " + entry.Value);
+                Trace.WriteLine("   clientid = " + entry.Value);
                 operationArguments.AuthorityClientId = entry.Value;
             }
             if (GetGitConfigEntry(config, operationArguments, "resource", out entry))
             {
-                Trace.WriteLine("\tresource = " + entry.Value);
+                Trace.WriteLine("   resource = " + entry.Value);
                 operationArguments.AuthorityResource = entry.Value;
             }
             if (GetGitConfigEntry(config, operationArguments, "validate", out entry))
             {
-                Trace.WriteLine("\tvalidate = " + entry.Value);
+                Trace.WriteLine("   validate = " + entry.Value);
                 bool validate = operationArguments.ValidateCredentials;
                 if (Boolean.TryParse(entry.Value, out validate))
                 {
@@ -310,7 +295,7 @@ namespace Microsoft.TeamFoundation.Git.Helpers.Authentication
             }
             if (GetGitConfigEntry(config, operationArguments, "interactive", out entry))
             {
-                Trace.WriteLine("\tinteractive = " + entry.Value);
+                Trace.WriteLine("   interactive = " + entry.Value);
 
                 if (String.Equals("always", entry.Value, StringComparison.OrdinalIgnoreCase)
                     || String.Equals("true", entry.Value, StringComparison.OrdinalIgnoreCase)
@@ -326,7 +311,7 @@ namespace Microsoft.TeamFoundation.Git.Helpers.Authentication
             }
             if (GetGitConfigEntry(config, operationArguments, "validate", out entry))
             {
-                Trace.WriteLine("\tvalidate = " + entry.Value);
+                Trace.WriteLine("   validate = " + entry.Value);
 
                 bool validate = operationArguments.ValidateCredentials;
                 if (Boolean.TryParse(entry.Value, out validate))
@@ -363,7 +348,7 @@ namespace Microsoft.TeamFoundation.Git.Helpers.Authentication
 
             foreach (var pair in values)
             {
-                Trace.WriteLine(String.Format("\t{0} = {1}", pair.Key, pair.Value));
+                Trace.WriteLine(String.Format("   {0} = {1}", pair.Key, pair.Value));
             }
 
             return values;

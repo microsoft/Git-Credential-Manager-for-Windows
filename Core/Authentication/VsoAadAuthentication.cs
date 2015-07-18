@@ -50,6 +50,8 @@ namespace Microsoft.TeamFoundation.Git.Helpers.Authentication
                 TokenPair tokens;
                 if ((tokens = this.VsoAuthority.AcquireToken(targetUri, this.ClientId, this.Resource, new Uri(RedirectUrl), null)) != null)
                 {
+                    Trace.WriteLine("   token aqusition succeeded.");
+
                     this.StoreRefreshToken(targetUri, tokens.RefeshToken);
 
                     return Task.Run(async () => { return await this.GeneratePersonalAccessToken(targetUri, tokens.AccessToken, requestCompactToken); }).Result;
@@ -57,11 +59,11 @@ namespace Microsoft.TeamFoundation.Git.Helpers.Authentication
             }
             catch (AdalException exception)
             {
-                Trace.WriteLine("\tFailed to aquire token from VsoAuthority.");
+                Trace.WriteLine("   token aquisition failed.");
                 Debug.Write(exception);
             }
 
-            Trace.WriteLine("\tInteractive logon failed");
+            Trace.WriteLine("   interactive logon failed");
             return false;
         }
 
@@ -77,6 +79,8 @@ namespace Microsoft.TeamFoundation.Git.Helpers.Authentication
                 TokenPair tokens;
                 if ((tokens = await this.VsoAuthority.AcquireTokenAsync(targetUri, this.ClientId, this.Resource, credentials)) != null)
                 {
+                    Trace.WriteLine("   token aquisition succeeded");
+
                     this.StoreRefreshToken(targetUri, tokens.RefeshToken);
 
                     return await this.GeneratePersonalAccessToken(targetUri, tokens.AccessToken, requestCompactToken);
@@ -84,11 +88,11 @@ namespace Microsoft.TeamFoundation.Git.Helpers.Authentication
             }
             catch (AdalException exception)
             {
-                Trace.WriteLine("\tFailed to aquire token from VsoAuthority.");
+                Trace.WriteLine("   token aquisition failed");
                 Debug.Write(exception);
             }
 
-            Trace.WriteLine("\tNon-interactive logon failed");
+            Trace.WriteLine("   non-interactive logon failed");
             return false;
         }
 
@@ -110,16 +114,30 @@ namespace Microsoft.TeamFoundation.Git.Helpers.Authentication
             }
             catch (AdalException exception)
             {
-                Trace.WriteLine("\tFailed to aquire token from VsoAuthority.");
+                Trace.WriteLine("   failed to aquire token from VsoAuthority.");
                 Debug.WriteLine(exception);
             }
 
-            Trace.WriteLine("\tNon-interactive logon failed");
+            Trace.WriteLine("   non-interactive logon failed");
             return false;
         }
-
+        /// <summary>
+        /// Sets credentials for future use with this authentication object.
+        /// </summary>
+        /// <remarks>Not supported.</remarks>
+        /// <param name="targetUri">
+        /// The uniform resource indicator of the resource access tokens are being set for.
+        /// </param>
+        /// <param name="credentials">The credentials being set.</param>
+        /// <returns>True if successful; false otherwise.</returns>
         public override bool SetCredentials(Uri targetUri, Credential credentials)
         {
+            BaseSecureStore.ValidateTargetUri(targetUri);
+            Credential.Validate(credentials);
+
+            Trace.WriteLine("VsoMsaAuthentication::SetCredentials");
+            Trace.WriteLine("   setting MSA credentials is not supported");
+
             // does nothing with VSO AAD backed accounts
             return false;
         }

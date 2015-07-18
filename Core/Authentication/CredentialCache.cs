@@ -5,7 +5,7 @@ using System.Diagnostics;
 namespace Microsoft.TeamFoundation.Git.Helpers.Authentication
 {
     /// <summary>
-    /// Stores credentials relative to target URIs. In-memory, thread-safe.
+    /// In memory, thread-safe credential cache which indexes values by target.
     /// </summary>
     public sealed class CredentialCache : BaseSecureStore, ICredentialStore
     {
@@ -30,7 +30,7 @@ namespace Microsoft.TeamFoundation.Git.Helpers.Authentication
         private readonly string _prefix;
 
         /// <summary>
-        /// Deleted credentials for target URI from the credential store
+        /// Deletes a credential from the cache.
         /// </summary>
         /// <param name="targetUri">The URI of the target for which credentials are being deleted</param>
         public void DeleteCredentials(Uri targetUri)

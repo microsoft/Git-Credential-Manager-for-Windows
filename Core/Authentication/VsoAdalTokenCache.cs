@@ -48,7 +48,7 @@ namespace Microsoft.TeamFoundation.Git.Helpers.Authentication
 
         private readonly object @lock = new object();
 
-        public void AfterAccessNotification(TokenCacheNotificationArgs args)
+        private void AfterAccessNotification(TokenCacheNotificationArgs args)
         {
             lock (@lock)
             {
@@ -68,13 +68,13 @@ namespace Microsoft.TeamFoundation.Git.Helpers.Authentication
                     }
                     catch (Exception exception)
                     {
-                        Trace.WriteLine(exception.ToString());
+                        Trace.WriteLine(exception, "Error");
                     }
                 }
             }
         }
 
-        public void BeforeAccessNotification(TokenCacheNotificationArgs args)
+        private void BeforeAccessNotification(TokenCacheNotificationArgs args)
         {
             lock (@lock)
             {
@@ -92,7 +92,7 @@ namespace Microsoft.TeamFoundation.Git.Helpers.Authentication
                     }
                     catch (Exception exception)
                     {
-                        Trace.WriteLine(exception.ToString());
+                        Trace.WriteLine(exception, "Error");
                     }
                 }
             }

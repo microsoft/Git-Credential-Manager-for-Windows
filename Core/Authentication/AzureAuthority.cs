@@ -81,11 +81,11 @@ namespace Microsoft.TeamFoundation.Git.Helpers.Authentication
                 AuthenticationResult authResult = authCtx.AcquireToken(resource, clientId, redirectUri, PromptBehavior.Always, UserIdentifier.AnyUser, queryParameters);
                 tokens = new TokenPair(authResult);
 
-                Trace.WriteLine("\t token acquisition succeeded.");
+                Trace.WriteLine("    token acquisition succeeded.");
             }
             catch (AdalException exception)
             {
-                Trace.WriteLine("\t token acquisition failed.");
+                Trace.WriteLine("    token acquisition failed.");
                 Debug.Write(exception);
             }
 
@@ -122,11 +122,11 @@ namespace Microsoft.TeamFoundation.Git.Helpers.Authentication
                 AuthenticationResult authResult = await authCtx.AcquireTokenAsync(resource, clientId, userCredential);
                 tokens = new TokenPair(authResult);
 
-                Trace.WriteLine("\t token acquisition succeeded.");
+                Trace.WriteLine("    token acquisition succeeded.");
             }
             catch (AdalException exception)
             {
-                Trace.WriteLine("\t token acquisition failed.");
+                Trace.WriteLine("    token acquisition failed.");
                 Debug.WriteLine(exception);
             }
 
@@ -163,11 +163,11 @@ namespace Microsoft.TeamFoundation.Git.Helpers.Authentication
                 AuthenticationResult authResult = await authCtx.AcquireTokenByRefreshTokenAsync(refreshToken.Value, clientId, resource);
                 tokens = new TokenPair(authResult);
 
-                Trace.WriteLine("\t token acquisition succeeded.");
+                Trace.WriteLine("    token acquisition succeeded.");
             }
             catch (AdalException exception)
             {
-                Trace.WriteLine("\t token acquisition failed.");
+                Trace.WriteLine("    token acquisition failed.");
                 Debug.WriteLine(exception);
             }
 
