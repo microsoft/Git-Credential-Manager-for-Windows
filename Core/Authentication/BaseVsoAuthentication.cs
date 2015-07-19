@@ -13,25 +13,35 @@ namespace Microsoft.TeamFoundation.Git.Helpers.Authentication
 
         protected const string AdalRefreshPrefx = "adal-refresh";
 
-        private BaseVsoAuthentication()
+        private BaseVsoAuthentication(string credentialPrefix, VsoTokenScope scope)
         {
             AdalTrace.TraceSource.Switch.Level = SourceLevels.Off;
             AdalTrace.LegacyTraceSwitch.Level = TraceLevel.Off;
 
             this.ClientId = DefaultClientId;
             this.Resource = DefaultResource;
-            this.TokenScope = VsoTokenScope.ProfileRead;
+            this.TokenScope = scope;
             this.AdaRefreshTokenStore = new TokenStore(AdalRefreshPrefx);
             this.VsoAuthority = new VsoAzureAuthority();
-        }
-        protected BaseVsoAuthentication(string credentialPrefix, VsoTokenScope tokenScope, string resource, string clientId)
-            : this()
-        {
-            this.PersonalAccessTokenCache = new TokenStore(credentialPrefix);
+            this.PersonalAccessTokenCache = new TokenCache(credentialPrefix);
             this.PersonalAccessTokenStore = new TokenStore(credentialPrefix);
-            this.ClientId = clientId ?? this.ClientId;
-            this.Resource = resource ?? this.Resource;
-            this.TokenScope = tokenScope ?? this.TokenScope;
+        }
+        /// <summary>
+        /// Invoked by a derived classes implementation.  allows custom back-ends to be used
+        /// </summary>
+        /// <param name="credentialPrefix"></param>
+        /// <param name="tokenScope"></param>
+        /// <param name="adaRefreshTokenStore"></param>
+        /// <param name="personalAccessTokenStore"></param>
+        protected BaseVsoAuthentication(
+            string credentialPrefix, 
+            VsoTokenScope tokenScope, 
+            ITokenStore adaRefreshTokenStore = null, 
+            ITokenStore personalAccessTokenStore = null)
+            : this(credentialPrefix, tokenScope)
+        {
+            this.AdaRefreshTokenStore = adaRefreshTokenStore ?? this.AdaRefreshTokenStore;
+            this.PersonalAccessTokenStore = personalAccessTokenStore ?? this.PersonalAccessTokenStore;
             this.VsoAdalTokenCache = new VsoAdalTokenCache();
             this.VsoIdeTokenCache = new TokenRegistry();
         }
@@ -41,7 +51,7 @@ namespace Microsoft.TeamFoundation.Git.Helpers.Authentication
             ITokenStore adaRefreshTokenStore,
             ITokenStore vsoIdeTokenCache,
             IVsoAuthority vsoAuthority)
-            : this()
+            : this("test", VsoTokenScope.ProfileRead)
         {
             this.PersonalAccessTokenStore = personalAccessTokenStore;
             this.PersonalAccessTokenCache = personalAccessTokenCache;

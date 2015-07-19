@@ -2,7 +2,6 @@
 using System.Diagnostics;
 using System.Threading.Tasks;
 using Microsoft.IdentityModel.Clients.ActiveDirectory;
-using Debug = System.Diagnostics.Debug;
 
 namespace Microsoft.TeamFoundation.Git.Helpers.Authentication
 {
@@ -13,9 +12,12 @@ namespace Microsoft.TeamFoundation.Git.Helpers.Authentication
         public VsoMsaAuthentication(
             string credentialPrefix,
             VsoTokenScope tokenScope,
-            string resource = null,
-            string clientId = null)
-            : base(credentialPrefix, tokenScope, resource, clientId)
+            ITokenStore adaRefreshTokenStore = null,
+            ITokenStore personalAccessTokenStore = null)
+            : base(credentialPrefix, 
+                   tokenScope,
+                   adaRefreshTokenStore,
+                   personalAccessTokenStore)
         {
             this.VsoAuthority = new VsoAzureAuthority(DefaultAuthorityHost);
         }

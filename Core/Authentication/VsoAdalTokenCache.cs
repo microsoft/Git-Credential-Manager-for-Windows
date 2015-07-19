@@ -22,12 +22,6 @@ namespace Microsoft.TeamFoundation.Git.Helpers.Authentication
             AfterAccess = AfterAccessNotification;
             BeforeAccess = BeforeAccessNotification;
 
-            DirectoryInfo cacheDirectory = new DirectoryInfo(directoryPath);
-            if (!cacheDirectory.Exists)
-            {
-                cacheDirectory.Create();
-            }
-
             string filePath = Path.Combine(directoryPath, AdalCacheFile);
 
             _cacheFilePath = filePath;
@@ -52,7 +46,7 @@ namespace Microsoft.TeamFoundation.Git.Helpers.Authentication
         {
             lock (@lock)
             {
-                if (this.HasStateChanged)
+                if (File.Exists(_cacheFilePath) && this.HasStateChanged)
                 {
                     Trace.WriteLine("VsoAdalTokenCache::AfterAccessNotification");
 

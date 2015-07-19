@@ -65,11 +65,6 @@ namespace Microsoft.TeamFoundation.Git.Helpers.Authentication
             Console.Out.WriteLine();
             Console.Out.WriteLine("      `git config --global credential.microsoft.visualstudio.com.authority AAD`");
             Console.Out.WriteLine();
-            Console.Out.WriteLine("   clientid       Defines the client identifier for the authority.");
-            Console.Out.WriteLine("                  Defaults to visualstudio.com. Only used by AAD authority.");
-            Console.Out.WriteLine();
-            Console.Out.WriteLine("   resource       Defines the resource identifier for the authority.");
-            Console.Out.WriteLine("                  Defaults to visualstudio.com. Only used by AAD authority.");
             Console.Out.WriteLine("   interactive    Specifies if user can be prompted for credentials or not.");
             Console.Out.WriteLine("                  Supports Auto, Always, or Never. Defaults to Auto.");
             Console.Out.WriteLine("                  Only used by AAD and MSA authority.");
@@ -228,15 +223,6 @@ namespace Microsoft.TeamFoundation.Git.Helpers.Authentication
             switch (operationArguments.Authority)
             {
                 case AuthorityType.AzureDirectory:
-                    // if the clientId and resource values exist, use them
-                    if (!String.IsNullOrWhiteSpace(operationArguments.AuthorityClientId) && !String.IsNullOrWhiteSpace(operationArguments.AuthorityResource))
-                    {
-                        string clientId = operationArguments.AuthorityClientId;
-                        string resource = operationArguments.AuthorityResource;
-
-                        Trace.WriteLine(String.Format("\tresource = {0}, clientId = {1}", resource, clientId));
-                        return new VsoAadAuthentication(CredentialPrefix, CredentialScope, resource, clientId);
-                    }
                     // return a generic AAD backed VSO authentication object
                     return new VsoAadAuthentication(CredentialPrefix, CredentialScope);
 
@@ -245,15 +231,6 @@ namespace Microsoft.TeamFoundation.Git.Helpers.Authentication
                     return new BasicAuthentication(CredentialPrefix);
 
                 case AuthorityType.MicrosoftAccount:
-                    // if the clientId and resource values exist, use them
-                    if (!String.IsNullOrWhiteSpace(operationArguments.AuthorityClientId) && !String.IsNullOrWhiteSpace(operationArguments.AuthorityResource))
-                    {
-                        string clientId = operationArguments.AuthorityClientId;
-                        string resource = operationArguments.AuthorityResource;
-
-                        Trace.WriteLine(String.Format("   resource = {0}, clientId = {1}", resource, clientId));
-                        return new VsoMsaAuthentication(CredentialPrefix, CredentialScope, resource, clientId);
-                    }
                     // return a generic MSA backed VSO authentication object
                     return new VsoMsaAuthentication(CredentialPrefix, CredentialScope);
             }
@@ -273,16 +250,6 @@ namespace Microsoft.TeamFoundation.Git.Helpers.Authentication
             {
                 Trace.WriteLine("   authority = " + entry.Value);
                 operationArguments.SetScheme(entry.Value);
-            }
-            if (GetGitConfigEntry(config, operationArguments, "clientid", out entry))
-            {
-                Trace.WriteLine("   clientid = " + entry.Value);
-                operationArguments.AuthorityClientId = entry.Value;
-            }
-            if (GetGitConfigEntry(config, operationArguments, "resource", out entry))
-            {
-                Trace.WriteLine("   resource = " + entry.Value);
-                operationArguments.AuthorityResource = entry.Value;
             }
             if (GetGitConfigEntry(config, operationArguments, "validate", out entry))
             {
