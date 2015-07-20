@@ -15,19 +15,15 @@ namespace Microsoft.TeamFoundation.Git.Helpers.Authentication
         /// <param name="credentialPrefix">
         /// Value use to parition values stored in the underlying credential storage.
         /// </param>
-        public BasicAuthentication(string credentialPrefix)
+        public BasicAuthentication(ICredentialStore credentialStore)
         {
-            this.CredentialStore = new CredentialStore(credentialPrefix);
-            this.CredentialCache = new CredentialCache(credentialPrefix);
-        }
-        internal BasicAuthentication(ICredentialStore credentialStore, ICredentialStore credentialCache)
-        {
+            if (credentialStore == null)
+                throw new ArgumentNullException("credentialStore", "The `credentialStore` parameter is null or invalid.");
+
             this.CredentialStore = credentialStore;
-            this.CredentialCache = credentialCache;
         }
 
         internal ICredentialStore CredentialStore { get; set; }
-        internal ICredentialStore CredentialCache { get; set; }
 
         /// <summary>
         /// Deletes a <see cref="Credential"/> from the storage used by the authentication object.
@@ -42,7 +38,6 @@ namespace Microsoft.TeamFoundation.Git.Helpers.Authentication
             Trace.WriteLine("BasicAuthentication::DeleteCredentials");
 
             this.CredentialStore.DeleteCredentials(targetUri);
-            this.CredentialCache.DeleteCredentials(targetUri);
         }
         /// <summary>
         /// Gets a <see cref="Credential"/> from the storage used by the authentication object.
@@ -61,16 +56,7 @@ namespace Microsoft.TeamFoundation.Git.Helpers.Authentication
 
             Trace.WriteLine("BasicAuthentication::GetCredentials");
 
-            // check the in-memory cache first
-            if (!this.CredentialCache.ReadCredentials(targetUri, out credentials))
-            {
-                // fall-back to the on disk cache
-                if (this.CredentialStore.ReadCredentials(targetUri, out credentials))
-                {
-                    // update the in-memory cache for faster future look-ups
-                    this.CredentialCache.WriteCredentials(targetUri, credentials);
-                }
-            }
+            this.CredentialStore.ReadCredentials(targetUri, out credentials);
 
             return credentials != null;
         }
@@ -90,7 +76,6 @@ namespace Microsoft.TeamFoundation.Git.Helpers.Authentication
             Trace.WriteLine("BasicAuthentication::SetCredentials");
 
             this.CredentialStore.WriteCredentials(targetUri, credentials);
-            this.CredentialCache.WriteCredentials(targetUri, credentials);
             return true;
         }
     }

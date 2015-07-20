@@ -13,18 +13,22 @@ namespace Microsoft.TeamFoundation.Git.Helpers.Authentication
 
         protected const string AdalRefreshPrefx = "adal-refresh";
 
-        private BaseVsoAuthentication(string credentialPrefix, VsoTokenScope scope)
+        private BaseVsoAuthentication(VsoTokenScope scope, ITokenStore personalAccessTokenStore)
         {
+            if (scope == null)
+                throw new ArgumentNullException("scope", "The `scope` parameter is null or invalid.");
+            if (personalAccessTokenStore == null)
+                throw new ArgumentNullException("personalAccessTokenStore", "The `personalAccessTokenStore` paramter is null or invalid.");
+
             AdalTrace.TraceSource.Switch.Level = SourceLevels.Off;
             AdalTrace.LegacyTraceSwitch.Level = TraceLevel.Off;
 
             this.ClientId = DefaultClientId;
             this.Resource = DefaultResource;
             this.TokenScope = scope;
-            this.AdaRefreshTokenStore = new TokenStore(AdalRefreshPrefx);
+            this.PersonalAccessTokenStore = personalAccessTokenStore;
+            this.AdaRefreshTokenStore = new SecretStore(AdalRefreshPrefx);
             this.VsoAuthority = new VsoAzureAuthority();
-            this.PersonalAccessTokenCache = new TokenCache(credentialPrefix);
-            this.PersonalAccessTokenStore = new TokenStore(credentialPrefix);
         }
         /// <summary>
         /// Invoked by a derived classes implementation.  allows custom back-ends to be used
@@ -34,27 +38,26 @@ namespace Microsoft.TeamFoundation.Git.Helpers.Authentication
         /// <param name="adaRefreshTokenStore"></param>
         /// <param name="personalAccessTokenStore"></param>
         protected BaseVsoAuthentication(
-            string credentialPrefix, 
-            VsoTokenScope tokenScope, 
-            ITokenStore adaRefreshTokenStore = null, 
-            ITokenStore personalAccessTokenStore = null)
-            : this(credentialPrefix, tokenScope)
+            VsoTokenScope tokenScope,
+            ITokenStore personalAccessTokenStore,
+            ITokenStore adaRefreshTokenStore = null)
+            : this(tokenScope, personalAccessTokenStore)
         {
             this.AdaRefreshTokenStore = adaRefreshTokenStore ?? this.AdaRefreshTokenStore;
-            this.PersonalAccessTokenStore = personalAccessTokenStore ?? this.PersonalAccessTokenStore;
             this.VsoAdalTokenCache = new VsoAdalTokenCache();
             this.VsoIdeTokenCache = new TokenRegistry();
         }
         internal BaseVsoAuthentication(
             ITokenStore personalAccessTokenStore,
-            ITokenStore personalAccessTokenCache,
             ITokenStore adaRefreshTokenStore,
             ITokenStore vsoIdeTokenCache,
             IVsoAuthority vsoAuthority)
-            : this("test", VsoTokenScope.ProfileRead)
+            : this(VsoTokenScope.ProfileRead, personalAccessTokenStore)
         {
-            this.PersonalAccessTokenStore = personalAccessTokenStore;
-            this.PersonalAccessTokenCache = personalAccessTokenCache;
+            Debug.Assert(adaRefreshTokenStore != null, "The adaRefreshTokenStore paramter is null or invalid.");
+            Debug.Assert(vsoIdeTokenCache != null, "The vsoIdeTokenCache paramter is null or invalid.");
+            Debug.Assert(vsoAuthority != null, "The vsoAuthority paramter is null or invalid.");
+
             this.AdaRefreshTokenStore = adaRefreshTokenStore;
             this.VsoIdeTokenCache = vsoIdeTokenCache;
             this.VsoAuthority = vsoAuthority;
@@ -70,8 +73,6 @@ namespace Microsoft.TeamFoundation.Git.Helpers.Authentication
 
         internal ITokenStore PersonalAccessTokenStore { get; set; }
         internal ITokenStore AdaRefreshTokenStore { get; set; }
-        internal ITokenStore PersonalAccessTokenCache { get; set; }
-
         internal IVsoAuthority VsoAuthority { get; set; }
 
         public override void DeleteCredentials(Uri targetUri)
@@ -84,7 +85,6 @@ namespace Microsoft.TeamFoundation.Git.Helpers.Authentication
             Token token = null;
             if (this.PersonalAccessTokenStore.ReadToken(targetUri, out credentials))
             {
-                this.PersonalAccessTokenCache.DeleteToken(targetUri);
                 this.PersonalAccessTokenStore.DeleteToken(targetUri);
             }
             else if (this.AdaRefreshTokenStore.ReadToken(targetUri, out token))
@@ -100,19 +100,9 @@ namespace Microsoft.TeamFoundation.Git.Helpers.Authentication
             Trace.WriteLine("BaseVsoAuthentication::GetCredentials");
 
             Token personalAccessToken;
-            // check the in-memory cache first
-            if (!this.PersonalAccessTokenCache.ReadToken(targetUri, out personalAccessToken))
+            if (this.PersonalAccessTokenStore.ReadToken(targetUri, out personalAccessToken))
             {
-                Trace.WriteLine("   unable to retrieve cached credentials, attempting stored credentials retrieval.");
-
-                // fall-back to the on disk cache
-                if (this.PersonalAccessTokenStore.ReadToken(targetUri, out personalAccessToken))
-                {
-                    Trace.WriteLine("   successfully retrieved stored credentials, updating credential cache");
-
-                    // update the in-memory cache for faster future look-ups
-                    this.PersonalAccessTokenCache.WriteToken(targetUri, personalAccessToken);
-                }
+                Trace.WriteLine("   successfully retrieved stored credentials, updating credential cache");
             }
 
             if (personalAccessToken != null)
@@ -152,7 +142,7 @@ namespace Microsoft.TeamFoundation.Git.Helpers.Authentication
                 // attempt to utilize any fedauth tokens captured by the IDE
                 if (this.VsoIdeTokenCache.ReadToken(targetUri, out refreshToken))
                 {
-                    Trace.WriteLine("   Federated auth token found in IDE cache.");
+                    Trace.WriteLine("   federated auth token found in IDE cache.");
 
                     return await this.GeneratePersonalAccessToken(targetUri, refreshToken, requireCompactToken);
                 }
@@ -203,7 +193,6 @@ namespace Microsoft.TeamFoundation.Git.Helpers.Authentication
             Token personalAccessToken;
             if ((personalAccessToken = await this.VsoAuthority.GeneratePersonalAccessToken(targetUri, accessToken, TokenScope, requestCompactToken)) != null)
             {
-                this.PersonalAccessTokenCache.WriteToken(targetUri, personalAccessToken);
                 this.PersonalAccessTokenStore.WriteToken(targetUri, personalAccessToken);
             }
 

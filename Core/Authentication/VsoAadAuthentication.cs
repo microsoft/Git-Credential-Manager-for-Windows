@@ -16,14 +16,12 @@ namespace Microsoft.TeamFoundation.Git.Helpers.Authentication
         public const string DefaultAuthorityHost = " https://management.core.windows.net/";
 
         public VsoAadAuthentication(
-            string credentialPrefix, 
-            VsoTokenScope tokenScope, 
-            ITokenStore adaRefreshTokenStore = null, 
-            ITokenStore personalAccessTokenStore = null)
-            : base(credentialPrefix, 
-                   tokenScope, 
-                   adaRefreshTokenStore, 
-                   personalAccessTokenStore)
+            VsoTokenScope tokenScope,
+            ITokenStore personalAccessTokenStore,
+            ITokenStore adaRefreshTokenStore = null)
+            : base(tokenScope,
+                   personalAccessTokenStore,
+                   adaRefreshTokenStore)
         {
             this.VsoAuthority = new VsoAzureAuthority();
         }
@@ -35,12 +33,10 @@ namespace Microsoft.TeamFoundation.Git.Helpers.Authentication
         /// <param name="adaRefreshTokenStore"></param>
         internal VsoAadAuthentication(
             ITokenStore personalAccessTokenStore,
-            ITokenStore personalAccessTokenCache,
             ITokenStore adaRefreshTokenStore,
             ITokenStore vsoIdeTokenCache,
             IVsoAuthority vsoAuthority)
             : base(personalAccessTokenStore,
-                   personalAccessTokenCache,
                    adaRefreshTokenStore,
                    vsoIdeTokenCache,
                    vsoAuthority)

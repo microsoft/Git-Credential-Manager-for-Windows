@@ -8,7 +8,7 @@ namespace Microsoft.TeamFoundation.Git.Helpers.Authentication
     public class VsoAadTests : AuthenticationTests
     {
         public VsoAadTests()
-            :base()
+            : base()
         { }
 
         [TestMethod]
@@ -57,13 +57,11 @@ namespace Microsoft.TeamFoundation.Git.Helpers.Authentication
             Token personalAccessToken;
             Token azureToken;
 
-            Assert.IsFalse(aadAuthentication.PersonalAccessTokenCache.ReadToken(targetUri, out personalAccessToken), "Personal Access Token found in cache unexpectedly.");
             Assert.IsFalse(aadAuthentication.PersonalAccessTokenStore.ReadToken(targetUri, out personalAccessToken), "Personal Access Token found in store unexpectedly.");
             Assert.IsFalse(aadAuthentication.AdaRefreshTokenStore.ReadToken(targetUri, out azureToken), "ADA Refresh Token found in store unexpectedly.");
 
             Assert.IsTrue(aadAuthentication.InteractiveLogon(targetUri, false), "Interactive logon failed unexpectedly.");
 
-            Assert.IsTrue(aadAuthentication.PersonalAccessTokenCache.ReadToken(targetUri, out personalAccessToken), "Personal Access Token not found in cache as expected.");
             Assert.IsTrue(aadAuthentication.PersonalAccessTokenStore.ReadToken(targetUri, out personalAccessToken), "Personal Access Token not found in store as expected.");
             Assert.IsTrue(aadAuthentication.AdaRefreshTokenStore.ReadToken(targetUri, out azureToken) && azureToken.Value == "token-refresh", "ADA Refresh Token not found in store as expected.");
         }
@@ -79,7 +77,6 @@ namespace Microsoft.TeamFoundation.Git.Helpers.Authentication
 
             Assert.IsTrue(Task.Run(async () => { return await aadAuthentication.NoninteractiveLogon(targetUri, false); }).Result, "Non-interactive logon unexpectedly failed.");
 
-            Assert.IsTrue(aadAuthentication.PersonalAccessTokenCache.ReadToken(targetUri, out personalAccessToken), "Personal Access Token not found in cache as expected.");
             Assert.IsTrue(aadAuthentication.PersonalAccessTokenStore.ReadToken(targetUri, out personalAccessToken), "Personal Access Token not found in store as expected.");
             Assert.IsTrue(aadAuthentication.AdaRefreshTokenStore.ReadToken(targetUri, out azureToken) && azureToken.Value == "token-refresh", "ADA Refresh Token not found in store as expected.");
         }
@@ -96,7 +93,6 @@ namespace Microsoft.TeamFoundation.Git.Helpers.Authentication
 
             Assert.IsTrue(Task.Run(async () => { return await aadAuthentication.NoninteractiveLogonWithCredentials(targetUri, originCreds, false); }).Result, "Non-interactive logon unexpectedly failed.");
 
-            Assert.IsTrue(aadAuthentication.PersonalAccessTokenCache.ReadToken(targetUri, out personalAccessToken), "Personal Access Token not found in cache as expected.");
             Assert.IsTrue(aadAuthentication.PersonalAccessTokenStore.ReadToken(targetUri, out personalAccessToken), "Personal Access Token not found in store as expected.");
             Assert.IsTrue(aadAuthentication.AdaRefreshTokenStore.ReadToken(targetUri, out azureToken) && azureToken.Value == "token-refresh", "ADA Refresh Token not found in store as expected.");
 
@@ -114,13 +110,11 @@ namespace Microsoft.TeamFoundation.Git.Helpers.Authentication
 
             Token personalAccessToken;
 
-            Assert.IsFalse(aadAuthentication.PersonalAccessTokenCache.ReadToken(targetUri, out personalAccessToken), "Personal Access Token unexpectedly found in cache.");
             Assert.IsFalse(aadAuthentication.PersonalAccessTokenStore.ReadToken(targetUri, out personalAccessToken), "Personal Access Token unexpectedly found in store.");
 
             Assert.IsTrue(Task.Run(async () => { return await aadAuthentication.RefreshCredentials(targetUri, false); }).Result, "Credentials refresh failed unexpectedly.");
             Assert.IsFalse(Task.Run(async () => { return await aadAuthentication.RefreshCredentials(invalidUri, false); }).Result, "Credentials refresh succeeded unexpectedly.");
 
-            Assert.IsTrue(aadAuthentication.PersonalAccessTokenCache.ReadToken(targetUri, out personalAccessToken), "Personal Access Token not found in cache as expected.");
             Assert.IsTrue(aadAuthentication.PersonalAccessTokenStore.ReadToken(targetUri, out personalAccessToken), "Personal Access Token not found in store as expected.");
         }
 
@@ -136,7 +130,6 @@ namespace Microsoft.TeamFoundation.Git.Helpers.Authentication
 
             Assert.IsFalse(aadAuthentication.SetCredentials(targetUri, credentials), "Credentials were unexpectedly set.");
 
-            Assert.IsFalse(aadAuthentication.PersonalAccessTokenCache.ReadToken(targetUri, out personalAccessToken), "Personal Access Token unexpectedly found in cache.");
             Assert.IsFalse(aadAuthentication.PersonalAccessTokenStore.ReadToken(targetUri, out personalAccessToken), "Personal Access Token unexpectedly found in store.");
             Assert.IsFalse(aadAuthentication.AdaRefreshTokenStore.ReadToken(targetUri, out azureToken), "ADA Refresh Token unexpectedly found in store.");
             Assert.IsFalse(aadAuthentication.GetCredentials(targetUri, out credentials), "Credentials were retrieved unexpectedly.");
@@ -154,14 +147,13 @@ namespace Microsoft.TeamFoundation.Git.Helpers.Authentication
             Assert.IsTrue(Task.Run(async () => { return await aadAuthentication.ValidateCredentials(DefaultTargetUri, credentials); }).Result, "Credential validation unexpectedly failed.");
         }
 
-        private VsoAadAuthentication GetVsoAadAuthentication(string prefix)
+        private VsoAadAuthentication GetVsoAadAuthentication(string @namespace)
         {
-            ITokenStore patStore = new TokenCache(prefix);
-            ITokenStore patCache = new TokenCache(prefix);
-            ITokenStore tokenStore = new TokenCache(prefix);
-            ITokenStore tokenCache = new TokenCache(prefix);
+            ITokenStore tokenStore1 = new SecretCache(@namespace + 1);
+            ITokenStore tokenStore2 = new SecretCache(@namespace + 2);
+            ITokenStore tokenStore3 = new SecretCache(@namespace + 3);
             IVsoAuthority vsoAuthority = new AuthorityFake();
-            return new VsoAadAuthentication(patStore, patCache, tokenStore, tokenCache, vsoAuthority);
+            return new VsoAadAuthentication(tokenStore1, tokenStore2, tokenStore3, vsoAuthority);
         }
     }
 }

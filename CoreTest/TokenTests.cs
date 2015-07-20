@@ -11,17 +11,17 @@ namespace Microsoft.TeamFoundation.Git.Helpers.Authentication
         [TestMethod]
         public void TokenStoreUrl()
         {
-            ITokenStoreTest(new TokenStore("test-token"), "http://dummy.url/for/testing", TokenString, DateTimeOffset.Now);
+            ITokenStoreTest(new SecretStore("test-token"), "http://dummy.url/for/testing", TokenString, DateTimeOffset.Now);
         }
         [TestMethod]
         public void TokenStoreUrlWithParams()
         {
-            ITokenStoreTest(new TokenStore("test-token"), "http://dummy.url/for/testing?with=params", TokenString, DateTimeOffset.Now);
+            ITokenStoreTest(new SecretStore("test-token"), "http://dummy.url/for/testing?with=params", TokenString, DateTimeOffset.Now);
         }
         [TestMethod]
         public void TokenStoreUnc()
         {
-            ITokenStoreTest(new TokenStore("test-token"), @"\\unc\share\test", TokenString, DateTimeOffset.Now);
+            ITokenStoreTest(new SecretStore("test-token"), @"\\unc\share\test", TokenString, DateTimeOffset.Now);
         }
         [TestMethod]
         public void TokenStoreValueNullRejection()
@@ -29,7 +29,7 @@ namespace Microsoft.TeamFoundation.Git.Helpers.Authentication
             bool threw = false;
             try
             {
-                ITokenStoreTest(new TokenStore("test-token"), "http://dummy.url/for/testing", null, DateTimeOffset.Now);
+                ITokenStoreTest(new SecretStore("test-token"), "http://dummy.url/for/testing", null, DateTimeOffset.Now);
             }
             catch
             {
@@ -45,7 +45,7 @@ namespace Microsoft.TeamFoundation.Git.Helpers.Authentication
             bool threw = false;
             try
             {
-                ITokenStoreTest(new TokenStore("test-token"), "http://dummy.url/for/testing", "", DateTimeOffset.Now);
+                ITokenStoreTest(new SecretStore("test-token"), "http://dummy.url/for/testing", "", DateTimeOffset.Now);
             }
             catch
             {
@@ -58,17 +58,17 @@ namespace Microsoft.TeamFoundation.Git.Helpers.Authentication
         [TestMethod]
         public void TokenCacheUrl()
         {
-            ITokenStoreTest(new TokenCache("test-token"), "http://dummy.url/for/testing", TokenString, DateTimeOffset.Now);
+            ITokenStoreTest(new SecretCache("test-token"), "http://dummy.url/for/testing", TokenString, DateTimeOffset.Now);
         }
         [TestMethod]
         public void TokenCacheUrlWithParams()
         {
-            ITokenStoreTest(new TokenCache("test-token"), "http://dummy.url/for/testing?with=params", TokenString, DateTimeOffset.Now);
+            ITokenStoreTest(new SecretCache("test-token"), "http://dummy.url/for/testing?with=params", TokenString, DateTimeOffset.Now);
         }
         [TestMethod]
         public void TokenCacheUnc()
         {
-            ITokenStoreTest(new TokenCache("test-token"), @"\\unc\share\test", TokenString, DateTimeOffset.Now);
+            ITokenStoreTest(new SecretCache("test-token"), @"\\unc\share\test", TokenString, DateTimeOffset.Now);
         }
         [TestMethod]
         public void TokenCacheValueNullRejection()
@@ -76,7 +76,7 @@ namespace Microsoft.TeamFoundation.Git.Helpers.Authentication
             bool threw = false;
             try
             {
-                ITokenStoreTest(new TokenCache("test-token"), "http://dummy.url/for/testing", null, DateTimeOffset.Now);
+                ITokenStoreTest(new SecretCache("test-token"), "http://dummy.url/for/testing", null, DateTimeOffset.Now);
             }
             catch
             {
@@ -92,12 +92,14 @@ namespace Microsoft.TeamFoundation.Git.Helpers.Authentication
             bool threw = false;
             try
             {
-                ITokenStoreTest(new TokenCache("test-token"), "http://dummy.url/for/testing", "", DateTimeOffset.Now);
+                ITokenStoreTest(new SecretCache("test-token"), "http://dummy.url/for/testing", "", DateTimeOffset.Now);
             }
             catch
             {
                 threw = true;
             }
+
+            Assert.IsTrue(threw, "Empty token was accepted.");
         }
 
         private void ITokenStoreTest(ITokenStore tokenStore, string url, string token, DateTimeOffset expires)

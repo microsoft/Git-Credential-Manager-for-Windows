@@ -9,6 +9,8 @@ namespace Microsoft.TeamFoundation.Git.Helpers.Authentication
 {
     public abstract class BaseSecureStore
     {
+        public static readonly char[] IllegalCharacters = new[] { ':', ';', '\\', '?', '@', '=', '&', '%', '$' };
+
         /// <summary>
         /// Prompts the user for credentials (username & password) and stores the results
         /// </summary>

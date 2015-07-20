@@ -5,7 +5,7 @@ namespace Microsoft.TeamFoundation.Git.Helpers.Authentication
     /// <summary>
     /// Credentials for user authentication.
     /// </summary>
-    public sealed class Credential : IEquatable<Credential>
+    public sealed class Credential : Secret, IEquatable<Credential>
     {
         public static readonly Credential Empty = new Credential(String.Empty, String.Empty);
 

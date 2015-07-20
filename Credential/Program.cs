@@ -14,7 +14,7 @@ namespace Microsoft.TeamFoundation.Git.Helpers.Authentication
     class Program
     {
         private const string ConfigPrefix = "credential";
-        private const string CredentialPrefix = "git";
+        private const string SecretsNamespace = "git";
         private static readonly VsoTokenScope CredentialScope = VsoTokenScope.CodeWrite | VsoTokenScope.ProfileRead;
         private const char HostSplitCharacter = '.';
 
@@ -220,19 +220,22 @@ namespace Microsoft.TeamFoundation.Git.Helpers.Authentication
             Trace.WriteLine("Program::CreateAuthentication");
             Trace.WriteLine("   authority = " + operationArguments.Authority);
 
+            var secrets = new SecretStore(SecretsNamespace);
+
             switch (operationArguments.Authority)
             {
                 case AuthorityType.AzureDirectory:
                     // return a generic AAD backed VSO authentication object
-                    return new VsoAadAuthentication(CredentialPrefix, CredentialScope);
+                    return new VsoAadAuthentication(CredentialScope, secrets);
 
                 case AuthorityType.Basic:
                 default:
-                    return new BasicAuthentication(CredentialPrefix);
+                    // return a generic username + password authentication object
+                    return new BasicAuthentication(secrets);
 
                 case AuthorityType.MicrosoftAccount:
                     // return a generic MSA backed VSO authentication object
-                    return new VsoMsaAuthentication(CredentialPrefix, CredentialScope);
+                    return new VsoMsaAuthentication(CredentialScope, secrets);
             }
         }
 

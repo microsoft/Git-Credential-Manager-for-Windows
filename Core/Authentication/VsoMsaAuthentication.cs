@@ -10,14 +10,12 @@ namespace Microsoft.TeamFoundation.Git.Helpers.Authentication
         public const string DefaultAuthorityHost = AzureAuthority.AuthorityHostUrlBase + "/live.com";
 
         public VsoMsaAuthentication(
-            string credentialPrefix,
             VsoTokenScope tokenScope,
-            ITokenStore adaRefreshTokenStore = null,
-            ITokenStore personalAccessTokenStore = null)
-            : base(credentialPrefix, 
-                   tokenScope,
-                   adaRefreshTokenStore,
-                   personalAccessTokenStore)
+            ITokenStore personalAccessTokenStore,
+            ITokenStore adaRefreshTokenStore = null)
+            : base(tokenScope,
+                   personalAccessTokenStore,
+                   adaRefreshTokenStore)
         {
             this.VsoAuthority = new VsoAzureAuthority(DefaultAuthorityHost);
         }
@@ -30,12 +28,10 @@ namespace Microsoft.TeamFoundation.Git.Helpers.Authentication
         /// <param name="vsoAuthority"></param>
         internal VsoMsaAuthentication(
             ITokenStore personalAccessTokenStore,
-            ITokenStore personalAccessTokenCache,
             ITokenStore adaRefreshTokenStore,
             ITokenStore vsoIdeTokenCache,
             IVsoAuthority liveAuthority)
             : base(personalAccessTokenStore,
-                   personalAccessTokenCache,
                    adaRefreshTokenStore,
                    vsoIdeTokenCache,
                    liveAuthority)

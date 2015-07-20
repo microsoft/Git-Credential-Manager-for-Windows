@@ -9,19 +9,19 @@ namespace Microsoft.TeamFoundation.Git.Helpers.Authentication.Test
         [TestMethod]
         public void CredentialStoreUrl()
         {
-            ICredentialStoreTest(new CredentialStore("test"), "http://dummy.url/for/testing", "username", "password");
+            ICredentialStoreTest(new SecretStore("test"), "http://dummy.url/for/testing", "username", "password");
         }
 
         [TestMethod]
         public void CredentialStoreUrlWithParams()
         {
-            ICredentialStoreTest(new CredentialStore("test"), "http://dummy.url/for/testing?with=params", "username", "password");
+            ICredentialStoreTest(new SecretStore("test"), "http://dummy.url/for/testing?with=params", "username", "password");
         }
 
         [TestMethod]
         public void CredentialStoreUnc()
         {
-            ICredentialStoreTest(new CredentialStore("test"), @"\\unc\share\test", "username", "password");
+            ICredentialStoreTest(new SecretStore("test"), @"\\unc\share\test", "username", "password");
         }
 
         [TestMethod]
@@ -29,7 +29,7 @@ namespace Microsoft.TeamFoundation.Git.Helpers.Authentication.Test
         {
             try
             {
-                ICredentialStoreTest(new CredentialStore("test"), "http://dummy.url/for/testing", null, "null_usernames_are_illegal");
+                ICredentialStoreTest(new SecretStore("test"), "http://dummy.url/for/testing", null, "null_usernames_are_illegal");
                 Assert.Fail("Null username was accepted");
             }
             catch { }
@@ -38,55 +38,55 @@ namespace Microsoft.TeamFoundation.Git.Helpers.Authentication.Test
         [TestMethod]
         public void CredentialStoreUsernameBlank()
         {
-            ICredentialStoreTest(new CredentialStore("test"), "http://dummy.url/for/testing", "", "blank_usernames_are_legal");
+            ICredentialStoreTest(new SecretStore("test"), "http://dummy.url/for/testing", "", "blank_usernames_are_legal");
         }
 
         [TestMethod]
         public void CredentialStorePasswordNull()
         {
-            ICredentialStoreTest(new CredentialStore("test"), "http://dummy.url/for/testing", "null_passwords_are_illegal", null);
+            ICredentialStoreTest(new SecretStore("test"), "http://dummy.url/for/testing", "null_passwords_are_illegal", null);
         }
 
         [TestMethod]
         public void CredentialStorePassswordBlank()
         {
-            ICredentialStoreTest(new CredentialStore("test"), "http://dummy.url/for/testing", "blank_passwords_are_legal", "");
+            ICredentialStoreTest(new SecretStore("test"), "http://dummy.url/for/testing", "blank_passwords_are_legal", "");
         }
 
         [TestMethod]
-        public void CredentialCacheUrl()
+        public void SecretCacheUrl()
         {
-            ICredentialStoreTest(new CredentialCache("test-cache"), "http://dummy.url/for/testing", "username", "password");
+            ICredentialStoreTest(new SecretCache("test-cache"), "http://dummy.url/for/testing", "username", "password");
         }
 
         [TestMethod]
-        public void CredentialCacheUrlWithParams()
+        public void SecretCacheUrlWithParams()
         {
-            ICredentialStoreTest(new CredentialCache("test-cache"), "http://dummy.url/for/testing?with=params", "username", "password");
+            ICredentialStoreTest(new SecretCache("test-cache"), "http://dummy.url/for/testing?with=params", "username", "password");
         }
 
         [TestMethod]
-        public void CredentialCacheUnc()
+        public void SecretCacheUnc()
         {
-            ICredentialStoreTest(new CredentialCache("test-cache"), @"\\unc\share\test", "username", "password");
+            ICredentialStoreTest(new SecretCache("test-cache"), @"\\unc\share\test", "username", "password");
         }
 
         [TestMethod]
-        public void CredentialCacheUsernameNull()
+        public void SecretCacheUsernameNull()
         {
-            ICredentialStoreTest(new CredentialCache("test-cache"), "http://dummy.url/for/testing", null, "null_usernames_are_illegal");
+            ICredentialStoreTest(new SecretCache("test-cache"), "http://dummy.url/for/testing", null, "null_usernames_are_illegal");
         }
 
         [TestMethod]
-        public void CredentialCacheUsernameBlankReject()
+        public void SecretCacheUsernameBlankReject()
         {
-            ICredentialStoreTest(new CredentialCache("test-cache"), "http://dummy.url/for/testing", "", "blank_usernames_are_illegal");
+            ICredentialStoreTest(new SecretCache("test-cache"), "http://dummy.url/for/testing", "", "blank_usernames_are_illegal");
         }
         
         [TestMethod]
-        public void CredentialCachePasswordNull()
+        public void SecretCachePasswordNull()
         {
-            ICredentialStoreTest(new CredentialCache("test-cache"), "http://dummy.url/for/testing", "null_passwords_are_illegal", null);
+            ICredentialStoreTest(new SecretCache("test-cache"), "http://dummy.url/for/testing", "null_passwords_are_illegal", null);
         }        
 
         private void ICredentialStoreTest(ICredentialStore credentialStore, string url, string username, string password)

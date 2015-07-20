@@ -52,13 +52,12 @@
     <Reference Include="System.Security" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Authentication\SecretCache.cs" />
     <Compile Include="Authentication\VsoAzureAuthority.cs" />
     <Compile Include="Authentication\VsoTokenScope.cs" />
     <Compile Include="Authentication\AzureAuthority.cs" />
-    <Compile Include="Authentication\CredentialCache.cs" />
     <Compile Include="Authentication\IAzureAuthority.cs" />
     <Compile Include="Authentication\IVsoMsaAuthentication.cs" />
-    <Compile Include="Authentication\TokenCache.cs" />
     <Compile Include="Authentication\TokenPair.cs" />
     <Compile Include="Authentication\TokenType.cs" />
     <Compile Include="Authentication\VsoAadAuthentication.cs" />
@@ -73,13 +72,13 @@
     <Compile Include="Authentication\ITokenStore.cs" />
     <Compile Include="Authentication\VsoAdalTokenCache.cs" />
     <Compile Include="Authentication\VsoMsaAuthentication.cs" />
-    <Compile Include="Authentication\CredentialStore.cs" />
-    <Compile Include="Authentication\TokenStore.cs" />
     <Compile Include="Authentication\Token.cs" />
     <Compile Include="Authentication\NativeMethods.cs" />
     <Compile Include="Authentication\IVsoAuthority.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Authentication\TokenRegistry.cs" />
+    <Compile Include="Authentication\SecretStore.cs" />
+    <Compile Include="Authentication\Secret.cs" />
     <Compile Include="Where.cs" />
   </ItemGroup>
   <ItemGroup>
