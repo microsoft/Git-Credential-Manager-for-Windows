@@ -89,12 +89,11 @@ namespace Microsoft.TeamFoundation.Git.Helpers.Authentication
 
         private static void Erase(OperationArguments operationArguments)
         {
-            Trace.WriteLine("Program.Erase");
-
             Debug.Assert(operationArguments != null, "The operationArguments is null");
             Debug.Assert(operationArguments.TargetUri != null, "The operationArgument.TargetUri is null");
 
-            Trace.WriteLine("targetUri = " + operationArguments.TargetUri);
+            Trace.WriteLine("Program::Erase");
+            Trace.WriteLine("   targetUri = " + operationArguments.TargetUri);
 
             BaseAuthentication authentication = CreateAuthentication(operationArguments);
 
@@ -115,11 +114,10 @@ namespace Microsoft.TeamFoundation.Git.Helpers.Authentication
 
         private static void Get(OperationArguments operationArguments)
         {
-            Trace.WriteLine("Program::Get");
-
             Debug.Assert(operationArguments != null, "The operationArguments is null");
             Debug.Assert(operationArguments.TargetUri != null, "The operationArgument.TargetUri is null");
 
+            Trace.WriteLine("Program::Get");
             Trace.WriteLine("   targetUri = " + operationArguments.TargetUri);
 
             BaseAuthentication authentication = CreateAuthentication(operationArguments);
@@ -143,6 +141,7 @@ namespace Microsoft.TeamFoundation.Git.Helpers.Authentication
                     Task.Run(async () =>
                     {
                         // attmempt to get cached creds -> refresh creds -> non-interactive logon -> interactive logon
+                        // note that AAD and MSA "credentials" are always actually scoped access tokens
                         if (((operationArguments.Interactivity != Interactivity.Always
                                 && aadAuth.GetCredentials(operationArguments.TargetUri, out credentials)
                                 && (!operationArguments.ValidateCredentials
@@ -207,6 +206,7 @@ namespace Microsoft.TeamFoundation.Git.Helpers.Authentication
             Debug.Assert(operationArguments.TargetUri != null, "The operationArgument.TargetUri is null");
 
             Trace.WriteLine("Program::Store");
+            Trace.WriteLine("   targetUri = " + operationArguments.TargetUri);
 
             BaseAuthentication authentication = CreateAuthentication(operationArguments);
             Credential credentials = new Credential(operationArguments.Username, operationArguments.Password ?? String.Empty);
