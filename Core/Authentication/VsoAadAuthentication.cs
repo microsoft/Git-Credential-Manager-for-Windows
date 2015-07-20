@@ -139,7 +139,7 @@ namespace Microsoft.TeamFoundation.Git.Helpers.Authentication
             Credential.Validate(credentials);
 
             Trace.WriteLine("VsoMsaAuthentication::SetCredentials");
-            Trace.WriteLine("   setting MSA credentials is not supported");
+            Trace.WriteLine("   setting AAD credentials is not supported");
 
             // does nothing with VSO AAD backed accounts
             return false;
