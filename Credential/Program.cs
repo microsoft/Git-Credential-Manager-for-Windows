@@ -141,7 +141,7 @@ namespace Microsoft.TeamFoundation.Git.Helpers.Authentication
                     Task.Run(async () =>
                     {
                         // attmempt to get cached creds -> refresh creds -> non-interactive logon -> interactive logon
-                        // note that AAD and MSA "credentials" are always actually scoped access tokens
+                        // note that AAD "credentials" are always actually scoped access tokens
                         if (((operationArguments.Interactivity != Interactivity.Always
                                 && aadAuth.GetCredentials(operationArguments.TargetUri, out credentials)
                                 && (!operationArguments.ValidateCredentials
@@ -174,6 +174,7 @@ namespace Microsoft.TeamFoundation.Git.Helpers.Authentication
                     Task.Run(async () =>
                     {
                         // attmempt to get cached creds -> refresh creds -> interactive logon
+                        // note that MSA "credentials" are always actually scoped access tokens
                         if (((operationArguments.Interactivity != Interactivity.Always
                                 && msaAuth.GetCredentials(operationArguments.TargetUri, out credentials)
                                 && (!operationArguments.ValidateCredentials
