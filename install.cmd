@@ -51,10 +51,12 @@ ECHO I'm installing "%gitExtensionName%" from "%installPath%" to "%destination%"
 GOTO COPY_FILES
 
 :COPY_FILES
-IF EXIST "%destination%\git-credential-store.exe" IF NOT EXIST "%destination%\~git-credential-store.exe~" REN "%destination%\git-credential-store.exe" "%destination%\~git-credential-store.exe~"
-(COPY /y "%installPath%"\*.exe "%destination%"\*.exe) || ECHO Oops! Fail to copy content from "%installPath%" to "%destination%"
-(COPY /y "%installPath%"\*.dll "%destination%"\*.dll) || ECHO Oops! Fail to copy content from "%installPath%" to "%destination%"
+IF EXIST "%destination%git-credential-store.exe" IF NOT EXIST "%destination%~git-credential-store.exe~" RENAME "%destination%git-credential-store.exe" "~git-credential-store.exe~"
+(COPY /y "%installPath%"*.exe "%destination%"*.exe) || ECHO Oops! Fail to copy content from "%installPath%" to "%destination%"
+(COPY /y "%installPath%"*.dll "%destination%"*.dll) || ECHO Oops! Fail to copy content from "%installPath%" to "%destination%"
 SET helperInstalled=1
+GOTO :END
+
 
 :INSTALLED_CHECK
 
@@ -70,14 +72,9 @@ GOTO :END
 :GIT_FOUND
 :: Pre-configure it for microsoft.visualstudio.com and mseng.visualstudio.com
 git config --global credential.helper store
-git config --global credential.visualstudio.com.authority MSA
-git config --global credential.microsoft.visualstudio.com.authority AAD
-git config --global credential.mseng.visualstudio.com.authority AAD
-git config --global credential.devdiv.visualstudio.com.authority AAD
 
 ECHO(
 ECHO %gitExtensionName% was installed!
-ECHO It was also configured for https://microsoft.visualstudio.com, https://mseng.visualstudio.com, and https://devdiv.visualstudio.com
 ECHO(
 GOTO :END
 

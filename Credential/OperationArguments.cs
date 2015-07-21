@@ -12,7 +12,7 @@ namespace Microsoft.TeamFoundation.Git.Helpers.Authentication
             Debug.Assert(stdin != null, "The stdin parameter is null");
 
 
-            this.Authority = AuthorityType.Basic;
+            this.Authority = AuthorityType.Auto;
             this.Interactivity = Interactivity.Auto;
             this.ValidateCredentials = true;
 

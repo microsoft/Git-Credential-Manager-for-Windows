@@ -50,22 +50,22 @@ namespace Microsoft.TeamFoundation.Git.Helpers.Authentication
         /// <returns>True if successfull; otherwise false.</returns>
         public bool InteractiveLogon(Uri targetUri, bool requireCompactToken)
         {
-            const string QueryParameterDomainHints = "domain_hint=live.com&display=popup";
-
-            Trace.WriteLine("VsoMsaAuthentication::InteractiveLogon");
+            const string QueryParameters = "domain_hint=live.com&display=popup&site_id=501454&nux=1";
 
             BaseSecureStore.ValidateTargetUri(targetUri);
+
+            Trace.WriteLine("VsoMsaAuthentication::InteractiveLogon");
 
             try
             {
                 TokenPair tokens;
-                if ((tokens = this.VsoAuthority.AcquireToken(targetUri, this.ClientId, this.Resource, new Uri(RedirectUrl), QueryParameterDomainHints)) != null)
+                if ((tokens = this.VsoAuthority.AcquireToken(targetUri, this.ClientId, this.Resource, new Uri(RedirectUrl), QueryParameters)) != null)
                 {
                     Trace.WriteLine("   token successfully acquired.");
 
                     this.StoreRefreshToken(targetUri, tokens.RefeshToken);
 
-                    return Task.Run(async () => { return await this.GeneratePersonalAccessToken(targetUri, tokens.AccessToken, requireCompactToken); }).Result;
+                    return this.GeneratePersonalAccessToken(targetUri, tokens.AccessToken, requireCompactToken).Result;
                 }
             }
             catch (AdalException exception)

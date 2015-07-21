@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
+using System.Net;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 // couple of local re-delcaration to make code easier to read
@@ -36,7 +37,7 @@ namespace Microsoft.TeamFoundation.Git.Helpers.Authentication
             LoadOperationArguments(operationArguments);
 
             // list of arg => method associations (case-insensitive)
-            Dictionary<string, Action<OperationArguments>> actions = 
+            Dictionary<string, Action<OperationArguments>> actions =
                 new Dictionary<string, Action<OperationArguments>>(StringComparer.OrdinalIgnoreCase)
             {
                 { "approve", Store },
@@ -63,7 +64,7 @@ namespace Microsoft.TeamFoundation.Git.Helpers.Authentication
             Console.Out.WriteLine("usage: git credential <command> [<args>]");
             Console.Out.WriteLine();
             Console.Out.WriteLine("   authority      Defines the type of authentication to be used.");
-            Console.Out.WriteLine("                  Supportd Basic, AAD, and MSA. Default is Basic.");
+            Console.Out.WriteLine("                  Supportd Auto, Basic, AAD, and MSA. Default is Auto.");
             Console.Out.WriteLine();
             Console.Out.WriteLine("      `git config --global credential.microsoft.visualstudio.com.authority AAD`");
             Console.Out.WriteLine();
@@ -116,6 +117,8 @@ namespace Microsoft.TeamFoundation.Git.Helpers.Authentication
 
         private static void Get(OperationArguments operationArguments)
         {
+            const string AadMsaAuthFailureMessage = "Logon failed, use ctrl+c to cancel basic credential prompt.";
+
             Debug.Assert(operationArguments != null, "The operationArguments is null");
             Debug.Assert(operationArguments.TargetUri != null, "The operationArgument.TargetUri is null");
 
@@ -125,7 +128,6 @@ namespace Microsoft.TeamFoundation.Git.Helpers.Authentication
             BaseAuthentication authentication = CreateAuthentication(operationArguments);
             Credential credentials = null;
 
-            Trace.WriteLine("   authority = " + operationArguments.Authority);
             switch (operationArguments.Authority)
             {
                 default:
@@ -167,6 +169,10 @@ namespace Microsoft.TeamFoundation.Git.Helpers.Authentication
                             Trace.WriteLine("   credentials found");
                             operationArguments.SetCredentials(credentials);
                         }
+                        else
+                        {
+                            Console.Error.WriteLine(AadMsaAuthFailureMessage);
+                        }
                     }).Wait();
                     break;
 
@@ -194,6 +200,10 @@ namespace Microsoft.TeamFoundation.Git.Helpers.Authentication
                         {
                             Trace.WriteLine("   credentials found");
                             operationArguments.SetCredentials(credentials);
+                        }
+                        else
+                        {
+                            Console.Error.WriteLine(AadMsaAuthFailureMessage);
                         }
                     }).Wait();
                     break;
@@ -227,16 +237,79 @@ namespace Microsoft.TeamFoundation.Git.Helpers.Authentication
 
             switch (operationArguments.Authority)
             {
+                case AuthorityType.Auto:
+                    const string VsoBaseUrlHost = "visualstudio.com";
+                    const string VsoResourceTenantHeader = "X-VSS-ResourceTenant";
+
+                    Trace.WriteLine("   detecting authority type");
+
+                    if (operationArguments.Host.EndsWith(VsoBaseUrlHost, StringComparison.OrdinalIgnoreCase))
+                    {
+                        Trace.WriteLine("   detected visualstudio.com, checking AAD vs MSA");
+
+                        try
+                        {
+                            var request = WebRequest.CreateHttp(operationArguments.TargetUri);
+                            request.Method = "HEAD";
+                            request.AllowAutoRedirect = false;
+                            var response = request.GetResponse();
+                            if (response != null && response.SupportsHeaders)
+                            {
+                                Trace.WriteLine("   server has responded");
+
+                                var tenant = response.Headers[VsoResourceTenantHeader];
+                                Guid tenantId;
+                                if (!String.IsNullOrWhiteSpace(tenant) && Guid.TryParse(tenant, out tenantId))
+                                {
+                                    Trace.WriteLine("   tenant '" + tenantId + "' detected");
+
+                                    if (tenantId == Guid.Empty)
+                                    {
+                                        operationArguments.Authority = AuthorityType.MicrosoftAccount;
+                                        goto case AuthorityType.MicrosoftAccount;
+                                    }
+                                    else
+                                    {
+                                        operationArguments.Authority = AuthorityType.AzureDirectory;
+                                        goto case AuthorityType.AzureDirectory;
+                                    }
+                                }
+                                else
+                                {
+                                    Trace.WriteLine("   server reponded with:");
+                                    foreach(string key in response.Headers.Keys)
+                                    {
+                                        Trace.WriteLine("   => " + key + " = " + response.Headers[key]);
+                                    }
+                                }
+                            }
+                        }
+                        catch (Exception exception)
+                        {
+                            Trace.WriteLine("   failed detection");
+                            Debug.WriteLine(exception);
+                        }
+                    }
+
+                    // default to basic authority
+                    goto case AuthorityType.Basic;
+
                 case AuthorityType.AzureDirectory:
+                    Trace.WriteLine("   authority is Azure Directory");
+
                     // return a generic AAD backed VSO authentication object
                     return new VsoAadAuthentication(CredentialScope, secrets);
 
                 case AuthorityType.Basic:
                 default:
+                    Trace.WriteLine("   authority is basic");
+
                     // return a generic username + password authentication object
                     return new BasicAuthentication(secrets);
 
                 case AuthorityType.MicrosoftAccount:
+                    Trace.WriteLine("   authority is Microsoft Live");
+
                     // return a generic MSA backed VSO authentication object
                     return new VsoMsaAuthentication(CredentialScope, secrets);
             }

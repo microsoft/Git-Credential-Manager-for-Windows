@@ -6,6 +6,11 @@
     internal enum AuthorityType
     {
         /// <summary>
+        /// Attempt to detect the authority automatically, fallback to <see cref="Basic"/> if 
+        /// unable to detect an authority.
+        /// </summary>
+        Auto,
+        /// <summary>
         /// Basic username and password scheme
         /// </summary>
         Basic,

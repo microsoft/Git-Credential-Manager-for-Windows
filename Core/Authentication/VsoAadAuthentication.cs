@@ -57,7 +57,7 @@ namespace Microsoft.TeamFoundation.Git.Helpers.Authentication
 
                     this.StoreRefreshToken(targetUri, tokens.RefeshToken);
 
-                    return Task.Run(async () => { return await this.GeneratePersonalAccessToken(targetUri, tokens.AccessToken, requestCompactToken); }).Result;
+                    return this.GeneratePersonalAccessToken(targetUri, tokens.AccessToken, requestCompactToken).Result;
                 }
             }
             catch (AdalException exception)
