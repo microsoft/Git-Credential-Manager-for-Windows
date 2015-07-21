@@ -235,84 +235,93 @@ namespace Microsoft.TeamFoundation.Git.Helpers.Authentication
 
             var secrets = new SecretStore(SecretsNamespace);
 
-            switch (operationArguments.Authority)
+            while (true)
             {
-                case AuthorityType.Auto:
-                    const string VsoBaseUrlHost = "visualstudio.com";
-                    const string VsoResourceTenantHeader = "X-VSS-ResourceTenant";
+                switch (operationArguments.Authority)
+                {
+                    case AuthorityType.Auto:
+                        Trace.WriteLine("   detecting authority type");
 
-                    Trace.WriteLine("   detecting authority type");
+                        // detect the authority
+                        operationArguments.Authority = DetectAuthority(operationArguments);
+                        break;
 
-                    if (operationArguments.Host.EndsWith(VsoBaseUrlHost, StringComparison.OrdinalIgnoreCase))
+                    case AuthorityType.AzureDirectory:
+                        Trace.WriteLine("   authority is Azure Directory");
+
+                        // return a generic AAD backed VSO authentication object
+                        return new VsoAadAuthentication(CredentialScope, secrets);
+
+                    case AuthorityType.Basic:
+                    default:
+                        Trace.WriteLine("   authority is basic");
+
+                        // return a generic username + password authentication object
+                        return new BasicAuthentication(secrets);
+
+                    case AuthorityType.MicrosoftAccount:
+                        Trace.WriteLine("   authority is Microsoft Live");
+
+                        // return a generic MSA backed VSO authentication object
+                        return new VsoMsaAuthentication(CredentialScope, secrets);
+                }
+            }
+        }
+
+        private static AuthorityType DetectAuthority(OperationArguments operationArguments)
+        {
+            const string VsoBaseUrlHost = "visualstudio.com";
+            const string VsoResourceTenantHeader = "X-VSS-ResourceTenant";
+
+            Trace.WriteLine("Program::DetectAuthority");
+
+            if (operationArguments.Host.EndsWith(VsoBaseUrlHost, StringComparison.OrdinalIgnoreCase))
+            {
+                Trace.WriteLine("   detected visualstudio.com, checking AAD vs MSA");
+
+                try
+                {
+                    // build a request that we expect to fail, do not allow redirect to sign in url
+                    var request = WebRequest.CreateHttp(operationArguments.TargetUri);
+                    request.Method = "HEAD";
+                    request.AllowAutoRedirect = false;
+
+                    // get the response from the server
+                    var response = request.GetResponse();
+
+                    // if the response exists and we have headers, parse them
+                    if (response != null && response.SupportsHeaders)
                     {
-                        Trace.WriteLine("   detected visualstudio.com, checking AAD vs MSA");
+                        Trace.WriteLine("   server has responded");
 
-                        try
+                        // find the VSO resource tenant entry
+                        var tenant = response.Headers[VsoResourceTenantHeader];
+                        Guid tenantId;
+                        if (!String.IsNullOrWhiteSpace(tenant) && Guid.TryParse(tenant, out tenantId))
                         {
-                            var request = WebRequest.CreateHttp(operationArguments.TargetUri);
-                            request.Method = "HEAD";
-                            request.AllowAutoRedirect = false;
-                            var response = request.GetResponse();
-                            if (response != null && response.SupportsHeaders)
+                            // empty Guid is MSA, anything else is AAD
+                            if (tenantId == Guid.Empty)
                             {
-                                Trace.WriteLine("   server has responded");
-
-                                var tenant = response.Headers[VsoResourceTenantHeader];
-                                Guid tenantId;
-                                if (!String.IsNullOrWhiteSpace(tenant) && Guid.TryParse(tenant, out tenantId))
-                                {
-                                    Trace.WriteLine("   tenant '" + tenantId + "' detected");
-
-                                    if (tenantId == Guid.Empty)
-                                    {
-                                        operationArguments.Authority = AuthorityType.MicrosoftAccount;
-                                        goto case AuthorityType.MicrosoftAccount;
-                                    }
-                                    else
-                                    {
-                                        operationArguments.Authority = AuthorityType.AzureDirectory;
-                                        goto case AuthorityType.AzureDirectory;
-                                    }
-                                }
-                                else
-                                {
-                                    Trace.WriteLine("   server reponded with:");
-                                    foreach(string key in response.Headers.Keys)
-                                    {
-                                        Trace.WriteLine("   => " + key + " = " + response.Headers[key]);
-                                    }
-                                }
+                                Trace.WriteLine("   MSA authority detected");
+                                return AuthorityType.MicrosoftAccount;
+                            }
+                            else
+                            {
+                                Trace.WriteLine("   AAD authority for tenant '" + tenantId + "' detected");
+                                return AuthorityType.AzureDirectory;
                             }
                         }
-                        catch (Exception exception)
-                        {
-                            Trace.WriteLine("   failed detection");
-                            Debug.WriteLine(exception);
-                        }
                     }
-
-                    // default to basic authority
-                    goto case AuthorityType.Basic;
-
-                case AuthorityType.AzureDirectory:
-                    Trace.WriteLine("   authority is Azure Directory");
-
-                    // return a generic AAD backed VSO authentication object
-                    return new VsoAadAuthentication(CredentialScope, secrets);
-
-                case AuthorityType.Basic:
-                default:
-                    Trace.WriteLine("   authority is basic");
-
-                    // return a generic username + password authentication object
-                    return new BasicAuthentication(secrets);
-
-                case AuthorityType.MicrosoftAccount:
-                    Trace.WriteLine("   authority is Microsoft Live");
-
-                    // return a generic MSA backed VSO authentication object
-                    return new VsoMsaAuthentication(CredentialScope, secrets);
+                }
+                catch (Exception exception)
+                {
+                    Trace.WriteLine("   failed detection");
+                    Debug.WriteLine(exception);
+                }
             }
+
+            // if all else fails, fallback to basic authentication
+            return AuthorityType.Basic;
         }
 
         private static void LoadOperationArguments(OperationArguments operationArguments)

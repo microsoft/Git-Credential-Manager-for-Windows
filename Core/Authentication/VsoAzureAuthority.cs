@@ -47,8 +47,8 @@ namespace Microsoft.TeamFoundation.Git.Helpers.Authentication
                 using (HttpClientHandler handler = new HttpClientHandler()
                 {
                     MaxAutomaticRedirections = 2,
-                    CookieContainer = new CookieContainer(),
-                    UseCookies = true,
+                    //CookieContainer = new CookieContainer(),
+                    //UseCookies = true,
                     UseDefaultCredentials = true
                 })
                 using (HttpClient httpClient = new HttpClient(handler)
@@ -70,20 +70,7 @@ namespace Microsoft.TeamFoundation.Git.Helpers.Authentication
                         case TokenType.Federated:
                             Trace.WriteLine("   using federated authentication token to acquire personal access token");
 
-                            string[] chunks = accessToken.Value.Split(';');
-
-                            foreach (string chunk in chunks)
-                            {
-                                int seperator = chunk.IndexOf('=');
-                                if (seperator > 0)
-                                {
-                                    string name = chunk.Substring(0, seperator);
-                                    string value = chunk.Substring(seperator + 1, chunk.Length - seperator - 1);
-
-                                    Cookie cookie = new Cookie(name, value, "/", TokenAuthHost);
-                                    handler.CookieContainer.Add(cookie);
-                                }
-                            }
+                            httpClient.DefaultRequestHeaders.Add("Cookie", accessToken.Value);
                             break;
 
                         default:
