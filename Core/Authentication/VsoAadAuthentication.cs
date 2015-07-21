@@ -1,16 +1,29 @@
-﻿using Microsoft.IdentityModel.Clients.ActiveDirectory;
-using System;
+﻿using System;
 using System.Diagnostics;
 using System.Threading.Tasks;
+using Microsoft.IdentityModel.Clients.ActiveDirectory;
 
 namespace Microsoft.TeamFoundation.Git.Helpers.Authentication
 {
+    /// <summary>
+    /// Facilitates Azure Directory authentication.
+    /// </summary>
     public sealed class VsoAadAuthentication : BaseVsoAuthentication, IVsoAadAuthentication
     {
-        public VsoAadAuthentication(string resource = null, string clientId = null)
-            : base(resource, clientId)
+        /// <summary>
+        /// 
+        /// </summary>
+        public const string DefaultAuthorityHost = " https://management.core.windows.net/";
+
+        public VsoAadAuthentication(
+            VsoTokenScope tokenScope,
+            ITokenStore personalAccessTokenStore,
+            ITokenStore adaRefreshTokenStore = null)
+            : base(tokenScope,
+                   personalAccessTokenStore,
+                   adaRefreshTokenStore)
         {
-            this.AzureAuthority = new AzureAuthority();
+            this.VsoAuthority = new VsoAzureAuthority();
         }
         /// <summary>
         /// Test constructor which allows for using fake credential stores
@@ -20,129 +33,116 @@ namespace Microsoft.TeamFoundation.Git.Helpers.Authentication
         /// <param name="adaRefreshTokenStore"></param>
         internal VsoAadAuthentication(
             ITokenStore personalAccessTokenStore,
-            ITokenStore personalAccessTokenCache,
             ITokenStore adaRefreshTokenStore,
-            IAzureAuthority azureAuthority,
+            ITokenStore vsoIdeTokenCache,
             IVsoAuthority vsoAuthority)
             : base(personalAccessTokenStore,
-                   personalAccessTokenCache,
                    adaRefreshTokenStore,
+                   vsoIdeTokenCache,
                    vsoAuthority)
-        {
-            this.AzureAuthority = azureAuthority;
-        }
+        { }
 
-        internal IAzureAuthority AzureAuthority { get; set; }
-
-        public bool InteractiveLogon(Uri targetUri)
+        public bool InteractiveLogon(Uri targetUri, bool requestCompactToken)
         {
             BaseSecureStore.ValidateTargetUri(targetUri);
 
-            Trace.TraceInformation("launching interactive UX");
+            Trace.WriteLine("VsoAadAuthentication::InteractiveLogon");
 
             try
             {
-                Tokens tokens;
-                if ((tokens = this.AzureAuthority.AcquireToken(this.ClientId, this.Resource, new Uri(RedirectUrl), null)) != null)
+                TokenPair tokens;
+                if ((tokens = this.VsoAuthority.AcquireToken(targetUri, this.ClientId, this.Resource, new Uri(RedirectUrl), null)) != null)
                 {
+                    Trace.WriteLine("   token aqusition succeeded.");
+
                     this.StoreRefreshToken(targetUri, tokens.RefeshToken);
 
-                    return Task.Run(async () => { return await this.GeneratePersonalAccessToken(targetUri, tokens.AccessToken); }).Result;
+                    return this.GeneratePersonalAccessToken(targetUri, tokens.AccessToken, requestCompactToken).Result;
                 }
             }
             catch (AdalException exception)
             {
+                Trace.WriteLine("   token aquisition failed.");
                 Debug.Write(exception);
             }
 
+            Trace.WriteLine("   interactive logon failed");
             return false;
         }
 
-        public async Task<bool> NoninteractiveLogonWithCredentials(Uri targetUri, Credential credentials)
+        public async Task<bool> NoninteractiveLogonWithCredentials(Uri targetUri, Credential credentials, bool requestCompactToken)
         {
             BaseSecureStore.ValidateTargetUri(targetUri);
             Credential.Validate(credentials);
 
-            Trace.TraceInformation("Begin InteractiveLogon for {0}", targetUri);
+            Trace.WriteLine("VsoAadAuthentication::NoninteractiveLogonWithCredentials");
 
             try
             {
-                Tokens tokens;
-                if ((tokens = await this.AzureAuthority.AcquireTokenAsync(this.ClientId, this.Resource, credentials)) != null)
+                TokenPair tokens;
+                if ((tokens = await this.VsoAuthority.AcquireTokenAsync(targetUri, this.ClientId, this.Resource, credentials)) != null)
                 {
+                    Trace.WriteLine("   token aquisition succeeded");
+
                     this.StoreRefreshToken(targetUri, tokens.RefeshToken);
 
-                    return await this.GeneratePersonalAccessToken(targetUri, tokens.AccessToken);
+                    return await this.GeneratePersonalAccessToken(targetUri, tokens.AccessToken, requestCompactToken);
                 }
             }
             catch (AdalException exception)
             {
+                Trace.WriteLine("   token aquisition failed");
                 Debug.Write(exception);
             }
 
-            Trace.TraceInformation("InteractiveLogon failed");
+            Trace.WriteLine("   non-interactive logon failed");
             return false;
         }
 
-        public async Task<bool> NoninteractiveLogon(Uri targetUri)
+        public async Task<bool> NoninteractiveLogon(Uri targetUri, bool requestCompactToken)
         {
             BaseSecureStore.ValidateTargetUri(targetUri);
 
-            Trace.TraceInformation("attempting non-interactive logon");
+            Trace.WriteLine("VsoAadAuthentication::NoninteractiveLogon");
 
             try
             {
-                Tokens tokens;
-                if ((tokens = await this.AzureAuthority.AcquireTokenAsync(this.ClientId, this.Resource)) != null)
+                TokenPair tokens;
+                if ((tokens = await this.VsoAuthority.AcquireTokenAsync(targetUri, this.ClientId, this.Resource)) != null)
                 {
                     this.StoreRefreshToken(targetUri, tokens.RefeshToken);
 
-                    return await this.GeneratePersonalAccessToken(targetUri, tokens.AccessToken);
+                    return await this.GeneratePersonalAccessToken(targetUri, tokens.AccessToken, requestCompactToken);
                 }
             }
             catch (AdalException exception)
             {
-                Debug.WriteLine(exception);
-                Trace.TraceError("Non-interactive logon failed");
-            }
-
-            return false;
-        }
-
-        public override async Task<bool> RefreshCredentials(Uri targetUri)
-        {
-            BaseSecureStore.ValidateTargetUri(targetUri);
-
-            try
-            {
-                Token refreshToken = null;
-                if (this.AdaRefreshTokenStore.ReadToken(targetUri, out refreshToken))
-                {
-                    Tokens tokens;
-                    return ((tokens = await this.AzureAuthority.AcquireTokenByRefreshTokenAsync(this.ClientId, this.Resource, refreshToken)) != null
-                        && await this.GeneratePersonalAccessToken(targetUri, tokens.AccessToken));
-                }
-            }
-            catch (AdalException exception)
-            {
+                Trace.WriteLine("   failed to acquire token from VsoAuthority.");
                 Debug.WriteLine(exception);
             }
 
+            Trace.WriteLine("   non-interactive logon failed");
             return false;
         }
-
+        /// <summary>
+        /// Sets credentials for future use with this authentication object.
+        /// </summary>
+        /// <remarks>Not supported.</remarks>
+        /// <param name="targetUri">
+        /// The uniform resource indicator of the resource access tokens are being set for.
+        /// </param>
+        /// <param name="credentials">The credentials being set.</param>
+        /// <returns>True if successful; false otherwise.</returns>
         public override bool SetCredentials(Uri targetUri, Credential credentials)
         {
             BaseSecureStore.ValidateTargetUri(targetUri);
             Credential.Validate(credentials);
 
-            var task = Task.Run<bool>(async () => { return await this.NoninteractiveLogonWithCredentials(targetUri, credentials); });
-            task.Wait();
+            Trace.WriteLine("VsoMsaAuthentication::SetCredentials");
+            Trace.WriteLine("   setting AAD credentials is not supported");
 
-            if (task.IsFaulted)
-                throw task.Exception;
-
-            return task.Result;
+            // does nothing with VSO AAD backed accounts
+            return false;
         }
     }
 }

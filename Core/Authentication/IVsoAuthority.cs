@@ -3,9 +3,10 @@ using System.Threading.Tasks;
 
 namespace Microsoft.TeamFoundation.Git.Helpers.Authentication
 {
-    internal interface IVsoAuthority
+    internal interface IVsoAuthority : IAzureAuthority
     {
-        Task<Token> GeneratePersonalAccessToken(Uri targetUri, Token accessToken);
-        Task<bool> ValidateCredentials(Credential credentials);
+        Task<Token> GeneratePersonalAccessToken(Uri targetUri, Token accessToken, VsoTokenScope tokenScope, bool requireCompactToken);
+        Task<bool> ValidateCredentials(Uri targetUri, Credential credentials);
+        Task<bool> ValidateToken(Uri targetUri, Token token);
     }
 }

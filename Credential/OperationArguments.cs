@@ -9,7 +9,10 @@ namespace Microsoft.TeamFoundation.Git.Helpers.Authentication
     {
         internal OperationArguments(TextReader stdin)
         {
-            this.Authority = AuthorityType.Basic;
+            Debug.Assert(stdin != null, "The stdin parameter is null");
+
+
+            this.Authority = AuthorityType.Auto;
             this.Interactivity = Interactivity.Auto;
             this.ValidateCredentials = true;
 
@@ -24,20 +27,20 @@ namespace Microsoft.TeamFoundation.Git.Helpers.Authentication
                     {
                         case "protocol":
                             this.Protocol = pair[1];
-                            Trace.TraceInformation("Protocol = {0}", this.Protocol);
                             break;
+
                         case "host":
                             this.Host = pair[1];
-                            Trace.TraceInformation("Host = {0}", this.Host);
                             break;
+
                         case "path":
                             this.Path = pair[1];
-                            Trace.TraceInformation("Path = {0}", this.Path);
                             break;
+
                         case "username":
                             this.Username = pair[1];
-                            Trace.TraceInformation("Username = {0}", this.Username);
                             break;
+
                         case "password":
                             this.Password = pair[1];
                             break;
@@ -58,8 +61,6 @@ namespace Microsoft.TeamFoundation.Git.Helpers.Authentication
         public string Username { get; private set; }
         public string Password { get; private set; }
         public AuthorityType Authority { get; set; }
-        public string AuthorityClientId { get; set; }
-        public string AuthorityResource { get; set; }
         public Interactivity Interactivity { get; set; }
         public bool ValidateCredentials { get; set; }
 
@@ -90,7 +91,6 @@ namespace Microsoft.TeamFoundation.Git.Helpers.Authentication
             {
                 this.Authority = AuthorityType.Basic;
             }
-            Trace.TraceInformation("authoriy set to {0}", this.Authority);
         }
 
         public override string ToString()

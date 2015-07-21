@@ -18,14 +18,12 @@ namespace Microsoft.TeamFoundation.Git.Helpers.Authentication
             Uri targetUri = new Uri("http://localhost");
             BasicAuthentication basicAuth = GetBasicAuthentication("basic-delete");
 
-            basicAuth.CredentialCache.WriteCredentials(targetUri, new Credential("username", "password"));
             basicAuth.CredentialStore.WriteCredentials(targetUri, new Credential("username", "password"));
 
             Credential credentials;
 
             basicAuth.DeleteCredentials(targetUri);
 
-            Assert.IsFalse(basicAuth.CredentialCache.ReadCredentials(targetUri, out credentials), "User credentials were not deleted as expected");
             Assert.IsFalse(basicAuth.CredentialStore.ReadCredentials(targetUri, out credentials), "User credentials were not deleted as expected");
         }
 
@@ -44,7 +42,6 @@ namespace Microsoft.TeamFoundation.Git.Helpers.Authentication
             basicAuth.CredentialStore.WriteCredentials(targetUri, credentials);
 
             Assert.IsTrue(basicAuth.GetCredentials(targetUri, out credentials), "User credentials were unexpectedly not retrieved.");
-            Assert.IsTrue(basicAuth.CredentialCache.ReadCredentials(targetUri, out credentials), "User credentials were unexpectedly not found in the cache.");
         }
 
         [TestMethod]
@@ -69,12 +66,11 @@ namespace Microsoft.TeamFoundation.Git.Helpers.Authentication
             Assert.IsTrue(basicAuth.GetCredentials(targetUri, out credentials), "User credentials were unexpectedly not retrieved.");
         }
 
-        private BasicAuthentication GetBasicAuthentication(string prefix)
+        private BasicAuthentication GetBasicAuthentication(string @namespace)
         {
-            ICredentialStore credentialStore = new CredentialCache(prefix);
-            ICredentialStore credentialCache = new CredentialCache(prefix);
+            ICredentialStore credentialStore = new SecretCache(@namespace);
 
-            return new BasicAuthentication(credentialStore, credentialCache);
+            return new BasicAuthentication(credentialStore);
         }
     }
 }

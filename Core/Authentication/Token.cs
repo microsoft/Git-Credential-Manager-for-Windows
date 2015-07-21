@@ -5,7 +5,10 @@ using System.Text;
 
 namespace Microsoft.TeamFoundation.Git.Helpers.Authentication
 {
-    public sealed class Token
+    /// <summary>
+    /// A security token, usually acquired by some authentication and identity services.
+    /// </summary>
+    public class Token : Secret, IEquatable<Token>
     {
         internal Token(string value, TokenType type)
         {
@@ -31,9 +34,48 @@ namespace Microsoft.TeamFoundation.Git.Helpers.Authentication
             this.Type = type;
         }
 
+        /// <summary>
+        /// The type of the secuity token.
+        /// </summary>
         public readonly TokenType Type;
+        /// <summary>
+        /// The raw contents of the token.
+        /// </summary>
         public readonly string Value;
 
+        /// <summary>
+        /// Compares an object to this <see cref="Token"/> for equality.
+        /// </summary>
+        /// <param name="obj">The object to compare.</param>
+        /// <returns>True is equal; false otherwise.</returns>
+        public override bool Equals(Object obj)
+        {
+            return this.Equals(obj as Token);
+        }
+        /// <summary>
+        /// Compares a <see cref="Token"/> to this Token for equality.
+        /// </summary>
+        /// <param name="other">The token to compare.</param>
+        /// <returns>True if equal; false otherwise.</returns>
+        public bool Equals(Token other)
+        {
+            return this == other;
+        }
+        /// <summary>
+        /// Gets a hash code based on the contents of the token.
+        /// </summary>
+        /// <returns>32-bit hash code.</returns>
+        public override Int32 GetHashCode()
+        {
+            unchecked
+            {
+                return ((int)Type) * Value.GetHashCode();
+            }
+        }
+        /// <summary>
+        /// Converts the token to a human friendly string.
+        /// </summary>
+        /// <returns>Humanish name of the token.</returns>
         public override string ToString()
         {
             System.ComponentModel.DescriptionAttribute attribute = Type.GetType()
@@ -51,7 +93,7 @@ namespace Microsoft.TeamFoundation.Git.Helpers.Authentication
             token = null;
 
             TokenType type;
-            fixed(byte* p = bytes)
+            fixed (byte* p = bytes)
             {
                 type = (TokenType)((int*)p)[0];
             }
@@ -75,7 +117,7 @@ namespace Microsoft.TeamFoundation.Git.Helpers.Authentication
                 byte[] encoded = Encoding.UTF8.GetBytes(token.Value);
                 bytes = new byte[encoded.Length + sizeof(int)];
 
-                fixed(byte* p = bytes)
+                fixed (byte* p = bytes)
                 {
                     ((int*)p)[0] = (int)token.Type;
                 }
@@ -94,11 +136,53 @@ namespace Microsoft.TeamFoundation.Git.Helpers.Authentication
         internal static void Validate(Token token)
         {
             if (token == null)
-                throw new ArgumentNullException("token");
+                throw new ArgumentNullException("token", "The `token` parameter is null or invalid.");
             if (String.IsNullOrWhiteSpace(token.Value))
-                throw new ArgumentException("The value of the token cannot be null or empty", "token");
-            if (token.Value.Length > NativeMethods.CREDENTIAL_PASSWORD_MAXLEN)
-                throw new ArgumentOutOfRangeException("token", String.Format("The value of the token cannot be longer than {0} characters", NativeMethods.CREDENTIAL_PASSWORD_MAXLEN));
+                throw new ArgumentException("The value of the `token` cannot be null or empty.", "token");
+            if (token.Value.Length > NativeMethods.Credential.PasswordMaxLength)
+                throw new ArgumentOutOfRangeException("token", String.Format("The value of the `token` cannot be longer than {0} characters.", NativeMethods.Credential.PasswordMaxLength));
+        }
+
+        /// <summary>
+        /// Explicity casts a personal access token token into a set of credentials
+        /// </summary>
+        /// <param name="token"></param>
+        /// <exception cref="InvalidCastException">
+        /// <paramref name="token">Throws if <see cref="Token.Type"/> is not <see cref="TokenType.Personal"/>.</paramref>
+        /// </exception>
+        public static explicit operator Credential(Token token)
+        {
+            if (token.Type != TokenType.Personal)
+                throw new InvalidCastException("Cannot cast " + token + " to credentials");
+
+            return new Credential(token.ToString(), token.Value);
+        }
+
+        /// <summary>
+        /// Compares two tokens for equality.
+        /// </summary>
+        /// <param name="token1">Token to compare.</param>
+        /// <param name="token2">Token to compare.</param>
+        /// <returns>True if equal; false otherwise.</returns>
+        public static bool operator ==(Token token1, Token token2)
+        {
+            if (ReferenceEquals(token1, token2))
+                return true;
+            if (ReferenceEquals(token1, null) || ReferenceEquals(null, token2))
+                return false;
+
+            return token1.Type == token2.Type
+                && String.Equals(token1.Value, token2.Value, StringComparison.Ordinal);
+        }
+        /// <summary>
+        /// Compares two tokens for inequality.
+        /// </summary>
+        /// <param name="token1">Token to compare.</param>
+        /// <param name="token2">Token to compare.</param>
+        /// <returns>False if equal; true otherwise.</returns>
+        public static bool operator !=(Token token1, Token token2)
+        {
+            return !(token1 == token2);
         }
     }
 }

@@ -5,8 +5,8 @@ namespace Microsoft.TeamFoundation.Git.Helpers.Authentication
 {
     internal interface IAzureAuthority
     {
-        Tokens AcquireToken(string clientId, string resource, Uri redirectUri, string queryParameters = null);
-        Task<Tokens> AcquireTokenAsync(string clientId, string resource, Credential credentials = null);
-        Task<Tokens> AcquireTokenByRefreshTokenAsync(string clientId, string resource, Token refreshToken);
+        TokenPair AcquireToken(Uri targetUri, string clientId, string resource, Uri redirectUri, string queryParameters = null);
+        Task<TokenPair> AcquireTokenAsync(Uri targetUri, string clientId, string resource, Credential credentials = null);
+        Task<TokenPair> AcquireTokenByRefreshTokenAsync(Uri targetUri, string clientId, string resource, Token refreshToken);
     }
 }
