@@ -22,7 +22,7 @@ SET exeBack=git-credential-store.bak
     IF NOT EXIST "%ProgramFiles(x86)%" GOTO :LEGACY_OS
     
     ECHO(
-    ECHO Hello! I'll install "%gitExtensionName%" so that you can interact with Visual Studio Online.
+    ECHO Hello! I'll install "%gitExtensionName%" so that you can securely store your credentials.
     ECHO(
 
     SET installPath=%~dp0
@@ -76,7 +76,8 @@ SET exeBack=git-credential-store.bak
 
 :GIT_FOUND
     :: Pre-configure it
-    git config --global credential.helper store && ECHO Set Updated your ~\.gitconfig (aka global config)
+    ECHO(
+    git config --global credential.helper store && ECHO Updated your ~\.gitconfig (aka global config)
     git config --global --remove url.mshttps://devdiv.visualstudio.com/ >nul 2>&1 && ECHO Removed mshttp nonsense for devdiv.visualstudio.com
     git config --global --remove url.mshttps://microsoft.visualstudio.com/ >nul 2>&1 && ECHO Removed mshttp nonsense for microsoft.visualstudio.com
     git config --global --remove url.mshttps://mseng.visualstudio.com/ >nul 2>&1 && ECHO Removed mshttp nonsense for mseng.visualstudio.com
