@@ -44,7 +44,7 @@ namespace Microsoft.TeamFoundation.Git.Helpers.Authentication
         public string AuthorityHostUrl { get; protected set; }
 
         /// <summary>
-        /// Aquires a <see cref="TokenPair"/> from the authority via an interactive user logon 
+        /// acquires a <see cref="TokenPair"/> from the authority via an interactive user logon 
         /// prompt.
         /// </summary>
         /// <param name="targetUri">
@@ -70,7 +70,7 @@ namespace Microsoft.TeamFoundation.Git.Helpers.Authentication
             Debug.Assert(redirectUri != null, "The redirectUri parameter is null");
             Debug.Assert(redirectUri.IsAbsoluteUri, "The redirectUri parameter is not an absolute Uri");
 
-            Trace.WriteLine("AzureAuthority::AquireToken");
+            Trace.WriteLine("AzureAuthority::acquireToken");
 
             TokenPair tokens = null;
             queryParameters = queryParameters ?? String.Empty;
@@ -93,7 +93,7 @@ namespace Microsoft.TeamFoundation.Git.Helpers.Authentication
         }
 
         /// <summary>
-        /// Aquires a <see cref="TokenPair"/> from the authority using optionally provided 
+        /// acquires a <see cref="TokenPair"/> from the authority using optionally provided 
         /// credentials or via the current identity.
         /// </summary>
         /// <param name="targetUri">
@@ -134,7 +134,7 @@ namespace Microsoft.TeamFoundation.Git.Helpers.Authentication
         }
 
         /// <summary>
-        /// Acquires an access token from the authority using a previously aquired refresh token.
+        /// Acquires an access token from the authority using a previously acquired refresh token.
         /// </summary>
         /// <param name="targetUri">
         /// The uniform resource indicator of the resource access tokens are being requested for.
@@ -144,7 +144,7 @@ namespace Microsoft.TeamFoundation.Git.Helpers.Authentication
         /// Identifier of the target resource that is the recipient of the requested token.
         /// </param>
         /// <param name="refreshToken">The <see cref="Token"/> of type <see cref="TokenType.Refresh"/>
-        /// to be used to aquire the access token.</param>
+        /// to be used to acquire the access token.</param>
         /// <returns>If successful a <see cref="TokenPair"/>; otherwise `null`.</returns>
         public async Task<TokenPair> AcquireTokenByRefreshTokenAsync(Uri targetUri, string clientId, string resource, Token refreshToken)
         {

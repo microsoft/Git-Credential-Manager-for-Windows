@@ -11,7 +11,7 @@ namespace Microsoft.TeamFoundation.Git.Helpers.Authentication
         public const string DefaultClientId = "872cd9fa-d31f-45e0-9eab-6e460a02d1f1";
         public const string RedirectUrl = "urn:ietf:wg:oauth:2.0:oob";
 
-        protected const string AdalRefreshPrefx = "adal-refresh";
+        protected const string AdalRefreshPrefx = "ada";
 
         private BaseVsoAuthentication(VsoTokenScope scope, ITokenStore personalAccessTokenStore)
         {

@@ -62,13 +62,13 @@ namespace Microsoft.TeamFoundation.Git.Helpers.Authentication
                     switch (accessToken.Type)
                     {
                         case TokenType.Access:
-                            Trace.WriteLine("   using Azure access token to aquire personal access token");
+                            Trace.WriteLine("   using Azure access token to acquire personal access token");
 
                             httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue(AccessTokenHeader, accessToken.Value);
                             break;
 
                         case TokenType.Federated:
-                            Trace.WriteLine("   using federated authentication token to aquire personal access token");
+                            Trace.WriteLine("   using federated authentication token to acquire personal access token");
 
                             string[] chunks = accessToken.Value.Split(';');
 

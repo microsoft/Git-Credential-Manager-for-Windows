@@ -38,7 +38,7 @@ namespace Microsoft.TeamFoundation.Git.Helpers.Authentication
         { }
 
         /// <summary>
-        /// Opens an interactive logon prompt to aquire aquire an authentication token from the
+        /// Opens an interactive logon prompt to acquire acquire an authentication token from the
         /// Microsoft Live authentication and identity service.
         /// </summary>
         /// <param name="targetUri">
@@ -61,7 +61,7 @@ namespace Microsoft.TeamFoundation.Git.Helpers.Authentication
                 TokenPair tokens;
                 if ((tokens = this.VsoAuthority.AcquireToken(targetUri, this.ClientId, this.Resource, new Uri(RedirectUrl), QueryParameterDomainHints)) != null)
                 {
-                    Trace.WriteLine("   token successfully aquired.");
+                    Trace.WriteLine("   token successfully acquired.");
 
                     this.StoreRefreshToken(targetUri, tokens.RefeshToken);
 
@@ -73,7 +73,7 @@ namespace Microsoft.TeamFoundation.Git.Helpers.Authentication
                 Debug.Write(exception);
             }
 
-            Trace.WriteLine("   failed to aquire token.");
+            Trace.WriteLine("   failed to acquire token.");
             return false;
         }
         /// <summary>

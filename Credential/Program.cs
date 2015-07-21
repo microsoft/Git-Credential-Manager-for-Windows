@@ -35,21 +35,23 @@ namespace Microsoft.TeamFoundation.Git.Helpers.Authentication
 
             LoadOperationArguments(operationArguments);
 
+            // list of arg => method associations (case-insensitive)
+            Dictionary<string, Action<OperationArguments>> actions = 
+                new Dictionary<string, Action<OperationArguments>>(StringComparer.OrdinalIgnoreCase)
+            {
+                { "approve", Store },
+                { "erase", Erase },
+                { "fill", Get },
+                { "get", Get },
+                { "reject", Erase },
+                { "store", Store },
+            };
+
             foreach (string arg in args)
             {
-                switch (arg)
+                if (actions.ContainsKey(arg))
                 {
-                    case "erase":
-                        Erase(operationArguments);
-                        break;
-
-                    case "get":
-                        Get(operationArguments);
-                        break;
-
-                    case "store":
-                        Store(operationArguments);
-                        break;
+                    actions[arg](operationArguments);
                 }
             }
         }
@@ -58,7 +60,7 @@ namespace Microsoft.TeamFoundation.Git.Helpers.Authentication
         {
             Trace.WriteLine("Program::PrintHelpMessage");
 
-            Console.Out.WriteLine("usage: git-credential-man <command> [<args>]");
+            Console.Out.WriteLine("usage: git credential <command> [<args>]");
             Console.Out.WriteLine();
             Console.Out.WriteLine("   authority      Defines the type of authentication to be used.");
             Console.Out.WriteLine("                  Supportd Basic, AAD, and MSA. Default is Basic.");
@@ -141,7 +143,7 @@ namespace Microsoft.TeamFoundation.Git.Helpers.Authentication
                     Task.Run(async () =>
                     {
                         // attmempt to get cached creds -> refresh creds -> non-interactive logon -> interactive logon
-                        // note that AAD "credentials" are always actually scoped access tokens
+                        // note that AAD "credentials" are always scoped access tokens
                         if (((operationArguments.Interactivity != Interactivity.Always
                                 && aadAuth.GetCredentials(operationArguments.TargetUri, out credentials)
                                 && (!operationArguments.ValidateCredentials
@@ -174,7 +176,7 @@ namespace Microsoft.TeamFoundation.Git.Helpers.Authentication
                     Task.Run(async () =>
                     {
                         // attmempt to get cached creds -> refresh creds -> interactive logon
-                        // note that MSA "credentials" are always actually scoped access tokens
+                        // note that MSA "credentials" are always scoped access tokens
                         if (((operationArguments.Interactivity != Interactivity.Always
                                 && msaAuth.GetCredentials(operationArguments.TargetUri, out credentials)
                                 && (!operationArguments.ValidateCredentials
@@ -467,6 +469,7 @@ namespace Microsoft.TeamFoundation.Git.Helpers.Authentication
         }
 
         [Conditional("DEBUG")]
+        [Conditional("TRACE")]
         private static void EnableDebugTrace()
         {
             // use the stderr stream for the trace as stdout is used in the cross-process communcations protocol

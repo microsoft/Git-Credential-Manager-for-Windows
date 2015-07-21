@@ -71,10 +71,10 @@ namespace Microsoft.TeamFoundation.Git.Helpers.Authentication
         {
             if (credentials == null)
                 throw new ArgumentNullException("credentials", "The Credentials object cannot be null");
-            if (credentials.Password.Length > NativeMethods.CREDENTIAL_PASSWORD_MAXLEN)
-                throw new ArgumentOutOfRangeException("credentials", string.Format("The Password field of the Credentials object cannot be longer than {0} characters", NativeMethods.CREDENTIAL_USERNAME_MAXLEN));
-            if (credentials.Username.Length > NativeMethods.CREDENTIAL_USERNAME_MAXLEN)
-                throw new ArgumentOutOfRangeException("credentials", string.Format("The Username field of the Credentials object cannot be longer than {0} characters", NativeMethods.CREDENTIAL_USERNAME_MAXLEN));
+            if (credentials.Password.Length > NativeMethods.Credential.PasswordMaxLength)
+                throw new ArgumentOutOfRangeException("credentials", string.Format("The Password field of the Credentials object cannot be longer than {0} characters", NativeMethods.Credential.UsernameMaxLength));
+            if (credentials.Username.Length > NativeMethods.Credential.UsernameMaxLength)
+                throw new ArgumentOutOfRangeException("credentials", string.Format("The Username field of the Credentials object cannot be longer than {0} characters", NativeMethods.Credential.UsernameMaxLength));
         }
 
         /// <summary>

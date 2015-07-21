@@ -117,7 +117,7 @@ namespace Microsoft.TeamFoundation.Git.Helpers.Authentication
             }
             catch (AdalException exception)
             {
-                Trace.WriteLine("   failed to aquire token from VsoAuthority.");
+                Trace.WriteLine("   failed to acquire token from VsoAuthority.");
                 Debug.WriteLine(exception);
             }
 
