@@ -11,6 +11,11 @@ namespace Microsoft.TeamFoundation.Git.Helpers.Authentication
 {
     internal class VsoAzureAuthority : AzureAuthority, IVsoAuthority
     {
+        /// <summary>
+        /// The maximum wait time for a network request before timing out
+        /// </summary>
+        public const int RequestTimeout = 15 * 1000; // 15 second limit
+
         public VsoAzureAuthority(string authorityHostUrl = null)
             : base()
         {
@@ -47,13 +52,11 @@ namespace Microsoft.TeamFoundation.Git.Helpers.Authentication
                 using (HttpClientHandler handler = new HttpClientHandler()
                 {
                     MaxAutomaticRedirections = 2,
-                    //CookieContainer = new CookieContainer(),
-                    //UseCookies = true,
                     UseDefaultCredentials = true
                 })
                 using (HttpClient httpClient = new HttpClient(handler)
                 {
-                    Timeout = TimeSpan.FromSeconds(15)
+                    Timeout = TimeSpan.FromMilliseconds(RequestTimeout)
                 })
                 {
                     string jsonContent = String.Format(TokenScopeJsonFormat, tokenScope);
@@ -124,6 +127,7 @@ namespace Microsoft.TeamFoundation.Git.Helpers.Authentication
             {
                 string basicAuthHeader = "Basic " + Convert.ToBase64String(Encoding.ASCII.GetBytes(String.Format("{0}:{1}", credentials.Username, credentials.Password)));
                 HttpWebRequest request = WebRequest.CreateHttp(validationUrl);
+                request.Timeout = RequestTimeout;
                 request.Headers.Add(HttpRequestHeader.Authorization, basicAuthHeader);
 
                 HttpWebResponse response = await request.GetResponseAsync() as HttpWebResponse;
@@ -161,7 +165,7 @@ namespace Microsoft.TeamFoundation.Git.Helpers.Authentication
                 string sessionAuthHeader = "Bearer " + token.Value;
                 HttpWebRequest request = WebRequest.CreateHttp(validationUrl);
                 request.Headers.Add(HttpRequestHeader.Authorization, sessionAuthHeader);
-                request.Timeout = 15 * 1000;
+                request.Timeout = RequestTimeout;
 
                 HttpWebResponse response = await request.GetResponseAsync() as HttpWebResponse;
 
