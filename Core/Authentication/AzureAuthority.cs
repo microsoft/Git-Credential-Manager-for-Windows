@@ -65,7 +65,7 @@ namespace Microsoft.TeamFoundation.Git.Helpers.Authentication
             Debug.Assert(redirectUri != null, "The redirectUri parameter is null");
             Debug.Assert(redirectUri.IsAbsoluteUri, "The redirectUri parameter is not an absolute Uri");
 
-            Trace.WriteLine("AzureAuthority::acquireToken");
+            Trace.WriteLine("AzureAuthority::AcquireToken");
 
             TokenPair tokens = null;
             queryParameters = queryParameters ?? String.Empty;

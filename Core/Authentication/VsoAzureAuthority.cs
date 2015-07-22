@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Diagnostics;
+using System.IO;
 using System.Net;
 using System.Net.Http;
 using System.Net.Http.Headers;
@@ -37,18 +38,17 @@ namespace Microsoft.TeamFoundation.Git.Helpers.Authentication
             const string TokenAuthHost = "app.vssps.visualstudio.com";
             const string SessionTokenUrl = "https://" + TokenAuthHost + "/_apis/token/sessiontokens?api-version=1.0";
             const string CompactTokenUrl = SessionTokenUrl + "&tokentype=compact";
-            const string TokenScopeJsonFormat = "{{ \"scope\" : \"{0}\" }}";
-            const string HttpJsonContentType = "application/json";
             const string AccessTokenHeader = "Bearer";
 
             Debug.Assert(targetUri != null, "The targetUri parameter is null");
             Debug.Assert(accessToken != null && !String.IsNullOrWhiteSpace(accessToken.Value) && (accessToken.Type == TokenType.Access || accessToken.Type == TokenType.Federated), "The accessToken parameter is null or invalid");
             Debug.Assert(tokenScope != null);
 
-            Trace.WriteLine("AzureAuthority::GeneratePersonalAccessToken");
+            Trace.WriteLine("VsoAzureAuthority::GeneratePersonalAccessToken");
 
             try
             {
+                // create a `HttpClient` with a minimum number of redirects, default creds, and a reasonable timeout (access token generation seems to hang occasionally)
                 using (HttpClientHandler handler = new HttpClientHandler()
                 {
                     MaxAutomaticRedirections = 2,
@@ -59,9 +59,6 @@ namespace Microsoft.TeamFoundation.Git.Helpers.Authentication
                     Timeout = TimeSpan.FromMilliseconds(RequestTimeout)
                 })
                 {
-                    string jsonContent = String.Format(TokenScopeJsonFormat, tokenScope);
-                    StringContent content = new StringContent(jsonContent, Encoding.UTF8, HttpJsonContentType);
-
                     switch (accessToken.Type)
                     {
                         case TokenType.Access:
@@ -80,26 +77,31 @@ namespace Microsoft.TeamFoundation.Git.Helpers.Authentication
                             return null;
                     }
 
-                    HttpResponseMessage response = await httpClient.PostAsync(requireCompactToken ? CompactTokenUrl : SessionTokenUrl,
-                                                                              content);
-                    if (response.StatusCode == HttpStatusCode.OK)
+                    if (await PopulateTokenTargetId(targetUri, accessToken))
                     {
-                        string responseText = await response.Content.ReadAsStringAsync();
+                        StringContent content = GetAccessTokenRequestBody(accessToken, tokenScope);
+                        string requestUrl = requireCompactToken ? CompactTokenUrl : SessionTokenUrl;
 
-                        Match tokenMatch = null;
-                        if ((tokenMatch = Regex.Match(responseText, @"\s*""token""\s*:\s*""([^\""]+)""\s*", RegexOptions.Compiled | RegexOptions.IgnoreCase)).Success)
+                        HttpResponseMessage response = await httpClient.PostAsync(requestUrl, content);
+                        if (response.StatusCode == HttpStatusCode.OK)
                         {
-                            string tokenValue = tokenMatch.Groups[1].Value;
-                            Token token = new Token(tokenValue, TokenType.Personal);
+                            string responseText = await response.Content.ReadAsStringAsync();
 
-                            Trace.WriteLine("   personal access token aquisition succeeded.");
+                            Match tokenMatch = null;
+                            if ((tokenMatch = Regex.Match(responseText, @"\s*""token""\s*:\s*""([^\""]+)""\s*", RegexOptions.Compiled | RegexOptions.IgnoreCase)).Success)
+                            {
+                                string tokenValue = tokenMatch.Groups[1].Value;
+                                Token token = new Token(tokenValue, TokenType.Personal);
 
-                            return token;
+                                Trace.WriteLine("   personal access token aquisition succeeded.");
+
+                                return token;
+                            }
                         }
-                    }
-                    else
-                    {
-                        Console.Error.WriteLine("Received '{0}' from Visual Studio Online authority. Unable to generate personal access token.", response.ReasonPhrase);
+                        else
+                        {
+                            Console.Error.WriteLine("Received '{0}' from Visual Studio Online authority. Unable to generate personal access token.", response.ReasonPhrase);
+                        }
                     }
                 }
             }
@@ -113,72 +115,230 @@ namespace Microsoft.TeamFoundation.Git.Helpers.Authentication
             return null;
         }
 
-        public async Task<bool> ValidateCredentials(Uri targetUri, Credential credentials)
+        public async Task<bool> PopulateTokenTargetId(Uri targetUri, Token accessToken)
         {
-            const string VsoValidationUrl = "_apis/connectiondata";
+            Debug.Assert(targetUri != null && targetUri.IsAbsoluteUri, "The targetUri parameter is null or invalid");
+            Debug.Assert(accessToken != null && !String.IsNullOrWhiteSpace(accessToken.Value) && (accessToken.Type == TokenType.Access || accessToken.Type == TokenType.Federated), "The accessToken parameter is null or invalid");
 
-            Credential.Validate(credentials);
+            Trace.WriteLine("VsoAzureAuthority::PopulateTokenTargetId");
 
-            Trace.WriteLine("VsoAzureAuthority::ValidateCredentials");
-
-            string validationUrl = String.Format("{0}://{1}/{2}", targetUri.Scheme, targetUri.DnsSafeHost, VsoValidationUrl);
+            string resultId = null;
+            Guid instanceId;
 
             try
             {
-                string basicAuthHeader = "Basic " + Convert.ToBase64String(Encoding.ASCII.GetBytes(String.Format("{0}:{1}", credentials.Username, credentials.Password)));
-                HttpWebRequest request = WebRequest.CreateHttp(validationUrl);
-                request.Timeout = RequestTimeout;
-                request.Headers.Add(HttpRequestHeader.Authorization, basicAuthHeader);
+                // create an request to the VSO deployment data end-point
+                var request = GetConnectionDataRequest(targetUri, accessToken);
 
-                HttpWebResponse response = await request.GetResponseAsync() as HttpWebResponse;
+                // send the request and wait for the response
+                using (var response = await request.GetResponseAsync())
+                using (var stream = response.GetResponseStream())
+                using (var reader = new StreamReader(stream, Encoding.UTF8))
+                {
+                    string content = await reader.ReadToEndAsync();
+                    Match match;
 
-                Trace.WriteLine("   validation status code: " + response.StatusCode);
-
-                return response.StatusCode == HttpStatusCode.OK;
+                    if ((match = Regex.Match(content, @"""instanceId""\s*\:\s*""([^""]+)""", RegexOptions.Compiled | RegexOptions.CultureInvariant | RegexOptions.IgnoreCase)).Success
+                        && match.Groups.Count == 2)
+                    {
+                        resultId = match.Groups[1].Value;
+                    }
+                }
             }
-            catch
+            catch (WebException webException)
             {
-                Trace.WriteLine("   credential validation failed");
+                Trace.WriteLine("   server returned " + webException.Status);
+            }
+
+            if (Guid.TryParse(resultId, out instanceId))
+            {
+                accessToken.TargetId = instanceId;
+
+                return true;
             }
 
             return false;
         }
 
-        public async Task<bool> ValidateToken(Uri targetUri, Token token)
+        /// <summary>
+        /// Validates that <see cref="Credential"/> are valid to grant access to the Visual Studio 
+        /// Online service represented by the <paramref name="targetUri"/> parameter.
+        /// </summary>
+        /// <param name="targetUri">Uniform resource identifier for a VSO service.</param>
+        /// <param name="credentials">
+        /// <see cref="Credential"/> expected to grant access to the VSO service.
+        /// </param>
+        /// <returns>True if successful; otherwise false.</returns>
+        public async Task<bool> ValidateCredentials(Uri targetUri, Credential credentials)
         {
-            const string VsoValidationUrl = "_apis/connectiondata";
+            Debug.Assert(targetUri != null && targetUri.IsAbsoluteUri, "The targetUri parameter is null or invalid");
+            Debug.Assert(credentials != null, "The credentials parameter is null or invalid");
 
-            Token.Validate(token);
-
-            Trace.WriteLine("VsoAzureAuthority::ValidateToken");
-
-            if (token.Type == TokenType.Personal)
-                return await this.ValidateCredentials(targetUri, (Credential)token);
-
-            if (!(token.Type == TokenType.Access || token.Type == TokenType.Refresh))
-                return false;
-
-            string validationUrl = String.Format("{0}://{1}/{2}", targetUri.Scheme, targetUri.DnsSafeHost, VsoValidationUrl);
+            Trace.WriteLine("VsoAzureAuthority::ValidateCredentials");
 
             try
             {
-                string sessionAuthHeader = "Bearer " + token.Value;
-                HttpWebRequest request = WebRequest.CreateHttp(validationUrl);
-                request.Headers.Add(HttpRequestHeader.Authorization, sessionAuthHeader);
-                request.Timeout = RequestTimeout;
+                // create an request to the VSO deployment data end-point
+                HttpWebRequest request = GetConnectionDataRequest(targetUri, credentials);
 
-                HttpWebResponse response = await request.GetResponseAsync() as HttpWebResponse;
-
-                Trace.WriteLine("   validation status code: " + response.StatusCode);
-
-                return response.StatusCode == HttpStatusCode.OK;
+                // send the request and wait for the response
+                using (HttpWebResponse response = await request.GetResponseAsync() as HttpWebResponse)
+                {
+                    // we're looking for 'OK 200' here, anything else is failure
+                    Trace.WriteLine("   server returned: " + response.StatusCode);
+                    return response.StatusCode == HttpStatusCode.OK;
+                }
+            }
+            catch (WebException webException)
+            {
+                Trace.WriteLine("   server returned: " + webException.Message);
             }
             catch
             {
-                Trace.WriteLine("   token validation failed");
+                Trace.WriteLine("   unexpected error");
             }
 
+            Trace.WriteLine("   credential validation failed");
             return false;
+        }
+
+        /// <summary>
+        /// <para>Validates that <see cref="Token"/> are valid to grant access to the Visual Studio 
+        /// Online service represented by the <paramref name="targetUri"/> parameter.</para>
+        /// <para>Tokens of <see cref="TokenType.Refresh"/> cannot grant access, and
+        /// therefore always fail - this does not mean the token is invalid.</para>
+        /// </summary>
+        /// <param name="targetUri">Uniform resource identifier for a VSO service.</param>
+        /// <param name="token">
+        /// <see cref="Token"/> expected to grant access to the VSO service.
+        /// </param>
+        /// <returns>True if successful; otherwise false.</returns>
+        public async Task<bool> ValidateToken(Uri targetUri, Token token)
+        {
+            Debug.Assert(targetUri != null && targetUri.IsAbsoluteUri, "The targetUri parameter is null or invalid");
+            Debug.Assert(token != null && (token.Type == TokenType.Access || token.Type == TokenType.Federated), "The token parameter is null or invalid");
+
+            Trace.WriteLine("VsoAzureAuthority::ValidateToken");
+
+            // personal access tokens are effectively credentials, treat them as such
+            if (token.Type == TokenType.Personal)
+                return await this.ValidateCredentials(targetUri, (Credential)token);
+
+            try
+            {
+                // create an request to the VSO deployment data end-point
+                HttpWebRequest request = GetConnectionDataRequest(targetUri, token);
+
+                // send the request and wait for the response
+                using (HttpWebResponse response = await request.GetResponseAsync() as HttpWebResponse)
+                {
+                    // we're looking for 'OK 200' here, anything else is failure
+                    Trace.WriteLine("   server returned: " + response.StatusCode);
+                    return response.StatusCode == HttpStatusCode.OK;
+                }
+            }
+            catch (WebException webException)
+            {
+                Trace.WriteLine("   server returned: " + webException.Message);
+            }
+            catch
+            {
+                Trace.WriteLine("   unexpected error");
+            }
+
+            Trace.WriteLine("   token validation failed");
+            return false;
+        }
+
+        private StringContent GetAccessTokenRequestBody(Token accessToken, VsoTokenScope tokenScope)
+        {
+            const string ContentJsonFormat = "{{ \"scope\" : \"{0}\", \"targetAccounts\" : [\"{1}\"] }}";
+            const string HttpJsonContentType = "application/json";
+
+            Debug.Assert(accessToken != null && (accessToken.Type == TokenType.Access || accessToken.Type == TokenType.Federated), "The accessToken parameter is null or invalid");
+            Debug.Assert(tokenScope != null, "The tokenScope parameter is null");
+
+            Trace.WriteLine("   creating access token scoped to '" + tokenScope + "' for '" + accessToken.TargetId + "'");
+
+            string jsonContent = String.Format(ContentJsonFormat, tokenScope, accessToken.TargetId);
+            StringContent content = new StringContent(jsonContent, Encoding.UTF8, HttpJsonContentType);
+
+            return content;
+        }
+
+        private HttpWebRequest GetConnectionDataRequest(Uri targetUri, Credential credentials)
+        {
+            const string BasicPrefix = "Basic ";
+            const string UsernamePasswordFormat = "{0}:{1}";
+
+            Debug.Assert(targetUri != null && targetUri.IsAbsoluteUri, "The targetUri parameter is null or invalid");
+            Debug.Assert(credentials != null, "The credentials parameter is null or invalid");
+
+            // create an request to the VSO deployment data end-point
+            HttpWebRequest request = GetConnectionDataRequest(targetUri);
+
+            // credentials are packed into the 'Authorization' header as a base64 encoded pair
+            string credPair = String.Format(UsernamePasswordFormat, credentials.Username, credentials.Password);
+            byte[] credBytes = Encoding.ASCII.GetBytes(credPair);
+            string base64enc = Convert.ToBase64String(credBytes);
+            string basicAuthHeader = BasicPrefix + base64enc;
+            request.Headers.Add(HttpRequestHeader.Authorization, basicAuthHeader);
+
+            return request;
+        }
+
+        private HttpWebRequest GetConnectionDataRequest(Uri targetUri, Token token)
+        {
+            const string BearerPrefix = "Bearer ";
+
+            Debug.Assert(targetUri != null && targetUri.IsAbsoluteUri, "The targetUri parameter is null or invalid");
+            Debug.Assert(token != null && (token.Type == TokenType.Access || token.Type == TokenType.Federated), "The token parameter is null or invalid");
+
+            Trace.WriteLine("VsoAzureAuthority::GetConnectionDataRequest");
+
+            // create an request to the VSO deployment data end-point
+            HttpWebRequest request = GetConnectionDataRequest(targetUri);
+
+            // different types of tokens are packed differently
+            switch (token.Type)
+            {
+                case TokenType.Access:
+                    Trace.WriteLine("   validating adal access token");
+
+                    // adal access tokens are packed into the Authorization header
+                    string sessionAuthHeader = BearerPrefix + token.Value;
+                    request.Headers.Add(HttpRequestHeader.Authorization, sessionAuthHeader);
+                    break;
+
+                case TokenType.Federated:
+                    Trace.WriteLine("   validating federated authentication token");
+
+                    // federated authentication tokens are sent as cookie(s)
+                    request.Headers.Add(HttpRequestHeader.Cookie, token.Value);
+                    break;
+
+                default:
+                    Trace.WriteLine("   unsupported token type");
+                    break;
+            }
+
+            return request;
+        }
+
+        private HttpWebRequest GetConnectionDataRequest(Uri targetUri)
+        {
+            const string VsoValidationUrlFormat = "https://{0}/_apis/connectiondata";
+
+            Debug.Assert(targetUri != null && targetUri.IsAbsoluteUri, "The targetUri parameter is null or invalid");
+
+            // create a url to the connection data end-point, it's deployment level and "always on".
+            string validationUrl = String.Format(VsoValidationUrlFormat, targetUri.DnsSafeHost);
+
+            // start building the request, only supports GET
+            HttpWebRequest request = WebRequest.CreateHttp(validationUrl);
+            request.Timeout = RequestTimeout;
+
+            return request;
         }
     }
 }

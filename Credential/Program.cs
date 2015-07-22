@@ -16,7 +16,7 @@ namespace Microsoft.TeamFoundation.Git.Helpers.Authentication
     {
         private const string ConfigPrefix = "credential";
         private const string SecretsNamespace = "git";
-        private static readonly VsoTokenScope CredentialScope = VsoTokenScope.CodeWrite | VsoTokenScope.ProfileRead;
+        private static readonly VsoTokenScope CredentialScope = VsoTokenScope.CodeWrite;
         private const char HostSplitCharacter = '.';
 
         static void Main(string[] args)
