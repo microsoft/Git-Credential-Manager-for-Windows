@@ -17,11 +17,11 @@ SET exeBack=git-credential-store.bak
         GOTO NEED_ADMIN_ACCESS
     )
 
-    :: Lgacy (32-bit) OS not supported
+    :: Legacy OS not supported
     IF NOT EXIST "%ProgramFiles(x86)%" GOTO :LEGACY_OS
     
     ECHO(
-    ECHO Hello! I'll install "%gitExtensionName%" so that you can securely store your credentials.
+    ECHO Hello! I'll install "%gitExtensionName%" so that Git can store credentials securely.
     ECHO(
 
     SET installPath=%~dp0
@@ -46,7 +46,7 @@ SET exeBack=git-credential-store.bak
     SET exeInstall=%ProgramFiles(x86)%\Git\cmd\git.exe
     IF NOT EXIST "%exeInstall%" GOTO :INSTALLED_CHECK
     
-    ECHO I'm installing "%gitExtensionName%" from "%installPath%" to "%destination%"...
+    ECHO I'm installing from "%installPath%" to "%destination%"...
     
     GOTO COPY_FILES
 
@@ -81,21 +81,21 @@ SET exeBack=git-credential-store.bak
     :: Pre-configure it
     ECHO(
         
-    (git config --global credential.helper store && ECHO Updated your ~\.gitconfig (aka global config)) || GOTO :FAILURE
+    (git config --global credential.helper store && (ECHO Updated your ~\.gitconfig [git config --global])) || GOTO :FAILURE
     git config --global --remove url.mshttps://devdiv.visualstudio.com/ >nul 2>&1 && ECHO Removed mshttp nonsense for devdiv.visualstudio.com
     git config --global --remove url.mshttps://microsoft.visualstudio.com/ >nul 2>&1 && ECHO Removed mshttp nonsense for microsoft.visualstudio.com
     git config --global --remove url.mshttps://mseng.visualstudio.com/ >nul 2>&1 && ECHO Removed mshttp nonsense for mseng.visualstudio.com
     git config --global --remove url.mshttps://office.visualstudio.com/ >nul 2>&1 && ECHO Removed mshttp nonsense for office.visualstudio.com
     
     ECHO(
-    ECHO %gitExtensionName% was installed! ^_^
+    ECHO %gitExtensionName% was installed! ^^_^^
     ECHO(
         
     GOTO :END
 
 
 :LEGACY_OS
-    :: No support for legacy (32-bit) operating systems
+    :: No support for legacy operating systems
     ECHO Oops! 32-bit OS Not Supported. U_U
     GOTO :END
 
