@@ -23,7 +23,6 @@ namespace Microsoft.TeamFoundation.Git.Helpers.Authentication
             Debug.Assert(authResult != null, "The authResult parameter is null");
             Debug.Assert(!String.IsNullOrWhiteSpace(authResult.AccessToken), "The authResult.AccessToken parameter is null or invalid.");
             Debug.Assert(!String.IsNullOrWhiteSpace(authResult.RefreshToken), "The authResult.RefreshToken parameter is null or invalid.");
-            Debug.Assert(!String.IsNullOrWhiteSpace(authResult.TenantId), "The authResult.TenantId parameter is null or invalid.");
             Debug.Assert(Enum.IsDefined(typeof(TokenType), type), "The type parameter is invalid");
 
             switch (type)
@@ -40,7 +39,11 @@ namespace Microsoft.TeamFoundation.Git.Helpers.Authentication
                     throw new ArgumentException("Unexpected token type encountered", "type");
             }
 
-            this.TargetId = Guid.Parse(authResult.TenantId);
+            Guid targetId = Guid.Empty;
+            if (Guid.TryParse(authResult.TenantId, out targetId))
+            {
+                this.TargetId = targetId;
+            }
             this.Type = type;
         }
 
