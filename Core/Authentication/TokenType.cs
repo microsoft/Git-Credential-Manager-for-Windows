@@ -2,6 +2,7 @@
 {
     public enum TokenType
     {
+        Unknown = 0,
         /// <summary>
         /// Azure Directory Access Token
         /// </summary>
@@ -26,6 +27,6 @@
         /// Used only for testing
         /// </summary>
         [System.ComponentModel.Description("Test-only Token")]
-        Test
+        Test,
     }
 }

@@ -10,6 +10,44 @@ namespace Microsoft.TeamFoundation.Git.Helpers.Authentication
     /// </summary>
     public class Token : Secret, IEquatable<Token>
     {
+        public static bool GetFriendlyNameFromType(TokenType type, out string name)
+        {
+            Debug.Assert(Enum.IsDefined(typeof(TokenType), type), "The type parameter is invalid");
+
+            name = null;
+
+            System.ComponentModel.DescriptionAttribute attribute = type.GetType()
+                                                                       .GetField(type.ToString())
+                                                                       .GetCustomAttributes(typeof(System.ComponentModel.DescriptionAttribute), false)
+                                                                       .SingleOrDefault() as System.ComponentModel.DescriptionAttribute;
+            name = attribute == null 
+                ? type.ToString() 
+                : attribute.Description;
+
+            return name != null;
+        }
+
+        public static bool GetTypeFromFriendlyName(string name, out TokenType type)
+        {
+            Debug.Assert(!String.IsNullOrWhiteSpace(name), "The name parameter is null or invalid");
+
+            type = TokenType.Unknown;
+
+            foreach (var value in Enum.GetValues(typeof(TokenType)))
+            {
+                type = (TokenType)value;
+
+                string typename;
+                if (GetFriendlyNameFromType(type, out typename))
+                {
+                    if (String.Equals(name, typename, StringComparison.OrdinalIgnoreCase))
+                        return true;
+                }
+            }
+
+            return false;
+        }
+
         internal Token(string value, TokenType type)
         {
             Debug.Assert(!String.IsNullOrWhiteSpace(value), "The value parameter is null or invalid");
@@ -17,6 +55,13 @@ namespace Microsoft.TeamFoundation.Git.Helpers.Authentication
 
             this.Type = type;
             this.Value = value;
+        }
+        internal Token(string value, string type)
+        {
+            Debug.Assert(!String.IsNullOrWhiteSpace(value), "The value parameter is null or invalid");
+            Debug.Assert(!String.IsNullOrWhiteSpace(type), "The type parameter is null or invalid");
+
+
         }
         internal Token(IdentityModel.Clients.ActiveDirectory.AuthenticationResult authResult, TokenType type)
         {
@@ -95,30 +140,34 @@ namespace Microsoft.TeamFoundation.Git.Helpers.Authentication
         /// <returns>Humanish name of the token.</returns>
         public override string ToString()
         {
-            System.ComponentModel.DescriptionAttribute attribute = Type.GetType()
-                                                                       .GetField(Type.ToString())
-                                                                       .GetCustomAttributes(typeof(System.ComponentModel.DescriptionAttribute), false)
-                                                                       .SingleOrDefault() as System.ComponentModel.DescriptionAttribute;
-            return attribute == null ? Type.ToString() : attribute.Description;
+            string value;
+            if (GetFriendlyNameFromType(Type, out value))
+                return value;
+            else
+                return base.ToString();
         }
 
-        internal static unsafe bool Deserialize(byte[] bytes, out Token token)
+        internal static unsafe bool Deserialize(byte[] bytes, TokenType type, out Token token)
         {
             Debug.Assert(bytes != null, "The bytes parameter is null");
-            Debug.Assert(bytes.Length > sizeof(DateTimeOffset), "The bytes parameter is too short");
+            Debug.Assert(bytes.Length > 0, "The bytes parameter is too short");
+            Debug.Assert(Enum.IsDefined(typeof(TokenType), type), "The type parameter is invlaid");
 
             token = null;
 
-            TokenType type;
-            fixed (byte* p = bytes)
+            try
             {
-                type = (TokenType)((int*)p)[0];
+                string value = Encoding.UTF8.GetString(bytes);
+
+                if (!String.IsNullOrWhiteSpace(value))
+                {
+                    token = new Token(value, type);
+                }
             }
-
-            Debug.Assert(Enum.IsDefined(typeof(TokenType), type), "The value of type is not a known value of TokenType");
-
-            string value = Encoding.UTF8.GetString(bytes, sizeof(int), bytes.Length - sizeof(int));
-            token = new Token(value, type);
+            catch
+            {
+                Trace.WriteLine("   token deserialization error");
+            }
 
             return token != null;
         }
@@ -129,22 +178,14 @@ namespace Microsoft.TeamFoundation.Git.Helpers.Authentication
             Debug.Assert(!String.IsNullOrWhiteSpace(token.Value), "The token.Value is invalid");
 
             bytes = null;
+
             try
             {
-                byte[] encoded = Encoding.UTF8.GetBytes(token.Value);
-                bytes = new byte[encoded.Length + sizeof(int)];
-
-                fixed (byte* p = bytes)
-                {
-                    ((int*)p)[0] = (int)token.Type;
-                }
-
-                Array.Copy(encoded, 0, bytes, sizeof(int), encoded.Length);
+                bytes = Encoding.UTF8.GetBytes(token.Value);
             }
-            catch (Exception exception)
+            catch
             {
-                Debug.WriteLine(exception);
-                bytes = null;
+                Trace.WriteLine("   token serialization error");
             }
 
             return bytes != null;

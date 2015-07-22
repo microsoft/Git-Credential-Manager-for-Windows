@@ -89,7 +89,11 @@ namespace Microsoft.TeamFoundation.Git.Helpers.Authentication
                     byte[] bytes = new byte[size];
                     Marshal.Copy(credStruct.CredentialBlob, bytes, 0, size);
 
-                    Token.Deserialize(bytes, out token);
+                    TokenType type;
+                    if (Token.GetTypeFromFriendlyName(credStruct.UserName, out type))
+                    {
+                        Token.Deserialize(bytes, type, out token);
+                    }
                 }
             }
             finally
@@ -134,38 +138,42 @@ namespace Microsoft.TeamFoundation.Git.Helpers.Authentication
             }
         }
 
-        protected void WriteToken(string targetName, Token token, string name)
+        protected void WriteToken(string targetName, Token token)
         {
             Trace.WriteLine("BaseSecureStore::WriteToken");
 
             byte[] bytes = null;
             if (Token.Serialize(token, out bytes))
             {
-                NativeMethods.Credential credential = new NativeMethods.Credential()
+                string name;
+                if (Token.GetFriendlyNameFromType(token.Type, out name))
                 {
-                    Type = NativeMethods.CredentialType.Generic,
-                    TargetName = targetName,
-                    CredentialBlobSize = (uint)bytes.Length,
-                    Persist = NativeMethods.CredentialPersist.LocalMachine,
-                    AttributeCount = 0,
-                    UserName = name,
-                };
-                try
-                {
-                    credential.CredentialBlob = Marshal.AllocCoTaskMem(bytes.Length);
-                    Marshal.Copy(bytes, 0, credential.CredentialBlob, bytes.Length);
+                    NativeMethods.Credential credential = new NativeMethods.Credential()
+                    {
+                        Type = NativeMethods.CredentialType.Generic,
+                        TargetName = targetName,
+                        CredentialBlobSize = (uint)bytes.Length,
+                        Persist = NativeMethods.CredentialPersist.LocalMachine,
+                        AttributeCount = 0,
+                        UserName = name,
+                    };
+                    try
+                    {
+                        credential.CredentialBlob = Marshal.AllocCoTaskMem(bytes.Length);
+                        Marshal.Copy(bytes, 0, credential.CredentialBlob, bytes.Length);
 
-                    if (!NativeMethods.CredWrite(ref credential, 0))
-                    {
-                        int errorCode = Marshal.GetLastWin32Error();
-                        throw new Exception("Failed to write credentials", new Win32Exception(errorCode));
+                        if (!NativeMethods.CredWrite(ref credential, 0))
+                        {
+                            int errorCode = Marshal.GetLastWin32Error();
+                            throw new Exception("Failed to write credentials", new Win32Exception(errorCode));
+                        }
                     }
-                }
-                finally
-                {
-                    if (credential.CredentialBlob != IntPtr.Zero)
+                    finally
                     {
-                        Marshal.FreeCoTaskMem(credential.CredentialBlob);
+                        if (credential.CredentialBlob != IntPtr.Zero)
+                        {
+                            Marshal.FreeCoTaskMem(credential.CredentialBlob);
+                        }
                     }
                 }
             }

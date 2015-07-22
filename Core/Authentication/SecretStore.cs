@@ -149,7 +149,7 @@ namespace Microsoft.TeamFoundation.Git.Helpers.Authentication
 
             _tokenCache.WriteToken(targetUri, token);
 
-            this.WriteToken(targetName, token, token.ToString());
+            this.WriteToken(targetName, token);
         }
 
         /// <summary>
