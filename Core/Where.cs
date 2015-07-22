@@ -60,41 +60,51 @@ namespace Microsoft.TeamFoundation.Git.Helpers
 
             path = null;
 
-            var dir = new DirectoryInfo(startingDirectory);
-            Func<DirectoryInfo, FileSystemInfo> hasOdb = (DirectoryInfo info) =>
+            if (!String.IsNullOrWhiteSpace(startingDirectory))
             {
-                return info.EnumerateFileSystemInfos()
-                           .Where((FileSystemInfo sub) =>
-                           {
-                               return String.Equals(sub.Name, GitOdbFolderName, StringComparison.OrdinalIgnoreCase);
-                           })
-                           .FirstOrDefault();
-            };
-
-            FileSystemInfo result = null;
-            while (dir.Exists && dir.Parent.Exists)
-            {
-                if ((result = hasOdb(dir)) != null)
-                    break;
-
-                dir = dir.Parent;
-            }
-
-            if (result !=null && result.Exists)
-            {
-                if (result is DirectoryInfo)
+                var dir = new DirectoryInfo(startingDirectory);
+                if (dir.Exists)
                 {
-                    var localPath = Path.Combine(result.FullName, LocalConfigFileName);
-                    if (File.Exists(localPath))
+                    Func<DirectoryInfo, FileSystemInfo> hasOdb = (DirectoryInfo info) =>
                     {
-                        path = localPath;
-                    }
-                }
-                else
-                {
-                    var content = File.ReadAllText(result.FullName);
+                        if (info == null || !info.Exists)
+                            return null;
 
-                    // TODO: handle .git file redirect
+                        return info.EnumerateFileSystemInfos()
+                                   .Where((FileSystemInfo sub) =>
+                                   {
+                                       return sub != null
+                                           && sub.Exists
+                                           && String.Equals(sub.Name, GitOdbFolderName, StringComparison.OrdinalIgnoreCase);
+                                   })
+                                   .FirstOrDefault();
+                    };
+
+                    FileSystemInfo result = null;
+                    while (dir != null && dir.Exists && dir.Parent != null && dir.Parent.Exists)
+                    {
+                        if ((result = hasOdb(dir)) != null)
+                            break;
+
+                        dir = dir.Parent;
+                    }
+
+                    if (result != null && result.Exists)
+                    {
+                        if (result is DirectoryInfo)
+                        {
+                            var localPath = Path.Combine(result.FullName, LocalConfigFileName);
+                            if (File.Exists(localPath))
+                            {
+                                path = localPath;
+                            }
+                        }
+                        else
+                        {
+                            // var content = File.ReadAllText(result.FullName);
+                            // TODO: handle .git files
+                        }
+                    }
                 }
             }
 

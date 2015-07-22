@@ -1,10 +1,5 @@
 ﻿using System;
 using System.Diagnostics;
-using System.Net;
-using System.Net.Http;
-using System.Net.Http.Headers;
-using System.Text;
-using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using Microsoft.IdentityModel.Clients.ActiveDirectory;
 
@@ -70,7 +65,7 @@ namespace Microsoft.TeamFoundation.Git.Helpers.Authentication
             Debug.Assert(redirectUri != null, "The redirectUri parameter is null");
             Debug.Assert(redirectUri.IsAbsoluteUri, "The redirectUri parameter is not an absolute Uri");
 
-            Trace.WriteLine("AzureAuthority::acquireToken");
+            Trace.WriteLine("AzureAuthority::AcquireToken");
 
             TokenPair tokens = null;
             queryParameters = queryParameters ?? String.Empty;
@@ -83,10 +78,9 @@ namespace Microsoft.TeamFoundation.Git.Helpers.Authentication
 
                 Trace.WriteLine("   token acquisition succeeded.");
             }
-            catch (AdalException exception)
+            catch (AdalException)
             {
                 Trace.WriteLine("   token acquisition failed.");
-                Debug.Write(exception);
             }
 
             return tokens;
@@ -124,10 +118,9 @@ namespace Microsoft.TeamFoundation.Git.Helpers.Authentication
 
                 Trace.WriteLine("   token acquisition succeeded.");
             }
-            catch (AdalException exception)
+            catch (AdalException)
             {
                 Trace.WriteLine("   token acquisition failed.");
-                Debug.WriteLine(exception);
             }
 
             return tokens;
@@ -165,10 +158,9 @@ namespace Microsoft.TeamFoundation.Git.Helpers.Authentication
 
                 Trace.WriteLine("   token acquisition succeeded.");
             }
-            catch (AdalException exception)
+            catch (AdalException)
             {
                 Trace.WriteLine("   token acquisition failed.");
-                Debug.WriteLine(exception);
             }
 
             return tokens;

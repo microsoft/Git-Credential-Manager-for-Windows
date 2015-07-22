@@ -12,11 +12,19 @@ namespace Microsoft.TeamFoundation.Git.Helpers.Authentication
     {
         internal Token(string value, TokenType type)
         {
+            Debug.Assert(!String.IsNullOrWhiteSpace(value), "The value parameter is null or invalid");
+            Debug.Assert(Enum.IsDefined(typeof(TokenType), type), "The type parameter is invalid");
+
             this.Type = type;
             this.Value = value;
         }
         internal Token(IdentityModel.Clients.ActiveDirectory.AuthenticationResult authResult, TokenType type)
         {
+            Debug.Assert(authResult != null, "The authResult parameter is null");
+            Debug.Assert(!String.IsNullOrWhiteSpace(authResult.AccessToken), "The authResult.AccessToken parameter is null or invalid.");
+            Debug.Assert(!String.IsNullOrWhiteSpace(authResult.RefreshToken), "The authResult.RefreshToken parameter is null or invalid.");
+            Debug.Assert(Enum.IsDefined(typeof(TokenType), type), "The type parameter is invalid");
+
             switch (type)
             {
                 case TokenType.Access:
@@ -31,6 +39,11 @@ namespace Microsoft.TeamFoundation.Git.Helpers.Authentication
                     throw new ArgumentException("Unexpected token type encountered", "type");
             }
 
+            Guid targetId = Guid.Empty;
+            if (Guid.TryParse(authResult.TenantId, out targetId))
+            {
+                this.TargetId = targetId;
+            }
             this.Type = type;
         }
 
@@ -42,6 +55,10 @@ namespace Microsoft.TeamFoundation.Git.Helpers.Authentication
         /// The raw contents of the token.
         /// </summary>
         public readonly string Value;
+        /// <summary>
+        /// The guid form Identity of the target
+        /// </summary>
+        public Guid TargetId { get; internal set; }
 
         /// <summary>
         /// Compares an object to this <see cref="Token"/> for equality.
