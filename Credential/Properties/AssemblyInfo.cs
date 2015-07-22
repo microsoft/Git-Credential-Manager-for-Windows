@@ -6,11 +6,11 @@ using System.Runtime.InteropServices;
 // General Information about an assembly is controlled through the following 
 // set of attributes. Change these attribute values to modify the information
 // associated with an assembly.
-[assembly: AssemblyTitle("Windows Git Credential Secure Store")]
+[assembly: AssemblyTitle("Microsoft Git Credential Secure Store for Windows")]
 [assembly: AssemblyDescription("Stores credentials for Git version control securely. Provides secure logon for Visual Studio Online (visualstudio.com).")]
 [assembly: AssemblyConfiguration("")]
 [assembly: AssemblyCompany("Microsoft Corporation")]
-[assembly: AssemblyProduct("Windows Git Credential Secure Store for Visual Studio Online (https://visualstudio.com)")]
+[assembly: AssemblyProduct("Microsoft Git Credential Secure Store for Windows")]
 [assembly: AssemblyCopyright("Copyright © Microsoft 2015")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]

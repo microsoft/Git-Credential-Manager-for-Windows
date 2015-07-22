@@ -2,8 +2,7 @@
 :: Check http://ss64.com/nt/syntax.html
 @ECHO OFF
 
-
-SET gitExtensionName=Git Credential Helper
+SET gitExtensionName=Microsoft Git Credential Secure Store for Windows
 SET exeName=git-credential-store.exe
 SET exeBack=git-credential-store.bak
 
@@ -18,7 +17,7 @@ SET exeBack=git-credential-store.bak
         GOTO NEED_ADMIN_ACCESS
     )
 
-    ::32-bit OS not supported
+    :: Lgacy (32-bit) OS not supported
     IF NOT EXIST "%ProgramFiles(x86)%" GOTO :LEGACY_OS
     
     ECHO(
@@ -31,30 +30,29 @@ SET exeBack=git-credential-store.bak
 
 
 :GIT_TOOLS_FOR_MICROSOFT_ENGINEERS
-    ::See if Git Tools for Microsoft Engineers are installed
+    :: See if Git Tools for Microsoft Engineers is installed
     SET destination=%ProgramFiles(x86)%\Git Tools for Microsoft Engineers\libexec\git-core\
     SET exeInstall=%ProgramFiles(x86)%\Git Tools for Microsoft Engineers\bin\git.exe
     IF NOT EXIST "%exeInstall%" GOTO :MSYSGIT
     
     ECHO I'm installing "%gitExtensionName%" from "%installPath%" to "%destination%"...
     
-    :: Copy the files
     GOTO COPY_FILES
 
 
 :MSYSGIT
-    ::See if Msys Git is installed
+    :: See if Msys Git is installed
     SET destination=%ProgramFiles(x86)%\Git\libexec\git-core\
     SET exeInstall=%ProgramFiles(x86)%\Git\cmd\git.exe
     IF NOT EXIST "%exeInstall%" GOTO :INSTALLED_CHECK
     
     ECHO I'm installing "%gitExtensionName%" from "%installPath%" to "%destination%"...
     
-    ::Copy the files
     GOTO COPY_FILES
 
 
 :COPY_FILES
+    :: Copy all of the necissary files to the git lib-exec folder
     (IF NOT EXIST "%destination%%exeBack%" (MOVE /y "%destination%%exeName%" "%destination%%exeBack%")) || ((ECHO Oops! Failed back up "%exeName%" to "%exeBack%") && GOTO :FAILURE)
     (IF EXIST "%destination%%exeName%" (MOVE /y "%destination%%exeName%" "%destination%~%exeName%~")) || ((ECHO Oops! Failed to rename "%exeName%" to "~%exeName%~") && GOTO :FAILURE)
     (COPY /v /y "%installPath%"*.dll "%destination%"*.dll) || ((ECHO Oops! Fail to copy content from "%installPath%" to "%destination%") && GOTO :FAILURE)
@@ -64,45 +62,56 @@ SET exeBack=git-credential-store.bak
 
 
 :INSTALLED_CHECK
-    ::Check if Git was found or not
-    IF %helperInstalled% == 1 GOTO :GIT_FOUND
-    GOTO :NO_GIT_FOUND
+    :: Check if Git was found or not
+    IF %helperInstalled% == 1 (
+        GOTO :GIT_FOUND
+    ) ELSE (
+        GOTO :NO_GIT_FOUND
+    )
 
 
 :NO_GIT_FOUND
-    ECHO Git not found in the expected locations :(. Make sure Git is installed.
+    ECHO Git not found in the expected location(s). Make sure Git is installed. U_U
+    ECHO Don't know where to get Git? Try http://git-scm.com/
+
     GOTO :END
 
 
 :GIT_FOUND
     :: Pre-configure it
     ECHO(
-    git config --global credential.helper store && ECHO Updated your ~\.gitconfig (aka global config)
+        
+    (git config --global credential.helper store && ECHO Updated your ~\.gitconfig (aka global config)) || GOTO :FAILURE
     git config --global --remove url.mshttps://devdiv.visualstudio.com/ >nul 2>&1 && ECHO Removed mshttp nonsense for devdiv.visualstudio.com
     git config --global --remove url.mshttps://microsoft.visualstudio.com/ >nul 2>&1 && ECHO Removed mshttp nonsense for microsoft.visualstudio.com
     git config --global --remove url.mshttps://mseng.visualstudio.com/ >nul 2>&1 && ECHO Removed mshttp nonsense for mseng.visualstudio.com
     git config --global --remove url.mshttps://office.visualstudio.com/ >nul 2>&1 && ECHO Removed mshttp nonsense for office.visualstudio.com
     
     ECHO(
-    ECHO %gitExtensionName% was installed!
+    ECHO %gitExtensionName% was installed! ^_^
     ECHO(
+        
     GOTO :END
 
 
 :LEGACY_OS
-    ECHO Oops! 32-bit OS Not Supported
+    :: No support for legacy (32-bit) operating systems
+    ECHO Oops! 32-bit OS Not Supported. U_U
     GOTO :END
 
 
 :NEED_ADMIN_ACCESS
-    ECHO You need to run this script elevated for it to work. Press ENTER to exit...
-    pause >nul
+    :: Script requires elevated privilages
+    ECHO You need to run this script elevated for it to work. U_U
+
     GOTO :END
 
 
 :FAILURE
-    ECHO Something went wrong and I was unable to complete the installation.
+    ECHO Something went wrong and I was unable to complete the installation. U_U
+
     GOTO :END
 
 
 :END
+
