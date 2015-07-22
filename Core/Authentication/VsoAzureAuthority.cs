@@ -79,7 +79,7 @@ namespace Microsoft.TeamFoundation.Git.Helpers.Authentication
 
                     if (await PopulateTokenTargetId(targetUri, accessToken))
                     {
-                        StringContent content = GetAccessTokenRequestBody(accessToken, tokenScope);
+                        StringContent content = GetAccessTokenRequestBody(targetUri, accessToken, tokenScope);
                         string requestUrl = requireCompactToken ? CompactTokenUrl : SessionTokenUrl;
 
                         HttpResponseMessage response = await httpClient.PostAsync(requestUrl, content);
@@ -250,9 +250,9 @@ namespace Microsoft.TeamFoundation.Git.Helpers.Authentication
             return false;
         }
 
-        private StringContent GetAccessTokenRequestBody(Token accessToken, VsoTokenScope tokenScope)
+        private StringContent GetAccessTokenRequestBody(Uri targetUri, Token accessToken, VsoTokenScope tokenScope)
         {
-            const string ContentJsonFormat = "{{ \"scope\" : \"{0}\", \"targetAccounts\" : [\"{1}\"] }}";
+            const string ContentJsonFormat = "{{ \"scope\" : \"{0}\", \"targetAccounts\" : [\"{1}\"], \"displayName\" : \"Git Access for {2}\" }}";
             const string HttpJsonContentType = "application/json";
 
             Debug.Assert(accessToken != null && (accessToken.Type == TokenType.Access || accessToken.Type == TokenType.Federated), "The accessToken parameter is null or invalid");
@@ -260,7 +260,7 @@ namespace Microsoft.TeamFoundation.Git.Helpers.Authentication
 
             Trace.WriteLine("   creating access token scoped to '" + tokenScope + "' for '" + accessToken.TargetId + "'");
 
-            string jsonContent = String.Format(ContentJsonFormat, tokenScope, accessToken.TargetId);
+            string jsonContent = String.Format(ContentJsonFormat, tokenScope, accessToken.TargetId, targetUri);
             StringContent content = new StringContent(jsonContent, Encoding.UTF8, HttpJsonContentType);
 
             return content;
