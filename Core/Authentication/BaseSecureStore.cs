@@ -85,14 +85,17 @@ namespace Microsoft.TeamFoundation.Git.Helpers.Authentication
                 if (NativeMethods.CredRead(targetName, NativeMethods.CredentialType.Generic, 0, out credPtr))
                 {
                     NativeMethods.Credential credStruct = (NativeMethods.Credential)Marshal.PtrToStructure(credPtr, typeof(NativeMethods.Credential));
-                    int size = (int)credStruct.CredentialBlobSize;
-                    byte[] bytes = new byte[size];
-                    Marshal.Copy(credStruct.CredentialBlob, bytes, 0, size);
-
-                    TokenType type;
-                    if (Token.GetTypeFromFriendlyName(credStruct.UserName, out type))
+                    if (credStruct.CredentialBlob != null && credStruct.CredentialBlobSize > 0)
                     {
-                        Token.Deserialize(bytes, type, out token);
+                        int size = (int)credStruct.CredentialBlobSize;
+                        byte[] bytes = new byte[size];
+                        Marshal.Copy(credStruct.CredentialBlob, bytes, 0, size);
+
+                        TokenType type;
+                        if (Token.GetTypeFromFriendlyName(credStruct.UserName, out type))
+                        {
+                            Token.Deserialize(bytes, type, out token);
+                        }
                     }
                 }
             }
