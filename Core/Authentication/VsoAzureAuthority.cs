@@ -87,20 +87,20 @@ namespace Microsoft.TeamFoundation.Git.Helpers.Authentication
                         {
                             string responseText = await response.Content.ReadAsStringAsync();
 
-                            Match tokenMatch = null;
-                            if ((tokenMatch = Regex.Match(responseText, @"\s*""token""\s*:\s*""([^\""]+)""\s*", RegexOptions.Compiled | RegexOptions.IgnoreCase)).Success)
+                            if (!String.IsNullOrWhiteSpace(responseText))
                             {
-                                string tokenValue = tokenMatch.Groups[1].Value;
-                                Token token = new Token(tokenValue, TokenType.Personal);
+                                // find the 'token : <value>' portion of the result content, if any
+                                Match tokenMatch = null;
+                                if ((tokenMatch = Regex.Match(responseText, @"\s*""token""\s*:\s*""([^\""]+)""\s*", RegexOptions.Compiled | RegexOptions.CultureInvariant | RegexOptions.IgnoreCase)).Success)
+                                {
+                                    string tokenValue = tokenMatch.Groups[1].Value;
+                                    Token token = new Token(tokenValue, TokenType.Personal);
 
-                                Trace.WriteLine("   personal access token aquisition succeeded.");
+                                    Trace.WriteLine("   personal access token aquisition succeeded.");
 
-                                return token;
+                                    return token;
+                                }
                             }
-                        }
-                        else
-                        {
-                            Console.Error.WriteLine("Received '{0}' from Visual Studio Online authority. Unable to generate personal access token.", response.ReasonPhrase);
                         }
                     }
                 }

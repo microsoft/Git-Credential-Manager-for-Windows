@@ -70,29 +70,6 @@ namespace Microsoft.TeamFoundation.Git.Helpers.Authentication
             this.Password = credentials.Password;
         }
 
-        public void SetScheme(string value)
-        {
-            if (String.Equals(value, "MSA", StringComparison.OrdinalIgnoreCase) ||
-                String.Equals(value, "Microsoft", StringComparison.OrdinalIgnoreCase) ||
-                String.Equals(value, "MicrosoftAccount", StringComparison.OrdinalIgnoreCase) ||
-                String.Equals(value, "Live", StringComparison.OrdinalIgnoreCase) ||
-                String.Equals(value, "LiveConnect", StringComparison.OrdinalIgnoreCase) ||
-                String.Equals(value, "LiveID", StringComparison.OrdinalIgnoreCase))
-            {
-                this.Authority = AuthorityType.MicrosoftAccount;
-            }
-            else if (String.Equals(value, "AAD", StringComparison.OrdinalIgnoreCase) ||
-                     String.Equals(value, "Azure", StringComparison.OrdinalIgnoreCase) ||
-                     String.Equals(value, "AzureDirectory", StringComparison.OrdinalIgnoreCase))
-            {
-                this.Authority = AuthorityType.AzureDirectory;
-            }
-            else
-            {
-                this.Authority = AuthorityType.Basic;
-            }
-        }
-
         public override string ToString()
         {
             StringBuilder builder = new StringBuilder();

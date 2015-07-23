@@ -331,23 +331,33 @@ namespace Microsoft.TeamFoundation.Git.Helpers.Authentication
             Trace.WriteLine("Program::LoadOperationArguments");
 
             Configuration config = LoadGitConfiguation();
-
             ConfigEntry entry;
 
             if (GetGitConfigEntry(config, operationArguments, "authority", out entry))
             {
                 Trace.WriteLine("   authority = " + entry.Value);
-                operationArguments.SetScheme(entry.Value);
-            }
-            if (GetGitConfigEntry(config, operationArguments, "validate", out entry))
-            {
-                Trace.WriteLine("   validate = " + entry.Value);
-                bool validate = operationArguments.ValidateCredentials;
-                if (Boolean.TryParse(entry.Value, out validate))
+
+                if (String.Equals(entry.Value, "MSA", StringComparison.OrdinalIgnoreCase)
+                    || String.Equals(entry.Value, "Microsoft", StringComparison.OrdinalIgnoreCase)
+                    || String.Equals(entry.Value, "MicrosoftAccount", StringComparison.OrdinalIgnoreCase)
+                    || String.Equals(entry.Value, "Live", StringComparison.OrdinalIgnoreCase)
+                    || String.Equals(entry.Value, "LiveConnect", StringComparison.OrdinalIgnoreCase)
+                    || String.Equals(entry.Value, "LiveID", StringComparison.OrdinalIgnoreCase))
                 {
-                    operationArguments.ValidateCredentials = validate;
+                    operationArguments.Authority = AuthorityType.MicrosoftAccount;
+                }
+                else if (String.Equals(entry.Value, "AAD", StringComparison.OrdinalIgnoreCase)
+                         || String.Equals(entry.Value, "Azure", StringComparison.OrdinalIgnoreCase)
+                         || String.Equals(entry.Value, "AzureDirectory", StringComparison.OrdinalIgnoreCase))
+                {
+                    operationArguments.Authority = AuthorityType.AzureDirectory;
+                }
+                else
+                {
+                    operationArguments.Authority = AuthorityType.Basic;
                 }
             }
+
             if (GetGitConfigEntry(config, operationArguments, "interactive", out entry))
             {
                 Trace.WriteLine("   interactive = " + entry.Value);
@@ -359,11 +369,12 @@ namespace Microsoft.TeamFoundation.Git.Helpers.Authentication
                     operationArguments.Interactivity = Interactivity.Always;
                 }
                 else if (String.Equals("never", entry.Value, StringComparison.OrdinalIgnoreCase)
-                   || String.Equals("false", entry.Value, StringComparison.OrdinalIgnoreCase))
+                         || String.Equals("false", entry.Value, StringComparison.OrdinalIgnoreCase))
                 {
                     operationArguments.Interactivity = Interactivity.Never;
                 }
             }
+
             if (GetGitConfigEntry(config, operationArguments, "validate", out entry))
             {
                 Trace.WriteLine("   validate = " + entry.Value);
@@ -384,18 +395,23 @@ namespace Microsoft.TeamFoundation.Git.Helpers.Authentication
 
             Trace.WriteLine("Program::LoadGitConfiguation");
 
+            // read Git's three configs from lowest priority to highest, overwriting values as
+            // higher prirority configurations are parsed, storing them in a handy lookup table
             Configuration values = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
 
+            // find and parse Git's system config
             if (Where.GitSystemConfig(out systemConfig))
             {
                 ParseGitConfig(systemConfig, values);
             }
 
+            // find and parse Git's global config
             if (Where.GitGlobalConfig(out globalConfig))
             {
                 ParseGitConfig(globalConfig, values);
             }
 
+            // find and parse Git's local config
             if (Where.GitLocalConfig(out localConfig))
             {
                 ParseGitConfig(localConfig, values);
@@ -423,23 +439,29 @@ namespace Microsoft.TeamFoundation.Git.Helpers.Authentication
             Match match = null;
             string section = null;
 
+            // parse each line in the config independently - Git's configs do not accept multi-line values
             foreach (var line in File.ReadLines(configPath))
             {
+                // skip empty and commented lines
                 if (String.IsNullOrWhiteSpace(line))
                     continue;
                 if (Regex.IsMatch(line, @"^\s*[#;]", RegexOptions.Compiled | RegexOptions.CultureInvariant))
                     continue;
 
+                // sections begin with values like [section] or [section "section name"]. All subsequent lines,
+                // until a new section is encountered, are children of the section
                 if ((match = Regex.Match(line, @"^\s*\[\s*(\w+)\s*(\""[^\""]+\""){0,1}\]", RegexOptions.Compiled | RegexOptions.CultureInvariant)).Success)
                 {
                     if (match.Groups.Count >= 2 && !String.IsNullOrWhiteSpace(match.Groups[1].Value))
                     {
                         section = match.Groups[1].Value.Trim();
 
+                        // check if the section is named, if so: process the name
                         if (match.Groups.Count >= 3 && !String.IsNullOrWhiteSpace(match.Groups[2].Value))
                         {
                             string val = match.Groups[2].Value.Trim();
 
+                            // triming off enclosing quotes makes usage easier, only trim in pairs
                             if (val[0] == '"')
                             {
                                 if (val[val.Length - 1] == '"')
@@ -456,6 +478,7 @@ namespace Microsoft.TeamFoundation.Git.Helpers.Authentication
                         }
                     }
                 }
+                // section children should be in the format of name = value pairs
                 else if ((match = Regex.Match(line, @"^\s*(\w+)\s*=\s*(.+)", RegexOptions.Compiled | RegexOptions.CultureInvariant)).Success)
                 {
                     if (match.Groups.Count >= 3
@@ -465,6 +488,7 @@ namespace Microsoft.TeamFoundation.Git.Helpers.Authentication
                         string key = section + HostSplitCharacter + match.Groups[1].Value.Trim();
                         string val = match.Groups[2].Value.Trim();
 
+                        // triming off enclosing quotes makes usage easier, only trim in pairs
                         if (val[0] == '"')
                         {
                             if (val[val.Length - 1] == '"')
@@ -477,6 +501,7 @@ namespace Microsoft.TeamFoundation.Git.Helpers.Authentication
                             }
                         }
 
+                        // add or update the (key, value)
                         if (values.ContainsKey(key))
                         {
                             values[key] = val;
@@ -520,9 +545,11 @@ namespace Microsoft.TeamFoundation.Git.Helpers.Authentication
                 }
             }
 
+            // try to find an unadorned match as a complete fallback
             if (GetGitConfigEntry(config, ConfigPrefix, String.Empty, key, out entry))
                 return true;
 
+            // nothing found
             entry = default(ConfigEntry);
             return false;
         }
@@ -537,15 +564,14 @@ namespace Microsoft.TeamFoundation.Git.Helpers.Authentication
                 ? String.Format("{0}.{1}", prefix, suffix)
                 : String.Format("{0}.{1}.{2}", prefix, key, suffix);
 
-            foreach (var candidate in config)
+            // if there's a match, return it
+            if (config.ContainsKey(match))
             {
-                if (String.Equals(candidate.Key, match, StringComparison.OrdinalIgnoreCase))
-                {
-                    entry = candidate;
-                    return true;
-                }
+                entry = new ConfigEntry(match, config[match]);
+                return true;
             }
 
+            // nothing found
             entry = default(ConfigEntry);
             return false;
         }
