@@ -3,8 +3,7 @@
 @ECHO OFF
 
 SET gitExtensionName=Microsoft Git Credential Secure Store for Windows
-SET exeName=git-credential-store.exe
-SET exeBack=git-credential-store.bak
+SET exeName=git-credential-secure.exe
 
 :CHECK_PERMISSIONS
     ECHO Administrative permissions required. 
@@ -52,8 +51,7 @@ SET exeBack=git-credential-store.bak
 
 
 :COPY_FILES
-    :: Copy all of the necissary files to the git lib-exec folder
-    (IF NOT EXIST "%destination%%exeBack%" (MOVE /y "%destination%%exeName%" "%destination%%exeBack%")) || ((ECHO Oops! Failed back up "%exeName%" to "%exeBack%") && GOTO :FAILURE)
+    :: Copy all of the necessary files to the git lib-exec folder
     (IF EXIST "%destination%%exeName%" (MOVE /y "%destination%%exeName%" "%destination%~%exeName%~")) || ((ECHO Oops! Failed to rename "%exeName%" to "~%exeName%~") && GOTO :FAILURE)
     (COPY /v /y "%installPath%"*.dll "%destination%"*.dll) || ((ECHO Oops! Fail to copy content from "%installPath%" to "%destination%") && GOTO :FAILURE)
     (COPY /v /y "%installPath%"*.exe "%destination%"*.exe) || ((ECHO Oops! Fail to copy content from "%installPath%" to "%destination%") && GOTO :FAILURE)
