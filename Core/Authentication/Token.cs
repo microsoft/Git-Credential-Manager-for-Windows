@@ -56,12 +56,16 @@ namespace Microsoft.TeamFoundation.Git.Helpers.Authentication
             this.Type = type;
             this.Value = value;
         }
-        internal Token(string value, string type)
+        internal Token(string value, string typeName)
         {
             Debug.Assert(!String.IsNullOrWhiteSpace(value), "The value parameter is null or invalid");
-            Debug.Assert(!String.IsNullOrWhiteSpace(type), "The type parameter is null or invalid");
+            Debug.Assert(!String.IsNullOrWhiteSpace(typeName), "The typeName parameter is null or invalid");
 
-
+            TokenType type;
+            if (!GetTypeFromFriendlyName(typeName, out type))
+            {
+                throw new ArgumentException("Unexpected token type encountered", "typeName");
+            }
         }
         internal Token(IdentityModel.Clients.ActiveDirectory.AuthenticationResult authResult, TokenType type)
         {

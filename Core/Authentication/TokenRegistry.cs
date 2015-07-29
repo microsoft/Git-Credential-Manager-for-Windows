@@ -45,34 +45,44 @@ namespace Microsoft.TeamFoundation.Git.Helpers.Authentication
 
             foreach (var key in EnumerateKeys(false))
             {
+                if (key == null)
+                    continue;
+
                 string url;
                 string type;
                 string value;
 
                 if (KeyIsValid(key, out url, out type, out value))
                 {
-                    Uri tokenUri = new Uri(url);
-                    if (tokenUri.IsBaseOf(targetUri))
+                    try
                     {
-                        byte[] data = Convert.FromBase64String(value);
-
-                        data = ProtectedData.Unprotect(data, null, DataProtectionScope.CurrentUser);
-
-                        value = Encoding.UTF8.GetString(data);
-
-                        TokenType tokenType;
-                        if (String.Equals(type, "Federated", StringComparison.OrdinalIgnoreCase))
+                        Uri tokenUri = new Uri(url);
+                        if (tokenUri.IsBaseOf(targetUri))
                         {
-                            tokenType = TokenType.Federated;
-                        }
-                        else
-                        {
-                            throw new InvalidOperationException("Unexpected token type encountered");
-                        }
+                            byte[] data = Convert.FromBase64String(value);
 
-                        token = new Token(value, tokenType);
+                            data = ProtectedData.Unprotect(data, null, DataProtectionScope.CurrentUser);
 
-                        return true;
+                            value = Encoding.UTF8.GetString(data);
+
+                            TokenType tokenType;
+                            if (String.Equals(type, "Federated", StringComparison.OrdinalIgnoreCase))
+                            {
+                                tokenType = TokenType.Federated;
+                            }
+                            else
+                            {
+                                throw new InvalidOperationException("Unexpected token type encountered");
+                            }
+
+                            token = new Token(value, tokenType);
+
+                            return true;
+                        }
+                    }
+                    catch
+                    {
+                        Trace.WriteLine("   token read from registry was corrupt");
                     }
                 }
             }
@@ -101,7 +111,15 @@ namespace Microsoft.TeamFoundation.Git.Helpers.Authentication
                 {
                     foreach (var nodeName in rootKey.GetSubKeyNames())
                     {
-                        var nodeKey = rootKey.OpenSubKey(nodeName, writeable);
+                        RegistryKey nodeKey = null;
+                        try
+                        {
+                            rootKey.OpenSubKey(nodeName, writeable);
+                        }
+                        catch
+                        {
+                            Trace.WriteLine("   failed to open subkey");
+                        }
 
                         if (nodeKey != null)
                         {
