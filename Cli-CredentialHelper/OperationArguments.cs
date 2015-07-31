@@ -16,6 +16,7 @@ namespace Microsoft.TeamFoundation.CredentialHelper
             this.Authority = AuthorityType.Auto;
             this.Interactivity = Interactivity.Auto;
             this.ValidateCredentials = true;
+            this.WriteLog = false;
 
             string line;
             while (!String.IsNullOrWhiteSpace((line = Console.In.ReadLine())))
@@ -64,6 +65,7 @@ namespace Microsoft.TeamFoundation.CredentialHelper
         public AuthorityType Authority { get; set; }
         public Interactivity Interactivity { get; set; }
         public bool ValidateCredentials { get; set; }
+        public bool WriteLog { get; set; }
 
         public void SetCredentials(Credential credentials)
         {

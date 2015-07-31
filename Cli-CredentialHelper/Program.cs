@@ -22,40 +22,51 @@ namespace Microsoft.TeamFoundation.CredentialHelper
 
         static void Main(string[] args)
         {
-            EnableDebugTrace();
-
-            if (args.Length == 0 || args[0].Contains('?'))
+            try
             {
-                PrintHelpMessage();
-                return;
-            }
+                EnableDebugTrace();
 
-            // parse the operations arguments from stdin (this is how git sends commands)
-            // see: https://www.kernel.org/pub/software/scm/git/docs/technical/api-credentials.html
-            // see: https://www.kernel.org/pub/software/scm/git/docs/git-credential.html
-            OperationArguments operationArguments = new OperationArguments(Console.In);
+                if (args.Length == 0 || args[0].Contains('?'))
+                {
+                    PrintHelpMessage();
+                    return;
+                }
 
-            LoadOperationArguments(operationArguments);
+                // parse the operations arguments from stdin (this is how git sends commands)
+                // see: https://www.kernel.org/pub/software/scm/git/docs/technical/api-credentials.html
+                // see: https://www.kernel.org/pub/software/scm/git/docs/git-credential.html
+                OperationArguments operationArguments = new OperationArguments(Console.In);
 
-            // list of arg => method associations (case-insensitive)
-            Dictionary<string, Action<OperationArguments>> actions =
-                new Dictionary<string, Action<OperationArguments>>(StringComparer.OrdinalIgnoreCase)
-            {
+                LoadOperationArguments(operationArguments);
+                EnableTraceLogging(operationArguments);
+
+                // list of arg => method associations (case-insensitive)
+                Dictionary<string, Action<OperationArguments>> actions =
+                    new Dictionary<string, Action<OperationArguments>>(StringComparer.OrdinalIgnoreCase)
+                {
                 { "approve", Store },
                 { "erase", Erase },
                 { "fill", Get },
                 { "get", Get },
                 { "reject", Erase },
                 { "store", Store },
-            };
+                };
 
-            foreach (string arg in args)
-            {
-                if (actions.ContainsKey(arg))
+                foreach (string arg in args)
                 {
-                    actions[arg](operationArguments);
+                    if (actions.ContainsKey(arg))
+                    {
+                        actions[arg](operationArguments);
+                    }
                 }
             }
+            catch (Exception exception)
+            {
+                Console.Error.WriteLine("Fatal: " + exception.GetType().Name + " encountered.");
+                LogEvent(exception.Message, EventLogEntryType.Error);
+            }
+
+            Trace.Flush();
         }
 
         private static void PrintHelpMessage()
@@ -82,6 +93,14 @@ namespace Microsoft.TeamFoundation.CredentialHelper
             Console.Out.WriteLine();
             Console.Out.WriteLine("      `git config --global credential.microsoft.visualstudio.com.validate false`");
             Console.Out.WriteLine();
+#if TRACE
+            Console.Out.WriteLine("   writelog       Enables trace logging of all activities. Logs are written to");
+            Console.Out.WriteLine("                  the .git/ folder at the root of the repository.");
+            Console.Out.WriteLine("                  Defaults to FALSE.");
+            Console.Out.WriteLine();
+            Console.Out.WriteLine("      `git config --global credential.writelog true`");
+            Console.Out.WriteLine();
+#endif
             Console.Out.WriteLine("Sample Configuration:");
             Console.Out.WriteLine(@"   [credential ""microsoft.visualstudio.com""]");
             Console.Out.WriteLine(@"       authority = AAD");
@@ -169,10 +188,12 @@ namespace Microsoft.TeamFoundation.CredentialHelper
                         {
                             Trace.WriteLine("   credentials found");
                             operationArguments.SetCredentials(credentials);
+                            LogEvent("Azure Directory credentials for " + operationArguments.TargetUri + " successfully retrieved.", EventLogEntryType.SuccessAudit);
                         }
                         else
                         {
                             Console.Error.WriteLine(AadMsaAuthFailureMessage);
+                            LogEvent("Failed to retrieve Azure Directory credentials for " + operationArguments.TargetUri + ".", EventLogEntryType.FailureAudit);
                         }
                     }).Wait();
                     break;
@@ -201,10 +222,12 @@ namespace Microsoft.TeamFoundation.CredentialHelper
                         {
                             Trace.WriteLine("   credentials found");
                             operationArguments.SetCredentials(credentials);
+                            LogEvent("Microsoft Live credentials for " + operationArguments.TargetUri + " successfully retrieved.", EventLogEntryType.SuccessAudit);
                         }
                         else
                         {
                             Console.Error.WriteLine(AadMsaAuthFailureMessage);
+                            LogEvent("Failed to retrieve Microsoft Live credentials for " + operationArguments.TargetUri + ".", EventLogEntryType.FailureAudit);
                         }
                     }).Wait();
                     break;
@@ -385,6 +408,19 @@ namespace Microsoft.TeamFoundation.CredentialHelper
                     operationArguments.ValidateCredentials = validate;
                 }
             }
+
+#if TRACE
+            if (GetGitConfigEntry(config, operationArguments, "writelog", out entry))
+            {
+                Trace.WriteLine("   writelog = " + entry.Value);
+
+                bool writelog = operationArguments.WriteLog;
+                if (Boolean.TryParse(entry.Value, out writelog))
+                {
+                    operationArguments.WriteLog = writelog;
+                }
+            }
+#endif
         }
 
         private static Configuration LoadGitConfiguation()
@@ -574,6 +610,74 @@ namespace Microsoft.TeamFoundation.CredentialHelper
             // nothing found
             entry = default(ConfigEntry);
             return false;
+        }
+
+        private static void LogEvent(string message, EventLogEntryType eventType)
+        {
+            //const string EventSource = "TFS Git Credential Helper";
+
+            /*** commented out due to UAC issues which require a proper installer to work around ***/
+
+            //Trace.WriteLine("Program::LogEvent");
+
+            //if (!EventLog.SourceExists(EventSource))
+            //{
+            //    EventLog.CreateEventSource(EventSource, "Application");
+
+            //    Trace.WriteLine("   event source created");
+            //}
+
+            //EventLog.WriteEntry(EventSource, message, eventType);
+
+            //Trace.WriteLine("   " + eventType + "event written");
+        }
+
+        [Conditional("TRACE")]
+        private static void EnableTraceLogging(OperationArguments operationArguments)
+        {
+            const int LogFileMaxLength = 8 * 1024 * 1024; // 8 MB
+
+            Trace.WriteLine("Program::EnableTraceLogging");
+
+            if (operationArguments.WriteLog)
+            {
+                Trace.WriteLine("   trace logging enabled");
+
+                string gitConfigPath;
+                if (Where.GitLocalConfig(out gitConfigPath))
+                {
+                    Trace.WriteLine("   git local config found at " + gitConfigPath);
+
+                    string dotGitPath = Path.GetDirectoryName(gitConfigPath);
+                    string logFilePath = Path.Combine(dotGitPath, Path.ChangeExtension(ConfigPrefix, ".log"));
+                    string logFileName = operationArguments.TargetUri.ToString();
+
+                    FileInfo logFileInfo = new FileInfo(logFilePath);
+                    if (logFileInfo.Exists && logFileInfo.Length > LogFileMaxLength)
+                    {
+                        for (int i = 1; i < Int32.MaxValue; i++)
+                        {
+                            string moveName = String.Format("{0}{1:000}.log", ConfigPrefix, i);
+                            string movePath = Path.Combine(dotGitPath, moveName);
+
+                            if (!File.Exists(movePath))
+                            {
+                                logFileInfo.MoveTo(movePath);
+                                break;
+                            }
+                        }
+                    }
+
+                    Trace.WriteLine("   trace log destination is " + logFilePath);
+
+                    var listener = new TextWriterTraceListener(logFilePath, logFileName);
+                    Trace.Listeners.Add(listener);
+
+                    // write a small header to help with identifying new log entries
+                    listener.WriteLine(Environment.NewLine);
+                    listener.WriteLine(String.Format("Log Start ({0:u})", DateTimeOffset.Now));
+                }
+            }
         }
 
         [Conditional("DEBUG")]
