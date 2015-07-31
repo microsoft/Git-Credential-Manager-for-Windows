@@ -1,0 +1,39 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio 14
+VisualStudioVersion = 14.0.23107.0
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Cli-CredentialHelper", "Cli-CredentialHelper\Cli-CredentialHelper.csproj", "{62F52119-63D4-40A8-A9DF-F1C4B473308A}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Microsoft.TeamFoundation.Authentication", "Microsoft.TeamFoundation.Authentication\Microsoft.TeamFoundation.Authentication.csproj", "{C1DAABC1-B493-459D-BB4F-04FBEFB1BA13}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Microsoft.TeamFoundation.Authentication.Test", "Test\Microsoft.TeamFoundation.Authentication.Test.csproj", "{0AEB1CFC-371F-415C-93C5-44CEAA0E9A34}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Installer", "Installer", "{55A29D70-EC6E-46B3-9685-46AE828ECB5F}"
+	ProjectSection(SolutionItems) = preProject
+		install.cmd = install.cmd
+	EndProjectSection
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{62F52119-63D4-40A8-A9DF-F1C4B473308A}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{62F52119-63D4-40A8-A9DF-F1C4B473308A}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{62F52119-63D4-40A8-A9DF-F1C4B473308A}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{62F52119-63D4-40A8-A9DF-F1C4B473308A}.Release|Any CPU.Build.0 = Release|Any CPU
+		{C1DAABC1-B493-459D-BB4F-04FBEFB1BA13}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{C1DAABC1-B493-459D-BB4F-04FBEFB1BA13}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{C1DAABC1-B493-459D-BB4F-04FBEFB1BA13}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{C1DAABC1-B493-459D-BB4F-04FBEFB1BA13}.Release|Any CPU.Build.0 = Release|Any CPU
+		{0AEB1CFC-371F-415C-93C5-44CEAA0E9A34}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{0AEB1CFC-371F-415C-93C5-44CEAA0E9A34}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{0AEB1CFC-371F-415C-93C5-44CEAA0E9A34}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{0AEB1CFC-371F-415C-93C5-44CEAA0E9A34}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+EndGlobal
