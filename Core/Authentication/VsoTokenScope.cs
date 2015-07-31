@@ -1,9 +1,12 @@
 ﻿using System;
+using System.Runtime.CompilerServices;
+using ScopeSet = System.Collections.Generic.HashSet<string>;
 
 namespace Microsoft.TeamFoundation.Git.Helpers.Authentication
 {
-    public class VsoTokenScope
+    public class VsoTokenScope : IEquatable<VsoTokenScope>
     {
+        public static readonly VsoTokenScope None = new VsoTokenScope(String.Empty);
         /// <summary>
         /// Grants the ability to access build artifacts, including build results, definitions, and 
         /// requests, and the ability to receive notifications about build events via service hooks.
@@ -99,19 +102,128 @@ namespace Microsoft.TeamFoundation.Git.Helpers.Authentication
 
         private VsoTokenScope(string value)
         {
-            Value = value;
+            if (String.IsNullOrWhiteSpace(value))
+            {
+                _scopes = new string[0];
+            }
+            else
+            {
+                _scopes = new string[1];
+                _scopes[0] = value;
+            }
         }
 
-        public readonly string Value;
+        private VsoTokenScope(string[] values)
+        {
+            _scopes = values;
+        }
+
+        private VsoTokenScope(ScopeSet set)
+        {
+            string[] result = new string[set.Count];
+            set.CopyTo(result);
+
+            _scopes = result;
+        }
+
+        public string Value { get { return String.Join(" ", _scopes); } }
+
+        private readonly string[] _scopes;
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public override bool Equals(object obj)
+        {
+            return this == obj as VsoTokenScope;
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public bool Equals(VsoTokenScope other)
+        {
+            return this == other;
+        }
+
+        public override int GetHashCode()
+        {
+            // largest 31-bit prime (https://msdn.microsoft.com/en-us/library/Ee621251.aspx)
+            int hash = 2147483647;
+
+            for (int i = 0; i < _scopes.Length; i++)
+            {
+                unchecked
+                {
+                    hash ^= _scopes[i].GetHashCode();
+                }
+            }
+
+            return hash;
+        }
 
         public override String ToString()
         {
             return Value;
         }
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static VsoTokenScope operator +(VsoTokenScope scope1, VsoTokenScope scope2)
+        {
+            ScopeSet set = new ScopeSet();
+            set.UnionWith(scope1._scopes);
+            set.UnionWith(scope2._scopes);
+
+            return new VsoTokenScope(set);
+        }
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static VsoTokenScope operator -(VsoTokenScope scope1, VsoTokenScope scope2)
+        {
+            ScopeSet set = new ScopeSet();
+            set.UnionWith(scope1._scopes);
+            set.ExceptWith(scope2._scopes);
+
+            return new VsoTokenScope(set);
+        }
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static VsoTokenScope operator |(VsoTokenScope scope1, VsoTokenScope scope2)
         {
-            return new VsoTokenScope(scope1.Value + " " + scope2.Value);
+            ScopeSet set = new ScopeSet();
+            set.UnionWith(scope1._scopes);
+            set.UnionWith(scope2._scopes);
+
+            return new VsoTokenScope(set);
+        }
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static VsoTokenScope operator &(VsoTokenScope scope1, VsoTokenScope scope2)
+        {
+            ScopeSet set = new ScopeSet();
+            set.UnionWith(scope1._scopes);
+            set.IntersectWith(scope2._scopes);
+
+            return new VsoTokenScope(set);
+        }
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static VsoTokenScope operator ^(VsoTokenScope scope1, VsoTokenScope scope2)
+        {
+            ScopeSet set = new ScopeSet();
+            set.UnionWith(scope1._scopes);
+            set.SymmetricExceptWith(scope2._scopes);
+
+            return new VsoTokenScope(set);
+        }
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static bool operator ==(VsoTokenScope scope1, VsoTokenScope scope2)
+        {
+            if (ReferenceEquals(scope1, scope2))
+                return true;
+            if (ReferenceEquals(scope1, null) || ReferenceEquals(null, scope2))
+                return false;
+
+            ScopeSet set = new ScopeSet();
+            set.UnionWith(scope1._scopes);
+            return set.SetEquals(scope2._scopes);
+        }
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static bool operator !=(VsoTokenScope scope1, VsoTokenScope scope2)
+        {
+            return !(scope1 == scope2);
         }
     }
 }
