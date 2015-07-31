@@ -93,14 +93,12 @@ namespace Microsoft.TeamFoundation.CredentialHelper
             Console.Out.WriteLine();
             Console.Out.WriteLine("      `git config --global credential.microsoft.visualstudio.com.validate false`");
             Console.Out.WriteLine();
-#if TRACE
             Console.Out.WriteLine("   writelog       Enables trace logging of all activities. Logs are written to");
             Console.Out.WriteLine("                  the .git/ folder at the root of the repository.");
             Console.Out.WriteLine("                  Defaults to FALSE.");
             Console.Out.WriteLine();
             Console.Out.WriteLine("      `git config --global credential.writelog true`");
             Console.Out.WriteLine();
-#endif
             Console.Out.WriteLine("Sample Configuration:");
             Console.Out.WriteLine(@"   [credential ""microsoft.visualstudio.com""]");
             Console.Out.WriteLine(@"       authority = AAD");
@@ -409,7 +407,6 @@ namespace Microsoft.TeamFoundation.CredentialHelper
                 }
             }
 
-#if TRACE
             if (GetGitConfigEntry(config, operationArguments, "writelog", out entry))
             {
                 Trace.WriteLine("   writelog = " + entry.Value);
@@ -420,7 +417,6 @@ namespace Microsoft.TeamFoundation.CredentialHelper
                     operationArguments.WriteLog = writelog;
                 }
             }
-#endif
         }
 
         private static Configuration LoadGitConfiguation()
@@ -632,7 +628,6 @@ namespace Microsoft.TeamFoundation.CredentialHelper
             //Trace.WriteLine("   " + eventType + "event written");
         }
 
-        [Conditional("TRACE")]
         private static void EnableTraceLogging(OperationArguments operationArguments)
         {
             const int LogFileMaxLength = 8 * 1024 * 1024; // 8 MB
@@ -681,7 +676,6 @@ namespace Microsoft.TeamFoundation.CredentialHelper
         }
 
         [Conditional("DEBUG")]
-        [Conditional("TRACE")]
         private static void EnableDebugTrace()
         {
             // use the stderr stream for the trace as stdout is used in the cross-process communcations protocol
