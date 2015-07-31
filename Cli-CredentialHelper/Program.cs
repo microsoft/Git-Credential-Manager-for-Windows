@@ -232,7 +232,6 @@ namespace Microsoft.TeamFoundation.CredentialHelper
             Debug.Assert(operationArguments != null, "The operationArguments is null");
 
             Trace.WriteLine("Program::CreateAuthentication");
-            Trace.WriteLine("   authority = " + operationArguments.Authority);
 
             var secrets = new SecretStore(SecretsNamespace);
 
