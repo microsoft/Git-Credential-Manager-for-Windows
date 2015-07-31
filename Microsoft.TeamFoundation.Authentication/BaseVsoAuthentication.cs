@@ -61,14 +61,14 @@ namespace Microsoft.TeamFoundation.Authentication
             this.AdaRefreshTokenStore = adaRefreshTokenStore;
             this.VsoIdeTokenCache = vsoIdeTokenCache;
             this.VsoAuthority = vsoAuthority;
-            this.VsoAdalTokenCache = IdentityModel.Clients.ActiveDirectory.TokenCache.DefaultShared;
+            this.VsoAdalTokenCache = TokenCache.DefaultShared;
         }
 
         public readonly string ClientId;
         public readonly string Resource;
         public readonly VsoTokenScope TokenScope;
 
-        protected readonly IdentityModel.Clients.ActiveDirectory.TokenCache VsoAdalTokenCache;
+        protected readonly TokenCache VsoAdalTokenCache;
         protected readonly ITokenStore VsoIdeTokenCache;
 
         internal ITokenStore PersonalAccessTokenStore { get; set; }
