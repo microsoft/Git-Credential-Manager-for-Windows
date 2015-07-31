@@ -2,8 +2,9 @@
 using System.Diagnostics;
 using System.IO;
 using System.Text;
+using Microsoft.TeamFoundation.Authentication;
 
-namespace Microsoft.TeamFoundation.Git.Helpers.Authentication
+namespace Microsoft.TeamFoundation.CredentialHelper
 {
     internal sealed class OperationArguments
     {

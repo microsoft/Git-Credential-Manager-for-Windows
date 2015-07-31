@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Diagnostics;
 
-namespace Microsoft.TeamFoundation.Git.Helpers.Authentication
+namespace Microsoft.TeamFoundation.Authentication
 {
     public class AuthenticationTests
     {

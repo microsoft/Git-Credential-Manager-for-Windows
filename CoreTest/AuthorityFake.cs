@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Threading.Tasks;
 
-namespace Microsoft.TeamFoundation.Git.Helpers.Authentication
+namespace Microsoft.TeamFoundation.Authentication
 {
     internal class AuthorityFake : IVsoAuthority
     {

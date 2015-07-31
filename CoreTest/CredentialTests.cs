@@ -1,7 +1,7 @@
 ﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System;
 
-namespace Microsoft.TeamFoundation.Git.Helpers.Authentication.Test
+namespace Microsoft.TeamFoundation.Authentication.Test
 {
     [TestClass]
     public class CredentialTests

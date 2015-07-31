@@ -5,16 +5,14 @@ VisualStudioVersion = 14.0.23107.0
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Cli-CredentialHelper", "Credential\Cli-CredentialHelper.csproj", "{62F52119-63D4-40A8-A9DF-F1C4B473308A}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Core", "Core\Core.csproj", "{C1DAABC1-B493-459D-BB4F-04FBEFB1BA13}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Microsoft.TeamFoundation.Authentication", "Core\Microsoft.TeamFoundation.Authentication.csproj", "{C1DAABC1-B493-459D-BB4F-04FBEFB1BA13}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CoreTest", "CoreTest\CoreTest.csproj", "{0AEB1CFC-371F-415C-93C5-44CEAA0E9A34}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Microsoft.TeamFoundation.Authentication.Test", "CoreTest\Microsoft.TeamFoundation.Authentication.Test.csproj", "{0AEB1CFC-371F-415C-93C5-44CEAA0E9A34}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Installer", "Installer", "{55A29D70-EC6E-46B3-9685-46AE828ECB5F}"
 	ProjectSection(SolutionItems) = preProject
 		install.cmd = install.cmd
 	EndProjectSection
-EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Cli-RemoteHelper", "Remote\Cli-RemoteHelper.csproj", "{6EEFD1B1-EFC5-44D1-B381-A9C98E3F5472}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -34,10 +32,6 @@ Global
 		{0AEB1CFC-371F-415C-93C5-44CEAA0E9A34}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{0AEB1CFC-371F-415C-93C5-44CEAA0E9A34}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{0AEB1CFC-371F-415C-93C5-44CEAA0E9A34}.Release|Any CPU.Build.0 = Release|Any CPU
-		{6EEFD1B1-EFC5-44D1-B381-A9C98E3F5472}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{6EEFD1B1-EFC5-44D1-B381-A9C98E3F5472}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{6EEFD1B1-EFC5-44D1-B381-A9C98E3F5472}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{6EEFD1B1-EFC5-44D1-B381-A9C98E3F5472}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

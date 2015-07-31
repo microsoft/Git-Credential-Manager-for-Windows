@@ -6,11 +6,12 @@ using System.Linq;
 using System.Net;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
+using Microsoft.TeamFoundation.Authentication;
 // couple of local re-delcaration to make code easier to read
 using ConfigEntry = System.Collections.Generic.KeyValuePair<string, string>;
 using Configuration = System.Collections.Generic.Dictionary<string, string>;
 
-namespace Microsoft.TeamFoundation.Git.Helpers.Authentication
+namespace Microsoft.TeamFoundation.CredentialHelper
 {
     class Program
     {

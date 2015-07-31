@@ -1,4 +1,4 @@
-﻿namespace Microsoft.TeamFoundation.Git.Helpers.Authentication
+﻿namespace Microsoft.TeamFoundation.CredentialHelper
 {
     /// <summary>
     /// Level of interactivity allowed and enabled.

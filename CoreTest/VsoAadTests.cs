@@ -2,7 +2,7 @@
 using System.Threading.Tasks;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
-namespace Microsoft.TeamFoundation.Git.Helpers.Authentication
+namespace Microsoft.TeamFoundation.Authentication
 {
     [TestClass]
     public class VsoAadTests : AuthenticationTests

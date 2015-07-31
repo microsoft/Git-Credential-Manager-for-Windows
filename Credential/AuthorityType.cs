@@ -1,4 +1,4 @@
-﻿namespace Microsoft.TeamFoundation.Git.Helpers.Authentication
+﻿namespace Microsoft.TeamFoundation.CredentialHelper
 {
     /// <summary>
     /// Type of authentication and identity authority expected.

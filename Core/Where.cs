@@ -2,7 +2,7 @@
 using System.IO;
 using System.Linq;
 
-namespace Microsoft.TeamFoundation.Git.Helpers
+namespace Microsoft.TeamFoundation.Authentication
 {
     public static class Where
     {

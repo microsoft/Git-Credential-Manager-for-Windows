@@ -4,19 +4,17 @@
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
-    <ProjectGuid>{62F52119-63D4-40A8-A9DF-F1C4B473308A}</ProjectGuid>
-    <OutputType>Exe</OutputType>
+    <ProjectGuid>{C1DAABC1-B493-459D-BB4F-04FBEFB1BA13}</ProjectGuid>
+    <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>Microsoft.TeamFoundation.CredentialHelper</RootNamespace>
-    <AssemblyName>git-credential-manager</AssemblyName>
+    <RootNamespace>Microsoft.TeamFoundation.Authentication</RootNamespace>
+    <AssemblyName>Microsoft.TeamFoundation.Authentication</AssemblyName>
     <TargetFrameworkVersion>v4.5.1</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
-    <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>
     <TargetFrameworkProfile />
-    <NuGetPackageImportStamp>3a83d7a9</NuGetPackageImportStamp>
+    <NuGetPackageImportStamp>3487aeea</NuGetPackageImportStamp>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
-    <PlatformTarget>x86</PlatformTarget>
     <DebugSymbols>true</DebugSymbols>
     <DebugType>full</DebugType>
     <Optimize>false</Optimize>
@@ -25,9 +23,9 @@
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+    <PlatformTarget>x86</PlatformTarget>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
-    <PlatformTarget>x86</PlatformTarget>
     <DebugType>pdbonly</DebugType>
     <Optimize>true</Optimize>
     <OutputPath>bin\Release\</OutputPath>
@@ -36,9 +34,7 @@
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
-  </PropertyGroup>
-  <PropertyGroup>
-    <StartupObject>Microsoft.TeamFoundation.CredentialHelper.Program</StartupObject>
+    <PlatformTarget>x86</PlatformTarget>
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="Microsoft.IdentityModel.Clients.ActiveDirectory, Version=2.18.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
@@ -53,35 +49,43 @@
     <Reference Include="System.Core" />
     <Reference Include="Microsoft.CSharp" />
     <Reference Include="System.Net.Http" />
+    <Reference Include="System.Security" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="AuthorityType.cs" />
-    <Compile Include="Interactivity.cs" />
-    <Compile Include="OperationArguments.cs" />
-    <Compile Include="Program.cs" />
+    <Compile Include="SecretCache.cs" />
+    <Compile Include="VsoAzureAuthority.cs" />
+    <Compile Include="VsoTokenScope.cs" />
+    <Compile Include="AzureAuthority.cs" />
+    <Compile Include="IAzureAuthority.cs" />
+    <Compile Include="IVsoMsaAuthentication.cs" />
+    <Compile Include="TokenPair.cs" />
+    <Compile Include="TokenType.cs" />
+    <Compile Include="VsoAadAuthentication.cs" />
+    <Compile Include="BaseVsoAuthentication.cs" />
+    <Compile Include="BaseAuthentication.cs" />
+    <Compile Include="BaseSecureStore.cs" />
+    <Compile Include="BasicAuthentication.cs" />
+    <Compile Include="Credential.cs" />
+    <Compile Include="IAuthentication.cs" />
+    <Compile Include="IVsoAadAuthentication.cs" />
+    <Compile Include="ICredentialStore.cs" />
+    <Compile Include="ITokenStore.cs" />
+    <Compile Include="VsoAdalTokenCache.cs" />
+    <Compile Include="VsoMsaAuthentication.cs" />
+    <Compile Include="Token.cs" />
+    <Compile Include="NativeMethods.cs" />
+    <Compile Include="IVsoAuthority.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-  </ItemGroup>
-  <ItemGroup>
-    <ProjectReference Include="..\Core\Microsoft.TeamFoundation.Authentication.csproj">
-      <Project>{c1daabc1-b493-459d-bb4f-04fbefb1ba13}</Project>
-      <Name>Microsoft.TeamFoundation.Authentication</Name>
-    </ProjectReference>
+    <Compile Include="TokenRegistry.cs" />
+    <Compile Include="SecretStore.cs" />
+    <Compile Include="Secret.cs" />
+    <Compile Include="Where.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="app.config" />
     <None Include="packages.config" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
-  <PropertyGroup>
-    <PostBuildEvent>IF NOT EXIST  "$(SolutionDir)Deploy" mkdir  "$(SolutionDir)Deploy"
-
-COPY /V /Y "$(SolutionDir)install.cmd" /A "$(TargetDir)install.cmd" /A
-COPY /V /Y "$(TargetDir)Microsoft.IdentityModel.Clients.ActiveDirectory.dll" "$(SolutionDir)Deploy\Microsoft.IdentityModel.Clients.ActiveDirectory.dll"
-COPY /V /Y "$(TargetDir)Microsoft.IdentityModel.Clients.ActiveDirectory.WindowsForms.dll" "$(SolutionDir)Deploy\Microsoft.IdentityModel.Clients.ActiveDirectory.WindowsForms.dll"
-COPY /V /Y "$(TargetDir)Microsoft.TeamFoundation.Authentication.dll" "$(SolutionDir)Deploy\Microsoft.TeamFoundation.Authentication.dll"
-COPY /V /Y "$(TargetDir)git-credential-manager.exe" "$(SolutionDir)Deploy\git-credential-manager.exe"
-COPY /V /Y "$(TargetDir)install.cmd" "$(SolutionDir)Deploy\install.cmd"</PostBuildEvent>
-  </PropertyGroup>
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.
   <Target Name="BeforeBuild">
