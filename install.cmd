@@ -94,18 +94,22 @@ SET exeName=git-credential-%name%.exe
 :LEGACY_OS
     :: No support for legacy operating systems
     ECHO Oops! 32-bit OS Not Supported. U_U
+	PAUSE
+	
     GOTO :END
 
 
 :NEED_ADMIN_ACCESS
     :: Script requires elevated privileges
     ECHO You need to run this script elevated for it to work. U_U
+	PAUSE
 
     GOTO :END
 
 
 :FAILURE
     ECHO Something went wrong and I was unable to complete the installation. U_U
+	PAUSE
 
     GOTO :END
 
