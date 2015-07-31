@@ -72,7 +72,7 @@
     <Compile Include="VsoTokenScopeTests.cs" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\Core\Microsoft.TeamFoundation.Authentication.csproj">
+    <ProjectReference Include="..\Microsoft.TeamFoundation.Authentication\Microsoft.TeamFoundation.Authentication.csproj">
       <Project>{c1daabc1-b493-459d-bb4f-04fbefb1ba13}</Project>
       <Name>Microsoft.TeamFoundation.Authentication</Name>
     </ProjectReference>
