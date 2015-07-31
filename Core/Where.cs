@@ -6,29 +6,39 @@ namespace Microsoft.TeamFoundation.Git.Helpers
 {
     public static class Where
     {
+        /// <summary>
+        /// Finds the "best" path to an app of a given name.
+        /// </summary>
+        /// <param name="name">The name of the application, without extension, to find.</param>
+        /// <param name="path">Path to the first match file which the operating system considers 
+        /// executable.</param>
+        /// <returns>True if succeeds; false otherwise.</returns>
         static public bool App(string name, out string path)
         {
-            string pathext = Environment.GetEnvironmentVariable("PATHEXT");
-            string envpath = Environment.GetEnvironmentVariable("PATH");
-
-            string[] exts = pathext.Split(';');
-            string[] paths = envpath.Split(';');
-
-            for (int i = 0; i < paths.Length; i++)
+            if (!String.IsNullOrWhiteSpace(name))
             {
-                if (String.IsNullOrWhiteSpace(paths[i]))
-                    continue;
+                string pathext = Environment.GetEnvironmentVariable("PATHEXT");
+                string envpath = Environment.GetEnvironmentVariable("PATH");
 
-                for (int j = 0; j < exts.Length; j++)
+                string[] exts = pathext.Split(';');
+                string[] paths = envpath.Split(';');
+
+                for (int i = 0; i < paths.Length; i++)
                 {
-                    if (String.IsNullOrWhiteSpace(exts[j]))
+                    if (String.IsNullOrWhiteSpace(paths[i]))
                         continue;
 
-                    string value = String.Format("{0}\\{1}{2}", paths[i], name, exts[j]);
-                    if (File.Exists(value))
+                    for (int j = 0; j < exts.Length; j++)
                     {
-                        path = value;
-                        return true;
+                        if (String.IsNullOrWhiteSpace(exts[j]))
+                            continue;
+
+                        string value = String.Format("{0}\\{1}{2}", paths[i], name, exts[j]);
+                        if (File.Exists(value))
+                        {
+                            path = value;
+                            return true;
+                        }
                     }
                 }
             }
@@ -37,6 +47,11 @@ namespace Microsoft.TeamFoundation.Git.Helpers
             return false;
         }
 
+        /// <summary>
+        /// Gets the path to the Git global configuration file.
+        /// </summary>
+        /// <param name="path">Path to the Git global configuration</param>
+        /// <returns>True if succeeds; false otherwise.</returns>
         public static bool GitGlobalConfig(out string path)
         {
             const string GlobalConfigFileName = ".gitconfig";
@@ -53,6 +68,12 @@ namespace Microsoft.TeamFoundation.Git.Helpers
             return path != null;
         }
 
+        /// <summary>
+        /// Gets the path to the Git local configuration file based on the <paramref name="startingDirectory"/>.
+        /// </summary>
+        /// <param name="startingDirectory">A directory of the repository where the configuration file is contained..</param>
+        /// <param name="path">Path to the Git local configuration</param>
+        /// <returns>True if succeeds; false otherwise.</returns>
         public static bool GitLocalConfig(string startingDirectory, out string path)
         {
             const string GitOdbFolderName = ".git";
@@ -110,15 +131,26 @@ namespace Microsoft.TeamFoundation.Git.Helpers
 
             return path != null;
         }
+        /// <summary>
+        /// Gets the path to the Git local configuration file based on the current working directory.
+        /// </summary>
+        /// <param name="path">Path to the Git local configuration.</param>
+        /// <returns>True if succeeds; false otherwise.</returns>
         public static bool GitLocalConfig(out string path)
         {
             return GitLocalConfig(Environment.CurrentDirectory, out path);
         }
 
+        /// <summary>
+        /// Gets the path to the Git system configuration file.
+        /// </summary>
+        /// <param name="path">Path to the Git system configuration.</param>
+        /// <returns>True if succeeds; false otherwise.</returns>
         public static bool GitSystemConfig(out string path)
         {
             const string SystemConfigFileName = "gitconfig";
 
+            // find Git on the local disk - the system config is stored relative to it
             if (App("git", out path))
             {
                 FileInfo gitInfo = new FileInfo(path);

@@ -3,7 +3,8 @@
 @ECHO OFF
 
 SET gitExtensionName=Microsoft Git Credential Secure Store for Windows
-SET exeName=git-credential-secure.exe
+SET name=manager
+SET exeName=git-credential-%name%.exe
 
 :CHECK_PERMISSIONS
     ECHO Administrative permissions required. 
@@ -25,7 +26,6 @@ SET exeName=git-credential-secure.exe
 
     SET installPath=%~dp0
     SET helperInstalled=0
-    SET remoteFileName=git-credential-man.exe
 
 
 :GIT_TOOLS_FOR_MICROSOFT_ENGINEERS
@@ -52,7 +52,6 @@ SET exeName=git-credential-secure.exe
 
 :COPY_FILES
     :: Copy all of the necessary files to the git lib-exec folder
-    (IF EXIST "%destination%%exeName%" (MOVE /y "%destination%%exeName%" "%destination%~%exeName%~")) || ((ECHO Oops! Failed to rename "%exeName%" to "~%exeName%~") && GOTO :FAILURE)
     (COPY /v /y "%installPath%"*.dll "%destination%"*.dll) || ((ECHO Oops! Fail to copy content from "%installPath%" to "%destination%") && GOTO :FAILURE)
     (COPY /v /y "%installPath%"*.exe "%destination%"*.exe) || ((ECHO Oops! Fail to copy content from "%installPath%" to "%destination%") && GOTO :FAILURE)
     
@@ -79,7 +78,7 @@ SET exeName=git-credential-secure.exe
     :: Pre-configure it
     ECHO(
         
-    (git config --global credential.helper store && (ECHO Updated your ~\.gitconfig [git config --global])) || GOTO :FAILURE
+    (git config --global credential.helper %name% && (ECHO Updated your ~\.gitconfig [git config --global])) || GOTO :FAILURE
     git config --global --remove url.mshttps://devdiv.visualstudio.com/ >nul 2>&1 && ECHO Removed mshttp nonsense for devdiv.visualstudio.com
     git config --global --remove url.mshttps://microsoft.visualstudio.com/ >nul 2>&1 && ECHO Removed mshttp nonsense for microsoft.visualstudio.com
     git config --global --remove url.mshttps://mseng.visualstudio.com/ >nul 2>&1 && ECHO Removed mshttp nonsense for mseng.visualstudio.com
@@ -99,7 +98,7 @@ SET exeName=git-credential-secure.exe
 
 
 :NEED_ADMIN_ACCESS
-    :: Script requires elevated privilages
+    :: Script requires elevated privileges
     ECHO You need to run this script elevated for it to work. U_U
 
     GOTO :END
