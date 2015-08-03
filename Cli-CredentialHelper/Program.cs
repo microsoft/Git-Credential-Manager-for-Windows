@@ -262,16 +262,31 @@ namespace Microsoft.TeamFoundation.CredentialHelper
                     Trace.WriteLine("   detecting authority type");
 
                     // detect the authority
-                    return BaseVsoAuthentication.GetAuthentication(operationArguments.TargetUri,
-                                                                   CredentialScope,
-                                                                   secrets);
+                    var authority = BaseVsoAuthentication.GetAuthentication(operationArguments.TargetUri,
+                                                                            CredentialScope,
+                                                                            secrets);
+
+                    if (authority is VsoMsaAuthentication)
+                    {
+                        operationArguments.Authority = AuthorityType.MicrosoftAccount;
+                    }
+                    else if (authority is VsoAadAuthentication)
+                    {
+                        operationArguments.Authority = AuthorityType.AzureDirectory;
+                    }
+                    else
+                    {
+                        operationArguments.Authority = AuthorityType.Basic;
+                    }
+
+                    return authority;
 
                 case AuthorityType.AzureDirectory:
                     Trace.WriteLine("   authority is Azure Directory");
 
                     Guid tenantId = Guid.Empty;
                     // return a generic AAD backed VSO authentication object
-                    return new VsoAadAuthentication(tenantId, CredentialScope, secrets);
+                    return new VsoAadAuthentication(Guid.Empty, CredentialScope, secrets);
 
                 case AuthorityType.Basic:
                 default:

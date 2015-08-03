@@ -38,7 +38,7 @@ namespace Microsoft.TeamFoundation.Authentication
             else
             {
                 // create an authority host url in the format of https://login.microsoft.com/12345678-9ABC-DEF0-1234-56789ABCDEF0
-                string authorityHost = String.Format("{0}/{1:D}", AzureAuthority.AuthorityHostUrlBase, tenantId);
+                string authorityHost = AzureAuthority.GetAuthorityUrl(tenantId);
                 this.VsoAuthority = new VsoAzureAuthority(authorityHost);
             }
         }

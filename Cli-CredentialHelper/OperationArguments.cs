@@ -12,7 +12,6 @@ namespace Microsoft.TeamFoundation.CredentialHelper
         {
             Debug.Assert(stdin != null, "The stdin parameter is null");
 
-
             this.Authority = AuthorityType.Auto;
             this.Interactivity = Interactivity.Auto;
             this.ValidateCredentials = true;
