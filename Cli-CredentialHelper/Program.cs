@@ -44,12 +44,12 @@ namespace Microsoft.TeamFoundation.CredentialHelper
                 Dictionary<string, Action<OperationArguments>> actions =
                     new Dictionary<string, Action<OperationArguments>>(StringComparer.OrdinalIgnoreCase)
                 {
-                { "approve", Store },
-                { "erase", Erase },
-                { "fill", Get },
-                { "get", Get },
-                { "reject", Erase },
-                { "store", Store },
+                    { "approve", Store },
+                    { "erase", Erase },
+                    { "fill", Get },
+                    { "get", Get },
+                    { "reject", Erase },
+                    { "store", Store },
                 };
 
                 foreach (string arg in args)

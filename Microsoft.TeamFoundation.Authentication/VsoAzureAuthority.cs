@@ -4,6 +4,7 @@ using System.IO;
 using System.Net;
 using System.Net.Http;
 using System.Net.Http.Headers;
+using System.Reflection;
 using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
@@ -59,6 +60,8 @@ namespace Microsoft.TeamFoundation.Authentication
                     Timeout = TimeSpan.FromMilliseconds(RequestTimeout)
                 })
                 {
+                    httpClient.DefaultRequestHeaders.Add("User-Agent", "Git/1.0 (git-credential-manager/" + Assembly.GetExecutingAssembly().GetName().Version.ToString(3) + ")");
+
                     switch (accessToken.Type)
                     {
                         case TokenType.Access:
@@ -122,7 +125,7 @@ namespace Microsoft.TeamFoundation.Authentication
 
             Trace.WriteLine("VsoAzureAuthority::PopulateTokenTargetId");
 
-            if (accessToken.TenantId!=Guid.Empty)
+            if (accessToken.TenantId != Guid.Empty)
                 return true;
 
             string resultId = null;
