@@ -256,36 +256,35 @@ namespace Microsoft.TeamFoundation.CredentialHelper
 
             var secrets = new SecretStore(SecretsNamespace);
 
-            while (true)
+            switch (operationArguments.Authority)
             {
-                switch (operationArguments.Authority)
-                {
-                    case AuthorityType.Auto:
-                        Trace.WriteLine("   detecting authority type");
+                case AuthorityType.Auto:
+                    Trace.WriteLine("   detecting authority type");
 
-                        // detect the authority
-                        operationArguments.Authority = DetectAuthority(operationArguments);
-                        break;
+                    // detect the authority
+                    return BaseVsoAuthentication.GetAuthentication(operationArguments.TargetUri,
+                                                                   CredentialScope,
+                                                                   secrets);
 
-                    case AuthorityType.AzureDirectory:
-                        Trace.WriteLine("   authority is Azure Directory");
+                case AuthorityType.AzureDirectory:
+                    Trace.WriteLine("   authority is Azure Directory");
 
-                        // return a generic AAD backed VSO authentication object
-                        return new VsoAadAuthentication(CredentialScope, secrets);
+                    Guid tenantId = Guid.Empty;
+                    // return a generic AAD backed VSO authentication object
+                    return new VsoAadAuthentication(tenantId, CredentialScope, secrets);
 
-                    case AuthorityType.Basic:
-                    default:
-                        Trace.WriteLine("   authority is basic");
+                case AuthorityType.Basic:
+                default:
+                    Trace.WriteLine("   authority is basic");
 
-                        // return a generic username + password authentication object
-                        return new BasicAuthentication(secrets);
+                    // return a generic username + password authentication object
+                    return new BasicAuthentication(secrets);
 
-                    case AuthorityType.MicrosoftAccount:
-                        Trace.WriteLine("   authority is Microsoft Live");
+                case AuthorityType.MicrosoftAccount:
+                    Trace.WriteLine("   authority is Microsoft Live");
 
-                        // return a generic MSA backed VSO authentication object
-                        return new VsoMsaAuthentication(CredentialScope, secrets);
-                }
+                    // return a generic MSA backed VSO authentication object
+                    return new VsoMsaAuthentication(CredentialScope, secrets);
             }
         }
 

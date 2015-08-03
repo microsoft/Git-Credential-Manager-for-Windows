@@ -10,7 +10,7 @@ namespace Microsoft.TeamFoundation.Authentication
 
         public VsoMsaAuthentication(
             VsoTokenScope tokenScope,
-            ITokenStore personalAccessTokenStore,
+            ICredentialStore personalAccessTokenStore,
             ITokenStore adaRefreshTokenStore = null)
             : base(tokenScope,
                    personalAccessTokenStore,
@@ -26,7 +26,7 @@ namespace Microsoft.TeamFoundation.Authentication
         /// <param name="liveAuthority"></param>
         /// <param name="vsoAuthority"></param>
         internal VsoMsaAuthentication(
-            ITokenStore personalAccessTokenStore,
+            ICredentialStore personalAccessTokenStore,
             ITokenStore adaRefreshTokenStore,
             ITokenStore vsoIdeTokenCache,
             IVsoAuthority liveAuthority)
