@@ -58,6 +58,7 @@ namespace Microsoft.TeamFoundation.Authentication
                 {
                     // build a request that we expect to fail, do not allow redirect to sign in url
                     var request = WebRequest.CreateHttp(targetUri);
+                    request.UserAgent = GetUserAgent();
                     request.Method = "HEAD";
                     request.AllowAutoRedirect = false;
 
@@ -86,6 +87,12 @@ namespace Microsoft.TeamFoundation.Authentication
 
             // if all else fails, fallback to basic authentication
             return false;
+        }
+
+        public static string GetUserAgent()
+        {
+            Version version = System.Reflection.Assembly.GetExecutingAssembly().GetName().Version;
+            return String.Format("git/1.0 (git-credential-manager/{0})", version.ToString(3));
         }
     }
 }

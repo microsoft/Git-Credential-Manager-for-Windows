@@ -60,7 +60,7 @@ namespace Microsoft.TeamFoundation.Authentication
                     Timeout = TimeSpan.FromMilliseconds(RequestTimeout)
                 })
                 {
-                    httpClient.DefaultRequestHeaders.Add("User-Agent", "Git/1.0 (git-credential-manager/" + Assembly.GetExecutingAssembly().GetName().Version.ToString(3) + ")");
+                    httpClient.DefaultRequestHeaders.Add("User-Agent", BaseAuthentication.GetUserAgent());
 
                     switch (accessToken.Type)
                     {
