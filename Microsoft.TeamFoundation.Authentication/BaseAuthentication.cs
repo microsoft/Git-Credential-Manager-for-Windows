@@ -54,6 +54,9 @@ namespace Microsoft.TeamFoundation.Authentication
             {
                 Trace.WriteLine("   detected visualstudio.com, checking AAD vs MSA");
 
+                string tenant = null;
+                WebResponse response;
+
                 try
                 {
                     // build a request that we expect to fail, do not allow redirect to sign in url
@@ -62,26 +65,27 @@ namespace Microsoft.TeamFoundation.Authentication
                     request.Method = "HEAD";
                     request.AllowAutoRedirect = false;
                     // get the response from the server
-                    var response = request.GetResponse();
-
-                    // if the response exists and we have headers, parse them
-                    if (response != null && response.SupportsHeaders)
-                    {
-                        Trace.WriteLine("   server has responded");
-
-                        // find the VSO resource tenant entry
-                        var tenant = response.Headers[VsoResourceTenantHeader];
-                        if (!String.IsNullOrWhiteSpace(tenant) && Guid.TryParse(tenant, out tenantId))
-                        {
-                            return true;
-                        }
-                    }
+                    response = request.GetResponse();
                 }
-                catch (Exception exception)
+                catch (WebException exception)
                 {
-                    Trace.WriteLine("   failed detection");
+                    response = exception.Response;
+                }
+
+                // if the response exists and we have headers, parse them
+                if (response != null && response.SupportsHeaders)
+                {
+                    Trace.WriteLine("   server has responded");
+
+                    // find the VSO resource tenant entry
+                    tenant = response.Headers[VsoResourceTenantHeader];
+
+                    return !String.IsNullOrWhiteSpace(tenant) 
+                        && Guid.TryParse(tenant, out tenantId);
                 }
             }
+
+            Trace.WriteLine("   failed detection");
 
             // if all else fails, fallback to basic authentication
             return false;
