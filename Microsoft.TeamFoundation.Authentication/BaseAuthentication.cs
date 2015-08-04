@@ -4,6 +4,9 @@ using System.Net;
 
 namespace Microsoft.TeamFoundation.Authentication
 {
+    /// <summary>
+    /// Base authentication mechanisms for setting, retrieving, and deleting stored credentials.
+    /// </summary>
     public abstract class BaseAuthentication : IAuthentication
     {
         /// <summary>
@@ -46,7 +49,7 @@ namespace Microsoft.TeamFoundation.Authentication
             const string VsoBaseUrlHost = "visualstudio.com";
             const string VsoResourceTenantHeader = "X-VSS-ResourceTenant";
 
-            Trace.WriteLine("Program::DetectTenant");
+            Trace.WriteLine("BaseAuthentication::DetectTenant");
 
             tenantId = Guid.Empty;
 
@@ -54,45 +57,41 @@ namespace Microsoft.TeamFoundation.Authentication
             {
                 Trace.WriteLine("   detected visualstudio.com, checking AAD vs MSA");
 
+                string tenant = null;
+                WebResponse response;
+
                 try
                 {
                     // build a request that we expect to fail, do not allow redirect to sign in url
                     var request = WebRequest.CreateHttp(targetUri);
-                    request.UserAgent = GetUserAgent();
+                    request.UserAgent = Global.GetUserAgent();
                     request.Method = "HEAD";
                     request.AllowAutoRedirect = false;
-
                     // get the response from the server
-                    var response = request.GetResponse();
-
-                    // if the response exists and we have headers, parse them
-                    if (response != null && response.SupportsHeaders)
-                    {
-                        Trace.WriteLine("   server has responded");
-
-                        // find the VSO resource tenant entry
-                        var tenant = response.Headers[VsoResourceTenantHeader];
-                        if (!String.IsNullOrWhiteSpace(tenant) && Guid.TryParse(tenant, out tenantId))
-                        {
-                            return true;
-                        }
-                    }
+                    response = request.GetResponse();
                 }
-                catch (Exception exception)
+                catch (WebException exception)
                 {
-                    Trace.WriteLine("   failed detection");
-                    Debug.WriteLine(exception);
+                    response = exception.Response;
+                }
+
+                // if the response exists and we have headers, parse them
+                if (response != null && response.SupportsHeaders)
+                {
+                    Trace.WriteLine("   server has responded");
+
+                    // find the VSO resource tenant entry
+                    tenant = response.Headers[VsoResourceTenantHeader];
+
+                    return !String.IsNullOrWhiteSpace(tenant) 
+                        && Guid.TryParse(tenant, out tenantId);
                 }
             }
 
+            Trace.WriteLine("   failed detection");
+
             // if all else fails, fallback to basic authentication
             return false;
-        }
-
-        public static string GetUserAgent()
-        {
-            Version version = System.Reflection.Assembly.GetExecutingAssembly().GetName().Version;
-            return String.Format("git/1.0 (git-credential-manager/{0})", version.ToString(3));
         }
     }
 }

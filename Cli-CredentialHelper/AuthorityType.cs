@@ -22,5 +22,9 @@
         /// Azure Directory Authentication based, including support for ADFS
         /// </summary>
         AzureDirectory,
+        /// <summary>
+        /// Operating system / network integrated authentication layer.
+        /// </summary>
+        Integrated,
     }
 }
