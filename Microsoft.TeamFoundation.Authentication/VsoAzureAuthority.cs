@@ -60,7 +60,7 @@ namespace Microsoft.TeamFoundation.Authentication
                     Timeout = TimeSpan.FromMilliseconds(RequestTimeout)
                 })
                 {
-                    httpClient.DefaultRequestHeaders.Add("User-Agent", BaseAuthentication.GetUserAgent());
+                    httpClient.DefaultRequestHeaders.Add("User-Agent", Global.GetUserAgent());
 
                     switch (accessToken.Type)
                     {
