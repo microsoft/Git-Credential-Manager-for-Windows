@@ -197,7 +197,7 @@ namespace Microsoft.TeamFoundation.Authentication
             ICredentialStore personalAccessTokenStore,
             ITokenStore adaRefreshTokenStore = null)
         {
-            Trace.WriteLine("Program::DetectAuthority");
+            Trace.WriteLine("BaseVsoAuthentication::DetectAuthority");
 
             Guid tenantId;
             if (DetectAuthority(targetUri, out tenantId))

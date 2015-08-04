@@ -46,7 +46,7 @@ namespace Microsoft.TeamFoundation.Authentication
             const string VsoBaseUrlHost = "visualstudio.com";
             const string VsoResourceTenantHeader = "X-VSS-ResourceTenant";
 
-            Trace.WriteLine("Program::DetectTenant");
+            Trace.WriteLine("BaseAuthentication::DetectTenant");
 
             tenantId = Guid.Empty;
 
@@ -61,7 +61,6 @@ namespace Microsoft.TeamFoundation.Authentication
                     request.UserAgent = GetUserAgent();
                     request.Method = "HEAD";
                     request.AllowAutoRedirect = false;
-
                     // get the response from the server
                     var response = request.GetResponse();
 
@@ -81,7 +80,6 @@ namespace Microsoft.TeamFoundation.Authentication
                 catch (Exception exception)
                 {
                     Trace.WriteLine("   failed detection");
-                    Debug.WriteLine(exception);
                 }
             }
 
