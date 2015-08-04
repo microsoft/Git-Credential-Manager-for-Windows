@@ -15,15 +15,32 @@ namespace Microsoft.TeamFoundation.Authentication
         /// </summary>
         public const string DefaultAuthorityHost = " https://management.core.windows.net/";
 
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="tenantId"></param>
+        /// <param name="tokenScope"></param>
+        /// <param name="personalAccessTokenStore"></param>
+        /// <param name="adaRefreshTokenStore"></param>
         public VsoAadAuthentication(
+            Guid tenantId,
             VsoTokenScope tokenScope,
-            ITokenStore personalAccessTokenStore,
+            ICredentialStore personalAccessTokenStore,
             ITokenStore adaRefreshTokenStore = null)
             : base(tokenScope,
                    personalAccessTokenStore,
                    adaRefreshTokenStore)
         {
-            this.VsoAuthority = new VsoAzureAuthority();
+            if (tenantId == Guid.Empty)
+            {
+                this.VsoAuthority = new VsoAzureAuthority(DefaultAuthorityHost);
+            }
+            else
+            {
+                // create an authority host url in the format of https://login.microsoft.com/12345678-9ABC-DEF0-1234-56789ABCDEF0
+                string authorityHost = AzureAuthority.GetAuthorityUrl(tenantId);
+                this.VsoAuthority = new VsoAzureAuthority(authorityHost);
+            }
         }
         /// <summary>
         /// Test constructor which allows for using fake credential stores
@@ -32,7 +49,7 @@ namespace Microsoft.TeamFoundation.Authentication
         /// <param name="userCredential"></param>
         /// <param name="adaRefreshTokenStore"></param>
         internal VsoAadAuthentication(
-            ITokenStore personalAccessTokenStore,
+            ICredentialStore personalAccessTokenStore,
             ITokenStore adaRefreshTokenStore,
             ITokenStore vsoIdeTokenCache,
             IVsoAuthority vsoAuthority)

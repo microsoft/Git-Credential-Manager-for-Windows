@@ -8,8 +8,8 @@ using Microsoft.Win32;
 namespace Microsoft.TeamFoundation.Authentication
 {
     /// <summary>
-    /// A token storage object which interacts with thecurrent user's Visual Studio hive in the 
-    /// Windows Registry.
+    /// A token storage object which interacts with the current user's Visual Studio 2015 hive in
+    /// the Windows Registry.
     /// </summary>
     public sealed class TokenRegistry : ITokenStore
     {
@@ -17,7 +17,7 @@ namespace Microsoft.TeamFoundation.Authentication
         private const string RegistryTypeKey = "Type";
         private const string RegistryUrlKey = "Url";
         private const string RegistryPathFormat = @"Software\Microsoft\VSCommon\{0}\ClientServices\TokenStorage\VisualStudio\VssApp";
-        private static readonly string[] Versions = new[] { "14.0" }; // only a single supported version today, latest version should be placed first
+        private static readonly string[] Versions = new[] { "14.0" }; // only VS 2015 supported
 
         public TokenRegistry()
         { }

@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
-namespace Microsoft.TeamFoundation.Authentication
+namespace Microsoft.TeamFoundation.Authentication.Test
 {
     [TestClass]
     public class VsoTokenScopeTests

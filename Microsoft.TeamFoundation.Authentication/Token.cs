@@ -20,8 +20,8 @@ namespace Microsoft.TeamFoundation.Authentication
                                                                        .GetField(type.ToString())
                                                                        .GetCustomAttributes(typeof(System.ComponentModel.DescriptionAttribute), false)
                                                                        .SingleOrDefault() as System.ComponentModel.DescriptionAttribute;
-            name = attribute == null 
-                ? type.ToString() 
+            name = attribute == null
+                ? type.ToString()
                 : attribute.Description;
 
             return name != null;
@@ -91,7 +91,7 @@ namespace Microsoft.TeamFoundation.Authentication
             Guid targetId = Guid.Empty;
             if (Guid.TryParse(authResult.TenantId, out targetId))
             {
-                this.TargetId = targetId;
+                this.TenantId = targetId;
             }
             this.Type = type;
         }
@@ -107,7 +107,7 @@ namespace Microsoft.TeamFoundation.Authentication
         /// <summary>
         /// The guid form Identity of the target
         /// </summary>
-        public Guid TargetId { get; internal set; }
+        public Guid TenantId { get; internal set; }
 
         /// <summary>
         /// Compares an object to this <see cref="Token"/> for equality.
@@ -161,11 +161,41 @@ namespace Microsoft.TeamFoundation.Authentication
 
             try
             {
-                string value = Encoding.UTF8.GetString(bytes);
+                int preamble = sizeof(TokenType) + sizeof(Guid);
 
-                if (!String.IsNullOrWhiteSpace(value))
+                if (bytes.Length > preamble)
                 {
-                    token = new Token(value, type);
+                    TokenType readType;
+                    Guid tenantId;
+
+                    fixed (byte* p = bytes)
+                    {
+                        readType = *(TokenType*)p;
+                        byte* g = p + sizeof(TokenType);
+                        tenantId = *(Guid*)g;
+                    }
+
+                    if (readType == type)
+                    {
+                        string value = Encoding.UTF8.GetString(bytes, preamble, bytes.Length - preamble);
+
+                        if (!String.IsNullOrWhiteSpace(value))
+                        {
+                            token = new Token(value, type);
+                            token.TenantId = tenantId;
+                        }
+                    }
+                }
+
+                // if value hasn't been set yet, fall back to old format decode
+                if (token == null)
+                {
+                    string value = Encoding.UTF8.GetString(bytes);
+
+                    if (!String.IsNullOrWhiteSpace(value))
+                    {
+                        token = new Token(value, type);
+                    }
                 }
             }
             catch
@@ -185,7 +215,18 @@ namespace Microsoft.TeamFoundation.Authentication
 
             try
             {
-                bytes = Encoding.UTF8.GetBytes(token.Value);
+                byte[] utf8bytes = Encoding.UTF8.GetBytes(token.Value);
+                bytes = new byte[utf8bytes.Length + sizeof(TokenType) + sizeof(Guid)];
+                byte[] guid = new byte[sizeof(Guid)];
+
+                fixed (byte* p = bytes)
+                {
+                    *((TokenType*)p) = token.Type;
+                    byte* g = p + sizeof(TokenType);
+                    *(Guid*)g = token.TenantId;
+                }
+
+                Array.Copy(utf8bytes, 0, bytes, sizeof(TokenType) + sizeof(Guid), utf8bytes.Length);
             }
             catch
             {

@@ -13,9 +13,9 @@ namespace Microsoft.TeamFoundation.Authentication
 
         protected const string AdalRefreshPrefx = "ada";
 
-        private BaseVsoAuthentication(VsoTokenScope scope, ITokenStore personalAccessTokenStore)
+        private BaseVsoAuthentication(VsoTokenScope tokenScope, ICredentialStore personalAccessTokenStore)
         {
-            if (scope == null)
+            if (tokenScope == null)
                 throw new ArgumentNullException("scope", "The `scope` parameter is null or invalid.");
             if (personalAccessTokenStore == null)
                 throw new ArgumentNullException("personalAccessTokenStore", "The `personalAccessTokenStore` paramter is null or invalid.");
@@ -25,7 +25,7 @@ namespace Microsoft.TeamFoundation.Authentication
 
             this.ClientId = DefaultClientId;
             this.Resource = DefaultResource;
-            this.TokenScope = scope;
+            this.TokenScope = tokenScope;
             this.PersonalAccessTokenStore = personalAccessTokenStore;
             this.AdaRefreshTokenStore = new SecretStore(AdalRefreshPrefx);
             this.VsoAuthority = new VsoAzureAuthority();
@@ -39,7 +39,7 @@ namespace Microsoft.TeamFoundation.Authentication
         /// <param name="personalAccessTokenStore"></param>
         protected BaseVsoAuthentication(
             VsoTokenScope tokenScope,
-            ITokenStore personalAccessTokenStore,
+            ICredentialStore personalAccessTokenStore,
             ITokenStore adaRefreshTokenStore = null)
             : this(tokenScope, personalAccessTokenStore)
         {
@@ -48,7 +48,7 @@ namespace Microsoft.TeamFoundation.Authentication
             this.VsoIdeTokenCache = new TokenRegistry();
         }
         internal BaseVsoAuthentication(
-            ITokenStore personalAccessTokenStore,
+            ICredentialStore personalAccessTokenStore,
             ITokenStore adaRefreshTokenStore,
             ITokenStore vsoIdeTokenCache,
             IVsoAuthority vsoAuthority)
@@ -71,9 +71,10 @@ namespace Microsoft.TeamFoundation.Authentication
         protected readonly TokenCache VsoAdalTokenCache;
         protected readonly ITokenStore VsoIdeTokenCache;
 
-        internal ITokenStore PersonalAccessTokenStore { get; set; }
+        internal ICredentialStore PersonalAccessTokenStore { get; set; }
         internal ITokenStore AdaRefreshTokenStore { get; set; }
         internal IVsoAuthority VsoAuthority { get; set; }
+        internal Guid TenantId { get; set; }
 
         public override void DeleteCredentials(Uri targetUri)
         {
@@ -81,11 +82,11 @@ namespace Microsoft.TeamFoundation.Authentication
 
             Trace.WriteLine("BaseVsoAuthentication::DeleteCredentials");
 
-            Token credentials = null;
+            Credential credentials = null;
             Token token = null;
-            if (this.PersonalAccessTokenStore.ReadToken(targetUri, out credentials))
+            if (this.PersonalAccessTokenStore.ReadCredentials(targetUri, out credentials))
             {
-                this.PersonalAccessTokenStore.DeleteToken(targetUri);
+                this.PersonalAccessTokenStore.DeleteCredentials(targetUri);
             }
             else if (this.AdaRefreshTokenStore.ReadToken(targetUri, out token))
             {
@@ -99,22 +100,12 @@ namespace Microsoft.TeamFoundation.Authentication
 
             Trace.WriteLine("BaseVsoAuthentication::GetCredentials");
 
-            Token personalAccessToken;
-            if (this.PersonalAccessTokenStore.ReadToken(targetUri, out personalAccessToken))
+            if (this.PersonalAccessTokenStore.ReadCredentials(targetUri, out credentials))
             {
                 Trace.WriteLine("   successfully retrieved stored credentials, updating credential cache");
             }
 
-            if (personalAccessToken != null)
-            {
-                credentials = new Credential(String.Empty, personalAccessToken.Value);
-                return true;
-            }
-            else
-            {
-                credentials = null;
-                return false;
-            }
+            return credentials != null;
         }
 
         public async Task<bool> RefreshCredentials(Uri targetUri, bool requireCompactToken)
@@ -125,9 +116,9 @@ namespace Microsoft.TeamFoundation.Authentication
 
             try
             {
-                Token refreshToken = null;
                 TokenPair tokens = null;
 
+                Token refreshToken = null;
                 // attempt to read from the local store
                 if (this.AdaRefreshTokenStore.ReadToken(targetUri, out refreshToken))
                 {
@@ -135,36 +126,19 @@ namespace Microsoft.TeamFoundation.Authentication
                     {
                         Trace.WriteLine("   Azure token found in primary cache.");
 
+                        this.TenantId = tokens.AccessToken.TenantId;
+
                         return await this.GeneratePersonalAccessToken(targetUri, tokens.AccessToken, requireCompactToken);
                     }
                 }
 
+                Token federatedAuthToken;
                 // attempt to utilize any fedauth tokens captured by the IDE
-                if (this.VsoIdeTokenCache.ReadToken(targetUri, out refreshToken))
+                if (this.VsoIdeTokenCache.ReadToken(targetUri, out federatedAuthToken))
                 {
                     Trace.WriteLine("   federated auth token found in IDE cache.");
 
-                    return await this.GeneratePersonalAccessToken(targetUri, refreshToken, requireCompactToken);
-                }
-
-                // attempt to utlize any azure auth tokens cached by the IDE
-                foreach (var item in this.VsoAdalTokenCache.ReadItems())
-                {
-                    tokens = new TokenPair(item.AccessToken, item.RefreshToken);
-
-                    if (item.ExpiresOn > DateTimeOffset.UtcNow
-                        && (await this.VsoAuthority.ValidateToken(targetUri, tokens.AccessToken)
-                            || ((tokens = await this.VsoAuthority.AcquireTokenByRefreshTokenAsync(targetUri, this.ClientId, this.Resource, tokens.RefeshToken)) != null
-                                && await this.VsoAuthority.ValidateToken(targetUri, tokens.AccessToken))))
-                    {
-                        Trace.WriteLine("   Azure token found in IDE cache.");
-
-                        return await this.GeneratePersonalAccessToken(targetUri, tokens.AccessToken, requireCompactToken);
-                    }
-                    else
-                    {
-                        this.VsoAdalTokenCache.DeleteItem(item);
-                    }
+                    return await this.GeneratePersonalAccessToken(targetUri, federatedAuthToken, requireCompactToken);
                 }
             }
             catch (Exception exception)
@@ -193,7 +167,7 @@ namespace Microsoft.TeamFoundation.Authentication
             Token personalAccessToken;
             if ((personalAccessToken = await this.VsoAuthority.GeneratePersonalAccessToken(targetUri, accessToken, TokenScope, requestCompactToken)) != null)
             {
-                this.PersonalAccessTokenStore.WriteToken(targetUri, personalAccessToken);
+                this.PersonalAccessTokenStore.WriteCredentials(targetUri, (Credential)personalAccessToken);
             }
 
             return personalAccessToken != null;
@@ -207,6 +181,42 @@ namespace Microsoft.TeamFoundation.Authentication
             Trace.WriteLine("BaseVsoAuthentication::StoreRefreshToken");
 
             this.AdaRefreshTokenStore.WriteToken(targetUri, refreshToken);
+        }
+
+        /// <summary>
+        /// Creates a new authentication broker based for the specified resource.
+        /// </summary>
+        /// <param name="targetUri">The resource for which authentication is being requested.</param>
+        /// <param name="scope">The scope of the access being requested.</param>
+        /// <param name="personalAccessTokenStore">Storage container for personal access token secrets.</param>
+        /// <param name="adaRefreshTokenStore">Storage container for Azure access token secrets.</param>
+        /// <returns></returns>
+        public static BaseAuthentication GetAuthentication(
+            Uri targetUri,
+            VsoTokenScope scope,
+            ICredentialStore personalAccessTokenStore,
+            ITokenStore adaRefreshTokenStore = null)
+        {
+            Trace.WriteLine("Program::DetectAuthority");
+
+            Guid tenantId;
+            if (DetectAuthority(targetUri, out tenantId))
+            {
+                // empty Guid is MSA, anything else is AAD
+                if (tenantId == Guid.Empty)
+                {
+                    Trace.WriteLine("   MSA authority detected");
+                    return new VsoMsaAuthentication(scope, personalAccessTokenStore, adaRefreshTokenStore);
+                }
+                else
+                {
+                    Trace.WriteLine("   AAD authority for tenant '" + tenantId + "' detected");
+                    return new VsoAadAuthentication(tenantId, scope, personalAccessTokenStore, adaRefreshTokenStore);
+                }
+            }
+
+            // if all else fails, fallback to basic authentication
+            return new BasicAuthentication(personalAccessTokenStore);
         }
     }
 }

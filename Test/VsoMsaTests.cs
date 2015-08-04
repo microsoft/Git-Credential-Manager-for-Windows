@@ -2,7 +2,7 @@
 using System.Threading.Tasks;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
-namespace Microsoft.TeamFoundation.Authentication
+namespace Microsoft.TeamFoundation.Authentication.Test
 {
     [TestClass]
     public class VsoMsaTests : AuthenticationTests
@@ -17,18 +17,18 @@ namespace Microsoft.TeamFoundation.Authentication
             Uri targetUri = DefaultTargetUri;
             VsoMsaAuthentication msaAuthority = GetVsoMsaAuthentication("msa-delete");
 
-            msaAuthority.PersonalAccessTokenStore.WriteToken(targetUri, DefaultPersonalAccessToken);
+            msaAuthority.PersonalAccessTokenStore.WriteCredentials(targetUri, DefaultPersonalAccessToken);
             msaAuthority.AdaRefreshTokenStore.WriteToken(targetUri, DefaultAzureRefreshToken);
 
-            Token personalAccessToken;
+            Credential personalAccessToken;
             Token azureToken;
 
             msaAuthority.DeleteCredentials(targetUri);
-            Assert.IsFalse(msaAuthority.PersonalAccessTokenStore.ReadToken(targetUri, out personalAccessToken), "Personal Access Tokens were not deleted as expected"); ;
+            Assert.IsFalse(msaAuthority.PersonalAccessTokenStore.ReadCredentials(targetUri, out personalAccessToken), "Personal Access Tokens were not deleted as expected"); ;
             Assert.IsTrue(msaAuthority.AdaRefreshTokenStore.ReadToken(targetUri, out azureToken), "Refresh Token wasn't read as expected.");
 
             msaAuthority.DeleteCredentials(targetUri);
-            Assert.IsFalse(msaAuthority.PersonalAccessTokenStore.ReadToken(targetUri, out personalAccessToken), "Personal Access Tokens were not deleted as expected"); ;
+            Assert.IsFalse(msaAuthority.PersonalAccessTokenStore.ReadCredentials(targetUri, out personalAccessToken), "Personal Access Tokens were not deleted as expected"); ;
             Assert.IsFalse(msaAuthority.AdaRefreshTokenStore.ReadToken(targetUri, out azureToken), "Refresh Token were not deleted as expected.");
         }
 
@@ -41,7 +41,7 @@ namespace Microsoft.TeamFoundation.Authentication
 
             Assert.IsFalse(msaAuthority.GetCredentials(targetUri, out credentials), "Credentials were retrieved unexpectedly.");
 
-            msaAuthority.PersonalAccessTokenStore.WriteToken(targetUri, DefaultPersonalAccessToken);
+            msaAuthority.PersonalAccessTokenStore.WriteCredentials(targetUri, DefaultPersonalAccessToken);
             msaAuthority.AdaRefreshTokenStore.WriteToken(targetUri, DefaultAzureRefreshToken);
 
             Assert.IsTrue(msaAuthority.GetCredentials(targetUri, out credentials), "Credentials were not retrieved as expected.");
@@ -53,15 +53,15 @@ namespace Microsoft.TeamFoundation.Authentication
             Uri targetUri = DefaultTargetUri;
             VsoMsaAuthentication msaAuthority = GetVsoMsaAuthentication("msa-logon");
 
-            Token personalAccessToken;
+            Credential personalAccessToken;
             Token azureToken;
 
-            Assert.IsFalse(msaAuthority.PersonalAccessTokenStore.ReadToken(targetUri, out personalAccessToken), "Personal Access Token found in store unexpectedly.");
+            Assert.IsFalse(msaAuthority.PersonalAccessTokenStore.ReadCredentials(targetUri, out personalAccessToken), "Personal Access Token found in store unexpectedly.");
             Assert.IsFalse(msaAuthority.AdaRefreshTokenStore.ReadToken(targetUri, out azureToken), "ADA Refresh Token found in store unexpectedly.");
 
             Assert.IsTrue(msaAuthority.InteractiveLogon(targetUri, false), "Interactive logon failed unexpectedly.");
 
-            Assert.IsTrue(msaAuthority.PersonalAccessTokenStore.ReadToken(targetUri, out personalAccessToken), "Personal Access Token not found in store as expected.");
+            Assert.IsTrue(msaAuthority.PersonalAccessTokenStore.ReadCredentials(targetUri, out personalAccessToken), "Personal Access Token not found in store as expected.");
             Assert.IsTrue(msaAuthority.AdaRefreshTokenStore.ReadToken(targetUri, out azureToken) && azureToken.Value == "token-refresh", "ADA Refresh Token not found in store as expected.");
         }
 
@@ -74,14 +74,14 @@ namespace Microsoft.TeamFoundation.Authentication
 
             msaAuthority.AdaRefreshTokenStore.WriteToken(targetUri, DefaultAzureRefreshToken);
 
-            Token personalAccessToken;
+            Credential personalAccessToken;
 
-            Assert.IsFalse(msaAuthority.PersonalAccessTokenStore.ReadToken(targetUri, out personalAccessToken), "Personal Access Token unexpectedly found in store.");
+            Assert.IsFalse(msaAuthority.PersonalAccessTokenStore.ReadCredentials(targetUri, out personalAccessToken), "Personal Access Token unexpectedly found in store.");
 
             Assert.IsTrue(Task.Run(async () => { return await msaAuthority.RefreshCredentials(targetUri, false); }).Result, "Credentials refresh failed unexpectedly.");
             Assert.IsFalse(Task.Run(async () => { return await msaAuthority.RefreshCredentials(invlaidUri, false); }).Result, "Credentials refresh succeeded unexpectedly.");
 
-            Assert.IsTrue(msaAuthority.PersonalAccessTokenStore.ReadToken(targetUri, out personalAccessToken), "Personal Access Token not found in store as expected.");
+            Assert.IsTrue(msaAuthority.PersonalAccessTokenStore.ReadCredentials(targetUri, out personalAccessToken), "Personal Access Token not found in store as expected.");
         }
 
         [TestMethod]
@@ -89,7 +89,7 @@ namespace Microsoft.TeamFoundation.Authentication
         {
             Uri targetUri = DefaultTargetUri;
             VsoMsaAuthentication msaAuthority = GetVsoMsaAuthentication("msa-set");
-            Token personalAccessToken;
+            Credential personalAccessToken;
             Token azureToken;
 
             try
@@ -99,7 +99,7 @@ namespace Microsoft.TeamFoundation.Authentication
             }
             catch { }
 
-            Assert.IsFalse(msaAuthority.PersonalAccessTokenStore.ReadToken(targetUri, out personalAccessToken), "Personal Access Token unexpectedly found in store.");
+            Assert.IsFalse(msaAuthority.PersonalAccessTokenStore.ReadCredentials(targetUri, out personalAccessToken), "Personal Access Token unexpectedly found in store.");
             Assert.IsFalse(msaAuthority.AdaRefreshTokenStore.ReadToken(targetUri, out azureToken), "ADA Refresh Token unexpectedly found in store.");
         }
 
@@ -118,7 +118,7 @@ namespace Microsoft.TeamFoundation.Authentication
 
         private VsoMsaAuthentication GetVsoMsaAuthentication(string @namespace)
         {
-            ITokenStore tokenStore1 = new SecretCache(@namespace + 1);
+            ICredentialStore tokenStore1 = new SecretCache(@namespace + 1);
             ITokenStore tokenStore2 = new SecretCache(@namespace + 2);
             ITokenStore tokenStore3 = new SecretCache(@namespace + 3);
             IVsoAuthority liveAuthority = new AuthorityFake();

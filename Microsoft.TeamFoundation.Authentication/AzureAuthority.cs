@@ -152,7 +152,14 @@ namespace Microsoft.TeamFoundation.Authentication
 
             try
             {
-                AuthenticationContext authCtx = new AuthenticationContext(AuthorityHostUrl, _adalTokenCache);
+                string authorityHostUrl = AuthorityHostUrl;
+
+                if (refreshToken.TenantId != Guid.Empty)
+                {
+                    authorityHostUrl = GetAuthorityUrl(refreshToken.TenantId);
+                }
+
+                AuthenticationContext authCtx = new AuthenticationContext(authorityHostUrl, _adalTokenCache);
                 AuthenticationResult authResult = await authCtx.AcquireTokenByRefreshTokenAsync(refreshToken.Value, clientId, resource);
                 tokens = new TokenPair(authResult);
 
@@ -164,6 +171,11 @@ namespace Microsoft.TeamFoundation.Authentication
             }
 
             return tokens;
+        }
+
+        public static string GetAuthorityUrl(Guid tenantId)
+        {
+            return String.Format("{0}/{1:D}", AzureAuthority.AuthorityHostUrlBase, tenantId);
         }
     }
 }

@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Threading.Tasks;
 
-namespace Microsoft.TeamFoundation.Authentication
+namespace Microsoft.TeamFoundation.Authentication.Test
 {
     internal class AuthorityFake : IVsoAuthority
     {
