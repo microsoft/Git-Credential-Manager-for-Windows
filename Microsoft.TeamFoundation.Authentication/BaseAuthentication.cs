@@ -4,6 +4,9 @@ using System.Net;
 
 namespace Microsoft.TeamFoundation.Authentication
 {
+    /// <summary>
+    /// Base authentication mechanisms for setting, retrieving, and deleting stored credentials.
+    /// </summary>
     public abstract class BaseAuthentication : IAuthentication
     {
         /// <summary>

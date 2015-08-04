@@ -5,6 +5,9 @@ using Microsoft.IdentityModel.Clients.ActiveDirectory;
 
 namespace Microsoft.TeamFoundation.Authentication
 {
+    /// <summary>
+    /// Base functionality for performing authentication operations against Visual Studio Online.
+    /// </summary>
     public abstract class BaseVsoAuthentication : BaseAuthentication
     {
         public const string DefaultResource = "499b84ac-1321-427f-aa17-267ca6975798";
@@ -31,12 +34,11 @@ namespace Microsoft.TeamFoundation.Authentication
             this.VsoAuthority = new VsoAzureAuthority();
         }
         /// <summary>
-        /// Invoked by a derived classes implementation.  allows custom back-ends to be used
+        /// Invoked by a derived classes implementation. Allows custom back-end implementatoins to be used.
         /// </summary>
-        /// <param name="credentialPrefix"></param>
-        /// <param name="tokenScope"></param>
-        /// <param name="adaRefreshTokenStore"></param>
-        /// <param name="personalAccessTokenStore"></param>
+        /// <param name="tokenScope">The desired scope of the acquired personal access token(s).</param>
+        /// <param name="personalAccessTokenStore">The secret store for acquired pesonal access token(s).</param>
+        /// <param name="adaRefreshTokenStore">The secret store for acquired Azure refresh token(s).</param>
         protected BaseVsoAuthentication(
             VsoTokenScope tokenScope,
             ICredentialStore personalAccessTokenStore,
@@ -64,18 +66,31 @@ namespace Microsoft.TeamFoundation.Authentication
             this.VsoAdalTokenCache = TokenCache.DefaultShared;
         }
 
+        /// <summary>
+        /// The application client identity by which access will be requested.
+        /// </summary>
         public readonly string ClientId;
+        /// <summary>
+        /// The Azure resource for which access will be requested.
+        /// </summary>
         public readonly string Resource;
+        /// <summary>
+        /// The desired scope of the authentication token to be requested.
+        /// </summary>
         public readonly VsoTokenScope TokenScope;
 
-        protected readonly TokenCache VsoAdalTokenCache;
-        protected readonly ITokenStore VsoIdeTokenCache;
+        internal readonly TokenCache VsoAdalTokenCache;
+        internal readonly ITokenStore VsoIdeTokenCache;
 
         internal ICredentialStore PersonalAccessTokenStore { get; set; }
         internal ITokenStore AdaRefreshTokenStore { get; set; }
         internal IVsoAuthority VsoAuthority { get; set; }
         internal Guid TenantId { get; set; }
 
+        /// <summary>
+        /// Deletes a set of stored credentials by their target resource.
+        /// </summary>
+        /// <param name="targetUri">The 'key' by which to identify credentials.</param>
         public override void DeleteCredentials(Uri targetUri)
         {
             BaseSecureStore.ValidateTargetUri(targetUri);
@@ -94,6 +109,13 @@ namespace Microsoft.TeamFoundation.Authentication
             }
         }
 
+        /// <summary>
+        /// Attempts to get a set of credentials from storage by their target resource.
+        /// </summary>
+        /// <param name="targetUri">The 'key' by which to identify credentials.</param>
+        /// <param name="credentials">Credentials associated with the URI is successful; null 
+        /// otherwise.</param>
+        /// <returns>True if successful; false otherwise.</returns>
         public override bool GetCredentials(Uri targetUri, out Credential credentials)
         {
             BaseSecureStore.ValidateTargetUri(targetUri);
@@ -108,6 +130,14 @@ namespace Microsoft.TeamFoundation.Authentication
             return credentials != null;
         }
 
+        /// <summary>
+        /// Attempts to generate a new personal access token (credentials) via use of a stored 
+        /// Azure refresh token, identitifed by the target resource.
+        /// </summary>
+        /// <param name="targetUri">The 'key' by which to identify the refresh token.</param>
+        /// <param name="requireCompactToken">Generates a compact token if true; generates a self 
+        /// describing token if false.</param>
+        /// <returns>True if successful; false otherwise.</returns>
         public async Task<bool> RefreshCredentials(Uri targetUri, bool requireCompactToken)
         {
             BaseSecureStore.ValidateTargetUri(targetUri);
@@ -150,6 +180,12 @@ namespace Microsoft.TeamFoundation.Authentication
             return false;
         }
 
+        /// <summary>
+        /// Validates that a set of credentials grants access to the target resource.
+        /// </summary>
+        /// <param name="targetUri">The target resource to validate against.</param>
+        /// <param name="credentials">The credentials to validate</param>
+        /// <returns>True if successful; false otherwise.</returns>
         public async Task<bool> ValidateCredentials(Uri targetUri, Credential credentials)
         {
             Trace.WriteLine("BaseVsoAuthentication::ValidateCredentials");
@@ -157,6 +193,16 @@ namespace Microsoft.TeamFoundation.Authentication
             return await this.VsoAuthority.ValidateCredentials(targetUri, credentials);
         }
 
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="targetUri">The target resource for which to acquire the personal access 
+        /// token for.</param>
+        /// <param name="accessToken">Azure Directory access token with privilages to grant access 
+        /// to the target resource.</param>
+        /// <param name="requestCompactToken">Generates a compact token if true; generates a self 
+        /// describing token if false.</param>
+        /// <returns>True if successful; false otherwise.</returns>
         protected async Task<bool> GeneratePersonalAccessToken(Uri targetUri, Token accessToken, bool requestCompactToken)
         {
             Debug.Assert(targetUri != null, "The targetUri parameter is null");
@@ -173,6 +219,11 @@ namespace Microsoft.TeamFoundation.Authentication
             return personalAccessToken != null;
         }
 
+        /// <summary>
+        /// Stores an Azure Directory refresh token.
+        /// </summary>
+        /// <param name="targetUri">The 'key' by which to identify the token.</param>
+        /// <param name="refreshToken">The token to be stored.</param>
         protected void StoreRefreshToken(Uri targetUri, Token refreshToken)
         {
             Debug.Assert(targetUri != null, "The targetUri parameter is null");
