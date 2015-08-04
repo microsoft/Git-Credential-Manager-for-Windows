@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
+using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using Microsoft.TeamFoundation.Authentication;
 
@@ -16,6 +17,10 @@ namespace Microsoft.TeamFoundation.CredentialHelper
 
         static void Main(string[] args)
         {
+            Credential c;
+            GithubAuthentication g = new GithubAuthentication(new SecretStore("test"));
+            g.InteractiveLogon(new Uri("https://www.github.com"), out c);
+
             try
             {
                 EnableDebugTrace();
