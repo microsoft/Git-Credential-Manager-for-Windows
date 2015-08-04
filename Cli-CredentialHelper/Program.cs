@@ -76,7 +76,8 @@ namespace Microsoft.TeamFoundation.CredentialHelper
             Console.Out.WriteLine("usage: git credential <command> [<args>]");
             Console.Out.WriteLine();
             Console.Out.WriteLine("   authority      Defines the type of authentication to be used.");
-            Console.Out.WriteLine("                  Supportd Auto, Basic, AAD, and MSA. Default is Auto.");
+            Console.Out.WriteLine("                  Supportd Auto, Basic, AAD, MSA, and Integrated.");
+            Console.Out.WriteLine("                  Default is Auto.");
             Console.Out.WriteLine();
             Console.Out.WriteLine("      `git config --global credential.microsoft.visualstudio.com.authority AAD`");
             Console.Out.WriteLine();
@@ -229,6 +230,11 @@ namespace Microsoft.TeamFoundation.CredentialHelper
                         }
                     }).Wait();
                     break;
+
+                case AuthorityType.Integrated:
+                    credentials = new Credential(String.Empty, String.Empty);
+                    operationArguments.SetCredentials(credentials);
+                    break;
             }
 
             Console.Out.Write(operationArguments);
@@ -330,6 +336,13 @@ namespace Microsoft.TeamFoundation.CredentialHelper
                          || String.Equals(entry.Value, "AzureDirectory", StringComparison.OrdinalIgnoreCase))
                 {
                     operationArguments.Authority = AuthorityType.AzureDirectory;
+                }
+                else if (String.Equals(entry.Value, "Integrated", StringComparison.OrdinalIgnoreCase)
+                         || String.Equals(entry.Value, "NTLM", StringComparison.OrdinalIgnoreCase)
+                         || String.Equals(entry.Value, "Kerberos", StringComparison.OrdinalIgnoreCase)
+                         || String.Equals(entry.Value, "SSO", StringComparison.OrdinalIgnoreCase))
+                {
+                    operationArguments.Authority = AuthorityType.Integrated;
                 }
                 else
                 {
