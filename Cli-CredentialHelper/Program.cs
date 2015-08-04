@@ -32,17 +32,8 @@ namespace Microsoft.TeamFoundation.CredentialHelper
                     return;
                 }
 
-                // parse the operations arguments from stdin (this is how git sends commands)
-                // see: https://www.kernel.org/pub/software/scm/git/docs/technical/api-credentials.html
-                // see: https://www.kernel.org/pub/software/scm/git/docs/git-credential.html
-                OperationArguments operationArguments = new OperationArguments(Console.In);
-
-                LoadOperationArguments(operationArguments);
-                EnableTraceLogging(operationArguments);
-
                 // list of arg => method associations (case-insensitive)
-                Dictionary<string, Action<OperationArguments>> actions =
-                    new Dictionary<string, Action<OperationArguments>>(StringComparer.OrdinalIgnoreCase)
+                Dictionary<string, Action> actions = new Dictionary<string, Action>(StringComparer.OrdinalIgnoreCase)
                 {
                     { "approve", Store },
                     { "erase", Erase },
@@ -56,7 +47,7 @@ namespace Microsoft.TeamFoundation.CredentialHelper
                 {
                     if (actions.ContainsKey(arg))
                     {
-                        actions[arg](operationArguments);
+                        actions[arg]();
                     }
                 }
             }
@@ -109,10 +100,18 @@ namespace Microsoft.TeamFoundation.CredentialHelper
             Console.Out.WriteLine(@"       helper = manager");
         }
 
-        private static void Erase(OperationArguments operationArguments)
+        private static void Erase()
         {
+            // parse the operations arguments from stdin (this is how git sends commands)
+            // see: https://www.kernel.org/pub/software/scm/git/docs/technical/api-credentials.html
+            // see: https://www.kernel.org/pub/software/scm/git/docs/git-credential.html
+            OperationArguments operationArguments = new OperationArguments(Console.In);
+
             Debug.Assert(operationArguments != null, "The operationArguments is null");
             Debug.Assert(operationArguments.TargetUri != null, "The operationArgument.TargetUri is null");
+
+            LoadOperationArguments(operationArguments);
+            EnableTraceLogging(operationArguments);
 
             Trace.WriteLine("Program::Erase");
             Trace.WriteLine("   targetUri = " + operationArguments.TargetUri);
@@ -134,12 +133,20 @@ namespace Microsoft.TeamFoundation.CredentialHelper
             }
         }
 
-        private static void Get(OperationArguments operationArguments)
+        private static void Get()
         {
             const string AadMsaAuthFailureMessage = "Logon failed, use ctrl+c to cancel basic credential prompt.";
 
+            // parse the operations arguments from stdin (this is how git sends commands)
+            // see: https://www.kernel.org/pub/software/scm/git/docs/technical/api-credentials.html
+            // see: https://www.kernel.org/pub/software/scm/git/docs/git-credential.html
+            OperationArguments operationArguments = new OperationArguments(Console.In);
+
             Debug.Assert(operationArguments != null, "The operationArguments is null");
             Debug.Assert(operationArguments.TargetUri != null, "The operationArgument.TargetUri is null");
+
+            LoadOperationArguments(operationArguments);
+            EnableTraceLogging(operationArguments);
 
             Trace.WriteLine("Program::Get");
             Trace.WriteLine("   targetUri = " + operationArguments.TargetUri);
@@ -240,11 +247,19 @@ namespace Microsoft.TeamFoundation.CredentialHelper
             Console.Out.Write(operationArguments);
         }
 
-        private static void Store(OperationArguments operationArguments)
+        private static void Store()
         {
+            // parse the operations arguments from stdin (this is how git sends commands)
+            // see: https://www.kernel.org/pub/software/scm/git/docs/technical/api-credentials.html
+            // see: https://www.kernel.org/pub/software/scm/git/docs/git-credential.html
+            OperationArguments operationArguments = new OperationArguments(Console.In);
+
             Debug.Assert(operationArguments != null, "The operationArguments is null");
             Debug.Assert(operationArguments.Username != null, "The operaionArgument.Username is null");
             Debug.Assert(operationArguments.TargetUri != null, "The operationArgument.TargetUri is null");
+
+            LoadOperationArguments(operationArguments);
+            EnableTraceLogging(operationArguments);
 
             Trace.WriteLine("Program::Store");
             Trace.WriteLine("   targetUri = " + operationArguments.TargetUri);
