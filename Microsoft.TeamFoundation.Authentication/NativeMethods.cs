@@ -23,7 +23,7 @@ namespace Microsoft.TeamFoundation.Authentication
         internal static extern bool CredWrite(ref Credential credential, UInt32 flags);
 
         /// <summary>
-        /// <para>The CredRead function reads a credential from the user's credential set. </para>
+        /// <para>Reads a credential from the user's credential set. </para>
         /// <para>The credential set used is the one associated with the logon session of the 
         /// current token. </para>
         /// <para>The token must not have the user's SID disabled.</para>
