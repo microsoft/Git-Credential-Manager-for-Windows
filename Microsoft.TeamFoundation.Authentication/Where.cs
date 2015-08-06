@@ -1,6 +1,7 @@
 ﻿using System;
 using System.IO;
 using System.Linq;
+using System.Text.RegularExpressions;
 
 namespace Microsoft.TeamFoundation.Authentication
 {
@@ -85,6 +86,7 @@ namespace Microsoft.TeamFoundation.Authentication
             {
                 var dir = new DirectoryInfo(startingDirectory);
                 if (dir.Exists)
+
                 {
                     Func<DirectoryInfo, FileSystemInfo> hasOdb = (DirectoryInfo info) =>
                     {
@@ -122,8 +124,43 @@ namespace Microsoft.TeamFoundation.Authentication
                         }
                         else
                         {
-                            // var content = File.ReadAllText(result.FullName);
-                            // TODO: handle .git files
+                            // parse the file like gitdir: ../.git/modules/libgit2sharp
+                            string content = null;
+
+                            using (FileStream stream = (result as FileInfo).OpenRead())
+                            using (StreamReader reader = new StreamReader(stream))
+                            {
+                                content = reader.ReadToEnd();
+                            }
+
+                            Match match;
+                            if ((match = Regex.Match(content, @"gitdir\s*:\s*([^\r\n]+)", RegexOptions.Compiled | RegexOptions.CultureInvariant | RegexOptions.IgnoreCase)).Success
+                                && match.Groups.Count > 1)
+                            {
+                                content = match.Groups[1].Value;
+                                content = content.Replace('/', '\\');
+
+                                string localPath = null;
+
+                                if (Path.IsPathRooted(content))
+                                {
+                                    localPath = content;
+                                }
+                                else
+                                {
+                                    localPath = Path.GetDirectoryName(result.FullName);
+                                    localPath = Path.Combine(localPath, content);
+                                }
+
+                                if (Directory.Exists(localPath))
+                                {
+                                    localPath = Path.Combine(localPath, LocalConfigFileName);
+                                    if (File.Exists(localPath))
+                                    {
+                                        path = localPath;
+                                    }
+                                }
+                            }
                         }
                     }
                 }
