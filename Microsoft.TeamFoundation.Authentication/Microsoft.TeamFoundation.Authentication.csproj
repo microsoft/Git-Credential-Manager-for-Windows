@@ -52,6 +52,7 @@
     <Reference Include="System.Security" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Configuration.cs" />
     <Compile Include="Global.cs" />
     <Compile Include="SecretCache.cs" />
     <Compile Include="VsoAzureAuthority.cs" />
