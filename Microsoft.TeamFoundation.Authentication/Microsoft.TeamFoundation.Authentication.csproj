@@ -56,14 +56,12 @@
   <ItemGroup>
     <Compile Include="Configuration.cs" />
     <Compile Include="GitHubAuthentication.cs" />
+    <Compile Include="GithubAuthority.cs" />
+    <Compile Include="GithubTokenScope.cs" />
     <Compile Include="Global.cs" />
     <Compile Include="IGithubAuthentication.cs" />
-    <Compile Include="Properties\Resources.Designer.cs">
-      <AutoGen>True</AutoGen>
-      <DesignTime>True</DesignTime>
-      <DependentUpon>Resources.resx</DependentUpon>
-    </Compile>
     <Compile Include="SecretCache.cs" />
+    <Compile Include="TokenScope.cs" />
     <Compile Include="VsoAzureAuthority.cs" />
     <Compile Include="VsoTokenScope.cs" />
     <Compile Include="AzureAuthority.cs" />
@@ -95,12 +93,6 @@
   <ItemGroup>
     <None Include="app.config" />
     <None Include="packages.config" />
-  </ItemGroup>
-  <ItemGroup>
-    <EmbeddedResource Include="Properties\Resources.resx">
-      <Generator>ResXFileCodeGenerator</Generator>
-      <LastGenOutput>Resources.Designer.cs</LastGenOutput>
-    </EmbeddedResource>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

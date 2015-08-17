@@ -81,26 +81,28 @@ namespace Microsoft.TeamFoundation.Authentication
 
                     if (await PopulateTokenTargetId(targetUri, accessToken))
                     {
-                        StringContent content = GetAccessTokenRequestBody(targetUri, accessToken, tokenScope);
                         string requestUrl = requireCompactToken ? CompactTokenUrl : SessionTokenUrl;
 
-                        HttpResponseMessage response = await httpClient.PostAsync(requestUrl, content);
-                        if (response.StatusCode == HttpStatusCode.OK)
+                        using (StringContent content = GetAccessTokenRequestBody(targetUri, accessToken, tokenScope))
+                        using (HttpResponseMessage response = await httpClient.PostAsync(requestUrl, content))
                         {
-                            string responseText = await response.Content.ReadAsStringAsync();
-
-                            if (!String.IsNullOrWhiteSpace(responseText))
+                            if (response.StatusCode == HttpStatusCode.OK)
                             {
-                                // find the 'token : <value>' portion of the result content, if any
-                                Match tokenMatch = null;
-                                if ((tokenMatch = Regex.Match(responseText, @"\s*""token""\s*:\s*""([^\""]+)""\s*", RegexOptions.Compiled | RegexOptions.CultureInvariant | RegexOptions.IgnoreCase)).Success)
+                                string responseText = await response.Content.ReadAsStringAsync();
+
+                                if (!String.IsNullOrWhiteSpace(responseText))
                                 {
-                                    string tokenValue = tokenMatch.Groups[1].Value;
-                                    Token token = new Token(tokenValue, TokenType.Personal);
+                                    // find the 'token : <value>' portion of the result content, if any
+                                    Match tokenMatch = null;
+                                    if ((tokenMatch = Regex.Match(responseText, @"\s*""token""\s*:\s*""([^\""]+)""\s*", RegexOptions.Compiled | RegexOptions.CultureInvariant | RegexOptions.IgnoreCase)).Success)
+                                    {
+                                        string tokenValue = tokenMatch.Groups[1].Value;
+                                        Token token = new Token(tokenValue, TokenType.Personal);
 
-                                    Trace.WriteLine("   personal access token aquisition succeeded.");
+                                        Trace.WriteLine("   personal access token aquisition succeeded.");
 
-                                    return token;
+                                        return token;
+                                    }
                                 }
                             }
                         }

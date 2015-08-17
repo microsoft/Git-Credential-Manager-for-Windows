@@ -373,6 +373,27 @@ namespace Microsoft.TeamFoundation.Authentication
         public static extern SafeFileHandle CreateFile(string fileName, FileAccess desiredAccess, FileShare shareMode, IntPtr securityAttributes, FileCreationDisposition creationDisposition, FileAttributes flagsAndAttributes, IntPtr templateFile);
 
         /// <summary>
+        /// Retrieves the current input mode of a console's input buffer or the current output mode 
+        /// of a console screen buffer.
+        /// </summary>
+        /// <param name="consoleHandle">
+        /// A handle to the console input buffer or the console screen buffer. The handle must have 
+        /// the <see cref="FileAccess.GenericRead"/> access right.
+        /// </param>
+        /// <param name="consoleMode">
+        /// <para>A pointer to a variable that receives the current mode of the specified buffer.</para>
+        /// <para>If the <paramref name="consoleHandle"/> parameter is an input handle, the mode 
+        /// can be one or more of the following values. When a console is created, all input modes 
+        /// except <see cref="ConsoleMode.WindowInput"/> are enabled by default.</para>
+        /// <para>If the <paramref name="consoleHandle"/> parameter is a screen buffer handle, the 
+        /// mode can be one or more of the following values. When a screen buffer is created, both 
+        /// output modes are enabled by default.</para>
+        /// </param>
+        /// <returns>True if success; otherwise false.</returns>
+        [DllImport(Kernel32, CallingConvention = CallingConvention.StdCall, CharSet = CharSet.Unicode, EntryPoint = "GetConsoleMode", SetLastError = true)]
+        public static extern bool GetConsoleMode(SafeFileHandle consoleHandle, out ConsoleMode consoleMode);
+
+        /// <summary>
         /// Reads character input from the console input buffer and removes it from the buffer.
         /// </summary>
         /// <param name="consoleInputHandle">
@@ -392,6 +413,27 @@ namespace Microsoft.TeamFoundation.Authentication
         /// <returns>True if success; otherwise false.</returns>
         [DllImport(Kernel32, CallingConvention = CallingConvention.StdCall, CharSet = CharSet.Unicode, EntryPoint = "ReadConsoleW", SetLastError = true)]
         public static extern bool ReadConsole(SafeFileHandle consoleInputHandle, [Out]StringBuilder buffer, uint numberOfCharsToRead, out uint numberOfCharsRead, IntPtr reserved);
+
+        /// <summary>
+        /// Sets the input mode of a console's input buffer or the output mode of a console screen 
+        /// buffer.
+        /// </summary>
+        /// <param name="consoleHandle">
+        /// A handle to the console input buffer or a console screen buffer. The handle must have 
+        /// the <see cref="FileAccess.GenericRead"/> access right. 
+        /// </param>
+        /// <param name="consoleMode">
+        /// <para>The input or output mode to be set. If the <paramref name="consoleHandle"/> 
+        /// parameter is an input handle, the mode can be one or more of the following values. When 
+        /// a console is created, all input modes except <see cref="ConsoleMode.WindowInput"/> are 
+        /// enabled by default.</para>
+        /// <para>If the <paramref name="consoleHandle"/> parameter is a screen buffer handle, the 
+        /// mode can be one or more of the following values. When a screen buffer is created, both 
+        /// output modes are enabled by default.</para>
+        /// </param>
+        /// <returns>True if success; otherwise false.</returns>
+        [DllImport(Kernel32, CallingConvention = CallingConvention.StdCall, CharSet = CharSet.Unicode, EntryPoint = "SetConsoleMode", SetLastError = true)]
+        public static extern bool SetConsoleMode(SafeFileHandle consoleHandle, ConsoleMode consoleMode);
 
         /// <summary>
         /// Writes a character string to a console screen buffer beginning at the current cursor 
@@ -418,87 +460,81 @@ namespace Microsoft.TeamFoundation.Authentication
         public static extern bool WriteConsole(SafeHandle consoleOutputHandle, [In]StringBuilder buffer, uint numberOfCharsToWrite, out uint numberOfCharsWritten, IntPtr reserved);
 
         [Flags]
+        public enum ConsoleMode : uint
+        {
+            /// <summary>
+            /// CTRL+C is processed by the system and is not placed in the input buffer. If the 
+            /// input buffer is being read by <see cref="ReadConsole(SafeFileHandle, StringBuilder, uint, out uint, IntPtr)"/>, 
+            /// other control keys are processed by the system and are not returned in the 
+            /// ReadConsole buffer. If the <see cref="LineInput"/> mode is also enabled, backspace, 
+            /// carriage return, and line feed characters are handled by the system.
+            /// </summary>
+            ProcessedInput = 0x0001,
+            /// <summary>
+            /// The <see cref="ReadConsole(SafeFileHandle, StringBuilder, uint, out uint, IntPtr)"/> 
+            /// function returns only when a carriage return character is read. If this mode is 
+            /// disabled, the functions return when one or more characters are available.
+            /// </summary>
+            LineInput = 0x0002,
+            /// <summary>
+            /// Characters read by the <see cref="ReadConsole(SafeFileHandle, StringBuilder, uint, out uint, IntPtr)"/> 
+            /// function are written to the active screen buffer as they are read. This mode can be 
+            /// used only if the <see cref="LineInput"/> mode is also enabled.
+            /// </summary>
+            EchoInput = 0x0004,
+            /// <summary>
+            /// User interactions that change the size of the console screen buffer are reported in 
+            /// the console's input buffer. Information about these events can be read from the 
+            /// input buffer by applications using the ReadConsoleInput function, but not by those 
+            /// using <see cref="ReadConsole(SafeFileHandle, StringBuilder, uint, out uint, IntPtr)"/>.
+            /// </summary>
+            WindowInput = 0x0008,
+            /// <summary>
+            /// If the mouse pointer is within the borders of the console window and the window has 
+            /// the keyboard focus, mouse events generated by mouse movement and button presses are 
+            /// placed in the input buffer. These events are discarded by <see cref="ReadConsole(SafeFileHandle, StringBuilder, uint, out uint, IntPtr)"/>, 
+            /// even when this mode is enabled.
+            /// </summary>
+            MouseInput = 0x0010,
+            /// <summary>
+            /// When enabled, text entered in a console window will be inserted at the current 
+            /// cursor location and all text following that location will not be overwritten. When 
+            /// disabled, all following text will be overwritten.
+            /// </summary>
+            InsertMode = 0x0020,
+            /// <summary>
+            /// This flag enables the user to use the mouse to select and edit text.
+            /// </summary>
+            QuickEdit = 0x0040,
+
+            /// <summary>
+            /// Characters written by the <see cref="WriteConsole(SafeHandle, StringBuilder, uint, out uint, IntPtr)"/> 
+            /// function or echoed by the ReadFile or ReadConsole function are parsed for ASCII 
+            /// control sequences, and the correct action is performed. Backspace, tab, bell, 
+            /// carriage return, and line feed characters are processed.
+            /// </summary>
+            ProcessedOuput = 0x0001,
+            /// <summary>
+            /// When writing with <see cref="WriteConsole(SafeHandle, StringBuilder, uint, out uint, IntPtr)"/> 
+            /// or echoing with ReadFile or ReadConsole, the cursor moves to the beginning of the 
+            /// next row when it reaches the end of the current row. This causes the rows displayed 
+            /// in the console window to scroll up automatically when the cursor advances beyond 
+            /// the last row in the window. It also causes the contents of the console screen 
+            /// buffer to scroll up (discarding the top row of the console screen buffer) when the 
+            /// cursor advances beyond the last row in the console screen buffer. If this mode is 
+            /// disabled, the last character in the row is overwritten with any subsequent 
+            /// characters.
+            /// </summary>
+            WrapAtEolOutput = 0x0002,
+        }
+
+        [Flags]
         public enum FileAccess : uint
         {
             GenericRead = 0x80000000,
             GenericWrite = 0x40000000,
             GenericExecute = 0x20000000,
             GenericAll = 0x10000000,
-        }
-
-        [Flags]
-        public enum FileShare : uint
-        {
-            /// <summary>
-            /// Prevents other processes from opening a file or device if they request delete, read, 
-            /// or write access.
-            /// </summary>
-            None = 0x00000000,
-            /// <summary>
-            /// <para>Enables subsequent open operations on an object to request read access.</para> 
-            /// <para>Otherwise, other processes cannot open the object if they request read access.</para>
-            /// <para>If this flag is not specified, but the object has been opened for read access, 
-            /// the function fails.</para>
-            /// </summary>
-            Read = 0x00000001,
-            /// <summary>
-            /// <para>Enables subsequent open operations on an object to request write access.</para> 
-            /// <para>Otherwise, other processes cannot open the object if they request write 
-            /// access.</para>  
-            /// <para>If this flag is not specified, but the object has been opened for write 
-            /// access, the function fails.</para> 
-            /// </summary>
-            Write = 0x00000002,
-            /// <summary>
-            /// <para>Enables subsequent open operations on an object to request delete access.</para> 
-            /// <para>Otherwise, other processes cannot open the object if they request delete 
-            /// access.</para> 
-            /// <para>If this flag is not specified, but the object has been opened for delete 
-            /// access, the function fails.</para> 
-            /// </summary>
-            Delete = 0x00000004
-        }
-
-        public enum FileCreationDisposition : uint
-        {
-            /// <summary>
-            /// <para>Creates a new file, only if it does not already exist.</para>
-            /// <para>If the specified file exists, the function fails and the last-error code is 
-            /// set to <see cref="Win32Error.FileExists"/>.</para>
-            /// <para>If the specified file does not exist and is a valid path to a writable 
-            /// location, a new file is created.</para>
-            /// </summary>
-            New = 1,
-            /// <summary>
-            /// <para>Creates a new file, always.</para>
-            /// <para>If the specified file exists and is writable, the function overwrites the 
-            /// file, the function succeeds, and last-error code is set to <see cref="Win32Error.AlreadExists"/>.</para>
-            /// <para>If the specified file does not exist and is a valid path, a new file is 
-            /// created, the function succeeds, and the last-error code is set to zero.</para>
-            /// </summary>
-            CreateAlways = 2,
-            /// <summary>
-            /// <para>Opens a file, always.</para>
-            /// <para>If the specified file exists, the function succeeds and the last-error code 
-            /// is set to <see cref="Win32Error.AlreadExists"/>.</para>
-            /// <para>If the specified file does not exist and is a valid path to a writable 
-            /// location, the function creates a file and the last-error code is set to zero.</para>
-            /// </summary>
-            OpenExisting = 3,
-            /// <summary>
-            /// <para>Opens a file or device, only if it exists.</para> 
-            /// <para>If the specified file or device does not exist, the function fails and the 
-            /// last-error code is set to <see cref="Win32Error.FileNotFound"/>.</para> 
-            /// </summary>
-            OpenAlways = 4,
-            /// <summary>
-            /// <para>Opens a file and truncates it so that its size is zero bytes, only if it 
-            /// exists.</para> 
-            /// <para>If the specified file does not exist, the function fails and the last-error 
-            /// code is set to <see cref="Win32Error.FileNotFound"/>.</para>
-            /// <para>The calling process must open the file with <see cref="FileAccess.GenericWrite"/>.</para>
-            /// </summary>
-            TruncateExisting = 5
         }
 
         [Flags]
@@ -640,6 +676,81 @@ namespace Microsoft.TeamFoundation.Authentication
             /// </summary>
             WriteThrough = 0x80000000,
         }
+
+        public enum FileCreationDisposition : uint
+        {
+            /// <summary>
+            /// <para>Creates a new file, only if it does not already exist.</para>
+            /// <para>If the specified file exists, the function fails and the last-error code is 
+            /// set to <see cref="Win32Error.FileExists"/>.</para>
+            /// <para>If the specified file does not exist and is a valid path to a writable 
+            /// location, a new file is created.</para>
+            /// </summary>
+            New = 1,
+            /// <summary>
+            /// <para>Creates a new file, always.</para>
+            /// <para>If the specified file exists and is writable, the function overwrites the 
+            /// file, the function succeeds, and last-error code is set to <see cref="Win32Error.AlreadExists"/>.</para>
+            /// <para>If the specified file does not exist and is a valid path, a new file is 
+            /// created, the function succeeds, and the last-error code is set to zero.</para>
+            /// </summary>
+            CreateAlways = 2,
+            /// <summary>
+            /// <para>Opens a file, always.</para>
+            /// <para>If the specified file exists, the function succeeds and the last-error code 
+            /// is set to <see cref="Win32Error.AlreadExists"/>.</para>
+            /// <para>If the specified file does not exist and is a valid path to a writable 
+            /// location, the function creates a file and the last-error code is set to zero.</para>
+            /// </summary>
+            OpenExisting = 3,
+            /// <summary>
+            /// <para>Opens a file or device, only if it exists.</para> 
+            /// <para>If the specified file or device does not exist, the function fails and the 
+            /// last-error code is set to <see cref="Win32Error.FileNotFound"/>.</para> 
+            /// </summary>
+            OpenAlways = 4,
+            /// <summary>
+            /// <para>Opens a file and truncates it so that its size is zero bytes, only if it 
+            /// exists.</para> 
+            /// <para>If the specified file does not exist, the function fails and the last-error 
+            /// code is set to <see cref="Win32Error.FileNotFound"/>.</para>
+            /// <para>The calling process must open the file with <see cref="FileAccess.GenericWrite"/>.</para>
+            /// </summary>
+            TruncateExisting = 5
+        }
+
+        [Flags]
+        public enum FileShare : uint
+        {
+            /// <summary>
+            /// Prevents other processes from opening a file or device if they request delete, read, 
+            /// or write access.
+            /// </summary>
+            None = 0x00000000,
+            /// <summary>
+            /// <para>Enables subsequent open operations on an object to request read access.</para> 
+            /// <para>Otherwise, other processes cannot open the object if they request read access.</para>
+            /// <para>If this flag is not specified, but the object has been opened for read access, 
+            /// the function fails.</para>
+            /// </summary>
+            Read = 0x00000001,
+            /// <summary>
+            /// <para>Enables subsequent open operations on an object to request write access.</para> 
+            /// <para>Otherwise, other processes cannot open the object if they request write 
+            /// access.</para>  
+            /// <para>If this flag is not specified, but the object has been opened for write 
+            /// access, the function fails.</para> 
+            /// </summary>
+            Write = 0x00000002,
+            /// <summary>
+            /// <para>Enables subsequent open operations on an object to request delete access.</para> 
+            /// <para>Otherwise, other processes cannot open the object if they request delete 
+            /// access.</para> 
+            /// <para>If this flag is not specified, but the object has been opened for delete 
+            /// access, the function fails.</para> 
+            /// </summary>
+            Delete = 0x00000004
+        }
         #endregion
 
         /// <summary>
@@ -657,6 +768,10 @@ namespace Microsoft.TeamFoundation.Authentication
             /// The system cannot find the file specified.
             /// </summary>
             public const int FileNotFound = 2;
+            /// <summary>
+            /// The handle is invalid.
+            /// </summary>
+            public const int InvalidHandle = 6;
             /// <summary>
             /// Not enough storage is available to process this command.
             /// </summary>

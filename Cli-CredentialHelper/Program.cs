@@ -19,7 +19,10 @@ namespace Microsoft.TeamFoundation.CredentialHelper
         {
             Credential c;
             GithubAuthentication g = new GithubAuthentication(new SecretStore("test"));
-            g.InteractiveLogon(new Uri("https://www.github.com"), out c);
+            if (g.InteractiveLogon(new Uri("https://www.github.com"), out c))
+            {
+                Console.Error.WriteLine(c.Username + " : " + c.Password);
+            }
 
             try
             {
