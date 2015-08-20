@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
-using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using Microsoft.TeamFoundation.Authentication;
 
@@ -13,13 +12,14 @@ namespace Microsoft.TeamFoundation.CredentialHelper
     {
         private const string ConfigPrefix = "credential";
         private const string SecretsNamespace = "git";
-        private static readonly VsoTokenScope CredentialScope = VsoTokenScope.CodeWrite;
+        private static readonly VsoTokenScope VsoCredentialScope = VsoTokenScope.CodeWrite;
+        private static readonly GithubTokenScope GithubCredentialScope = GithubTokenScope.RepoPublic;
 
         static void Main(string[] args)
         {
             Credential c;
             GithubAuthentication g = new GithubAuthentication(new SecretStore("test"));
-            if (g.InteractiveLogon(new Uri("https://www.github.com"), out c))
+            if (g.InteractiveLogon(new Uri("https://www.github.com"), GithubCredentialScope, out c))
             {
                 Console.Error.WriteLine(c.Username + " : " + c.Password);
             }
@@ -286,7 +286,7 @@ namespace Microsoft.TeamFoundation.CredentialHelper
 
                     // detect the authority
                     var authority = BaseVsoAuthentication.GetAuthentication(operationArguments.TargetUri,
-                                                                            CredentialScope,
+                                                                            VsoCredentialScope,
                                                                             secrets);
                     // set the authority type based on the returned value
                     if (authority is VsoMsaAuthentication)
@@ -309,7 +309,7 @@ namespace Microsoft.TeamFoundation.CredentialHelper
 
                     Guid tenantId = Guid.Empty;
                     // return a generic AAD backed VSO authentication object
-                    return new VsoAadAuthentication(Guid.Empty, CredentialScope, secrets);
+                    return new VsoAadAuthentication(Guid.Empty, VsoCredentialScope, secrets);
 
                 case AuthorityType.Basic:
                 default:
@@ -322,7 +322,7 @@ namespace Microsoft.TeamFoundation.CredentialHelper
                     Trace.WriteLine("   authority is Microsoft Live");
 
                     // return a generic MSA backed VSO authentication object
-                    return new VsoMsaAuthentication(CredentialScope, secrets);
+                    return new VsoMsaAuthentication(VsoCredentialScope, secrets);
             }
         }
 

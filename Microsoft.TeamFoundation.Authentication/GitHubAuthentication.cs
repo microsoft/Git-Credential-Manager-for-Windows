@@ -24,9 +24,11 @@ namespace Microsoft.TeamFoundation.Authentication
                 throw new ArgumentNullException("personalAccessTokenStore");
 
             _personalAccessTokenStore = personalAccessTokenStore;
+            _githubAuthority = new GithubAuthority();
         }
 
         private readonly ICredentialStore _personalAccessTokenStore;
+        private readonly IGithubAuthority _githubAuthority;
 
         public void DeleteCredentials(Uri targetUri)
         {
@@ -38,7 +40,7 @@ namespace Microsoft.TeamFoundation.Authentication
             throw new NotImplementedException();
         }
 
-        public bool InteractiveLogon(Uri targetUri, out Credential credentials)
+        public bool InteractiveLogon(Uri targetUri, GithubTokenScope scope, out Credential credentials)
         {
             const int BufferReadSize = 32 * 1024;
 
@@ -147,7 +149,8 @@ namespace Microsoft.TeamFoundation.Authentication
 
                 Token token;
 
-                if (AcquireToken(targetUri, username, password, null, out token) && token == null)
+                GithubAuthenticationResult result;
+                if ((result = _githubAuthority.AcquireToken(targetUri, username, password, null, scope, out token)) && token == null)
                 {
                     buffer.Clear()
                           .AppendLine()
@@ -169,7 +172,7 @@ namespace Microsoft.TeamFoundation.Authentication
                     string authenticationCode = buffer.ToString(0, (int)read);
                     authenticationCode = authenticationCode.Trim(Environment.NewLine.ToCharArray());
 
-                    if (AcquireToken(targetUri, username, password, authenticationCode, out token))
+                    if (result = _githubAuthority.AcquireToken(targetUri, username, password, authenticationCode, scope, out token))
                     {
                         credentials = (Credential)token;
                     }
@@ -183,85 +186,6 @@ namespace Microsoft.TeamFoundation.Authentication
         public bool SetCredentials(Uri targetUri, Credential credentials)
         {
             throw new NotImplementedException();
-        }
-
-        private bool AcquireToken(Uri targetUri, string username, string password, string authenticationCode, out Token token)
-        {
-            const string githubAuthorityUrl = "https://api.github.com/authorizations";
-            const string GithubOptHeader = "X-GitHub-OTP";
-
-            using (HttpClientHandler handler = new HttpClientHandler()
-            {
-                MaxAutomaticRedirections = 2,
-                UseDefaultCredentials = true
-            })
-            using (HttpClient httpClient = new HttpClient(handler)
-            {
-                Timeout = TimeSpan.FromMilliseconds(RequestTimeout)
-            })
-            {
-                httpClient.DefaultRequestHeaders.Add("User-Agent", Global.GetUserAgent());
-                httpClient.DefaultRequestHeaders.Add("Accept", "application/vnd.github.v3+json");
-
-                string basicAuthValue = String.Format("{0}:{1}", username, password);
-                byte[] authBytes = Encoding.UTF8.GetBytes(basicAuthValue);
-                basicAuthValue = Convert.ToBase64String(authBytes);
-
-                httpClient.DefaultRequestHeaders.Add("Authorization", "Basic " + basicAuthValue);
-
-                if (!String.IsNullOrWhiteSpace(authenticationCode))
-                {
-                    httpClient.DefaultRequestHeaders.Add(GithubOptHeader, authenticationCode);
-                }
-
-                Token local = null;
-                bool result = Task.Run(async () =>
-                {
-                    const string HttpJsonContentType = "application/x-www-form-urlencoded";
-                    const string JsonContentFormat = @"{{ ""scopes"": [""public_repo""], ""note"": ""admin script"", ""fingerprint"": ""{0}"" }}";
-
-                    string jsonContent = String.Format(JsonContentFormat, targetUri);
-
-                    using (StringContent content = new StringContent(jsonContent, Encoding.UTF8, HttpJsonContentType))
-                    using (HttpResponseMessage response = await httpClient.PostAsync(githubAuthorityUrl, content))
-                    {
-                        switch (response.StatusCode)
-                        {
-                            case HttpStatusCode.OK:
-                            case HttpStatusCode.Created:
-                                {
-                                    string responseText = await response.Content.ReadAsStringAsync();
-
-                                    Match tokenMatch;
-                                    if ((tokenMatch = Regex.Match(responseText, @"\s*""token""\s*:\s*""([^""]+)""\s*", RegexOptions.Compiled | RegexOptions.CultureInvariant | RegexOptions.IgnoreCase)).Success
-                                        && tokenMatch.Groups.Count > 1)
-                                    {
-                                        string tokenText = tokenMatch.Groups[1].Value;
-                                        local = new Token(tokenText, TokenType.Personal);
-                                    }
-
-                                    return local != null;
-                                }
-
-                            case HttpStatusCode.Unauthorized:
-                                {
-                                    if (String.IsNullOrWhiteSpace(authenticationCode)
-                                        && response.Headers.Any(x => String.Equals(GithubOptHeader, x.Key, StringComparison.OrdinalIgnoreCase)))
-                                        return true;
-                                    else
-                                        return false;
-                                }
-
-                            default:
-                                return false;
-                        }
-
-                    }
-                }).Result;
-
-                token = local;
-                return result;
-            }
         }
     }
 }

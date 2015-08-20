@@ -56,10 +56,12 @@
   <ItemGroup>
     <Compile Include="Configuration.cs" />
     <Compile Include="GitHubAuthentication.cs" />
+    <Compile Include="GithubAuthenticationResult.cs" />
     <Compile Include="GithubAuthority.cs" />
     <Compile Include="GithubTokenScope.cs" />
     <Compile Include="Global.cs" />
     <Compile Include="IGithubAuthentication.cs" />
+    <Compile Include="IGithubAuthority.cs" />
     <Compile Include="SecretCache.cs" />
     <Compile Include="TokenScope.cs" />
     <Compile Include="VsoAzureAuthority.cs" />
