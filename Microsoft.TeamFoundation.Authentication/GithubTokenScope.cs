@@ -1,4 +1,6 @@
 ﻿using System;
+using System.Collections;
+using System.Collections.Generic;
 using System.Runtime.CompilerServices;
 using ScopeSet = System.Collections.Generic.HashSet<string>;
 
@@ -39,6 +41,31 @@ namespace Microsoft.TeamFoundation.Authentication
         private GithubTokenScope(ScopeSet set)
             : base(set)
         { }
+
+        public static IEnumerable<GithubTokenScope> EnumerateValues()
+        {
+            yield return Gist;
+            yield return Notifications;
+            yield return OrgAdmin;
+            yield return OrgRead;
+            yield return OrgWrite;
+            yield return OrgHookAdmin;
+            yield return PublicKeyAdmin;
+            yield return PublicKeyRead;
+            yield return PublicKeyWrite;
+            yield return Repo;
+            yield return RepoDelete;
+            yield return RepoDeployment;
+            yield return RepoPublic;
+            yield return RepoStatus;
+            yield return RepoHookAdmin;
+            yield return RepoHookRead;
+            yield return RepoHookWrite;
+            yield return User;
+            yield return UserEmail;
+            yield return UserFollow;
+            yield break;
+        }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static GithubTokenScope operator +(GithubTokenScope scope1, GithubTokenScope scope2)

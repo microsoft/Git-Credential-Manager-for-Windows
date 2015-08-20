@@ -1,5 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 namespace Microsoft.TeamFoundation.Authentication.Test
@@ -52,43 +51,32 @@ namespace Microsoft.TeamFoundation.Authentication.Test
         {
             HashSet<int> hashCodes = new HashSet<int>();
 
-            Assert.IsTrue(hashCodes.Add(VsoTokenScope.BuildAccess.GetHashCode()));
-            Assert.IsTrue(hashCodes.Add(VsoTokenScope.BuildExecute.GetHashCode()));
-            Assert.IsTrue(hashCodes.Add(VsoTokenScope.ChatManage.GetHashCode()));
-            Assert.IsTrue(hashCodes.Add(VsoTokenScope.ChatWrite.GetHashCode()));
-            Assert.IsTrue(hashCodes.Add(VsoTokenScope.CodeManage.GetHashCode()));
-            Assert.IsTrue(hashCodes.Add(VsoTokenScope.CodeRead.GetHashCode()));
-            Assert.IsTrue(hashCodes.Add(VsoTokenScope.CodeWrite.GetHashCode()));
-            Assert.IsTrue(hashCodes.Add(VsoTokenScope.None.GetHashCode()));
-            Assert.IsTrue(hashCodes.Add(VsoTokenScope.PackagingManage.GetHashCode()));
-            Assert.IsTrue(hashCodes.Add(VsoTokenScope.PackagingRead.GetHashCode()));
-            Assert.IsTrue(hashCodes.Add(VsoTokenScope.PackagingWrite.GetHashCode()));
-            Assert.IsTrue(hashCodes.Add(VsoTokenScope.ProfileRead.GetHashCode()));
-            Assert.IsTrue(hashCodes.Add(VsoTokenScope.ServiceHookRead.GetHashCode()));
-            Assert.IsTrue(hashCodes.Add(VsoTokenScope.ServiceHookWrite.GetHashCode()));
-            Assert.IsTrue(hashCodes.Add(VsoTokenScope.TestRead.GetHashCode()));
-            Assert.IsTrue(hashCodes.Add(VsoTokenScope.TestWrite.GetHashCode()));
-            Assert.IsTrue(hashCodes.Add(VsoTokenScope.WorkRead.GetHashCode()));
-            Assert.IsTrue(hashCodes.Add(VsoTokenScope.WorkWrite.GetHashCode()));
+            foreach (var item in VsoTokenScope.EnumerateValues())
+            {
+                Assert.IsTrue(hashCodes.Add(item.GetHashCode()));
+            }
 
-            Assert.IsTrue(hashCodes.Add((VsoTokenScope.CodeRead | VsoTokenScope.BuildAccess).GetHashCode()));
-            Assert.IsTrue(hashCodes.Add((VsoTokenScope.CodeRead | VsoTokenScope.BuildExecute).GetHashCode()));
-            Assert.IsTrue(hashCodes.Add((VsoTokenScope.CodeRead | VsoTokenScope.ChatManage).GetHashCode()));
-            Assert.IsTrue(hashCodes.Add((VsoTokenScope.CodeRead | VsoTokenScope.ChatWrite).GetHashCode()));
-            Assert.IsTrue(hashCodes.Add((VsoTokenScope.CodeRead | VsoTokenScope.CodeManage).GetHashCode()));
-            Assert.IsFalse(hashCodes.Add((VsoTokenScope.CodeRead | VsoTokenScope.CodeRead).GetHashCode()));
-            Assert.IsTrue(hashCodes.Add((VsoTokenScope.CodeRead | VsoTokenScope.CodeWrite).GetHashCode()));
-            Assert.IsFalse(hashCodes.Add((VsoTokenScope.CodeRead | VsoTokenScope.None).GetHashCode()));
-            Assert.IsTrue(hashCodes.Add((VsoTokenScope.CodeRead | VsoTokenScope.PackagingManage).GetHashCode()));
-            Assert.IsTrue(hashCodes.Add((VsoTokenScope.CodeRead | VsoTokenScope.PackagingRead).GetHashCode()));
-            Assert.IsTrue(hashCodes.Add((VsoTokenScope.CodeRead | VsoTokenScope.PackagingWrite).GetHashCode()));
-            Assert.IsTrue(hashCodes.Add((VsoTokenScope.CodeRead | VsoTokenScope.ProfileRead).GetHashCode()));
-            Assert.IsTrue(hashCodes.Add((VsoTokenScope.CodeRead | VsoTokenScope.ServiceHookRead).GetHashCode()));
-            Assert.IsTrue(hashCodes.Add((VsoTokenScope.CodeRead | VsoTokenScope.ServiceHookWrite).GetHashCode()));
-            Assert.IsTrue(hashCodes.Add((VsoTokenScope.CodeRead | VsoTokenScope.TestRead).GetHashCode()));
-            Assert.IsTrue(hashCodes.Add((VsoTokenScope.CodeRead | VsoTokenScope.TestWrite).GetHashCode()));
-            Assert.IsTrue(hashCodes.Add((VsoTokenScope.CodeRead | VsoTokenScope.WorkRead).GetHashCode()));
-            Assert.IsTrue(hashCodes.Add((VsoTokenScope.CodeRead | VsoTokenScope.WorkWrite).GetHashCode()));
+            int loop1 = 0;
+            foreach (var item1 in VsoTokenScope.EnumerateValues())
+            {
+                int loop2 = 0;
+
+                foreach (var item2 in VsoTokenScope.EnumerateValues())
+                {
+                    if (loop1 < loop2)
+                    {
+                        Assert.IsTrue(hashCodes.Add((item1 | item2).GetHashCode()));
+                    }
+                    else
+                    {
+                        Assert.IsFalse(hashCodes.Add((item1 | item2).GetHashCode()));
+                    }
+
+                    loop2++;
+                }
+
+                loop1++;
+            }
         }
 
         [TestMethod]

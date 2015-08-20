@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Runtime.CompilerServices;
 using ScopeSet = System.Collections.Generic.HashSet<string>;
 
@@ -111,6 +112,27 @@ namespace Microsoft.TeamFoundation.Authentication
         private VsoTokenScope(ScopeSet set)
             : base(set)
         { }
+
+        public static IEnumerable<VsoTokenScope> EnumerateValues()
+        {
+            yield return BuildAccess;
+            yield return BuildExecute;
+            yield return ChatManage;
+            yield return ChatWrite;
+            yield return CodeManage;
+            yield return CodeRead;
+            yield return CodeWrite;
+            yield return PackagingManage;
+            yield return PackagingRead;
+            yield return PackagingWrite;
+            yield return ProfileRead;
+            yield return ServiceHookRead;
+            yield return ServiceHookWrite;
+            yield return TestRead;
+            yield return TestWrite;
+            yield return WorkRead;
+            yield return WorkWrite;
+        }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static VsoTokenScope operator +(VsoTokenScope scope1, VsoTokenScope scope2)
