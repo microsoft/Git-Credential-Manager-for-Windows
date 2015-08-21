@@ -1,46 +1,91 @@
 ﻿using System;
 using System.ComponentModel;
-using System.Linq;
-using System.Net;
-using System.Net.Http;
+using System.Diagnostics;
 using System.Runtime.InteropServices;
 using System.Text;
-using System.Text.RegularExpressions;
-using System.Threading.Tasks;
 using Microsoft.Win32.SafeHandles;
 
 namespace Microsoft.TeamFoundation.Authentication
 {
-    public class GithubAuthentication : IGithubAuthentication
+    public class GithubAuthentication : BaseAuthentication, IGithubAuthentication
     {
         /// <summary>
         /// The maximum wait time for a network request before timing out
         /// </summary>
         public const int RequestTimeout = 15 * 1000; // 15 second limit
 
-        public GithubAuthentication(ICredentialStore personalAccessTokenStore)
+        public GithubAuthentication(GithubTokenScope tokenScope, ICredentialStore personalAccessTokenStore)
         {
+            if (tokenScope == null)
+                throw new ArgumentNullException("tokenScope", "The parameter `tokenScope` is null or invalid.");
             if (personalAccessTokenStore == null)
-                throw new ArgumentNullException("personalAccessTokenStore");
+                throw new ArgumentNullException("personalAccessTokenStore", "The parameter `personalAccessTokenStore` is null or invalid.");
 
-            _personalAccessTokenStore = personalAccessTokenStore;
-            _githubAuthority = new GithubAuthority();
+            TokenScope = tokenScope;
+
+            PersonalAccessTokenStore = personalAccessTokenStore;
+            GithubAuthority = new GithubAuthority();
         }
 
-        private readonly ICredentialStore _personalAccessTokenStore;
-        private readonly IGithubAuthority _githubAuthority;
+        public readonly GithubTokenScope TokenScope;
 
-        public void DeleteCredentials(Uri targetUri)
+        internal IGithubAuthority GithubAuthority { get; set; }
+        internal ICredentialStore PersonalAccessTokenStore { get; set; }
+
+        public override void DeleteCredentials(Uri targetUri)
         {
-            throw new NotImplementedException();
+            BaseSecureStore.ValidateTargetUri(targetUri);
+
+            Trace.WriteLine("GithubAuthentication::DeleteCredentials");
+
+            Credential credentials = null;
+            if (this.PersonalAccessTokenStore.ReadCredentials(targetUri, out credentials))
+            {
+                this.PersonalAccessTokenStore.DeleteCredentials(targetUri);
+            }
         }
 
-        public bool GetCredentials(Uri targetUri, out Credential credentials)
+        public static Boolean GetAuthentication(
+            Uri targetUri,
+            GithubTokenScope tokenScope,
+            ICredentialStore personalAccessTokenStore,
+            out BaseAuthentication authentication)
         {
-            throw new NotImplementedException();
+            const string GitHubBaseUrlHost = "github.com";
+
+            BaseSecureStore.ValidateTargetUri(targetUri);
+            if (personalAccessTokenStore == null)
+                throw new ArgumentNullException("personalAccessTokenStore", "The `personalAccessTokenStore` is null or invalid.");
+
+            Trace.WriteLine("GithubAuthentication::GetAuthentication");
+
+            if (targetUri.DnsSafeHost.EndsWith(GitHubBaseUrlHost, StringComparison.OrdinalIgnoreCase))
+            {
+                authentication = new GithubAuthentication(tokenScope, personalAccessTokenStore);
+            }
+            else
+            {
+                authentication = null;
+            }
+
+            return authentication != null;
         }
 
-        public bool InteractiveLogon(Uri targetUri, GithubTokenScope scope, out Credential credentials)
+        public override bool GetCredentials(Uri targetUri, out Credential credentials)
+        {
+            BaseSecureStore.ValidateTargetUri(targetUri);
+
+            Trace.WriteLine("GithubAuthentication::GetCredentials");
+
+            if (this.PersonalAccessTokenStore.ReadCredentials(targetUri, out credentials))
+            {
+                Trace.WriteLine("   successfully retrieved stored credentials, updating credential cache");
+            }
+
+            return credentials != null;
+        }
+
+        public bool InteractiveLogon(Uri targetUri, out Credential credentials)
         {
             const int BufferReadSize = 32 * 1024;
 
@@ -150,7 +195,7 @@ namespace Microsoft.TeamFoundation.Authentication
                 Token token;
 
                 GithubAuthenticationResult result;
-                if ((result = _githubAuthority.AcquireToken(targetUri, username, password, null, scope, out token)) && token == null)
+                if ((result = GithubAuthority.AcquireToken(targetUri, username, password, null, this.TokenScope, out token)) && token == null)
                 {
                     buffer.Clear()
                           .AppendLine()
@@ -172,7 +217,7 @@ namespace Microsoft.TeamFoundation.Authentication
                     string authenticationCode = buffer.ToString(0, (int)read);
                     authenticationCode = authenticationCode.Trim(Environment.NewLine.ToCharArray());
 
-                    if (result = _githubAuthority.AcquireToken(targetUri, username, password, authenticationCode, scope, out token))
+                    if (result = GithubAuthority.AcquireToken(targetUri, username, password, authenticationCode, this.TokenScope, out token))
                     {
                         credentials = (Credential)token;
                     }
@@ -183,9 +228,35 @@ namespace Microsoft.TeamFoundation.Authentication
             return false;
         }
 
-        public bool SetCredentials(Uri targetUri, Credential credentials)
+        public bool NoninteractiveLogonWithCredentials(Uri targetUri, string username, string password, string authenticationCode = null)
         {
-            throw new NotImplementedException();
+            BaseSecureStore.ValidateTargetUri(targetUri);
+            if (String.IsNullOrWhiteSpace(username))
+                throw new ArgumentNullException("username", "The `username` parameter is null or invalid.");
+            if (String.IsNullOrWhiteSpace(password))
+                throw new ArgumentNullException("username", "The `password` parameter is null or invalid.");
+
+            Trace.WriteLine("GithubAuthentication::NoninteractiveLogonWithCredentials");
+
+            Token token;
+
+            GithubAuthenticationResult result;
+            if (result = GithubAuthority.AcquireToken(targetUri, username, password, authenticationCode, this.TokenScope, out token))
+            {
+                PersonalAccessTokenStore.WriteCredentials(targetUri, (Credential)token);
+                return true;
+            }
+
+            return false;
+        }
+
+        public override bool SetCredentials(Uri targetUri, Credential credentials)
+        {
+            BaseSecureStore.ValidateTargetUri(targetUri);
+            Credential.Validate(credentials);
+
+            // not supported
+            return true;
         }
     }
 }

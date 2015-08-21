@@ -23,6 +23,10 @@
         /// </summary>
         AzureDirectory,
         /// <summary>
+        /// GitHub authentication
+        /// </summary>
+        GitHub,
+        /// <summary>
         /// Operating system / network integrated authentication layer.
         /// </summary>
         Integrated,

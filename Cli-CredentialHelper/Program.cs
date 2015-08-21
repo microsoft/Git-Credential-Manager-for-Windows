@@ -17,13 +17,6 @@ namespace Microsoft.TeamFoundation.CredentialHelper
 
         static void Main(string[] args)
         {
-            Credential c;
-            GithubAuthentication g = new GithubAuthentication(new SecretStore("test"));
-            if (g.InteractiveLogon(new Uri("https://www.github.com"), GithubCredentialScope, out c))
-            {
-                Console.Error.WriteLine(c.Username + " : " + c.Password);
-            }
-
             try
             {
                 EnableDebugTrace();
@@ -138,6 +131,7 @@ namespace Microsoft.TeamFoundation.CredentialHelper
         private static void Get()
         {
             const string AadMsaAuthFailureMessage = "Logon failed, use ctrl+c to cancel basic credential prompt.";
+            const string GitHubAuthFailureMessage = "Logon failed, use ctrl+c to cancel basic credential prompt.";
 
             // parse the operations arguments from stdin (this is how git sends commands)
             // see: https://www.kernel.org/pub/software/scm/git/docs/technical/api-credentials.html
@@ -240,6 +234,31 @@ namespace Microsoft.TeamFoundation.CredentialHelper
                     }).Wait();
                     break;
 
+                case AuthorityType.GitHub:
+                    GithubAuthentication ghAuth = authentication as GithubAuthentication;
+
+                    if ((operationArguments.Interactivity != Interactivity.Always
+                            && ghAuth.GetCredentials(operationArguments.TargetUri, out credentials)
+                            && (!operationArguments.ValidateCredentials
+                                || true /* replace with ghAuth.ValidateCredentials(operationArguments.TargetUri, credentials) */))
+                        || (operationArguments.Interactivity != Interactivity.Never
+                            && ghAuth.InteractiveLogon(operationArguments.TargetUri, out credentials)
+                            && ghAuth.GetCredentials(operationArguments.TargetUri, out credentials)
+                            && (!operationArguments.ValidateCredentials
+                                || true /* replace with ghAuth.ValidateCredentials(operationArguments.TargetUri, credentials) */)))
+                    {
+                        Trace.WriteLine("   credentials found");
+                        operationArguments.SetCredentials(credentials);
+                        LogEvent("GitHub credentials for " + operationArguments.TargetUri + " successfully retrieved.", EventLogEntryType.SuccessAudit);
+                    }
+                    else
+                    {
+                        Console.Error.WriteLine(GitHubAuthFailureMessage);
+                        LogEvent("Failed to retrieve GitHub credentials for " + operationArguments.TargetUri + ".", EventLogEntryType.FailureAudit);
+                    }
+
+                    break;
+
                 case AuthorityType.Integrated:
                     credentials = new Credential(String.Empty, String.Empty);
                     operationArguments.SetCredentials(credentials);
@@ -285,9 +304,19 @@ namespace Microsoft.TeamFoundation.CredentialHelper
                     Trace.WriteLine("   detecting authority type");
 
                     // detect the authority
-                    var authority = BaseVsoAuthentication.GetAuthentication(operationArguments.TargetUri,
-                                                                            VsoCredentialScope,
-                                                                            secrets);
+                    BaseAuthentication authority;
+                    if (BaseVsoAuthentication.GetAuthentication(operationArguments.TargetUri,
+                                                                VsoCredentialScope,
+                                                                secrets,
+                                                                null,
+                                                                out authority)
+                        || GithubAuthentication.GetAuthentication(operationArguments.TargetUri, 
+                                                                  GithubCredentialScope,
+                                                                  secrets,
+                                                                  out authority))
+                    {
+
+                    }
                     // set the authority type based on the returned value
                     if (authority is VsoMsaAuthentication)
                     {
@@ -296,6 +325,10 @@ namespace Microsoft.TeamFoundation.CredentialHelper
                     else if (authority is VsoAadAuthentication)
                     {
                         operationArguments.Authority = AuthorityType.AzureDirectory;
+                    }
+                    else if (authority is GithubAuthentication)
+                    {
+                        operationArguments.Authority = AuthorityType.GitHub;
                     }
                     else
                     {
