@@ -303,7 +303,7 @@ namespace Microsoft.TeamFoundation.CredentialHelper
             Trace.WriteLine("   targetUri = " + operationArguments.TargetUri);
 
             BaseAuthentication authentication = CreateAuthentication(operationArguments);
-            Credential credentials = new Credential(operationArguments.Username, operationArguments.Password ?? String.Empty);
+            Credential credentials = new Credential(operationArguments.Username, operationArguments.Password);
             authentication.SetCredentials(operationArguments.TargetUri, credentials);
         }
 

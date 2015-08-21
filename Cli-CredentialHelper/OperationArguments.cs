@@ -17,6 +17,12 @@ namespace Microsoft.TeamFoundation.CredentialHelper
             this.ValidateCredentials = true;
             this.WriteLog = false;
 
+            if (Debugger.IsAttached)
+            {
+                // most likely need to hand set values here and skip the `Console.In.ReadLine` call
+                Debugger.Break();
+            }
+
             string line;
             while (!String.IsNullOrWhiteSpace((line = Console.In.ReadLine())))
             {
