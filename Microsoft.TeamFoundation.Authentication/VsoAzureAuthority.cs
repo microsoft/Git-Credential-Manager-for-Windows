@@ -4,6 +4,7 @@ using System.IO;
 using System.Net;
 using System.Net.Http;
 using System.Net.Http.Headers;
+using System.Reflection;
 using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
@@ -132,7 +133,7 @@ namespace Microsoft.TeamFoundation.Authentication
             try
             {
                 // create an request to the VSO deployment data end-point
-                var request = GetConnectionDataRequest(targetUri, accessToken);
+                HttpWebRequest request = GetConnectionDataRequest(targetUri, accessToken);
 
                 // send the request and wait for the response
                 using (var response = await request.GetResponseAsync())
