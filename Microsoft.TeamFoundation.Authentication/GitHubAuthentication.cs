@@ -3,6 +3,7 @@ using System.ComponentModel;
 using System.Diagnostics;
 using System.Runtime.InteropServices;
 using System.Text;
+using System.Threading.Tasks;
 using Microsoft.Win32.SafeHandles;
 
 namespace Microsoft.TeamFoundation.Authentication
@@ -88,6 +89,8 @@ namespace Microsoft.TeamFoundation.Authentication
         public bool InteractiveLogon(Uri targetUri, out Credential credentials)
         {
             const int BufferReadSize = 32 * 1024;
+
+            credentials = null;
 
             StringBuilder buffer = new StringBuilder(BufferReadSize);
             uint read = 0;
@@ -192,10 +195,14 @@ namespace Microsoft.TeamFoundation.Authentication
                     throw new Win32Exception(error, "Unable to set console mode (" + error + ").");
                 }
 
-                Token token;
-
                 GithubAuthenticationResult result;
-                if ((result = GithubAuthority.AcquireToken(targetUri, username, password, null, this.TokenScope, out token)) && token == null)
+
+                if (result = GithubAuthority.AcquireToken(targetUri, username, password, null, this.TokenScope).Result)
+                {
+                    credentials = (Credential)result.Token;
+                    this.PersonalAccessTokenStore.WriteCredentials(targetUri, credentials);
+                }
+                else if (result == GithubAuthenticationResultType.TwoFactorApp || result == GithubAuthenticationResultType.TwoFactorSms)
                 {
                     buffer.Clear()
                           .AppendLine()
@@ -217,18 +224,18 @@ namespace Microsoft.TeamFoundation.Authentication
                     string authenticationCode = buffer.ToString(0, (int)read);
                     authenticationCode = authenticationCode.Trim(Environment.NewLine.ToCharArray());
 
-                    if (result = GithubAuthority.AcquireToken(targetUri, username, password, authenticationCode, this.TokenScope, out token))
+                    if (result = GithubAuthority.AcquireToken(targetUri, username, password, authenticationCode, this.TokenScope).Result)
                     {
-                        credentials = (Credential)token;
+                        credentials = (Credential)result.Token;
+                        this.PersonalAccessTokenStore.WriteCredentials(targetUri, credentials);
                     }
                 }
             }
 
-            credentials = null;
-            return false;
+            return credentials != null;
         }
 
-        public bool NoninteractiveLogonWithCredentials(Uri targetUri, string username, string password, string authenticationCode = null)
+        public async Task<bool> NoninteractiveLogonWithCredentials(Uri targetUri, string username, string password, string authenticationCode = null)
         {
             BaseSecureStore.ValidateTargetUri(targetUri);
             if (String.IsNullOrWhiteSpace(username))
@@ -238,12 +245,10 @@ namespace Microsoft.TeamFoundation.Authentication
 
             Trace.WriteLine("GithubAuthentication::NoninteractiveLogonWithCredentials");
 
-            Token token;
-
             GithubAuthenticationResult result;
-            if (result = GithubAuthority.AcquireToken(targetUri, username, password, authenticationCode, this.TokenScope, out token))
+            if (result = await GithubAuthority.AcquireToken(targetUri, username, password, authenticationCode, this.TokenScope))
             {
-                PersonalAccessTokenStore.WriteCredentials(targetUri, (Credential)token);
+                PersonalAccessTokenStore.WriteCredentials(targetUri, (Credential)result.Token);
                 return true;
             }
 
@@ -257,6 +262,16 @@ namespace Microsoft.TeamFoundation.Authentication
 
             // not supported
             return true;
+        }
+
+        public async Task<bool> ValidateCredentials(Uri targetUri, Credential credentials)
+        {
+            BaseSecureStore.ValidateTargetUri(targetUri);
+            Credential.Validate(credentials);
+
+            Trace.WriteLine("GithubAuthentication::ValidateCredentials");
+
+            return await GithubAuthority.ValidateCredentials(targetUri, credentials);
         }
     }
 }

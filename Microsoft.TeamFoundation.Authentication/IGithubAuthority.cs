@@ -1,15 +1,17 @@
 ﻿using System;
+using System.Threading.Tasks;
 
 namespace Microsoft.TeamFoundation.Authentication
 {
     internal interface IGithubAuthority
     {
-        GithubAuthenticationResult AcquireToken(
+        Task<GithubAuthenticationResult> AcquireToken(
             Uri targetUri,
             string username,
             string password,
             string authenticationCode,
-            GithubTokenScope scope,
-            out Token token);
+            GithubTokenScope scope);
+
+        Task<bool> ValidateCredentials(Uri targetUri, Credential credentials);
     }
 }
