@@ -156,7 +156,7 @@ namespace Microsoft.TeamFoundation.Authentication
                     {
                         Trace.WriteLine("   Azure token found in primary cache.");
 
-                        this.TenantId = tokens.AccessToken.TenantId;
+                        this.TenantId = tokens.AccessToken.TargetIdentity;
 
                         return await this.GeneratePersonalAccessToken(targetUri, tokens.AccessToken, requireCompactToken);
                     }

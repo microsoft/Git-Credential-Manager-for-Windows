@@ -154,9 +154,9 @@ namespace Microsoft.TeamFoundation.Authentication
             {
                 string authorityHostUrl = AuthorityHostUrl;
 
-                if (refreshToken.TenantId != Guid.Empty)
+                if (refreshToken.TargetIdentity != Guid.Empty)
                 {
-                    authorityHostUrl = GetAuthorityUrl(refreshToken.TenantId);
+                    authorityHostUrl = GetAuthorityUrl(refreshToken.TargetIdentity);
                 }
 
                 AuthenticationContext authCtx = new AuthenticationContext(authorityHostUrl, _adalTokenCache);

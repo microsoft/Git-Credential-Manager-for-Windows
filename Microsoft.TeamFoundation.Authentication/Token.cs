@@ -88,10 +88,10 @@ namespace Microsoft.TeamFoundation.Authentication
                     throw new ArgumentException("Unexpected token type encountered", "type");
             }
 
-            Guid targetId = Guid.Empty;
-            if (Guid.TryParse(authResult.TenantId, out targetId))
+            Guid tenantId = Guid.Empty;
+            if (Guid.TryParse(authResult.TenantId, out tenantId))
             {
-                this.TenantId = targetId;
+                this.TargetIdentity = tenantId;
             }
             this.Type = type;
         }
@@ -107,7 +107,7 @@ namespace Microsoft.TeamFoundation.Authentication
         /// <summary>
         /// The guid form Identity of the target
         /// </summary>
-        public Guid TenantId { get; internal set; }
+        public Guid TargetIdentity { get; internal set; }
 
         /// <summary>
         /// Compares an object to this <see cref="Token"/> for equality.
@@ -166,13 +166,13 @@ namespace Microsoft.TeamFoundation.Authentication
                 if (bytes.Length > preamble)
                 {
                     TokenType readType;
-                    Guid tenantId;
+                    Guid targetIdentity;
 
                     fixed (byte* p = bytes)
                     {
                         readType = *(TokenType*)p;
                         byte* g = p + sizeof(TokenType);
-                        tenantId = *(Guid*)g;
+                        targetIdentity = *(Guid*)g;
                     }
 
                     if (readType == type)
@@ -182,7 +182,7 @@ namespace Microsoft.TeamFoundation.Authentication
                         if (!String.IsNullOrWhiteSpace(value))
                         {
                             token = new Token(value, type);
-                            token.TenantId = tenantId;
+                            token.TargetIdentity = targetIdentity;
                         }
                     }
                 }
@@ -223,7 +223,7 @@ namespace Microsoft.TeamFoundation.Authentication
                 {
                     *((TokenType*)p) = token.Type;
                     byte* g = p + sizeof(TokenType);
-                    *(Guid*)g = token.TenantId;
+                    *(Guid*)g = token.TargetIdentity;
                 }
 
                 Array.Copy(utf8bytes, 0, bytes, sizeof(TokenType) + sizeof(Guid), utf8bytes.Length);

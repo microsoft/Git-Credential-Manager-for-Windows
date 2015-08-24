@@ -4,7 +4,6 @@ using System.IO;
 using System.Net;
 using System.Net.Http;
 using System.Net.Http.Headers;
-using System.Reflection;
 using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
@@ -125,9 +124,6 @@ namespace Microsoft.TeamFoundation.Authentication
 
             Trace.WriteLine("VsoAzureAuthority::PopulateTokenTargetId");
 
-            if (accessToken.TenantId != Guid.Empty)
-                return true;
-
             string resultId = null;
             Guid instanceId;
 
@@ -158,7 +154,8 @@ namespace Microsoft.TeamFoundation.Authentication
 
             if (Guid.TryParse(resultId, out instanceId))
             {
-                accessToken.TenantId = instanceId;
+                Trace.WriteLine("   target identity is " + resultId);
+                accessToken.TargetIdentity = instanceId;
 
                 return true;
             }
@@ -264,9 +261,9 @@ namespace Microsoft.TeamFoundation.Authentication
             Debug.Assert(accessToken != null && (accessToken.Type == TokenType.Access || accessToken.Type == TokenType.Federated), "The accessToken parameter is null or invalid");
             Debug.Assert(tokenScope != null, "The tokenScope parameter is null");
 
-            Trace.WriteLine("   creating access token scoped to '" + tokenScope + "' for '" + accessToken.TenantId + "'");
+            Trace.WriteLine("   creating access token scoped to '" + tokenScope + "' for '" + accessToken.TargetIdentity + "'");
 
-            string jsonContent = String.Format(ContentJsonFormat, tokenScope, accessToken.TenantId, targetUri, Environment.MachineName);
+            string jsonContent = String.Format(ContentJsonFormat, tokenScope, accessToken.TargetIdentity, targetUri, Environment.MachineName);
             StringContent content = new StringContent(jsonContent, Encoding.UTF8, HttpJsonContentType);
 
             return content;
