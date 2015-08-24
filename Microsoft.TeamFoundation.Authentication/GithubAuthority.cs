@@ -25,6 +25,15 @@ namespace Microsoft.TeamFoundation.Authentication
 
         private readonly string _authorityUrl;
 
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="targetUri"></param>
+        /// <param name="username"></param>
+        /// <param name="password"></param>
+        /// <param name="authenticationCode"></param>
+        /// <param name="scope"></param>
+        /// <returns></returns>
         public async Task<GithubAuthenticationResult> AcquireToken(
             Uri targetUri,
             string username,
@@ -151,9 +160,15 @@ namespace Microsoft.TeamFoundation.Authentication
             }
         }
 
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="targetUri"></param>
+        /// <param name="credentials"></param>
+        /// <returns></returns>
         public async Task<bool> ValidateCredentials(Uri targetUri, Credential credentials)
         {
-            const string ValidationUrl = "https://api.github.com/user/keys";
+            const string ValidationUrl = "https://api.github.com/user/subscriptions";
 
             Debug.Assert(targetUri != null && targetUri.IsAbsoluteUri, "The `targetUri` parameter is null or invalid.");
             Debug.Assert(credentials != null, "The `targetUri` parameter is null or invalid.");

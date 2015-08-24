@@ -13,7 +13,7 @@ namespace Microsoft.TeamFoundation.CredentialHelper
         private const string ConfigPrefix = "credential";
         private const string SecretsNamespace = "git";
         private static readonly VsoTokenScope VsoCredentialScope = VsoTokenScope.CodeWrite;
-        private static readonly GithubTokenScope GithubCredentialScope = GithubTokenScope.Gist | GithubTokenScope.Repo | GithubTokenScope.RepoPublic;
+        private static readonly GithubTokenScope GithubCredentialScope = GithubTokenScope.Gist | GithubTokenScope.PublicKeyRead | GithubTokenScope.Repo;
 
         static void Main(string[] args)
         {

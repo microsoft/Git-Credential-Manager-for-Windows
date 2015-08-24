@@ -8,6 +8,9 @@ using Microsoft.Win32.SafeHandles;
 
 namespace Microsoft.TeamFoundation.Authentication
 {
+    /// <summary>
+    /// 
+    /// </summary>
     public class GithubAuthentication : BaseAuthentication, IGithubAuthentication
     {
         /// <summary>
@@ -15,6 +18,11 @@ namespace Microsoft.TeamFoundation.Authentication
         /// </summary>
         public const int RequestTimeout = 15 * 1000; // 15 second limit
 
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="tokenScope"></param>
+        /// <param name="personalAccessTokenStore"></param>
         public GithubAuthentication(GithubTokenScope tokenScope, ICredentialStore personalAccessTokenStore)
         {
             if (tokenScope == null)
@@ -33,6 +41,10 @@ namespace Microsoft.TeamFoundation.Authentication
         internal IGithubAuthority GithubAuthority { get; set; }
         internal ICredentialStore PersonalAccessTokenStore { get; set; }
 
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="targetUri"></param>
         public override void DeleteCredentials(Uri targetUri)
         {
             BaseSecureStore.ValidateTargetUri(targetUri);
@@ -43,10 +55,19 @@ namespace Microsoft.TeamFoundation.Authentication
             if (this.PersonalAccessTokenStore.ReadCredentials(targetUri, out credentials))
             {
                 this.PersonalAccessTokenStore.DeleteCredentials(targetUri);
+                Trace.WriteLine("   credentials deleted");
             }
         }
 
-        public static Boolean GetAuthentication(
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="targetUri"></param>
+        /// <param name="tokenScope"></param>
+        /// <param name="personalAccessTokenStore"></param>
+        /// <param name="authentication"></param>
+        /// <returns>True if success; otherwise false.</returns>
+        public static bool GetAuthentication(
             Uri targetUri,
             GithubTokenScope tokenScope,
             ICredentialStore personalAccessTokenStore,
@@ -63,15 +84,23 @@ namespace Microsoft.TeamFoundation.Authentication
             if (targetUri.DnsSafeHost.EndsWith(GitHubBaseUrlHost, StringComparison.OrdinalIgnoreCase))
             {
                 authentication = new GithubAuthentication(tokenScope, personalAccessTokenStore);
+                Trace.WriteLine("   authentication for GitHub created");
             }
             else
             {
                 authentication = null;
+                Trace.WriteLine("   not github.com, authentication creation aborted");
             }
 
             return authentication != null;
         }
 
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="targetUri"></param>
+        /// <param name="credentials"></param>
+        /// <returns>True if success; otherwise false.</returns>
         public override bool GetCredentials(Uri targetUri, out Credential credentials)
         {
             BaseSecureStore.ValidateTargetUri(targetUri);
@@ -86,6 +115,12 @@ namespace Microsoft.TeamFoundation.Authentication
             return credentials != null;
         }
 
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="targetUri"></param>
+        /// <param name="credentials"></param>
+        /// <returns>True if success; otherwise false.</returns>
         public bool InteractiveLogon(Uri targetUri, out Credential credentials)
         {
             const int BufferReadSize = 32 * 1024;
@@ -235,6 +270,14 @@ namespace Microsoft.TeamFoundation.Authentication
             return credentials != null;
         }
 
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="targetUri"></param>
+        /// <param name="username"></param>
+        /// <param name="password"></param>
+        /// <param name="authenticationCode"></param>
+        /// <returns>True if success; otherwise false.</returns>
         public async Task<bool> NoninteractiveLogonWithCredentials(Uri targetUri, string username, string password, string authenticationCode = null)
         {
             BaseSecureStore.ValidateTargetUri(targetUri);
@@ -255,15 +298,27 @@ namespace Microsoft.TeamFoundation.Authentication
             return false;
         }
 
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="targetUri"></param>
+        /// <param name="credentials"></param>
+        /// <returns>True if success; otherwise false.</returns>
         public override bool SetCredentials(Uri targetUri, Credential credentials)
         {
             BaseSecureStore.ValidateTargetUri(targetUri);
             Credential.Validate(credentials);
 
-            // not supported
+            PersonalAccessTokenStore.WriteCredentials(targetUri, credentials);
             return true;
         }
 
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="targetUri"></param>
+        /// <param name="credentials"></param>
+        /// <returns></returns>
         public async Task<bool> ValidateCredentials(Uri targetUri, Credential credentials)
         {
             BaseSecureStore.ValidateTargetUri(targetUri);
