@@ -63,12 +63,28 @@ namespace Microsoft.TeamFoundation.Authentication
                 }
 
                 const string HttpJsonContentType = "application/x-www-form-urlencoded";
-                const string JsonContentFormat = @"{{ ""scopes"": [""{0}""], ""note"": ""git: {1} on {2}"" }}";
+                const string JsonContentFormat = @"{{ ""scopes"": {0}, ""note"": ""git: {1} on {2}"" }}";
 
-                StringBuilder scopes = new StringBuilder();
-                
+                StringBuilder scopesBuilder = new StringBuilder();
+                scopesBuilder.Append('[');
 
-                string jsonContent = String.Format(JsonContentFormat, targetUri, Environment.MachineName);
+                foreach (var item in scope.ToString().Split(' '))
+                {
+                    scopesBuilder.Append("\"")
+                                 .Append(item)
+                                 .Append("\"")
+                                 .Append(", ");
+                }
+
+                // remove trailing ", "
+                if (scopesBuilder.Length > 0)
+                {
+                    scopesBuilder.Remove(scopesBuilder.Length - 2, 2);
+                }
+
+                scopesBuilder.Append(']');
+
+                string jsonContent = String.Format(JsonContentFormat, scopesBuilder, targetUri, Environment.MachineName);
 
                 using (StringContent content = new StringContent(jsonContent, Encoding.UTF8, HttpJsonContentType))
                 using (HttpResponseMessage response = await httpClient.PostAsync(_authorityUrl, content))
@@ -93,7 +109,7 @@ namespace Microsoft.TeamFoundation.Authentication
                                 if (token == null)
                                 {
                                     Trace.WriteLine("   authentication failure");
-                                    return new GithubAuthenticationResult(GithubAuthenticationResultType.Failure)
+                                    return new GithubAuthenticationResult(GithubAuthenticationResultType.Failure);
                                 }
                                 else
                                 {
@@ -131,7 +147,6 @@ namespace Microsoft.TeamFoundation.Authentication
                             Trace.WriteLine("   authentication failed");
                             return new GithubAuthenticationResult(GithubAuthenticationResultType.Failure);
                     }
-
                 }
             }
         }
@@ -143,35 +158,39 @@ namespace Microsoft.TeamFoundation.Authentication
 
             Trace.WriteLine("   GithubAuthority::ValidateCredentials");
 
-            string authstring = String.Format("{0}:{1}", credentials.Username, credentials.Password);
-            byte[] authbytes = Encoding.UTF8.GetBytes(authstring);
-            string authencode = Convert.ToBase64String(authbytes);
+            string authString = String.Format("{0}:{1}", credentials.Username, credentials.Password);
+            byte[] authBytes = Encoding.UTF8.GetBytes(authString);
+            string authEncode = Convert.ToBase64String(authBytes);
 
-            HttpWebRequest request = WebRequest.CreateHttp(_authorityUrl);
-            request.Headers.Add(HttpRequestHeader.Accept, GitHubApiAcceptsHeaderValue);
-            request.Headers.Add(HttpRequestHeader.Authorization, "Basic " + authencode);
-            request.Headers.Add(HttpRequestHeader.UserAgent, Global.GetUserAgent());
-
-            try
+            // craft the request header for the GitHub v3 API w/ credentials
+            using (HttpClientHandler handler = new HttpClientHandler()
             {
-                using (HttpWebResponse response = await request.GetResponseAsync() as HttpWebResponse)
+                MaxAutomaticRedirections = 2,
+                UseDefaultCredentials = true
+            })
+            using (HttpClient httpClient = new HttpClient(handler)
+            {
+                Timeout = TimeSpan.FromMilliseconds(RequestTimeout)
+            })
+            {
+                httpClient.DefaultRequestHeaders.Add("User-Agent", Global.GetUserAgent());
+                httpClient.DefaultRequestHeaders.Add("Accept", GitHubApiAcceptsHeaderValue);
+                httpClient.DefaultRequestHeaders.Add("Authorization", "Basic " + authEncode);
+
+                using (HttpResponseMessage response = await httpClient.GetAsync(_authorityUrl))
                 {
-                    // we're looking for 'OK 200' here, anything else is failure
-                    Trace.WriteLine("   server returned: " + response.StatusCode);
-                    return response.StatusCode == HttpStatusCode.OK;
+                    if (response.IsSuccessStatusCode)
+                    {
+                        Trace.WriteLine("   credential validation succeeded");
+                        return true;
+                    }
+                    else
+                    {
+                        Trace.WriteLine("   credential validation failed");
+                        return false;
+                    }
                 }
-            }
-            catch (WebException webException)
-            {
-                Trace.WriteLine("   server returned: " + webException.Message);
-            }
-            catch
-            {
-                Trace.WriteLine("   unexpected error");
-            }
-
-            Trace.WriteLine("   credential validation failed");
-            return false;
+            }            
         }
     }
 }

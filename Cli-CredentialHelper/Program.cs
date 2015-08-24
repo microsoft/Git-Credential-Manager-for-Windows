@@ -13,7 +13,7 @@ namespace Microsoft.TeamFoundation.CredentialHelper
         private const string ConfigPrefix = "credential";
         private const string SecretsNamespace = "git";
         private static readonly VsoTokenScope VsoCredentialScope = VsoTokenScope.CodeWrite;
-        private static readonly GithubTokenScope GithubCredentialScope = GithubTokenScope.RepoPublic;
+        private static readonly GithubTokenScope GithubCredentialScope = GithubTokenScope.Gist | GithubTokenScope.Repo | GithubTokenScope.RepoPublic;
 
         static void Main(string[] args)
         {
@@ -237,26 +237,28 @@ namespace Microsoft.TeamFoundation.CredentialHelper
                 case AuthorityType.GitHub:
                     GithubAuthentication ghAuth = authentication as GithubAuthentication;
 
-                    if ((operationArguments.Interactivity != Interactivity.Always
-                            && ghAuth.GetCredentials(operationArguments.TargetUri, out credentials)
-                            && (!operationArguments.ValidateCredentials
-                                || true /* replace with ghAuth.ValidateCredentials(operationArguments.TargetUri, credentials) */))
-                        || (operationArguments.Interactivity != Interactivity.Never
-                            && ghAuth.InteractiveLogon(operationArguments.TargetUri, out credentials)
-                            && ghAuth.GetCredentials(operationArguments.TargetUri, out credentials)
-                            && (!operationArguments.ValidateCredentials
-                                || true /* replace with ghAuth.ValidateCredentials(operationArguments.TargetUri, credentials) */)))
+                    Task.Run(async () =>
                     {
-                        Trace.WriteLine("   credentials found");
-                        operationArguments.SetCredentials(credentials);
-                        LogEvent("GitHub credentials for " + operationArguments.TargetUri + " successfully retrieved.", EventLogEntryType.SuccessAudit);
-                    }
-                    else
-                    {
-                        Console.Error.WriteLine(GitHubAuthFailureMessage);
-                        LogEvent("Failed to retrieve GitHub credentials for " + operationArguments.TargetUri + ".", EventLogEntryType.FailureAudit);
-                    }
-
+                        if ((operationArguments.Interactivity != Interactivity.Always
+                                && ghAuth.GetCredentials(operationArguments.TargetUri, out credentials)
+                                && (!operationArguments.ValidateCredentials
+                                    || await ghAuth.ValidateCredentials(operationArguments.TargetUri, credentials)))
+                            || (operationArguments.Interactivity != Interactivity.Never
+                                && ghAuth.InteractiveLogon(operationArguments.TargetUri, out credentials)
+                                && ghAuth.GetCredentials(operationArguments.TargetUri, out credentials)
+                                && (!operationArguments.ValidateCredentials
+                                    || await ghAuth.ValidateCredentials(operationArguments.TargetUri, credentials))))
+                        {
+                            Trace.WriteLine("   credentials found");
+                            operationArguments.SetCredentials(credentials);
+                            LogEvent("GitHub credentials for " + operationArguments.TargetUri + " successfully retrieved.", EventLogEntryType.SuccessAudit);
+                        }
+                        else
+                        {
+                            Console.Error.WriteLine(GitHubAuthFailureMessage);
+                            LogEvent("Failed to retrieve GitHub credentials for " + operationArguments.TargetUri + ".", EventLogEntryType.FailureAudit);
+                        }
+                    }).Wait();
                     break;
 
                 case AuthorityType.Integrated:
@@ -310,7 +312,7 @@ namespace Microsoft.TeamFoundation.CredentialHelper
                                                                 secrets,
                                                                 null,
                                                                 out authority)
-                        || GithubAuthentication.GetAuthentication(operationArguments.TargetUri, 
+                        || GithubAuthentication.GetAuthentication(operationArguments.TargetUri,
                                                                   GithubCredentialScope,
                                                                   secrets,
                                                                   out authority))
