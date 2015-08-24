@@ -153,6 +153,8 @@ namespace Microsoft.TeamFoundation.Authentication
 
         public async Task<bool> ValidateCredentials(Uri targetUri, Credential credentials)
         {
+            const string ValidationUrl = "https://api.github.com/user/keys";
+
             Debug.Assert(targetUri != null && targetUri.IsAbsoluteUri, "The `targetUri` parameter is null or invalid.");
             Debug.Assert(credentials != null, "The `targetUri` parameter is null or invalid.");
 
@@ -177,7 +179,7 @@ namespace Microsoft.TeamFoundation.Authentication
                 httpClient.DefaultRequestHeaders.Add("Accept", GitHubApiAcceptsHeaderValue);
                 httpClient.DefaultRequestHeaders.Add("Authorization", "Basic " + authEncode);
 
-                using (HttpResponseMessage response = await httpClient.GetAsync(_authorityUrl))
+                using (HttpResponseMessage response = await httpClient.GetAsync(ValidationUrl))
                 {
                     if (response.IsSuccessStatusCode)
                     {
