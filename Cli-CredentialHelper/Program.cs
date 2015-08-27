@@ -36,6 +36,7 @@ namespace Microsoft.TeamFoundation.CredentialHelper
                     { "get", Get },
                     { "reject", Erase },
                     { "store", Store },
+                    { "version", Version }
                 };
 
                 foreach (string arg in args)
@@ -290,6 +291,15 @@ namespace Microsoft.TeamFoundation.CredentialHelper
             BaseAuthentication authentication = CreateAuthentication(operationArguments);
             Credential credentials = new Credential(operationArguments.Username, operationArguments.Password ?? String.Empty);
             authentication.SetCredentials(operationArguments.TargetUri, credentials);
+        }
+
+        private static void Version()
+        {
+            Trace.WriteLine("Program::Version");
+
+            var version = System.Reflection.Assembly.GetEntryAssembly().GetName().Version;
+
+            Console.Out.WriteLine("Microsoft Git Credential Manager for Windows version {0}", version.ToString(3));
         }
 
         private static BaseAuthentication CreateAuthentication(OperationArguments operationArguments)
