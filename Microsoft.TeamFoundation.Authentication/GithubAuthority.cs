@@ -11,7 +11,13 @@ namespace Microsoft.TeamFoundation.Authentication
 {
     internal class GithubAuthority : IGithubAuthority
     {
+        /// <summary>
+        /// The GitHub authorizations URL
+        /// </summary>
         public const string DefaultAuthorityUrl = "https://api.github.com/authorizations";
+        /// <summary>
+        /// The GitHub required HTTP accepts header value
+        /// </summary>
         public const string GitHubApiAcceptsHeaderValue = "application/vnd.github.v3+json";
         /// <summary>
         /// The maximum wait time for a network request before timing out

@@ -9,15 +9,10 @@ using Microsoft.Win32.SafeHandles;
 namespace Microsoft.TeamFoundation.Authentication
 {
     /// <summary>
-    /// 
+    /// Facilitates GitHub simple and two-factor authentication
     /// </summary>
     public class GithubAuthentication : BaseAuthentication, IGithubAuthentication
     {
-        /// <summary>
-        /// The maximum wait time for a network request before timing out
-        /// </summary>
-        public const int RequestTimeout = 15 * 1000; // 15 second limit
-
         /// <summary>
         /// 
         /// </summary>
@@ -124,8 +119,6 @@ namespace Microsoft.TeamFoundation.Authentication
         public bool InteractiveLogon(Uri targetUri, out Credential credentials)
         {
             const int BufferReadSize = 32 * 1024;
-
-            credentials = null;
 
             StringBuilder buffer = new StringBuilder(BufferReadSize);
             uint read = 0;
@@ -234,14 +227,19 @@ namespace Microsoft.TeamFoundation.Authentication
 
                 if (result = GithubAuthority.AcquireToken(targetUri, username, password, null, this.TokenScope).Result)
                 {
+                    Trace.WriteLine("   token aquisition succeeded");
+
                     credentials = (Credential)result.Token;
                     this.PersonalAccessTokenStore.WriteCredentials(targetUri, credentials);
+
+                    return true;
                 }
-                else if (result == GithubAuthenticationResultType.TwoFactorApp || result == GithubAuthenticationResultType.TwoFactorSms)
+                else if (result == GithubAuthenticationResultType.TwoFactorApp 
+                      || result == GithubAuthenticationResultType.TwoFactorSms)
                 {
                     buffer.Clear()
                           .AppendLine()
-                          .Append("authentication code: ");
+                          .Append("authcode: ");
                     if (!NativeMethods.WriteConsole(stdout, buffer, (uint)buffer.Length, out written, IntPtr.Zero))
                     {
                         int error = Marshal.GetLastWin32Error();
@@ -261,13 +259,19 @@ namespace Microsoft.TeamFoundation.Authentication
 
                     if (result = GithubAuthority.AcquireToken(targetUri, username, password, authenticationCode, this.TokenScope).Result)
                     {
+                        Trace.WriteLine("   token aquisition succeeded");
+
                         credentials = (Credential)result.Token;
                         this.PersonalAccessTokenStore.WriteCredentials(targetUri, credentials);
+
+                        return true;
                     }
                 }
             }
 
-            return credentials != null;
+            Trace.WriteLine("   interactive logon failed");
+            credentials = null;
+            return false;
         }
 
         /// <summary>
@@ -291,10 +295,14 @@ namespace Microsoft.TeamFoundation.Authentication
             GithubAuthenticationResult result;
             if (result = await GithubAuthority.AcquireToken(targetUri, username, password, authenticationCode, this.TokenScope))
             {
+                Trace.WriteLine("   token aquisition succeeded");
+
                 PersonalAccessTokenStore.WriteCredentials(targetUri, (Credential)result.Token);
+
                 return true;
             }
 
+            Trace.WriteLine("   non-interactive logon failed");
             return false;
         }
 
@@ -309,7 +317,10 @@ namespace Microsoft.TeamFoundation.Authentication
             BaseSecureStore.ValidateTargetUri(targetUri);
             Credential.Validate(credentials);
 
+            Trace.WriteLine("GithubAuthentication::SetCredentials");
+
             PersonalAccessTokenStore.WriteCredentials(targetUri, credentials);
+
             return true;
         }
 
