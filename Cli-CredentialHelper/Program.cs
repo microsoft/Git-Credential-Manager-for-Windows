@@ -15,6 +15,19 @@ namespace Microsoft.TeamFoundation.CredentialHelper
         private static readonly VsoTokenScope VsoCredentialScope = VsoTokenScope.CodeWrite;
         private static readonly GithubTokenScope GithubCredentialScope = GithubTokenScope.Gist | GithubTokenScope.PublicKeyRead | GithubTokenScope.Repo;
 
+        internal static Version Version
+        {
+            get
+            {
+                if (_version==null)
+                {
+                    _version = System.Reflection.Assembly.GetEntryAssembly().GetName().Version; ;
+                }
+                return _version;
+            }
+        }
+        private static Version _version;
+
         static void Main(string[] args)
         {
             try
@@ -36,7 +49,7 @@ namespace Microsoft.TeamFoundation.CredentialHelper
                     { "get", Get },
                     { "reject", Erase },
                     { "store", Store },
-                    { "version", Version }
+                    { "version", PrintVersion }
                 };
 
                 foreach (string arg in args)
@@ -49,6 +62,7 @@ namespace Microsoft.TeamFoundation.CredentialHelper
             }
             catch (Exception exception)
             {
+                Trace.WriteLine("Fatal: " + exception.ToString());
                 Console.Error.WriteLine("Fatal: " + exception.GetType().Name + " encountered.");
                 LogEvent(exception.Message, EventLogEntryType.Error);
             }
@@ -293,13 +307,11 @@ namespace Microsoft.TeamFoundation.CredentialHelper
             authentication.SetCredentials(operationArguments.TargetUri, credentials);
         }
 
-        private static void Version()
+        private static void PrintVersion()
         {
             Trace.WriteLine("Program::Version");
 
-            var version = System.Reflection.Assembly.GetEntryAssembly().GetName().Version;
-
-            Console.Out.WriteLine("Microsoft Git Credential Manager for Windows version {0}", version.ToString(3));
+            Console.Out.WriteLine("Microsoft Git Credential Manager for Windows version {0}", Version.ToString(3));
         }
 
         private static BaseAuthentication CreateAuthentication(OperationArguments operationArguments)
@@ -327,27 +339,26 @@ namespace Microsoft.TeamFoundation.CredentialHelper
                                                                   secrets,
                                                                   out authority))
                     {
-
-                    }
-                    // set the authority type based on the returned value
-                    if (authority is VsoMsaAuthentication)
-                    {
-                        operationArguments.Authority = AuthorityType.MicrosoftAccount;
-                    }
-                    else if (authority is VsoAadAuthentication)
-                    {
-                        operationArguments.Authority = AuthorityType.AzureDirectory;
-                    }
-                    else if (authority is GithubAuthentication)
-                    {
-                        operationArguments.Authority = AuthorityType.GitHub;
-                    }
-                    else
-                    {
-                        operationArguments.Authority = AuthorityType.Basic;
+                        // set the authority type based on the returned value
+                        if (authority is VsoMsaAuthentication)
+                        {
+                            operationArguments.Authority = AuthorityType.MicrosoftAccount;
+                            goto case AuthorityType.MicrosoftAccount;
+                        }
+                        else if (authority is VsoAadAuthentication)
+                        {
+                            operationArguments.Authority = AuthorityType.AzureDirectory;
+                            goto case AuthorityType.AzureDirectory;
+                        }
+                        else if (authority is GithubAuthentication)
+                        {
+                            operationArguments.Authority = AuthorityType.GitHub;
+                            goto case AuthorityType.GitHub;
+                        }
                     }
 
-                    return authority;
+                    operationArguments.Authority = AuthorityType.Basic;
+                    goto case AuthorityType.Basic;
 
                 case AuthorityType.AzureDirectory:
                     Trace.WriteLine("   authority is Azure Directory");
@@ -362,6 +373,11 @@ namespace Microsoft.TeamFoundation.CredentialHelper
 
                     // return a generic username + password authentication object
                     return new BasicAuthentication(secrets);
+
+                case AuthorityType.GitHub:
+                    Trace.WriteLine("    authority it GitHub");
+
+                    return new GithubAuthentication(GithubCredentialScope, secrets);
 
                 case AuthorityType.MicrosoftAccount:
                     Trace.WriteLine("   authority is Microsoft Live");
@@ -515,6 +531,7 @@ namespace Microsoft.TeamFoundation.CredentialHelper
                     // write a small header to help with identifying new log entries
                     listener.WriteLine(Environment.NewLine);
                     listener.WriteLine(String.Format("Log Start ({0:u})", DateTimeOffset.Now));
+                    listener.WriteLine(String.Format("Microsoft Git Credential Manager for Windows version {0}", Version.ToString(3)));
                 }
             }
         }
