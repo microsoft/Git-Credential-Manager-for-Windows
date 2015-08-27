@@ -189,6 +189,9 @@ namespace Microsoft.TeamFoundation.Authentication
                                              .TrimEnd('/', '\\')
                                              .TrimEnd();
             string targetName = String.Format(PrimaryNameFormat, _namespace, targetUri.Scheme, trimmedHostUrl);
+
+            Trace.WriteLine("   target name = " + targetName);
+
             return targetName;
         }
     }

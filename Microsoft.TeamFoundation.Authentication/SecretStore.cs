@@ -163,11 +163,16 @@ namespace Microsoft.TeamFoundation.Authentication
 
             Debug.Assert(targetUri != null, "The targetUri parameter is null");
 
+            Trace.WriteLine("SecretStore::GetTargetName");
+
             // trim any trailing slashes and/or whitespace for compat with git-credential-winstore
             string trimmedHostUrl = targetUri.Host
                                              .TrimEnd('/', '\\')
                                              .TrimEnd();
             string targetName = String.Format(TokenNameFormat, _namespace, targetUri.Scheme, trimmedHostUrl);
+
+            Trace.WriteLine("   target name = " + targetName);
+
             return targetName;
         }
     }
