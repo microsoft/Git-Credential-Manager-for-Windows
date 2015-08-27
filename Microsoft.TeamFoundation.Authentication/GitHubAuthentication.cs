@@ -31,15 +31,20 @@ namespace Microsoft.TeamFoundation.Authentication
             GithubAuthority = new GithubAuthority();
         }
 
+        /// <summary>
+        /// The desired scope of the authentication token to be requested.
+        /// </summary>
         public readonly GithubTokenScope TokenScope;
 
         internal IGithubAuthority GithubAuthority { get; set; }
         internal ICredentialStore PersonalAccessTokenStore { get; set; }
 
         /// <summary>
-        /// 
+        /// Deletes a <see cref="Credential"/> from the storage used by the authentication object.
         /// </summary>
-        /// <param name="targetUri"></param>
+        /// <param name="targetUri">
+        /// The uniform resource indicator used to uniquely identitfy the credentials.
+        /// </param>
         public override void DeleteCredentials(Uri targetUri)
         {
             BaseSecureStore.ValidateTargetUri(targetUri);
@@ -55,12 +60,14 @@ namespace Microsoft.TeamFoundation.Authentication
         }
 
         /// <summary>
-        /// 
+        /// Gets a configured authentication object for 'github.com'.
         /// </summary>
-        /// <param name="targetUri"></param>
-        /// <param name="tokenScope"></param>
-        /// <param name="personalAccessTokenStore"></param>
-        /// <param name="authentication"></param>
+        /// <param name="targetUri">The uniform resource indicator of the resource which requires 
+        /// authentication.</param>
+        /// <param name="tokenScope">The desired scope of any personal access tokens aqcuired.</param>
+        /// <param name="personalAccessTokenStore">A secure secret store for any personal access 
+        /// tokens acquired.</param>
+        /// <param name="authentication">(out) The authenitcation object if successful.</param>
         /// <returns>True if success; otherwise false.</returns>
         public static bool GetAuthentication(
             Uri targetUri,
@@ -91,11 +98,16 @@ namespace Microsoft.TeamFoundation.Authentication
         }
 
         /// <summary>
-        /// 
+        /// Gets a <see cref="Credential"/> from the storage used by the authentication object.
         /// </summary>
-        /// <param name="targetUri"></param>
-        /// <param name="credentials"></param>
-        /// <returns>True if success; otherwise false.</returns>
+        /// <param name="targetUri">
+        /// The uniform resource indicator used to uniquely identitfy the credentials.
+        /// </param>
+        /// <param name="credentials">
+        /// (out) A <see cref="Credential"/> object from the authentication object, 
+        /// authority or storage; otherwise `null`, if successful.
+        /// </param>
+        /// <returns>True if successful; otherwise false.</returns>
         public override bool GetCredentials(Uri targetUri, out Credential credentials)
         {
             BaseSecureStore.ValidateTargetUri(targetUri);
@@ -111,10 +123,13 @@ namespace Microsoft.TeamFoundation.Authentication
         }
 
         /// <summary>
-        /// 
+        /// <para></para>
+        /// <para>Tokens acquired are stored in the secure secret store provided during 
+        /// initialization.</para>
         /// </summary>
-        /// <param name="targetUri"></param>
-        /// <param name="credentials"></param>
+        /// <param name="targetUri">The unique identifier for the resource for which access is to 
+        /// be acquired.</param>
+        /// <param name="credentials">(out) Credentials when acquision is successful; null otherwise.</param>
         /// <returns>True if success; otherwise false.</returns>
         public bool InteractiveLogon(Uri targetUri, out Credential credentials)
         {
@@ -275,12 +290,15 @@ namespace Microsoft.TeamFoundation.Authentication
         }
 
         /// <summary>
-        /// 
+        /// <para></para>
+        /// <para>Tokens acquired are stored in the secure secret store provided during 
+        /// initialization.</para>
         /// </summary>
-        /// <param name="targetUri"></param>
-        /// <param name="username"></param>
-        /// <param name="password"></param>
-        /// <param name="authenticationCode"></param>
+        /// <param name="targetUri">The unique identifier for the resource for which access is to 
+        /// be acquired.</param>
+        /// <param name="username">The username of the account for which access is to be acquired.</param>
+        /// <param name="password">The password of the account for which access is to be acquired.</param>
+        /// <param name="authenticationCode">The two-factor authentication code for use in access acquision.</param>
         /// <returns>True if success; otherwise false.</returns>
         public async Task<bool> NoninteractiveLogonWithCredentials(Uri targetUri, string username, string password, string authenticationCode = null)
         {
@@ -307,11 +325,13 @@ namespace Microsoft.TeamFoundation.Authentication
         }
 
         /// <summary>
-        /// 
+        /// Sets a <see cref="Credential"/> in the storage used by the authentication object.
         /// </summary>
-        /// <param name="targetUri"></param>
-        /// <param name="credentials"></param>
-        /// <returns>True if success; otherwise false.</returns>
+        /// <param name="targetUri">
+        /// The uniform resource indicator used to uniquely identitfy the credentials.
+        /// </param>
+        /// <param name="credentials">The value to be stored.</param>
+        /// <returns>True if successful; otherwise false.</returns>
         public override bool SetCredentials(Uri targetUri, Credential credentials)
         {
             BaseSecureStore.ValidateTargetUri(targetUri);
@@ -325,11 +345,12 @@ namespace Microsoft.TeamFoundation.Authentication
         }
 
         /// <summary>
-        /// 
+        /// Validates that a set of credentials grants access to the target resource.
         /// </summary>
-        /// <param name="targetUri"></param>
-        /// <param name="credentials"></param>
-        /// <returns></returns>
+        /// <param name="targetUri">The unique identifier for the resource for which credentials 
+        /// are being validated against.</param>
+        /// <param name="credentials">The credentials to validate.</param>
+        /// <returns>True is successful; otherwise false.</returns>
         public async Task<bool> ValidateCredentials(Uri targetUri, Credential credentials)
         {
             BaseSecureStore.ValidateTargetUri(targetUri);

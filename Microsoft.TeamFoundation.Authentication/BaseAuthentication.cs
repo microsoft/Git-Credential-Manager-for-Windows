@@ -14,6 +14,7 @@ namespace Microsoft.TeamFoundation.Authentication
         /// The uniform resource indicator used to uniquely identitfy the credentials.
         /// </param>
         public abstract void DeleteCredentials(Uri targetUri);
+
         /// <summary>
         /// Gets a <see cref="Credential"/> from the storage used by the authentication object.
         /// </summary>
@@ -26,8 +27,9 @@ namespace Microsoft.TeamFoundation.Authentication
         /// </param>
         /// <returns>True if successful; otherwise false.</returns>
         public abstract bool GetCredentials(Uri targetUri, out Credential credentials);
+
         /// <summary>
-        /// Sets a <see cref="Credential"/> in the storage used by the authentication object.otr
+        /// Sets a <see cref="Credential"/> in the storage used by the authentication object.
         /// </summary>
         /// <param name="targetUri">
         /// The uniform resource indicator used to uniquely identitfy the credentials.
