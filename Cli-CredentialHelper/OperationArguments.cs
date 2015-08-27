@@ -82,24 +82,15 @@ namespace Microsoft.TeamFoundation.CredentialHelper
             builder.Append("host=")
                    .Append(this.Host ?? String.Empty)
                    .Append("\n");
-            if (this.Path != null)
-            {
-                builder.Append("path=")
-                       .Append(this.Path)
+            builder.Append("path=")
+                       .Append(this.Path ?? String.Empty)
                        .Append("\n");
-            }
-            if (this.Username != null)
-            {
-                builder.Append("username=")
-                       .Append(this.Username)
+            builder.Append("username=")
+                       .Append(this.Username ?? String.Empty)
                        .Append("\n");
-            }
-            if (this.Password != null)
-            {
-                builder.Append("password=")
-                       .Append(this.Password)
+            builder.Append("password=")
+                       .Append(this.Password ?? String.Empty)
                        .Append("\n");
-            }
 
             return builder.ToString();
         }
