@@ -132,7 +132,7 @@ namespace Microsoft.TeamFoundation.Authentication
             try
             {
                 // create an request to the VSO deployment data end-point
-                var request = GetConnectionDataRequest(targetUri, accessToken);
+                HttpWebRequest request = GetConnectionDataRequest(targetUri, accessToken);
 
                 // send the request and wait for the response
                 using (var response = await request.GetResponseAsync())
