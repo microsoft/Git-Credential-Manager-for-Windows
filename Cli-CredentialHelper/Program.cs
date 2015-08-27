@@ -19,7 +19,7 @@ namespace Microsoft.TeamFoundation.CredentialHelper
         {
             get
             {
-                if (_version==null)
+                if (_version == null)
                 {
                     _version = System.Reflection.Assembly.GetEntryAssembly().GetName().Version; ;
                 }

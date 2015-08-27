@@ -17,12 +17,6 @@ namespace Microsoft.TeamFoundation.CredentialHelper
             this.ValidateCredentials = true;
             this.WriteLog = false;
 
-            if (Debugger.IsAttached)
-            {
-                // most likely need to hand set values here and skip the `Console.In.ReadLine` call
-                Debugger.Break();
-            }
-
             string line;
             while (!String.IsNullOrWhiteSpace((line = Console.In.ReadLine())))
             {
@@ -89,14 +83,14 @@ namespace Microsoft.TeamFoundation.CredentialHelper
                    .Append(this.Host ?? String.Empty)
                    .Append("\n");
             builder.Append("path=")
-                       .Append(this.Path ?? String.Empty)
-                       .Append("\n");
+                   .Append(this.Path ?? String.Empty)
+                   .Append("\n");
             builder.Append("username=")
-                       .Append(this.Username ?? String.Empty)
-                       .Append("\n");
+                   .Append(this.Username ?? String.Empty)
+                   .Append("\n");
             builder.Append("password=")
-                       .Append(this.Password ?? String.Empty)
-                       .Append("\n");
+                   .Append(this.Password ?? String.Empty)
+                   .Append("\n");
 
             return builder.ToString();
         }
