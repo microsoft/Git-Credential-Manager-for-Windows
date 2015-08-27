@@ -12,7 +12,21 @@ namespace Microsoft.TeamFoundation.CredentialHelper
     {
         private const string ConfigPrefix = "credential";
         private const string SecretsNamespace = "git";
-        private static readonly VsoTokenScope CredentialScope = VsoTokenScope.CodeWrite;
+        private static readonly VsoTokenScope VsoCredentialScope = VsoTokenScope.CodeWrite;
+        private static readonly GithubTokenScope GithubCredentialScope = GithubTokenScope.Gist | GithubTokenScope.PublicKeyRead | GithubTokenScope.Repo;
+
+        internal static Version Version
+        {
+            get
+            {
+                if (_version==null)
+                {
+                    _version = System.Reflection.Assembly.GetEntryAssembly().GetName().Version; ;
+                }
+                return _version;
+            }
+        }
+        private static Version _version;
 
         static void Main(string[] args)
         {
@@ -35,6 +49,7 @@ namespace Microsoft.TeamFoundation.CredentialHelper
                     { "get", Get },
                     { "reject", Erase },
                     { "store", Store },
+                    { "version", PrintVersion }
                 };
 
                 foreach (string arg in args)
@@ -47,6 +62,7 @@ namespace Microsoft.TeamFoundation.CredentialHelper
             }
             catch (Exception exception)
             {
+                Trace.WriteLine("Fatal: " + exception.ToString());
                 Console.Error.WriteLine("Fatal: " + exception.GetType().Name + " encountered.");
                 LogEvent(exception.Message, EventLogEntryType.Error);
             }
@@ -130,6 +146,7 @@ namespace Microsoft.TeamFoundation.CredentialHelper
         private static void Get()
         {
             const string AadMsaAuthFailureMessage = "Logon failed, use ctrl+c to cancel basic credential prompt.";
+            const string GitHubAuthFailureMessage = "Logon failed, use ctrl+c to cancel basic credential prompt.";
 
             // parse the operations arguments from stdin (this is how git sends commands)
             // see: https://www.kernel.org/pub/software/scm/git/docs/technical/api-credentials.html
@@ -232,6 +249,33 @@ namespace Microsoft.TeamFoundation.CredentialHelper
                     }).Wait();
                     break;
 
+                case AuthorityType.GitHub:
+                    GithubAuthentication ghAuth = authentication as GithubAuthentication;
+
+                    Task.Run(async () =>
+                    {
+                        if ((operationArguments.Interactivity != Interactivity.Always
+                                && ghAuth.GetCredentials(operationArguments.TargetUri, out credentials)
+                                && (!operationArguments.ValidateCredentials
+                                    || await ghAuth.ValidateCredentials(operationArguments.TargetUri, credentials)))
+                            || (operationArguments.Interactivity != Interactivity.Never
+                                && ghAuth.InteractiveLogon(operationArguments.TargetUri, out credentials)
+                                && ghAuth.GetCredentials(operationArguments.TargetUri, out credentials)
+                                && (!operationArguments.ValidateCredentials
+                                    || await ghAuth.ValidateCredentials(operationArguments.TargetUri, credentials))))
+                        {
+                            Trace.WriteLine("   credentials found");
+                            operationArguments.SetCredentials(credentials);
+                            LogEvent("GitHub credentials for " + operationArguments.TargetUri + " successfully retrieved.", EventLogEntryType.SuccessAudit);
+                        }
+                        else
+                        {
+                            Console.Error.WriteLine(GitHubAuthFailureMessage);
+                            LogEvent("Failed to retrieve GitHub credentials for " + operationArguments.TargetUri + ".", EventLogEntryType.FailureAudit);
+                        }
+                    }).Wait();
+                    break;
+
                 case AuthorityType.Integrated:
                     credentials = new Credential(String.Empty, String.Empty);
                     operationArguments.SetCredentials(credentials);
@@ -263,6 +307,13 @@ namespace Microsoft.TeamFoundation.CredentialHelper
             authentication.SetCredentials(operationArguments.TargetUri, credentials);
         }
 
+        private static void PrintVersion()
+        {
+            Trace.WriteLine("Program::Version");
+
+            Console.Out.WriteLine("Microsoft Git Credential Manager for Windows version {0}", Version.ToString(3));
+        }
+
         private static BaseAuthentication CreateAuthentication(OperationArguments operationArguments)
         {
             Debug.Assert(operationArguments != null, "The operationArguments is null");
@@ -277,31 +328,44 @@ namespace Microsoft.TeamFoundation.CredentialHelper
                     Trace.WriteLine("   detecting authority type");
 
                     // detect the authority
-                    var authority = BaseVsoAuthentication.GetAuthentication(operationArguments.TargetUri,
-                                                                            CredentialScope,
-                                                                            secrets);
-                    // set the authority type based on the returned value
-                    if (authority is VsoMsaAuthentication)
+                    BaseAuthentication authority;
+                    if (BaseVsoAuthentication.GetAuthentication(operationArguments.TargetUri,
+                                                                VsoCredentialScope,
+                                                                secrets,
+                                                                null,
+                                                                out authority)
+                        || GithubAuthentication.GetAuthentication(operationArguments.TargetUri,
+                                                                  GithubCredentialScope,
+                                                                  secrets,
+                                                                  out authority))
                     {
-                        operationArguments.Authority = AuthorityType.MicrosoftAccount;
-                    }
-                    else if (authority is VsoAadAuthentication)
-                    {
-                        operationArguments.Authority = AuthorityType.AzureDirectory;
-                    }
-                    else
-                    {
-                        operationArguments.Authority = AuthorityType.Basic;
+                        // set the authority type based on the returned value
+                        if (authority is VsoMsaAuthentication)
+                        {
+                            operationArguments.Authority = AuthorityType.MicrosoftAccount;
+                            goto case AuthorityType.MicrosoftAccount;
+                        }
+                        else if (authority is VsoAadAuthentication)
+                        {
+                            operationArguments.Authority = AuthorityType.AzureDirectory;
+                            goto case AuthorityType.AzureDirectory;
+                        }
+                        else if (authority is GithubAuthentication)
+                        {
+                            operationArguments.Authority = AuthorityType.GitHub;
+                            goto case AuthorityType.GitHub;
+                        }
                     }
 
-                    return authority;
+                    operationArguments.Authority = AuthorityType.Basic;
+                    goto case AuthorityType.Basic;
 
                 case AuthorityType.AzureDirectory:
                     Trace.WriteLine("   authority is Azure Directory");
 
                     Guid tenantId = Guid.Empty;
                     // return a generic AAD backed VSO authentication object
-                    return new VsoAadAuthentication(Guid.Empty, CredentialScope, secrets);
+                    return new VsoAadAuthentication(Guid.Empty, VsoCredentialScope, secrets);
 
                 case AuthorityType.Basic:
                 default:
@@ -310,11 +374,16 @@ namespace Microsoft.TeamFoundation.CredentialHelper
                     // return a generic username + password authentication object
                     return new BasicAuthentication(secrets);
 
+                case AuthorityType.GitHub:
+                    Trace.WriteLine("    authority it GitHub");
+
+                    return new GithubAuthentication(GithubCredentialScope, secrets);
+
                 case AuthorityType.MicrosoftAccount:
                     Trace.WriteLine("   authority is Microsoft Live");
 
                     // return a generic MSA backed VSO authentication object
-                    return new VsoMsaAuthentication(CredentialScope, secrets);
+                    return new VsoMsaAuthentication(VsoCredentialScope, secrets);
             }
         }
 
@@ -462,6 +531,7 @@ namespace Microsoft.TeamFoundation.CredentialHelper
                     // write a small header to help with identifying new log entries
                     listener.WriteLine(Environment.NewLine);
                     listener.WriteLine(String.Format("Log Start ({0:u})", DateTimeOffset.Now));
+                    listener.WriteLine(String.Format("Microsoft Git Credential Manager for Windows version {0}", Version.ToString(3)));
                 }
             }
         }

@@ -255,6 +255,9 @@ namespace Microsoft.TeamFoundation.Authentication
         /// </exception>
         public static explicit operator Credential(Token token)
         {
+            if (token == null)
+                return null;
+
             if (token.Type != TokenType.Personal)
                 throw new InvalidCastException("Cannot cast " + token + " to credentials");
 

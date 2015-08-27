@@ -1,10 +1,11 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Runtime.CompilerServices;
 using ScopeSet = System.Collections.Generic.HashSet<string>;
 
 namespace Microsoft.TeamFoundation.Authentication
 {
-    public class VsoTokenScope : IEquatable<VsoTokenScope>
+    public class VsoTokenScope : TokenScope
     {
         public static readonly VsoTokenScope None = new VsoTokenScope(String.Empty);
         /// <summary>
@@ -101,66 +102,36 @@ namespace Microsoft.TeamFoundation.Authentication
         public static readonly VsoTokenScope WorkWrite = new VsoTokenScope("vso.work_write");
 
         private VsoTokenScope(string value)
-        {
-            if (String.IsNullOrWhiteSpace(value))
-            {
-                _scopes = new string[0];
-            }
-            else
-            {
-                _scopes = new string[1];
-                _scopes[0] = value;
-            }
-        }
+            : base(value)
+        { }
 
         private VsoTokenScope(string[] values)
-        {
-            _scopes = values;
-        }
+            : base(values)
+        { }
 
         private VsoTokenScope(ScopeSet set)
+            : base(set)
+        { }
+
+        public static IEnumerable<VsoTokenScope> EnumerateValues()
         {
-            string[] result = new string[set.Count];
-            set.CopyTo(result);
-
-            _scopes = result;
-        }
-
-        public string Value { get { return String.Join(" ", _scopes); } }
-
-        private readonly string[] _scopes;
-
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public override bool Equals(object obj)
-        {
-            return this == obj as VsoTokenScope;
-        }
-
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public bool Equals(VsoTokenScope other)
-        {
-            return this == other;
-        }
-
-        public override int GetHashCode()
-        {
-            // largest 31-bit prime (https://msdn.microsoft.com/en-us/library/Ee621251.aspx)
-            int hash = 2147483647;
-
-            for (int i = 0; i < _scopes.Length; i++)
-            {
-                unchecked
-                {
-                    hash ^= _scopes[i].GetHashCode();
-                }
-            }
-
-            return hash;
-        }
-
-        public override String ToString()
-        {
-            return Value;
+            yield return BuildAccess;
+            yield return BuildExecute;
+            yield return ChatManage;
+            yield return ChatWrite;
+            yield return CodeManage;
+            yield return CodeRead;
+            yield return CodeWrite;
+            yield return PackagingManage;
+            yield return PackagingRead;
+            yield return PackagingWrite;
+            yield return ProfileRead;
+            yield return ServiceHookRead;
+            yield return ServiceHookWrite;
+            yield return TestRead;
+            yield return TestWrite;
+            yield return WorkRead;
+            yield return WorkWrite;
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -207,23 +178,6 @@ namespace Microsoft.TeamFoundation.Authentication
             set.SymmetricExceptWith(scope2._scopes);
 
             return new VsoTokenScope(set);
-        }
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static bool operator ==(VsoTokenScope scope1, VsoTokenScope scope2)
-        {
-            if (ReferenceEquals(scope1, scope2))
-                return true;
-            if (ReferenceEquals(scope1, null) || ReferenceEquals(null, scope2))
-                return false;
-
-            ScopeSet set = new ScopeSet();
-            set.UnionWith(scope1._scopes);
-            return set.SetEquals(scope2._scopes);
-        }
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static bool operator !=(VsoTokenScope scope1, VsoTokenScope scope2)
-        {
-            return !(scope1 == scope2);
         }
     }
 }

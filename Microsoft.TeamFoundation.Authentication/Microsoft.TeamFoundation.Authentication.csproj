@@ -35,6 +35,9 @@
     <WarningLevel>4</WarningLevel>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
     <PlatformTarget>x86</PlatformTarget>
+    <WarningsAsErrors>
+    </WarningsAsErrors>
+    <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="Microsoft.IdentityModel.Clients.ActiveDirectory, Version=2.18.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
@@ -48,13 +51,22 @@
     <Reference Include="System" />
     <Reference Include="System.Core" />
     <Reference Include="Microsoft.CSharp" />
+    <Reference Include="System.Data" />
+    <Reference Include="System.Drawing" />
     <Reference Include="System.Net.Http" />
     <Reference Include="System.Security" />
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Configuration.cs" />
+    <Compile Include="GitHubAuthentication.cs" />
+    <Compile Include="GithubAuthenticationResult.cs" />
+    <Compile Include="GithubAuthority.cs" />
+    <Compile Include="GithubTokenScope.cs" />
     <Compile Include="Global.cs" />
+    <Compile Include="IGithubAuthentication.cs" />
+    <Compile Include="IGithubAuthority.cs" />
     <Compile Include="SecretCache.cs" />
+    <Compile Include="TokenScope.cs" />
     <Compile Include="VsoAzureAuthority.cs" />
     <Compile Include="VsoTokenScope.cs" />
     <Compile Include="AzureAuthority.cs" />
