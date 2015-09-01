@@ -32,7 +32,7 @@ namespace Microsoft.TeamFoundation.Authentication
         /// </summary>
         public readonly string Password;
         /// <summary>
-        /// Unique identitfier of the user.
+        /// Unique identifier of the user.
         /// </summary>
         public readonly string Username;
 
@@ -40,16 +40,16 @@ namespace Microsoft.TeamFoundation.Authentication
         /// Compares an object to this <see cref="Credential"/> for equality.
         /// </summary>
         /// <param name="obj">The object to compare.</param>
-        /// <returns>True is equal; false otherwise.</returns>
+        /// <returns><see langword="true"/> if equal; <see langword="false"/> otherwise.</returns>
         public override bool Equals(Object obj)
         {
             return this == obj as Credential;
         }
         /// <summary>
-        /// Compares a <see cref="Credential"/> to this Credetials for equality.
+        /// Compares a <see cref="Credential"/> to this <see cref="Credential"/> for equality.
         /// </summary>
-        /// <param name="other">Credential to compared.</param>
-        /// <returns>True if equal; false if otherwise.</returns>
+        /// <param name="other">Credential to be compared.</param>
+        /// <returns><see langword="true"/> if equal; <see langword="false"/> otherwise.</returns>
         public bool Equals(Credential other)
         {
             return this == other;
@@ -82,7 +82,7 @@ namespace Microsoft.TeamFoundation.Authentication
         /// </summary>
         /// <param name="credential1">Credential to compare.</param>
         /// <param name="credential2">Credential to compare.</param>
-        /// <returns>True if equal; false otherwise.</returns>
+        /// <returns><see langword="true"/> if equal; <see langword="false"/> otherwise.</returns>
         public static bool operator ==(Credential credential1, Credential credential2)
         {
             if (ReferenceEquals(credential1, credential2))
@@ -98,7 +98,7 @@ namespace Microsoft.TeamFoundation.Authentication
         /// </summary>
         /// <param name="credential1">Credential to compare.</param>
         /// <param name="credential2">Credential to compare.</param>
-        /// <returns>False if equal; true otherwise.</returns>
+        /// <returns><see langword="false"/> if equal; <see langword="true"/> otherwise.</returns>
         public static bool operator !=(Credential credential1, Credential credential2)
         {
             return !(credential1 == credential2);
