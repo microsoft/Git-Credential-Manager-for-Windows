@@ -35,10 +35,10 @@ namespace Microsoft.TeamFoundation.Authentication
             this.VsoAuthority = new VsoAzureAuthority();
         }
         /// <summary>
-        /// Invoked by a derived classes implementation. Allows custom back-end implementatoins to be used.
+        /// Invoked by a derived classes implementation. Allows custom back-end implementations to be used.
         /// </summary>
         /// <param name="tokenScope">The desired scope of the acquired personal access token(s).</param>
-        /// <param name="personalAccessTokenStore">The secret store for acquired pesonal access token(s).</param>
+        /// <param name="personalAccessTokenStore">The secret store for acquired personal access token(s).</param>
         /// <param name="adaRefreshTokenStore">The secret store for acquired Azure refresh token(s).</param>
         protected BaseVsoAuthentication(
             VsoTokenScope tokenScope,
@@ -114,9 +114,9 @@ namespace Microsoft.TeamFoundation.Authentication
         /// Attempts to get a set of credentials from storage by their target resource.
         /// </summary>
         /// <param name="targetUri">The 'key' by which to identify credentials.</param>
-        /// <param name="credentials">Credentials associated with the URI is successful; null 
-        /// otherwise.</param>
-        /// <returns>True if successful; false otherwise.</returns>
+        /// <param name="credentials">Credentials associated with the URI if successful;
+        /// <see langword="null"/> otherwise.</param>
+        /// <returns><see langword="true"/> if successful; <see langword="false" /> otherwise.</returns>
         public override bool GetCredentials(Uri targetUri, out Credential credentials)
         {
             BaseSecureStore.ValidateTargetUri(targetUri);
@@ -133,12 +133,12 @@ namespace Microsoft.TeamFoundation.Authentication
 
         /// <summary>
         /// Attempts to generate a new personal access token (credentials) via use of a stored 
-        /// Azure refresh token, identitifed by the target resource.
+        /// Azure refresh token, identified by the target resource.
         /// </summary>
         /// <param name="targetUri">The 'key' by which to identify the refresh token.</param>
-        /// <param name="requireCompactToken">Generates a compact token if true; generates a self 
-        /// describing token if false.</param>
-        /// <returns>True if successful; false otherwise.</returns>
+        /// <param name="requireCompactToken">Generates a compact token if <see langword="true"/>;
+        /// generates a self describing token if <see langword="false"/>.</param>
+        /// <returns><see langword="true"/> if successful; <see langword="false"/> otherwise.</returns>
         public async Task<bool> RefreshCredentials(Uri targetUri, bool requireCompactToken)
         {
             BaseSecureStore.ValidateTargetUri(targetUri);
@@ -185,8 +185,8 @@ namespace Microsoft.TeamFoundation.Authentication
         /// Validates that a set of credentials grants access to the target resource.
         /// </summary>
         /// <param name="targetUri">The target resource to validate against.</param>
-        /// <param name="credentials">The credentials to validate</param>
-        /// <returns>True if successful; false otherwise.</returns>
+        /// <param name="credentials">The credentials to validate.</param>
+        /// <returns><see langword="true"/> if successful; <see langword="false"/> otherwise.</returns>
         public async Task<bool> ValidateCredentials(Uri targetUri, Credential credentials)
         {
             Trace.WriteLine("BaseVsoAuthentication::ValidateCredentials");
@@ -199,11 +199,11 @@ namespace Microsoft.TeamFoundation.Authentication
         /// </summary>
         /// <param name="targetUri">The target resource for which to acquire the personal access 
         /// token for.</param>
-        /// <param name="accessToken">Azure Directory access token with privilages to grant access 
+        /// <param name="accessToken">Azure Directory access token with privileges to grant access
         /// to the target resource.</param>
-        /// <param name="requestCompactToken">Generates a compact token if true; generates a self 
-        /// describing token if false.</param>
-        /// <returns>True if successful; false otherwise.</returns>
+        /// <param name="requestCompactToken">Generates a compact token if <see langword="true"/>;
+        /// generates a self describing token if <see langword="false"/>.</param>
+        /// <returns><see langword="true"/> if successful; <see langword="false"/> otherwise.</returns>
         protected async Task<bool> GeneratePersonalAccessToken(Uri targetUri, Token accessToken, bool requestCompactToken)
         {
             Debug.Assert(targetUri != null, "The targetUri parameter is null");
@@ -240,7 +240,7 @@ namespace Microsoft.TeamFoundation.Authentication
         /// </summary>
         /// <param name="targetUri">The resource which the authority protects.</param>
         /// <param name="tenantId">The identity of the authority tenant; <see cref="Guid.Empty"/> otherwise.</param>
-        /// <returns>True is the authority is Visual Studio Online; False otherwise</returns>
+        /// <returns><see langword="true"/> if the authority is Visual Studio Online; <see langword="false"/> otherwise</returns>
         public static bool DetectAuthority(Uri targetUri, out Guid tenantId)
         {
             const string VsoBaseUrlHost = "visualstudio.com";
@@ -298,7 +298,13 @@ namespace Microsoft.TeamFoundation.Authentication
         /// <param name="scope">The scope of the access being requested.</param>
         /// <param name="personalAccessTokenStore">Storage container for personal access token secrets.</param>
         /// <param name="adaRefreshTokenStore">Storage container for Azure access token secrets.</param>
-        /// <returns></returns>
+        /// <param name="authentication">
+        /// An implementation of <see cref="BaseAuthentication"/> if one was detected;
+        /// <see langword="null"/> otherwise.
+        /// </param>
+        /// <returns>
+        /// <see langword="true"/> if an authority could be determined; <see langword="false"/> otherwise.
+        /// </returns>
         public static bool GetAuthentication(
             Uri targetUri,
             VsoTokenScope scope,
