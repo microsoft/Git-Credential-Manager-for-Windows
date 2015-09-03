@@ -18,14 +18,21 @@ namespace Microsoft.TeamFoundation.Authentication.Test
 [core]
     autocrlf = false
 ";
+
+            var values = TestParseGitConfig(input);
+
+            Assert.AreEqual("false", values["core.autocrlf"]);
+        }
+
+        private static Dictionary<string, string> TestParseGitConfig(string input)
+        {
             var values = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
 
             using (var sr = new StringReader(input))
             {
                 Configuration.ParseGitConfig(sr, values);
             }
-
-            Assert.AreEqual("false", values["core.autocrlf"]);
+            return values;
         }
     }
 }
