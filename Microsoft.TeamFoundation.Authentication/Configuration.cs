@@ -143,11 +143,20 @@ namespace Microsoft.TeamFoundation.Authentication
             if (!File.Exists(configPath))
                 return;
 
+            using (var sr = new StreamReader(File.OpenRead(configPath)))
+            {
+                ParseGitConfig(sr, _values);
+            }
+        }
+
+        internal static void ParseGitConfig(TextReader tr, IDictionary<string, string> destination)
+        {
             Match match = null;
             string section = null;
 
             // parse each line in the config independently - Git's configs do not accept multi-line values
-            foreach (var line in File.ReadLines(configPath))
+            string line;
+            while ((line = tr.ReadLine()) != null)
             {
                 // skip empty and commented lines
                 if (String.IsNullOrWhiteSpace(line))
@@ -209,13 +218,13 @@ namespace Microsoft.TeamFoundation.Authentication
                         }
 
                         // add or update the (key, value)
-                        if (_values.ContainsKey(key))
+                        if (destination.ContainsKey(key))
                         {
-                            _values[key] = val;
+                            destination[key] = val;
                         }
                         else
                         {
-                            _values.Add(key, val);
+                            destination.Add(key, val);
                         }
                     }
                 }

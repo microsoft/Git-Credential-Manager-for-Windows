@@ -64,6 +64,7 @@
     <Compile Include="AuthenticationTests.cs" />
     <Compile Include="AuthorityFake.cs" />
     <Compile Include="BasicAuthTests.cs" />
+    <Compile Include="ConfigurationTests.cs" />
     <Compile Include="CredentialTests.cs" />
     <Compile Include="GithubTokenScopeTests.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
