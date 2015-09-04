@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Reflection;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 namespace Microsoft.TeamFoundation.Authentication.Test
@@ -38,6 +39,24 @@ namespace Microsoft.TeamFoundation.Authentication.Test
             var values = TestParseGitConfig(input);
 
             Assert.AreEqual("false", values["core.autocrlf"]);
+        }
+
+        [TestMethod]
+        public void ParseGitConfig_SampleFile()
+        {
+            var values = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
+            var me = this.GetType();
+            var us = me.Assembly;
+
+            using (var rs = us.GetManifestResourceStream(me, "sample.gitconfig"))
+            using (var sr = new StreamReader(rs))
+            {
+                Configuration.ParseGitConfig(sr, values);
+            }
+
+            Assert.AreEqual(36, values.Count);
+            Assert.AreEqual("\\\"C:/Utils/Compare It!/wincmp3.exe\\\" \\\"$(cygpath -w \\\"$LOCAL\\\")\\\" \\\"$(cygpath -w \\\"$REMOTE\\\")\\\"", values["difftool.cygcompareit.cmd"], "The quotes remained.");
+            Assert.AreEqual("!f() { git fetch origin && git checkout -b $1 origin/master --no-track; }; f", values["alias.cob"], "The quotes were stripped.");
         }
 
         private static Dictionary<string, string> TestParseGitConfig(string input)
