@@ -166,7 +166,7 @@ namespace Microsoft.TeamFoundation.Authentication
 
                 // sections begin with values like [section] or [section "section name"]. All subsequent lines,
                 // until a new section is encountered, are children of the section
-                if ((match = Regex.Match(line, @"^\s*\[\s*(\w+)\s*(\""[^\""]+\""){0,1}\]", RegexOptions.Compiled | RegexOptions.CultureInvariant)).Success)
+                if ((match = Regex.Match(line, @"^\s*\[\s*(\w+)\s*(\""[^\]]+){0,1}\]", RegexOptions.Compiled | RegexOptions.CultureInvariant)).Success)
                 {
                     if (match.Groups.Count >= 2 && !String.IsNullOrWhiteSpace(match.Groups[1].Value))
                     {

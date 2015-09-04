@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
-using System.Reflection;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 namespace Microsoft.TeamFoundation.Authentication.Test
@@ -39,6 +38,19 @@ namespace Microsoft.TeamFoundation.Authentication.Test
             var values = TestParseGitConfig(input);
 
             Assert.AreEqual("false", values["core.autocrlf"]);
+        }
+
+        [TestMethod]
+        public void ParseGitConfig_PartiallyQuoted()
+        {
+            const string input = @"
+[core ""oneQuote]
+    autocrlf = ""false
+";
+
+            var values = TestParseGitConfig(input);
+
+            Assert.AreEqual("false", values["core.oneQuote.autocrlf"]);
         }
 
         [TestMethod]
