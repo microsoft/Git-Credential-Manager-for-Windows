@@ -17,8 +17,6 @@ namespace Microsoft.TeamFoundation.Authentication
             if (!Directory.Exists(directory))
                 throw new DirectoryNotFoundException(directory);
 
-            _values = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
-
             LoadGitConfiguation(directory);
         }
 
@@ -26,7 +24,12 @@ namespace Microsoft.TeamFoundation.Authentication
             : this(Environment.CurrentDirectory)
         { }
 
-        private readonly Dictionary<string, string> _values;
+        internal Configuration(TextReader configReader)
+        {
+            ParseGitConfig(configReader, _values);
+        }
+
+        private readonly Dictionary<string, string> _values = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
 
         public string this[string key]
         {
