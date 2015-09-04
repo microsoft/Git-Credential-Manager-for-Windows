@@ -81,5 +81,44 @@ namespace Microsoft.TeamFoundation.Authentication.Test
             }
             return values;
         }
+
+        [TestMethod]
+        public void ReadThroughPublicMethods()
+        {
+            const string input = "\n" +
+                    "[core]\n" +
+                    "    autocrlf = false\n" +
+                    "[credential \"microsoft.visualstudio.com\"]\n" +
+                    "    authority = AAD\n" +
+                    "[credential \"visualstudio.com\"]\n" +
+                    "    authority = MSA\n" +
+                    "[credential \"https://ntlm.visualstudio.com\"]\n" +
+                    "    authority = NTLM\n" +
+                    "[credential]\n" +
+                    "    helper = manager\n" +
+                    "";
+            Configuration cut;
+
+            using (var sr = new StringReader(input))
+            {
+                cut = new Configuration(sr);
+            }
+
+            Assert.AreEqual(true, cut.ContainsKey("CoRe.AuToCrLf"));
+            Assert.AreEqual("false", cut["CoRe.AuToCrLf"]);
+
+            Configuration.Entry entry;
+            Assert.AreEqual(true, cut.TryGetEntry("core", (string)null, "autocrlf", out entry));
+            Assert.AreEqual("false", entry.Value);
+
+            Assert.AreEqual(true, cut.TryGetEntry("credential", new Uri("https://microsoft.visualstudio.com"), "authority", out entry));
+            Assert.AreEqual("AAD", entry.Value);
+
+            Assert.AreEqual(true, cut.TryGetEntry("credential", new Uri("https://mseng.visualstudio.com"), "authority", out entry));
+            Assert.AreEqual("MSA", entry.Value);
+
+            Assert.AreEqual(true, cut.TryGetEntry("credential", new Uri("https://ntlm.visualstudio.com"), "authority", out entry));
+            Assert.AreEqual("NTLM", entry.Value);
+        }
     }
 }
