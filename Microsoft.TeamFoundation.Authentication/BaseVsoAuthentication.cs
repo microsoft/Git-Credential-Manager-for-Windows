@@ -321,6 +321,7 @@ namespace Microsoft.TeamFoundation.Authentication
                 {
                     Trace.WriteLine("   AAD authority for tenant '" + tenantId + "' detected");
                     authentication = new VsoAadAuthentication(tenantId, scope, personalAccessTokenStore, adaRefreshTokenStore);
+                    (authentication as VsoAadAuthentication).TenantId = tenantId;
                 }
             }
             else

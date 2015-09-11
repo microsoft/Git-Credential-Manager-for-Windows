@@ -13,7 +13,7 @@ namespace Microsoft.TeamFoundation.Authentication
         /// <summary>
         /// The default authority host for all Azure Directory authentiation
         /// </summary>
-        public const string DefaultAuthorityHost = " https://management.core.windows.net/";
+        public const string DefaultAuthorityHost = " https://management.core.windows.net";
 
         /// <summary>
         /// 
