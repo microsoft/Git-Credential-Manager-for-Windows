@@ -321,6 +321,7 @@ namespace Microsoft.TeamFoundation.CredentialHelper
             Trace.WriteLine("Program::CreateAuthentication");
 
             var secrets = new SecretStore(SecretsNamespace);
+            BaseAuthentication authority = null;
 
             switch (operationArguments.Authority)
             {
@@ -328,7 +329,6 @@ namespace Microsoft.TeamFoundation.CredentialHelper
                     Trace.WriteLine("   detecting authority type");
 
                     // detect the authority
-                    BaseAuthentication authority;
                     if (BaseVsoAuthentication.GetAuthentication(operationArguments.TargetUri,
                                                                 VsoCredentialScope,
                                                                 secrets,
@@ -364,26 +364,27 @@ namespace Microsoft.TeamFoundation.CredentialHelper
                     Trace.WriteLine("   authority is Azure Directory");
 
                     Guid tenantId = Guid.Empty;
-                    // return a generic AAD backed VSO authentication object
-                    return new VsoAadAuthentication(Guid.Empty, VsoCredentialScope, secrets);
+                    // return the allocated authority or a generic AAD backed VSO authentication object
+                    return authority ?? new VsoAadAuthentication(Guid.Empty, VsoCredentialScope, secrets);
 
                 case AuthorityType.Basic:
                 default:
                     Trace.WriteLine("   authority is basic");
 
                     // return a generic username + password authentication object
-                    return new BasicAuthentication(secrets);
+                    return authority ?? new BasicAuthentication(secrets);
 
                 case AuthorityType.GitHub:
                     Trace.WriteLine("    authority it GitHub");
 
-                    return new GithubAuthentication(GithubCredentialScope, secrets);
+                    // return a GitHub authenitcation object
+                    return authority ?? new GithubAuthentication(GithubCredentialScope, secrets);
 
                 case AuthorityType.MicrosoftAccount:
                     Trace.WriteLine("   authority is Microsoft Live");
 
-                    // return a generic MSA backed VSO authentication object
-                    return new VsoMsaAuthentication(VsoCredentialScope, secrets);
+                    // return the allocated authority or a generic MSA backed VSO authentication object
+                    return authority ?? new VsoMsaAuthentication(VsoCredentialScope, secrets);
             }
         }
 
