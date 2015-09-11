@@ -18,7 +18,7 @@ namespace Microsoft.TeamFoundation.CredentialHelper
             this.WriteLog = false;
 
             string line;
-            while (!String.IsNullOrWhiteSpace((line = Console.In.ReadLine())))
+            while (!String.IsNullOrWhiteSpace((line = stdin.ReadLine())))
             {
                 string[] pair = line.Split(new[] { '=' }, 2);
 

@@ -17,8 +17,6 @@ namespace Microsoft.TeamFoundation.Authentication
             if (!Directory.Exists(directory))
                 throw new DirectoryNotFoundException(directory);
 
-            _values = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
-
             LoadGitConfiguation(directory);
         }
 
@@ -26,7 +24,12 @@ namespace Microsoft.TeamFoundation.Authentication
             : this(Environment.CurrentDirectory)
         { }
 
-        private readonly Dictionary<string, string> _values;
+        internal Configuration(TextReader configReader)
+        {
+            ParseGitConfig(configReader, _values);
+        }
+
+        private readonly Dictionary<string, string> _values = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
 
         public string this[string key]
         {
@@ -143,11 +146,20 @@ namespace Microsoft.TeamFoundation.Authentication
             if (!File.Exists(configPath))
                 return;
 
+            using (var sr = new StreamReader(File.OpenRead(configPath)))
+            {
+                ParseGitConfig(sr, _values);
+            }
+        }
+
+        internal static void ParseGitConfig(TextReader tr, IDictionary<string, string> destination)
+        {
             Match match = null;
             string section = null;
 
             // parse each line in the config independently - Git's configs do not accept multi-line values
-            foreach (var line in File.ReadLines(configPath))
+            string line;
+            while ((line = tr.ReadLine()) != null)
             {
                 // skip empty and commented lines
                 if (String.IsNullOrWhiteSpace(line))
@@ -157,7 +169,7 @@ namespace Microsoft.TeamFoundation.Authentication
 
                 // sections begin with values like [section] or [section "section name"]. All subsequent lines,
                 // until a new section is encountered, are children of the section
-                if ((match = Regex.Match(line, @"^\s*\[\s*(\w+)\s*(\""[^\""]+\""){0,1}\]", RegexOptions.Compiled | RegexOptions.CultureInvariant)).Success)
+                if ((match = Regex.Match(line, @"^\s*\[\s*(\w+)\s*(\""[^\]]+){0,1}\]", RegexOptions.Compiled | RegexOptions.CultureInvariant)).Success)
                 {
                     if (match.Groups.Count >= 2 && !String.IsNullOrWhiteSpace(match.Groups[1].Value))
                     {
@@ -209,13 +221,13 @@ namespace Microsoft.TeamFoundation.Authentication
                         }
 
                         // add or update the (key, value)
-                        if (_values.ContainsKey(key))
+                        if (destination.ContainsKey(key))
                         {
-                            _values[key] = val;
+                            destination[key] = val;
                         }
                         else
                         {
-                            _values.Add(key, val);
+                            destination.Add(key, val);
                         }
                     }
                 }
