@@ -40,5 +40,7 @@ To enable the Git Credential Manager logging, use the following:
 git config --global credential.helper.writelog true
 ```
 
+Log files will be written to the repo's local .git/ folder.
+
 ## License
 [License](https://github.com/Microsoft/Git-Credential-Manager-for-Windows/blob/master/LICENSE.txt)
