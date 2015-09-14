@@ -2,7 +2,7 @@
 using System.Diagnostics;
 using System.IO;
 using System.Text;
-using Microsoft.TeamFoundation.Authentication;
+using Microsoft.Alm.Authentication;
 
 namespace Microsoft.TeamFoundation.CredentialHelper
 {
