@@ -1,5 +1,5 @@
  # Git Credential Manager for Windows
-The [Git Credential Manager for Windows](https://github.com/Microsoft/Git-Credential-Manager-for-Windows) provides secure Git credential storage for Windows. It's the successor to the [Windows Credential Store for Git (git-credential-winstore)](https://gitcredentialstore.codeplex.com/), which is not longer maintained.
+The [Git Credential Manager for Windows](https://github.com/Microsoft/Git-Credential-Manager-for-Windows) provides secure Git credential storage for Windows. It's the successor to the [Windows Credential Store for Git  (git-credential-winstore)](https://gitcredentialstore.codeplex.com/), which is not longer maintained.
 
 This project provides the functionality from the Windows Credential Store for
 Git(git-credential-winstore), and new features, including:
@@ -53,4 +53,4 @@ git config --global credential.helper.writelog true
 Log files will be written to the repo's local `.git/` folder.
 
 ## License
-This project uses the [MIT License](https://github.com/Microsoft/Git-Credential-Manager-for-Windows/blob/master/LICENSE.txt)
+This project uses the [MIT License](https://github.com/Microsoft/Git-Credential-Manager-for-Windows/blob/master/LICENSE.txt).
