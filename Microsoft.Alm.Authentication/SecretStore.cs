@@ -171,6 +171,11 @@ namespace Microsoft.Alm.Authentication
                                              .TrimEnd();
             string targetName = String.Format(TokenNameFormat, _namespace, targetUri.Scheme, trimmedHostUrl);
 
+            if (!targetUri.IsDefaultPort)
+            {
+                targetName += ":" + targetUri.Port;
+            }
+
             Trace.WriteLine("   target name = " + targetName);
 
             return targetName;
