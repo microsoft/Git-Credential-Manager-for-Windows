@@ -40,24 +40,28 @@ SET netfxInstalled=0
     (REG QUERY %netfxClient%| findstr "Release"| findstr /I "0x5C786" 1>nul 2>&1) && SET netfxInstalled=1
     (REG QUERY %netfxClient%| findstr "Release"| findstr /I "0x5CBF5" 1>nul 2>&1) && SET netfxInstalled=1
     (REG QUERY %netfxClient%| findstr "Release"| findstr /I "0x6004F" 1>nul 2>&1) && SET netfxInstalled=1
+    (REG QUERY %netfxClient%| findstr "Release"| findstr /I "0x60050" 1>nul 2>&1) && SET netfxInstalled=1
     (REG QUERY %netfxClient%| findstr "Release"| findstr /I "0x60051" 1>nul 2>&1) && SET netfxInstalled=1
 
     (REG QUERY %netfxClient%| findstr "Release"| findstr /I "378675" 1>nul 2>&1) && SET netfxInstalled=1
     (REG QUERY %netfxClient%| findstr "Release"| findstr /I "378758" 1>nul 2>&1) && SET netfxInstalled=1
     (REG QUERY %netfxClient%| findstr "Release"| findstr /I "379893" 1>nul 2>&1) && SET netfxInstalled=1
     (REG QUERY %netfxClient%| findstr "Release"| findstr /I "393295" 1>nul 2>&1) && SET netfxInstalled=1
+    (REG QUERY %netfxClient%| findstr "Release"| findstr /I "393296" 1>nul 2>&1) && SET netfxInstalled=1
     (REG QUERY %netfxClient%| findstr "Release"| findstr /I "393297" 1>nul 2>&1) && SET netfxInstalled=1
 
     (REG QUERY %netfxFull%| findstr "Release"| findstr /I "0x5C733" 1>nul 2>&1) && SET netfxInstalled=1
     (REG QUERY %netfxFull%| findstr "Release"| findstr /I "0x5C786" 1>nul 2>&1) && SET netfxInstalled=1
     (REG QUERY %netfxFull%| findstr "Release"| findstr /I "0x5CBF5" 1>nul 2>&1) && SET netfxInstalled=1
     (REG QUERY %netfxFull%| findstr "Release"| findstr /I "0x6004F" 1>nul 2>&1) && SET netfxInstalled=1
+    (REG QUERY %netfxFull%| findstr "Release"| findstr /I "0x60050" 1>nul 2>&1) && SET netfxInstalled=1
     (REG QUERY %netfxFull%| findstr "Release"| findstr /I "0x60051" 1>nul 2>&1) && SET netfxInstalled=1
 
     (REG QUERY %netfxFull%| findstr "Release"| findstr /I "378675" 1>nul 2>&1) && SET netfxInstalled=1
     (REG QUERY %netfxFull%| findstr "Release"| findstr /I "378758" 1>nul 2>&1) && SET netfxInstalled=1
     (REG QUERY %netfxFull%| findstr "Release"| findstr /I "379893" 1>nul 2>&1) && SET netfxInstalled=1
     (REG QUERY %netfxFull%| findstr "Release"| findstr /I "393295" 1>nul 2>&1) && SET netfxInstalled=1
+    (REG QUERY %netfxFull%| findstr "Release"| findstr /I "393296" 1>nul 2>&1) && SET netfxInstalled=1
     (REG QUERY %netfxFull%| findstr "Release"| findstr /I "393297" 1>nul 2>&1) && SET netfxInstalled=1
 
     IF %netfxInstalled% NEQ 1 (
