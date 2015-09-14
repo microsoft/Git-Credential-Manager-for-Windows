@@ -1,5 +1,5 @@
-# Git Credential Manager for Windows
-The [Git Credential Manager for Windows](https://github.com/Microsoft/Git-Credential-Manager-for-Windows) provides secure Git credential storage for Windows devices. It's the successor to the [Windows Credential Store for Git](https://gitcredentialstore.codeplex.com/), which is not longer maintained. All future developement will happen here and we've implemented a few of the features requests from the Windows Credential Store for Git, such as support for two-factor authentication on GitHub and use the standard Git prompt for credential input. In addition to these features, we've added support for Visual Studio Online authentication so it's easy to generate a personal access token and respond to a muti-factor authentication challegne from Microsot Account or Azure Active Directory.
+ # Git Credential Manager for Windows
+The [Git Credential Manager for Windows](https://github.com/Microsoft/Git-Credential-Manager-for-Windows) provides secure Git credential storage for Windows devices. It's the successor to the [Windows Credential Store for Git](https://gitcredentialstore.codeplex.com/), which is not longer maintained. All future development will happen here and we've implemented a few of the features requests from the Windows Credential Store for Git, such as support for two-factor authentication on GitHub and use the standard Git prompt for credential input. In addition to these features, we've added support for Visual Studio Online authentication so it's easy to generate a personal access token and respond to a muti-factor authentication challenge from Microsoft Account or Azure Active Directory.
 
 This is a community project so feel free to contribute ideas, submit bugs, or code new features and fix bugs.
 
@@ -40,7 +40,7 @@ To enable the Git Credential Manager logging, use the following:
 git config --global credential.helper.writelog true
 ```
 
-Log files will be written to the repo's local .git/ folder.
+Log files will be written to the repo's local `.git/` folder.
 
 ## License
 [License](https://github.com/Microsoft/Git-Credential-Manager-for-Windows/blob/master/LICENSE.txt)
