@@ -16,7 +16,7 @@ Build agents often need to minimize the amount of network traffic they generate.
 
 To avoid Microsoft Account vs. Azure Active Directory look-up against a Visual Studio Online account use: 
 ```
-git config --global credential.helper.authority AAD
+git config --global credential.helper.authority Azure
 ```
 
 To avoid unnecessary service account credential validation use: 
