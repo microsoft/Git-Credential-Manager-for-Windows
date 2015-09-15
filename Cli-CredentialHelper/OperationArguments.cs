@@ -2,7 +2,7 @@
 using System.Diagnostics;
 using System.IO;
 using System.Text;
-using Microsoft.TeamFoundation.Authentication;
+using Microsoft.Alm.Authentication;
 
 namespace Microsoft.TeamFoundation.CredentialHelper
 {
@@ -85,12 +85,20 @@ namespace Microsoft.TeamFoundation.CredentialHelper
             builder.Append("path=")
                    .Append(this.Path ?? String.Empty)
                    .Append("\n");
-            builder.Append("username=")
-                   .Append(this.Username ?? String.Empty)
-                   .Append("\n");
-            builder.Append("password=")
-                   .Append(this.Password ?? String.Empty)
-                   .Append("\n");
+            // only write out username if we know it
+            if (this.Username != null)
+            {
+                builder.Append("username=")
+                       .Append(this.Username)
+                       .Append("\n");
+            }
+            // only write out password if we know it
+            if (this.Password != null)
+            {
+                builder.Append("password=")
+                       .Append(this.Password)
+                       .Append("\n");
+            }
 
             return builder.ToString();
         }
