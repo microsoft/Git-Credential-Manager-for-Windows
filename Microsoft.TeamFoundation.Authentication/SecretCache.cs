@@ -68,8 +68,8 @@ namespace Microsoft.TeamFoundation.Authentication
         /// Reads credentials for a target URI from the credential store
         /// </summary>
         /// <param name="targetUri">The URI of the target for which credentials are being read</param>
-        /// <param name="credentials">The credentials from the store; null if failure</param>
-        /// <returns>True if success; false if failure</returns>
+        /// <param name="credentials">The credentials from the store; <see langword="null"/> if failure</param>
+        /// <returns><see langword="true"/> if success; <see langword="false"/> if failure</returns>
         public bool ReadCredentials(Uri targetUri, out Credential credentials)
         {
             BaseSecureStore.ValidateTargetUri(targetUri);
@@ -97,8 +97,8 @@ namespace Microsoft.TeamFoundation.Authentication
         /// Gets a token from the cache.
         /// </summary>
         /// <param name="targetUri">The key which to find the token.</param>
-        /// <param name="token">The token if successful; otherwise `null`.</param>
-        /// <returns>True if successful; false otherwise.</returns>
+        /// <param name="token">The token if successful; otherwise <see langword="null"/>.</param>
+        /// <returns><see langword="true"/> if successful; <see langword="false"/> otherwise.</returns>
         public bool ReadToken(Uri targetUri, out Token token)
         {
             BaseSecureStore.ValidateTargetUri(targetUri);

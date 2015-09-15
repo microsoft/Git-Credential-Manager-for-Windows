@@ -13,7 +13,7 @@ namespace Microsoft.TeamFoundation.Authentication
         /// <param name="name">The name of the application, without extension, to find.</param>
         /// <param name="path">Path to the first match file which the operating system considers 
         /// executable.</param>
-        /// <returns>True if succeeds; false otherwise.</returns>
+        /// <returns><see langword="True"/> if succeeds; <see langword="false"/> otherwise.</returns>
         static public bool App(string name, out string path)
         {
             if (!String.IsNullOrWhiteSpace(name))
@@ -52,7 +52,7 @@ namespace Microsoft.TeamFoundation.Authentication
         /// Gets the path to the Git global configuration file.
         /// </summary>
         /// <param name="path">Path to the Git global configuration</param>
-        /// <returns>True if succeeds; false otherwise.</returns>
+        /// <returns><see langword="True"/> if succeeds; <see langword="false"/> otherwise.</returns>
         public static bool GitGlobalConfig(out string path)
         {
             const string GlobalConfigFileName = ".gitconfig";
@@ -72,9 +72,9 @@ namespace Microsoft.TeamFoundation.Authentication
         /// <summary>
         /// Gets the path to the Git local configuration file based on the <paramref name="startingDirectory"/>.
         /// </summary>
-        /// <param name="startingDirectory">A directory of the repository where the configuration file is contained..</param>
+        /// <param name="startingDirectory">A directory of the repository where the configuration file is contained.</param>
         /// <param name="path">Path to the Git local configuration</param>
-        /// <returns>True if succeeds; false otherwise.</returns>
+        /// <returns><see langword="True"/> if succeeds; <see langword="false"/> otherwise.</returns>
         public static bool GitLocalConfig(string startingDirectory, out string path)
         {
             const string GitOdbFolderName = ".git";
@@ -172,7 +172,7 @@ namespace Microsoft.TeamFoundation.Authentication
         /// Gets the path to the Git local configuration file based on the current working directory.
         /// </summary>
         /// <param name="path">Path to the Git local configuration.</param>
-        /// <returns>True if succeeds; false otherwise.</returns>
+        /// <returns><see langword="True"/> if succeeds; <see langword="false"/> otherwise.</returns>
         public static bool GitLocalConfig(out string path)
         {
             return GitLocalConfig(Environment.CurrentDirectory, out path);
@@ -182,7 +182,7 @@ namespace Microsoft.TeamFoundation.Authentication
         /// Gets the path to the Git system configuration file.
         /// </summary>
         /// <param name="path">Path to the Git system configuration.</param>
-        /// <returns>True if succeeds; false otherwise.</returns>
+        /// <returns><see langword="True"/> if succeeds; <see langword="false"/> otherwise.</returns>
         public static bool GitSystemConfig(out string path)
         {
             const string SystemConfigFileName = "gitconfig";

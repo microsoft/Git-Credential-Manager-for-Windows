@@ -9,11 +9,10 @@ namespace Microsoft.TeamFoundation.Authentication
     public sealed class BasicAuthentication : BaseAuthentication, IAuthentication
     {
         /// <summary>
-        /// Creats a new <see cref="BasicAuthentication"/> object with a prefix used to interact
-        /// with the underlying credential storage.
+        /// Creates a new <see cref="BasicAuthentication"/> object with an underlying credential store.
         /// </summary>
-        /// <param name="credentialPrefix">
-        /// Value use to parition values stored in the underlying credential storage.
+        /// <param name="credentialStore">
+        /// The <see cref="ICredentialStore"/> to delegate to.
         /// </param>
         public BasicAuthentication(ICredentialStore credentialStore)
         {
@@ -29,7 +28,7 @@ namespace Microsoft.TeamFoundation.Authentication
         /// Deletes a <see cref="Credential"/> from the storage used by the authentication object.
         /// </summary>
         /// <param name="targetUri">
-        /// The uniform resource indicator used to uniquely identitfy the credentials.
+        /// The uniform resource indicator used to uniquely identify the credentials.
         /// </param>
         public override void DeleteCredentials(Uri targetUri)
         {
@@ -43,13 +42,13 @@ namespace Microsoft.TeamFoundation.Authentication
         /// Gets a <see cref="Credential"/> from the storage used by the authentication object.
         /// </summary>
         /// <param name="targetUri">
-        /// The uniform resource indicator used to uniquely identitfy the credentials.
+        /// The uniform resource indicator used to uniquely identify the credentials.
         /// </param>
         /// <param name="credentials">
         /// If successful a <see cref="Credential"/> object from the authentication object, 
-        /// authority or storage; otherwise `null`.
+        /// authority or storage; otherwise <see langword="null"/>.
         /// </param>
-        /// <returns>True if successful; otherwise false.</returns>
+        /// <returns><see langword="true"/> if successful; otherwise <see langword="false"/>.</returns>
         public override bool GetCredentials(Uri targetUri, out Credential credentials)
         {
             BaseSecureStore.ValidateTargetUri(targetUri);
@@ -61,13 +60,13 @@ namespace Microsoft.TeamFoundation.Authentication
             return credentials != null;
         }
         /// <summary>
-        /// Sets a <see cref="Credential"/> in the storage used by the authentication object.otr
+        /// Sets a <see cref="Credential"/> in the storage used by the authentication object.
         /// </summary>
         /// <param name="targetUri">
-        /// The uniform resource indicator used to uniquely identitfy the credentials.
+        /// The uniform resource indicator used to uniquely identify the credentials.
         /// </param>
         /// <param name="credentials">The value to be stored.</param>
-        /// <returns>True if successful; otherwise false.</returns>
+        /// <returns><see langword="true"/> if successful; otherwise <see langword="false"/>.</returns>
         public override bool SetCredentials(Uri targetUri, Credential credentials)
         {
             BaseSecureStore.ValidateTargetUri(targetUri);

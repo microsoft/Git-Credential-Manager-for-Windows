@@ -37,7 +37,7 @@ namespace Microsoft.TeamFoundation.Authentication
         private ITokenStore _tokenCache;
 
         /// <summary>
-        /// Deleted credentials for target URI from the credential store
+        /// Deletes credentials for target URI from the credential store
         /// </summary>
         /// <param name="targetUri">The URI of the target for which credentials are being deleted</param>
         public void DeleteCredentials(Uri targetUri)
@@ -54,9 +54,9 @@ namespace Microsoft.TeamFoundation.Authentication
         }
 
         /// <summary>
-        /// Deleted credentials for target URI from the credential store
+        /// Deletes the token for target URI from the token store
         /// </summary>
-        /// <param name="targetUri">The URI of the target for which credentials are being deleted</param>
+        /// <param name="targetUri">The URI of the target for which the token is being deleted</param>
         public void DeleteToken(Uri targetUri)
         {
             ValidateTargetUri(targetUri);
@@ -73,8 +73,8 @@ namespace Microsoft.TeamFoundation.Authentication
         /// Reads credentials for a target URI from the credential store
         /// </summary>
         /// <param name="targetUri">The URI of the target for which credentials are being read</param>
-        /// <param name="credentials">The credentials from the store; null if failure</param>
-        /// <returns>True if success; false if failure</returns>
+        /// <param name="credentials">The credentials from the store; <see langword="null"/> if failure</param>
+        /// <returns><see langword="true"/> if success; <see langword="false"/> if failure</returns>
         public bool ReadCredentials(Uri targetUri, out Credential credentials)
         {
             ValidateTargetUri(targetUri);
@@ -92,11 +92,11 @@ namespace Microsoft.TeamFoundation.Authentication
         }
 
         /// <summary>
-        /// Reads credentials for a target URI from the credential store
+        /// Reads a token for a target URI from the token store
         /// </summary>
-        /// <param name="targetUri">The URI of the target for which credentials are being read</param>
-        /// <param name="token">The token from the store; null if failure</param>
-        /// <returns>True if success; false if failure</returns>
+        /// <param name="targetUri">The URI of the target for which a token is being read</param>
+        /// <param name="token">The token from the store; <see langword="null"/> if failure</param>
+        /// <returns><see langword="true"/> if success; <see langword="false"/> if failure</returns>
         public bool ReadToken(Uri targetUri, out Token token)
         {
             ValidateTargetUri(targetUri);
@@ -134,9 +134,9 @@ namespace Microsoft.TeamFoundation.Authentication
         }
 
         /// <summary>
-        /// Writes credentials for a target URI to the credential store
+        /// Writes a token for a target URI to the token store
         /// </summary>
-        /// <param name="targetUri">The URI of the target for which credentials are being stored</param>
+        /// <param name="targetUri">The URI of the target for which a token is being stored</param>
         /// <param name="token">The token to be stored</param>
         public void WriteToken(Uri targetUri, Token token)
         {

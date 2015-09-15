@@ -11,7 +11,7 @@ namespace Microsoft.TeamFoundation.Authentication
         /// Deletes a <see cref="Credential"/> from the storage used by the authentication object.
         /// </summary>
         /// <param name="targetUri">
-        /// The uniform resource indicator used to uniquely identitfy the credentials.
+        /// The uniform resource indicator used to uniquely identify the credentials.
         /// </param>
         public abstract void DeleteCredentials(Uri targetUri);
 
@@ -19,23 +19,23 @@ namespace Microsoft.TeamFoundation.Authentication
         /// Gets a <see cref="Credential"/> from the storage used by the authentication object.
         /// </summary>
         /// <param name="targetUri">
-        /// The uniform resource indicator used to uniquely identitfy the credentials.
+        /// The uniform resource indicator used to uniquely identify the credentials.
         /// </param>
         /// <param name="credentials">
         /// If successful a <see cref="Credential"/> object from the authentication object, 
-        /// authority or storage; otherwise `null`.
+        /// authority or storage; otherwise <see langword="null"/>.
         /// </param>
-        /// <returns>True if successful; otherwise false.</returns>
+        /// <returns><see langword="true"/> if successful; otherwise <see langword="false"/>.</returns>
         public abstract bool GetCredentials(Uri targetUri, out Credential credentials);
 
         /// <summary>
         /// Sets a <see cref="Credential"/> in the storage used by the authentication object.
         /// </summary>
         /// <param name="targetUri">
-        /// The uniform resource indicator used to uniquely identitfy the credentials.
+        /// The uniform resource indicator used to uniquely identify the credentials.
         /// </param>
         /// <param name="credentials">The value to be stored.</param>
-        /// <returns>True if successful; otherwise false.</returns>
+        /// <returns><see langword="true"/> if successful; otherwise <see langword="false"/>.</returns>
         public abstract bool SetCredentials(Uri targetUri, Credential credentials);
     }
 }

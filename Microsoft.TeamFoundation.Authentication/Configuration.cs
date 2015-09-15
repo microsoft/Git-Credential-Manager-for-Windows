@@ -13,7 +13,7 @@ namespace Microsoft.TeamFoundation.Authentication
         public Configuration(string directory)
         {
             if (String.IsNullOrWhiteSpace(directory))
-                throw new ArgumentNullException("currentDirectory");
+                throw new ArgumentNullException("directory");
             if (!Directory.Exists(directory))
                 throw new DirectoryNotFoundException(directory);
 
@@ -44,7 +44,7 @@ namespace Microsoft.TeamFoundation.Authentication
         public bool TryGetEntry(string prefix, string key, string suffix, out Entry entry)
         {
             Debug.Assert(prefix != null, "The prefix parameter is null");
-            Debug.Assert(suffix != null, "The suffic parameter is null");
+            Debug.Assert(suffix != null, "The suffix parameter is null");
 
             string match = String.IsNullOrEmpty(key)
                 ? String.Format("{0}.{1}", prefix, suffix)
@@ -66,7 +66,7 @@ namespace Microsoft.TeamFoundation.Authentication
         {
             Debug.Assert(key != null, "The key parameter is null");
 
-            Trace.WriteLine("Configuration::GetGitConfigEntry");
+            Trace.WriteLine("Configuration::TryGetEntry");
 
             if (targetUri != null)
             {
@@ -109,7 +109,7 @@ namespace Microsoft.TeamFoundation.Authentication
             Trace.WriteLine("Configuration::LoadGitConfiguation");
 
             // read Git's three configs from lowest priority to highest, overwriting values as
-            // higher prirority configurations are parsed, storing them in a handy lookup table
+            // higher priority configurations are parsed, storing them in a handy lookup table
 
             // find and parse Git's system config
             if (Where.GitSystemConfig(out systemConfig))
@@ -138,7 +138,7 @@ namespace Microsoft.TeamFoundation.Authentication
         private void ParseGitConfig(string configPath)
         {
             Debug.Assert(!String.IsNullOrWhiteSpace(configPath), "The configPath parameter is null or invalid.");
-            Debug.Assert(File.Exists(configPath), "The configPath parameter references a non-existant file.");
+            Debug.Assert(File.Exists(configPath), "The configPath parameter references a non-existent file.");
             Debug.Assert(_values != null, "The configPath parameter is null or invalid.");
 
             Trace.WriteLine("Configuration::ParseGitConfig");

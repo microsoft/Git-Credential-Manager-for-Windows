@@ -77,7 +77,7 @@ namespace Microsoft.TeamFoundation.CredentialHelper
             Console.Out.WriteLine("usage: git credential <command> [<args>]");
             Console.Out.WriteLine();
             Console.Out.WriteLine("   authority      Defines the type of authentication to be used.");
-            Console.Out.WriteLine("                  Supportd Auto, Basic, AAD, MSA, and Integrated.");
+            Console.Out.WriteLine("                  Supports Auto, Basic, AAD, MSA, and Integrated.");
             Console.Out.WriteLine("                  Default is Auto.");
             Console.Out.WriteLine();
             Console.Out.WriteLine("      `git config --global credential.microsoft.visualstudio.com.authority AAD`");
@@ -89,9 +89,9 @@ namespace Microsoft.TeamFoundation.CredentialHelper
             Console.Out.WriteLine("      `git config --global credential.microsoft.visualstudio.com.interactive never`");
             Console.Out.WriteLine();
             Console.Out.WriteLine("   validate       Causes validation of credentials before supplying them");
-            Console.Out.WriteLine("                  to Git. Invalid credentials are attemped to refreshed");
+            Console.Out.WriteLine("                  to Git. Invalid credentials get a refresh attempt");
             Console.Out.WriteLine("                  before failing. Incurs some minor overhead.");
-            Console.Out.WriteLine("                  Defaults to TRUE. Ignore by Basic authority.");
+            Console.Out.WriteLine("                  Defaults to TRUE. Ignored by Basic authority.");
             Console.Out.WriteLine();
             Console.Out.WriteLine("      `git config --global credential.microsoft.visualstudio.com.validate false`");
             Console.Out.WriteLine();
@@ -540,7 +540,7 @@ namespace Microsoft.TeamFoundation.CredentialHelper
         [Conditional("DEBUG")]
         private static void EnableDebugTrace()
         {
-            // use the stderr stream for the trace as stdout is used in the cross-process communcations protocol
+            // use the stderr stream for the trace as stdout is used in the cross-process communications protocol
             Trace.Listeners.Add(new ConsoleTraceListener(useErrorStream: true));
         }
     }

@@ -34,7 +34,7 @@ namespace Microsoft.TeamFoundation.Authentication
         private readonly VsoAdalTokenCache _adalTokenCache;
 
         /// <summary>
-        /// The URL use to interact with the Azure identity service.
+        /// The URL used to interact with the Azure identity service.
         /// </summary>
         public string AuthorityHostUrl { get; protected set; }
 
@@ -53,10 +53,10 @@ namespace Microsoft.TeamFoundation.Authentication
         /// Address to return to upon receiving a response from the authority.
         /// </param>
         /// <param name="queryParameters">
-        /// Optional: appended as is to the query string in the HTTP authentication request to the 
+        /// Optional: appended as-is to the query string in the HTTP authentication request to the
         /// authority.
         /// </param>
-        /// <returns>If successful a <see cref="TokenPair"/>; otherwise `null`.</returns>
+        /// <returns>If successful a <see cref="TokenPair"/>; otherwise <see langword="null"/>.</returns>
         public TokenPair AcquireToken(Uri targetUri, string clientId, string resource, Uri redirectUri, string queryParameters = null)
         {
             Debug.Assert(targetUri != null && targetUri.IsAbsoluteUri, "The targetUri parameter is null or invalid");
@@ -98,7 +98,7 @@ namespace Microsoft.TeamFoundation.Authentication
         /// Identifier of the target resource that is the recipient of the requested token.
         /// </param>
         /// <param name="credentials">Optional: user credential to use for token acquisition.</param>
-        /// <returns>If successful a <see cref="TokenPair"/>; otherwise `null`.</returns>
+        /// <returns>If successful a <see cref="TokenPair"/>; otherwise <see langword="null"/>.</returns>
         public async Task<TokenPair> AcquireTokenAsync(Uri targetUri, string clientId, string resource, Credential credentials = null)
         {
             Debug.Assert(targetUri != null && targetUri.IsAbsoluteUri, "The targetUri parameter is null or invalid");
@@ -138,7 +138,7 @@ namespace Microsoft.TeamFoundation.Authentication
         /// </param>
         /// <param name="refreshToken">The <see cref="Token"/> of type <see cref="TokenType.Refresh"/>
         /// to be used to acquire the access token.</param>
-        /// <returns>If successful a <see cref="TokenPair"/>; otherwise `null`.</returns>
+        /// <returns>If successful a <see cref="TokenPair"/>; otherwise <see langword="null"/>.</returns>
         public async Task<TokenPair> AcquireTokenByRefreshTokenAsync(Uri targetUri, string clientId, string resource, Token refreshToken)
         {
             Debug.Assert(targetUri != null && targetUri.IsAbsoluteUri, "The targetUri parameter is null or invalid");
