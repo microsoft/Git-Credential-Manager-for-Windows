@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
-namespace Microsoft.TeamFoundation.Authentication.Test
+namespace Microsoft.Alm.Authentication.Test
 {
     /// <summary>
     /// A class to test <see cref="Configuration"/>.
