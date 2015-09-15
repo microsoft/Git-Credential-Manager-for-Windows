@@ -22,19 +22,23 @@ namespace Microsoft.Alm.Authentication
         /// (optional) Write-through, read-first cache. Default cache is used if a custom cache is 
         /// not provided.
         /// </param>
-        public SecretStore(string @namespace, ICredentialStore credentialCache = null, ITokenStore tokenCache = null)
+        public SecretStore(string @namespace, ICredentialStore credentialCache = null, ITokenStore tokenCache = null, Secret.UriNameConversion getTargetName = null)
         {
             if (String.IsNullOrWhiteSpace(@namespace) || @namespace.IndexOfAny(IllegalCharacters) != -1)
                 throw new ArgumentNullException("prefix", "The `prefix` parameter is null or invalid.");
 
+            _getTargetName = getTargetName ?? Secret.UriToName;
+
             _namespace = @namespace;
-            _credentialCache = credentialCache ?? new SecretCache(@namespace);
-            _tokenCache = tokenCache ?? new SecretCache(@namespace);
+            _credentialCache = credentialCache ?? new SecretCache(@namespace, _getTargetName);
+            _tokenCache = tokenCache ?? new SecretCache(@namespace, _getTargetName);
         }
 
         private string _namespace;
         private ICredentialStore _credentialCache;
         private ITokenStore _tokenCache;
+
+        private readonly Secret.UriNameConversion _getTargetName;
 
         /// <summary>
         /// Deletes credentials for target URI from the credential store
@@ -159,26 +163,11 @@ namespace Microsoft.Alm.Authentication
         /// <returns>Properly formatted TargetName string</returns>
         protected override string GetTargetName(Uri targetUri)
         {
-            const string TokenNameFormat = "{0}:{1}://{2}";
-
             Debug.Assert(targetUri != null, "The targetUri parameter is null");
 
             Trace.WriteLine("SecretStore::GetTargetName");
 
-            // trim any trailing slashes and/or whitespace for compat with git-credential-winstore
-            string trimmedHostUrl = targetUri.Host
-                                             .TrimEnd('/', '\\')
-                                             .TrimEnd();
-            string targetName = String.Format(TokenNameFormat, _namespace, targetUri.Scheme, trimmedHostUrl);
-
-            if (!targetUri.IsDefaultPort)
-            {
-                targetName += ":" + targetUri.Port;
-            }
-
-            Trace.WriteLine("   target name = " + targetName);
-
-            return targetName;
+            return _getTargetName(targetUri, _namespace);
         }
     }
 }

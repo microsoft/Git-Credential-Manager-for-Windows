@@ -471,7 +471,7 @@ namespace Microsoft.TeamFoundation.CredentialHelper
 
         private static void LogEvent(string message, EventLogEntryType eventType)
         {
-            const string EventSource = "Git Credential Manager";
+            //const string EventSource = "Git Credential Manager";
 
             /*** commented out due to UAC issues which require a proper installer to work around ***/
 

@@ -13,14 +13,16 @@ namespace Microsoft.Alm.Authentication
 
         private static readonly Dictionary<string, Secret> _cache;
 
-        public SecretCache(string @namespace)
+        public SecretCache(string @namespace, Secret.UriNameConversion getTargetName = null)
         {
             Debug.Assert(!String.IsNullOrWhiteSpace(@namespace), "The namespace parameter is null or invalid");
 
             _namespace = @namespace;
+            _getTargetName = getTargetName ?? Secret.UriToName;
         }
 
         private readonly string _namespace;
+        private readonly Secret.UriNameConversion _getTargetName;
 
         /// <summary>
         /// Deletes a credential from the cache.
@@ -176,23 +178,18 @@ namespace Microsoft.Alm.Authentication
             }
         }
 
+        /// <summary>
+        /// Formats a TargetName string based on the TargetUri base on the format started by git-credential-winstore
+        /// </summary>
+        /// <param name="targetUri">Uri of the target</param>
+        /// <returns>Properly formatted TargetName string</returns>
         private string GetTargetName(Uri targetUri)
         {
-            const string PrimaryNameFormat = "{0}{1}://{2}";
-
-            Debug.Assert(targetUri != null && targetUri.IsAbsoluteUri, "The targetUri parameter is null or invalid");
+            Debug.Assert(targetUri != null, "The targetUri parameter is null");
 
             Trace.WriteLine("SecretCache::GetTargetName");
 
-            // trim any trailing slashes and/or whitespace for compat with git-credential-winstore
-            string trimmedHostUrl = targetUri.Host
-                                             .TrimEnd('/', '\\')
-                                             .TrimEnd();
-            string targetName = String.Format(PrimaryNameFormat, _namespace, targetUri.Scheme, trimmedHostUrl);
-
-            Trace.WriteLine("   target name = " + targetName);
-
-            return targetName;
+            return _getTargetName(targetUri, _namespace);
         }
     }
 }
