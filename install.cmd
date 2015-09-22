@@ -2,23 +2,24 @@
 :: Check http://ss64.com/nt/syntax.html
 @ECHO OFF
 
+:: global constants
 SET gitExtensionName="Microsoft Git Credential Manager for Windows"
 SET name=manager
 SET exeName=git-credential-%name%.exe
+
+:: global variables
 SET installPath=%~dp0
 SET gitInstalled=0
 SET netfxInstalled=0
 SET pathToGit=""
 
+:: parameter variables
 SET paramGitPath=""
 SET paramNetfx=0
 SET paramInstallTo=""
 
-
-:HELLO
-
-    ECHO Hello! I'll install %gitExtensionName%.
-    ECHO(
+:: clean up quoted values
+CALL :DEQUOTE gitExtensionName
 
 
 :PARAMETERS
@@ -89,6 +90,12 @@ SET paramInstallTo=""
 :PARAMETERS_END
 
     SETLOCAL DISABLEDELAYEDEXPANSION
+
+
+:HELLO
+
+    ECHO Hello! I'll install %gitExtensionName%.
+    ECHO(
 
 
 :CHECK_PERMISSIONS
@@ -317,5 +324,19 @@ SET paramInstallTo=""
 :PRINT_HELP
 
     :: Print help information
+    ECHO:%exeName% [[--install-to ^<path^>] [--git-path ^<path-to-git^>] --no-netfx]
+    ECHO(
+    ECHO: --install-to  Specifies a path to install to. This is in addition to to
+    ECHO:               any Git installation locations detected.
+    ECHO(
+    ECHO: --git-path    Specifies a location to look for git.exe when installing
+    ECHO:               in addition to any Git installation locations detected.
+    ECHO(
+    ECHO: --no-netfx    Specifies that the installer should NOT detect if the
+    ECHO:               Microsoft .NET Framwork (aka NetFX) is installed or not
+    ECHO:               and that the installer should progress regardless.
+    ECHO(
+
+    EXIT /B 0
 
 
