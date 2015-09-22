@@ -1,4 +1,4 @@
-﻿namespace Microsoft.TeamFoundation.CredentialHelper
+﻿namespace Microsoft.Alm.CredentialHelper
 {
     /// <summary>
     /// Type of authentication and identity authority expected.

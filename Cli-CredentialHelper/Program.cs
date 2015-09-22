@@ -6,7 +6,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.Alm.Authentication;
 
-namespace Microsoft.TeamFoundation.CredentialHelper
+namespace Microsoft.Alm.CredentialHelper
 {
     class Program
     {

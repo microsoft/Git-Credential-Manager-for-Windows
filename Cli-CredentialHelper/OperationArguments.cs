@@ -4,7 +4,7 @@ using System.IO;
 using System.Text;
 using Microsoft.Alm.Authentication;
 
-namespace Microsoft.TeamFoundation.CredentialHelper
+namespace Microsoft.Alm.CredentialHelper
 {
     internal sealed class OperationArguments
     {

@@ -1,4 +1,4 @@
-﻿namespace Microsoft.TeamFoundation.CredentialHelper
+﻿namespace Microsoft.Alm.CredentialHelper
 {
     /// <summary>
     /// Level of interactivity allowed and enabled.
