@@ -19,19 +19,19 @@ If you just want to use the Git Credential Manager for Windows, you can download
 ## Build agents
 Build agents cannot manage modal dialogs, therefore we recommended the following configuration.
 ```
-git config --global credential.helper.interactive never
+git config --global credential.interactive never
 ```
 
 Build agents often need to minimize the amount of network traffic they generate. 
 
 To avoid Microsoft Account vs. Azure Active Directory look-up against a Visual Studio Online account use: 
 ```
-git config --global credential.helper.authority Azure
+git config --global credential.authority Azure
 ```
 
 To avoid unnecessary service account credential validation use: 
 ```
-git config --global credential.helper.validate false
+git config --global credential.validate false
 ```
 
 ## Contribute
@@ -47,7 +47,7 @@ Please submit a Contributor License Agreement (CLA) before submitting a pull req
 ## Debugging
 To enable the Git Credential Manager logging, use the following:
 ```
-git config --global credential.helper.writelog true
+git config --global credential.writelog true
 ```
 
 Log files will be written to the repo's local `.git/` folder.
