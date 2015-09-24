@@ -3,16 +3,19 @@
 @ECHO OFF
 
 :: global constants
-SET title="Microsoft Git Credential Manager for Windows"
 SET powershell=0
+
+IF "%~1" EQU "--help" (
+    GOTO :PRINT_HELP
+)
+IF "%~1" EQU "/?" (
+    GOTO :PRINT_HELP
+)
 
 :ADMIN_DETECT
 
     :: Installation requires elevated privileges to write to the `Program Files` directories
-    net session 2>&1 1>nul
-    IF %errorLevel% NEQ 0 (
-        GOTO :ADMIN_NOT_FOUND
-    )
+    (net session 2>&1 1>nul) || GOTO :ADMIN_NOT_FOUND
 
 
 :POWERSHELL_DETECT
@@ -27,45 +30,56 @@ SET powershell=0
         GOTO :POWERSHELL_NOT_FOUND
     )
 
-    (powershell -nologo -file install.ps1 "%title%" %*) || GOTO :FAILURE
+    (powershell -file install.ps1 %*) || GOTO :FAILURE
 
 
 :SUCCESS
-
-    ECHO(
-    ECHO Success! %title% was installed! ^^_^^
-    ECHO(
 
     EXIT /B 0
 
 
 :FAILURE
 
-    ECHO(
+    ECHO.
     ECHO Something went wrong and I was unable to complete the installation. U_U
-    PAUSE
 
-    EXIT /B 1
+    EXIT /B %errorlevel%
 
 
 :ADMIN_NOT_FOUND
 
     :: Script requires elevated privileges
-    ECHO(
+    ECHO.
     ECHO You need to run this script elevated for it to work. U_U
-    PAUSE
 
     EXIT /B 2
 
 
 :POWERSHELL_NOT_FOUND
 
-    ECHO(
+    ECHO.
     ECHO Failed to detect Microsoft PowerShell. Make sure it is installed. U_U
     ECHO Don't know where to get Microsoft Powershell? Try http://bit.ly/1KuWq86
-    ECHO(
-    PAUSE
 
     EXIT /B 3
+
+
+:PRINT_HELP
+
+    ECHO.
+    ECHO install [[--git-path ^<path-to-git^>] [--install-to ^<installation-path^>] [--skip-netfx]]
+    ECHO.
+    ECHO: --git-path    Specifies a location to look for git.exe when installing in
+    ECHO:               addition to any Git installation locations detected.
+    ECHO.
+    ECHO: --install-to  Specifies a path to install to. This is in addition to any Git
+    ECHO:               installation locations detected.
+    ECHO.
+    ECHO: --skip-netfx  Specifies that the installer should skip the detection of the
+    ECHO:               Microsoft .NET Framwork (aka netfx) and that the installer should
+    ECHO:               progress regardless.
+    ECHO.
+
+    EXIT /B 0
 
 
