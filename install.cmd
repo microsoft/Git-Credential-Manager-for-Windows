@@ -27,7 +27,7 @@ SET powershell=0
         GOTO :POWERSHELL_NOT_FOUND
     )
 
-    (install.ps1 "%title%" %*) || GOTO :FAILURE
+    (powershell -nologo -file install.ps1 "%title%" %*) || GOTO :FAILURE
 
 
 :SUCCESS
