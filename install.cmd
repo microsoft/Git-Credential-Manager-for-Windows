@@ -29,8 +29,8 @@ IF "%~1" EQU "/?" (
     IF %powershell% NEQ 1 (
         GOTO :POWERSHELL_NOT_FOUND
     )
-
-    (powershell -file install.ps1 %*) || GOTO :FAILURE
+    
+    (powershell -executionpolicy bypass  -file "%~dp0\install.ps1" %*) || GOTO :FAILURE
 
 
 :SUCCESS
