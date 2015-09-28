@@ -80,7 +80,7 @@ function PerformSetup($paths) {
         $err = @()
         $files = @("Microsoft.Alm.Authentication.dll", 
                    "Microsoft.IdentityModel.Clients.ActiveDirectory.dll",
-                   "Microsoft.IdentityModel.Clients.ActiveDirectory.WindowsForms.dll"
+                   "Microsoft.IdentityModel.Clients.ActiveDirectory.WindowsForms.dll",
                    "git-credential-manager.exe")
         
         foreach ($file in $files) {
