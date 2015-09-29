@@ -3,11 +3,11 @@
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
-    <ProjectGuid>{FF70EB69-AE6D-4DCC-BA9F-12CB0C6581AE}</ProjectGuid>
+    <ProjectGuid>{5C9EF428-0D26-436A-A8BB-32E58357B36D}</ProjectGuid>
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>Microsoft.TeamFoundation.CredentialHelper.Test</RootNamespace>
-    <AssemblyName>Microsoft.TeamFoundation.CredentialHelper.Test</AssemblyName>
+    <RootNamespace>Microsoft.Alm.Git.Test</RootNamespace>
+    <AssemblyName>Microsoft.Alm.Git.Test</AssemblyName>
     <TargetFrameworkVersion>v4.5.2</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <ProjectTypeGuids>{3AC096D0-A1C2-E12C-1390-A8335801FDAB};{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}</ProjectTypeGuids>
@@ -54,13 +54,16 @@
     </Otherwise>
   </Choose>
   <ItemGroup>
-    <Compile Include="OperationArgumentsTests.cs" />
+    <Compile Include="ConfigurationTests.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\Cli-CredentialHelper\Cli-CredentialHelper.csproj">
-      <Project>{62f52119-63d4-40a8-a9df-f1c4b473308a}</Project>
-      <Name>Cli-CredentialHelper</Name>
+    <EmbeddedResource Include="sample.gitconfig" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\Microsoft.Alm.Git\Microsoft.Alm.Git.csproj">
+      <Project>{4827c16d-5c58-406d-ab3f-3700bb0d06fe}</Project>
+      <Name>Microsoft.Alm.Git</Name>
     </ProjectReference>
   </ItemGroup>
   <Choose>

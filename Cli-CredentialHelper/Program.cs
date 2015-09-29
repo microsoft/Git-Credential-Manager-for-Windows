@@ -5,6 +5,7 @@ using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.Alm.Authentication;
+using Microsoft.Alm.Git;
 
 namespace Microsoft.Alm.CredentialHelper
 {
@@ -17,6 +18,18 @@ namespace Microsoft.Alm.CredentialHelper
         private static readonly VsoTokenScope VsoCredentialScope = VsoTokenScope.CodeWrite | VsoTokenScope.PackagingRead;
         private static readonly GithubTokenScope GithubCredentialScope = GithubTokenScope.Gist | GithubTokenScope.PublicKeyRead | GithubTokenScope.Repo;
 
+        internal static string ExecutablePath
+        {
+            get
+            {
+                if (_exeutablePath == null)
+                {
+                    LoadAssemblyInformation();
+                }
+                return _exeutablePath;
+            }
+        }
+        private static string _exeutablePath;
         internal static string Location
         {
             get
@@ -92,8 +105,8 @@ namespace Microsoft.Alm.CredentialHelper
             }
             catch (Exception exception)
             {
-                Trace.WriteLine("Fatal: " + exception.ToString());
                 Console.Error.WriteLine("Fatal: " + exception.GetType().Name + " encountered.");
+                Trace.WriteLine("Fatal: " + exception.ToString());
                 LogEvent(exception.Message, EventLogEntryType.Error);
             }
 
@@ -430,7 +443,8 @@ namespace Microsoft.Alm.CredentialHelper
             var assembly = System.Reflection.Assembly.GetEntryAssembly();
             var asseName = assembly.GetName();
 
-            _location = assembly.Location;
+            _exeutablePath = assembly.Location;
+            _location = Path.GetDirectoryName(_exeutablePath);
             _name = asseName.Name;
             _version = asseName.Version;
         }
