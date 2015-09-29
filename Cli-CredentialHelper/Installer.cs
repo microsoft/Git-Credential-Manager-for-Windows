@@ -42,7 +42,7 @@ namespace Microsoft.Alm.CredentialHelper
                     if (args.Length > i + 1)
                     {
                         i += 1;
-                        _customGitPath = args[i];
+                        _customGit = args[i];
                     }
                 }
                 else if (String.Equals(args[i], ParamUnattendKey, StringComparison.OrdinalIgnoreCase))
@@ -65,7 +65,7 @@ namespace Microsoft.Alm.CredentialHelper
 
         private bool _unattended = false;
         private bool _skipNetfxTest = false;
-        private string _customGitPath = null;
+        private string _customGit = null;
         private string _customPath = null;
         private string _pathToGit = null;
 
@@ -82,7 +82,7 @@ namespace Microsoft.Alm.CredentialHelper
                 string regWowPath = Registry.GetValue(@"HKEY_LOCAL_MACHINE\SOFTWARE\Wow6432Node\Microsoft\Windows\CurrentVersion\Uninstall\Git_is1", "InstallLocation", String.Empty) as String;
                 string pf64path = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ProgramFiles), @"Git");
 
-                candidates = new []
+                candidates = new[]
                 {
                     new GitPaths(regNatPath, GitPaths.Version2_64bit),
                     new GitPaths(pf64path, GitPaths.Version2_64bit),
@@ -98,7 +98,7 @@ namespace Microsoft.Alm.CredentialHelper
             }
             else
             {
-                candidates = new []
+                candidates = new[]
                 {
                     new GitPaths(regNatPath, GitPaths.Version2_32bit),
                     new GitPaths(pf32path, GitPaths.Version2_32bit),
@@ -165,8 +165,6 @@ namespace Microsoft.Alm.CredentialHelper
                 Version netfxVersion;
                 if (_skipNetfxTest || DetectNetFx(out netfxVersion))
                 {
-                    bool deployed = false;
-
                     if (!String.IsNullOrWhiteSpace(_customPath))
                     {
                         if (!Directory.Exists(_customPath))
@@ -192,8 +190,6 @@ namespace Microsoft.Alm.CredentialHelper
                                 }
 
                                 Console.Out.WriteLine("        {0} file(s) copied", copiedFiles.Count);
-
-                                deployed = true;
                             }
                             else
                             {
@@ -238,10 +234,9 @@ namespace Microsoft.Alm.CredentialHelper
                                     Pause();
 
                                     Result = ResultValue.DeploymentFailed;
+                                    break;
                                 }
                             }
-
-                            deployed = true;
                         }
                         else
                         {
@@ -252,7 +247,7 @@ namespace Microsoft.Alm.CredentialHelper
                             Result = ResultValue.InvalidPathToGit;
                         }
 
-                        if (deployed && UpdateConfig())
+                        if (Result == ResultValue.Success && UpdateConfig())
                         {
                             Console.Out.WriteLine();
                             Console.Out.WriteLine("Updated your ~/.gitconfig [git config --global]");
@@ -263,6 +258,8 @@ namespace Microsoft.Alm.CredentialHelper
 
                             Result = ResultValue.Success;
                         }
+
+                        Pause();
                     }
                 }
                 else
@@ -367,12 +364,12 @@ namespace Microsoft.Alm.CredentialHelper
                 arguments.Append(" ")
                          .Append(ParamSkipFxKey);
             }
-            if (!String.IsNullOrEmpty(_customGitPath))
+            if (!String.IsNullOrEmpty(_customGit))
             {
                 arguments.Append(" ")
                          .Append(ParamGitPathKey)
                          .Append(" \"")
-                         .Append(_customGitPath)
+                         .Append(_customGit)
                          .Append("\"");
             }
             if (!String.IsNullOrEmpty(_customPath))
@@ -389,6 +386,7 @@ namespace Microsoft.Alm.CredentialHelper
             {
                 FileName = Program.Name,
                 Arguments = arguments.ToString(),
+                UseShellExecute = true, // shellexecute for verb usage
                 Verb = "runas", // used to invoke elevation
                 WorkingDirectory = Environment.CurrentDirectory,
             };
@@ -405,6 +403,7 @@ namespace Microsoft.Alm.CredentialHelper
 
         public enum ResultValue : int
         {
+            UnknownFailure = -1,
             Success = 0,
             InvalidPathToGit,
             InvalidCustomPath,
