@@ -57,7 +57,6 @@
     <Reference Include="System.Security" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Configuration.cs" />
     <Compile Include="GitHubAuthentication.cs" />
     <Compile Include="GithubAuthenticationResult.cs" />
     <Compile Include="GithubAuthority.cs" />
@@ -93,7 +92,6 @@
     <Compile Include="TokenRegistry.cs" />
     <Compile Include="SecretStore.cs" />
     <Compile Include="Secret.cs" />
-    <Compile Include="Where.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="app.config" />

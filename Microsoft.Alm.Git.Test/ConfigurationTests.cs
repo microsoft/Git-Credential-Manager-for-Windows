@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
-namespace Microsoft.Alm.Authentication.Test
+namespace Microsoft.Alm.Git.Test
 {
     /// <summary>
     /// A class to test <see cref="Configuration"/>.

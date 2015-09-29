@@ -5,23 +5,62 @@ using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.Alm.Authentication;
+using Microsoft.Alm.Git;
 
 namespace Microsoft.Alm.CredentialHelper
 {
     class Program
     {
+        public const string Title = "Git Credential Manager for Windows";
+
         private const string ConfigPrefix = "credential";
         private const string SecretsNamespace = "git";
-        private static readonly VsoTokenScope VsoCredentialScope = VsoTokenScope.CodeWrite;
+        private static readonly VsoTokenScope VsoCredentialScope = VsoTokenScope.CodeWrite | VsoTokenScope.PackagingRead;
         private static readonly GithubTokenScope GithubCredentialScope = GithubTokenScope.Gist | GithubTokenScope.PublicKeyRead | GithubTokenScope.Repo;
 
+        internal static string ExecutablePath
+        {
+            get
+            {
+                if (_exeutablePath == null)
+                {
+                    LoadAssemblyInformation();
+                }
+                return _exeutablePath;
+            }
+        }
+        private static string _exeutablePath;
+        internal static string Location
+        {
+            get
+            {
+                if (_location == null)
+                {
+                    LoadAssemblyInformation();
+                }
+                return _location;
+            }
+        }
+        private static string _location;
+        internal static string Name
+        {
+            get
+            {
+                if (_name == null)
+                {
+                    LoadAssemblyInformation();
+                }
+                return _name;
+            }
+        }
+        private static string _name;
         internal static Version Version
         {
             get
             {
                 if (_version == null)
                 {
-                    _version = System.Reflection.Assembly.GetEntryAssembly().GetName().Version; ;
+                    LoadAssemblyInformation();
                 }
                 return _version;
             }
@@ -49,21 +88,25 @@ namespace Microsoft.Alm.CredentialHelper
                     { "get", Get },
                     { "reject", Erase },
                     { "store", Store },
-                    { "version", PrintVersion }
+                    { "version", PrintVersion },
+                    { "install", Install },
                 };
 
-                foreach (string arg in args)
+                // invoke action specified by arg0
+                if (actions.ContainsKey(args[0]))
                 {
-                    if (actions.ContainsKey(arg))
-                    {
-                        actions[arg]();
-                    }
+                    actions[args[0]]();
+                }
+                else
+                {
+                    // display unknown command error
+                    Console.Error.WriteLine("Unknown command '{0}'. Please use {1} ? to display help.", args[0], Program.Name);
                 }
             }
             catch (Exception exception)
             {
-                Trace.WriteLine("Fatal: " + exception.ToString());
                 Console.Error.WriteLine("Fatal: " + exception.GetType().Name + " encountered.");
+                Trace.WriteLine("Fatal: " + exception.ToString());
                 LogEvent(exception.Message, EventLogEntryType.Error);
             }
 
@@ -193,8 +236,8 @@ namespace Microsoft.Alm.CredentialHelper
                                 && (!operationArguments.ValidateCredentials
                                     || await aadAuth.ValidateCredentials(operationArguments.TargetUri, credentials)))
                             || (operationArguments.Interactivity != Interactivity.Always
-                                && await aadAuth.NoninteractiveLogon(operationArguments.TargetUri, true)
-                                && aadAuth.GetCredentials(operationArguments.TargetUri, out credentials)
+                                    && await aadAuth.NoninteractiveLogon(operationArguments.TargetUri, true)
+                                    && aadAuth.GetCredentials(operationArguments.TargetUri, out credentials)
                                 && (!operationArguments.ValidateCredentials
                                     || await aadAuth.ValidateCredentials(operationArguments.TargetUri, credentials)))
                             || (operationArguments.Interactivity != Interactivity.Never
@@ -314,6 +357,13 @@ namespace Microsoft.Alm.CredentialHelper
             Console.Out.WriteLine("Microsoft Git Credential Manager for Windows version {0}", Version.ToString(3));
         }
 
+        private static void Install()
+        {
+            var installer = new Installer();
+            installer.RunConsole();
+            Environment.Exit(installer.ExitCode);
+        }
+
         private static BaseAuthentication CreateAuthentication(OperationArguments operationArguments)
         {
             Debug.Assert(operationArguments != null, "The operationArguments is null");
@@ -386,6 +436,17 @@ namespace Microsoft.Alm.CredentialHelper
                     // return the allocated authority or a generic MSA backed VSO authentication object
                     return authority ?? new VsoMsaAuthentication(VsoCredentialScope, secrets);
             }
+        }
+
+        private static void LoadAssemblyInformation()
+        {
+            var assembly = System.Reflection.Assembly.GetEntryAssembly();
+            var asseName = assembly.GetName();
+
+            _exeutablePath = assembly.Location;
+            _location = Path.GetDirectoryName(_exeutablePath);
+            _name = asseName.Name;
+            _version = asseName.Version;
         }
 
         private static void LoadOperationArguments(OperationArguments operationArguments)
@@ -532,7 +593,7 @@ namespace Microsoft.Alm.CredentialHelper
                     // write a small header to help with identifying new log entries
                     listener.WriteLine(Environment.NewLine);
                     listener.WriteLine(String.Format("Log Start ({0:u})", DateTimeOffset.Now));
-                    listener.WriteLine(String.Format("Microsoft Git Credential Manager for Windows version {0}", Version.ToString(3)));
+                    listener.WriteLine(String.Format("Microsoft {0} version {0}", Program.Title, Version.ToString(3)));
                 }
             }
         }

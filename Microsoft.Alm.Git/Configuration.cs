@@ -4,10 +4,12 @@ using System.Diagnostics;
 using System.IO;
 using System.Text.RegularExpressions;
 
-namespace Microsoft.Alm.Authentication
+namespace Microsoft.Alm.Git
 {
     public sealed class Configuration
     {
+        public static readonly string[] LegalConfigNames = { "local", "global", "system" };
+
         private const char HostSplitCharacter = '.';
 
         public Configuration(string directory)

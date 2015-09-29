@@ -12,7 +12,6 @@ EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Installer", "Installer", "{55A29D70-EC6E-46B3-9685-46AE828ECB5F}"
 	ProjectSection(SolutionItems) = preProject
 		install.cmd = install.cmd
-		install.ps1 = install.ps1
 	EndProjectSection
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Cli-CredentialHelper.Test", "Cli-CredentialHelper.Test\Cli-CredentialHelper.Test.csproj", "{FF70EB69-AE6D-4DCC-BA9F-12CB0C6581AE}"
@@ -22,6 +21,10 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Documents", "Documents", "{
 		LICENSE.TXT = LICENSE.TXT
 		README.md = README.md
 	EndProjectSection
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Microsoft.Alm.Git", "Microsoft.Alm.Git\Microsoft.Alm.Git.csproj", "{4827C16D-5C58-406D-AB3F-3700BB0D06FE}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Microsoft.Alm.Git.Test", "Microsoft.Alm.Git.Test\Microsoft.Alm.Git.Test.csproj", "{5C9EF428-0D26-436A-A8BB-32E58357B36D}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -45,8 +48,19 @@ Global
 		{FF70EB69-AE6D-4DCC-BA9F-12CB0C6581AE}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{FF70EB69-AE6D-4DCC-BA9F-12CB0C6581AE}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{FF70EB69-AE6D-4DCC-BA9F-12CB0C6581AE}.Release|Any CPU.Build.0 = Release|Any CPU
+		{4827C16D-5C58-406D-AB3F-3700BB0D06FE}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{4827C16D-5C58-406D-AB3F-3700BB0D06FE}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{4827C16D-5C58-406D-AB3F-3700BB0D06FE}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{4827C16D-5C58-406D-AB3F-3700BB0D06FE}.Release|Any CPU.Build.0 = Release|Any CPU
+		{5C9EF428-0D26-436A-A8BB-32E58357B36D}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{5C9EF428-0D26-436A-A8BB-32E58357B36D}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{5C9EF428-0D26-436A-A8BB-32E58357B36D}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{5C9EF428-0D26-436A-A8BB-32E58357B36D}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+		{55A29D70-EC6E-46B3-9685-46AE828ECB5F} = {663DC05D-FDC6-4EAB-AC4B-983D486B92B9}
 	EndGlobalSection
 EndGlobal
