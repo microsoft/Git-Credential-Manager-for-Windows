@@ -2,13 +2,14 @@
 The [Git Credential Manager for Windows](https://github.com/Microsoft/Git-Credential-Manager-for-Windows) provides secure Git credential storage for Windows. It's the successor to the [Windows Credential Store for Git  (git-credential-winstore)](https://gitcredentialstore.codeplex.com/), which is no longer maintained.
 
 This project provides the same functionality as the Windows Credential Store for
-Git(git-credential-winstore), and new features, including:
+Git (git-credential-winstore), and new features, including:
 
  * Secure password storage in the Windows Credential Store
- * Non-interative mode with multiple settings for build agents
+ * Multi-factor authentication against Visual Studio Online.
  * Two-factor authentication for GitHub authentication
- * Visual Studio Online authentication including Multi-Factor Authentication,
-   using a personal access token, for Microsoft Account or Azure Active Directory
+ * Non-interative mode, when authenticating against Visual Studio Online backed by Azure Directory
+ * Optional settings for build agent optimization
+ * Support for Personal Access Token generation and usage, for both Visual Studio Online and GitHub.
 
 This is a community project so feel free to contribute ideas, submit bugs, fix bugs, or code new features.
 
