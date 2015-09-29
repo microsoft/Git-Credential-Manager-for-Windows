@@ -5,11 +5,11 @@ This project provides the same functionality as the Windows Credential Store for
 Git (git-credential-winstore), and new features, including:
 
  * Secure password storage in the Windows Credential Store
- * Multi-factor authentication against Visual Studio Online.
- * Two-factor authentication for GitHub authentication
- * Non-interative mode, when authenticating against Visual Studio Online backed by Azure Directory
+ * Multi-factor authentication support for Visual Studio Online.
+ * Two-factor authentication support for GitHub
+ * Personal Access Token generation and usage support for Visual Studio Online and GitHub
+ * Non-interative mode support for Visual Studio Online backed by Azure Directory
  * Optional settings for build agent optimization
- * Support for Personal Access Token generation and usage, for both Visual Studio Online and GitHub.
 
 This is a community project so feel free to contribute ideas, submit bugs, fix bugs, or code new features.
 
