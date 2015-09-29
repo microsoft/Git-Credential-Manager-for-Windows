@@ -12,6 +12,7 @@ namespace Microsoft.Alm.CredentialHelper
     class Program
     {
         public const string Title = "Git Credential Manager for Windows";
+        public const string SourceUrl = "https://github.com/Microsoft/Git-Credential-Manager-for-Windows";
 
         private const string ConfigPrefix = "credential";
         private const string SecretsNamespace = "git";
@@ -354,7 +355,7 @@ namespace Microsoft.Alm.CredentialHelper
         {
             Trace.WriteLine("Program::Version");
 
-            Console.Out.WriteLine("Microsoft Git Credential Manager for Windows version {0}", Version.ToString(3));
+            Console.Out.WriteLine("{0} version {1}", Title, Version.ToString(3));
         }
 
         private static void Install()
