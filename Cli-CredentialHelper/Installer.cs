@@ -18,6 +18,7 @@ namespace Microsoft.Alm.CredentialHelper
         private static readonly IReadOnlyList<string> Files = new List<string>
         {
             "Microsoft.Alm.Authentication.dll",
+            "Microsoft.Alm.Git.dll",
             "Microsoft.IdentityModel.Clients.ActiveDirectory.dll",
             "Microsoft.IdentityModel.Clients.ActiveDirectory.WindowsForms.dll",
             "git-credential-manager.exe"
