@@ -7,7 +7,7 @@ This project includes:
  * Multi-factor authentication support for Visual Studio Online.
  * Two-factor authentication support for GitHub
  * Personal Access Token generation and usage support for Visual Studio Online and GitHub
- * Non-interative mode support for Visual Studio Online backed by Azure Directory
+ * Non-interactive mode support for Visual Studio Online backed by Azure Directory
  * Optional settings for build agent optimization
 
 This is a community project so feel free to contribute ideas, submit bugs, fix bugs, or code new features.
