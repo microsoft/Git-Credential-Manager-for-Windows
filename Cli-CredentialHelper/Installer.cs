@@ -18,6 +18,7 @@ namespace Microsoft.Alm.CredentialHelper
         private static readonly IReadOnlyList<string> Files = new List<string>
         {
             "Microsoft.Alm.Authentication.dll",
+            "Microsoft.Alm.Git.dll",
             "Microsoft.IdentityModel.Clients.ActiveDirectory.dll",
             "Microsoft.IdentityModel.Clients.ActiveDirectory.WindowsForms.dll",
             "git-credential-manager.exe"
@@ -139,22 +140,37 @@ namespace Microsoft.Alm.CredentialHelper
                             Console.Out.WriteLine();
                             Console.Out.WriteLine("Deploying to custom path: '{0}'.", _customPath);
 
-                            List<string> copiedFiles;
-                            if (CopyFiles(Program.Location, _customPath, out copiedFiles))
+                            GitInstallation customPath;
+                            if (Where.FindGitInstallation(_customPath, KnownGitDistribution.GitForWindows64v2, out customPath)
+                                || Where.FindGitInstallation(_customPath, KnownGitDistribution.GitForWindows32v2, out customPath)
+                                || Where.FindGitInstallation(_customPath, KnownGitDistribution.GitForWindows32v1, out customPath))
                             {
-                                foreach (string file in copiedFiles)
+                                List<string> copiedFiles;
+                                if (CopyFiles(Program.Location, customPath.Libexec, out copiedFiles))
                                 {
-                                    Console.Out.WriteLine("  {0}", file);
-                                }
+                                    foreach (string file in copiedFiles)
+                                    {
+                                        Console.Out.WriteLine("  {0}", file);
+                                    }
 
-                                Console.Out.WriteLine("        {0} file(s) copied", copiedFiles.Count);
+                                    Console.Out.WriteLine("        {0} file(s) copied", copiedFiles.Count);
+                                }
+                                else
+                                {
+                                    Console.Error.WriteLine("  deployment failed. U_U");
+                                    Pause();
+
+                                    Result = ResultValue.FileCopyFailed;
+                                }
                             }
                             else
                             {
-                                Console.Error.WriteLine("  deployment failed. U_U");
+                                Console.Error.WriteLine();
+                                Console.Error.WriteLine("Fatal: custom path does not conform to expected layout. U_U", _customPath);
                                 Pause();
 
-                                Result = ResultValue.FileCopyFailed;
+                                Result = ResultValue.InvalidCustomPath;
+                                return;
                             }
                         }
                     }
@@ -163,21 +179,21 @@ namespace Microsoft.Alm.CredentialHelper
                         Console.WriteLine();
                         Console.WriteLine("Looking for Git installation(s)...");
 
-                        List<string> paths;
-                        if (Where.Git(out _pathToGit, out paths))
+                        List<GitInstallation> installations;
+                        if (Where.FindGitInstallations(out _pathToGit, out installations))
                         {
-                            foreach (string path in paths)
+                            foreach (var installation in installations)
                             {
-                                Console.Out.WriteLine("  {0}", path);
+                                Console.Out.WriteLine("  {0}", installation.Path);
                             }
 
-                            foreach (string path in paths)
+                            foreach (var installation in installations)
                             {
                                 Console.Out.WriteLine();
-                                Console.Out.WriteLine("Deploying from '{0}' to '{1}'.", Program.Location, path);
+                                Console.Out.WriteLine("Deploying from '{0}' to '{1}'.", Program.Location, installation.Path);
 
                                 List<string> copiedFiles;
-                                if (CopyFiles(Program.Location, path, out copiedFiles))
+                                if (CopyFiles(Program.Location, installation.Libexec, out copiedFiles))
                                 {
                                     foreach (string file in copiedFiles)
                                     {
@@ -209,11 +225,11 @@ namespace Microsoft.Alm.CredentialHelper
                         {
                             Console.Out.WriteLine();
 
-                            if (SetGitConfig("system"))
+                            if (SetSystemConfig(installations))
                             {
                                 Console.Out.WriteLine("Updated your /etc/gitconfig [git config --system]");
 
-                                if (SetGitConfig("global"))
+                                if (SetGlobalConfig())
                                 {
                                     Console.Out.WriteLine("Updated your ~/.gitconfig [git config --global]");
                                 }
@@ -227,7 +243,10 @@ namespace Microsoft.Alm.CredentialHelper
                             }
                             else
                             {
-                                Result = ResultValue.GitConfigGlobalFailed;
+                                Console.Error.WriteLine();
+                                Console.Error.WriteLine("Fatal: Unable to update your /etc/gitconfig correctly.");
+
+                                Result = ResultValue.GitConfigSystemFailed;
                                 return;
                             }
 
@@ -235,14 +254,17 @@ namespace Microsoft.Alm.CredentialHelper
                             {
                                 Console.Out.WriteLine();
                                 Console.Out.WriteLine("Success! {0} was installed! ^_^", Program.Title);
+
+                                Pause();
                             }
                             else
                             {
+                                Console.Error.WriteLine();
+                                Console.Error.WriteLine("Fatal: An error occured. U_U", Program.Title);
 
+                                Pause();
                             }
                         }
-
-                        Pause();
                     }
                 }
                 else
@@ -275,20 +297,15 @@ namespace Microsoft.Alm.CredentialHelper
             }
         }
 
-        public bool SetGitConfig(string configName)
+        public bool SetGlobalConfig()
         {
-            if (String.IsNullOrWhiteSpace(configName))
-                throw new ArgumentNullException("configName", "The configName parameter cannot be null.");
-            if (!Configuration.LegalConfigNames.Contains(configName))
-                throw new ArgumentException("Only legal values are " + String.Join(", ", Configuration.LegalConfigNames) + ".", "configName");
-
-            Trace.WriteLine("Installer::UpdateConfig");
+            Trace.WriteLine("Installer::SetGlobalConfig");
 
             if (File.Exists(_pathToGit))
             {
                 var options = new ProcessStartInfo()
                 {
-                    Arguments = String.Format("config --{0} credential.helper manager", configName),
+                    Arguments = String.Format("config --global credential.helper manager"),
                     FileName = _pathToGit,
                     CreateNoWindow = true,
                     UseShellExecute = true,
@@ -306,6 +323,46 @@ namespace Microsoft.Alm.CredentialHelper
             }
 
             return false;
+        }
+
+        public bool SetSystemConfig(List<GitInstallation> installs)
+        {
+            if (installs == null)
+                throw new ArgumentNullException("installs", "The `installs` parameter cannot be null.");
+
+            Trace.WriteLine("Installer::SetSystemConfig");
+
+            int successCount = 0;
+
+            foreach (var install in installs)
+            {
+                if (File.Exists(install.Cmd))
+                {
+                    var options = new ProcessStartInfo()
+                    {
+                        Arguments = String.Format("config --global credential.helper manager"),
+                        FileName = install.Cmd,
+                        CreateNoWindow = true,
+                        UseShellExecute = true,
+                    };
+
+                    Trace.WriteLine("   cmd " + options.FileName + " " + options.Arguments + ".");
+
+                    var gitProcess = Process.Start(options);
+
+                    gitProcess.WaitForExit();
+
+                    Trace.WriteLine("   Git exited with " + gitProcess.ExitCode + ".");
+
+                    // record at least a single success
+                    if (gitProcess.ExitCode == 0)
+                    {
+                        successCount += 1;
+                    }
+                }
+            }
+
+            return successCount == installs.Count;
         }
 
         private bool CopyFiles(string srcPath, string dstPath, out List<string> copedFiles)
