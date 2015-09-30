@@ -6,10 +6,10 @@ using System.Runtime.InteropServices;
 // set of attributes. Change these attribute values to modify the information
 // associated with an assembly.
 [assembly: AssemblyTitle("Microsoft Application Lifecycle Management Authenitcation for Windows Test Suite")]
-[assembly: AssemblyDescription("")]
+[assembly: AssemblyDescription("Tests for the Microsoft.Alm.Authentication project.")]
 [assembly: AssemblyConfiguration("")]
 [assembly: AssemblyCompany("Microsoft Corporation")]
-[assembly: AssemblyProduct("Microsoft Application Lifecycle Management Authenitcation for Windows Test Suite")]
+[assembly: AssemblyProduct("https://github.com/Microsoft/Git-Credential-Manager-for-Windows")]
 [assembly: AssemblyCopyright("Copyright © Microsoft Corporation 2015")]
 [assembly: AssemblyTrademark("Microsoft")]
 [assembly: AssemblyCulture("")]
