@@ -424,67 +424,74 @@ namespace Microsoft.Alm.CredentialHelper
         {
             Trace.WriteLine("Installer::RunElevated");
 
-            /* cannot install while not elevated (need access to %PROGRAMFILES%), re-launch 
-               self as an elevated process with identical arguments. */
-
-            // build arguments
-            var arguments = new System.Text.StringBuilder("install");
             if (_unattended)
             {
-                arguments.Append(" ")
-                         .Append(ParamUnattendKey);
-            }
-            if (_skipNetfxTest)
-            {
-                arguments.Append(" ")
-                         .Append(ParamSkipFxKey);
-            }
-            if (!String.IsNullOrEmpty(_customGit))
-            {
-                arguments.Append(" ")
-                         .Append(ParamGitPathKey)
-                         .Append(" \"")
-                         .Append(_customGit)
-                         .Append("\"");
-            }
-            if (!String.IsNullOrEmpty(_customPath))
-            {
-                arguments.Append(" ")
-                         .Append(ParamSkipFxKey)
-                         .Append(" \"")
-                         .Append(_customPath)
-                         .Append("\"");
-            }
-
-            // build process start options
-            var options = new ProcessStartInfo()
-            {
-                FileName = "cmd",
-                Arguments = String.Format("/c \"{0}\" {1}", Program.ExecutablePath, arguments.ToString()),
-                UseShellExecute = true, // shellexecute for verb usage
-                Verb = "runas", // used to invoke elevation
-                WorkingDirectory = Program.Location,
-            };
-
-            Trace.WriteLine("   cmd " + options.Verb + " " + options.FileName + " " + options.Arguments);
-
-            try
-            {
-                // create the process
-                var elevated = Process.Start(options);
-
-                // wait for the process to complete
-                elevated.WaitForExit();
-
-                Trace.WriteLine("   process exited with " + elevated.ExitCode + ".");
-
-                // exit with the elevated process' exit code
-                this.ExitCode = elevated.ExitCode;
-            }
-            catch (Exception exception)
-            {
-                Trace.WriteLine("   process failed with " + exception.Message);
                 this.Result = ResultValue.Unprivileged;
+            }
+            else
+            {
+                /* cannot install while not elevated (need access to %PROGRAMFILES%), re-launch 
+                   self as an elevated process with identical arguments. */
+
+                // build arguments
+                var arguments = new System.Text.StringBuilder("install");
+                if (_unattended)
+                {
+                    arguments.Append(" ")
+                             .Append(ParamUnattendKey);
+                }
+                if (_skipNetfxTest)
+                {
+                    arguments.Append(" ")
+                             .Append(ParamSkipFxKey);
+                }
+                if (!String.IsNullOrEmpty(_customGit))
+                {
+                    arguments.Append(" ")
+                             .Append(ParamGitPathKey)
+                             .Append(" \"")
+                             .Append(_customGit)
+                             .Append("\"");
+                }
+                if (!String.IsNullOrEmpty(_customPath))
+                {
+                    arguments.Append(" ")
+                             .Append(ParamSkipFxKey)
+                             .Append(" \"")
+                             .Append(_customPath)
+                             .Append("\"");
+                }
+
+                // build process start options
+                var options = new ProcessStartInfo()
+                {
+                    FileName = "cmd",
+                    Arguments = String.Format("/c \"{0}\" {1}", Program.ExecutablePath, arguments.ToString()),
+                    UseShellExecute = true, // shellexecute for verb usage
+                    Verb = "runas", // used to invoke elevation
+                    WorkingDirectory = Program.Location,
+                };
+
+                Trace.WriteLine("   cmd " + options.Verb + " " + options.FileName + " " + options.Arguments);
+
+                try
+                {
+                    // create the process
+                    var elevated = Process.Start(options);
+
+                    // wait for the process to complete
+                    elevated.WaitForExit();
+
+                    Trace.WriteLine("   process exited with " + elevated.ExitCode + ".");
+
+                    // exit with the elevated process' exit code
+                    this.ExitCode = elevated.ExitCode;
+                }
+                catch (Exception exception)
+                {
+                    Trace.WriteLine("   process failed with " + exception.Message);
+                    this.Result = ResultValue.Unprivileged;
+                }
             }
         }
 
