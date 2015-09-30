@@ -53,13 +53,20 @@ namespace Microsoft.Alm.Git
             return false;
         }
 
+        public static bool FindGitInstallation(string path, KnownGitDistribution distro, out GitInstallation installation)
+        {
+            installation = new GitInstallation(path, distro);
+            return GitInstallation.IsValid(installation);
+        }
+
         /// <summary>
         /// Finds and returns paths to Git installtions in common locations.
         /// </summary>
+        /// <param name="hints">(optional) List of paths the caller believes Git can be found.</param>
         /// <param name="gitCmdPath">The best path to git.exe for CMD invocation.</param>
         /// <param name="paths">All discoverd paths to the root of Git installations.</param>
         /// <returns><see langword="True"/> if Git was detected; <see langword="false"/> otherwise.</returns>
-        public static bool Git(out string gitCmdPath, out List<string> paths)
+        public static bool FindGitInstallations(out string gitCmdPath, out List<GitInstallation> installations)
         {
             const string GitAppName = @"Git";
             const string GitSubkeyName = @"SOFTWARE\Microsoft\Windows\CurrentVersion\Uninstall\Git_is1";
@@ -68,7 +75,7 @@ namespace Microsoft.Alm.Git
             Trace.WriteLine("Where::Git");
 
             gitCmdPath = null;
-            paths = new List<string>();
+            installations = null;
 
             var pf32path = String.Empty;
             var pf64path = String.Empty;
@@ -112,7 +119,7 @@ namespace Microsoft.Alm.Git
                 }
             }
 
-            List<GitPath> candidates = new List<GitPath>();
+            List<GitInstallation> candidates = new List<GitInstallation>();
             // add candidate locations in order of preference
             if (Where.App(GitAppName, out envpath))
             {
@@ -123,45 +130,46 @@ namespace Microsoft.Alm.Git
                 envpath = Path.GetDirectoryName(envpath);
                 envpath = Path.GetDirectoryName(envpath);
 
-                candidates.Add(new GitPath(envpath, GitPath.Version2_64bit));
-                candidates.Add(new GitPath(envpath, GitPath.Version2_32bit));
-                candidates.Add(new GitPath(envpath, GitPath.Version1_32bit));
+                candidates.Add(new GitInstallation(envpath, KnownGitDistribution.GitForWindows64v2));
+                candidates.Add(new GitInstallation(envpath, KnownGitDistribution.GitForWindows32v2));
+                candidates.Add(new GitInstallation(envpath, KnownGitDistribution.GitForWindows32v1));
             }
+
             if (!String.IsNullOrEmpty(reg64path))
             {
-                candidates.Add(new GitPath(reg64path, GitPath.Version2_64bit));
+                candidates.Add(new GitInstallation(reg64path, KnownGitDistribution.GitForWindows64v2));
             }
             if (!String.IsNullOrEmpty(pf32path))
             {
-                candidates.Add(new GitPath(pf64path, GitPath.Version2_64bit));
+                candidates.Add(new GitInstallation(pf64path, KnownGitDistribution.GitForWindows64v2));
             }
             if (!String.IsNullOrEmpty(reg32path))
             {
-                candidates.Add(new GitPath(reg32path, GitPath.Version2_32bit));
-                candidates.Add(new GitPath(reg32path, GitPath.Version1_32bit));
+                candidates.Add(new GitInstallation(reg32path, KnownGitDistribution.GitForWindows32v2));
+                candidates.Add(new GitInstallation(reg32path, KnownGitDistribution.GitForWindows32v1));
             }
             if (!String.IsNullOrEmpty(pf32path))
             {
-                candidates.Add(new GitPath(pf32path, GitPath.Version2_32bit));
-                candidates.Add(new GitPath(pf32path, GitPath.Version1_32bit));
+                candidates.Add(new GitInstallation(pf32path, KnownGitDistribution.GitForWindows32v2));
+                candidates.Add(new GitInstallation(pf32path, KnownGitDistribution.GitForWindows32v1));
             }
 
-            HashSet<string> pathSet = new HashSet<string>();
+            HashSet<GitInstallation> pathSet = new HashSet<GitInstallation>();
             foreach (var candidate in candidates)
             {
-                if (Directory.Exists(candidate.Libexec) && File.Exists(candidate.Cmd))
+                if (GitInstallation.IsValid(candidate))
                 {
                     // trap the first (preferred) path to Git
-                    if (pathSet.Add(candidate.Path.TrimEnd('\\')) && String.IsNullOrEmpty(gitCmdPath))
+                    if (pathSet.Add(candidate) && gitCmdPath == null)
                     {
                         gitCmdPath = candidate.Cmd;
                     }
                 }
             }
 
-            paths = pathSet.ToList();
+            installations = pathSet.ToList();
 
-            return gitCmdPath != null;
+            return installations.Count > 0;
         }
 
         /// <summary>

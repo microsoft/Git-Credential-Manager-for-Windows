@@ -72,6 +72,11 @@ namespace Microsoft.Alm.CredentialHelper
         {
             try
             {
+                while (Trace.Listeners.Count > 0)
+                {
+                    Trace.Listeners.RemoveAt(0);
+                }
+
                 EnableDebugTrace();
 
                 if (args.Length == 0 || args[0].Contains('?'))
