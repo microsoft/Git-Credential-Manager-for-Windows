@@ -13,7 +13,7 @@ This project includes:
 This is a community project so feel free to contribute ideas, submit bugs, fix bugs, or code new features.
 
 ## Download and Install
-To use the Git Credential Manager for Windows, you can download the [latest installer](https://github.com/Microsoft/Git-Credential-Manager-for-Windows/releases). If you clone and build the repo, you can run install.cmd to install.
+To use the Git Credential Manager for Windows, you can download the [latest installer](https://github.com/Microsoft/Git-Credential-Manager-for-Windows/releases). To install, extract the .zip file and run install.cmd from an administrator command prompt.
 
 ## Build agents
 Build agents cannot manage modal dialogs, therefore we recommended the following configuration.
