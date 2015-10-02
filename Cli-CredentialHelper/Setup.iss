@@ -1,10 +1,13 @@
 ; This script requires Inno Setup Compiler 5.5.6 or later to compile
+; The Inno Setup Compiler (and IDE) can be found at http://www.jrsoftware.org/isinfo.php
+; The IDP plugin for Inno Setup is also required and can be found at https://mitrichsoftware.wordpress.com/inno-setup-tools/inno-download-plugin/
 
 #include <idp.iss>
 
 #define MyAppName "Git Credential Manager for Windows"
 #define MyAppVersion "0.9.14"
 #define MyAppPublisher "Microsoft Corporation"
+#define MyAppPublisherURL "http://www.microsoft.com"
 #define MyAppURL "https://github.com/Microsoft/Git-Credential-Manager-for-Windows"
 #define MyAppExeName "git-credential-manager.exe"
 
@@ -13,17 +16,20 @@ AppId={{9F0CBE43-690B-4C03-8845-6AC2CDB29815}
 AppName={#MyAppName}
 AppVersion={#MyAppVersion}
 AppPublisher={#MyAppPublisher}
-AppPublisherURL={#MyAppURL}
+AppPublisherURL={#MyAppPublisherURL}
 AppSupportURL={#MyAppURL}
 AppUpdatesURL={#MyAppURL}
+AppCopyright=Copyright © Microsoft 2015
+AppReadmeFile=https://github.com/Microsoft/Git-Credential-Manager-for-Windows/blob/master/README.md
+BackColor=clWhite
 BackSolid=yes
 DefaultDirName={userpf}\{#MyAppName}
 LicenseFile=..\Deploy\LICENSE.TXT
 OutputBaseFilename=Setup
-Compression=lzma2/ultra64
+Compression=lzma2
+InternalCompressLevel=ultra64
 SolidCompression=yes
 MinVersion=6.1.7600
-DisableProgramGroupPage=yes
 DisableDirPage=yes
 DisableReadyPage=yes
 SetupIconFile=Assets\gcmicon.ico
@@ -35,7 +41,14 @@ WizardImageStretch=no
 WindowResizable=no
 
 [Languages]
-Name: "english"; MessagesFile: "compiler:Default.isl"
+Name: "english"; MessagesFile: "compiler:Default.isl";
+
+[Types]
+Name: "full"; Description: "Full installation"; Flags: iscustom;
+
+[Components]
+Name: "NetFx"; Description: "The Microsoft .NET Framework 4.6."; ExtraDiskSpaceRequired: 381005824; Types: full; Flags: fixed; Check: DetectGitChecked;
+Name: "Git4Win"; Description: "Git for Windows 2.5.3."; ExtraDiskSpaceRequired: 394309632; Types: full; Flags: fixed; Check: DetectNetFxChecked;
 
 [Dirs]
 Name: "{tmp}\gcmSetup"
@@ -63,14 +76,20 @@ var
   bSuccess: Boolean;
   strValue: String;
 begin
-    Result := False;
+    Result := True;
 
-    bSuccess := RegQueryStringValue(HKLM, 'HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows\CurrentVersion\Uninstall\Git_is1', 'InstallLocation', strValue);
+    bSuccess := RegQueryStringValue(HKLM, 'SOFTWARE\Microsoft\Windows\CurrentVersion\Uninstall\Git_is1', 'InstallLocation', strValue)
+             or RegQueryStringValue(HKLM, 'SOFTWARE\Wow6432Node\Microsoft\Windows\CurrentVersion\Uninstall\Git_is1', 'InstallLocation', strValue);
+
     if not bSuccess then
       begin
         Result := False;
-        MsgBox('Git for Windows was not detected in the system.', mbError, MB_OK);
       end;
+end;
+
+function DetectGitChecked(): Boolean;
+begin
+  Result := not DetectGit();
 end;
 
 function DetectNetFx(version: NetFx_Version): Boolean;
@@ -129,48 +148,70 @@ begin
     end;
 end;
 
-function InstallFramework() : Boolean;
+function DetectNetFxChecked(): Boolean;
+begin
+  Result := not DetectNetFx(NetFx_v451);
+end;
+
+function InstallPrerequisites() : Boolean;
 var
+  bInstallFx40: Boolean;
+  bInstallFx46: Boolean;
+  bInstallGit: Boolean;
   StatusText: string;
   ResultCode: Integer;
 begin
   Result := True;
 
-  if FileExists(ExpandConstant('{tmp}\NetFx40Installer.exe')) then
+  bInstallFx40 := FileExists(ExpandConstant('{tmp}\NetFx40Installer.exe'));
+  bInstallFx46 := FileExists(ExpandConstant('{tmp}\NetFx46Installer.exe'));
+  bInstallGit := FileExists(ExpandConstant('{tmp}\Git-2.6.0-64-bit.exe'));
+
+  if bInstallFx40 or bInstallFx46 then
     begin
       StatusText := WizardForm.StatusLabel.Caption;
       WizardForm.StatusLabel.Caption := 'Installing .NET Framework. This might take a few minutes...';
       WizardForm.ProgressGauge.Style := npbstMarquee;
+
       try
-        if not Exec(ExpandConstant('{tmp}\NetFx40Installer.exe'), '/passive /norestart', '', SW_SHOW, ewWaitUntilTerminated, ResultCode) then
+        if bInstallFx40 then
           begin
-            Result := False;
-            MsgBox('.NET installation failed with code: ' + IntToStr(ResultCode) + '.', mbError, MB_OK);
+            if not Exec(ExpandConstant('{tmp}\NetFx40Installer.exe'), '/passive /norestart', '', SW_SHOW, ewWaitUntilTerminated, ResultCode) then
+              begin
+                Result := False;
+                MsgBox('.NET installation failed with code: ' + IntToStr(ResultCode) + '.', mbError, MB_OK);
+              end;
+          end;
+
+        if bInstallFx46 then
+          begin
+            if not Exec(ExpandConstant('{tmp}\NetFx46Installer.exe'), '/passive /norestart', '', SW_SHOW, ewWaitUntilTerminated, ResultCode) then
+              begin
+                Result := False;
+                MsgBox('.NET installation failed with code: ' + IntToStr(ResultCode) + '.', mbError, MB_OK);
+              end;
           end;
       finally
         WizardForm.StatusLabel.Caption := StatusText;
         WizardForm.ProgressGauge.Style := npbstNormal;
-
-        DeleteFile(ExpandConstant('{tmp}\NetFx40Installer.exe'));
       end;
     end;
 
-  if FileExists(ExpandConstant('{tmp}\NetFx46Installer.exe')) then
+  if bInstallGit then
     begin
       StatusText := WizardForm.StatusLabel.Caption;
-      WizardForm.StatusLabel.Caption := 'Installing .NET Framework. This might take a few minutes...';
+      WizardForm.StatusLabel.Caption := 'Installing Git for Windows. This might take a few minutes...';
       WizardForm.ProgressGauge.Style := npbstMarquee;
+
       try
-        if not Exec(ExpandConstant('{tmp}\NetFx46Installer.exe'), '/passive /norestart', '', SW_SHOW, ewWaitUntilTerminated, ResultCode) then
+        if not Exec(ExpandConstant('{tmp}\Git-2.6.0-64-bit.exe'), '/NOCANCEL', '', SW_SHOW, ewWaitUntilTerminated, ResultCode) then
           begin
             Result := False;
-            MsgBox('.NET installation failed with code: ' + IntToStr(ResultCode) + '.', mbError, MB_OK);
+            MsgBox('Installing Git for Windows failed with code: ' + IntToStr(ResultCode) + '.', mbError, MB_OK);
           end;
       finally
         WizardForm.StatusLabel.Caption := StatusText;
         WizardForm.ProgressGauge.Style := npbstNormal;
-
-        DeleteFile(ExpandConstant('{tmp}\NetFx46Installer.exe'));
       end;
     end;
 end;
@@ -210,6 +251,12 @@ begin
       idpAddFile('http://download.microsoft.com/download/1/4/A/14A6C422-0D3C-4811-A31F-5EF91A83C368/NDP46-KB3045560-Web.exe', ExpandConstant('{tmp}\NetFx46Installer.exe'));
       idpDownloadAfter(wpReady);
     end;
+
+  if not DetectGit() then
+    begin
+      idpAddFile('http://github.com/git-for-windows/git/releases/download/v2.6.0.windows.1/Git-2.6.0-64-bit.exe', ExpandConstant('{tmp}\Git-2.6.0-64-bit.exe'));
+      idpDownloadAfter(wpReady);
+    end;
 end;
 
 procedure CurStepChanged(CurStep: TSetupStep);
@@ -217,7 +264,7 @@ begin
   case CurStep of
     ssInstall:
       begin
-        if not (InstallFramework() and DetectGit()) then
+        if not (InstallPrerequisites()) then
           begin
             Abort();
           end;
@@ -227,7 +274,7 @@ begin
       begin
         if not (InstallManager()) then
           begin
-            Abort();
+            RaiseException('Fatal: An error occured when updating the local system.');
           end;
       end;
   end;  
