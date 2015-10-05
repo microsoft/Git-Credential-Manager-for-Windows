@@ -9,11 +9,6 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Microsoft.Alm.Authenticatio
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Microsoft.Alm.Authentication.Test", "Microsoft.Alm.Authentication.Test\Microsoft.Alm.Authentication.Test.csproj", "{0AEB1CFC-371F-415C-93C5-44CEAA0E9A34}"
 EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Installer", "Installer", "{55A29D70-EC6E-46B3-9685-46AE828ECB5F}"
-	ProjectSection(SolutionItems) = preProject
-		install.cmd = install.cmd
-	EndProjectSection
-EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Cli-CredentialHelper.Test", "Cli-CredentialHelper.Test\Cli-CredentialHelper.Test.csproj", "{FF70EB69-AE6D-4DCC-BA9F-12CB0C6581AE}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Documents", "Documents", "{663DC05D-FDC6-4EAB-AC4B-983D486B92B9}"
@@ -59,8 +54,5 @@ Global
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
-	EndGlobalSection
-	GlobalSection(NestedProjects) = preSolution
-		{55A29D70-EC6E-46B3-9685-46AE828ECB5F} = {663DC05D-FDC6-4EAB-AC4B-983D486B92B9}
 	EndGlobalSection
 EndGlobal

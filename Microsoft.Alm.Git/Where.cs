@@ -63,10 +63,12 @@ namespace Microsoft.Alm.Git
         /// Finds and returns paths to Git installtions in common locations.
         /// </summary>
         /// <param name="hints">(optional) List of paths the caller believes Git can be found.</param>
-        /// <param name="gitCmdPath">The best path to git.exe for CMD invocation.</param>
-        /// <param name="paths">All discoverd paths to the root of Git installations.</param>
+        /// <param name="paths">
+        /// All discoverd paths to the root of Git installations, ordered by 'priority' with first
+        /// being the best installation to use when shelling out to Git.exe.
+        /// </param>
         /// <returns><see langword="True"/> if Git was detected; <see langword="false"/> otherwise.</returns>
-        public static bool FindGitInstallations(out string gitCmdPath, out List<GitInstallation> installations)
+        public static bool FindGitInstallations(out List<GitInstallation> installations)
         {
             const string GitAppName = @"Git";
             const string GitSubkeyName = @"SOFTWARE\Microsoft\Windows\CurrentVersion\Uninstall\Git_is1";
@@ -74,7 +76,6 @@ namespace Microsoft.Alm.Git
 
             Trace.WriteLine("Where::Git");
 
-            gitCmdPath = null;
             installations = null;
 
             var pf32path = String.Empty;
@@ -123,9 +124,6 @@ namespace Microsoft.Alm.Git
             // add candidate locations in order of preference
             if (Where.App(GitAppName, out envpath))
             {
-                // prefer the version of Git on %PATH%
-                gitCmdPath = envpath;
-
                 // `Where.App` returns the path to the executable, truncate to the installation root
                 envpath = Path.GetDirectoryName(envpath);
                 envpath = Path.GetDirectoryName(envpath);
@@ -159,11 +157,7 @@ namespace Microsoft.Alm.Git
             {
                 if (GitInstallation.IsValid(candidate))
                 {
-                    // trap the first (preferred) path to Git
-                    if (pathSet.Add(candidate) && gitCmdPath == null)
-                    {
-                        gitCmdPath = candidate.Cmd;
-                    }
+                    pathSet.Add(candidate);
                 }
             }
 
