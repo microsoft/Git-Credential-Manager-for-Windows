@@ -75,7 +75,8 @@ namespace Microsoft.Alm.Git
 
         public override int GetHashCode()
         {
-            return Path.GetHashCode();
+            return Path.ToLowerInvariant()
+                       .GetHashCode();
         }
 
         public override String ToString()
