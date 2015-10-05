@@ -74,7 +74,10 @@ namespace Microsoft.Alm.CredentialHelper
             {
                 EnableDebugTrace();
 
-                if (args.Length == 0 || args[0].Contains('?'))
+                if (args.Length == 0 
+                    || String.Equals(args[0], "--help", StringComparison.OrdinalIgnoreCase)
+                    || String.Equals(args[0], "-h", StringComparison.OrdinalIgnoreCase)
+                    || args[0].Contains('?'))
                 {
                     PrintHelpMessage();
                     return;
@@ -85,12 +88,15 @@ namespace Microsoft.Alm.CredentialHelper
                 {
                     { "approve", Store },
                     { "erase", Erase },
+                    { "deploy", Deploy },
                     { "fill", Get },
                     { "get", Get },
+                    { "install", Deploy },
                     { "reject", Erase },
+                    { "remove", Remove },
                     { "store", Store },
+                    { "uninstall", Remove },
                     { "version", PrintVersion },
-                    { "install", Install },
                 };
 
                 // invoke action specified by arg0
@@ -118,21 +124,43 @@ namespace Microsoft.Alm.CredentialHelper
         {
             Trace.WriteLine("Program::PrintHelpMessage");
 
-            Console.Out.WriteLine("usage: git credential-manager [approve|erase|fill|get|reject|store|version|install] [<args>]");
+            Console.Out.WriteLine("usage: git credential-manager [approve|erase|deploy|fill|get|reject|remove|store|uninstall|version] [<args>]");
             Console.Out.WriteLine();
-            Console.Out.WriteLine("  install      Deploys the " + Title);
-            Console.Out.WriteLine("               package and configures Git installations to use it.");
+            Console.Out.WriteLine("Command Line Options:");
             Console.Out.WriteLine();
-            Console.Out.WriteLine("    --path     Specifies a path for the packaged to be deployed to.");
-            Console.Out.WriteLine("               If a path is provided, the installer will not copy binaries");
-            Console.Out.WriteLine("               into local Git installations.");
+            Console.Out.WriteLine("  deploy       Deploys the " + Title);
+            Console.Out.WriteLine("               package and sets Git configuration to use the helper.");
             Console.Out.WriteLine();
-            Console.Out.WriteLine("    --passive  Instructs the installer to not prompt the user for input");
-            Console.Out.WriteLine("               during installation and restricts output to error messages only.");
+            Console.Out.WriteLine("    " + Installer.ParamPathKey + "     Specifies a path for the installer to deploy to.");
+            Console.Out.WriteLine("               If a path is provided, the installer will not seek additional");
+            Console.Out.WriteLine("               Git installations to modify.");
             Console.Out.WriteLine();
-            Console.Out.WriteLine("    --forced   Instructs the installer to proceed with installtion even if");
-            Console.Out.WriteLine("               prerequisites are not met. When combined with --passive all output");
-            Console.Out.WriteLine("               is eliminated; only the return code can be used to validate success.");
+            Console.Out.WriteLine("    " + Installer.ParamPassiveKey + "  Instructs the installer to not prompt the user for input");
+            Console.Out.WriteLine("               during deployment and restricts output to error messages only.");
+            Console.Out.WriteLine("               When combined with " + Installer.ParamForceKey + " all output is eliminated; only the");
+            Console.Out.WriteLine("               return code can be used to validate success.");
+            Console.Out.WriteLine();
+            Console.Out.WriteLine("    " + Installer.ParamForceKey + "    Instructs the installer to proceed with deployment even if");
+            Console.Out.WriteLine("               prerequisites are not met or errors are encountered.");
+            Console.Out.WriteLine("               When combined with " + Installer.ParamPassiveKey + " all output is eliminated; only the");
+            Console.Out.WriteLine("               return code can be used to validate success.");
+            Console.Out.WriteLine();
+            Console.Out.WriteLine("  remove       Removes the " + Title);
+            Console.Out.WriteLine("               package and unsets Git configuration to no longer use the helper.");
+            Console.Out.WriteLine();
+            Console.Out.WriteLine("    " + Installer.ParamPathKey + "     Specifies a path for the installer to remove from.");
+            Console.Out.WriteLine("               If a path is provided, the installer will not seek additional");
+            Console.Out.WriteLine("               Git installations to modify.");
+            Console.Out.WriteLine();
+            Console.Out.WriteLine("    " + Installer.ParamPassiveKey + "  Instructs the installer to not prompt the user for input");
+            Console.Out.WriteLine("               during removal and restricts output to error messages only.");
+            Console.Out.WriteLine("               When combined with " + Installer.ParamForceKey + " all output is eliminated; only the");
+            Console.Out.WriteLine("               return code can be used to validate success.");
+            Console.Out.WriteLine();
+            Console.Out.WriteLine("    " + Installer.ParamForceKey + "    Instructs the installer to proceed with removal even if");
+            Console.Out.WriteLine("               prerequisites are not met or errors are encountered.");
+            Console.Out.WriteLine("               When combined with " + Installer.ParamPassiveKey + " all output is eliminated; only the");
+            Console.Out.WriteLine("               return code can be used to validate success.");
             Console.Out.WriteLine();
             Console.Out.WriteLine("  version       Displays the current version.");
             Console.Out.WriteLine();
@@ -167,10 +195,13 @@ namespace Microsoft.Alm.CredentialHelper
             Console.Out.WriteLine();
             Console.Out.WriteLine(@"  [credential ""microsoft.visualstudio.com""]");
             Console.Out.WriteLine(@"      authority = AAD");
+            Console.Out.WriteLine(@"      interactive = never");
+            Console.Out.WriteLine(@"      validate = false");
             Console.Out.WriteLine(@"  [credential ""visualstudio.com""]");
             Console.Out.WriteLine(@"      authority = MSA");
             Console.Out.WriteLine(@"  [credential]");
             Console.Out.WriteLine(@"      helper = manager");
+            Console.Out.WriteLine(@"      writelog = true");
             Console.Out.WriteLine();
         }
 
@@ -378,11 +409,22 @@ namespace Microsoft.Alm.CredentialHelper
             Console.Out.WriteLine("{0} version {1}", Title, Version.ToString(3));
         }
 
-        private static void Install()
+        private static void Deploy()
         {
+            Trace.WriteLine("Program::Deploy");
+
             var installer = new Installer();
             installer.RunConsole();
+
+            Trace.WriteLine(String.Format("   Installer result = {0}.", installer.Result));
+            Trace.WriteLine(String.Format("   Installer exit code = {0}.", installer.ExitCode));
+
             Environment.Exit(installer.ExitCode);
+        }
+
+        private static void Remove()
+        {
+            Trace.WriteLine("Program::Remove");
         }
 
         private static BaseAuthentication CreateAuthentication(OperationArguments operationArguments)

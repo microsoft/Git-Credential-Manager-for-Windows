@@ -9,9 +9,9 @@ namespace Microsoft.Alm.CredentialHelper
 {
     internal class Installer
     {
-        private const string ParamPathKey = "--path";
-        private const string ParamPassiveKey = "--passive";
-        private const string ParamForceKey = "--force";
+        internal const string ParamPathKey = "--path";
+        internal const string ParamPassiveKey = "--passive";
+        internal const string ParamForceKey = "--force";
         private static readonly Version NetFxMinVersion = new Version(4, 5, 1);
         private static readonly IReadOnlyList<string> Files = new List<string>
         {
