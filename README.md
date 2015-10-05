@@ -15,6 +15,11 @@ This is a community project so feel free to contribute ideas, submit bugs, fix b
 ## Download and Install
 To use the Git Credential Manager for Windows, you can download the [latest installer](https://github.com/Microsoft/Git-Credential-Manager-for-Windows/releases). To install, extract the .zip file and run install.cmd from an administrator command prompt.
 
+### Manual Installation
+To run a manual installation of the Git Credential Manager for Windows, clone the sources, open the soluttion file in Visual Studio, and build the solution. All necissary components will be copied from the build output locations into a `.\Deploy` folder at the root of the solution. From an elevated command prompt in the `.\Deploy` folder issue the following command `git-credential-manager install`.
+
+Various options are available for uniquely configured systems, like automated build systems. For systems with a **non-standard placement of Git** use the `--path <git>` parameter to supply where Git is located and thus where the GCM should be deployed to. For systems looking to **avoid checking for the Microsoft .NET Framework** and other simial prerequisites use `--force` option. For systems looking for **silent installation without any prompts**, use the `--passive` option.
+
 ## Build agents
 Build agents cannot manage modal dialogs, therefore we recommended the following configuration.
 ```
