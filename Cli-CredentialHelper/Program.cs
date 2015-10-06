@@ -14,6 +14,18 @@ namespace Microsoft.Alm.CredentialHelper
         public const string Title = "Git Credential Manager for Windows";
         public const string SourceUrl = "https://github.com/Microsoft/Git-Credential-Manager-for-Windows";
 
+        internal const string CommandApprove = "approve";
+        internal const string CommandErase = "erase";
+        internal const string CommandDeploy = "deploy";
+        internal const string CommandFill = "fill";
+        internal const string CommandGet = "get";
+        internal const string CommandInstall = "install";
+        internal const string CommandReject = "reject";
+        internal const string CommandRemove = "remove";
+        internal const string CommandStore = "store";
+        internal const string CommandUninstall = "uninstall";
+        internal const string CommandVersion = "version";
+
         internal const string ConfigAuthortyKey = "authority";
         internal const string ConfigInteractiveKey = "interactive";
         internal const string ConfigValidateKey = "validate";
@@ -23,6 +35,20 @@ namespace Microsoft.Alm.CredentialHelper
         private const string SecretsNamespace = "git";
         private static readonly VsoTokenScope VsoCredentialScope = VsoTokenScope.CodeWrite | VsoTokenScope.PackagingRead;
         private static readonly GithubTokenScope GithubCredentialScope = GithubTokenScope.Gist | GithubTokenScope.PublicKeyRead | GithubTokenScope.Repo;
+        private static readonly List<string> CommandList = new List<string>
+        {
+            CommandApprove,
+            CommandDeploy,
+            CommandErase,
+            CommandFill,
+            CommandGet,
+            CommandInstall,
+            CommandReject,
+            CommandRemove,
+            CommandStore,
+            CommandUninstall,
+            CommandVersion
+        };
 
         internal static string ExecutablePath
         {
@@ -129,11 +155,11 @@ namespace Microsoft.Alm.CredentialHelper
         {
             Trace.WriteLine("Program::PrintHelpMessage");
 
-            Console.Out.WriteLine("usage: git credential-manager [approve|erase|deploy|fill|get|reject|remove|store|uninstall|version] [<args>]");
+            Console.Out.WriteLine("usage: git credential-manager [" + String.Join("|", CommandList) + "] [<args>]");
             Console.Out.WriteLine();
             Console.Out.WriteLine("Command Line Options:");
             Console.Out.WriteLine();
-            Console.Out.WriteLine("  deploy       Deploys the " + Title);
+            Console.Out.WriteLine("  " + CommandDeploy + "       Deploys the " + Title);
             Console.Out.WriteLine("               package and sets Git configuration to use the helper.");
             Console.Out.WriteLine();
             Console.Out.WriteLine("    " + Installer.ParamPathKey + "     Specifies a path for the installer to deploy to.");
@@ -150,7 +176,7 @@ namespace Microsoft.Alm.CredentialHelper
             Console.Out.WriteLine("               When combined with " + Installer.ParamPassiveKey + " all output is eliminated; only the");
             Console.Out.WriteLine("               return code can be used to validate success.");
             Console.Out.WriteLine();
-            Console.Out.WriteLine("  remove       Removes the " + Title);
+            Console.Out.WriteLine("  " + CommandRemove + "       Removes the " + Title);
             Console.Out.WriteLine("               package and unsets Git configuration to no longer use the helper.");
             Console.Out.WriteLine();
             Console.Out.WriteLine("    " + Installer.ParamPathKey + "     Specifies a path for the installer to remove from.");
@@ -167,7 +193,7 @@ namespace Microsoft.Alm.CredentialHelper
             Console.Out.WriteLine("               When combined with " + Installer.ParamPassiveKey + " all output is eliminated; only the");
             Console.Out.WriteLine("               return code can be used to validate success.");
             Console.Out.WriteLine();
-            Console.Out.WriteLine("  version       Displays the current version.");
+            Console.Out.WriteLine("  " + CommandVersion + "       Displays the current version.");
             Console.Out.WriteLine();
             Console.Out.WriteLine("Git Configuration Options:");
             Console.Out.WriteLine();
@@ -175,26 +201,26 @@ namespace Microsoft.Alm.CredentialHelper
             Console.Out.WriteLine("               Supports Auto, Basic, AAD, MSA, and Integrated.");
             Console.Out.WriteLine("               Default is Auto.");
             Console.Out.WriteLine();
-            Console.Out.WriteLine("      `git config --global credential.microsoft.visualstudio.com.authority AAD`");
+            Console.Out.WriteLine("      `git config --global credential.microsoft.visualstudio.com." + ConfigAuthortyKey + " AAD`");
             Console.Out.WriteLine();
             Console.Out.WriteLine("  " + ConfigInteractiveKey + "  Specifies if user can be prompted for credentials or not.");
             Console.Out.WriteLine("               Supports Auto, Always, or Never. Defaults to Auto.");
             Console.Out.WriteLine("               Only used by AAD and MSA authority.");
             Console.Out.WriteLine();
-            Console.Out.WriteLine("      `git config --global credential.microsoft.visualstudio.com.interactive never`");
+            Console.Out.WriteLine("      `git config --global credential.microsoft.visualstudio.com." + ConfigInteractiveKey + " never`");
             Console.Out.WriteLine();
             Console.Out.WriteLine("  " + ConfigValidateKey + "     Causes validation of credentials before supplying them");
             Console.Out.WriteLine("               to Git. Invalid credentials get a refresh attempt");
             Console.Out.WriteLine("               before failing. Incurs some minor overhead.");
             Console.Out.WriteLine("               Defaults to TRUE. Ignored by Basic authority.");
             Console.Out.WriteLine();
-            Console.Out.WriteLine("      `git config --global credential.microsoft.visualstudio.com.validate false`");
+            Console.Out.WriteLine("      `git config --global credential.microsoft.visualstudio.com." + ConfigValidateKey + " false`");
             Console.Out.WriteLine();
             Console.Out.WriteLine("  " + ConfigWritelogKey + "     Enables trace logging of all activities. Logs are written to");
             Console.Out.WriteLine("               the local .git/ folder at the root of the repository.");
             Console.Out.WriteLine("               Defaults to FALSE.");
             Console.Out.WriteLine();
-            Console.Out.WriteLine("      `git config --global credential.writelog true`");
+            Console.Out.WriteLine("      `git config --global credential." + ConfigWritelogKey + " true`");
             Console.Out.WriteLine();
             Console.Out.WriteLine("Sample Configuration:");
             Console.Out.WriteLine();
