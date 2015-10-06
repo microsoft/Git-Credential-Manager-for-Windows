@@ -133,7 +133,9 @@ namespace Microsoft.Alm.Authentication
         /// <returns>True if success; otherwise false.</returns>
         public bool InteractiveLogon(Uri targetUri, out Credential credentials)
         {
-            const int BufferReadSize = 32 * 1024;
+            // ReadConsole 32768 fail, 32767 ok 
+            // @linquize [https://github.com/Microsoft/Git-Credential-Manager-for-Windows/commit/a62b9a19f430d038dcd85a610d97e5f763980f85]
+            const int BufferReadSize = 32 * 1024 - 7;
 
             StringBuilder buffer = new StringBuilder(BufferReadSize);
             uint read = 0;
