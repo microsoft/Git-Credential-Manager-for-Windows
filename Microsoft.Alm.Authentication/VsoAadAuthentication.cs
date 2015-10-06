@@ -11,11 +11,6 @@ namespace Microsoft.Alm.Authentication
     public sealed class VsoAadAuthentication : BaseVsoAuthentication, IVsoAadAuthentication
     {
         /// <summary>
-        /// The default authority host for all Azure Directory authentication
-        /// </summary>
-        public const string DefaultAuthorityHost = " https://management.core.windows.net";
-
-        /// <summary>
         /// 
         /// </summary>
         /// <param name="tenantId">
@@ -39,7 +34,7 @@ namespace Microsoft.Alm.Authentication
         {
             if (tenantId == Guid.Empty)
             {
-                this.VsoAuthority = new VsoAzureAuthority(DefaultAuthorityHost);
+                this.VsoAuthority = new VsoAzureAuthority(AzureAuthority.DefaultAuthorityHostUrl);
             }
             else
             {
