@@ -68,6 +68,8 @@ namespace Microsoft.Alm.CredentialHelper
 
         public void DeployConsole()
         {
+            Trace.WriteLine("Installer::DeployConsole");
+
             if (_isPassive)
             {
                 Console.SetOut(TextWriter.Null);
@@ -76,8 +78,6 @@ namespace Microsoft.Alm.CredentialHelper
                     Console.SetError(TextWriter.Null);
                 }
             }
-
-            Trace.WriteLine("Installer::RunConsole");
 
             System.Security.Principal.WindowsIdentity identity = System.Security.Principal.WindowsIdentity.GetCurrent();
             System.Security.Principal.WindowsPrincipal principal = new System.Security.Principal.WindowsPrincipal(identity);
@@ -326,6 +326,11 @@ namespace Microsoft.Alm.CredentialHelper
             return version != null;
         }
 
+        public bool RemoveConsole()
+        {
+            throw new NotImplementedException();
+        }
+
         public bool SetGlobalConfig(string gitCmdPath = null)
         {
             Trace.WriteLine("Installer::SetGlobalConfig");
@@ -452,7 +457,7 @@ namespace Microsoft.Alm.CredentialHelper
 
         private void DeployElevated()
         {
-            Trace.WriteLine("Installer::RunElevated");
+            Trace.WriteLine("Installer::DeployElevated");
 
             if (_isPassive)
             {
@@ -524,6 +529,73 @@ namespace Microsoft.Alm.CredentialHelper
                 Console.Out.WriteLine();
                 Console.Out.WriteLine("Press any key to continue...");
                 Console.ReadKey();
+            }
+        }
+
+        private void RemoveElevated()
+        {
+            Trace.WriteLine("Installer::RemoveElevated");
+
+            if (_isPassive)
+            {
+                this.Result = ResultValue.Unprivileged;
+            }
+            else
+            {
+                /* cannot uninstall while not elevated (need access to %PROGRAMFILES%), re-launch 
+                   self as an elevated process with identical arguments. */
+
+                // build arguments
+                var arguments = new System.Text.StringBuilder("remove");
+                if (_isPassive)
+                {
+                    arguments.Append(" ")
+                             .Append(ParamPassiveKey);
+                }
+                if (_isForced)
+                {
+                    arguments.Append(" ")
+                             .Append(ParamForceKey);
+                }
+                if (!String.IsNullOrEmpty(_customPath))
+                {
+                    arguments.Append(" ")
+                             .Append(ParamForceKey)
+                             .Append(" \"")
+                             .Append(_customPath)
+                             .Append("\"");
+                }
+
+                // build process start options
+                var options = new ProcessStartInfo()
+                {
+                    FileName = "cmd",
+                    Arguments = String.Format("/c \"{0}\" {1}", Program.ExecutablePath, arguments.ToString()),
+                    UseShellExecute = true, // shellexecute for verb usage
+                    Verb = "runas", // used to invoke elevation
+                    WorkingDirectory = Program.Location,
+                };
+
+                Trace.WriteLine("   cmd " + options.Verb + " " + options.FileName + " " + options.Arguments);
+
+                try
+                {
+                    // create the process
+                    var elevated = Process.Start(options);
+
+                    // wait for the process to complete
+                    elevated.WaitForExit();
+
+                    Trace.WriteLine("   process exited with " + elevated.ExitCode + ".");
+
+                    // exit with the elevated process' exit code
+                    this.ExitCode = elevated.ExitCode;
+                }
+                catch (Exception exception)
+                {
+                    Trace.WriteLine("   process failed with " + exception.Message);
+                    this.Result = ResultValue.Unprivileged;
+                }
             }
         }
 
