@@ -445,7 +445,7 @@ namespace Microsoft.Alm.CredentialHelper
             Trace.WriteLine("Program::Deploy");
 
             var installer = new Installer();
-            installer.RunConsole();
+            installer.DeployConsole();
 
             Trace.WriteLine(String.Format("   Installer result = {0}.", installer.Result));
             Trace.WriteLine(String.Format("   Installer exit code = {0}.", installer.ExitCode));

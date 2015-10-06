@@ -66,37 +66,7 @@ namespace Microsoft.Alm.CredentialHelper
         private string _customPath = null;
         private string _gitCmdPath = null;
 
-        public bool DetectNetFx(out Version version)
-        {
-            const string NetFxKeyBase = @"HKEY_LOCAL_MACHINE\Software\Microsoft\Net Framework Setup\NDP\v4\";
-            const string NetFxKeyClient = NetFxKeyBase + @"\Client";
-            const string NetFxKeyFull = NetFxKeyBase + @"\Full";
-            const string ValueName = "Version";
-            const string DefaultValue = "0.0.0";
-
-            Trace.WriteLine("Installer::DetectNetFx");
-
-            // default to not found state
-            version = null;
-
-            string netfxString = null;
-            Version netfxVerson = null;
-
-            // query for existing installations of .NET
-            if ((netfxString = Registry.GetValue(NetFxKeyClient, ValueName, DefaultValue) as String) != null
-                    && Version.TryParse(netfxString, out netfxVerson)
-                || (netfxString = Registry.GetValue(NetFxKeyFull, ValueName, DefaultValue) as String) != null
-                    && Version.TryParse(netfxString, out netfxVerson))
-            {
-                Trace.WriteLine("   .NET version " + netfxVerson.ToString(3) + " detected.");
-
-                version = netfxVerson;
-            }
-
-            return version != null;
-        }
-
-        public void RunConsole()
+        public void DeployConsole()
         {
             if (_isPassive)
             {
@@ -113,7 +83,7 @@ namespace Microsoft.Alm.CredentialHelper
             System.Security.Principal.WindowsPrincipal principal = new System.Security.Principal.WindowsPrincipal(identity);
             if (!principal.IsInRole(System.Security.Principal.WindowsBuiltInRole.Administrator))
             {
-                RunElevated();
+                DeployElevated();
                 return;
             }
 
@@ -326,6 +296,36 @@ namespace Microsoft.Alm.CredentialHelper
             Pause();
         }
 
+        public bool DetectNetFx(out Version version)
+        {
+            const string NetFxKeyBase = @"HKEY_LOCAL_MACHINE\Software\Microsoft\Net Framework Setup\NDP\v4\";
+            const string NetFxKeyClient = NetFxKeyBase + @"\Client";
+            const string NetFxKeyFull = NetFxKeyBase + @"\Full";
+            const string ValueName = "Version";
+            const string DefaultValue = "0.0.0";
+
+            Trace.WriteLine("Installer::DetectNetFx");
+
+            // default to not found state
+            version = null;
+
+            string netfxString = null;
+            Version netfxVerson = null;
+
+            // query for existing installations of .NET
+            if ((netfxString = Registry.GetValue(NetFxKeyClient, ValueName, DefaultValue) as String) != null
+                    && Version.TryParse(netfxString, out netfxVerson)
+                || (netfxString = Registry.GetValue(NetFxKeyFull, ValueName, DefaultValue) as String) != null
+                    && Version.TryParse(netfxString, out netfxVerson))
+            {
+                Trace.WriteLine("   .NET version " + netfxVerson.ToString(3) + " detected.");
+
+                version = netfxVerson;
+            }
+
+            return version != null;
+        }
+
         public bool SetGlobalConfig(string gitCmdPath = null)
         {
             Trace.WriteLine("Installer::SetGlobalConfig");
@@ -450,17 +450,7 @@ namespace Microsoft.Alm.CredentialHelper
             return false;
         }
 
-        private void Pause()
-        {
-            if (!_isPassive)
-            {
-                Console.Out.WriteLine();
-                Console.Out.WriteLine("Press any key to continue...");
-                Console.ReadKey();
-            }
-        }
-
-        private void RunElevated()
+        private void DeployElevated()
         {
             Trace.WriteLine("Installer::RunElevated");
 
@@ -524,6 +514,16 @@ namespace Microsoft.Alm.CredentialHelper
                     Trace.WriteLine("   process failed with " + exception.Message);
                     this.Result = ResultValue.Unprivileged;
                 }
+            }
+        }
+
+        private void Pause()
+        {
+            if (!_isPassive)
+            {
+                Console.Out.WriteLine();
+                Console.Out.WriteLine("Press any key to continue...");
+                Console.ReadKey();
             }
         }
 
