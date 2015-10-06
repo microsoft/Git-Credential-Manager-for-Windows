@@ -14,6 +14,11 @@ namespace Microsoft.Alm.CredentialHelper
         public const string Title = "Git Credential Manager for Windows";
         public const string SourceUrl = "https://github.com/Microsoft/Git-Credential-Manager-for-Windows";
 
+        internal const string ConfigAuthortyKey = "authority";
+        internal const string ConfigInteractiveKey = "interactive";
+        internal const string ConfigValidateKey = "validate";
+        internal const string ConfigWritelogKey = "writelog";
+
         private const string ConfigPrefix = "credential";
         private const string SecretsNamespace = "git";
         private static readonly VsoTokenScope VsoCredentialScope = VsoTokenScope.CodeWrite | VsoTokenScope.PackagingRead;
@@ -74,7 +79,7 @@ namespace Microsoft.Alm.CredentialHelper
             {
                 EnableDebugTrace();
 
-                if (args.Length == 0 
+                if (args.Length == 0
                     || String.Equals(args[0], "--help", StringComparison.OrdinalIgnoreCase)
                     || String.Equals(args[0], "-h", StringComparison.OrdinalIgnoreCase)
                     || args[0].Contains('?'))
@@ -166,26 +171,26 @@ namespace Microsoft.Alm.CredentialHelper
             Console.Out.WriteLine();
             Console.Out.WriteLine("Git Configuration Options:");
             Console.Out.WriteLine();
-            Console.Out.WriteLine("  authority    Defines the type of authentication to be used.");
+            Console.Out.WriteLine("  " + ConfigAuthortyKey + "    Defines the type of authentication to be used.");
             Console.Out.WriteLine("               Supports Auto, Basic, AAD, MSA, and Integrated.");
             Console.Out.WriteLine("               Default is Auto.");
             Console.Out.WriteLine();
             Console.Out.WriteLine("      `git config --global credential.microsoft.visualstudio.com.authority AAD`");
             Console.Out.WriteLine();
-            Console.Out.WriteLine("  interactive  Specifies if user can be prompted for credentials or not.");
+            Console.Out.WriteLine("  " + ConfigInteractiveKey + "  Specifies if user can be prompted for credentials or not.");
             Console.Out.WriteLine("               Supports Auto, Always, or Never. Defaults to Auto.");
             Console.Out.WriteLine("               Only used by AAD and MSA authority.");
             Console.Out.WriteLine();
             Console.Out.WriteLine("      `git config --global credential.microsoft.visualstudio.com.interactive never`");
             Console.Out.WriteLine();
-            Console.Out.WriteLine("  validate     Causes validation of credentials before supplying them");
+            Console.Out.WriteLine("  " + ConfigValidateKey + "     Causes validation of credentials before supplying them");
             Console.Out.WriteLine("               to Git. Invalid credentials get a refresh attempt");
             Console.Out.WriteLine("               before failing. Incurs some minor overhead.");
             Console.Out.WriteLine("               Defaults to TRUE. Ignored by Basic authority.");
             Console.Out.WriteLine();
             Console.Out.WriteLine("      `git config --global credential.microsoft.visualstudio.com.validate false`");
             Console.Out.WriteLine();
-            Console.Out.WriteLine("  writelog     Enables trace logging of all activities. Logs are written to");
+            Console.Out.WriteLine("  " + ConfigWritelogKey + "     Enables trace logging of all activities. Logs are written to");
             Console.Out.WriteLine("               the local .git/ folder at the root of the repository.");
             Console.Out.WriteLine("               Defaults to FALSE.");
             Console.Out.WriteLine();
@@ -194,14 +199,14 @@ namespace Microsoft.Alm.CredentialHelper
             Console.Out.WriteLine("Sample Configuration:");
             Console.Out.WriteLine();
             Console.Out.WriteLine(@"  [credential ""microsoft.visualstudio.com""]");
-            Console.Out.WriteLine(@"      authority = AAD");
-            Console.Out.WriteLine(@"      interactive = never");
-            Console.Out.WriteLine(@"      validate = false");
+            Console.Out.WriteLine(@"      " + ConfigAuthortyKey + " = AAD");
+            Console.Out.WriteLine(@"      " + ConfigInteractiveKey + " = never");
+            Console.Out.WriteLine(@"      " + ConfigValidateKey + " = false");
             Console.Out.WriteLine(@"  [credential ""visualstudio.com""]");
-            Console.Out.WriteLine(@"      authority = MSA");
+            Console.Out.WriteLine(@"      " + ConfigAuthortyKey + " = MSA");
             Console.Out.WriteLine(@"  [credential]");
             Console.Out.WriteLine(@"      helper = manager");
-            Console.Out.WriteLine(@"      writelog = true");
+            Console.Out.WriteLine(@"      " + ConfigWritelogKey + " = true");
             Console.Out.WriteLine();
         }
 
@@ -521,9 +526,9 @@ namespace Microsoft.Alm.CredentialHelper
             Configuration config = new Configuration();
             Configuration.Entry entry;
 
-            if (config.TryGetEntry(ConfigPrefix, operationArguments.TargetUri, "authority", out entry))
+            if (config.TryGetEntry(ConfigPrefix, operationArguments.TargetUri, ConfigAuthortyKey, out entry))
             {
-                Trace.WriteLine("   authority = " + entry.Value);
+                Trace.WriteLine("   " + ConfigAuthortyKey + " = " + entry.Value);
 
                 if (String.Equals(entry.Value, "MSA", StringComparison.OrdinalIgnoreCase)
                     || String.Equals(entry.Value, "Microsoft", StringComparison.OrdinalIgnoreCase)
@@ -553,9 +558,9 @@ namespace Microsoft.Alm.CredentialHelper
                 }
             }
 
-            if (config.TryGetEntry(ConfigPrefix, operationArguments.TargetUri, "interactive", out entry))
+            if (config.TryGetEntry(ConfigPrefix, operationArguments.TargetUri, ConfigInteractiveKey, out entry))
             {
-                Trace.WriteLine("   interactive = " + entry.Value);
+                Trace.WriteLine("   " + ConfigInteractiveKey + " = " + entry.Value);
 
                 if (String.Equals("always", entry.Value, StringComparison.OrdinalIgnoreCase)
                     || String.Equals("true", entry.Value, StringComparison.OrdinalIgnoreCase)
@@ -570,9 +575,9 @@ namespace Microsoft.Alm.CredentialHelper
                 }
             }
 
-            if (config.TryGetEntry(ConfigPrefix, operationArguments.TargetUri, "validate", out entry))
+            if (config.TryGetEntry(ConfigPrefix, operationArguments.TargetUri, ConfigValidateKey, out entry))
             {
-                Trace.WriteLine("   validate = " + entry.Value);
+                Trace.WriteLine("   " + ConfigValidateKey + " = " + entry.Value);
 
                 bool validate = operationArguments.ValidateCredentials;
                 if (Boolean.TryParse(entry.Value, out validate))
@@ -581,9 +586,9 @@ namespace Microsoft.Alm.CredentialHelper
                 }
             }
 
-            if (config.TryGetEntry(ConfigPrefix, operationArguments.TargetUri, "writelog", out entry))
+            if (config.TryGetEntry(ConfigPrefix, operationArguments.TargetUri, ConfigWritelogKey, out entry))
             {
-                Trace.WriteLine("   writelog = " + entry.Value);
+                Trace.WriteLine("   " + ConfigWritelogKey + " = " + entry.Value);
 
                 bool writelog = operationArguments.WriteLog;
                 if (Boolean.TryParse(entry.Value, out writelog))
