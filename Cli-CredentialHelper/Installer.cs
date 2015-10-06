@@ -256,33 +256,37 @@ namespace Microsoft.Alm.CredentialHelper
             // all necissary content has been deployed to the system
             Result = ResultValue.Success;
 
-            // deployment is complete, configure git installations
-            if (SetSystemConfig(installations))
-            {
-                Console.Out.WriteLine();
-                Console.Out.WriteLine("Updated your /etc/gitconfig [git config --system]");
-            }
-            else
-            {
-                Console.Out.WriteLine();
+            // only update the system configs if using a custom path
+            Configuration.Type types = String.IsNullOrWhiteSpace(_customPath)
+                ? Configuration.Type.Global | Configuration.Type.System
+                : Configuration.Type.System;
 
-                // updating /etc/gitconfig should not fail installation when forced 
-                if (!_isForced)
+            Configuration.Type updateTypes;
+            if (SetGitConfig(installations, GitConfigAction.Set, types, out updateTypes))
+            {
+                if ((updateTypes & Configuration.Type.System) == Configuration.Type.System)
                 {
-                    // only 'fatal' when not forced
-                    Console.Error.Write("Fatal: ");
+                    Console.Out.WriteLine();
+                    Console.Out.WriteLine("Updated your /etc/gitconfig [git config --system]");
+                }
+                else
+                {
+                    Console.Out.WriteLine();
 
-                    Result = ResultValue.GitConfigSystemFailed;
-                    return;
+                    // updating /etc/gitconfig should not fail installation when forced 
+                    if (!_isForced)
+                    {
+                        // only 'fatal' when not forced
+                        Console.Error.Write("Fatal: ");
+
+                        Result = ResultValue.GitConfigSystemFailed;
+                        return;
+                    }
+
+                    Console.Error.WriteLine("Unable to update your /etc/gitconfig correctly.");
                 }
 
-                Console.Error.WriteLine("Unable to update your /etc/gitconfig correctly.");
-            }
-
-            // only set ~/.gitconfig if not a custom path
-            if (String.IsNullOrWhiteSpace(_customPath))
-            {
-                if (SetGlobalConfig())
+                if ((updateTypes & Configuration.Type.Global) == Configuration.Type.Global)
                 {
                     Console.Out.WriteLine("Updated your ~/.gitconfig [git config --global]");
                 }
@@ -472,33 +476,37 @@ namespace Microsoft.Alm.CredentialHelper
             // all necissary content has been deployed to the system
             Result = ResultValue.Success;
 
-            // removal is complete, configure git installations
-            if (UnsetSystemConfig(installations))
-            {
-                Console.Out.WriteLine();
-                Console.Out.WriteLine("Updated your /etc/gitconfig [git config --system]");
-            }
-            else
-            {
-                Console.Out.WriteLine();
+            // only update the system configs if using a custom path
+            Configuration.Type types = String.IsNullOrWhiteSpace(_customPath)
+                ? Configuration.Type.Global | Configuration.Type.System
+                : Configuration.Type.System;
 
-                // updating /etc/gitconfig should not fail installation when forced 
-                if (!_isForced)
+            Configuration.Type updateTypes;
+            if (SetGitConfig(installations, GitConfigAction.Unset, types, out updateTypes))
+            {
+                if ((updateTypes & Configuration.Type.System) == Configuration.Type.System)
                 {
-                    // only 'fatal' when not forced
-                    Console.Error.Write("Fatal: ");
+                    Console.Out.WriteLine();
+                    Console.Out.WriteLine("Updated your /etc/gitconfig [git config --system]");
+                }
+                else
+                {
+                    Console.Out.WriteLine();
 
-                    Result = ResultValue.GitConfigSystemFailed;
-                    return;
+                    // updating /etc/gitconfig should not fail installation when forced 
+                    if (!_isForced)
+                    {
+                        // only 'fatal' when not forced
+                        Console.Error.Write("Fatal: ");
+
+                        Result = ResultValue.GitConfigSystemFailed;
+                        return;
+                    }
+
+                    Console.Error.WriteLine("Unable to update your /etc/gitconfig correctly.");
                 }
 
-                Console.Error.WriteLine("Unable to update your /etc/gitconfig correctly.");
-            }
-
-            // only set ~/.gitconfig if not a custom path
-            if (String.IsNullOrWhiteSpace(_customPath))
-            {
-                if (UnsetGlobalConfig())
+                if ((updateTypes & Configuration.Type.Global) == Configuration.Type.Global)
                 {
                     Console.Out.WriteLine("Updated your ~/.gitconfig [git config --global]");
                 }
@@ -517,162 +525,74 @@ namespace Microsoft.Alm.CredentialHelper
             Pause();
         }
 
-        public bool SetGlobalConfig(string gitCmdPath = null)
+        public bool SetGitConfig(List<GitInstallation> installations, GitConfigAction action, Configuration.Type type, out Configuration.Type updated)
         {
-            Trace.WriteLine("Installer::SetGlobalConfig");
+            Trace.WriteLine("Installer::SetGitConfig");
+            Trace.WriteLine("   action = " + action + ".");
 
-            // try hard to avoid throwing an exception
-            gitCmdPath = gitCmdPath ?? _gitCmdPath;
-            if (gitCmdPath == null)
+            updated = Configuration.Type.None;
+
+            if (installations == null && !Where.FindGitInstallations(out installations))
             {
-                List<GitInstallation> installations;
-                if (Where.FindGitInstallations(out installations))
+                Trace.WriteLine("   No Git installations detected to update.");
+                return false;
+            }
+
+            if ((type & Configuration.Type.Global) == Configuration.Type.Global)
+            {
+                // the 0 entry in the installations list is the "preferred" instance of Git
+                string gitCmdPath = installations[0].Cmd;
+                string globalCmd = action == GitConfigAction.Set
+                    ? "config --global credential.helper manager"
+                    : "config --global --unset credential.helper";
+
+                if (ExecuteGit(gitCmdPath, globalCmd))
                 {
-                    gitCmdPath = installations[0].Cmd;
+                    Trace.WriteLine("   updatin ~/.gitconfig succeeded.");
+
+                    updated |= Configuration.Type.Global;
+                }
+                else
+                {
+                    Trace.WriteLine("   updating ~/.gitconfig failed.");
+
+                    return false;
                 }
             }
 
-            if (gitCmdPath != null && File.Exists(gitCmdPath))
+            if ((type & Configuration.Type.System) == Configuration.Type.System)
             {
-                var options = new ProcessStartInfo()
+                string systemCmd = action == GitConfigAction.Set
+                    ? "config --system credential.helper manager"
+                    : "config --system --unset credential.helper";
+
+                int successCount = 0;
+
+                foreach (var installation in installations)
                 {
-                    Arguments = "config --global credential.helper manager",
-                    FileName = gitCmdPath,
-                    CreateNoWindow = true,
-                    UseShellExecute = false,
-                };
-
-                Trace.WriteLine("   cmd " + options.FileName + " " + options.Arguments + ".");
-
-                var gitProcess = Process.Start(options);
-
-                gitProcess.WaitForExit();
-
-                Trace.WriteLine("   Git exited with " + gitProcess.ExitCode + ".");
-
-                return gitProcess.ExitCode == 0;
-            }
-
-            return false;
-        }
-
-        public bool SetSystemConfig(List<GitInstallation> installations = null)
-        {
-            if (installations == null && !Where.FindGitInstallations(out installations))
-                return false;
-
-            Trace.WriteLine("Installer::SetSystemConfig");
-
-            int successCount = 0;
-
-            foreach (var install in installations)
-            {
-                if (File.Exists(install.Cmd))
-                {
-                    var options = new ProcessStartInfo()
+                    if (ExecuteGit(installation.Cmd, systemCmd))
                     {
-                        Arguments = "config --system credential.helper manager",
-                        FileName = install.Cmd,
-                        CreateNoWindow = true,
-                        UseShellExecute = false,
-                    };
+                        Trace.WriteLine("   updatin /etc/gitconfig succeeded.");
 
-                    Trace.WriteLine("   cmd " + options.FileName + " " + options.Arguments + ".");
-
-                    var gitProcess = Process.Start(options);
-
-                    gitProcess.WaitForExit();
-
-                    Trace.WriteLine("   Git exited with " + gitProcess.ExitCode + ".");
-
-                    // record at least a single success
-                    if (gitProcess.ExitCode == 0)
+                        successCount++;
+                    }
+                    else
                     {
-                        successCount += 1;
+                        Trace.WriteLine("   updating ~/.gitconfig failed.");
                     }
                 }
-            }
 
-            return successCount == installations.Count;
-        }
-
-        public bool UnsetGlobalConfig(string gitCmdPath = null)
-        {
-            Trace.WriteLine("Installer::UnsetGlobalConfig");
-
-            // try hard to avoid throwing an exception
-            gitCmdPath = gitCmdPath ?? _gitCmdPath;
-            if (gitCmdPath == null)
-            {
-                List<GitInstallation> installations;
-                if (Where.FindGitInstallations(out installations))
+                if (successCount == installations.Count)
                 {
-                    gitCmdPath = installations[0].Cmd;
+                    updated |= Configuration.Type.System;
+                }
+                else
+                {
+                    return false;
                 }
             }
 
-            if (gitCmdPath != null && File.Exists(gitCmdPath))
-            {
-                var options = new ProcessStartInfo()
-                {
-                    Arguments = "config --global --unset credential.helper",
-                    FileName = gitCmdPath,
-                    CreateNoWindow = true,
-                    UseShellExecute = false,
-                };
-
-                Trace.WriteLine("   cmd " + options.FileName + " " + options.Arguments + ".");
-
-                var gitProcess = Process.Start(options);
-
-                gitProcess.WaitForExit();
-
-                Trace.WriteLine("   Git exited with " + gitProcess.ExitCode + ".");
-
-                return gitProcess.ExitCode == 0;
-            }
-
-            return false;
-        }
-
-        public bool UnsetSystemConfig(List<GitInstallation> installations = null)
-        {
-            if (installations == null && !Where.FindGitInstallations(out installations))
-                return false;
-
-            Trace.WriteLine("Installer::UnsetSystemConfig");
-
-            int successCount = 0;
-
-            foreach (var install in installations)
-            {
-                if (File.Exists(install.Cmd))
-                {
-                    var options = new ProcessStartInfo()
-                    {
-                        Arguments = "config --system --unset credential.helper",
-                        FileName = install.Cmd,
-                        CreateNoWindow = true,
-                        UseShellExecute = false,
-                    };
-
-                    Trace.WriteLine("   cmd " + options.FileName + " " + options.Arguments + ".");
-
-                    var gitProcess = Process.Start(options);
-
-                    gitProcess.WaitForExit();
-
-                    Trace.WriteLine("   Git exited with " + gitProcess.ExitCode + ".");
-
-                    // record at least a single success
-                    if (gitProcess.ExitCode == 0)
-                    {
-                        successCount += 1;
-                    }
-                }
-            }
-
-            return successCount == installations.Count;
+            return true;
         }
 
         private bool CleanFiles(string path, out List<string> cleanedFiles)
@@ -898,6 +818,27 @@ namespace Microsoft.Alm.CredentialHelper
             }
         }
 
+        private bool ExecuteGit(string gitCmdPath, string command)
+        {
+            var options = new ProcessStartInfo()
+            {
+                Arguments = "config --global credential.helper manager",
+                FileName = gitCmdPath,
+                CreateNoWindow = true,
+                UseShellExecute = false,
+            };
+
+            Trace.WriteLine("   cmd " + options.FileName + " " + options.Arguments + ".");
+
+            var gitProcess = Process.Start(options);
+
+            gitProcess.WaitForExit();
+
+            Trace.WriteLine("   Git exited with " + gitProcess.ExitCode + ".");
+
+            return gitProcess.ExitCode == 0;
+        }
+
         public enum ResultValue : int
         {
             UnknownFailure = -1,
@@ -909,6 +850,12 @@ namespace Microsoft.Alm.CredentialHelper
             GitConfigGlobalFailed,
             GitConfigSystemFailed,
             GitNotFound,
+        }
+
+        public enum GitConfigAction
+        {
+            Set,
+            Unset,
         }
     }
 }
