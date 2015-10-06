@@ -1,5 +1,5 @@
 #Git Credential Manager for Windows
-The [Git Credential Manager for Windows](https://github.com/Microsoft/Git-Credential-Manager-for-Windows) provides secure Git credential storage for Windows. It's the successor to the [Windows Credential Store for Git  (git-credential-winstore)](https://gitcredentialstore.codeplex.com/), which is no longer maintained.
+The [Git Credential Manager for Windows (GCM)](https://github.com/Microsoft/Git-Credential-Manager-for-Windows) provides secure Git credential storage for Windows. It's the successor to the [Windows Credential Store for Git  (git-credential-winstore)](https://gitcredentialstore.codeplex.com/), which is no longer maintained.
 
 This project includes:
 
@@ -13,7 +13,12 @@ This project includes:
 This is a community project so feel free to contribute ideas, submit bugs, fix bugs, or code new features.
 
 ## Download and Install
-To use the Git Credential Manager for Windows, you can download the [latest installer](https://github.com/Microsoft/Git-Credential-Manager-for-Windows/releases). To install, extract the .zip file and run install.cmd from an administrator command prompt.
+To use the GCM, you can download the [latest installer](https://github.com/Microsoft/Git-Credential-Manager-for-Windows/releases). To install, extract the .zip file and run install.cmd from an administrator command prompt.
+
+### Build and Install from Sources
+To build and install the GCM yourself, clone the sources, open the solution file in Visual Studio, and build the solution. All necessary components will be copied from the build output locations into a `.\Deploy` folder at the root of the solution. From an elevated command prompt in the `.\Deploy` folder issue the following command `git-credential-manager install`.
+
+Various options are available for uniquely configured systems, like automated build systems. For systems with a **non-standard placement of Git** use the `--path <git>` parameter to supply where Git is located and thus where the GCM should be deployed to. For systems looking to **avoid checking for the Microsoft .NET Framework** and other simial prerequisites use `--force` option. For systems looking for **silent installation without any prompts**, use the `--passive` option.
 
 ## Build agents
 Build agents cannot manage modal dialogs, therefore we recommended the following configuration.
