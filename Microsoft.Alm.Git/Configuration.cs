@@ -183,9 +183,9 @@ namespace Microsoft.Alm.Git
                             string val = match.Groups[2].Value.Trim();
 
                             // triming off enclosing quotes makes usage easier, only trim in pairs
-                            if (val[0] == '"')
+                            if (val.Length > 0 && val[0] == '"')
                             {
-                                if (val[val.Length - 1] == '"')
+                                if (val[val.Length - 1] == '"' && val.Length > 1)
                                 {
                                     val = val.Substring(1, val.Length - 2);
                                 }
@@ -210,9 +210,9 @@ namespace Microsoft.Alm.Git
                         string val = match.Groups[2].Value.Trim();
 
                         // triming off enclosing quotes makes usage easier, only trim in pairs
-                        if (val[0] == '"')
+                        if (val.Length > 0 && val[0] == '"')
                         {
-                            if (val[val.Length - 1] == '"')
+                            if (val[val.Length - 1] == '"' && val.Length > 1)
                             {
                                 val = val.Substring(1, val.Length - 2);
                             }
