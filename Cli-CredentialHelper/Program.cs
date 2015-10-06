@@ -456,6 +456,14 @@ namespace Microsoft.Alm.CredentialHelper
         private static void Remove()
         {
             Trace.WriteLine("Program::Remove");
+
+            var installer = new Installer();
+            installer.RemoveConsole();
+
+            Trace.WriteLine(String.Format("   Installer result = {0}.", installer.Result));
+            Trace.WriteLine(String.Format("   Installer exit code = {0}.", installer.ExitCode));
+
+            Environment.Exit(installer.ExitCode);
         }
 
         private static BaseAuthentication CreateAuthentication(OperationArguments operationArguments)
