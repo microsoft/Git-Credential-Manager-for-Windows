@@ -9,9 +9,9 @@ namespace Microsoft.Alm.CredentialHelper
 {
     internal class Installer
     {
-        private const string ParamPathKey = "--path";
-        private const string ParamPassiveKey = "--passive";
-        private const string ParamForceKey = "--force";
+        internal const string ParamPathKey = "--path";
+        internal const string ParamPassiveKey = "--passive";
+        internal const string ParamForceKey = "--force";
         private static readonly Version NetFxMinVersion = new Version(4, 5, 1);
         private static readonly IReadOnlyList<string> Files = new List<string>
         {
@@ -64,7 +64,165 @@ namespace Microsoft.Alm.CredentialHelper
         private bool _isPassive = false;
         private bool _isForced = false;
         private string _customPath = null;
-        private string _gitCmdPath = null;
+        private TextWriter _stdout = null;
+        private TextWriter _stderr = null;
+
+        public void DeployConsole()
+        {
+            Trace.WriteLine("Installer::DeployConsole");
+
+            SetOutput(_isPassive, _isPassive && _isForced);
+            try
+            {
+                System.Security.Principal.WindowsIdentity identity = System.Security.Principal.WindowsIdentity.GetCurrent();
+                System.Security.Principal.WindowsPrincipal principal = new System.Security.Principal.WindowsPrincipal(identity);
+                if (!principal.IsInRole(System.Security.Principal.WindowsBuiltInRole.Administrator))
+                {
+                    DeployElevated();
+                    return;
+                }
+
+                List<GitInstallation> installations = null;
+
+                // use the custom installation path if supplied
+                if (!String.IsNullOrEmpty(_customPath))
+                {
+                    if (!Directory.Exists(_customPath))
+                    {
+                        Console.Out.WriteLine();
+                        Console.Error.WriteLine("Fatal: custom path does not exist: '{0}'. U_U", _customPath);
+                        Pause();
+
+                        Result = ResultValue.InvalidCustomPath;
+                        return;
+                    }
+
+                    Console.Out.WriteLine();
+                    Console.Out.WriteLine("Deploying to custom path: '{0}'.", _customPath);
+
+                    // if the custom path points to a git location then treat it properly
+                    GitInstallation installation;
+                    if (Where.FindGitInstallation(_customPath, KnownGitDistribution.GitForWindows64v2, out installation)
+                        || Where.FindGitInstallation(_customPath, KnownGitDistribution.GitForWindows32v2, out installation)
+                        || Where.FindGitInstallation(_customPath, KnownGitDistribution.GitForWindows32v1, out installation))
+                    {
+                        Trace.Write("   Git found: " + installation.Path);
+
+                        // track known Git installtations
+                        installations = new List<GitInstallation>();
+                        installations.Add(installation);
+                    }
+                }
+                // since no custom installation path was supplied, use default logic
+                else
+                {
+                    Console.Out.WriteLine();
+                    Console.Out.WriteLine("Looking for Git installation(s)...");
+
+                    if (Where.FindGitInstallations(out installations))
+                    {
+                        foreach (var installation in installations)
+                        {
+                            Console.Out.WriteLine("  {0}", installation.Path);
+                        }
+                    }
+                }
+
+                if (installations == null)
+                {
+                    Console.Out.WriteLine();
+                    Console.Error.WriteLine("Fatal: Git was not detected, unable to continue. U_U");
+                    Pause();
+
+                    Result = ResultValue.GitNotFound;
+                    return;
+                }
+
+                List<string> cleanedFiles;
+                foreach (var installation in installations)
+                {
+                    Console.Out.WriteLine();
+                    Console.Out.WriteLine("Deploying from '{0}' to '{1}'.", Program.Location, installation.Path);
+
+                    if (CopyFiles(Program.Location, installation.Libexec, out cleanedFiles))
+                    {
+                        foreach (var file in cleanedFiles)
+                        {
+                            Console.Out.WriteLine("  {0}", file);
+                        }
+
+                        Console.Out.WriteLine("        {0} file(s) copied", cleanedFiles.Count);
+                    }
+                    else if (_isForced)
+                    {
+                        Console.Error.WriteLine("  deployment failed. U_U");
+                    }
+                    else
+                    {
+                        Console.Error.WriteLine("  deployment failed. U_U");
+                        Pause();
+
+                        Result = ResultValue.RemovalFailed;
+                        return;
+                    }
+                }
+
+                // only update the system configs if using a custom path
+                Configuration.Type types = String.IsNullOrWhiteSpace(_customPath)
+                    ? Configuration.Type.Global | Configuration.Type.System
+                    : Configuration.Type.System;
+
+                Configuration.Type updateTypes;
+                if (SetGitConfig(installations, GitConfigAction.Set, types, out updateTypes))
+                {
+                    if ((updateTypes & Configuration.Type.System) == Configuration.Type.System)
+                    {
+                        Console.Out.WriteLine();
+                        Console.Out.WriteLine("Updated your /etc/gitconfig [git config --system]");
+                    }
+                    else
+                    {
+                        Console.Out.WriteLine();
+
+                        // updating /etc/gitconfig should not fail installation when forced 
+                        if (!_isForced)
+                        {
+                            // only 'fatal' when not forced
+                            Console.Error.Write("Fatal: ");
+
+                            Result = ResultValue.GitConfigSystemFailed;
+                            return;
+                        }
+
+                        Console.Error.WriteLine("Unable to update your /etc/gitconfig correctly.");
+                    }
+
+                    if ((updateTypes & Configuration.Type.Global) == Configuration.Type.Global)
+                    {
+                        Console.Out.WriteLine("Updated your ~/.gitconfig [git config --global]");
+                    }
+                    else
+                    {
+                        Console.Out.WriteLine();
+                        Console.Error.WriteLine("Fatal: Unable to update your ~/.gitconfig correctly.");
+
+                        Result = ResultValue.GitConfigGlobalFailed;
+                        return;
+                    }
+                }
+
+                // all necissary content has been deployed to the system
+                Result = ResultValue.Success;
+
+                Console.Out.WriteLine();
+                Console.Out.WriteLine("Success! {0} was deployed! ^_^", Program.Title);
+                Pause();
+            }
+            finally
+            {
+                SetOutput(true, true);
+            }
+        }
 
         public bool DetectNetFx(out Version version)
         {
@@ -96,76 +254,27 @@ namespace Microsoft.Alm.CredentialHelper
             return version != null;
         }
 
-        public void RunConsole()
+        public void RemoveConsole()
         {
-            if (_isPassive)
+            Trace.WriteLine("Installer::RemoveConsole");
+
+            SetOutput(_isPassive, _isPassive && _isForced);
+            try
             {
-                Console.SetOut(TextWriter.Null);
-                if (_isForced)
+                System.Security.Principal.WindowsIdentity identity = System.Security.Principal.WindowsIdentity.GetCurrent();
+                System.Security.Principal.WindowsPrincipal principal = new System.Security.Principal.WindowsPrincipal(identity);
+                if (!principal.IsInRole(System.Security.Principal.WindowsBuiltInRole.Administrator))
                 {
-                    Console.SetError(TextWriter.Null);
-                }
-            }
-
-            Trace.WriteLine("Installer::RunConsole");
-
-            System.Security.Principal.WindowsIdentity identity = System.Security.Principal.WindowsIdentity.GetCurrent();
-            System.Security.Principal.WindowsPrincipal principal = new System.Security.Principal.WindowsPrincipal(identity);
-            if (!principal.IsInRole(System.Security.Principal.WindowsBuiltInRole.Administrator))
-            {
-                RunElevated();
-                return;
-            }
-
-            // if installation is not forced, insure that an acceptable version of .NET is installed on the system
-            Version netfxVersion;
-            if (!(_isForced || DetectNetFx(out netfxVersion) && netfxVersion >= NetFxMinVersion))
-            {
-                Console.Out.WriteLine();
-
-                if (netfxVersion == null)
-                {
-                    Console.Error.WriteLine("Fatal: failed to detect the Microsoft .NET Framework. Make sure it is installed. U_U");
-                }
-                else
-                {
-                    Console.Error.WriteLine("Fatal: detected Microsoft .NET Framework version {0:3}. {1:3} or newer is required. U_U", netfxVersion, NetFxMinVersion);
+                    RemoveElevated();
+                    return;
                 }
 
-                Console.Error.WriteLine("Don't know where to get the Microsoft .NET Framework? Try http://bit.ly/1kE08Rz.");
-                Pause();
+                List<GitInstallation> installations = null;
 
-                Result = ResultValue.NetFxNotFound;
-                return;
-            }
-
-            List<GitInstallation> installations = null;
-
-            // use the custom installation path if supplied
-            if (!String.IsNullOrEmpty(_customPath))
-            {
-                Console.Out.WriteLine();
-                Console.Out.WriteLine("Deploying to custom path: '{0}'.", _customPath);
-
-                if (!Directory.Exists(_customPath))
+                // use the custom installation path if supplied
+                if (!String.IsNullOrEmpty(_customPath))
                 {
-                    if (_isForced)
-                    {
-                        try
-                        {
-                            Directory.CreateDirectory(_customPath);
-                        }
-                        catch
-                        {
-                            Console.Out.WriteLine();
-                            Console.Error.WriteLine("Fatal: custom path is invalid: '{0}'. U_U", _customPath);
-                            Pause();
-
-                            Result = ResultValue.InvalidCustomPath;
-                            return;
-                        }
-                    }
-                    else
+                    if (!Directory.Exists(_customPath))
                     {
                         Console.Out.WriteLine();
                         Console.Error.WriteLine("Fatal: custom path does not exist: '{0}'. U_U", _customPath);
@@ -174,105 +283,39 @@ namespace Microsoft.Alm.CredentialHelper
                         Result = ResultValue.InvalidCustomPath;
                         return;
                     }
-                }
 
-                // if the custom path points to a git location then treat it properly
-                GitInstallation installation;
-                if (Where.FindGitInstallation(_customPath, KnownGitDistribution.GitForWindows64v2, out installation)
-                    || Where.FindGitInstallation(_customPath, KnownGitDistribution.GitForWindows32v2, out installation)
-                    || Where.FindGitInstallation(_customPath, KnownGitDistribution.GitForWindows32v1, out installation))
-                {
-                    // track known Git installtations
-                    installations = new List<GitInstallation>();
-                    installations.Add(installation);
-                    // set the path to Git
-                    _gitCmdPath = installation.Cmd;
+                    Console.Out.WriteLine();
+                    Console.Out.WriteLine("Removing from custom path: '{0}'.", _customPath);
 
-                    List<string> copiedFiles;
-                    if (CopyFiles(Program.Location, installation.Libexec, out copiedFiles))
+                    // if the custom path points to a git location then treat it properly
+                    GitInstallation installation;
+                    if (Where.FindGitInstallation(_customPath, KnownGitDistribution.GitForWindows64v2, out installation)
+                        || Where.FindGitInstallation(_customPath, KnownGitDistribution.GitForWindows32v2, out installation)
+                        || Where.FindGitInstallation(_customPath, KnownGitDistribution.GitForWindows32v1, out installation))
                     {
-                        foreach (string file in copiedFiles)
-                        {
-                            Console.Out.WriteLine("  {0}", file);
-                        }
+                        Trace.Write("   Git found: " + installation.Path);
 
-                        Console.Out.WriteLine("        {0} file(s) copied", copiedFiles.Count);
-                    }
-                    else
-                    {
-                        Console.Error.WriteLine("  deployment failed. U_U");
-                        Pause();
-
-                        Result = ResultValue.DeploymentFailed;
-                        return;
+                        // track known Git installtations
+                        installations = new List<GitInstallation>();
+                        installations.Add(installation);
                     }
                 }
+                // since no custom installation path was supplied, use default logic
                 else
                 {
-                    List<string> copiedFiles;
-                    if (CopyFiles(Program.Location, _customPath, out copiedFiles))
+                    Console.Out.WriteLine();
+                    Console.Out.WriteLine("Looking for Git installation(s)...");
+
+                    if (Where.FindGitInstallations(out installations))
                     {
-                        foreach (string file in copiedFiles)
+                        foreach (var installation in installations)
                         {
-                            Console.Out.WriteLine("  {0}", file);
-                        }
-
-                        Console.Out.WriteLine("        {0} file(s) copied", copiedFiles.Count);
-                    }
-                    else
-                    {
-                        Console.Error.WriteLine("  deployment failed. U_U");
-                        Pause();
-
-                        Result = ResultValue.DeploymentFailed;
-                        return;
-                    }
-                }
-            }
-            // since no custom installation path was supplied, use default logic
-            else
-            {
-                Console.WriteLine();
-                Console.WriteLine("Looking for Git installation(s)...");
-
-                if (Where.FindGitInstallations(out installations))
-                {
-                    _gitCmdPath = installations[0].Cmd;
-
-                    foreach (var installation in installations)
-                    {
-                        Console.Out.WriteLine("  {0}", installation.Path);
-                    }
-
-                    foreach (var installation in installations)
-                    {
-                        Console.Out.WriteLine();
-                        Console.Out.WriteLine("Deploying from '{0}' to '{1}'.", Program.Location, installation.Path);
-
-                        List<string> copiedFiles;
-                        if (CopyFiles(Program.Location, installation.Libexec, out copiedFiles))
-                        {
-                            foreach (string file in copiedFiles)
-                            {
-                                Console.Out.WriteLine("  {0}", file);
-                            }
-
-                            Console.Out.WriteLine("        {0} file(s) copied", copiedFiles.Count);
-                        }
-                        else
-                        {
-                            Console.Error.WriteLine("  deployment failed. U_U");
-                            Pause();
-
-                            Result = ResultValue.DeploymentFailed;
-
-                            // stop installing now if not a forced installation
-                            if (!_isForced)
-                                break;
+                            Console.Out.WriteLine("  {0}", installation.Path);
                         }
                     }
                 }
-                else
+
+                if (installations == null)
                 {
                     Console.Out.WriteLine();
                     Console.Error.WriteLine("Fatal: Git was not detected, unable to continue. U_U");
@@ -281,135 +324,205 @@ namespace Microsoft.Alm.CredentialHelper
                     Result = ResultValue.GitNotFound;
                     return;
                 }
-            }
 
-            // all necissary content has been deployed to the system
-            Result = ResultValue.Success;
+                // only update the system configs if using a custom path
+                Configuration.Type types = String.IsNullOrWhiteSpace(_customPath)
+                    ? Configuration.Type.Global | Configuration.Type.System
+                    : Configuration.Type.System;
 
-            // deployment is complete, configure git installations
-            if (SetSystemConfig(installations))
-            {
-                Console.Out.WriteLine();
-                Console.Out.WriteLine("Updated your /etc/gitconfig [git config --system]");
-            }
-            else
-            {
-                Console.Out.WriteLine();
-
-                // updating /etc/gitconfig should not fail installation when forced 
-                if (!_isForced)
+                Configuration.Type updateTypes;
+                if (SetGitConfig(installations, GitConfigAction.Unset, types, out updateTypes))
                 {
-                    Console.Error.Write("Fatal: ");
-
-                    Result = ResultValue.GitConfigSystemFailed;
-                    return;
-                }
-
-                Console.Error.WriteLine("Unable to update your /etc/gitconfig correctly.");
-            }
-
-            if (SetGlobalConfig())
-            {
-                Console.Out.WriteLine("Updated your ~/.gitconfig [git config --global]");
-            }
-            else
-            {
-                Console.Out.WriteLine();
-                Console.Error.WriteLine("Fatal: Unable to update your ~/.gitconfig correctly.");
-
-                Result = ResultValue.GitConfigGlobalFailed;
-                return;
-            }
-
-            Console.Out.WriteLine();
-            Console.Out.WriteLine("Success! {0} was installed! ^_^", Program.Title);
-            Pause();
-        }
-
-        public bool SetGlobalConfig(string gitCmdPath = null)
-        {
-            Trace.WriteLine("Installer::SetGlobalConfig");
-
-            // try hard to avoid throwing an exception
-            gitCmdPath = gitCmdPath ?? _gitCmdPath;
-            if (gitCmdPath == null)
-            {
-                List<GitInstallation> installations;
-                if (Where.FindGitInstallations(out installations))
-                {
-                    gitCmdPath = installations[0].Cmd;
-                }
-            }
-
-            if (gitCmdPath != null && File.Exists(gitCmdPath))
-            {
-                var options = new ProcessStartInfo()
-                {
-                    Arguments = "config --global credential.helper manager",
-                    FileName = gitCmdPath,
-                    CreateNoWindow = true,
-                    UseShellExecute = false,
-                };
-
-                Trace.WriteLine("   cmd " + options.FileName + " " + options.Arguments + ".");
-
-                var gitProcess = Process.Start(options);
-
-                gitProcess.WaitForExit();
-
-                Trace.WriteLine("   Git exited with " + gitProcess.ExitCode + ".");
-
-                return gitProcess.ExitCode == 0;
-            }
-
-            return false;
-        }
-
-        public bool SetSystemConfig(List<GitInstallation> installations = null)
-        {
-            if (installations == null && !Where.FindGitInstallations(out installations))
-                return false;
-
-            Trace.WriteLine("Installer::SetSystemConfig");
-
-            int successCount = 0;
-
-            foreach (var install in installations)
-            {
-                if (File.Exists(install.Cmd))
-                {
-                    var options = new ProcessStartInfo()
+                    if ((updateTypes & Configuration.Type.System) == Configuration.Type.System)
                     {
-                        Arguments = "config --global credential.helper manager",
-                        FileName = install.Cmd,
-                        CreateNoWindow = true,
-                        UseShellExecute = false,
-                    };
-
-                    Trace.WriteLine("   cmd " + options.FileName + " " + options.Arguments + ".");
-
-                    var gitProcess = Process.Start(options);
-
-                    gitProcess.WaitForExit();
-
-                    Trace.WriteLine("   Git exited with " + gitProcess.ExitCode + ".");
-
-                    // record at least a single success
-                    if (gitProcess.ExitCode == 0)
+                        Console.Out.WriteLine();
+                        Console.Out.WriteLine("Updated your /etc/gitconfig [git config --system]");
+                    }
+                    else
                     {
-                        successCount += 1;
+                        Console.Out.WriteLine();
+
+                        // updating /etc/gitconfig should not fail installation when forced 
+                        if (!_isForced)
+                        {
+                            // only 'fatal' when not forced
+                            Console.Error.Write("Fatal: ");
+
+                            Result = ResultValue.GitConfigSystemFailed;
+                            return;
+                        }
+
+                        Console.Error.WriteLine("Unable to update your /etc/gitconfig correctly.");
+                    }
+
+                    if ((updateTypes & Configuration.Type.Global) == Configuration.Type.Global)
+                    {
+                        Console.Out.WriteLine("Updated your ~/.gitconfig [git config --global]");
+                    }
+                    else
+                    {
+                        Console.Out.WriteLine();
+                        Console.Error.WriteLine("Fatal: Unable to update your ~/.gitconfig correctly.");
+
+                        Result = ResultValue.GitConfigGlobalFailed;
+                        return;
                     }
                 }
-            }
 
-            return successCount == installations.Count;
+                List<string> cleanedFiles;
+                foreach (var installation in installations)
+                {
+                    Console.Out.WriteLine();
+                    Console.Out.WriteLine("Removing from '{0}'.", installation.Path);
+
+                    if (CleanFiles(installation.Libexec, out cleanedFiles))
+                    {
+                        foreach (var file in cleanedFiles)
+                        {
+                            Console.Out.WriteLine("  {0}", file);
+                        }
+
+                        Console.Out.WriteLine("        {0} file(s) cleaned", cleanedFiles.Count);
+                    }
+                    else if (_isForced)
+                    {
+                        Console.Error.WriteLine("  removal failed. U_U");
+                    }
+                    else
+                    {
+                        Console.Error.WriteLine("  removal failed. U_U");
+                        Pause();
+
+                        Result = ResultValue.RemovalFailed;
+                        return;
+                    }
+                }
+
+                // all necissary content has been deployed to the system
+                Result = ResultValue.Success;
+
+                Console.Out.WriteLine();
+                Console.Out.WriteLine("Success! {0} was removed! ^_^", Program.Title);
+                Pause();
+            }
+            finally
+            {
+                SetOutput(true, true);
+            }
         }
 
-        private bool CopyFiles(string srcPath, string dstPath, out List<string> copedFiles)
+        public bool SetGitConfig(List<GitInstallation> installations, GitConfigAction action, Configuration.Type type, out Configuration.Type updated)
+        {
+            Trace.WriteLine("Installer::SetGitConfig");
+            Trace.WriteLine("   action = " + action + ".");
+
+            updated = Configuration.Type.None;
+
+            if (installations == null && !Where.FindGitInstallations(out installations))
+            {
+                Trace.WriteLine("   No Git installations detected to update.");
+                return false;
+            }
+
+            if ((type & Configuration.Type.Global) == Configuration.Type.Global)
+            {
+                // the 0 entry in the installations list is the "preferred" instance of Git
+                string gitCmdPath = installations[0].Cmd;
+                string globalCmd = action == GitConfigAction.Set
+                    ? "config --global credential.helper manager"
+                    : "config --global --unset credential.helper";
+
+                if (ExecuteGit(gitCmdPath, globalCmd))
+                {
+                    Trace.WriteLine("   updating ~/.gitconfig succeeded.");
+
+                    updated |= Configuration.Type.Global;
+                }
+                else
+                {
+                    Trace.WriteLine("   updating ~/.gitconfig failed.");
+
+                    Console.Out.WriteLine();
+                    Console.Error.WriteLine("Fatal: Unable to update ~/.gitconfig.");
+                    Pause();
+                    return false;
+                }
+            }
+
+            if ((type & Configuration.Type.System) == Configuration.Type.System)
+            {
+                string systemCmd = action == GitConfigAction.Set
+                    ? "config --system credential.helper manager"
+                    : "config --system --unset credential.helper";
+
+                int successCount = 0;
+
+                foreach (var installation in installations)
+                {
+                    if (ExecuteGit(installation.Cmd, systemCmd))
+                    {
+                        Trace.WriteLine("   updating /etc/gitconfig succeeded.");
+
+                        successCount++;
+                    }
+                    else
+                    {
+                        Trace.WriteLine("   updating ~/.gitconfig failed.");
+                    }
+                }
+
+                if (successCount == installations.Count)
+                {
+                    updated |= Configuration.Type.System;
+                }
+                else
+                {
+                    return false;
+                }
+            }
+
+            return true;
+        }
+
+        private bool CleanFiles(string path, out List<string> cleanedFiles)
+        {
+            Trace.WriteLine("Installer::CleanFiles");
+
+            cleanedFiles = new List<string>();
+
+            if (!Directory.Exists(path))
+            {
+                Trace.WriteLine("   path '" + path + "' does not exist.");
+                return false;
+            }
+
+            try
+            {
+                foreach (string file in Files)
+                {
+                    string target = Path.Combine(path, file);
+
+                    Trace.WriteLine("   clean '" + target + "'.");
+
+                    File.Delete(target);
+
+                    cleanedFiles.Add(file);
+                }
+
+                return true;
+            }
+            catch
+            {
+                Trace.WriteLine("   clean failed.");
+                return false;
+            }
+        }
+
+        private bool CopyFiles(string srcPath, string dstPath, out List<string> copiedFiles)
         {
             Trace.WriteLine("Installer::CopyFiles");
 
-            copedFiles = new List<string>();
+            copiedFiles = new List<string>();
 
             if (!Directory.Exists(srcPath))
             {
@@ -430,7 +543,7 @@ namespace Microsoft.Alm.CredentialHelper
 
                         File.Copy(src, dst, true);
 
-                        copedFiles.Add(file);
+                        copiedFiles.Add(file);
                     }
 
                     return true;
@@ -450,19 +563,9 @@ namespace Microsoft.Alm.CredentialHelper
             return false;
         }
 
-        private void Pause()
+        private void DeployElevated()
         {
-            if (!_isPassive)
-            {
-                Console.Out.WriteLine();
-                Console.Out.WriteLine("Press any key to continue...");
-                Console.ReadKey();
-            }
-        }
-
-        private void RunElevated()
-        {
-            Trace.WriteLine("Installer::RunElevated");
+            Trace.WriteLine("Installer::DeployElevated");
 
             if (_isPassive)
             {
@@ -527,6 +630,135 @@ namespace Microsoft.Alm.CredentialHelper
             }
         }
 
+        private bool ExecuteGit(string gitCmdPath, string command)
+        {
+            if (String.IsNullOrEmpty(gitCmdPath) || String.IsNullOrEmpty(command))
+                return false;
+
+            if (!File.Exists(gitCmdPath))
+                return false;
+
+            var options = new ProcessStartInfo()
+            {
+                Arguments = command,
+                FileName = gitCmdPath,
+                CreateNoWindow = true,
+                UseShellExecute = false,
+            };
+
+            Trace.WriteLine("   cmd " + options.FileName + " " + options.Arguments + ".");
+
+            var gitProcess = Process.Start(options);
+
+            gitProcess.WaitForExit();
+
+            Trace.WriteLine("   Git exited with " + gitProcess.ExitCode + ".");
+
+            return gitProcess.ExitCode == 0;
+        }
+
+        private void Pause()
+        {
+            if (!_isPassive)
+            {
+                Console.Out.WriteLine();
+                Console.Out.WriteLine("Press any key to continue...");
+                Console.ReadKey();
+            }
+        }
+
+        private void RemoveElevated()
+        {
+            Trace.WriteLine("Installer::RemoveElevated");
+
+            if (_isPassive)
+            {
+                this.Result = ResultValue.Unprivileged;
+            }
+            else
+            {
+                /* cannot uninstall while not elevated (need access to %PROGRAMFILES%), re-launch 
+                   self as an elevated process with identical arguments. */
+
+                // build arguments
+                var arguments = new System.Text.StringBuilder("remove");
+                if (_isPassive)
+                {
+                    arguments.Append(" ")
+                             .Append(ParamPassiveKey);
+                }
+                if (_isForced)
+                {
+                    arguments.Append(" ")
+                             .Append(ParamForceKey);
+                }
+                if (!String.IsNullOrEmpty(_customPath))
+                {
+                    arguments.Append(" ")
+                             .Append(ParamForceKey)
+                             .Append(" \"")
+                             .Append(_customPath)
+                             .Append("\"");
+                }
+
+                // build process start options
+                var options = new ProcessStartInfo()
+                {
+                    FileName = "cmd",
+                    Arguments = String.Format("/c \"{0}\" {1}", Program.ExecutablePath, arguments.ToString()),
+                    UseShellExecute = true, // shellexecute for verb usage
+                    Verb = "runas", // used to invoke elevation
+                    WorkingDirectory = Program.Location,
+                };
+
+                Trace.WriteLine("   cmd " + options.Verb + " " + options.FileName + " " + options.Arguments);
+
+                try
+                {
+                    // create the process
+                    var elevated = Process.Start(options);
+
+                    // wait for the process to complete
+                    elevated.WaitForExit();
+
+                    Trace.WriteLine("   process exited with " + elevated.ExitCode + ".");
+
+                    // exit with the elevated process' exit code
+                    this.ExitCode = elevated.ExitCode;
+                }
+                catch (Exception exception)
+                {
+                    Trace.WriteLine("   process failed with " + exception.Message);
+                    this.Result = ResultValue.Unprivileged;
+                }
+            }
+        }
+
+        private void SetOutput(bool muteStdout, bool muteStderr)
+        {
+            if (muteStdout)
+            {
+                _stdout = Console.Out;
+                Console.SetOut(TextWriter.Null);
+            }
+            else if (_stdout != null)
+            {
+                Console.SetOut(_stdout);
+                _stdout = null;
+            }
+
+            if (muteStderr)
+            {
+                _stderr = Console.Out;
+                Console.SetOut(TextWriter.Null);
+            }
+            else if (_stderr != null)
+            {
+                Console.SetOut(_stderr);
+                _stderr = null;
+            }
+        }
+
         public enum ResultValue : int
         {
             UnknownFailure = -1,
@@ -538,6 +770,13 @@ namespace Microsoft.Alm.CredentialHelper
             GitConfigGlobalFailed,
             GitConfigSystemFailed,
             GitNotFound,
+            RemovalFailed,
+        }
+
+        public enum GitConfigAction
+        {
+            Set,
+            Unset,
         }
     }
 }

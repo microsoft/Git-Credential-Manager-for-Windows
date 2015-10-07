@@ -14,10 +14,41 @@ namespace Microsoft.Alm.CredentialHelper
         public const string Title = "Git Credential Manager for Windows";
         public const string SourceUrl = "https://github.com/Microsoft/Git-Credential-Manager-for-Windows";
 
+        internal const string CommandApprove = "approve";
+        internal const string CommandErase = "erase";
+        internal const string CommandDeploy = "deploy";
+        internal const string CommandFill = "fill";
+        internal const string CommandGet = "get";
+        internal const string CommandInstall = "install";
+        internal const string CommandReject = "reject";
+        internal const string CommandRemove = "remove";
+        internal const string CommandStore = "store";
+        internal const string CommandUninstall = "uninstall";
+        internal const string CommandVersion = "version";
+
+        internal const string ConfigAuthortyKey = "authority";
+        internal const string ConfigInteractiveKey = "interactive";
+        internal const string ConfigValidateKey = "validate";
+        internal const string ConfigWritelogKey = "writelog";
+
         private const string ConfigPrefix = "credential";
         private const string SecretsNamespace = "git";
         private static readonly VsoTokenScope VsoCredentialScope = VsoTokenScope.CodeWrite | VsoTokenScope.PackagingRead;
         private static readonly GithubTokenScope GithubCredentialScope = GithubTokenScope.Gist | GithubTokenScope.PublicKeyRead | GithubTokenScope.Repo;
+        private static readonly List<string> CommandList = new List<string>
+        {
+            CommandApprove,
+            CommandDeploy,
+            CommandErase,
+            CommandFill,
+            CommandGet,
+            CommandInstall,
+            CommandReject,
+            CommandRemove,
+            CommandStore,
+            CommandUninstall,
+            CommandVersion
+        };
 
         internal static string ExecutablePath
         {
@@ -74,7 +105,10 @@ namespace Microsoft.Alm.CredentialHelper
             {
                 EnableDebugTrace();
 
-                if (args.Length == 0 || args[0].Contains('?'))
+                if (args.Length == 0
+                    || String.Equals(args[0], "--help", StringComparison.OrdinalIgnoreCase)
+                    || String.Equals(args[0], "-h", StringComparison.OrdinalIgnoreCase)
+                    || args[0].Contains('?'))
                 {
                     PrintHelpMessage();
                     return;
@@ -85,12 +119,15 @@ namespace Microsoft.Alm.CredentialHelper
                 {
                     { "approve", Store },
                     { "erase", Erase },
+                    { "deploy", Deploy },
                     { "fill", Get },
                     { "get", Get },
+                    { "install", Deploy },
                     { "reject", Erase },
+                    { "remove", Remove },
                     { "store", Store },
+                    { "uninstall", Remove },
                     { "version", PrintVersion },
-                    { "install", Install },
                 };
 
                 // invoke action specified by arg0
@@ -118,59 +155,84 @@ namespace Microsoft.Alm.CredentialHelper
         {
             Trace.WriteLine("Program::PrintHelpMessage");
 
-            Console.Out.WriteLine("usage: git credential-manager [approve|erase|fill|get|reject|store|version|install] [<args>]");
+            Console.Out.WriteLine("usage: git credential-manager [" + String.Join("|", CommandList) + "] [<args>]");
             Console.Out.WriteLine();
-            Console.Out.WriteLine("  install      Deploys the " + Title);
-            Console.Out.WriteLine("               package and configures Git installations to use it.");
+            Console.Out.WriteLine("Command Line Options:");
             Console.Out.WriteLine();
-            Console.Out.WriteLine("    --path     Specifies a path for the packaged to be deployed to.");
-            Console.Out.WriteLine("               If a path is provided, the installer will not copy binaries");
-            Console.Out.WriteLine("               into local Git installations.");
+            Console.Out.WriteLine("  " + CommandDeploy + "       Deploys the " + Title);
+            Console.Out.WriteLine("               package and sets Git configuration to use the helper.");
             Console.Out.WriteLine();
-            Console.Out.WriteLine("    --passive  Instructs the installer to not prompt the user for input");
-            Console.Out.WriteLine("               during installation and restricts output to error messages only.");
+            Console.Out.WriteLine("    " + Installer.ParamPathKey + "     Specifies a path for the installer to deploy to.");
+            Console.Out.WriteLine("               If a path is provided, the installer will not seek additional");
+            Console.Out.WriteLine("               Git installations to modify.");
             Console.Out.WriteLine();
-            Console.Out.WriteLine("    --forced   Instructs the installer to proceed with installtion even if");
-            Console.Out.WriteLine("               prerequisites are not met. When combined with --passive all output");
-            Console.Out.WriteLine("               is eliminated; only the return code can be used to validate success.");
+            Console.Out.WriteLine("    " + Installer.ParamPassiveKey + "  Instructs the installer to not prompt the user for input");
+            Console.Out.WriteLine("               during deployment and restricts output to error messages only.");
+            Console.Out.WriteLine("               When combined with " + Installer.ParamForceKey + " all output is eliminated; only the");
+            Console.Out.WriteLine("               return code can be used to validate success.");
             Console.Out.WriteLine();
-            Console.Out.WriteLine("  version       Displays the current version.");
+            Console.Out.WriteLine("    " + Installer.ParamForceKey + "    Instructs the installer to proceed with deployment even if");
+            Console.Out.WriteLine("               prerequisites are not met or errors are encountered.");
+            Console.Out.WriteLine("               When combined with " + Installer.ParamPassiveKey + " all output is eliminated; only the");
+            Console.Out.WriteLine("               return code can be used to validate success.");
+            Console.Out.WriteLine();
+            Console.Out.WriteLine("  " + CommandRemove + "       Removes the " + Title);
+            Console.Out.WriteLine("               package and unsets Git configuration to no longer use the helper.");
+            Console.Out.WriteLine();
+            Console.Out.WriteLine("    " + Installer.ParamPathKey + "     Specifies a path for the installer to remove from.");
+            Console.Out.WriteLine("               If a path is provided, the installer will not seek additional");
+            Console.Out.WriteLine("               Git installations to modify.");
+            Console.Out.WriteLine();
+            Console.Out.WriteLine("    " + Installer.ParamPassiveKey + "  Instructs the installer to not prompt the user for input");
+            Console.Out.WriteLine("               during removal and restricts output to error messages only.");
+            Console.Out.WriteLine("               When combined with " + Installer.ParamForceKey + " all output is eliminated; only the");
+            Console.Out.WriteLine("               return code can be used to validate success.");
+            Console.Out.WriteLine();
+            Console.Out.WriteLine("    " + Installer.ParamForceKey + "    Instructs the installer to proceed with removal even if");
+            Console.Out.WriteLine("               prerequisites are not met or errors are encountered.");
+            Console.Out.WriteLine("               When combined with " + Installer.ParamPassiveKey + " all output is eliminated; only the");
+            Console.Out.WriteLine("               return code can be used to validate success.");
+            Console.Out.WriteLine();
+            Console.Out.WriteLine("  " + CommandVersion + "       Displays the current version.");
             Console.Out.WriteLine();
             Console.Out.WriteLine("Git Configuration Options:");
             Console.Out.WriteLine();
-            Console.Out.WriteLine("  authority    Defines the type of authentication to be used.");
+            Console.Out.WriteLine("  " + ConfigAuthortyKey + "    Defines the type of authentication to be used.");
             Console.Out.WriteLine("               Supports Auto, Basic, AAD, MSA, and Integrated.");
             Console.Out.WriteLine("               Default is Auto.");
             Console.Out.WriteLine();
-            Console.Out.WriteLine("      `git config --global credential.microsoft.visualstudio.com.authority AAD`");
+            Console.Out.WriteLine("      `git config --global credential.microsoft.visualstudio.com." + ConfigAuthortyKey + " AAD`");
             Console.Out.WriteLine();
-            Console.Out.WriteLine("  interactive  Specifies if user can be prompted for credentials or not.");
+            Console.Out.WriteLine("  " + ConfigInteractiveKey + "  Specifies if user can be prompted for credentials or not.");
             Console.Out.WriteLine("               Supports Auto, Always, or Never. Defaults to Auto.");
             Console.Out.WriteLine("               Only used by AAD and MSA authority.");
             Console.Out.WriteLine();
-            Console.Out.WriteLine("      `git config --global credential.microsoft.visualstudio.com.interactive never`");
+            Console.Out.WriteLine("      `git config --global credential.microsoft.visualstudio.com." + ConfigInteractiveKey + " never`");
             Console.Out.WriteLine();
-            Console.Out.WriteLine("  validate     Causes validation of credentials before supplying them");
+            Console.Out.WriteLine("  " + ConfigValidateKey + "     Causes validation of credentials before supplying them");
             Console.Out.WriteLine("               to Git. Invalid credentials get a refresh attempt");
             Console.Out.WriteLine("               before failing. Incurs some minor overhead.");
             Console.Out.WriteLine("               Defaults to TRUE. Ignored by Basic authority.");
             Console.Out.WriteLine();
-            Console.Out.WriteLine("      `git config --global credential.microsoft.visualstudio.com.validate false`");
+            Console.Out.WriteLine("      `git config --global credential.microsoft.visualstudio.com." + ConfigValidateKey + " false`");
             Console.Out.WriteLine();
-            Console.Out.WriteLine("  writelog     Enables trace logging of all activities. Logs are written to");
+            Console.Out.WriteLine("  " + ConfigWritelogKey + "     Enables trace logging of all activities. Logs are written to");
             Console.Out.WriteLine("               the local .git/ folder at the root of the repository.");
             Console.Out.WriteLine("               Defaults to FALSE.");
             Console.Out.WriteLine();
-            Console.Out.WriteLine("      `git config --global credential.writelog true`");
+            Console.Out.WriteLine("      `git config --global credential." + ConfigWritelogKey + " true`");
             Console.Out.WriteLine();
             Console.Out.WriteLine("Sample Configuration:");
             Console.Out.WriteLine();
             Console.Out.WriteLine(@"  [credential ""microsoft.visualstudio.com""]");
-            Console.Out.WriteLine(@"      authority = AAD");
+            Console.Out.WriteLine(@"      " + ConfigAuthortyKey + " = AAD");
+            Console.Out.WriteLine(@"      " + ConfigInteractiveKey + " = never");
+            Console.Out.WriteLine(@"      " + ConfigValidateKey + " = false");
             Console.Out.WriteLine(@"  [credential ""visualstudio.com""]");
-            Console.Out.WriteLine(@"      authority = MSA");
+            Console.Out.WriteLine(@"      " + ConfigAuthortyKey + " = MSA");
             Console.Out.WriteLine(@"  [credential]");
             Console.Out.WriteLine(@"      helper = manager");
+            Console.Out.WriteLine(@"      " + ConfigWritelogKey + " = true");
             Console.Out.WriteLine();
         }
 
@@ -378,10 +440,29 @@ namespace Microsoft.Alm.CredentialHelper
             Console.Out.WriteLine("{0} version {1}", Title, Version.ToString(3));
         }
 
-        private static void Install()
+        private static void Deploy()
         {
+            Trace.WriteLine("Program::Deploy");
+
             var installer = new Installer();
-            installer.RunConsole();
+            installer.DeployConsole();
+
+            Trace.WriteLine(String.Format("   Installer result = {0}.", installer.Result));
+            Trace.WriteLine(String.Format("   Installer exit code = {0}.", installer.ExitCode));
+
+            Environment.Exit(installer.ExitCode);
+        }
+
+        private static void Remove()
+        {
+            Trace.WriteLine("Program::Remove");
+
+            var installer = new Installer();
+            installer.RemoveConsole();
+
+            Trace.WriteLine(String.Format("   Installer result = {0}.", installer.Result));
+            Trace.WriteLine(String.Format("   Installer exit code = {0}.", installer.ExitCode));
+
             Environment.Exit(installer.ExitCode);
         }
 
@@ -479,9 +560,9 @@ namespace Microsoft.Alm.CredentialHelper
             Configuration config = new Configuration();
             Configuration.Entry entry;
 
-            if (config.TryGetEntry(ConfigPrefix, operationArguments.TargetUri, "authority", out entry))
+            if (config.TryGetEntry(ConfigPrefix, operationArguments.TargetUri, ConfigAuthortyKey, out entry))
             {
-                Trace.WriteLine("   authority = " + entry.Value);
+                Trace.WriteLine("   " + ConfigAuthortyKey + " = " + entry.Value);
 
                 if (String.Equals(entry.Value, "MSA", StringComparison.OrdinalIgnoreCase)
                     || String.Equals(entry.Value, "Microsoft", StringComparison.OrdinalIgnoreCase)
@@ -511,9 +592,9 @@ namespace Microsoft.Alm.CredentialHelper
                 }
             }
 
-            if (config.TryGetEntry(ConfigPrefix, operationArguments.TargetUri, "interactive", out entry))
+            if (config.TryGetEntry(ConfigPrefix, operationArguments.TargetUri, ConfigInteractiveKey, out entry))
             {
-                Trace.WriteLine("   interactive = " + entry.Value);
+                Trace.WriteLine("   " + ConfigInteractiveKey + " = " + entry.Value);
 
                 if (String.Equals("always", entry.Value, StringComparison.OrdinalIgnoreCase)
                     || String.Equals("true", entry.Value, StringComparison.OrdinalIgnoreCase)
@@ -528,9 +609,9 @@ namespace Microsoft.Alm.CredentialHelper
                 }
             }
 
-            if (config.TryGetEntry(ConfigPrefix, operationArguments.TargetUri, "validate", out entry))
+            if (config.TryGetEntry(ConfigPrefix, operationArguments.TargetUri, ConfigValidateKey, out entry))
             {
-                Trace.WriteLine("   validate = " + entry.Value);
+                Trace.WriteLine("   " + ConfigValidateKey + " = " + entry.Value);
 
                 bool validate = operationArguments.ValidateCredentials;
                 if (Boolean.TryParse(entry.Value, out validate))
@@ -539,9 +620,9 @@ namespace Microsoft.Alm.CredentialHelper
                 }
             }
 
-            if (config.TryGetEntry(ConfigPrefix, operationArguments.TargetUri, "writelog", out entry))
+            if (config.TryGetEntry(ConfigPrefix, operationArguments.TargetUri, ConfigWritelogKey, out entry))
             {
-                Trace.WriteLine("   writelog = " + entry.Value);
+                Trace.WriteLine("   " + ConfigWritelogKey + " = " + entry.Value);
 
                 bool writelog = operationArguments.WriteLog;
                 if (Boolean.TryParse(entry.Value, out writelog))

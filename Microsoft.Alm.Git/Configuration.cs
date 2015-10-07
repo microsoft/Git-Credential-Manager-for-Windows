@@ -247,5 +247,15 @@ namespace Microsoft.Alm.Git
             public readonly string Key;
             public readonly string Value;
         }
+
+        [Flags]
+        public enum Type
+        {
+            None = 0,
+            Local = 1 << 0,
+            Global = 1 << 1,
+            Xdg = 1 << 2,
+            System = 1 << 3,
+        }
     }
 }
