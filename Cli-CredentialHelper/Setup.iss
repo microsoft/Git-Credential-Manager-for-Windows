@@ -59,7 +59,15 @@ Source: "..\Deploy\Microsoft.Alm.Authentication.dll"; DestDir: "{app}"; Flags: i
 Source: "..\Deploy\Microsoft.Alm.Git.dll"; DestDir: "{app}"; Flags: ignoreversion
 Source: "..\Deploy\Microsoft.IdentityModel.Clients.ActiveDirectory.dll"; DestDir: "{app}"; Flags: ignoreversion
 Source: "..\Deploy\Microsoft.IdentityModel.Clients.ActiveDirectory.WindowsForms.dll"; DestDir: "{app}"; Flags: ignoreversion
-Source: "..\Deploy\README.md"; DestDir: "{app}"; Flags: ignoreversion isreadme
+Source: "..\Deploy\README.md"; DestDir: "{app}"; Flags: ignoreversion
+
+[UninstallDelete]
+Type: files; Name: "{app}\git-credential-manager.exe";
+Type: files; Name: "{app}\Microsoft.Alm.Authentication.dll";
+Type: files; Name: "{app}\Microsoft.Alm.Git.dll";
+Type: files; Name: "{app}\Microsoft.IdentityModel.Clients.ActiveDirectory.dll";
+Type: files; Name: "{app}\Microsoft.IdentityModel.Clients.ActiveDirectory.WindowsForms.dll";
+Type: files; Name: "{app}\README.md";
 
 [Code]
 type NetFx_Version = (
@@ -228,7 +236,7 @@ begin
   WizardForm.ProgressGauge.Style := npbstMarquee;
 
   try
-    if Exec(ExpandConstant('{app}\git-credential-manager.exe'), 'install --passive --nofail', '', SW_HIDE, ewWaitUntilTerminated, ResultCode) then
+    if Exec(ExpandConstant('{app}\git-credential-manager.exe'), 'deploy --passive --nofail', '', SW_HIDE, ewWaitUntilTerminated, ResultCode) then
       begin
         Result := True;
       end;
@@ -236,6 +244,24 @@ begin
     WizardForm.StatusLabel.Caption := StatusText;
     WizardForm.ProgressGauge.Style := npbstNormal;
   end;     
+end;
+
+function UninstallManager() : Boolean;
+var
+  ResultCode: integer;
+  StatusText: string;
+begin
+  Result := false;
+
+  if Exec(ExpandConstant('{app}\git-credential-manager.exe'), 'remove --passive --nofail', '', SW_HIDE, ewWaitUntilTerminated, ResultCode) then
+    begin
+      Result := True;
+    end;
+end;
+
+function InitializeUninstall(): Boolean;
+begin
+  Result := True;
 end;
 
 procedure InitializeWizard;
@@ -278,5 +304,16 @@ begin
           end;
       end;
   end;  
+end;
+
+procedure CurUninstallStepChanged(CurStep: TUninstallStep);
+begin
+  case CurStep of
+    usUninstall:
+      if not (UninstallManager()) then
+        begin
+          Abort();
+        end;
+    end;
 end;
 
