@@ -47,8 +47,8 @@ Name: "english"; MessagesFile: "compiler:Default.isl";
 Name: "full"; Description: "Full installation"; Flags: iscustom;
 
 [Components]
-Name: "NetFx"; Description: "The Microsoft .NET Framework 4.6."; ExtraDiskSpaceRequired: 381005824; Types: full; Flags: fixed; Check: DetectGitChecked;
-Name: "Git4Win"; Description: "Git for Windows 2.5.3."; ExtraDiskSpaceRequired: 394309632; Types: full; Flags: fixed; Check: DetectNetFxChecked;
+Name: "NetFx"; Description: "The Microsoft .NET Framework 4.6."; ExtraDiskSpaceRequired: 381005824; Types: full; Flags: fixed; Check: DetectNetFxChecked;
+Name: "Git4Win"; Description: "Git for Windows 2.5.3."; ExtraDiskSpaceRequired: 394309632; Types: full; Flags: fixed; Check: DetectGitChecked;
 
 [Dirs]
 Name: "{tmp}\gcmSetup"
