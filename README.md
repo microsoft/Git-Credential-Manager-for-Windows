@@ -13,7 +13,10 @@ This project includes:
 This is a community project so feel free to contribute ideas, submit bugs, fix bugs, or code new features.
 
 ## Download and Install
-To use the GCM, you can download the [latest installer](https://github.com/Microsoft/Git-Credential-Manager-for-Windows/releases). To install, extract the .zip file and run install.cmd from an administrator command prompt.
+To use the GCM, you can download the [latest installer](https://github.com/Microsoft/Git-Credential-Manager-for-Windows/releases). To install, double-click Setup.exe and follow the instructions presented.
+
+### Manual Installation
+Note for users with special installation needs, you can still extract the .zip file and run install.cmd from an administrator command prompt. This allows specification of the installation options explained below.
 
 ### Build and Install from Sources
 To build and install the GCM yourself, clone the sources, open the solution file in Visual Studio, and build the solution. All necessary components will be copied from the build output locations into a `.\Deploy` folder at the root of the solution. From an elevated command prompt in the `.\Deploy` folder issue the following command `git-credential-manager install`.
