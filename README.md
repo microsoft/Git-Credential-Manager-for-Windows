@@ -1,5 +1,5 @@
 #Git Credential Manager for Windows
-The [Git Credential Manager for Windows (GCM)](https://github.com/Microsoft/Git-Credential-Manager-for-Windows) provides secure Git credential storage for Windows. It's the successor to the [Windows Credential Store for Git  (git-credential-winstore)](https://gitcredentialstore.codeplex.com/), which is no longer maintained.
+The [Git Credential Manager for Windows (GCM)](https://github.com/Microsoft/Git-Credential-Manager-for-Windows) provides secure Git credential storage for Windows. It's the successor to the [Windows Credential Store for Git  (git-credential-winstore)](https://gitcredentialstore.codeplex.com/), which is no longer maintained. Compared to Git's build-in credential storage for Windows ([wincred](https://git-scm.com/book/en/v2/Git-Tools-Credential-Storage)), which provides single-factor authentication support working on any HTTP enabled Git repository, it provides multi-factor authentication support for Visual Studio Online and GitHub.
 
 This project includes:
 
