@@ -5,7 +5,7 @@
 #include <idp.iss>
 
 #define MyAppName "Git Credential Manager for Windows"
-#define MyAppVersion "0.9.14"
+#define MyAppVersion "0.9.15"
 #define MyAppPublisher "Microsoft Corporation"
 #define MyAppPublisherURL "http://www.microsoft.com"
 #define MyAppURL "https://github.com/Microsoft/Git-Credential-Manager-for-Windows"
@@ -48,7 +48,7 @@ Name: "full"; Description: "Full installation"; Flags: iscustom;
 
 [Components]
 Name: "NetFx"; Description: "The Microsoft .NET Framework 4.6."; ExtraDiskSpaceRequired: 381005824; Types: full; Flags: fixed; Check: DetectNetFxChecked;
-Name: "Git4Win"; Description: "Git for Windows 2.5.3."; ExtraDiskSpaceRequired: 394309632; Types: full; Flags: fixed; Check: DetectGitChecked;
+Name: "Git4Win"; Description: "Git for Windows."; ExtraDiskSpaceRequired: 394309632; Types: full; Flags: fixed; Check: DetectGitChecked;
 
 [Dirs]
 Name: "{tmp}\gcmSetup"
@@ -173,7 +173,7 @@ begin
 
   bInstallFx40 := FileExists(ExpandConstant('{tmp}\NetFx40Installer.exe'));
   bInstallFx46 := FileExists(ExpandConstant('{tmp}\NetFx46Installer.exe'));
-  bInstallGit := FileExists(ExpandConstant('{tmp}\Git-2.6.0-64-bit.exe'));
+  bInstallGit := FileExists(ExpandConstant('{tmp}\Git-2-64-bit.exe'));
 
   if bInstallFx40 or bInstallFx46 then
     begin
@@ -212,7 +212,7 @@ begin
       WizardForm.ProgressGauge.Style := npbstMarquee;
 
       try
-        if not Exec(ExpandConstant('{tmp}\Git-2.6.0-64-bit.exe'), '/NOCANCEL', '', SW_SHOW, ewWaitUntilTerminated, ResultCode) then
+        if not Exec(ExpandConstant('{tmp}\Git-2-64-bit.exe'), '/NOCANCEL', '', SW_SHOW, ewWaitUntilTerminated, ResultCode) then
           begin
             Result := False;
             MsgBox('Installing Git for Windows failed with code: ' + IntToStr(ResultCode) + '.', mbError, MB_OK);
@@ -280,7 +280,7 @@ begin
 
   if not DetectGit() then
     begin
-      idpAddFile('http://github.com/git-for-windows/git/releases/download/v2.6.0.windows.1/Git-2.6.0-64-bit.exe', ExpandConstant('{tmp}\Git-2.6.0-64-bit.exe'));
+      idpAddFile('https://github.com/git-for-windows/git/releases/latest', ExpandConstant('{tmp}\Git-2-64-bit.exe'));
       idpDownloadAfter(wpReady);
     end;
 end;
