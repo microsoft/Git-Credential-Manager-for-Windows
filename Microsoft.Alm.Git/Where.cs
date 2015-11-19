@@ -163,8 +163,10 @@ namespace Microsoft.Alm.Git
             if (Where.App(GitAppName, out shellPathValue))
             {
                 // `Where.App` returns the path to the executable, truncate to the installation root
-                shellPathValue = Path.GetDirectoryName(shellPathValue);
-                shellPathValue = Path.GetDirectoryName(shellPathValue);
+                if (shellPathValue.EndsWith(GitInstallation.AllVersionCmdPath, StringComparison.InvariantCultureIgnoreCase))
+                {
+                    shellPathValue = shellPathValue.Substring(0, shellPathValue.Length - GitInstallation.AllVersionCmdPath.Length);
+                }
 
                 candidates.Add(new GitInstallation(shellPathValue, KnownGitDistribution.GitForWindows64v2));
                 candidates.Add(new GitInstallation(shellPathValue, KnownGitDistribution.GitForWindows32v2));
