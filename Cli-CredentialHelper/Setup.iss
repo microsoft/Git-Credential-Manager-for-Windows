@@ -4,12 +4,22 @@
 
 #include <idp.iss>
 
-#define MyAppName "Git Credential Manager for Windows"
+#define MyAppName "Microsoft Git Credential Manager for Windows"
 #define MyAppVersion "0.9.15"
 #define MyAppPublisher "Microsoft Corporation"
 #define MyAppPublisherURL "http://www.microsoft.com"
 #define MyAppURL "https://github.com/Microsoft/Git-Credential-Manager-for-Windows"
 #define MyAppExeName "git-credential-manager.exe"
+#define Git4WinName "Git for Windows 2.6.3"
+#define Git4WinUrl "https://github.com/git-for-windows/git/releases/download/v2.6.3.windows.1/Git-2.6.3-64-bit.exe"
+#define Git4WinFile "Git-2.6.3-64-bit.exe"
+#define Git4WinSpace 394309632
+#define NetFxName "The Microsoft .NET Framework 4.6."
+#define NetFxBaseFile "NetFx40Installer.exe"
+#define NetFxBaseUrl "http://download.microsoft.com/download/1/B/E/1BE39E79-7E39-46A3-96FF-047F95396215/dotNetFx40_Full_setup.exe"
+#define NetFxCoreFile "NetFx46Installer.exe"
+#define NetFxCoreUrl "http://download.microsoft.com/download/1/4/A/14A6C422-0D3C-4811-A31F-5EF91A83C368/NDP46-KB3045560-Web.exe"
+#define NetFxSpace 381005824
 
 [Setup]
 AppId={{9F0CBE43-690B-4C03-8845-6AC2CDB29815}
@@ -47,8 +57,8 @@ Name: "english"; MessagesFile: "compiler:Default.isl";
 Name: "full"; Description: "Full installation"; Flags: iscustom;
 
 [Components]
-Name: "NetFx"; Description: "The Microsoft .NET Framework 4.6."; ExtraDiskSpaceRequired: 381005824; Types: full; Flags: fixed; Check: DetectNetFxChecked;
-Name: "Git4Win"; Description: "Git for Windows."; ExtraDiskSpaceRequired: 394309632; Types: full; Flags: fixed; Check: DetectGitChecked;
+Name: "NetFx"; Description: {#NetFxName}; ExtraDiskSpaceRequired: {#NetFxSpace}; Types: full; Flags: fixed; Check: DetectNetFxChecked;
+Name: "Git4Win"; Description: {#Git4WinName}; ExtraDiskSpaceRequired: {#Git4WinSpace}; Types: full; Flags: fixed; Check: DetectGitChecked;
 
 [Dirs]
 Name: "{tmp}\gcmSetup"
@@ -173,20 +183,20 @@ var
 begin
   Result := True;
 
-  bInstallFx40 := FileExists(ExpandConstant('{tmp}\NetFx40Installer.exe'));
-  bInstallFx46 := FileExists(ExpandConstant('{tmp}\NetFx46Installer.exe'));
-  bInstallGit := FileExists(ExpandConstant('{tmp}\Git-2-64-bit.exe'));
+  bInstallFx40 := FileExists(ExpandConstant('{tmp}\{#NetFxBaseFile}'));
+  bInstallFx46 := FileExists(ExpandConstant('{tmp}\{#NetFxCoreFile}'));
+  bInstallGit := FileExists(ExpandConstant('{tmp}\{#Git4WinFile}'));
 
   if bInstallFx40 or bInstallFx46 then
     begin
       StatusText := WizardForm.StatusLabel.Caption;
-      WizardForm.StatusLabel.Caption := 'Installing .NET Framework. This might take a few minutes...';
+      WizardForm.StatusLabel.Caption := 'Installing {#NetFxName}. This might take a few minutes...';
       WizardForm.ProgressGauge.Style := npbstMarquee;
 
       try
         if bInstallFx40 then
           begin
-            if not Exec(ExpandConstant('{tmp}\NetFx40Installer.exe'), '/passive /norestart', '', SW_SHOW, ewWaitUntilTerminated, ResultCode) then
+            if not Exec(ExpandConstant('{tmp}\{#NetFxBaseFile}'), '/passive /norestart', '', SW_SHOW, ewWaitUntilTerminated, ResultCode) then
               begin
                 Result := False;
                 MsgBox('.NET installation failed with code: ' + IntToStr(ResultCode) + '.', mbError, MB_OK);
@@ -195,7 +205,7 @@ begin
 
         if bInstallFx46 then
           begin
-            if not Exec(ExpandConstant('{tmp}\NetFx46Installer.exe'), '/passive /norestart', '', SW_SHOW, ewWaitUntilTerminated, ResultCode) then
+            if not Exec(ExpandConstant('{tmp}\{#NetFxCoreFile}'), '/passive /norestart', '', SW_SHOW, ewWaitUntilTerminated, ResultCode) then
               begin
                 Result := False;
                 MsgBox('.NET installation failed with code: ' + IntToStr(ResultCode) + '.', mbError, MB_OK);
@@ -210,11 +220,11 @@ begin
   if bInstallGit then
     begin
       StatusText := WizardForm.StatusLabel.Caption;
-      WizardForm.StatusLabel.Caption := 'Installing Git for Windows. This might take a few minutes...';
+      WizardForm.StatusLabel.Caption := 'Installing {#Git4WinName}. This might take a few minutes...';
       WizardForm.ProgressGauge.Style := npbstMarquee;
 
       try
-        if not Exec(ExpandConstant('{tmp}\Git-2-64-bit.exe'), '/NOCANCEL', '', SW_SHOW, ewWaitUntilTerminated, ResultCode) then
+        if not Exec(ExpandConstant('{tmp}\{#Git4WinFile}'), '/NOCANCEL', '', SW_SHOW, ewWaitUntilTerminated, ResultCode) then
           begin
             Result := False;
             MsgBox('Installing Git for Windows failed with code: ' + IntToStr(ResultCode) + '.', mbError, MB_OK);
@@ -234,7 +244,7 @@ begin
   Result := False;
 
   StatusText := WizardForm.StatusLabel.Caption;
-  WizardForm.StatusLabel.Caption := 'Installing Git Credential Manager for Windows.';
+  WizardForm.StatusLabel.Caption := 'Installing {#MyAppName}.';
   WizardForm.ProgressGauge.Style := npbstMarquee;
 
   try
@@ -270,19 +280,19 @@ procedure InitializeWizard;
 begin
   if not DetectNetFx(NetFx_v40) then
     begin
-      idpAddFile('http://download.microsoft.com/download/1/B/E/1BE39E79-7E39-46A3-96FF-047F95396215/dotNetFx40_Full_setup.exe', ExpandConstant('{tmp}\NetFx40Installer.exe'));
+      idpAddFile('{#NetFxBaseUrl}', ExpandConstant('{tmp}\{#NetFxBaseFile}'));
       idpDownloadAfter(wpReady);
     end;
 
   if not DetectNetFx(NetFx_v451) then
     begin
-      idpAddFile('http://download.microsoft.com/download/1/4/A/14A6C422-0D3C-4811-A31F-5EF91A83C368/NDP46-KB3045560-Web.exe', ExpandConstant('{tmp}\NetFx46Installer.exe'));
+      idpAddFile('{#NetFxCoreUrl}', ExpandConstant('{tmp}\{#NetFxCoreFile}'));
       idpDownloadAfter(wpReady);
     end;
 
   if not DetectGit() then
     begin
-      idpAddFile('https://github.com/git-for-windows/git/releases/latest', ExpandConstant('{tmp}\Git-2-64-bit.exe'));
+      idpAddFile('{#Git4WinUrl}', ExpandConstant('{tmp}\{#Git4WinFile}'));
       idpDownloadAfter(wpReady);
     end;
 end;
