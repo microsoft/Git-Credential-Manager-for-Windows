@@ -54,6 +54,21 @@ namespace Microsoft.Alm.CredentialHelper
             }
         }
 
+        private static string UserBinPath
+        {
+            get
+            {
+                if (_userBinPath == null)
+                {
+                    string userBinPath = Environment.GetFolderPath(Environment.SpecialFolder.UserProfile);
+                    userBinPath = Path.Combine(userBinPath, "bin");
+                    _userBinPath = userBinPath;
+                }
+                return _userBinPath;
+            }
+        }
+        private static string _userBinPath = null;
+
         public int ExitCode
         {
             get { return (int)Result; }
@@ -167,10 +182,32 @@ namespace Microsoft.Alm.CredentialHelper
                     }
                 }
 
-                // only update the system configs if using a custom path
-                Configuration.Type types = String.IsNullOrWhiteSpace(_customPath)
-                    ? Configuration.Type.Global | Configuration.Type.System
-                    : Configuration.Type.System;
+                Console.Out.WriteLine();
+                Console.Out.WriteLine("Deploying from '{0}' to '{1}'.", Program.Location, UserBinPath);
+
+                if (CopyFiles(Program.Location, UserBinPath, out cleanedFiles))
+                {
+                    foreach (var file in cleanedFiles)
+                    {
+                        Console.Out.WriteLine("  {0}", file);
+                    }
+
+                    Console.Out.WriteLine("        {0} file(s) copied", cleanedFiles.Count);
+                }
+                else if (_isForced)
+                {
+                    Console.Error.WriteLine("  deployment failed. U_U");
+                }
+                else
+                {
+                    Console.Error.WriteLine("  deployment failed. U_U");
+                    Pause();
+
+                    Result = ResultValue.RemovalFailed;
+                    return;
+                }
+
+                Configuration.Type types = Configuration.Type.Global;
 
                 Configuration.Type updateTypes;
                 if (SetGitConfig(installations, GitConfigAction.Set, types, out updateTypes))
@@ -325,10 +362,7 @@ namespace Microsoft.Alm.CredentialHelper
                     return;
                 }
 
-                // only update the system configs if using a custom path
-                Configuration.Type types = String.IsNullOrWhiteSpace(_customPath)
-                    ? Configuration.Type.Global | Configuration.Type.System
-                    : Configuration.Type.System;
+                Configuration.Type types = Configuration.Type.Global | Configuration.Type.System;
 
                 Configuration.Type updateTypes;
                 if (SetGitConfig(installations, GitConfigAction.Unset, types, out updateTypes))
@@ -376,6 +410,34 @@ namespace Microsoft.Alm.CredentialHelper
                     Console.Out.WriteLine("Removing from '{0}'.", installation.Path);
 
                     if (CleanFiles(installation.Libexec, out cleanedFiles))
+                    {
+                        foreach (var file in cleanedFiles)
+                        {
+                            Console.Out.WriteLine("  {0}", file);
+                        }
+
+                        Console.Out.WriteLine("        {0} file(s) cleaned", cleanedFiles.Count);
+                    }
+                    else if (_isForced)
+                    {
+                        Console.Error.WriteLine("  removal failed. U_U");
+                    }
+                    else
+                    {
+                        Console.Error.WriteLine("  removal failed. U_U");
+                        Pause();
+
+                        Result = ResultValue.RemovalFailed;
+                        return;
+                    }
+                }
+
+                if (Directory.Exists(UserBinPath))
+                {
+                    Console.Out.WriteLine();
+                    Console.Out.WriteLine("Removing from '{0}'.", UserBinPath);
+
+                    if (CleanFiles(UserBinPath, out cleanedFiles))
                     {
                         foreach (var file in cleanedFiles)
                         {
