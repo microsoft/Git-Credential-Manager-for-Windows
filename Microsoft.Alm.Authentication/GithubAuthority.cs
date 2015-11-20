@@ -69,7 +69,7 @@ namespace Microsoft.Alm.Authentication
                 }
 
                 const string HttpJsonContentType = "application/x-www-form-urlencoded";
-                const string JsonContentFormat = @"{{ ""scopes"": {0}, ""note"": ""git: {1} on {2}"" }}";
+                const string JsonContentFormat = @"{{ ""scopes"": {0}, ""note"": ""git: {1} on {2} at {3:dd-MMM-yyyy HH:mm}"" }}";
 
                 StringBuilder scopesBuilder = new StringBuilder();
                 scopesBuilder.Append('[');
@@ -90,7 +90,7 @@ namespace Microsoft.Alm.Authentication
 
                 scopesBuilder.Append(']');
 
-                string jsonContent = String.Format(JsonContentFormat, scopesBuilder, targetUri, Environment.MachineName);
+                string jsonContent = String.Format(JsonContentFormat, scopesBuilder, targetUri, Environment.MachineName, DateTime.Now);
 
                 using (StringContent content = new StringContent(jsonContent, Encoding.UTF8, HttpJsonContentType))
                 using (HttpResponseMessage response = await httpClient.PostAsync(_authorityUrl, content))
