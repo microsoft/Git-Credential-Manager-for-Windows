@@ -162,7 +162,6 @@ namespace Microsoft.Alm.Authentication
                       .Append(targetUri.Scheme)
                       .Append("://")
                       .Append(targetUri.DnsSafeHost)
-                      .Append("/")
                       .Append(targetUri.PathAndQuery)
                       .AppendLine();
                 if (!NativeMethods.WriteConsole(stdout, buffer, (uint)buffer.Length, out written, IntPtr.Zero))
