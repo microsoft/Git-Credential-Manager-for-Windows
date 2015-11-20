@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
+using System.Linq;
 using Microsoft.Alm.Git;
 using Microsoft.Win32;
 
@@ -494,7 +495,7 @@ namespace Microsoft.Alm.CredentialHelper
                     ? "config --global credential.helper manager"
                     : "config --global --unset credential.helper";
 
-                if (ExecuteGit(gitCmdPath, globalCmd))
+                if (ExecuteGit(gitCmdPath, globalCmd, 0, 5))
                 {
                     Trace.WriteLine("   updating ~/.gitconfig succeeded.");
 
@@ -521,7 +522,7 @@ namespace Microsoft.Alm.CredentialHelper
 
                 foreach (var installation in installations)
                 {
-                    if (ExecuteGit(installation.Cmd, systemCmd))
+                    if (ExecuteGit(installation.Cmd, systemCmd, 0, 5))
                     {
                         Trace.WriteLine("   updating /etc/gitconfig succeeded.");
 
@@ -692,7 +693,7 @@ namespace Microsoft.Alm.CredentialHelper
             }
         }
 
-        private bool ExecuteGit(string gitCmdPath, string command)
+        private bool ExecuteGit(string gitCmdPath, string command, params int[] allowedExitCodes)
         {
             if (String.IsNullOrEmpty(gitCmdPath) || String.IsNullOrEmpty(command))
                 return false;
@@ -716,7 +717,10 @@ namespace Microsoft.Alm.CredentialHelper
 
             Trace.WriteLine("   Git exited with " + gitProcess.ExitCode + ".");
 
-            return gitProcess.ExitCode == 0;
+            if (allowedExitCodes != null && allowedExitCodes.Length > 0)
+                return allowedExitCodes.Contains(gitProcess.ExitCode);
+            else
+                return gitProcess.ExitCode == 0;
         }
 
         private void Pause()
