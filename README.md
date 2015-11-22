@@ -25,7 +25,7 @@ To use the GCM, you can download the [latest installer](<https://github.com/Micr
 
 ## How to use ##
 
-You don't. It [magically](<https://github.com/Microsoft/Git-Credential-Manager-for-Windows/issues/31>) works.
+You don't. It [magically](<https://github.com/Microsoft/Git-Credential-Manager-for-Windows/issues/31>) works when credentials are needed. One Example for when pushing to VSO it automatically opens a window and initialize an oauth2 flow to get your token. 
 
 ### Manual Installation
 
