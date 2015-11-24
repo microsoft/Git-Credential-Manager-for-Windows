@@ -283,5 +283,14 @@ namespace Microsoft.Alm.Authentication
         /// <param name="authenticationCode">The authentication code provided by the user.</param>
         /// <returns>True if successful; otherwise false.</returns>
         public delegate bool AcquireAuthenticationCodeDelegate(Uri targetUri, GithubAuthenticationResultType resultType, out string authenticationCode);
+
+        /// <summary>
+        /// Delegate for reporting the success, or not, of an authentiction attempt.
+        /// </summary>
+        /// <param name="targetUri">
+        /// The uniform resource indicator used to uniquely identitfy the credentials.
+        /// </param>
+        /// <param name="result">The result of the interactive authenticaiton attempt.</param>
+        public delegate void AuthenticationResult(Uri targetUri, GithubAuthenticationResultType result);
     }
 }
