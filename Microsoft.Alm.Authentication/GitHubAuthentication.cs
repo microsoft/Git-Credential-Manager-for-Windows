@@ -22,7 +22,8 @@ namespace Microsoft.Alm.Authentication
             GithubTokenScope tokenScope,
             ICredentialStore personalAccessTokenStore,
             AcquireCredentialsDelegate acquireCredentialsCallback,
-            AcquireAuthenticationCodeDelegate acquireAuthenticationCodeCallback)
+            AcquireAuthenticationCodeDelegate acquireAuthenticationCodeCallback,
+            AuthenticationResultDelegate authenticationResultCallback)
         {
             if (tokenScope == null)
                 throw new ArgumentNullException("tokenScope", "The parameter `tokenScope` is null or invalid.");
@@ -40,6 +41,7 @@ namespace Microsoft.Alm.Authentication
 
             AcquireCredentialsCallback = acquireCredentialsCallback;
             AcquireAuthenticationCodeCallback = acquireAuthenticationCodeCallback;
+            AuthenticationResultCallback = authenticationResultCallback;
         }
 
         /// <summary>
@@ -51,6 +53,7 @@ namespace Microsoft.Alm.Authentication
         internal ICredentialStore PersonalAccessTokenStore { get; set; }
         internal AcquireCredentialsDelegate AcquireCredentialsCallback { get; set; }
         internal AcquireAuthenticationCodeDelegate AcquireAuthenticationCodeCallback { get; set; }
+        internal AuthenticationResultDelegate AuthenticationResultCallback { get; set; }
 
         /// <summary>
         /// Deletes a <see cref="Credential"/> from the storage used by the authentication object.
@@ -88,6 +91,7 @@ namespace Microsoft.Alm.Authentication
             ICredentialStore personalAccessTokenStore,
             AcquireCredentialsDelegate acquireCredentialsCallback,
             AcquireAuthenticationCodeDelegate acquireAuthenticationCodeCallback,
+            AuthenticationResultDelegate authenticationResultCallback,
             out BaseAuthentication authentication)
         {
             const string GitHubBaseUrlHost = "github.com";
@@ -100,7 +104,7 @@ namespace Microsoft.Alm.Authentication
 
             if (targetUri.DnsSafeHost.EndsWith(GitHubBaseUrlHost, StringComparison.OrdinalIgnoreCase))
             {
-                authentication = new GithubAuthentication(tokenScope, personalAccessTokenStore, acquireCredentialsCallback, acquireAuthenticationCodeCallback);
+                authentication = new GithubAuthentication(tokenScope, personalAccessTokenStore, acquireCredentialsCallback, acquireAuthenticationCodeCallback, authenticationResultCallback);
                 Trace.WriteLine("   authentication for GitHub created");
             }
             else
@@ -161,6 +165,12 @@ namespace Microsoft.Alm.Authentication
                     credentials = (Credential)result.Token;
                     this.PersonalAccessTokenStore.WriteCredentials(targetUri, credentials);
 
+                    // if a result callback was registered, call it
+                    if (AuthenticationResultCallback!=null)
+                    {
+                        AuthenticationResultCallback(targetUri, result);
+                    }
+
                     return true;
                 }
                 else if (result == GithubAuthenticationResultType.TwoFactorApp
@@ -176,9 +186,21 @@ namespace Microsoft.Alm.Authentication
                             credentials = (Credential)result.Token;
                             this.PersonalAccessTokenStore.WriteCredentials(targetUri, credentials);
 
+                            // if a result callback was registered, call it
+                            if (AuthenticationResultCallback != null)
+                            {
+                                AuthenticationResultCallback(targetUri, result);
+                            }
+
                             return true;
                         }
                     }
+                }
+
+                // if a result callback was registered, call it
+                if (AuthenticationResultCallback != null)
+                {
+                    AuthenticationResultCallback(targetUri, result);
                 }
             }
 
@@ -291,6 +313,6 @@ namespace Microsoft.Alm.Authentication
         /// The uniform resource indicator used to uniquely identitfy the credentials.
         /// </param>
         /// <param name="result">The result of the interactive authenticaiton attempt.</param>
-        public delegate void AuthenticationResult(Uri targetUri, GithubAuthenticationResultType result);
+        public delegate void AuthenticationResultDelegate(Uri targetUri, GithubAuthenticationResultType result);
     }
 }

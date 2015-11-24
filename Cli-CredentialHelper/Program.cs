@@ -495,6 +495,7 @@ namespace Microsoft.Alm.CredentialHelper
                                                                   secrets,
                                                                   GithubCredentialPrompt, 
                                                                   GithubAuthCodePrompt,
+                                                                  null,
                                                                   out authority))
                     {
                         // set the authority type based on the returned value
@@ -539,7 +540,8 @@ namespace Microsoft.Alm.CredentialHelper
                     return authority ?? new GithubAuthentication(GithubCredentialScope, 
                                                                  secrets, 
                                                                  GithubCredentialPrompt, 
-                                                                 GithubAuthCodePrompt);
+                                                                 GithubAuthCodePrompt,
+                                                                 null);
 
                 case AuthorityType.MicrosoftAccount:
                     Trace.WriteLine("   authority is Microsoft Live");
