@@ -18,17 +18,28 @@ namespace Microsoft.Alm.Authentication
         /// </summary>
         /// <param name="tokenScope"></param>
         /// <param name="personalAccessTokenStore"></param>
-        public GithubAuthentication(GithubTokenScope tokenScope, ICredentialStore personalAccessTokenStore)
+        public GithubAuthentication(
+            GithubTokenScope tokenScope,
+            ICredentialStore personalAccessTokenStore,
+            AcquireCredentialsDelegate acquireCredentialsCallback,
+            AcquireAuthenticationCodeDelegate acquireAuthenticationCodeCallback)
         {
             if (tokenScope == null)
                 throw new ArgumentNullException("tokenScope", "The parameter `tokenScope` is null or invalid.");
             if (personalAccessTokenStore == null)
                 throw new ArgumentNullException("personalAccessTokenStore", "The parameter `personalAccessTokenStore` is null or invalid.");
+            if (acquireCredentialsCallback == null)
+                throw new ArgumentNullException("acquireCredentialsCallback", "The parameter `acquireCredentialsCallback` is null or invalid.");
+            if (acquireAuthenticationCodeCallback == null)
+                throw new ArgumentNullException("acquireAuthenticationCodeCallback", "The parameter `acquireAuthenticationCodeCallback` is null or invalid.");
 
             TokenScope = tokenScope;
 
             PersonalAccessTokenStore = personalAccessTokenStore;
             GithubAuthority = new GithubAuthority();
+
+            AcquireCredentialsCallback = acquireCredentialsCallback;
+            AcquireAuthenticationCodeCallback = acquireAuthenticationCodeCallback;
         }
 
         /// <summary>
@@ -38,6 +49,8 @@ namespace Microsoft.Alm.Authentication
 
         internal IGithubAuthority GithubAuthority { get; set; }
         internal ICredentialStore PersonalAccessTokenStore { get; set; }
+        internal AcquireCredentialsDelegate AcquireCredentialsCallback { get; set; }
+        internal AcquireAuthenticationCodeDelegate AcquireAuthenticationCodeCallback { get; set; }
 
         /// <summary>
         /// Deletes a <see cref="Credential"/> from the storage used by the authentication object.
@@ -73,6 +86,8 @@ namespace Microsoft.Alm.Authentication
             Uri targetUri,
             GithubTokenScope tokenScope,
             ICredentialStore personalAccessTokenStore,
+            AcquireCredentialsDelegate acquireCredentialsCallback,
+            AcquireAuthenticationCodeDelegate acquireAuthenticationCodeCallback,
             out BaseAuthentication authentication)
         {
             const string GitHubBaseUrlHost = "github.com";
@@ -85,7 +100,7 @@ namespace Microsoft.Alm.Authentication
 
             if (targetUri.DnsSafeHost.EndsWith(GitHubBaseUrlHost, StringComparison.OrdinalIgnoreCase))
             {
-                authentication = new GithubAuthentication(tokenScope, personalAccessTokenStore);
+                authentication = new GithubAuthentication(tokenScope, personalAccessTokenStore, acquireCredentialsCallback, acquireAuthenticationCodeCallback);
                 Trace.WriteLine("   authentication for GitHub created");
             }
             else
@@ -133,112 +148,10 @@ namespace Microsoft.Alm.Authentication
         /// <returns>True if success; otherwise false.</returns>
         public bool InteractiveLogon(Uri targetUri, out Credential credentials)
         {
-            // ReadConsole 32768 fail, 32767 ok 
-            // @linquize [https://github.com/Microsoft/Git-Credential-Manager-for-Windows/commit/a62b9a19f430d038dcd85a610d97e5f763980f85]
-            const int BufferReadSize = 32 * 1024 - 7;
-
-            StringBuilder buffer = new StringBuilder(BufferReadSize);
-            uint read = 0;
-            uint written = 0;
-
-            NativeMethods.FileAccess fileAccessFlags = NativeMethods.FileAccess.GenericRead | NativeMethods.FileAccess.GenericWrite;
-            NativeMethods.FileAttributes fileAttributes = NativeMethods.FileAttributes.Normal;
-            NativeMethods.FileCreationDisposition fileCreationDisposition = NativeMethods.FileCreationDisposition.OpenExisting;
-            NativeMethods.FileShare fileShareFlags = NativeMethods.FileShare.Read | NativeMethods.FileShare.Write;
-
-            using (SafeFileHandle stdout = NativeMethods.CreateFile("CONOUT$", fileAccessFlags, fileShareFlags, IntPtr.Zero, fileCreationDisposition, fileAttributes, IntPtr.Zero))
-            using (SafeFileHandle stdin = NativeMethods.CreateFile("CONIN$", fileAccessFlags, fileShareFlags, IntPtr.Zero, fileCreationDisposition, fileAttributes, IntPtr.Zero))
+            string username;
+            string password;
+            if (AcquireCredentialsCallback(targetUri, out username, out password))
             {
-                // read the current console mode
-                NativeMethods.ConsoleMode consoleMode;
-                if (!NativeMethods.GetConsoleMode(stdin, out consoleMode))
-                {
-                    int error = Marshal.GetLastWin32Error();
-                    throw new Win32Exception(error, "Unable to determine console mode (" + error + ").");
-                }
-
-                // instruct the user as to what they are expected to do
-                buffer.Append("Please enter your GitHub credentials for ")
-                      .Append(targetUri.Scheme)
-                      .Append("://")
-                      .Append(targetUri.DnsSafeHost)
-                      .Append(targetUri.PathAndQuery)
-                      .AppendLine();
-                if (!NativeMethods.WriteConsole(stdout, buffer, (uint)buffer.Length, out written, IntPtr.Zero))
-                {
-                    int error = Marshal.GetLastWin32Error();
-                    throw new Win32Exception(error, "Unable to write to standard output (" + error + ").");
-                }
-
-                // clear the buffer for the next operation
-                buffer.Clear();
-
-                // prompt the user for the username wanted
-                buffer.Append("username: ");
-                if (!NativeMethods.WriteConsole(stdout, buffer, (uint)buffer.Length, out written, IntPtr.Zero))
-                {
-                    int error = Marshal.GetLastWin32Error();
-                    throw new Win32Exception(error, "Unable to write to standard output (" + error + ").");
-                }
-
-                // clear the buffer for the next operation
-                buffer.Clear();
-
-                // read input from the user
-                if (!NativeMethods.ReadConsole(stdin, buffer, BufferReadSize, out read, IntPtr.Zero))
-                {
-                    int error = Marshal.GetLastWin32Error();
-                    throw new Win32Exception(error, "Unable to read from standard input (" + error + ").");
-                }
-
-                // record input from the user into local storage, stripping any eol chars
-                string username = buffer.ToString(0, (int)read);
-                username = username.Trim(Environment.NewLine.ToCharArray());
-
-                // clear the buffer for the next operation
-                buffer.Clear();
-
-                // set the console mode to current without echo input
-                NativeMethods.ConsoleMode consoleMode2 = consoleMode ^ NativeMethods.ConsoleMode.EchoInput;
-
-                if (!NativeMethods.SetConsoleMode(stdin, consoleMode2))
-                {
-                    int error = Marshal.GetLastWin32Error();
-                    throw new Win32Exception(error, "Unable to set console mode (" + error + ").");
-                }
-
-                // prompt the user for password
-                buffer.Append("password: ");
-                if (!NativeMethods.WriteConsole(stdout, buffer, (uint)buffer.Length, out written, IntPtr.Zero))
-                {
-                    int error = Marshal.GetLastWin32Error();
-                    throw new Win32Exception(error, "Unable to write to standard output (" + error + ").");
-                }
-
-                // clear the buffer for the next operation
-                buffer.Clear();
-
-                // read input from the user
-                if (!NativeMethods.ReadConsole(stdin, buffer, BufferReadSize, out read, IntPtr.Zero))
-                {
-                    int error = Marshal.GetLastWin32Error();
-                    throw new Win32Exception(error, "Unable to read from standard input (" + error + ").");
-                }
-
-                // record input from the user into local storage, stripping any eol chars
-                string password = buffer.ToString(0, (int)read);
-                password = password.Trim(Environment.NewLine.ToCharArray());
-
-                // clear the buffer for the next operation
-                buffer.Clear();
-
-                // restore the console mode to its original value
-                if (!NativeMethods.SetConsoleMode(stdin, consoleMode))
-                {
-                    int error = Marshal.GetLastWin32Error();
-                    throw new Win32Exception(error, "Unable to set console mode (" + error + ").");
-                }
-
                 GithubAuthenticationResult result;
 
                 if (result = GithubAuthority.AcquireToken(targetUri, username, password, null, this.TokenScope).Result)
@@ -250,37 +163,21 @@ namespace Microsoft.Alm.Authentication
 
                     return true;
                 }
-                else if (result == GithubAuthenticationResultType.TwoFactorApp 
-                      || result == GithubAuthenticationResultType.TwoFactorSms)
+                else if (result == GithubAuthenticationResultType.TwoFactorApp
+                        || result == GithubAuthenticationResultType.TwoFactorSms)
                 {
-                    buffer.Clear()
-                          .AppendLine()
-                          .Append("authcode: ");
-                    if (!NativeMethods.WriteConsole(stdout, buffer, (uint)buffer.Length, out written, IntPtr.Zero))
+                    string authenticationCode;
+                    if (AcquireAuthenticationCodeCallback(targetUri, result, out authenticationCode))
                     {
-                        int error = Marshal.GetLastWin32Error();
-                        throw new Win32Exception(error, "Unable to write to standard output (" + error + ").");
-                    }
-                    buffer.Clear();
+                        if (result = GithubAuthority.AcquireToken(targetUri, username, password, authenticationCode, this.TokenScope).Result)
+                        {
+                            Trace.WriteLine("   token aquisition succeeded");
 
-                    // read input from the user
-                    if (!NativeMethods.ReadConsole(stdin, buffer, BufferReadSize, out read, IntPtr.Zero))
-                    {
-                        int error = Marshal.GetLastWin32Error();
-                        throw new Win32Exception(error, "Unable to read from standard input (" + error + ").");
-                    }
+                            credentials = (Credential)result.Token;
+                            this.PersonalAccessTokenStore.WriteCredentials(targetUri, credentials);
 
-                    string authenticationCode = buffer.ToString(0, (int)read);
-                    authenticationCode = authenticationCode.Trim(Environment.NewLine.ToCharArray());
-
-                    if (result = GithubAuthority.AcquireToken(targetUri, username, password, authenticationCode, this.TokenScope).Result)
-                    {
-                        Trace.WriteLine("   token aquisition succeeded");
-
-                        credentials = (Credential)result.Token;
-                        this.PersonalAccessTokenStore.WriteCredentials(targetUri, credentials);
-
-                        return true;
+                            return true;
+                        }
                     }
                 }
             }
@@ -361,5 +258,30 @@ namespace Microsoft.Alm.Authentication
 
             return await GithubAuthority.ValidateCredentials(targetUri, credentials);
         }
+
+        /// <summary>
+        /// Delegate for credential acquisition from the UX.
+        /// </summary>
+        /// <param name="targetUri">
+        /// The uniform resource indicator used to uniquely identitfy the credentials.
+        /// </param>
+        /// <param name="username">The username supplied by the user.</param>
+        /// <param name="password">The password supplied by the user.</param>
+        /// <returns>True if successful; otherwise false.</returns>
+        public delegate bool AcquireCredentialsDelegate(Uri targetUri, out string username, out string password);
+
+        /// <summary>
+        /// Delegate for authentication code acquisition from the UX.
+        /// </summary>
+        /// <param name="targetUri">
+        /// The uniform resource indicator used to uniquely identitfy the credentials.
+        /// </param>
+        /// <param name="resultType">
+        /// <para>The result of initial logon attempt, using the results of <see cref="AcquireCredentialsDelegate"/>.</para>
+        /// <para>Should be either <see cref="GithubAuthenticationResultType.TwoFactorApp"/> or <see cref="GithubAuthenticationResultType.TwoFactorSms"/>.</para>
+        /// </param>
+        /// <param name="authenticationCode">The authentication code provided by the user.</param>
+        /// <returns>True if successful; otherwise false.</returns>
+        public delegate bool AcquireAuthenticationCodeDelegate(Uri targetUri, GithubAuthenticationResultType resultType, out string authenticationCode);
     }
 }
