@@ -527,7 +527,7 @@ namespace Microsoft.Alm.CredentialHelper
                     return authority ?? new BasicAuthentication(secrets);
 
                 case AuthorityType.GitHub:
-                    Trace.WriteLine("    authority it GitHub");
+                    Trace.WriteLine("   authority it GitHub");
 
                     // return a GitHub authenitcation object
                     return authority ?? new GithubAuthentication(GithubCredentialScope, secrets);
