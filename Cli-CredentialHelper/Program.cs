@@ -915,7 +915,7 @@ namespace Microsoft.Alm.CredentialHelper
             NativeMethods.CredentialUiInfo credUiInfo = new NativeMethods.CredentialUiInfo
             {
                 BannerArt = IntPtr.Zero,
-                CaptionText = "Git Credentials",
+                CaptionText = Title,
                 MessageText = String.Format("Enter you credentials for {0}://{1}.", targetUri.Scheme, targetUri.DnsSafeHost),
                 Parent = IntPtr.Zero,
                 Size = Marshal.SizeOf(typeof(NativeMethods.CredentialUiInfo))

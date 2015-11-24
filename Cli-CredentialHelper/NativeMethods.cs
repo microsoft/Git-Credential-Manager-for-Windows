@@ -664,7 +664,7 @@ namespace Microsoft.Alm.CredentialHelper
             Pack32Wow = 0x10000000,
         }
 
-        [StructLayout(LayoutKind.Sequential)]
+        [StructLayout(LayoutKind.Sequential, CharSet = CharSet.Unicode)]
         public unsafe struct CredentialUiInfo
         {
             public int Size;
