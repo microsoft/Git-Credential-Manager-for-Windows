@@ -848,8 +848,13 @@ namespace Microsoft.Alm.CredentialHelper
             using (SafeFileHandle stdout = NativeMethods.CreateFile(NativeMethods.ConsoleOutName, fileAccessFlags, fileShareFlags, IntPtr.Zero, fileCreationDisposition, fileAttributes, IntPtr.Zero))
             using (SafeFileHandle stdin = NativeMethods.CreateFile(NativeMethods.ConsoleInName, fileAccessFlags, fileShareFlags, IntPtr.Zero, fileCreationDisposition, fileAttributes, IntPtr.Zero))
             {
+                string type = resultType == GithubAuthenticationResultType.TwoFactorApp 
+                    ? "app" 
+                    : "sms";
                 buffer.AppendLine()
-                      .Append("authcode: ");
+                      .Append("authcode (")
+                      .Append(type)
+                      .Append("): ");
                 if (!NativeMethods.WriteConsole(stdout, buffer, (uint)buffer.Length, out written, IntPtr.Zero))
                 {
                     int error = Marshal.GetLastWin32Error();
