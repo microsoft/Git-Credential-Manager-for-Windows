@@ -1,4 +1,7 @@
 ﻿using System;
+using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
+using System.Linq;
 using System.Runtime.InteropServices;
 using System.Text;
 using Microsoft.Win32.SafeHandles;
@@ -506,6 +509,69 @@ namespace Microsoft.Alm.CredentialHelper
             GenericCredentials = 0x4,
         }
 
+        internal enum CredentialType : uint
+        {
+            /// <summary>
+            /// <para>The `<see cref="Credential"/>` is a generic credential. The credential will 
+            /// not be used by any particular authentication package.</para>
+            /// <para>The credential will be stored securely but has no other significant 
+            /// characteristics.<para>
+            /// </summary>
+            Generic = 0x01,
+            /// <summary>
+            /// <para>The `<see cref="Credential"/>` is a password credential and is specific to 
+            /// Microsoft's authentication packages. </para>
+            /// <para>The NTLM, Kerberos, and Negotiate authentication packages will automatically 
+            /// use this credential when connecting to the named target.</para>
+            /// </summary>
+            DomainPassword = 0x02,
+            /// <summary>
+            /// <para>The `<see cref="Credential"/>` is a certificate credential and is specific to 
+            /// Microsoft's authentication packages. </para>
+            /// <para>The Kerberos, Negotiate, and Schannel authentication packages automatically 
+            /// use this credential when connecting to the named target.</para>
+            /// </summary>
+            DomainCertificate = 0x03,
+            /// <summary>
+            /// <para>The `<see cref="Credential"/>` is a password credential and is specific to 
+            /// authentication packages from Microsoft. </para>
+            /// <para>The Passport authentication package will automatically use this credential 
+            /// when connecting to the named target.</para>
+            /// </summary>
+            [Obsolete("This value is no longer supported", true)]
+            DomainVisiblePassword = 0x04,
+            /// <summary>
+            /// <para>The `<see cref="Credential"/>` is a certificate credential that is a generic 
+            /// authentication package.</para>
+            /// </summary>
+            GenericCertificate = 0x05,
+            /// <summary>
+            /// <para>The `<see cref="Credential"/>` is supported by extended Negotiate packages.</para>
+            /// </summary>
+            /// <remarks>
+            /// Windows Server 2008, Windows Vista, Windows Server 2003, and Windows XP:  This 
+            /// value is not supported.
+            /// </remarks>
+            DomainExtended = 0x06,
+            /// <summary>
+            /// <para>The maximum number of supported credential types.<para>
+            /// </summary>
+            /// <remarks>
+            /// Windows Server 2008, Windows Vista, Windows Server 2003, and Windows XP:  This 
+            /// value is not supported.
+            /// </remarks>
+            Maximum = 0x07,
+            /// <summary>
+            /// <para>The extended maximum number of supported credential types that now allow new 
+            /// applications to run on older operating systems.</para>
+            /// </summary>
+            /// <remarks>
+            /// Windows Server 2008, Windows Vista, Windows Server 2003, and Windows XP:  This 
+            /// value is not supported.
+            /// </remarks>
+            MaximumEx = Maximum + 1000
+        }
+
         [Flags]
         public enum CredentialUiFlags
         {
@@ -598,6 +664,7 @@ namespace Microsoft.Alm.CredentialHelper
             Pack32Wow = 0x10000000,
         }
 
+        [StructLayout(LayoutKind.Sequential)]
         public unsafe struct CredentialUiInfo
         {
             public int Size;
@@ -667,7 +734,7 @@ namespace Microsoft.Alm.CredentialHelper
         /// <param name="flags">A value that specifies behavior for this function.</param>
         /// <returns><see cref="Win32Error"/> code value on failure; otherwise <see cref="Win32Error.Success"/>.</returns>
         [DllImport(CredUi32, CharSet = CharSet.Unicode, EntryPoint = "CredUIPromptForWindowsCredentialsW", SetLastError = true)]
-        public static extern int CredUIPromptForWindowsCredentials(ref CredentialUiInfo credUiInfo, uint authError, ref CredentialPackFlags authPackage, IntPtr inAuthBuffer, uint inAuthBufferSize, out IntPtr outAuthBuffer, out uint outAuthBufferSize, ref bool saveCredentials, CredentialUiWindowsFlags flags);
+        public static extern int CredUIPromptForWindowsCredentials(ref CredentialUiInfo credInfo, uint authError, ref CredentialPackFlags authPackage, IntPtr inAuthBuffer, uint inAuthBufferSize, out IntPtr outAuthBuffer, out uint outAuthBufferSize, ref bool saveCredentials, CredentialUiWindowsFlags flags);
 
         /// <summary>
         /// Converts a string user name and password into an authentication buffer.

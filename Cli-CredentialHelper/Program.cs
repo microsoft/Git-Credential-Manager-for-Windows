@@ -922,18 +922,17 @@ namespace Microsoft.Alm.CredentialHelper
             };
 
             bool saveCredentials = false;
-            NativeMethods.CredentialPackFlags packFlags = NativeMethods.CredentialPackFlags.GenericCredentials;
+            NativeMethods.CredentialPackFlags authPackage  = NativeMethods.CredentialPackFlags.None;
             IntPtr packedAuthBufferPtr = IntPtr.Zero;
             uint packedAuthBufferSize = 0;
-            NativeMethods.CredentialUiWindowsFlags flags = NativeMethods.CredentialUiWindowsFlags.Generic
-                                                         | NativeMethods.CredentialUiWindowsFlags.Pack32Wow;
+            NativeMethods.CredentialUiWindowsFlags flags = NativeMethods.CredentialUiWindowsFlags.Generic;
 
             try
             {
                 int result;
                 if ((result = NativeMethods.CredUIPromptForWindowsCredentials(ref credUiInfo,
                                                                               0,
-                                                                              ref packFlags,
+                                                                              ref authPackage,
                                                                               IntPtr.Zero,
                                                                               0,
                                                                               out packedAuthBufferPtr,
@@ -954,7 +953,7 @@ namespace Microsoft.Alm.CredentialHelper
                 int passwordLen = passwordBuffer.Capacity;
                 int domainLen = domainBuffer.Capacity;
 
-                if (!NativeMethods.CredUnPackAuthenticationBuffer(packFlags,
+                if (!NativeMethods.CredUnPackAuthenticationBuffer(authPackage,
                                                                   packedAuthBufferPtr,
                                                                   packedAuthBufferSize,
                                                                   usernameBuffer,
