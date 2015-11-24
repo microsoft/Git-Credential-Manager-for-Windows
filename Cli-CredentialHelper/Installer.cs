@@ -213,28 +213,6 @@ namespace Microsoft.Alm.CredentialHelper
                 Configuration.Type updateTypes;
                 if (SetGitConfig(installations, GitConfigAction.Set, types, out updateTypes))
                 {
-                    if ((updateTypes & Configuration.Type.System) == Configuration.Type.System)
-                    {
-                        Console.Out.WriteLine();
-                        Console.Out.WriteLine("Updated your /etc/gitconfig [git config --system]");
-                    }
-                    else
-                    {
-                        Console.Out.WriteLine();
-
-                        // updating /etc/gitconfig should not fail installation when forced 
-                        if (!_isForced)
-                        {
-                            // only 'fatal' when not forced
-                            Console.Error.Write("Fatal: ");
-
-                            Result = ResultValue.GitConfigSystemFailed;
-                            return;
-                        }
-
-                        Console.Error.WriteLine("Unable to update your /etc/gitconfig correctly.");
-                    }
-
                     if ((updateTypes & Configuration.Type.Global) == Configuration.Type.Global)
                     {
                         Console.Out.WriteLine("Updated your ~/.gitconfig [git config --global]");
