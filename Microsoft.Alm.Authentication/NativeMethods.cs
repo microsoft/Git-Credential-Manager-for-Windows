@@ -332,6 +332,10 @@ namespace Microsoft.Alm.Authentication
         internal static class Win32Error
         {
             /// <summary>
+            /// The operation completed successfully.
+            /// </summary>
+            public const int Success = 0;
+            /// <summary>
             /// The system cannot find the file specified.
             /// </summary>
             public const int FileNotFound = 2;

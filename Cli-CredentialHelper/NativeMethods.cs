@@ -1,4 +1,7 @@
 ﻿using System;
+using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
+using System.Linq;
 using System.Runtime.InteropServices;
 using System.Text;
 using Microsoft.Win32.SafeHandles;
@@ -9,6 +12,9 @@ namespace Microsoft.Alm.CredentialHelper
     {
         public const string ConsoleInName = "CONIN$";
         public const string ConsoleOutName = "CONOUT$";
+
+        private const string Advapi32 = "advapi32.dll";
+        private const string CredUi32 = "credui.dll";
         private const string Kernel32 = "kernel32.dll";
 
         [Flags]
@@ -488,5 +494,368 @@ namespace Microsoft.Alm.CredentialHelper
         /// <returns>True if success; otherwise false.</returns>
         [DllImport(Kernel32, CallingConvention = CallingConvention.StdCall, CharSet = CharSet.Unicode, EntryPoint = "WriteConsoleW", SetLastError = true)]
         public static extern bool WriteConsole(SafeHandle consoleOutputHandle, [In]StringBuilder buffer, uint numberOfCharsToWrite, out uint numberOfCharsWritten, IntPtr reserved);
+
+        private const string Advapi32 = "advapi32.dll";
+        private const string CredUi32 = "credui.dll";
+
+        public const int CREDUI_MAX_MESSAGE_LENGTH = 0;
+
+        [Flags]
+        public enum CredentialPackFlags : uint
+        {
+            None = 0,
+            ProtectedCredentials = 0x1,
+            WowBuffer = 0x2,
+            GenericCredentials = 0x4,
+        }
+
+        internal enum CredentialType : uint
+        {
+            /// <summary>
+            /// <para>The `<see cref="Credential"/>` is a generic credential. The credential will 
+            /// not be used by any particular authentication package.</para>
+            /// <para>The credential will be stored securely but has no other significant 
+            /// characteristics.<para>
+            /// </summary>
+            Generic = 0x01,
+            /// <summary>
+            /// <para>The `<see cref="Credential"/>` is a password credential and is specific to 
+            /// Microsoft's authentication packages. </para>
+            /// <para>The NTLM, Kerberos, and Negotiate authentication packages will automatically 
+            /// use this credential when connecting to the named target.</para>
+            /// </summary>
+            DomainPassword = 0x02,
+            /// <summary>
+            /// <para>The `<see cref="Credential"/>` is a certificate credential and is specific to 
+            /// Microsoft's authentication packages. </para>
+            /// <para>The Kerberos, Negotiate, and Schannel authentication packages automatically 
+            /// use this credential when connecting to the named target.</para>
+            /// </summary>
+            DomainCertificate = 0x03,
+            /// <summary>
+            /// <para>The `<see cref="Credential"/>` is a password credential and is specific to 
+            /// authentication packages from Microsoft. </para>
+            /// <para>The Passport authentication package will automatically use this credential 
+            /// when connecting to the named target.</para>
+            /// </summary>
+            [Obsolete("This value is no longer supported", true)]
+            DomainVisiblePassword = 0x04,
+            /// <summary>
+            /// <para>The `<see cref="Credential"/>` is a certificate credential that is a generic 
+            /// authentication package.</para>
+            /// </summary>
+            GenericCertificate = 0x05,
+            /// <summary>
+            /// <para>The `<see cref="Credential"/>` is supported by extended Negotiate packages.</para>
+            /// </summary>
+            /// <remarks>
+            /// Windows Server 2008, Windows Vista, Windows Server 2003, and Windows XP:  This 
+            /// value is not supported.
+            /// </remarks>
+            DomainExtended = 0x06,
+            /// <summary>
+            /// <para>The maximum number of supported credential types.<para>
+            /// </summary>
+            /// <remarks>
+            /// Windows Server 2008, Windows Vista, Windows Server 2003, and Windows XP:  This 
+            /// value is not supported.
+            /// </remarks>
+            Maximum = 0x07,
+            /// <summary>
+            /// <para>The extended maximum number of supported credential types that now allow new 
+            /// applications to run on older operating systems.</para>
+            /// </summary>
+            /// <remarks>
+            /// Windows Server 2008, Windows Vista, Windows Server 2003, and Windows XP:  This 
+            /// value is not supported.
+            /// </remarks>
+            MaximumEx = Maximum + 1000
+        }
+
+        [Flags]
+        public enum CredentialUiFlags
+        {
+            None = 0,
+            IncorrectPassword = 0x1,
+            DoNoPersist = 0x2,
+            EquestAdministrator = 0x4,
+            ExcludeCertificates = 0x8,
+            RequireCertificates = 0x10,
+            ShowSaveCheckbox = 0x40,
+            AlwaysShowUi = 0x80,
+            RequireSmartCard = 0x100,
+            PasswordOnlyOk = 0x200,
+            ValidateUsername = 0x400,
+            CompleteUsername = 0x800,
+            Persist = 0x1000,
+            ServerCredential = 0x4000,
+            ExpectConfermatino = 0x20000,
+            GenericCredentals = 0x40000,
+            UsernameTargetCredentials = 0x80000,
+            KeepUsername = 0x100000,
+        }
+
+        public enum CredentialUiResult : uint
+        {
+            Success = 0,
+            Cancelled = 1223,
+            NoSuchLogonSession = 1312,
+            NotFound = 1168,
+            InvalidAccountName = 1315,
+            InsufficientBuffer = 122,
+            InvalidParameter = 87,
+            InvalidFlags = 1004,
+        }
+
+        [Flags]
+        public enum CredentialUiWindowsFlags : uint
+        {
+            None = 0,
+            /// <summary>
+            /// The caller is requesting that the credential provider return the user name and 
+            /// password in plain text.
+            /// </summary>
+            Generic = 0x1,
+            /// <summary>
+            /// The Save check box is displayed in the dialog box.
+            /// </summary>
+            Checkbox = 0x2,
+            /// <summary>
+            /// Only credential providers that support the authentication package specified by the 
+            /// `authPackage` parameter should be enumerated.
+            /// </summary>
+            AuthPackageOnly = 0x10,
+            /// <summary>
+            /// <para>Only the credentials specified by the `inAuthBuffer` parameter for the 
+            /// authentication package specified by the `authPackage` parameter should be 
+            /// enumerated.</para>
+            /// <para>If this flag is set, and the `inAuthBuffer` parameter is `null`, the function 
+            /// fails.</para>
+            /// </summary>
+            InCredOnly = 0x20,
+            /// <summary>
+            /// Credential providers should enumerate only administrators. This value is intended 
+            /// for User Account Control (UAC) purposes only. We recommend that external callers 
+            /// not set this flag.
+            /// </summary>
+            EnumerateAdmins = 0x100,
+            /// <summary>
+            /// Only the incoming credentials for the authentication package specified by the 
+            /// `authPackage` parameter should be enumerated.
+            /// </summary>
+            EnumerateCurrentUser = 0x200,
+            /// <summary>
+            /// The credential dialog box should be displayed on the secure desktop. This value 
+            /// cannot be combined with <see cref="Generic"/>.
+            /// </summary>
+            SecurePrompt = 0x1000,
+            /// <summary>
+            /// The credential dialog box is invoked by the SspiPromptForCredentials function, and 
+            /// the client is prompted before a prior handshake. If SSPIPFC_NO_CHECKBOX is passed 
+            /// in the `inAuthBuffer` parameter, then the credential provider should not display 
+            /// the check box.
+            /// </summary>
+            Preprompting = 0x2000,
+            /// <summary>
+            /// The credential provider should align the credential BLOB pointed to by the 
+            /// `outAuthBuffer` parameter to a 32-bit boundary, even if the provider is running on 
+            /// a 64-bit system.
+            /// </summary>
+            Pack32Wow = 0x10000000,
+        }
+
+        [StructLayout(LayoutKind.Sequential, CharSet = CharSet.Unicode)]
+        public unsafe struct CredentialUiInfo
+        {
+            public int Size;
+            public IntPtr Parent;
+            public string MessageText;
+            public string CaptionText;
+            public IntPtr BannerArt;
+        }
+
+        [DllImport(CredUi32, CharSet = CharSet.Unicode, EntryPoint = "CredUIPromptForCredentialsW", SetLastError = true)]
+        public static extern CredentialUiResult CredUIPromptForCredentials(ref CredentialUiInfo credUiInfo, string targetName, IntPtr reserved, uint authError, StringBuilder username, int usernameMaxLen, StringBuilder password, int passwordMaxLen, ref bool saveCredentials, CredentialUiFlags flags);
+
+        /// <summary>
+        /// Creates and displays a configurable dialog box that allows users to supply credential 
+        /// information by using any credential provider installed on the local computer.
+        /// </summary>
+        /// <param name="credUiInfo">
+        /// <para>A pointer to a <see cref="CredentialUiInfo"/> structure that contains information 
+        /// for customizing the appearance of the dialog box that this function displays.</para>
+        /// <para>If the hwndParent member of the <see cref="CredentialUiInfo"/> structure is not 
+        /// NULL, this function displays a modal dialog box centered on the parent window.</para>
+        /// <para>If the hwndParent member of the <see cref="CredentialUiInfo"/> structure is NULL, 
+        /// the function displays a dialog box centered on the screen.</para>
+        /// <para>This function ignores the <see cref="CredentialUiInfo.BannerArt"/> member of the 
+        /// <see cref="CredentialUiInfo"/>  structure.</para>
+        /// </param>
+        /// <param name="authError">A Windows error code, defined in Winerror.h, that is displayed 
+        /// in the dialog box. If credentials previously collected were not valid, the caller uses 
+        /// this parameter to pass the error message from the API that collected the credentials 
+        /// (for example, Winlogon) to this function. The corresponding error message is formatted 
+        /// and displayed in the dialog box. Set the value of this parameter to zero to display no 
+        /// error message.</param>
+        /// <param name="authPackage">
+        /// <para>On input, the value of this parameter is used to specify the authentication 
+        /// package for which the credentials in the <paramref name="inAuthBuffer"/> buffer are 
+        /// serialized. If the value of <paramref name="inAuthBuffer"/> is `null` and the 
+        /// <see cref="CredentialUiWindowsFlags.AuthPackageOnly"/> flag is set in the 
+        /// <paramref name="flgs"/> parameter, only credential providers capable of serializing 
+        /// credentials for the specified authentication package are to be enumerated.</para>
+        /// <para>To get the appropriate value to use for this parameter on input, call the 
+        /// `LsaLookupAuthenticationPackage` function and use the value of the 
+        /// <paramref name="authPackage"/> parameter of that function.</para>
+        /// <para>On output, this parameter specifies the authentication package for which the 
+        /// credentials in the <paramref name="outAuthBuffer"/> buffer are serialized.</para>
+        /// </param>
+        /// <param name="inAuthBuffer">A pointer to a credential BLOB that is used to populate the 
+        /// credential fields in the dialog box. Set the value of this parameter to NULL to leave 
+        /// the credential fields empty.</param>
+        /// <param name="inAuthBufferSize">The size, in bytes, of the pvInAuthBuffer buffer.</param>
+        /// <param name="outAuthBuffer">
+        /// <para>The address of a pointer that, on output, specifies the credential BLOB. For 
+        /// Kerberos, NTLM, or Negotiate credentials, call the CredUnPackAuthenticationBuffer 
+        /// function to convert this BLOB to string representations of the credentials.</para>
+        /// <para>When you have finished using the credential BLOB, clear it from memory by calling 
+        /// the SecureZeroMemory function, and free it by calling the CoTaskMemFree function.</para>
+        /// </param>
+        /// <param name="outAuthBufferSize">The size, in bytes, of the ppvOutAuthBuffer buffer.</param>
+        /// <param name="saveCredentials">
+        /// <para>A pointer to a `bool` value that, on input, specifies whether the Save check box 
+        /// is selected in the dialog box that this function displays. On output, the value of this 
+        /// parameter specifies whether the Save check box was selected when the user clicks the 
+        /// Submit button in the dialog box. Set this parameter to `null` to ignore the Save check 
+        /// box.</para>
+        /// <para>This parameter is ignored if the CREDUIWIN_CHECKBOX flag is not set in the 
+        /// dwFlags parameter.</para>
+        /// </param>
+        /// <param name="flags">A value that specifies behavior for this function.</param>
+        /// <returns><see cref="Win32Error"/> code value on failure; otherwise <see cref="Win32Error.Success"/>.</returns>
+        [DllImport(CredUi32, CharSet = CharSet.Unicode, EntryPoint = "CredUIPromptForWindowsCredentialsW", SetLastError = true)]
+        public static extern int CredUIPromptForWindowsCredentials(ref CredentialUiInfo credInfo, uint authError, ref CredentialPackFlags authPackage, IntPtr inAuthBuffer, uint inAuthBufferSize, out IntPtr outAuthBuffer, out uint outAuthBufferSize, ref bool saveCredentials, CredentialUiWindowsFlags flags);
+
+        /// <summary>
+        /// Converts a string user name and password into an authentication buffer.
+        /// </summary>
+        /// <param name="flags">Specifies how the credential should be packed. This can be a 
+        /// combination of the following flags.</param>
+        /// <param name="username">A pointer to a null-terminated string that specifies the user 
+        /// name to be converted.</param>
+        /// <param name="password">A pointer to a null-terminated string that specifies the 
+        /// password to be converted.   </param>
+        /// <param name="packedCredentials">A pointer to an array of bytes that, on output, 
+        /// receives the packed authentication buffer. This parameter can be `null` to receive the 
+        /// required buffer size in the <paramref name="packedCredentialsSize"/> parameter.</param>
+        /// <param name="packedCredentialsSize">A pointer to a DWORD value that specifies the size, 
+        /// in bytes, of the <paramref name="packedCredentials"/> buffer. On output, if the buffer 
+        /// is not of sufficient size, specifies the required size, in bytes, of the 
+        /// <paramref name="packedCredentials"/> buffer.</param>
+        /// <returns>Trus if success; otherwise false.</returns>
+        [DllImport(CredUi32, CharSet = CharSet.Unicode, EntryPoint = "CredPackAuthenticationBufferW", SetLastError = true)]
+        public static extern bool CredPackAuthenticationBuffer(CredentialPackFlags flags, string username, string password, IntPtr packedCredentials, ref int packedCredentialsSize);
+
+        /// <summary>
+        /// Converts an authentication buffer returned by a call to the 
+        /// <see cref="CredUIPromptForWindowsCredentials"/> function into a string user name and password.
+        /// </summary>
+        /// <param name="flags">
+        /// <para>Setting the value of this parameter to `CRED_PACK_PROTECTED_CREDENTIALS` 
+        /// specifies that the function attempts to decrypt the credentials in the authentication 
+        /// buffer. If the credential cannot be decrypted, the function returns `false`, and a call 
+        /// to the GetLastError function will return the value <see cref="Win32Error.NotCapable"/>.</para>
+        /// <para>How the decryption is done depends on the format of the authentication buffer.</para>
+        /// <para>If the authentication buffer is a `SEC_WINNT_AUTH_IDENTITY_EX2` structure, the 
+        /// function can decrypt the buffer if it is encrypted by using `SspiEncryptAuthIdentityEx` 
+        /// with the `SEC_WINNT_AUTH_IDENTITY_ENCRYPT_SAME_LOGON` option.</para>
+        /// <para>If the authentication buffer is one of the marshaled `KERB_*_LOGON` structures, 
+        /// the function decrypts the password before returning it in the <paramref name="password"/> 
+        /// buffer.</para>
+        /// </param>
+        /// <param name="authBuffer">A pointer to the authentication buffer to be converted.</param>
+        /// <param name="authBufferSize">The size, in bytes, of the pAuthBuffer buffer.</param>
+        /// <param name="username">A pointer to a null-terminated string that receives the user 
+        /// name.</param>
+        /// <param name="maxUsernameLen">A pointer to a DWORD value that specifies the size, in 
+        /// characters, of the <paramref name="username"/> buffer. On output, if the buffer is not 
+        /// of sufficient size, specifies the required size, in characters, of the 
+        /// <paramref name="username"/> buffer. The size includes terminating `null` character.</param>
+        /// <param name="domainName">A pointer to a null-terminated string that receives the name 
+        /// of the user's domain.</param>
+        /// <param name="maxDomainNameLen">pointer to a DWORD value that specifies the size, in 
+        /// characters, of the <paramref name="domainName"/> buffer. On output, if the buffer is 
+        /// not of sufficient size, specifies the required size, in characters, of the 
+        /// <paramref name="domainName"/> buffer. The size includes the terminating `null` 
+        /// character. The required size can be zero if there is no domain name.</param>
+        /// <param name="password">A pointer to a null-terminated string that receives the password.</param>
+        /// <param name="maxPasswordLen">A pointer to a DWORD value that specifies the size, in 
+        /// characters, of the <paramref name="password"/> buffer. On output, if the buffer is not 
+        /// of sufficient size, specifies the required size, in characters, of the 
+        /// <paramref name="password"/> buffer. The size includes the terminating `null` character.</param>
+        /// <returns>True if successful; otherwise false.</returns>
+        [DllImport(CredUi32, CharSet = CharSet.Unicode, EntryPoint = "CredUnPackAuthenticationBufferW", SetLastError = true)]
+        public static extern bool CredUnPackAuthenticationBuffer(CredentialPackFlags flags, IntPtr authBuffer, uint authBufferSize, StringBuilder username, ref int maxUsernameLen, StringBuilder domainName, ref int maxDomainNameLen, StringBuilder password, ref int maxPasswordLen);
+
+        /// <summary>
+        /// The System Error Codes are very broad. Each one can occur in one of many hundreds of 
+        /// locations in the system. Consequently the descriptions of these codes cannot be very 
+        /// specific. Use of these codes requires some amount of investigation and analysis. You 
+        /// need to note both the programmatic and the run-time context in which these errors occur. 
+        /// Because these codes are defined in WinError.h for anyone to use, sometimes the codes 
+        /// are returned by non-system software. Sometimes the code is returned by a function deep 
+        /// in the stack and far removed from your code that is handling the error.
+        /// </summary>
+        internal static class Win32Error
+        {
+            /// <summary>
+            /// The operation completed successfully.
+            /// </summary>
+            public const int Success = 0;
+            /// <summary>
+            /// The system cannot find the file specified.
+            /// </summary>
+            public const int FileNotFound = 2;
+            /// <summary>
+            /// The handle is invalid.
+            /// </summary>
+            public const int InvalidHandle = 6;
+            /// <summary>
+            /// Not enough storage is available to process this command.
+            /// </summary>
+            public const int NotEnoughMemory = 8;
+            /// <summary>
+            /// A device attached to the system is not functioning.
+            /// </summary>
+            public const int GenericFailure = 31;
+            /// <summary>
+            /// The process cannot access the file because it is being used by another process.
+            /// </summary>
+            public const int SharingViolation = 32;
+            /// <summary>
+            /// The file exists.
+            /// </summary>
+            public const int FileExists = 80;
+            /// <summary>
+            /// The data area passed to a system call is too small.
+            /// </summary>
+            public const int InsufficientBuffer = 122;
+            /// <summary>
+            /// Cannot create a file when that file already exists.
+            /// </summary>
+            public const int AlreadExists = 183;
+            /// <summary>
+            /// The implementation is not capable of performing the request.
+            /// </summary>
+            public const int NotCapable = 775;
+            /// <summary>
+            /// Element not found.
+            /// </summary>
+            public const int NotFound = 1168;
+            /// <summary>
+            /// A specified logon session does not exist. It may already have been terminated.
+            /// </summary>
+            public const int NoSuchLogonSession = 1312;
+        }
     }
 }
