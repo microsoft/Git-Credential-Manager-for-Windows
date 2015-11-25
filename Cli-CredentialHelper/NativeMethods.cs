@@ -310,196 +310,6 @@ namespace Microsoft.Alm.CredentialHelper
             Delete = 0x00000004
         }
 
-        /// <summary>
-        /// The System Error Codes are very broad. Each one can occur in one of many hundreds of 
-        /// locations in the system. Consequently the descriptions of these codes cannot be very 
-        /// specific. Use of these codes requires some amount of investigation and analysis. You 
-        /// need to note both the programmatic and the run-time context in which these errors occur. 
-        /// Because these codes are defined in WinError.h for anyone to use, sometimes the codes 
-        /// are returned by non-system software. Sometimes the code is returned by a function deep 
-        /// in the stack and far removed from your code that is handling the error.
-        /// </summary>
-        internal static class Win32Error
-        {
-            /// <summary>
-            /// The system cannot find the file specified.
-            /// </summary>
-            public const int FileNotFound = 2;
-            /// <summary>
-            /// The handle is invalid.
-            /// </summary>
-            public const int InvalidHandle = 6;
-            /// <summary>
-            /// Not enough storage is available to process this command.
-            /// </summary>
-            public const int NotEnoughMemory = 8;
-            /// <summary>
-            /// The process cannot access the file because it is being used by another process.
-            /// </summary>
-            public const int SharingViloation = 32;
-            /// <summary>
-            /// The file exists.
-            /// </summary>
-            public const int FileExists = 80;
-            /// <summary>
-            /// Cannot create a file when that file already exists.
-            /// </summary>
-            public const int AlreadExists = 183;
-            /// <summary>
-            /// Element not found.
-            /// </summary>
-            public const int NotFound = 1168;
-            /// <summary>
-            /// A specified logon session does not exist. It may already have been terminated.
-            /// </summary>
-            public const int NoSuchLogonSession = 1312;
-        }
-
-        /// <summary>
-        /// Creates or opens a file or I/O device. The most commonly used I/O devices are as 
-        /// follows: file, file stream, directory, physical disk, volume, console buffer, tape 
-        /// drive, communications resource, mailslot, and pipe. The function returns a handle that 
-        /// can be used to access the file or device for various types of I/O depending on the file 
-        /// or device and the flags and attributes specified.
-        /// </summary>
-        /// <param name="fileName">
-        /// <para>The name of the file or device to be created or opened. You may use either 
-        /// forward slashes (/) or backslashes (\) in this name.</para>
-        /// <para>In the ANSI version of this function, the name is limited to MAX_PATH characters. 
-        /// To extend this limit to 32,767 wide characters, call the Unicode version of the 
-        /// function and prepend "\\?\" to the path.</para>
-        /// </param>
-        /// <param name="desiredAccess">
-        /// <para>The requested access to the file or device, which can be summarized as read, 
-        /// write, both or neither zero).</para>
-        /// <para>f this parameter is zero, the application can query certain metadata such as file, 
-        /// directory, or device attributes without accessing that file or device, even if 
-        /// <see cref="FileAccess.GenericRead"/> access would have been denied.</para>
-        /// <para>You cannot request an access mode that conflicts with the sharing mode that is 
-        /// specified by the <paramref name="sharedMode"/> parameter in an open request that 
-        /// already has an open handle.</para>
-        /// </param>
-        /// <param name="shareMode">
-        /// <para>The requested sharing mode of the file or device, which can be read, write, both, 
-        /// delete, all of these, or none (refer to the following table). Access requests to 
-        /// attributes or extended attributes are not affected by this flag.</para>
-        /// <para>If this parameter is zero and CreateFile succeeds, the file or device cannot be 
-        /// shared and cannot be opened again until the handle to the file or device is closed.</para>
-        /// <para>You cannot request a sharing mode that conflicts with the access mode that is 
-        /// specified in an existing request that has an open handle. CreateFile would fail and 
-        /// the <see cref="Marshal.GetLastWin32Error"/> function would return 
-        /// <see cref="Win32Error.SharingViloation"/>.</para>
-        /// <para>To enable a process to share a file or device while another process has the file 
-        /// or device open, use a compatible combination of one or more of the following values.</para>
-        /// </param>
-        /// <param name="securityAttributes">This parameter should be <see cref="IntPtr.Zero"/>.</param>
-        /// <param name="creationDisposition">
-        /// <para>An action to take on a file or device that exists or does not exist.</para>
-        /// <para>For devices other than files, this parameter is usually set to <see cref="FileCreationDisposition.OpenExisting"/>.</para>
-        /// </param>
-        /// <param name="flagsAndAttributes">
-        /// <para>The file or device attributes and flags, <see cref="FileAttributes.Normal"/> 
-        /// being the most common default value for files.</para>
-        /// <para>This parameter can include any combination of <see cref="FileAttributes"/>. All 
-        /// other file attributes override <see cref="FileAttributes.Normal"/>.</para>
-        /// </param>
-        /// <param name="templateFile">This parameter should be <see cref="IntPtr.Zero"/>.</param>
-        /// <returns>A handle to the file created.</returns>
-        [DllImport(Kernel32, CallingConvention = CallingConvention.StdCall, CharSet = CharSet.Unicode, EntryPoint = "CreateFileW", SetLastError = true)]
-        public static extern SafeFileHandle CreateFile(string fileName, FileAccess desiredAccess, FileShare shareMode, IntPtr securityAttributes, FileCreationDisposition creationDisposition, FileAttributes flagsAndAttributes, IntPtr templateFile);
-
-        /// <summary>
-        /// Retrieves the current input mode of a console's input buffer or the current output mode 
-        /// of a console screen buffer.
-        /// </summary>
-        /// <param name="consoleHandle">
-        /// A handle to the console input buffer or the console screen buffer. The handle must have 
-        /// the <see cref="FileAccess.GenericRead"/> access right.
-        /// </param>
-        /// <param name="consoleMode">
-        /// <para>A pointer to a variable that receives the current mode of the specified buffer.</para>
-        /// <para>If the <paramref name="consoleHandle"/> parameter is an input handle, the mode 
-        /// can be one or more of the following values. When a console is created, all input modes 
-        /// except <see cref="ConsoleMode.WindowInput"/> are enabled by default.</para>
-        /// <para>If the <paramref name="consoleHandle"/> parameter is a screen buffer handle, the 
-        /// mode can be one or more of the following values. When a screen buffer is created, both 
-        /// output modes are enabled by default.</para>
-        /// </param>
-        /// <returns>True if success; otherwise false.</returns>
-        [DllImport(Kernel32, CallingConvention = CallingConvention.StdCall, CharSet = CharSet.Unicode, EntryPoint = "GetConsoleMode", SetLastError = true)]
-        public static extern bool GetConsoleMode(SafeFileHandle consoleHandle, out ConsoleMode consoleMode);
-
-        /// <summary>
-        /// Reads character input from the console input buffer and removes it from the buffer.
-        /// </summary>
-        /// <param name="consoleInputHandle">
-        /// A handle to the console input buffer. The handle must have the <see cref="FileAccess.GenericRead"/> access right.
-        /// </param>
-        /// <param name="buffer">
-        /// <para>A pointer to a buffer that receives the data read from the console input buffer.</para>
-        /// <para>The storage for this buffer is allocated from a shared heap for the process that is 64 KB in size. The maximum size of the buffer will depend on heap usage.</para>
-        /// </param>
-        /// <param name="numberOfCharsToRead">
-        /// The number of characters to be read. The size of the buffer pointed to by the <paramref name="buffer"/> parameter should be at least <paramref name="NumberofCharsToRead"/> * sizeof(<see cref="char"/>) bytes.
-        /// </param>
-        /// <param name="numberOfCharsRead">
-        /// A pointer to a variable that receives the number of characters actually read.
-        /// </param>
-        /// <param name="reserved">Reserved; must be <see cref="IntPtr.Zero"/>.</param>
-        /// <returns>True if success; otherwise false.</returns>
-        [DllImport(Kernel32, CallingConvention = CallingConvention.StdCall, CharSet = CharSet.Unicode, EntryPoint = "ReadConsoleW", SetLastError = true)]
-        public static extern bool ReadConsole(SafeFileHandle consoleInputHandle, [Out]StringBuilder buffer, uint numberOfCharsToRead, out uint numberOfCharsRead, IntPtr reserved);
-
-        /// <summary>
-        /// Sets the input mode of a console's input buffer or the output mode of a console screen 
-        /// buffer.
-        /// </summary>
-        /// <param name="consoleHandle">
-        /// A handle to the console input buffer or a console screen buffer. The handle must have 
-        /// the <see cref="FileAccess.GenericRead"/> access right. 
-        /// </param>
-        /// <param name="consoleMode">
-        /// <para>The input or output mode to be set. If the <paramref name="consoleHandle"/> 
-        /// parameter is an input handle, the mode can be one or more of the following values. When 
-        /// a console is created, all input modes except <see cref="ConsoleMode.WindowInput"/> are 
-        /// enabled by default.</para>
-        /// <para>If the <paramref name="consoleHandle"/> parameter is a screen buffer handle, the 
-        /// mode can be one or more of the following values. When a screen buffer is created, both 
-        /// output modes are enabled by default.</para>
-        /// </param>
-        /// <returns>True if success; otherwise false.</returns>
-        [DllImport(Kernel32, CallingConvention = CallingConvention.StdCall, CharSet = CharSet.Unicode, EntryPoint = "SetConsoleMode", SetLastError = true)]
-        public static extern bool SetConsoleMode(SafeFileHandle consoleHandle, ConsoleMode consoleMode);
-
-        /// <summary>
-        /// Writes a character string to a console screen buffer beginning at the current cursor 
-        /// location.
-        /// </summary>
-        /// <param name="consoleOutputHandle">A handle to the console screen buffer. The handle 
-        /// must have the <see cref="FileAccess.GenericWrite"/> access right.</param>
-        /// <param name="buffer">
-        /// <para>A pointer to a buffer that contains characters to be written to the console 
-        /// screen buffer.</para>
-        /// <para>The storage for this buffer is allocated from a shared heap for the process that 
-        /// is 64 KB in size. The maximum size of the buffer will depend on heap usage.</para>
-        /// </param>
-        /// <param name="numberOfCharsToWrite">
-        /// The number of characters to be written. If the total size of the specified number of 
-        /// characters exceeds the available heap, the function fails with <see cref="Win32Error.NotEnoughMemory"/>.
-        /// </param>
-        /// <param name="numberOfCharsWritten">
-        /// A pointer to a variable that receives the number of characters actually written.
-        /// </param>
-        /// <param name="reserved">Reserved; must be <see cref="IntPtr.Zero"/>.</param>
-        /// <returns>True if success; otherwise false.</returns>
-        [DllImport(Kernel32, CallingConvention = CallingConvention.StdCall, CharSet = CharSet.Unicode, EntryPoint = "WriteConsoleW", SetLastError = true)]
-        public static extern bool WriteConsole(SafeHandle consoleOutputHandle, [In]StringBuilder buffer, uint numberOfCharsToWrite, out uint numberOfCharsWritten, IntPtr reserved);
-
-        private const string Advapi32 = "advapi32.dll";
-        private const string CredUi32 = "credui.dll";
-
-        public const int CREDUI_MAX_MESSAGE_LENGTH = 0;
-
         [Flags]
         public enum CredentialPackFlags : uint
         {
@@ -796,6 +606,146 @@ namespace Microsoft.Alm.CredentialHelper
         /// <returns>True if successful; otherwise false.</returns>
         [DllImport(CredUi32, CharSet = CharSet.Unicode, EntryPoint = "CredUnPackAuthenticationBufferW", SetLastError = true)]
         public static extern bool CredUnPackAuthenticationBuffer(CredentialPackFlags flags, IntPtr authBuffer, uint authBufferSize, StringBuilder username, ref int maxUsernameLen, StringBuilder domainName, ref int maxDomainNameLen, StringBuilder password, ref int maxPasswordLen);
+
+        /// <summary>
+        /// Creates or opens a file or I/O device. The most commonly used I/O devices are as 
+        /// follows: file, file stream, directory, physical disk, volume, console buffer, tape 
+        /// drive, communications resource, mailslot, and pipe. The function returns a handle that 
+        /// can be used to access the file or device for various types of I/O depending on the file 
+        /// or device and the flags and attributes specified.
+        /// </summary>
+        /// <param name="fileName">
+        /// <para>The name of the file or device to be created or opened. You may use either 
+        /// forward slashes (/) or backslashes (\) in this name.</para>
+        /// <para>In the ANSI version of this function, the name is limited to MAX_PATH characters. 
+        /// To extend this limit to 32,767 wide characters, call the Unicode version of the 
+        /// function and prepend "\\?\" to the path.</para>
+        /// </param>
+        /// <param name="desiredAccess">
+        /// <para>The requested access to the file or device, which can be summarized as read, 
+        /// write, both or neither zero).</para>
+        /// <para>f this parameter is zero, the application can query certain metadata such as file, 
+        /// directory, or device attributes without accessing that file or device, even if 
+        /// <see cref="FileAccess.GenericRead"/> access would have been denied.</para>
+        /// <para>You cannot request an access mode that conflicts with the sharing mode that is 
+        /// specified by the <paramref name="sharedMode"/> parameter in an open request that 
+        /// already has an open handle.</para>
+        /// </param>
+        /// <param name="shareMode">
+        /// <para>The requested sharing mode of the file or device, which can be read, write, both, 
+        /// delete, all of these, or none (refer to the following table). Access requests to 
+        /// attributes or extended attributes are not affected by this flag.</para>
+        /// <para>If this parameter is zero and CreateFile succeeds, the file or device cannot be 
+        /// shared and cannot be opened again until the handle to the file or device is closed.</para>
+        /// <para>You cannot request a sharing mode that conflicts with the access mode that is 
+        /// specified in an existing request that has an open handle. CreateFile would fail and 
+        /// the <see cref="Marshal.GetLastWin32Error"/> function would return 
+        /// <see cref="Win32Error.SharingViloation"/>.</para>
+        /// <para>To enable a process to share a file or device while another process has the file 
+        /// or device open, use a compatible combination of one or more of the following values.</para>
+        /// </param>
+        /// <param name="securityAttributes">This parameter should be <see cref="IntPtr.Zero"/>.</param>
+        /// <param name="creationDisposition">
+        /// <para>An action to take on a file or device that exists or does not exist.</para>
+        /// <para>For devices other than files, this parameter is usually set to <see cref="FileCreationDisposition.OpenExisting"/>.</para>
+        /// </param>
+        /// <param name="flagsAndAttributes">
+        /// <para>The file or device attributes and flags, <see cref="FileAttributes.Normal"/> 
+        /// being the most common default value for files.</para>
+        /// <para>This parameter can include any combination of <see cref="FileAttributes"/>. All 
+        /// other file attributes override <see cref="FileAttributes.Normal"/>.</para>
+        /// </param>
+        /// <param name="templateFile">This parameter should be <see cref="IntPtr.Zero"/>.</param>
+        /// <returns>A handle to the file created.</returns>
+        [DllImport(Kernel32, CallingConvention = CallingConvention.StdCall, CharSet = CharSet.Unicode, EntryPoint = "CreateFileW", SetLastError = true)]
+        public static extern SafeFileHandle CreateFile(string fileName, FileAccess desiredAccess, FileShare shareMode, IntPtr securityAttributes, FileCreationDisposition creationDisposition, FileAttributes flagsAndAttributes, IntPtr templateFile);
+
+        /// <summary>
+        /// Retrieves the current input mode of a console's input buffer or the current output mode 
+        /// of a console screen buffer.
+        /// </summary>
+        /// <param name="consoleHandle">
+        /// A handle to the console input buffer or the console screen buffer. The handle must have 
+        /// the <see cref="FileAccess.GenericRead"/> access right.
+        /// </param>
+        /// <param name="consoleMode">
+        /// <para>A pointer to a variable that receives the current mode of the specified buffer.</para>
+        /// <para>If the <paramref name="consoleHandle"/> parameter is an input handle, the mode 
+        /// can be one or more of the following values. When a console is created, all input modes 
+        /// except <see cref="ConsoleMode.WindowInput"/> are enabled by default.</para>
+        /// <para>If the <paramref name="consoleHandle"/> parameter is a screen buffer handle, the 
+        /// mode can be one or more of the following values. When a screen buffer is created, both 
+        /// output modes are enabled by default.</para>
+        /// </param>
+        /// <returns>True if success; otherwise false.</returns>
+        [DllImport(Kernel32, CallingConvention = CallingConvention.StdCall, CharSet = CharSet.Unicode, EntryPoint = "GetConsoleMode", SetLastError = true)]
+        public static extern bool GetConsoleMode(SafeFileHandle consoleHandle, out ConsoleMode consoleMode);
+
+        /// <summary>
+        /// Reads character input from the console input buffer and removes it from the buffer.
+        /// </summary>
+        /// <param name="consoleInputHandle">
+        /// A handle to the console input buffer. The handle must have the <see cref="FileAccess.GenericRead"/> access right.
+        /// </param>
+        /// <param name="buffer">
+        /// <para>A pointer to a buffer that receives the data read from the console input buffer.</para>
+        /// <para>The storage for this buffer is allocated from a shared heap for the process that is 64 KB in size. The maximum size of the buffer will depend on heap usage.</para>
+        /// </param>
+        /// <param name="numberOfCharsToRead">
+        /// The number of characters to be read. The size of the buffer pointed to by the <paramref name="buffer"/> parameter should be at least <paramref name="NumberofCharsToRead"/> * sizeof(<see cref="char"/>) bytes.
+        /// </param>
+        /// <param name="numberOfCharsRead">
+        /// A pointer to a variable that receives the number of characters actually read.
+        /// </param>
+        /// <param name="reserved">Reserved; must be <see cref="IntPtr.Zero"/>.</param>
+        /// <returns>True if success; otherwise false.</returns>
+        [DllImport(Kernel32, CallingConvention = CallingConvention.StdCall, CharSet = CharSet.Unicode, EntryPoint = "ReadConsoleW", SetLastError = true)]
+        public static extern bool ReadConsole(SafeFileHandle consoleInputHandle, [Out]StringBuilder buffer, uint numberOfCharsToRead, out uint numberOfCharsRead, IntPtr reserved);
+
+        /// <summary>
+        /// Sets the input mode of a console's input buffer or the output mode of a console screen 
+        /// buffer.
+        /// </summary>
+        /// <param name="consoleHandle">
+        /// A handle to the console input buffer or a console screen buffer. The handle must have 
+        /// the <see cref="FileAccess.GenericRead"/> access right. 
+        /// </param>
+        /// <param name="consoleMode">
+        /// <para>The input or output mode to be set. If the <paramref name="consoleHandle"/> 
+        /// parameter is an input handle, the mode can be one or more of the following values. When 
+        /// a console is created, all input modes except <see cref="ConsoleMode.WindowInput"/> are 
+        /// enabled by default.</para>
+        /// <para>If the <paramref name="consoleHandle"/> parameter is a screen buffer handle, the 
+        /// mode can be one or more of the following values. When a screen buffer is created, both 
+        /// output modes are enabled by default.</para>
+        /// </param>
+        /// <returns>True if success; otherwise false.</returns>
+        [DllImport(Kernel32, CallingConvention = CallingConvention.StdCall, CharSet = CharSet.Unicode, EntryPoint = "SetConsoleMode", SetLastError = true)]
+        public static extern bool SetConsoleMode(SafeFileHandle consoleHandle, ConsoleMode consoleMode);
+
+        /// <summary>
+        /// Writes a character string to a console screen buffer beginning at the current cursor 
+        /// location.
+        /// </summary>
+        /// <param name="consoleOutputHandle">A handle to the console screen buffer. The handle 
+        /// must have the <see cref="FileAccess.GenericWrite"/> access right.</param>
+        /// <param name="buffer">
+        /// <para>A pointer to a buffer that contains characters to be written to the console 
+        /// screen buffer.</para>
+        /// <para>The storage for this buffer is allocated from a shared heap for the process that 
+        /// is 64 KB in size. The maximum size of the buffer will depend on heap usage.</para>
+        /// </param>
+        /// <param name="numberOfCharsToWrite">
+        /// The number of characters to be written. If the total size of the specified number of 
+        /// characters exceeds the available heap, the function fails with <see cref="Win32Error.NotEnoughMemory"/>.
+        /// </param>
+        /// <param name="numberOfCharsWritten">
+        /// A pointer to a variable that receives the number of characters actually written.
+        /// </param>
+        /// <param name="reserved">Reserved; must be <see cref="IntPtr.Zero"/>.</param>
+        /// <returns>True if success; otherwise false.</returns>
+        [DllImport(Kernel32, CallingConvention = CallingConvention.StdCall, CharSet = CharSet.Unicode, EntryPoint = "WriteConsoleW", SetLastError = true)]
+        public static extern bool WriteConsole(SafeHandle consoleOutputHandle, [In]StringBuilder buffer, uint numberOfCharsToWrite, out uint numberOfCharsWritten, IntPtr reserved);
 
         /// <summary>
         /// The System Error Codes are very broad. Each one can occur in one of many hundreds of 
