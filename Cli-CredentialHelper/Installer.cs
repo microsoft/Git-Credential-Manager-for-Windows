@@ -186,6 +186,11 @@ namespace Microsoft.Alm.CredentialHelper
                 Console.Out.WriteLine();
                 Console.Out.WriteLine("Deploying from '{0}' to '{1}'.", Program.Location, UserBinPath);
 
+                if(!Directory.Exists(UserBinPath))
+                {
+                    Directory.CreateDirectory(UserBinPath);
+                }
+
                 if (CopyFiles(Program.Location, UserBinPath, out cleanedFiles))
                 {
                     foreach (var file in cleanedFiles)
