@@ -5,7 +5,7 @@
 #include <idp.iss>
 
 #define MyAppName "Microsoft Git Credential Manager for Windows"
-#define MyAppVersion "0.9.15"
+#define MyAppVersion "1.0.0"
 #define MyAppPublisher "Microsoft Corporation"
 #define MyAppPublisherURL "http://www.microsoft.com"
 #define MyAppURL "https://github.com/Microsoft/Git-Credential-Manager-for-Windows"
