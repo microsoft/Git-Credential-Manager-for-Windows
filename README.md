@@ -21,7 +21,7 @@ This is a community project so feel free to contribute ideas, submit bugs, fix b
 
 ## Download and Install ##
 
-To use the GCM, you can download the [latest installer](<https://github.com/Microsoft/Git-Credential-Manager-for-Windows/releases>). To install, double-click Setup.exe and follow the instructions presented.
+To use the GCM, you can download the [latest installer](<https://github.com/Microsoft/Git-Credential-Manager-for-Windows/releases/latest>). To install, double-click Setup.exe and follow the instructions presented.
 
 ## How to use ##
 
