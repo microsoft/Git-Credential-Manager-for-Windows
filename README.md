@@ -1,18 +1,18 @@
 Git Credential Manager for Windows
 ==================================
 
-The [Git Credential Manager for Windows (GCM)](<https://github.com/Microsoft/Git-Credential-Manager-for-Windows>) provides secure Git credential storage for Windows. It's the successor to the [Windows Credential Store for Git (git-credential-winstore)](<https://gitcredentialstore.codeplex.com/>), which is no longer maintained. Compared to Git's build-in credential storage for Windows ([wincred](<https://git-scm.com/book/en/v2/Git-Tools-Credential-Storage>)), which provides single-factor authentication support working on any HTTP enabled Git repository, it provides multi-factor authentication support for Visual Studio Online and GitHub.
+The [Git Credential Manager for Windows (GCM)](<https://github.com/Microsoft/Git-Credential-Manager-for-Windows>) provides secure Git credential storage for Windows. It's the successor to the [Windows Credential Store for Git (git-credential-winstore)](<https://gitcredentialstore.codeplex.com/>), which is no longer maintained. Compared to Git's build-in credential storage for Windows ([wincred](<https://git-scm.com/book/en/v2/Git-Tools-Credential-Storage>)), which provides single-factor authentication support working on any HTTP enabled Git repository, it provides multi-factor authentication support for Visual Studio Team Services and GitHub.
 
 This project includes:
 
  * Secure password storage in the Windows Credential Store
  
- * Multi-factor authentication support for Visual Studio Online.
+ * Multi-factor authentication support for Visual Studio Team Services.
  * Two-factor authentication support for GitHub
  
- * Personal Access Token generation and usage support for Visual Studio Online and GitHub
+ * Personal Access Token generation and usage support for Visual Studio Team Services and GitHub
  
- * Non-interactive mode support for Visual Studio Online backed by Azure Directory
+ * Non-interactive mode support for Visual Studio Team Services backed by Azure Directory
  
  * Optional settings for build agent optimization
 
@@ -91,7 +91,7 @@ git config --global credential.interactive never
 
 Build agents often need to minimize the amount of network traffic they generate.
 
-To avoid Microsoft Account vs. Azure Active Directory look-up against a Visual Studio Online account use:
+To avoid Microsoft Account vs. Azure Active Directory look-up against a Visual Studio Team Services account use:
 
 ```
 git config --global credential.authority Azure
