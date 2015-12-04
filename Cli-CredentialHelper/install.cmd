@@ -53,7 +53,7 @@ IF "%~1" EQU "/?" (
 
 :PRINT_HELP
 
-    "~dp0\%git-credential-manager ?"
+    "%~dp0\git-credential-manager" ?
 
     EXIT /B 0
 
