@@ -667,7 +667,7 @@ namespace Microsoft.Alm.CredentialHelper
             {
                 Trace.WriteLine("   " + ConfigUseModalUi + " = " + entry.Value);
 
-                bool usemodel = operationArguments.WriteLog;
+                bool usemodel = operationArguments.UseModalUi;
                 if (Boolean.TryParse(entry.Value, out usemodel))
                 {
                     operationArguments.UseModalUi = usemodel;
