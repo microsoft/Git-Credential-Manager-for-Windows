@@ -916,7 +916,7 @@ namespace Microsoft.Alm.CredentialHelper
             {
                 BannerArt = IntPtr.Zero,
                 CaptionText = Title,
-                MessageText = String.Format("Enter you credentials for {0}://{1}.", targetUri.Scheme, targetUri.DnsSafeHost),
+                MessageText = String.Format("Enter your credentials for {0}://{1}.", targetUri.Scheme, targetUri.DnsSafeHost),
                 Parent = IntPtr.Zero,
                 Size = Marshal.SizeOf(typeof(NativeMethods.CredentialUiInfo))
             };
