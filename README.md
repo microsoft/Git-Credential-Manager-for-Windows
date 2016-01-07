@@ -6,18 +6,13 @@ The [Git Credential Manager for Windows (GCM)](<https://github.com/Microsoft/Git
 This project includes:
 
  * Secure password storage in the Windows Credential Store
- 
  * Multi-factor authentication support for Visual Studio Team Services.
  * Two-factor authentication support for GitHub
- 
  * Personal Access Token generation and usage support for Visual Studio Team Services and GitHub
- 
  * Non-interactive mode support for Visual Studio Team Services backed by Azure Directory
- 
  * Optional settings for build agent optimization
 
- 
-This is a community project so feel free to contribute ideas, submit bugs, fix bugs, or code new features.
+This is a community project so feel free to contribute ideas, submit bugs, fix bugs, or code new features. For detailed information on how the GCM works go to the [wiki](https://github.com/Microsoft/Git-Credential-Manager-for-Windows/wiki/How-the-Git-Credential-Managers-works).
 
 ## Download and Install ##
 
