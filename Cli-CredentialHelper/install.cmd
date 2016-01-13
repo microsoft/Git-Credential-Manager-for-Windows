@@ -1,4 +1,4 @@
-:: Wanto to update this thing and don't know how?
+:: Want to update this thing and don't know how?
 :: Check http://ss64.com/nt/syntax.html
 @ECHO OFF
 SETLOCAL ENABLEEXTENSIONS
