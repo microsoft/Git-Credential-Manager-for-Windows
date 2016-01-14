@@ -1,12 +1,12 @@
 Git Credential Manager for Windows
 ==================================
 
-The [Git Credential Manager for Windows (GCM)](<https://github.com/Microsoft/Git-Credential-Manager-for-Windows>) provides secure Git credential storage for Windows. It's the successor to the [Windows Credential Store for Git (git-credential-winstore)](<https://gitcredentialstore.codeplex.com/>), which is no longer maintained. Compared to Git's build-in credential storage for Windows ([wincred](<https://git-scm.com/book/en/v2/Git-Tools-Credential-Storage>)), which provides single-factor authentication support working on any HTTP enabled Git repository, it provides multi-factor authentication support for Visual Studio Team Services and GitHub.
+The [Git Credential Manager for Windows (GCM)](<https://github.com/Microsoft/Git-Credential-Manager-for-Windows>) provides secure Git credential storage for Windows. It's the successor to the [Windows Credential Store for Git (git-credential-winstore)](<https://gitcredentialstore.codeplex.com/>), which is no longer maintained. Compared to Git's built-in credential storage for Windows ([wincred](<https://git-scm.com/book/en/v2/Git-Tools-Credential-Storage>)), which provides single-factor authentication support working on any HTTP enabled Git repository, GCM provides multi-factor authentication support for Visual Studio Team Services and GitHub.
 
 This project includes:
 
  * Secure password storage in the Windows Credential Store
- * Multi-factor authentication support for Visual Studio Team Services.
+ * Multi-factor authentication support for Visual Studio Team Services
  * Two-factor authentication support for GitHub
  * Personal Access Token generation and usage support for Visual Studio Team Services and GitHub
  * Non-interactive mode support for Visual Studio Team Services backed by Azure Directory
@@ -20,7 +20,7 @@ To use the GCM, you can download the [latest installer](<https://github.com/Micr
 
 ## How to use ##
 
-You don't. It [magically](<https://github.com/Microsoft/Git-Credential-Manager-for-Windows/issues/31>) works when credentials are needed. One Example for when pushing to VSO it automatically opens a window and initialize an oauth2 flow to get your token. 
+You don't. It [magically](<https://github.com/Microsoft/Git-Credential-Manager-for-Windows/issues/31>) works when credentials are needed. For example, when pushing to VSO, it automatically opens a window and initializes an oauth2 flow to get your token.
 
 ### Manual Installation
 
@@ -30,7 +30,7 @@ Note for users with special installation needs, you can still extract the `gcm-<
 
 To build and install the GCM yourself, clone the sources, open the solution file in Visual Studio, and build the solution. All necessary components will be copied from the build output locations into a `.\Deploy` folder at the root of the solution. From an elevated command prompt in the `.\Deploy` folder issue the following command `git-credential-manager install`.
 
-Various options are available for uniquely configured systems, like automated build systems. For systems with a **non-standard placement of Git** use the `--path <git>` parameter to supply where Git is located and thus where the GCM should be deployed to. For systems looking to **avoid checking for the Microsoft .NET Framework** and other simial prerequisites use `--force` option. For systems looking for **silent installation without any prompts**, use the `--passive` option.
+Various options are available for uniquely configured systems, like automated build systems. For systems with a **non-standard placement of Git** use the `--path <git>` parameter to supply where Git is located and thus where the GCM should be deployed to. For systems looking to **avoid checking for the Microsoft .NET Framework** and other similar prerequisites use the `--force` option. For systems looking for **silent installation without any prompts**, use the `--passive` option.
 
 ## FAQ ##
 
@@ -44,15 +44,15 @@ Most likely, your environment is not configured correctly. You can verify that y
 
 Most likely reason is that your GUI “shells out” to git.exe to perform Git operations. When it does so, it cannot respond to the command line prompts for username and password like a real user can. To avoid being asked for your credentials on the command line, and instead be asked via a modal dialog you’ll need to configure the Credential Manager.
 
- 1. Decide if you want to be a global setting (all of your repos) or a local setting (just one repo).
- 
- 2. Start your favorite shell (cmd, powershell, bash, etc.)
- 
+ 1. Decide if you want this to be a global setting (all of your repos) or a local setting (just one repo).
+
+ 2. Start your favorite shell. (cmd, powershell, bash, etc.)
+
  3. Update your settings, so that Git Credential Manager knows to display a dialog and not prompt at the command line:
- 
+
     * If you’ve decided this is a global setting run `git config --global credential.modalprompt true`.
-    
-    * If you’ve decided this a per repo setting, `cd` to your repo and in each repo run `git config credential.modalprompt true`.
+
+    * If you’ve decided this a per repo setting, `cd` to your repo and in that repo run `git config credential.modalprompt true`.
 
 ### Q: Why am I not seeing my SSH keys being saved?
 
@@ -66,14 +66,14 @@ The Git Credential Manager does not work on Windows XP, Max OS, or Linux because
 
 We can safely say that we have no interest in supporting Windows XP. Even [Microsoft has ended support for Windows XP](<http://windows.microsoft.com/en-us/windows/end-support-help>). Support for Mac OS and Linux are very much something that we’re interesting in. We’re looking at options with [.NET Foundation cross-platform support](<https://github.com/dotnet>) and [ADAL Node.js support](<https://github.com/AzureAD/azure-activedirectory-library-for-nodejs>). Neither option is ready for a security application, and we’re not ready to port yet -- let’s at least get the ‘for Windows’ version to version 1.0 first!
 
-### Q: Why is there not support for my distributionversion of Git? Why is Git for Windows favored?
+### Q: Why is there not support for my distribution/version of Git? Why is Git for Windows favored?
 
 The Credential Manager deployment helpers (`install.cmd` and `Setup.exe`) are focused on support for [Git for Windows](<https://github.com/git-for-windows>) because Git for Windows conforms to the expected/normal behavior of software on Windows. It is easy to detect, has predictable installation location, etc. This makes supporting it cheaper and more reliable.
 
-That said, so long as your favorite version of Git supports Git’s git-credential flow it is supported by the Git Credential Manager for Windows. Setup will have to be manual, and if you find a way to script it we would love to have you contribute that to our project.
+That said, so long as your favorite version of Git supports Git’s git-credential flow, it is supported by the Git Credential Manager for Windows. Setup will have to be manual, and if you find a way to script it we would love to have you contribute that to our project.
 
  1. Copy the contents of the `gcm-<version>.zip` to your Git’s /bin folder. This varies per distribution, but it is likely next to other git tools like `git-status.exe`.
- 
+
  2. Update your Git configuration by running `git config --global credential.helper manager`.
 
 ## Build agents ##
@@ -103,9 +103,9 @@ git config --global credential.validate false
 There are many ways to contribue.
 
  * [Submit bugs](<https://github.com/Microsoft/Git-Credential-Manager-for-Windows/issues>) and help us verify fixes as they are checked in.
- 
+
  * Review [code changes](<https://github.com/Microsoft/Git-Credential-Manager-for-Windows/pulls>).
- 
+
  * Contribute bug fixes and features.
 
 For code contributions, you will need to complete a Contributor License Agreement (CLA). Briefly, this agreement testifies that you grant us permission to use the submitted change according to the terms of the project's license, and that the work being submitted is under the appropriate copyright.
