@@ -61,8 +61,9 @@ namespace Microsoft.Alm.CredentialHelper
             {
                 if (_userBinPath == null)
                 {
-                    string userBinPath = Environment.GetFolderPath(Environment.SpecialFolder.UserProfile);
-                    userBinPath = Path.Combine(userBinPath, "bin");
+                    // looking to install into '%ProgramData%\Git'
+                    string userBinPath = Environment.GetFolderPath(Environment.SpecialFolder.CommonApplicationData);
+                    userBinPath = Path.Combine(userBinPath, "Git");
                     _userBinPath = userBinPath;
                 }
                 return _userBinPath;
