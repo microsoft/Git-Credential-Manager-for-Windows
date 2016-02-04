@@ -53,9 +53,11 @@ namespace Microsoft.Alm.Git.Test
                 KnownGitDistribution kgd = (KnownGitDistribution)v;
 
                 var a = list.Where(x => x.Version == kgd);
-                Assert.IsTrue(a.All(x => x != a.First() || string.Equals(x.Git, a.First().Git, System.StringComparison.OrdinalIgnoreCase)));
-                Assert.IsTrue(a.All(x => x != a.First() || string.Equals(x.Config, a.First().Config, System.StringComparison.OrdinalIgnoreCase)));
-                Assert.IsTrue(a.All(x => x != a.First() || string.Equals(x.Libexec, a.First().Libexec, System.StringComparison.OrdinalIgnoreCase)));
+                Assert.IsTrue(a.All(x => x != a.First() || GitInstallation.PathComparer.Equals(x.Cmd, a.First().Cmd)));
+                Assert.IsTrue(a.All(x => x != a.First() || GitInstallation.PathComparer.Equals(x.Config, a.First().Config)));
+                Assert.IsTrue(a.All(x => x != a.First() || GitInstallation.PathComparer.Equals(x.Git, a.First().Git)));
+                Assert.IsTrue(a.All(x => x != a.First() || GitInstallation.PathComparer.Equals(x.Libexec, a.First().Libexec)));
+                Assert.IsTrue(a.All(x => x != a.First() || GitInstallation.PathComparer.Equals(x.Sh, a.First().Sh)));
             }
         }
     }
