@@ -61,8 +61,9 @@ namespace Microsoft.Alm.CredentialHelper
             {
                 if (_userBinPath == null)
                 {
-                    string userBinPath = Environment.GetFolderPath(Environment.SpecialFolder.UserProfile);
-                    userBinPath = Path.Combine(userBinPath, "bin");
+                    // looking to install into '%ProgramData%\Git'
+                    string userBinPath = Environment.GetFolderPath(Environment.SpecialFolder.CommonApplicationData);
+                    userBinPath = Path.Combine(userBinPath, "Git");
                     _userBinPath = userBinPath;
                 }
                 return _userBinPath;
@@ -473,7 +474,7 @@ namespace Microsoft.Alm.CredentialHelper
             if ((type & Configuration.Type.Global) == Configuration.Type.Global)
             {
                 // the 0 entry in the installations list is the "preferred" instance of Git
-                string gitCmdPath = installations[0].Cmd;
+                string gitCmdPath = installations[0].Git;
                 string globalCmd = action == GitConfigAction.Set
                     ? "config --global credential.helper manager"
                     : "config --global --unset credential.helper";
@@ -505,7 +506,7 @@ namespace Microsoft.Alm.CredentialHelper
 
                 foreach (var installation in installations)
                 {
-                    if (ExecuteGit(installation.Cmd, systemCmd, 0, 5))
+                    if (ExecuteGit(installation.Git, systemCmd, 0, 5))
                     {
                         Trace.WriteLine("   updating /etc/gitconfig succeeded.");
 

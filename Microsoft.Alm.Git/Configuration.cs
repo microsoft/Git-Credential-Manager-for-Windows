@@ -12,6 +12,10 @@ namespace Microsoft.Alm.Git
 
         private const char HostSplitCharacter = '.';
 
+        private static readonly Lazy<Regex> CommentRegex = new Lazy<Regex>(() => new Regex(@"^\s*[#;]", RegexOptions.Compiled | RegexOptions.CultureInvariant));
+        private static readonly Lazy<Regex> KeyValueRegex = new Lazy<Regex>(() => new Regex(@"^\s*(\w+)\s*=\s*(.+)", RegexOptions.Compiled | RegexOptions.CultureInvariant));
+        private static readonly Lazy<Regex> SectionRegex = new Lazy<Regex>(() => new Regex(@"^\s*\[\s*(\w+)\s*(\""[^\]]+){0,1}\]", RegexOptions.Compiled | RegexOptions.CultureInvariant));
+
         public Configuration(string directory)
         {
             if (String.IsNullOrWhiteSpace(directory))
@@ -104,14 +108,21 @@ namespace Microsoft.Alm.Git
 
         public void LoadGitConfiguation(string directory)
         {
+            string portableConfig = null;
             string systemConfig = null;
             string globalConfig = null;
             string localConfig = null;
 
             Trace.WriteLine("Configuration::LoadGitConfiguation");
 
-            // read Git's three configs from lowest priority to highest, overwriting values as
+            // read Git's four configs from lowest priority to highest, overwriting values as
             // higher priority configurations are parsed, storing them in a handy lookup table
+
+            // find and parse Git's protable config
+            if (Where.GitPortableConfig(out portableConfig))
+            {
+                ParseGitConfig(portableConfig);
+            }
 
             // find and parse Git's system config
             if (Where.GitSystemConfig(out systemConfig))
@@ -166,12 +177,12 @@ namespace Microsoft.Alm.Git
                 // skip empty and commented lines
                 if (String.IsNullOrWhiteSpace(line))
                     continue;
-                if (Regex.IsMatch(line, @"^\s*[#;]", RegexOptions.Compiled | RegexOptions.CultureInvariant))
+                if (CommentRegex.Value.IsMatch(line))
                     continue;
 
                 // sections begin with values like [section] or [section "section name"]. All subsequent lines,
                 // until a new section is encountered, are children of the section
-                if ((match = Regex.Match(line, @"^\s*\[\s*(\w+)\s*(\""[^\]]+){0,1}\]", RegexOptions.Compiled | RegexOptions.CultureInvariant)).Success)
+                if ((match = SectionRegex.Value.Match(line)).Success)
                 {
                     if (match.Groups.Count >= 2 && !String.IsNullOrWhiteSpace(match.Groups[1].Value))
                     {
@@ -200,7 +211,7 @@ namespace Microsoft.Alm.Git
                     }
                 }
                 // section children should be in the format of name = value pairs
-                else if ((match = Regex.Match(line, @"^\s*(\w+)\s*=\s*(.+)", RegexOptions.Compiled | RegexOptions.CultureInvariant)).Success)
+                else if ((match = KeyValueRegex.Value.Match(line)).Success)
                 {
                     if (match.Groups.Count >= 3
                         && !String.IsNullOrEmpty(match.Groups[1].Value)
@@ -256,6 +267,7 @@ namespace Microsoft.Alm.Git
             Global = 1 << 1,
             Xdg = 1 << 2,
             System = 1 << 3,
+            Portable = 1 << 4,
         }
     }
 }

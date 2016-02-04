@@ -17,7 +17,7 @@ namespace Microsoft.Alm.Git
         /// <param name="path">Path to the first match file which the operating system considers 
         /// executable.</param>
         /// <returns><see langword="True"/> if succeeds; <see langword="false"/> otherwise.</returns>
-        static public bool App(string name, out string path)
+        static public bool FindApp(string name, out string path)
         {
             Trace.WriteLine("Where::App");
 
@@ -160,7 +160,7 @@ namespace Microsoft.Alm.Git
 
             List<GitInstallation> candidates = new List<GitInstallation>();
             // add candidate locations in order of preference
-            if (Where.App(GitAppName, out shellPathValue))
+            if (Where.FindApp(GitAppName, out shellPathValue))
             {
                 // `Where.App` returns the path to the executable, truncate to the installation root
                 if (shellPathValue.EndsWith(GitInstallation.AllVersionCmdPath, StringComparison.InvariantCultureIgnoreCase))
@@ -370,6 +370,28 @@ namespace Microsoft.Alm.Git
         }
 
         /// <summary>
+        /// Gets the path to the Git portable system configuration file.
+        /// </summary>
+        /// <param name="path">Path to the Git portable system configuration</param>
+        /// <returns><see langword="True"/> if succeeds; <se
+        public static bool GitPortableConfig(out string path)
+        {
+            const string PortableConfigFolder = "Git";
+            const string PortableConfigFileName = "config";
+
+            path = null;
+
+            var portableConfigPath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.CommonApplicationData), PortableConfigFolder, PortableConfigFileName);
+
+            if (File.Exists(portableConfigPath))
+            {
+                path = portableConfigPath;
+            }
+
+            return path != null;
+        }
+
+        /// <summary>
         /// Gets the path to the Git system configuration file.
         /// </summary>
         /// <param name="path">Path to the Git system configuration.</param>
@@ -381,7 +403,7 @@ namespace Microsoft.Alm.Git
             Trace.WriteLine("Where::GitSystemConfig");
 
             // find Git on the local disk - the system config is stored relative to it
-            if (App("git", out path))
+            if (FindApp("git", out path))
             {
                 FileInfo gitInfo = new FileInfo(path);
                 DirectoryInfo dir = gitInfo.Directory;

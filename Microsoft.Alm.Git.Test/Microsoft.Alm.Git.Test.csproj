@@ -50,7 +50,9 @@
     </When>
     <Otherwise>
       <ItemGroup>
-        <Reference Include="Microsoft.VisualStudio.QualityTools.UnitTestFramework" />
+        <Reference Include="Microsoft.VisualStudio.QualityTools.UnitTestFramework">
+          <Private>False</Private>
+        </Reference>
       </ItemGroup>
     </Otherwise>
   </Choose>
@@ -58,6 +60,7 @@
     <Compile Include="ConfigurationTests.cs" />
     <Compile Include="GitInstallationTests.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="WhereTests.cs" />
   </ItemGroup>
   <ItemGroup>
     <EmbeddedResource Include="sample.gitconfig" />
