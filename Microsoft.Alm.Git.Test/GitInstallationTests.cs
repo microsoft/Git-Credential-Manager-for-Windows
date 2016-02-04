@@ -53,7 +53,7 @@ namespace Microsoft.Alm.Git.Test
                 KnownGitDistribution kgd = (KnownGitDistribution)v;
 
                 var a = list.Where(x => x.Version == kgd);
-                Assert.IsTrue(a.All(x => x != a.First() || string.Equals(x.Cmd, a.First().Cmd, System.StringComparison.OrdinalIgnoreCase)));
+                Assert.IsTrue(a.All(x => x != a.First() || string.Equals(x.Git, a.First().Git, System.StringComparison.OrdinalIgnoreCase)));
                 Assert.IsTrue(a.All(x => x != a.First() || string.Equals(x.Config, a.First().Config, System.StringComparison.OrdinalIgnoreCase)));
                 Assert.IsTrue(a.All(x => x != a.First() || string.Equals(x.Libexec, a.First().Libexec, System.StringComparison.OrdinalIgnoreCase)));
             }
