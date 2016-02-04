@@ -484,6 +484,40 @@ namespace Microsoft.Alm.CredentialHelper
             public IntPtr BannerArt;
         }
 
+        /// <summary>
+        /// Creates and displays a configurable dialog box that accepts credentials information from a user.
+        /// </summary>
+        /// <param name="credUiInfo">A pointer to a <see cref="CredentialUiInfo"/> structure that 
+        /// contains information for customizing the appearance of the dialog box</param>
+        /// <param name="targetName">A pointer to a null-terminated string that contains the name of 
+        /// the target for the credentials, typically a server name. For Distributed File System (DFS) 
+        /// connections, this string is of the form ServerName\ShareName. This parameter is used to 
+        /// identify target information when storing and retrieving credentials.</param>
+        /// <param name="reserved">This parameter is reserved for future use. It must be NUL</param>
+        /// <param name="authError">Specifies why the credential dialog box is needed. A caller can 
+        /// pass this Windows error parameter, returned by another authentication call, to allow the 
+        /// dialog box to accommodate certain errors. For example, if the password expired status code
+        /// is passed, the dialog box could prompt the user to change the password on the account.</param>
+        /// <param name="username">
+        /// <para>A pointer to a null-terminated string that contains the user name for the credentials. 
+        /// If a nonzero-length string is passed, the <paramref name="username"/> option of the dialog box 
+        /// is prefilled with the string.</param>
+        /// <param name="usernameMaxLen">The maximum number of characters that can be copied to 
+        /// <paramref name="username"/> including the terminating null character.</param>
+        /// <param name="password">
+        /// <para>A pointer to a null-terminated string that contains the password for the credentials. If 
+        /// a nonzero-length string is specified for <paramref name="password"/>, the password option of 
+        /// the dialog box will be prefilled with the string.</para>
+        /// </param>
+        /// <param name="passwordMaxLen">he maximum number of characters that can be copied to 
+        /// <paramref name="password"/> including the terminating null character.</param>
+        /// <param name="saveCredentials">A pointer to a <langword name="bool"/> that specifies the initial
+        /// state of the Save check box and receives the state of the Save check box after the user has 
+        /// responded to the dialog box. If this value is not NULL and <see cref="CredUIPromptForCredentials"/> 
+        /// returns <see cref="CredentialUiResult.Success"/>, then <paramref name="save"/> returns the state of the 
+        /// Save check box when the user chose OK in the dialog box.</param>
+        /// <param name="flags">Specifies special behavior for this function</param>
+        /// <returns><see cref="CredentialUiResult"/></returns>
         [DllImport(CredUi32, CharSet = CharSet.Unicode, EntryPoint = "CredUIPromptForCredentialsW", SetLastError = true)]
         public static extern CredentialUiResult CredUIPromptForCredentials(ref CredentialUiInfo credUiInfo, string targetName, IntPtr reserved, uint authError, StringBuilder username, int usernameMaxLen, StringBuilder password, int passwordMaxLen, ref bool saveCredentials, CredentialUiFlags flags);
 
