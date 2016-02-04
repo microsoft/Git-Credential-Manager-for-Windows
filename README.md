@@ -18,6 +18,8 @@ This is a community project so feel free to contribute ideas, submit bugs, fix b
 
 To use the GCM, you can download the [latest installer](<https://github.com/Microsoft/Git-Credential-Manager-for-Windows/releases/latest>). To install, double-click Setup.exe and follow the instructions presented.
 
+When prompted to select your terminal emulator for Git Bash you should choose the Windows' default console window. GCM will not prompt you for credentials in a MinTTY setup.
+
 ## How to use ##
 
 You don't. It [magically](<https://github.com/Microsoft/Git-Credential-Manager-for-Windows/issues/31>) works when credentials are needed. For example, when pushing to VSO, it automatically opens a window and initializes an oauth2 flow to get your token.
