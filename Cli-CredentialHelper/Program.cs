@@ -32,9 +32,10 @@ namespace Microsoft.Alm.CredentialHelper
 
         internal const string ConfigAuthortyKey = "authority";
         internal const string ConfigInteractiveKey = "interactive";
-        internal const string ConfigUseModalUi = "modalprompt";
+        internal const string ConfigUseModalPrompt = "modalprompt";
         internal const string ConfigValidateKey = "validate";
         internal const string ConfigWritelogKey = "writelog";
+        internal const string ConfigPreserveCredntials = "preserve";
 
         private const string ConfigPrefix = "credential";
         private const string SecretsNamespace = "git";
@@ -149,6 +150,13 @@ namespace Microsoft.Alm.CredentialHelper
                     Console.Error.WriteLine("Unknown command '{0}'. Please use {1} ? to display help.", args[0], Program.Name);
                 }
             }
+            catch (AggregateException exception)
+            {
+                // print out more useful information when an `AggregateException` is encountered
+                Console.Error.WriteLine("Fatal: " + exception.InnerExceptions[0].GetType().Name + " encountered.");
+                Trace.WriteLine("Fatal: " + exception.ToString());
+                LogEvent(exception.Message, EventLogEntryType.Error);
+            }
             catch (Exception exception)
             {
                 Console.Error.WriteLine("Fatal: " + exception.GetType().Name + " encountered.");
@@ -217,12 +225,12 @@ namespace Microsoft.Alm.CredentialHelper
             Console.Out.WriteLine();
             Console.Out.WriteLine("      `git config --global credential.microsoft.visualstudio.com." + ConfigInteractiveKey + " never`");
             Console.Out.WriteLine();
-            Console.Out.WriteLine("  " + ConfigUseModalUi + "  Forces authentication to use a modal dialog instead of");
+            Console.Out.WriteLine("  " + ConfigUseModalPrompt + "  Forces authentication to use a modal dialog instead of");
             Console.Out.WriteLine("               asking for credentials at the command prompt.");
             Console.Out.WriteLine("               Only used by Basic authority.");
             Console.Out.WriteLine("               Defaults to FALSE.");
             Console.Out.WriteLine();
-            Console.Out.WriteLine("      `git config --global credential." + ConfigUseModalUi + " true`");
+            Console.Out.WriteLine("      `git config --global credential." + ConfigUseModalPrompt + " true`");
             Console.Out.WriteLine();
             Console.Out.WriteLine("  " + ConfigValidateKey + "     Causes validation of credentials before supplying them");
             Console.Out.WriteLine("               to Git. Invalid credentials get a refresh attempt");
@@ -230,6 +238,13 @@ namespace Microsoft.Alm.CredentialHelper
             Console.Out.WriteLine("               Defaults to TRUE. Ignored by Basic authority.");
             Console.Out.WriteLine();
             Console.Out.WriteLine("      `git config --global credential.microsoft.visualstudio.com." + ConfigValidateKey + " false`");
+            Console.Out.WriteLine();
+            Console.Out.WriteLine("  " + ConfigPreserveCredntials + "     Prevents the deletion of credentials even when they are");
+            Console.Out.WriteLine("               reported as invlaid by Git. Can lead to lockout situations once credentials");
+            Console.Out.WriteLine("               expire and until those credentials are manually removed.");
+            Console.Out.WriteLine("               Defaults to FALSE.");
+            Console.Out.WriteLine();
+            Console.Out.WriteLine("      `git config --global credential.microsoft.visualstudio.com." + ConfigPreserveCredntials + " true`");
             Console.Out.WriteLine();
             Console.Out.WriteLine("  " + ConfigWritelogKey + "     Enables trace logging of all activities. Logs are written to");
             Console.Out.WriteLine("               the local .git/ folder at the root of the repository.");
@@ -266,6 +281,13 @@ namespace Microsoft.Alm.CredentialHelper
 
             Trace.WriteLine("Program::Erase");
             Trace.WriteLine("   targetUri = " + operationArguments.TargetUri);
+
+            if (operationArguments.PreserveCredentials)
+            {
+                Trace.WriteLine("   " + ConfigPreserveCredntials + " = true");
+                Trace.WriteLine("   cancelling erase request.");
+                return;
+            }
 
             BaseAuthentication authentication = CreateAuthentication(operationArguments);
 
@@ -517,7 +539,7 @@ namespace Microsoft.Alm.CredentialHelper
                         || GithubAuthentication.GetAuthentication(operationArguments.TargetUri,
                                                                   GithubCredentialScope,
                                                                   secrets,
-                                                                  GithubCredentialPrompt, 
+                                                                  GithubCredentialPrompt,
                                                                   GithubAuthCodePrompt,
                                                                   null,
                                                                   out authority))
@@ -561,9 +583,9 @@ namespace Microsoft.Alm.CredentialHelper
                     Trace.WriteLine("   authority it GitHub");
 
                     // return a GitHub authenitcation object
-                    return authority ?? new GithubAuthentication(GithubCredentialScope, 
-                                                                 secrets, 
-                                                                 GithubCredentialPrompt, 
+                    return authority ?? new GithubAuthentication(GithubCredentialScope,
+                                                                 secrets,
+                                                                 GithubCredentialPrompt,
                                                                  GithubAuthCodePrompt,
                                                                  null);
 
@@ -666,14 +688,25 @@ namespace Microsoft.Alm.CredentialHelper
                 }
             }
 
-            if (config.TryGetEntry(ConfigPrefix, operationArguments.TargetUri, ConfigUseModalUi, out entry))
+            if (config.TryGetEntry(ConfigPrefix, operationArguments.TargetUri, ConfigUseModalPrompt, out entry))
             {
-                Trace.WriteLine("   " + ConfigUseModalUi + " = " + entry.Value);
+                Trace.WriteLine("   " + ConfigUseModalPrompt + " = " + entry.Value);
 
                 bool usemodel = operationArguments.UseModalUi;
                 if (Boolean.TryParse(entry.Value, out usemodel))
                 {
                     operationArguments.UseModalUi = usemodel;
+                }
+            }
+
+            if (config.TryGetEntry(ConfigPrefix, operationArguments.TargetUri, ConfigPreserveCredntials, out entry))
+            {
+                Trace.WriteLine("   " + ConfigPreserveCredntials + " = " + entry.Value);
+
+                bool preserveCredentials = operationArguments.UseModalUi;
+                if (Boolean.TryParse(entry.Value, out preserveCredentials))
+                {
+                    operationArguments.PreserveCredentials = preserveCredentials;
                 }
             }
         }
@@ -746,13 +779,18 @@ namespace Microsoft.Alm.CredentialHelper
             }
         }
 
-        private static bool CustomPromptForCredentials( Uri targetUri, out string username, out string password, string message ) {
-            NativeMethods.CredentialUiInfo credUiInfo = new NativeMethods.CredentialUiInfo {
+        private static bool PromptForCredentialsBase( Uri targetUri, out string username, out string password, string message ) {
+            Debug.Assert(targetUri != null);
+
+            Trace.WriteLine("Program::PromptForCredentials");
+
+            NativeMethods.CredentialUiInfo credUiInfo = new NativeMethods.CredentialUiInfo
+            {
                 BannerArt = IntPtr.Zero,
                 CaptionText = Title,
                 MessageText = message,
                 Parent = IntPtr.Zero,
-                Size = Marshal.SizeOf( typeof( NativeMethods.CredentialUiInfo ) )
+                Size = Marshal.SizeOf(typeof(NativeMethods.CredentialUiInfo))
             };
 
             bool saveCredentials = false;
@@ -761,9 +799,11 @@ namespace Microsoft.Alm.CredentialHelper
             uint packedAuthBufferSize = 0;
             NativeMethods.CredentialUiWindowsFlags flags = NativeMethods.CredentialUiWindowsFlags.Generic;
 
-            try {
-                int result;
-                if ( ( result = NativeMethods.CredUIPromptForWindowsCredentials( ref credUiInfo,
+            try
+            {
+                // open a standard Windows authentication dialog to acquire username + password credentials
+                int error;
+                if ((error = NativeMethods.CredUIPromptForWindowsCredentials(ref credUiInfo,
                                                                               0,
                                                                               ref authPackage,
                                                                               IntPtr.Zero,
@@ -771,21 +811,26 @@ namespace Microsoft.Alm.CredentialHelper
                                                                               out packedAuthBufferPtr,
                                                                               out packedAuthBufferSize,
                                                                               ref saveCredentials,
-                                                                              flags ) ) != NativeMethods.Win32Error.Success ) {
+                                                                              flags)) != NativeMethods.Win32Error.Success)
+                {
                     username = null;
                     password = null;
+
+                    Trace.WriteLine("   credential prompt failed (" + NativeMethods.Win32Error.GetText(error) + ").");
 
                     return false;
                 }
 
-                StringBuilder usernameBuffer = new StringBuilder( 512 );
-                StringBuilder domainBuffer = new StringBuilder( 256 );
-                StringBuilder passwordBuffer = new StringBuilder( 512 );
+                // use `StringBuilder` references instead of string so that they can be written to
+                StringBuilder usernameBuffer = new StringBuilder(512);
+                StringBuilder domainBuffer = new StringBuilder(256);
+                StringBuilder passwordBuffer = new StringBuilder(512);
                 int usernameLen = usernameBuffer.Capacity;
                 int passwordLen = passwordBuffer.Capacity;
                 int domainLen = domainBuffer.Capacity;
 
-                if ( !NativeMethods.CredUnPackAuthenticationBuffer( authPackage,
+                // unpack the result into locally useful data
+                if (!NativeMethods.CredUnPackAuthenticationBuffer(authPackage,
                                                                   packedAuthBufferPtr,
                                                                   packedAuthBufferSize,
                                                                   usernameBuffer,
@@ -793,9 +838,13 @@ namespace Microsoft.Alm.CredentialHelper
                                                                   domainBuffer,
                                                                   ref domainLen,
                                                                   passwordBuffer,
-                                                                  ref passwordLen ) ) {
+                                                                  ref passwordLen))
+                {
                     username = null;
                     password = null;
+
+                    error = Marshal.GetLastWin32Error();
+                    Trace.WriteLine("   failed to unpack buffer (" + NativeMethods.Win32Error.GetText(error) + ").");
 
                     return false;
                 }
@@ -804,9 +853,13 @@ namespace Microsoft.Alm.CredentialHelper
                 password = passwordBuffer.ToString();
 
                 return true;
-            } catch { throw; } finally {
-                if ( packedAuthBufferPtr != IntPtr.Zero ) {
-                    Marshal.FreeHGlobal( packedAuthBufferPtr );
+            }
+            catch { throw; }
+            finally
+            {
+                if (packedAuthBufferPtr != IntPtr.Zero)
+                {
+                    Marshal.FreeHGlobal(packedAuthBufferPtr);
                 }
             }
         }
@@ -819,7 +872,7 @@ namespace Microsoft.Alm.CredentialHelper
             string username;
             string password;
 
-            var result = CustomPromptForCredentials( targetUri, out username, out password,
+            var result = PromptForCredentialsBase( targetUri, out username, out password,
                 string.Format( "Enter {0} authentication code for {1}://{2}.",
                     resultType == GithubAuthenticationResultType.TwoFactorApp ? "app" : "sms",
                     targetUri.Scheme, targetUri.DnsSafeHost ) );
@@ -845,7 +898,11 @@ namespace Microsoft.Alm.CredentialHelper
 
             // ReadConsole 32768 fail, 32767 ok 
             // @linquize [https://github.com/Microsoft/Git-Credential-Manager-for-Windows/commit/a62b9a19f430d038dcd85a610d97e5f763980f85]
-            const int BufferReadSize = 32 * 1024 - 7;
+            const int BufferReadSize = 16 * 1024;
+
+            Debug.Assert(targetUri != null);
+
+            Trace.WriteLine("Program::GithubCredentialPrompt");
 
             StringBuilder buffer = new StringBuilder(BufferReadSize);
             uint read = 0;
@@ -867,8 +924,10 @@ namespace Microsoft.Alm.CredentialHelper
                 if (!NativeMethods.GetConsoleMode(stdin, out consoleMode))
                 {
                     int error = Marshal.GetLastWin32Error();
-                    throw new Win32Exception(error, "Unable to determine console mode (" + error + ").");
+                    throw new Win32Exception(error, "Unable to determine console mode (" + NativeMethods.Win32Error.GetText(error) + ").");
                 }
+
+                Trace.WriteLine("   console mode = " + consoleMode);
 
                 // instruct the user as to what they are expected to do
                 buffer.Append("Please enter your GitHub credentials for ")
@@ -880,7 +939,7 @@ namespace Microsoft.Alm.CredentialHelper
                 if (!NativeMethods.WriteConsole(stdout, buffer, (uint)buffer.Length, out written, IntPtr.Zero))
                 {
                     int error = Marshal.GetLastWin32Error();
-                    throw new Win32Exception(error, "Unable to write to standard output (" + error + ").");
+                    throw new Win32Exception(error, "Unable to write to standard output (" + NativeMethods.Win32Error.GetText(error) + ").");
                 }
 
                 // clear the buffer for the next operation
@@ -891,7 +950,7 @@ namespace Microsoft.Alm.CredentialHelper
                 if (!NativeMethods.WriteConsole(stdout, buffer, (uint)buffer.Length, out written, IntPtr.Zero))
                 {
                     int error = Marshal.GetLastWin32Error();
-                    throw new Win32Exception(error, "Unable to write to standard output (" + error + ").");
+                    throw new Win32Exception(error, "Unable to write to standard output (" + NativeMethods.Win32Error.GetText(error) + ").");
                 }
 
                 // clear the buffer for the next operation
@@ -901,7 +960,7 @@ namespace Microsoft.Alm.CredentialHelper
                 if (!NativeMethods.ReadConsole(stdin, buffer, BufferReadSize, out read, IntPtr.Zero))
                 {
                     int error = Marshal.GetLastWin32Error();
-                    throw new Win32Exception(error, "Unable to read from standard input (" + error + ").");
+                    throw new Win32Exception(error, "Unable to read from standard input (" + NativeMethods.Win32Error.GetText(error) + ").");
                 }
 
                 // record input from the user into local storage, stripping any eol chars
@@ -919,15 +978,17 @@ namespace Microsoft.Alm.CredentialHelper
                     if (!NativeMethods.SetConsoleMode(stdin, consoleMode2))
                     {
                         int error = Marshal.GetLastWin32Error();
-                        throw new Win32Exception(error, "Unable to set console mode (" + error + ").");
+                        throw new Win32Exception(error, "Unable to set console mode (" + NativeMethods.Win32Error.GetText(error) + ").");
                     }
+
+                    Trace.WriteLine("   console mode = " + consoleMode2);
 
                     // prompt the user for password
                     buffer.Append("password: ");
                     if (!NativeMethods.WriteConsole(stdout, buffer, (uint)buffer.Length, out written, IntPtr.Zero))
                     {
                         int error = Marshal.GetLastWin32Error();
-                        throw new Win32Exception(error, "Unable to write to standard output (" + error + ").");
+                        throw new Win32Exception(error, "Unable to write to standard output (" + NativeMethods.Win32Error.GetText(error) + ").");
                     }
 
                     // clear the buffer for the next operation
@@ -937,7 +998,7 @@ namespace Microsoft.Alm.CredentialHelper
                     if (!NativeMethods.ReadConsole(stdin, buffer, BufferReadSize, out read, IntPtr.Zero))
                     {
                         int error = Marshal.GetLastWin32Error();
-                        throw new Win32Exception(error, "Unable to read from standard input (" + error + ").");
+                        throw new Win32Exception(error, "Unable to read from standard input (" + NativeMethods.Win32Error.GetText(error) + ").");
                     }
 
                     // record input from the user into local storage, stripping any eol chars
@@ -951,8 +1012,10 @@ namespace Microsoft.Alm.CredentialHelper
                     if (!NativeMethods.SetConsoleMode(stdin, consoleMode))
                     {
                         int error = Marshal.GetLastWin32Error();
-                        throw new Win32Exception(error, "Unable to set console mode (" + error + ").");
+                        throw new Win32Exception(error, "Unable to set console mode (" + NativeMethods.Win32Error.GetText(error) + ").");
                     }
+
+                    Trace.WriteLine("   console mode = " + consoleMode);
                 }
             }
 
@@ -968,7 +1031,11 @@ namespace Microsoft.Alm.CredentialHelper
 
             // ReadConsole 32768 fail, 32767 ok 
             // @linquize [https://github.com/Microsoft/Git-Credential-Manager-for-Windows/commit/a62b9a19f430d038dcd85a610d97e5f763980f85]
-            const int BufferReadSize = 32 * 1024 - 7;
+            const int BufferReadSize = 16 * 1024;
+
+            Debug.Assert(targetUri != null);
+
+            Trace.WriteLine("Program::GithubAuthCodePrompt");
 
             StringBuilder buffer = new StringBuilder(BufferReadSize);
             uint read = 0;
@@ -984,17 +1051,21 @@ namespace Microsoft.Alm.CredentialHelper
             using (SafeFileHandle stdout = NativeMethods.CreateFile(NativeMethods.ConsoleOutName, fileAccessFlags, fileShareFlags, IntPtr.Zero, fileCreationDisposition, fileAttributes, IntPtr.Zero))
             using (SafeFileHandle stdin = NativeMethods.CreateFile(NativeMethods.ConsoleInName, fileAccessFlags, fileShareFlags, IntPtr.Zero, fileCreationDisposition, fileAttributes, IntPtr.Zero))
             {
-                string type = resultType == GithubAuthenticationResultType.TwoFactorApp 
-                    ? "app" 
+                string type = resultType == GithubAuthenticationResultType.TwoFactorApp
+                    ? "app"
                     : "sms";
+
+                Trace.WriteLine("   2fa type = " + type);
+
                 buffer.AppendLine()
                       .Append("authcode (")
                       .Append(type)
                       .Append("): ");
+
                 if (!NativeMethods.WriteConsole(stdout, buffer, (uint)buffer.Length, out written, IntPtr.Zero))
                 {
                     int error = Marshal.GetLastWin32Error();
-                    throw new Win32Exception(error, "Unable to write to standard output (" + error + ").");
+                    throw new Win32Exception(error, "Unable to write to standard output (" + NativeMethods.Win32Error.GetText(error) + ").");
                 }
                 buffer.Clear();
 
@@ -1002,7 +1073,7 @@ namespace Microsoft.Alm.CredentialHelper
                 if (!NativeMethods.ReadConsole(stdin, buffer, BufferReadSize, out read, IntPtr.Zero))
                 {
                     int error = Marshal.GetLastWin32Error();
-                    throw new Win32Exception(error, "Unable to read from standard input (" + error + ").");
+                    throw new Win32Exception(error, "Unable to read from standard input (" + NativeMethods.Win32Error.GetText(error) + ").");
                 }
 
                 authenticationCode = buffer.ToString(0, (int)read);
@@ -1013,7 +1084,7 @@ namespace Microsoft.Alm.CredentialHelper
         }
 
         private static bool PromptForCredentials( Uri targetUri, out string username, out string password ) {
-            return CustomPromptForCredentials( targetUri, out username, out password,
+            return PromptForCredentialsBase( targetUri, out username, out password,
                 String.Format( "Enter your credentials for {0}://{1}.", targetUri.Scheme, targetUri.DnsSafeHost ) );
         }
 
