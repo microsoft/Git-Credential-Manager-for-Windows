@@ -63,6 +63,7 @@ namespace Microsoft.Alm.CredentialHelper
         public string Password { get; private set; }
         public AuthorityType Authority { get; set; }
         public Interactivity Interactivity { get; set; }
+        public bool PreserveCredentials { get; set; }
         public bool ValidateCredentials { get; set; }
         public bool UseModalUi { get; set; }
         public bool WriteLog { get; set; }

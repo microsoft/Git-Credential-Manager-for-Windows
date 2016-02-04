@@ -32,9 +32,10 @@ namespace Microsoft.Alm.CredentialHelper
 
         internal const string ConfigAuthortyKey = "authority";
         internal const string ConfigInteractiveKey = "interactive";
-        internal const string ConfigUseModalUi = "modalprompt";
+        internal const string ConfigUseModalPrompt = "modalprompt";
         internal const string ConfigValidateKey = "validate";
         internal const string ConfigWritelogKey = "writelog";
+        internal const string ConfigPreserveCredntials = "preserve";
 
         private const string ConfigPrefix = "credential";
         private const string SecretsNamespace = "git";
@@ -221,12 +222,12 @@ namespace Microsoft.Alm.CredentialHelper
             Console.Out.WriteLine();
             Console.Out.WriteLine("      `git config --global credential.microsoft.visualstudio.com." + ConfigInteractiveKey + " never`");
             Console.Out.WriteLine();
-            Console.Out.WriteLine("  " + ConfigUseModalUi + "  Forces authentication to use a modal dialog instead of");
+            Console.Out.WriteLine("  " + ConfigUseModalPrompt + "  Forces authentication to use a modal dialog instead of");
             Console.Out.WriteLine("               asking for credentials at the command prompt.");
             Console.Out.WriteLine("               Only used by Basic authority.");
             Console.Out.WriteLine("               Defaults to FALSE.");
             Console.Out.WriteLine();
-            Console.Out.WriteLine("      `git config --global credential." + ConfigUseModalUi + " true`");
+            Console.Out.WriteLine("      `git config --global credential." + ConfigUseModalPrompt + " true`");
             Console.Out.WriteLine();
             Console.Out.WriteLine("  " + ConfigValidateKey + "     Causes validation of credentials before supplying them");
             Console.Out.WriteLine("               to Git. Invalid credentials get a refresh attempt");
@@ -234,6 +235,13 @@ namespace Microsoft.Alm.CredentialHelper
             Console.Out.WriteLine("               Defaults to TRUE. Ignored by Basic authority.");
             Console.Out.WriteLine();
             Console.Out.WriteLine("      `git config --global credential.microsoft.visualstudio.com." + ConfigValidateKey + " false`");
+            Console.Out.WriteLine();
+            Console.Out.WriteLine("  " + ConfigPreserveCredntials + "     Prevents the deletion of credentials even when they are");
+            Console.Out.WriteLine("               reported as invlaid by Git. Can lead to lockout situations once credentials");
+            Console.Out.WriteLine("               expire and until those credentials are manually removed.");
+            Console.Out.WriteLine("               Defaults to FALSE.");
+            Console.Out.WriteLine();
+            Console.Out.WriteLine("      `git config --global credential.microsoft.visualstudio.com." + ConfigPreserveCredntials + " true`");
             Console.Out.WriteLine();
             Console.Out.WriteLine("  " + ConfigWritelogKey + "     Enables trace logging of all activities. Logs are written to");
             Console.Out.WriteLine("               the local .git/ folder at the root of the repository.");
@@ -270,6 +278,13 @@ namespace Microsoft.Alm.CredentialHelper
 
             Trace.WriteLine("Program::Erase");
             Trace.WriteLine("   targetUri = " + operationArguments.TargetUri);
+
+            if (operationArguments.PreserveCredentials)
+            {
+                Trace.WriteLine("   " + ConfigPreserveCredntials + " = true");
+                Trace.WriteLine("   cancelling erase request.");
+                return;
+            }
 
             BaseAuthentication authentication = CreateAuthentication(operationArguments);
 
@@ -670,14 +685,25 @@ namespace Microsoft.Alm.CredentialHelper
                 }
             }
 
-            if (config.TryGetEntry(ConfigPrefix, operationArguments.TargetUri, ConfigUseModalUi, out entry))
+            if (config.TryGetEntry(ConfigPrefix, operationArguments.TargetUri, ConfigUseModalPrompt, out entry))
             {
-                Trace.WriteLine("   " + ConfigUseModalUi + " = " + entry.Value);
+                Trace.WriteLine("   " + ConfigUseModalPrompt + " = " + entry.Value);
 
                 bool usemodel = operationArguments.UseModalUi;
                 if (Boolean.TryParse(entry.Value, out usemodel))
                 {
                     operationArguments.UseModalUi = usemodel;
+                }
+            }
+
+            if (config.TryGetEntry(ConfigPrefix, operationArguments.TargetUri, ConfigPreserveCredntials, out entry))
+            {
+                Trace.WriteLine("   " + ConfigPreserveCredntials + " = " + entry.Value);
+
+                bool preserveCredentials = operationArguments.UseModalUi;
+                if (Boolean.TryParse(entry.Value, out preserveCredentials))
+                {
+                    operationArguments.PreserveCredentials = preserveCredentials;
                 }
             }
         }
