@@ -370,6 +370,28 @@ namespace Microsoft.Alm.Git
         }
 
         /// <summary>
+        /// Gets the path to the Git portable system configuration file.
+        /// </summary>
+        /// <param name="path">Path to the Git portable system configuration</param>
+        /// <returns><see langword="True"/> if succeeds; <se
+        public static bool GitPortableConfig(out string path)
+        {
+            const string PortableConfigFolder = "Git";
+            const string PortableConfigFileName = "config";
+
+            path = null;
+
+            var portableConfigPath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.CommonApplicationData), PortableConfigFolder, PortableConfigFileName);
+
+            if (File.Exists(portableConfigPath))
+            {
+                path = portableConfigPath;
+            }
+
+            return path != null;
+        }
+
+        /// <summary>
         /// Gets the path to the Git system configuration file.
         /// </summary>
         /// <param name="path">Path to the Git system configuration.</param>
