@@ -104,10 +104,7 @@ namespace Microsoft.Alm.CredentialHelper
             }
         }
         private static Version _version;
-
-        // Storing OperationArguments here for the sake of Github ModalPrompts
-        private static OperationArguments operationArguments;
-
+        
         static void Main(string[] args)
         {
             try
@@ -271,7 +268,7 @@ namespace Microsoft.Alm.CredentialHelper
             // parse the operations arguments from stdin (this is how git sends commands)
             // see: https://www.kernel.org/pub/software/scm/git/docs/technical/api-credentials.html
             // see: https://www.kernel.org/pub/software/scm/git/docs/git-credential.html
-            operationArguments = new OperationArguments(Console.In);
+            OperationArguments operationArguments = new OperationArguments(Console.In);
 
             Debug.Assert(operationArguments != null, "The operationArguments is null");
             Debug.Assert(operationArguments.TargetUri != null, "The operationArgument.TargetUri is null");
@@ -314,7 +311,7 @@ namespace Microsoft.Alm.CredentialHelper
             // parse the operations arguments from stdin (this is how git sends commands)
             // see: https://www.kernel.org/pub/software/scm/git/docs/technical/api-credentials.html
             // see: https://www.kernel.org/pub/software/scm/git/docs/git-credential.html
-            operationArguments = new OperationArguments(Console.In);
+            OperationArguments operationArguments = new OperationArguments(Console.In);
 
             Debug.Assert(operationArguments != null, "The operationArguments is null");
             Debug.Assert(operationArguments.TargetUri != null, "The operationArgument.TargetUri is null");
@@ -466,7 +463,7 @@ namespace Microsoft.Alm.CredentialHelper
             // parse the operations arguments from stdin (this is how git sends commands)
             // see: https://www.kernel.org/pub/software/scm/git/docs/technical/api-credentials.html
             // see: https://www.kernel.org/pub/software/scm/git/docs/git-credential.html
-            operationArguments = new OperationArguments(Console.In);
+            OperationArguments operationArguments = new OperationArguments(Console.In);
 
             Debug.Assert(operationArguments != null, "The operationArguments is null");
             Debug.Assert(operationArguments.Username != null, "The operaionArgument.Username is null");
@@ -539,8 +536,8 @@ namespace Microsoft.Alm.CredentialHelper
                         || GithubAuthentication.GetAuthentication(operationArguments.TargetUri,
                                                                   GithubCredentialScope,
                                                                   secrets,
-                                                                  GithubCredentialPrompt,
-                                                                  GithubAuthCodePrompt,
+                                                                  operationArguments.UseModalUi ? (GithubAuthentication.AcquireCredentialsDelegate)GithubCredentialModalPrompt : GithubCredentialPrompt,
+                                                                  operationArguments.UseModalUi ? (GithubAuthentication.AcquireAuthenticationCodeDelegate)GithubAuthCodeModalPrompt : GithubAuthCodePrompt,
                                                                   null,
                                                                   out authority))
                     {
@@ -892,10 +889,6 @@ namespace Microsoft.Alm.CredentialHelper
 
         private static bool GithubCredentialPrompt(Uri targetUri, out string username, out string password)
         {
-            if ( operationArguments.UseModalUi ) {
-                return GithubCredentialModalPrompt( targetUri, out username, out password );
-            }
-
             // ReadConsole 32768 fail, 32767 ok 
             // @linquize [https://github.com/Microsoft/Git-Credential-Manager-for-Windows/commit/a62b9a19f430d038dcd85a610d97e5f763980f85]
             const int BufferReadSize = 16 * 1024;
@@ -1025,10 +1018,6 @@ namespace Microsoft.Alm.CredentialHelper
 
         private static bool GithubAuthCodePrompt(Uri targetUri, GithubAuthenticationResultType resultType, out string authenticationCode)
         {
-            if ( operationArguments.UseModalUi ) {
-                return GithubAuthCodeModalPrompt( targetUri, resultType, out authenticationCode );
-            }
-
             // ReadConsole 32768 fail, 32767 ok 
             // @linquize [https://github.com/Microsoft/Git-Credential-Manager-for-Windows/commit/a62b9a19f430d038dcd85a610d97e5f763980f85]
             const int BufferReadSize = 16 * 1024;
