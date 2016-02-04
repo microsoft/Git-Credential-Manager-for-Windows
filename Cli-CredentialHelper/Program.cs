@@ -582,9 +582,9 @@ namespace Microsoft.Alm.CredentialHelper
                     // return a GitHub authenitcation object
                     return authority ?? new GithubAuthentication(GithubCredentialScope,
                                                                  secrets,
-                                                                 GithubCredentialPrompt,
-                                                                 GithubAuthCodePrompt,
-                                                                 null);
+                                                                 operationArguments.UseModalUi ? (GithubAuthentication.AcquireCredentialsDelegate)GithubCredentialModalPrompt : GithubCredentialPrompt,
+                                                                  operationArguments.UseModalUi ? (GithubAuthentication.AcquireAuthenticationCodeDelegate)GithubAuthCodeModalPrompt : GithubAuthCodePrompt,
+                                                                 null );
 
                 case AuthorityType.MicrosoftAccount:
                     Trace.WriteLine("   authority is Microsoft Live");
