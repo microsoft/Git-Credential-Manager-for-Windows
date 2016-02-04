@@ -104,6 +104,9 @@ namespace Microsoft.Alm.CredentialHelper
         }
         private static Version _version;
 
+        // Storing OperationArguments here for the sake of Github ModalPrompts
+        private static OperationArguments operationArguments;
+
         static void Main(string[] args)
         {
             try
@@ -253,7 +256,7 @@ namespace Microsoft.Alm.CredentialHelper
             // parse the operations arguments from stdin (this is how git sends commands)
             // see: https://www.kernel.org/pub/software/scm/git/docs/technical/api-credentials.html
             // see: https://www.kernel.org/pub/software/scm/git/docs/git-credential.html
-            OperationArguments operationArguments = new OperationArguments(Console.In);
+            operationArguments = new OperationArguments(Console.In);
 
             Debug.Assert(operationArguments != null, "The operationArguments is null");
             Debug.Assert(operationArguments.TargetUri != null, "The operationArgument.TargetUri is null");
@@ -289,7 +292,7 @@ namespace Microsoft.Alm.CredentialHelper
             // parse the operations arguments from stdin (this is how git sends commands)
             // see: https://www.kernel.org/pub/software/scm/git/docs/technical/api-credentials.html
             // see: https://www.kernel.org/pub/software/scm/git/docs/git-credential.html
-            OperationArguments operationArguments = new OperationArguments(Console.In);
+            operationArguments = new OperationArguments(Console.In);
 
             Debug.Assert(operationArguments != null, "The operationArguments is null");
             Debug.Assert(operationArguments.TargetUri != null, "The operationArgument.TargetUri is null");
@@ -441,7 +444,7 @@ namespace Microsoft.Alm.CredentialHelper
             // parse the operations arguments from stdin (this is how git sends commands)
             // see: https://www.kernel.org/pub/software/scm/git/docs/technical/api-credentials.html
             // see: https://www.kernel.org/pub/software/scm/git/docs/git-credential.html
-            OperationArguments operationArguments = new OperationArguments(Console.In);
+            operationArguments = new OperationArguments(Console.In);
 
             Debug.Assert(operationArguments != null, "The operationArguments is null");
             Debug.Assert(operationArguments.Username != null, "The operaionArgument.Username is null");
@@ -743,8 +746,103 @@ namespace Microsoft.Alm.CredentialHelper
             }
         }
 
+        private static bool CustomPromptForCredentials( Uri targetUri, out string username, out string password, string message ) {
+            NativeMethods.CredentialUiInfo credUiInfo = new NativeMethods.CredentialUiInfo {
+                BannerArt = IntPtr.Zero,
+                CaptionText = Title,
+                MessageText = message,
+                Parent = IntPtr.Zero,
+                Size = Marshal.SizeOf( typeof( NativeMethods.CredentialUiInfo ) )
+            };
+
+            bool saveCredentials = false;
+            NativeMethods.CredentialPackFlags authPackage = NativeMethods.CredentialPackFlags.None;
+            IntPtr packedAuthBufferPtr = IntPtr.Zero;
+            uint packedAuthBufferSize = 0;
+            NativeMethods.CredentialUiWindowsFlags flags = NativeMethods.CredentialUiWindowsFlags.Generic;
+
+            try {
+                int result;
+                if ( ( result = NativeMethods.CredUIPromptForWindowsCredentials( ref credUiInfo,
+                                                                              0,
+                                                                              ref authPackage,
+                                                                              IntPtr.Zero,
+                                                                              0,
+                                                                              out packedAuthBufferPtr,
+                                                                              out packedAuthBufferSize,
+                                                                              ref saveCredentials,
+                                                                              flags ) ) != NativeMethods.Win32Error.Success ) {
+                    username = null;
+                    password = null;
+
+                    return false;
+                }
+
+                StringBuilder usernameBuffer = new StringBuilder( 512 );
+                StringBuilder domainBuffer = new StringBuilder( 256 );
+                StringBuilder passwordBuffer = new StringBuilder( 512 );
+                int usernameLen = usernameBuffer.Capacity;
+                int passwordLen = passwordBuffer.Capacity;
+                int domainLen = domainBuffer.Capacity;
+
+                if ( !NativeMethods.CredUnPackAuthenticationBuffer( authPackage,
+                                                                  packedAuthBufferPtr,
+                                                                  packedAuthBufferSize,
+                                                                  usernameBuffer,
+                                                                  ref usernameLen,
+                                                                  domainBuffer,
+                                                                  ref domainLen,
+                                                                  passwordBuffer,
+                                                                  ref passwordLen ) ) {
+                    username = null;
+                    password = null;
+
+                    return false;
+                }
+
+                username = usernameBuffer.ToString();
+                password = passwordBuffer.ToString();
+
+                return true;
+            } catch { throw; } finally {
+                if ( packedAuthBufferPtr != IntPtr.Zero ) {
+                    Marshal.FreeHGlobal( packedAuthBufferPtr );
+                }
+            }
+        }
+
+        private static bool GithubCredentialModalPrompt( Uri targetUri, out string username, out string password ) {
+            return PromptForCredentials( targetUri, out username, out password );
+        }
+
+        private static bool GithubAuthCodeModalPrompt( Uri targetUri, GithubAuthenticationResultType resultType, out string authenticationCode ) {
+            string username;
+            string password;
+
+            var result = CustomPromptForCredentials( targetUri, out username, out password,
+                string.Format( "Enter {0} authentication code for {1}://{2}.",
+                    resultType == GithubAuthenticationResultType.TwoFactorApp ? "app" : "sms",
+                    targetUri.Scheme, targetUri.DnsSafeHost ) );
+
+            authenticationCode = "";
+
+            if ( !string.IsNullOrWhiteSpace( username ) ) {
+                authenticationCode = username;
+            } else if ( !string.IsNullOrWhiteSpace( password ) ) {
+                authenticationCode = password;
+            } else {
+                authenticationCode = null;
+            }
+
+            return authenticationCode != null;
+        }
+
         private static bool GithubCredentialPrompt(Uri targetUri, out string username, out string password)
         {
+            if ( operationArguments.UseModalUi ) {
+                return GithubCredentialModalPrompt( targetUri, out username, out password );
+            }
+
             // ReadConsole 32768 fail, 32767 ok 
             // @linquize [https://github.com/Microsoft/Git-Credential-Manager-for-Windows/commit/a62b9a19f430d038dcd85a610d97e5f763980f85]
             const int BufferReadSize = 32 * 1024 - 7;
@@ -864,6 +962,10 @@ namespace Microsoft.Alm.CredentialHelper
 
         private static bool GithubAuthCodePrompt(Uri targetUri, GithubAuthenticationResultType resultType, out string authenticationCode)
         {
+            if ( operationArguments.UseModalUi ) {
+                return GithubAuthCodeModalPrompt( targetUri, resultType, out authenticationCode );
+            }
+
             // ReadConsole 32768 fail, 32767 ok 
             // @linquize [https://github.com/Microsoft/Git-Credential-Manager-for-Windows/commit/a62b9a19f430d038dcd85a610d97e5f763980f85]
             const int BufferReadSize = 32 * 1024 - 7;
@@ -910,78 +1012,9 @@ namespace Microsoft.Alm.CredentialHelper
             return authenticationCode != null;
         }
 
-        private static bool PromptForCredentials(Uri targetUri, out string username, out string password)
-        {
-            NativeMethods.CredentialUiInfo credUiInfo = new NativeMethods.CredentialUiInfo
-            {
-                BannerArt = IntPtr.Zero,
-                CaptionText = Title,
-                MessageText = String.Format("Enter your credentials for {0}://{1}.", targetUri.Scheme, targetUri.DnsSafeHost),
-                Parent = IntPtr.Zero,
-                Size = Marshal.SizeOf(typeof(NativeMethods.CredentialUiInfo))
-            };
-
-            bool saveCredentials = false;
-            NativeMethods.CredentialPackFlags authPackage  = NativeMethods.CredentialPackFlags.None;
-            IntPtr packedAuthBufferPtr = IntPtr.Zero;
-            uint packedAuthBufferSize = 0;
-            NativeMethods.CredentialUiWindowsFlags flags = NativeMethods.CredentialUiWindowsFlags.Generic;
-
-            try
-            {
-                int result;
-                if ((result = NativeMethods.CredUIPromptForWindowsCredentials(ref credUiInfo,
-                                                                              0,
-                                                                              ref authPackage,
-                                                                              IntPtr.Zero,
-                                                                              0,
-                                                                              out packedAuthBufferPtr,
-                                                                              out packedAuthBufferSize,
-                                                                              ref saveCredentials,
-                                                                              flags)) != NativeMethods.Win32Error.Success)
-                {
-                    username = null;
-                    password = null;
-
-                    return false;
-                }
-
-                StringBuilder usernameBuffer = new StringBuilder(512);
-                StringBuilder domainBuffer = new StringBuilder(256);
-                StringBuilder passwordBuffer = new StringBuilder(512);
-                int usernameLen = usernameBuffer.Capacity;
-                int passwordLen = passwordBuffer.Capacity;
-                int domainLen = domainBuffer.Capacity;
-
-                if (!NativeMethods.CredUnPackAuthenticationBuffer(authPackage,
-                                                                  packedAuthBufferPtr,
-                                                                  packedAuthBufferSize,
-                                                                  usernameBuffer,
-                                                                  ref usernameLen,
-                                                                  domainBuffer,
-                                                                  ref domainLen,
-                                                                  passwordBuffer,
-                                                                  ref passwordLen))
-                {
-                    username = null;
-                    password = null;
-
-                    return false;
-                }
-
-                username = usernameBuffer.ToString();
-                password = passwordBuffer.ToString();
-
-                return true;
-            }
-            catch { throw; }
-            finally
-            {
-                if (packedAuthBufferPtr != IntPtr.Zero)
-                {
-                    Marshal.FreeHGlobal(packedAuthBufferPtr);
-                }
-            }
+        private static bool PromptForCredentials( Uri targetUri, out string username, out string password ) {
+            return CustomPromptForCredentials( targetUri, out username, out password,
+                String.Format( "Enter your credentials for {0}://{1}.", targetUri.Scheme, targetUri.DnsSafeHost ) );
         }
 
         [Conditional("DEBUG")]
