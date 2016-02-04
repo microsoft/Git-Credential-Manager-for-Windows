@@ -776,7 +776,7 @@ namespace Microsoft.Alm.CredentialHelper
             }
         }
 
-        private static bool PromptForCredentialsBase( Uri targetUri, out string username, out string password, string message ) {
+        private static bool PromptForCredentialsBase( Uri targetUri, out string username, out string password, string message, string displayUsername = "") {
             Debug.Assert(targetUri != null);
 
             Trace.WriteLine("Program::PromptForCredentials");
@@ -792,6 +792,17 @@ namespace Microsoft.Alm.CredentialHelper
 
             bool saveCredentials = false;
             NativeMethods.CredentialPackFlags authPackage = NativeMethods.CredentialPackFlags.None;
+
+            IntPtr inBufferPtr = IntPtr.Zero;
+            int inBufferSize = 0;
+
+            if ( !string.IsNullOrEmpty( displayUsername ) ) {
+                // Execute with ZeroPtr to determine buffer size
+                NativeMethods.CredPackAuthenticationBuffer( authPackage, displayUsername, "", inBufferPtr, ref inBufferSize );
+                inBufferPtr = Marshal.AllocCoTaskMem( inBufferSize );
+                NativeMethods.CredPackAuthenticationBuffer( authPackage, displayUsername, "", inBufferPtr, ref inBufferSize );
+            }
+
             IntPtr packedAuthBufferPtr = IntPtr.Zero;
             uint packedAuthBufferSize = 0;
             NativeMethods.CredentialUiWindowsFlags flags = NativeMethods.CredentialUiWindowsFlags.Generic;
@@ -803,8 +814,8 @@ namespace Microsoft.Alm.CredentialHelper
                 if ((error = NativeMethods.CredUIPromptForWindowsCredentials(ref credUiInfo,
                                                                               0,
                                                                               ref authPackage,
-                                                                              IntPtr.Zero,
-                                                                              0,
+                                                                              inBufferPtr,
+                                                                              (uint)inBufferSize,
                                                                               out packedAuthBufferPtr,
                                                                               out packedAuthBufferSize,
                                                                               ref saveCredentials,
@@ -858,6 +869,11 @@ namespace Microsoft.Alm.CredentialHelper
                 {
                     Marshal.FreeHGlobal(packedAuthBufferPtr);
                 }
+
+                if (inBufferPtr != IntPtr.Zero) 
+                {
+                    Marshal.FreeCoTaskMem( inBufferPtr );
+                }
             }
         }
 
@@ -865,20 +881,18 @@ namespace Microsoft.Alm.CredentialHelper
             return PromptForCredentials( targetUri, out username, out password );
         }
 
-        private static bool GithubAuthCodeModalPrompt( Uri targetUri, GithubAuthenticationResultType resultType, out string authenticationCode ) {
-            string username;
+        private static bool GithubAuthCodeModalPrompt( Uri targetUri, GithubAuthenticationResultType resultType, string username, out string authenticationCode ) {
+            string temp;
             string password;
 
-            var result = PromptForCredentialsBase( targetUri, out username, out password,
+            var result = PromptForCredentialsBase( targetUri, out temp, out password,
                 string.Format( "Enter {0} authentication code for {1}://{2}.",
                     resultType == GithubAuthenticationResultType.TwoFactorApp ? "app" : "sms",
-                    targetUri.Scheme, targetUri.DnsSafeHost ) );
+                    targetUri.Scheme, targetUri.DnsSafeHost ), username );
 
             authenticationCode = "";
 
-            if ( !string.IsNullOrWhiteSpace( username ) ) {
-                authenticationCode = username;
-            } else if ( !string.IsNullOrWhiteSpace( password ) ) {
+            if ( !string.IsNullOrWhiteSpace( password ) ) {
                 authenticationCode = password;
             } else {
                 authenticationCode = null;
@@ -1016,7 +1030,7 @@ namespace Microsoft.Alm.CredentialHelper
                 && password != null;
         }
 
-        private static bool GithubAuthCodePrompt(Uri targetUri, GithubAuthenticationResultType resultType, out string authenticationCode)
+        private static bool GithubAuthCodePrompt(Uri targetUri, GithubAuthenticationResultType resultType, string username, out string authenticationCode)
         {
             // ReadConsole 32768 fail, 32767 ok 
             // @linquize [https://github.com/Microsoft/Git-Credential-Manager-for-Windows/commit/a62b9a19f430d038dcd85a610d97e5f763980f85]

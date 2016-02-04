@@ -177,7 +177,7 @@ namespace Microsoft.Alm.Authentication
                         || result == GithubAuthenticationResultType.TwoFactorSms)
                 {
                     string authenticationCode;
-                    if (AcquireAuthenticationCodeCallback(targetUri, result, out authenticationCode))
+                    if (AcquireAuthenticationCodeCallback(targetUri, result, username, out authenticationCode))
                     {
                         if (result = GithubAuthority.AcquireToken(targetUri, username, password, authenticationCode, this.TokenScope).Result)
                         {
@@ -304,7 +304,7 @@ namespace Microsoft.Alm.Authentication
         /// </param>
         /// <param name="authenticationCode">The authentication code provided by the user.</param>
         /// <returns>True if successful; otherwise false.</returns>
-        public delegate bool AcquireAuthenticationCodeDelegate(Uri targetUri, GithubAuthenticationResultType resultType, out string authenticationCode);
+        public delegate bool AcquireAuthenticationCodeDelegate(Uri targetUri, GithubAuthenticationResultType resultType, string username, out string authenticationCode);
 
         /// <summary>
         /// Delegate for reporting the success, or not, of an authentiction attempt.
