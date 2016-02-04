@@ -806,6 +806,41 @@ namespace Microsoft.Alm.CredentialHelper
             /// A specified logon session does not exist. It may already have been terminated.
             /// </summary>
             public const int NoSuchLogonSession = 1312;
+
+            public static string GetText(int error)
+            {
+                switch (error)
+                {
+                    default:
+                        return error.ToString();
+                    case 1:
+                        return "INVALID_FUNCTION";
+                    case NativeMethods.Win32Error.AlreadExists:
+                        return "ALREADY_EXISTS";
+                    case NativeMethods.Win32Error.FileExists:
+                        return "FILE_EXISTS";
+                    case NativeMethods.Win32Error.FileNotFound:
+                        return "FILE_NOT_FOUND";
+                    case NativeMethods.Win32Error.GenericFailure:
+                        return "GENERIC_FAILURE (" + error + ")";
+                    case NativeMethods.Win32Error.InsufficientBuffer:
+                        return "INSUFFICIENT_BUFFER";
+                    case NativeMethods.Win32Error.InvalidHandle:
+                        return "INVALID_HANDLE";
+                    case NativeMethods.Win32Error.NoSuchLogonSession:
+                        return "NO_SUCH_LOGON_SESSION";
+                    case NativeMethods.Win32Error.NotCapable:
+                        return "NOT_CAPABLE";
+                    case NativeMethods.Win32Error.NotEnoughMemory:
+                        return "NOT_ENOUGH_MEMORY";
+                    case NativeMethods.Win32Error.NotFound:
+                        return "NOT_FOUND";
+                    case NativeMethods.Win32Error.SharingViolation:
+                        return "SHARING_VILOATION";
+                    case NativeMethods.Win32Error.Success:
+                        return "SUCCESS";
+                }
+            }
         }
     }
 }
