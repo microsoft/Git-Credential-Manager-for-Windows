@@ -5,14 +5,14 @@
 #include <idp.iss>
 
 #define MyAppName "Microsoft Git Credential Manager for Windows"
-#define MyAppVersion "1.0.0"
+#define MyAppVersion "1.1.0"
 #define MyAppPublisher "Microsoft Corporation"
 #define MyAppPublisherURL "http://www.microsoft.com"
 #define MyAppURL "https://github.com/Microsoft/Git-Credential-Manager-for-Windows"
 #define MyAppExeName "git-credential-manager.exe"
-#define Git4WinName "Git for Windows 2.6.4"
-#define Git4WinUrl "https://github.com/git-for-windows/git/releases/download/v2.6.4.windows.1/Git-2.6.4-64-bit.exe"
-#define Git4WinFile "Git-2.6.4-64-bit.exe"
+#define Git4WinName "Git for Windows 2.7.0"
+#define Git4WinUrl "https://github.com/git-for-windows/git/releases/download/v2.7.0.windows.2/Git-2.7.0.2-64-bit.exe"
+#define Git4WinFile "Git-2.7.0-64-bit.exe"
 #define Git4WinSpace 394309632
 #define NetFxName "The Microsoft .NET Framework 4.6."
 #define NetFxBaseFile "NetFx40Installer.exe"
@@ -29,13 +29,13 @@ AppPublisher={#MyAppPublisher}
 AppPublisherURL={#MyAppPublisherURL}
 AppSupportURL={#MyAppURL}
 AppUpdatesURL={#MyAppURL}
-AppCopyright=Copyright © Microsoft 2015
+AppCopyright=Copyright © Microsoft 2016
 AppReadmeFile=https://github.com/Microsoft/Git-Credential-Manager-for-Windows/blob/master/README.md
 BackColor=clWhite
 BackSolid=yes
 DefaultDirName={userpf}\{#MyAppName}
 LicenseFile=..\Deploy\LICENSE.TXT
-OutputBaseFilename=Setup
+OutputBaseFilename=GCMW-1.1.0
 Compression=lzma2
 InternalCompressLevel=ultra64
 SolidCompression=yes
