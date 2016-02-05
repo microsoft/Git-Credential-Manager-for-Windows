@@ -3,7 +3,7 @@ using System.Threading.Tasks;
 
 namespace Microsoft.Alm.Authentication.Test
 {
-    internal class AuthorityFake : IVsoAuthority
+    internal class AuthorityFake : IVstsAuthority
     {
         public TokenPair AcquireToken(Uri targetUri, string clientId, string resource, Uri redirectUri, string queryParameters = null)
         {
@@ -20,7 +20,7 @@ namespace Microsoft.Alm.Authentication.Test
             return await Task.Run(() => { return new TokenPair("token-access", "token-refresh"); });
         }
 
-        public async Task<Token> GeneratePersonalAccessToken(Uri targetUri, Token accessToken, VsoTokenScope tokenScope, bool requireCompactToken)
+        public async Task<Token> GeneratePersonalAccessToken(Uri targetUri, Token accessToken, VstsTokenScope tokenScope, bool requireCompactToken)
         {
             return await Task.Run(() => { return new Token("personal-access-token", TokenType.Personal); });
         }

@@ -5,17 +5,17 @@ using Microsoft.VisualStudio.TestTools.UnitTesting;
 namespace Microsoft.Alm.Authentication.Test
 {
     [TestClass]
-    public class VsoMsaTests : AuthenticationTests
+    public class VstsMsaTests : AuthenticationTests
     {
-        public VsoMsaTests()
+        public VstsMsaTests()
             : base()
         { }
 
         [TestMethod]
-        public void VsoMsaDeleteCredentialsTest()
+        public void VstsMsaDeleteCredentialsTest()
         {
             Uri targetUri = DefaultTargetUri;
-            VsoMsaAuthentication msaAuthority = GetVsoMsaAuthentication("msa-delete");
+            VstsMsaAuthentication msaAuthority = GetVstsMsaAuthentication("msa-delete");
 
             msaAuthority.PersonalAccessTokenStore.WriteCredentials(targetUri, DefaultPersonalAccessToken);
             msaAuthority.AdaRefreshTokenStore.WriteToken(targetUri, DefaultAzureRefreshToken);
@@ -33,10 +33,10 @@ namespace Microsoft.Alm.Authentication.Test
         }
 
         [TestMethod]
-        public void VsoMsaGetCredentialsTest()
+        public void VstsMsaGetCredentialsTest()
         {
             Uri targetUri = DefaultTargetUri;
-            VsoMsaAuthentication msaAuthority = GetVsoMsaAuthentication("msa-get");
+            VstsMsaAuthentication msaAuthority = GetVstsMsaAuthentication("msa-get");
             Credential credentials;
 
             Assert.IsFalse(msaAuthority.GetCredentials(targetUri, out credentials), "Credentials were retrieved unexpectedly.");
@@ -48,10 +48,10 @@ namespace Microsoft.Alm.Authentication.Test
         }
 
         [TestMethod]
-        public void VsoMsaInteractiveLogonTest()
+        public void VstsMsaInteractiveLogonTest()
         {
             Uri targetUri = DefaultTargetUri;
-            VsoMsaAuthentication msaAuthority = GetVsoMsaAuthentication("msa-logon");
+            VstsMsaAuthentication msaAuthority = GetVstsMsaAuthentication("msa-logon");
 
             Credential personalAccessToken;
             Token azureToken;
@@ -66,11 +66,11 @@ namespace Microsoft.Alm.Authentication.Test
         }
 
         [TestMethod]
-        public void VsoMsaRefreshCredentialsTest()
+        public void VstsMsaRefreshCredentialsTest()
         {
             Uri targetUri = DefaultTargetUri;
             Uri invlaidUri = InvalidTargetUri;
-            VsoMsaAuthentication msaAuthority = GetVsoMsaAuthentication("msa-refresh");
+            VstsMsaAuthentication msaAuthority = GetVstsMsaAuthentication("msa-refresh");
 
             msaAuthority.AdaRefreshTokenStore.WriteToken(targetUri, DefaultAzureRefreshToken);
 
@@ -85,10 +85,10 @@ namespace Microsoft.Alm.Authentication.Test
         }
 
         [TestMethod]
-        public void VsoMsaSetCredentialsTest()
+        public void VstsMsaSetCredentialsTest()
         {
             Uri targetUri = DefaultTargetUri;
-            VsoMsaAuthentication msaAuthority = GetVsoMsaAuthentication("msa-set");
+            VstsMsaAuthentication msaAuthority = GetVstsMsaAuthentication("msa-set");
             Credential personalAccessToken;
             Token azureToken;
 
@@ -104,9 +104,9 @@ namespace Microsoft.Alm.Authentication.Test
         }
 
         [TestMethod]
-        public void VsoMsaValidateCredentialsTest()
+        public void VstsMsaValidateCredentialsTest()
         {
-            VsoMsaAuthentication msaAuthority = GetVsoMsaAuthentication("msa-validate");
+            VstsMsaAuthentication msaAuthority = GetVstsMsaAuthentication("msa-validate");
             Credential credentials = null;
 
             Assert.IsFalse(Task.Run(async () => { return await msaAuthority.ValidateCredentials(DefaultTargetUri, credentials); }).Result, "Credential validation unexpectedly failed.");
@@ -116,13 +116,13 @@ namespace Microsoft.Alm.Authentication.Test
             Assert.IsTrue(Task.Run(async () => { return await msaAuthority.ValidateCredentials(DefaultTargetUri, credentials); }).Result, "Credential validation unexpectedly failed.");
         }
 
-        private VsoMsaAuthentication GetVsoMsaAuthentication(string @namespace)
+        private VstsMsaAuthentication GetVstsMsaAuthentication(string @namespace)
         {
             ICredentialStore tokenStore1 = new SecretCache(@namespace + 1);
             ITokenStore tokenStore2 = new SecretCache(@namespace + 2);
             ITokenStore tokenStore3 = new SecretCache(@namespace + 3);
-            IVsoAuthority liveAuthority = new AuthorityFake();
-            return new VsoMsaAuthentication(tokenStore1, tokenStore2, tokenStore3, liveAuthority);
+            IVstsAuthority liveAuthority = new AuthorityFake();
+            return new VstsMsaAuthentication(tokenStore1, tokenStore2, tokenStore3, liveAuthority);
         }
     }
 }

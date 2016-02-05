@@ -8,14 +8,14 @@ namespace Microsoft.Alm.Authentication
     /// <summary>
     /// Facilitates Azure Directory authentication.
     /// </summary>
-    public sealed class VsoAadAuthentication : BaseVsoAuthentication, IVsoAadAuthentication
+    public sealed class VstsAadAuthentication : BaseVstsAuthentication, IVstsAadAuthentication
     {
         /// <summary>
         /// 
         /// </summary>
         /// <param name="tenantId">
         /// <para>The unique identifier for the responsible Azure tenant.</para>
-        /// <para>Use <see cref="BaseVsoAuthentication.GetAuthentication"/>
+        /// <para>Use <see cref="BaseVstsAuthentication.GetAuthentication"/>
         /// to detect the tenant identity and create the authentication object.</para>
         /// </param>
         /// <param name="tokenScope">The scope of all access tokens acquired by the authority.</param>
@@ -23,9 +23,9 @@ namespace Microsoft.Alm.Authentication
         /// access tokens acquired.</param>
         /// <param name="adaRefreshTokenStore">The secure secret store for storing any Azure tokens 
         /// acquired.</param>
-        public VsoAadAuthentication(
+        public VstsAadAuthentication(
             Guid tenantId,
-            VsoTokenScope tokenScope,
+            VstsTokenScope tokenScope,
             ICredentialStore personalAccessTokenStore,
             ITokenStore adaRefreshTokenStore = null)
             : base(tokenScope,
@@ -34,34 +34,34 @@ namespace Microsoft.Alm.Authentication
         {
             if (tenantId == Guid.Empty)
             {
-                this.VsoAuthority = new VsoAzureAuthority(AzureAuthority.DefaultAuthorityHostUrl);
+                this.VstsAuthority = new VstsAzureAuthority(AzureAuthority.DefaultAuthorityHostUrl);
             }
             else
             {
                 // create an authority host url in the format of https://login.microsoft.com/12345678-9ABC-DEF0-1234-56789ABCDEF0
                 string authorityHost = AzureAuthority.GetAuthorityUrl(tenantId);
-                this.VsoAuthority = new VsoAzureAuthority(authorityHost);
+                this.VstsAuthority = new VstsAzureAuthority(authorityHost);
             }
         }
 
         /// <summary>
         /// Test constructor which allows for using fake credential stores
         /// </summary>
-        internal VsoAadAuthentication(
+        internal VstsAadAuthentication(
             ICredentialStore personalAccessTokenStore,
             ITokenStore adaRefreshTokenStore,
-            ITokenStore vsoIdeTokenCache,
-            IVsoAuthority vsoAuthority)
+            ITokenStore vstsIdeTokenCache,
+            IVstsAuthority vstsAuthority)
             : base(personalAccessTokenStore,
                    adaRefreshTokenStore,
-                   vsoIdeTokenCache,
-                   vsoAuthority)
+                   vstsIdeTokenCache,
+                   vstsAuthority)
         { }
 
         /// <summary>
         /// <para>Creates an interactive logon session, using ADAL secure browser GUI, which 
         /// enables users to authenticate with the Azure tenant and acquire the necessary access 
-        /// tokens to exchange for a VSO personal access token.</para>
+        /// tokens to exchange for a VSTS personal access token.</para>
         /// <para>Tokens acquired are stored in the secure secret stores provided during 
         /// initialization.</para>
         /// </summary>
@@ -78,12 +78,12 @@ namespace Microsoft.Alm.Authentication
         {
             BaseSecureStore.ValidateTargetUri(targetUri);
 
-            Trace.WriteLine("VsoAadAuthentication::InteractiveLogon");
+            Trace.WriteLine("VstsAadAuthentication::InteractiveLogon");
 
             try
             {
                 TokenPair tokens;
-                if ((tokens = this.VsoAuthority.AcquireToken(targetUri, this.ClientId, this.Resource, new Uri(RedirectUrl), null)) != null)
+                if ((tokens = this.VstsAuthority.AcquireToken(targetUri, this.ClientId, this.Resource, new Uri(RedirectUrl), null)) != null)
                 {
                     Trace.WriteLine("   token aqusition succeeded.");
 
@@ -103,7 +103,7 @@ namespace Microsoft.Alm.Authentication
 
         /// <summary>
         /// <para>Uses credentials to authenticate with the Azure tenant and acquire the necessary 
-        /// access tokens to exchange for a VSO personal access token.</para>
+        /// access tokens to exchange for a VSTS personal access token.</para>
         /// <para>Tokens acquired are stored in the secure secret stores provided during 
         /// initialization.</para>
         /// </summary>
@@ -123,12 +123,12 @@ namespace Microsoft.Alm.Authentication
             BaseSecureStore.ValidateTargetUri(targetUri);
             Credential.Validate(credentials);
 
-            Trace.WriteLine("VsoAadAuthentication::NoninteractiveLogonWithCredentials");
+            Trace.WriteLine("VstsAadAuthentication::NoninteractiveLogonWithCredentials");
 
             try
             {
                 TokenPair tokens;
-                if ((tokens = await this.VsoAuthority.AcquireTokenAsync(targetUri, this.ClientId, this.Resource, credentials)) != null)
+                if ((tokens = await this.VstsAuthority.AcquireTokenAsync(targetUri, this.ClientId, this.Resource, credentials)) != null)
                 {
                     Trace.WriteLine("   token aquisition succeeded");
 
@@ -148,7 +148,7 @@ namespace Microsoft.Alm.Authentication
 
         /// <summary>
         /// <para>Uses Active Directory Federation Services to authenticate with the Azure tenant 
-        /// non-interactively and acquire the necessary access tokens to exchange for a VSO personal 
+        /// non-interactively and acquire the necessary access tokens to exchange for a VSTS personal 
         /// access token.</para>
         /// <para>Tokens acquired are stored in the secure secret stores provided during 
         /// initialization.</para>
@@ -166,12 +166,12 @@ namespace Microsoft.Alm.Authentication
         {
             BaseSecureStore.ValidateTargetUri(targetUri);
 
-            Trace.WriteLine("VsoAadAuthentication::NoninteractiveLogon");
+            Trace.WriteLine("VstsAadAuthentication::NoninteractiveLogon");
 
             try
             {
                 TokenPair tokens;
-                if ((tokens = await this.VsoAuthority.AcquireTokenAsync(targetUri, this.ClientId, this.Resource)) != null)
+                if ((tokens = await this.VstsAuthority.AcquireTokenAsync(targetUri, this.ClientId, this.Resource)) != null)
                 {
                     Trace.WriteLine("   token aquisition succeeded");
 
@@ -182,7 +182,7 @@ namespace Microsoft.Alm.Authentication
             }
             catch (AdalException)
             {
-                Trace.WriteLine("   failed to acquire token from VsoAuthority.");
+                Trace.WriteLine("   failed to acquire token from VstsAuthority.");
             }
 
             Trace.WriteLine("   non-interactive logon failed");
@@ -203,10 +203,10 @@ namespace Microsoft.Alm.Authentication
             BaseSecureStore.ValidateTargetUri(targetUri);
             Credential.Validate(credentials);
 
-            Trace.WriteLine("VsoMsaAuthentication::SetCredentials");
+            Trace.WriteLine("VstsMsaAuthentication::SetCredentials");
             Trace.WriteLine("   setting AAD credentials is not supported");
 
-            // does nothing with VSO AAD backed accounts
+            // does nothing with VSTS AAD backed accounts
             return false;
         }
     }

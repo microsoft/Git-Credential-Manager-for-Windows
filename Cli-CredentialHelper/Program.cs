@@ -39,7 +39,7 @@ namespace Microsoft.Alm.CredentialHelper
 
         private const string ConfigPrefix = "credential";
         private const string SecretsNamespace = "git";
-        private static readonly VsoTokenScope VsoCredentialScope = VsoTokenScope.CodeWrite | VsoTokenScope.PackagingRead;
+        private static readonly VstsTokenScope VstsCredentialScope = VstsTokenScope.CodeWrite | VstsTokenScope.PackagingRead;
         private static readonly GithubTokenScope GithubCredentialScope = GithubTokenScope.Gist | GithubTokenScope.PublicKeyRead | GithubTokenScope.Repo;
         private static readonly List<string> CommandList = new List<string>
         {
@@ -298,9 +298,9 @@ namespace Microsoft.Alm.CredentialHelper
 
                 case AuthorityType.AzureDirectory:
                 case AuthorityType.MicrosoftAccount:
-                    Trace.WriteLine("   deleting VSO credentials");
-                    BaseVsoAuthentication vsoAuth = authentication as BaseVsoAuthentication;
-                    vsoAuth.DeleteCredentials(operationArguments.TargetUri);
+                    Trace.WriteLine("   deleting VSTS credentials");
+                    BaseVstsAuthentication vstsAuth = authentication as BaseVstsAuthentication;
+                    vstsAuth.DeleteCredentials(operationArguments.TargetUri);
                     break;
 
                 case AuthorityType.GitHub:
@@ -358,7 +358,7 @@ namespace Microsoft.Alm.CredentialHelper
                     break;
 
                 case AuthorityType.AzureDirectory:
-                    VsoAadAuthentication aadAuth = authentication as VsoAadAuthentication;
+                    VstsAadAuthentication aadAuth = authentication as VstsAadAuthentication;
 
                     Task.Run(async () =>
                     {
@@ -397,7 +397,7 @@ namespace Microsoft.Alm.CredentialHelper
                     break;
 
                 case AuthorityType.MicrosoftAccount:
-                    VsoMsaAuthentication msaAuth = authentication as VsoMsaAuthentication;
+                    VstsMsaAuthentication msaAuth = authentication as VstsMsaAuthentication;
 
                     Task.Run(async () =>
                     {
@@ -536,8 +536,8 @@ namespace Microsoft.Alm.CredentialHelper
                     Trace.WriteLine("   detecting authority type");
 
                     // detect the authority
-                    if (BaseVsoAuthentication.GetAuthentication(operationArguments.TargetUri,
-                                                                VsoCredentialScope,
+                    if (BaseVstsAuthentication.GetAuthentication(operationArguments.TargetUri,
+                                                                VstsCredentialScope,
                                                                 secrets,
                                                                 null,
                                                                 out authority)
@@ -554,12 +554,12 @@ namespace Microsoft.Alm.CredentialHelper
                                                                   out authority))
                     {
                         // set the authority type based on the returned value
-                        if (authority is VsoMsaAuthentication)
+                        if (authority is VstsMsaAuthentication)
                         {
                             operationArguments.Authority = AuthorityType.MicrosoftAccount;
                             goto case AuthorityType.MicrosoftAccount;
                         }
-                        else if (authority is VsoAadAuthentication)
+                        else if (authority is VstsAadAuthentication)
                         {
                             operationArguments.Authority = AuthorityType.AzureDirectory;
                             goto case AuthorityType.AzureDirectory;
@@ -578,8 +578,8 @@ namespace Microsoft.Alm.CredentialHelper
                     Trace.WriteLine("   authority is Azure Directory");
 
                     Guid tenantId = Guid.Empty;
-                    // return the allocated authority or a generic AAD backed VSO authentication object
-                    return authority ?? new VsoAadAuthentication(Guid.Empty, VsoCredentialScope, secrets);
+                    // return the allocated authority or a generic AAD backed VSTS authentication object
+                    return authority ?? new VstsAadAuthentication(Guid.Empty, VstsCredentialScope, secrets);
 
                 case AuthorityType.Basic:
                 default:
@@ -605,8 +605,8 @@ namespace Microsoft.Alm.CredentialHelper
                 case AuthorityType.MicrosoftAccount:
                     Trace.WriteLine("   authority is Microsoft Live");
 
-                    // return the allocated authority or a generic MSA backed VSO authentication object
-                    return authority ?? new VsoMsaAuthentication(VsoCredentialScope, secrets);
+                    // return the allocated authority or a generic MSA backed VSTS authentication object
+                    return authority ?? new VstsMsaAuthentication(VstsCredentialScope, secrets);
             }
         }
 

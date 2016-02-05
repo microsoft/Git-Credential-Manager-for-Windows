@@ -4,35 +4,35 @@ using Microsoft.IdentityModel.Clients.ActiveDirectory;
 
 namespace Microsoft.Alm.Authentication
 {
-    public sealed class VsoMsaAuthentication : BaseVsoAuthentication, IVsoMsaAuthentication
+    public sealed class VstsMsaAuthentication : BaseVstsAuthentication, IVstsMsaAuthentication
     {
         public const string DefaultAuthorityHost = AzureAuthority.AuthorityHostUrlBase + "/live.com";
 
-        public VsoMsaAuthentication(
-            VsoTokenScope tokenScope,
+        public VstsMsaAuthentication(
+            VstsTokenScope tokenScope,
             ICredentialStore personalAccessTokenStore,
             ITokenStore adaRefreshTokenStore = null)
             : base(tokenScope,
                    personalAccessTokenStore,
                    adaRefreshTokenStore)
         {
-            this.VsoAuthority = new VsoAzureAuthority(DefaultAuthorityHost);
+            this.VstsAuthority = new VstsAzureAuthority(DefaultAuthorityHost);
         }
         /// <summary>
         /// Test constructor which allows for using fake credential stores
         /// </summary>
         /// <param name="personalAccessTokenStore"></param>
         /// <param name="adaRefreshTokenStore"></param>
+        /// <param name="vstsIdeTokenCache"></param>
         /// <param name="liveAuthority"></param>
-        /// <param name="vsoAuthority"></param>
-        internal VsoMsaAuthentication(
+        internal VstsMsaAuthentication(
             ICredentialStore personalAccessTokenStore,
             ITokenStore adaRefreshTokenStore,
-            ITokenStore vsoIdeTokenCache,
-            IVsoAuthority liveAuthority)
+            ITokenStore vstsIdeTokenCache,
+            IVstsAuthority liveAuthority)
             : base(personalAccessTokenStore,
                    adaRefreshTokenStore,
-                   vsoIdeTokenCache,
+                   vstsIdeTokenCache,
                    liveAuthority)
         { }
 
@@ -53,12 +53,12 @@ namespace Microsoft.Alm.Authentication
 
             BaseSecureStore.ValidateTargetUri(targetUri);
 
-            Trace.WriteLine("VsoMsaAuthentication::InteractiveLogon");
+            Trace.WriteLine("VstsMsaAuthentication::InteractiveLogon");
 
             try
             {
                 TokenPair tokens;
-                if ((tokens = this.VsoAuthority.AcquireToken(targetUri, this.ClientId, this.Resource, new Uri(RedirectUrl), QueryParameters)) != null)
+                if ((tokens = this.VstsAuthority.AcquireToken(targetUri, this.ClientId, this.Resource, new Uri(RedirectUrl), QueryParameters)) != null)
                 {
                     Trace.WriteLine("   token successfully acquired.");
 
@@ -89,10 +89,10 @@ namespace Microsoft.Alm.Authentication
             BaseSecureStore.ValidateTargetUri(targetUri);
             Credential.Validate(credentials);
 
-            Trace.WriteLine("VsoMsaAuthentication::SetCredentials");
+            Trace.WriteLine("VstsMsaAuthentication::SetCredentials");
             Trace.WriteLine("   setting MSA credentials is not supported");
 
-            // does nothing with VSO MSA backed accounts
+            // does nothing with VSTS MSA backed accounts
             return false;
         }
     }

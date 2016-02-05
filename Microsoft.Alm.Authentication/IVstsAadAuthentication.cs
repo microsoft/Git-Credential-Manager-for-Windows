@@ -3,7 +3,7 @@ using System.Threading.Tasks;
 
 namespace Microsoft.Alm.Authentication
 {
-    public interface IVsoAadAuthentication
+    public interface IVstsAadAuthentication
     {
         bool InteractiveLogon(Uri targetUri, bool requestCompactToken);
         Task<bool> NoninteractiveLogonWithCredentials(Uri targetUri, Credential credentials, bool requestCompactToken);

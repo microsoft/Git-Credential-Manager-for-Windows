@@ -11,7 +11,7 @@ namespace Microsoft.Alm.Authentication.Test
         public static readonly Credential DefaultPersonalAccessToken = new Credential("personal-access-token", "personal-access-token");
         public static readonly Uri DefaultTargetUri = new Uri("https://unit-test.uri/git-credential");
         public static readonly Uri InvalidTargetUri = new Uri("https://invlaid-test.uri/git-credential");
-        public static readonly VsoTokenScope DefaultTokenScope = VsoTokenScope.CodeWrite;
+        public static readonly VstsTokenScope DefaultTokenScope = VstsTokenScope.CodeWrite;
 
         public AuthenticationTests()
         {

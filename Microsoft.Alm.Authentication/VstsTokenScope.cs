@@ -5,31 +5,31 @@ using ScopeSet = System.Collections.Generic.HashSet<string>;
 
 namespace Microsoft.Alm.Authentication
 {
-    public class VsoTokenScope : TokenScope
+    public class VstsTokenScope : TokenScope
     {
-        public static readonly VsoTokenScope None = new VsoTokenScope(String.Empty);
+        public static readonly VstsTokenScope None = new VstsTokenScope(String.Empty);
         /// <summary>
         /// Grants the ability to access build artifacts, including build results, definitions, and 
         /// requests, and the ability to receive notifications about build events via service hooks.
         /// </summary>
-        public static readonly VsoTokenScope BuildAccess = new VsoTokenScope("vso.build");
+        public static readonly VstsTokenScope BuildAccess = new VstsTokenScope("vso.build");
         /// <summary>
         /// Grants the ability to access build artifacts, including build results, definitions, and 
         /// requests, and the ability to queue a build, update build properties, and the ability to 
         /// receive notifications about build events via service hooks.
         /// </summary>
-        public static readonly VsoTokenScope BuildExecute = new VsoTokenScope("vso.build_execute");
+        public static readonly VstsTokenScope BuildExecute = new VstsTokenScope("vso.build_execute");
         /// <summary>
         /// Grants the ability to access rooms and view, post, and update messages. Also grants the 
         /// ability to manage rooms and users and to receive notifications about new messages via 
         /// service hooks.
         /// </summary>
-        public static readonly VsoTokenScope ChatManage = new VsoTokenScope("vso.chat_manage");
+        public static readonly VstsTokenScope ChatManage = new VstsTokenScope("vso.chat_manage");
         /// <summary>
         /// Grants the ability to access rooms and view, post, and update messages. Also grants the 
         /// ability to receive notifications about new messages via service hooks.
         /// </summary>
-        public static readonly VsoTokenScope ChatWrite = new VsoTokenScope("vso.chat_write");
+        public static readonly VstsTokenScope ChatWrite = new VstsTokenScope("vso.chat_write");
         /// <summary>
         /// Grants the ability to read, update, and delete source code, access metadata about 
         /// commits, changesets, branches, and other version control artifacts. Also grants the 
@@ -37,83 +37,83 @@ namespace Microsoft.Alm.Authentication
         /// code reviews, and to receive notifications about version control events via service 
         /// hooks.
         /// </summary>
-        public static readonly VsoTokenScope CodeManage = new VsoTokenScope("vso.code_manage");
+        public static readonly VstsTokenScope CodeManage = new VstsTokenScope("vso.code_manage");
         /// <summary>
         /// Grants the ability to read source code and metadata about commits, changesets, branches, 
         /// and other version control artifacts. Also grants the ability to get notified about 
         /// version control events via service hooks.
         /// </summary>
-        public static readonly VsoTokenScope CodeRead = new VsoTokenScope("vso.code");
+        public static readonly VstsTokenScope CodeRead = new VstsTokenScope("vso.code");
         /// <summary>
         /// Grants the ability to read, update, and delete source code, access metadata about 
         /// commits, changesets, branches, and other version control artifacts. Also grants the 
         /// ability to create and manage pull requests and code reviews and to receive 
         /// notifications about version control events via service hooks.
         /// </summary>
-        public static readonly VsoTokenScope CodeWrite = new VsoTokenScope("vso.code_write");
+        public static readonly VstsTokenScope CodeWrite = new VstsTokenScope("vso.code_write");
         /// <summary>
         /// Grants the ability to read, write, and delete feeds and packages.
         /// </summary>
-        public static readonly VsoTokenScope PackagingManage = new VsoTokenScope("vso.packaging_manage");
+        public static readonly VstsTokenScope PackagingManage = new VstsTokenScope("vso.packaging_manage");
         /// <summary>
         /// Grants the ability to list feeds and read packages in those feeds.
         /// </summary>
-        public static readonly VsoTokenScope PackagingRead = new VsoTokenScope("vso.packaging");
+        public static readonly VstsTokenScope PackagingRead = new VstsTokenScope("vso.packaging");
         /// <summary>
         /// Grants the ability to list feeds and read, write, and delete packages in those feeds.
         /// </summary>
-        public static readonly VsoTokenScope PackagingWrite = new VsoTokenScope("vso.packaging_write");
+        public static readonly VstsTokenScope PackagingWrite = new VstsTokenScope("vso.packaging_write");
         /// <summary>
         /// Grants the ability to read your profile, accounts, collections, projects, teams, and 
         /// other top-level organizational artifacts.
         /// </summary>
-        public static readonly VsoTokenScope ProfileRead = new VsoTokenScope("vso.profile");
+        public static readonly VstsTokenScope ProfileRead = new VstsTokenScope("vso.profile");
         /// <summary>
         /// Grants the ability to read service hook subscriptions and metadata, including supported
         /// events, consumers, and actions.
         /// </summary>
-        public static readonly VsoTokenScope ServiceHookRead = new VsoTokenScope("vso.hooks");
+        public static readonly VstsTokenScope ServiceHookRead = new VstsTokenScope("vso.hooks");
         /// <summary>
         /// Grants the ability to create and update service hook subscriptions and read metadata, 
         /// including supported events, consumers, and actions."
         /// </summary>
-        public static readonly VsoTokenScope ServiceHookWrite = new VsoTokenScope("vso.hooks_write");
+        public static readonly VstsTokenScope ServiceHookWrite = new VstsTokenScope("vso.hooks_write");
         /// <summary>
         /// Grants the ability to read test plans, cases, results and other test management related 
         /// artifacts.
         /// </summary>
-        public static readonly VsoTokenScope TestRead = new VsoTokenScope("vso.test");
+        public static readonly VstsTokenScope TestRead = new VstsTokenScope("vso.test");
         /// <summary>
         /// Grants the ability to read, create, and update test plans, cases, results and other 
         /// test management related artifacts.
         /// </summary>
-        public static readonly VsoTokenScope TestWrite = new VsoTokenScope("vso.test_write");
+        public static readonly VstsTokenScope TestWrite = new VstsTokenScope("vso.test_write");
         /// <summary>
         /// Grants the ability to read work items, queries, boards, area and iterations paths, and 
         /// other work item tracking related metadata. Also grants the ability to execute queries 
         /// and to receive notifications about work item events via service hooks.
         /// </summary>
-        public static readonly VsoTokenScope WorkRead = new VsoTokenScope("vso.work");
+        public static readonly VstsTokenScope WorkRead = new VstsTokenScope("vso.work");
         /// <summary>
         /// Grants the ability to read, create, and update work items and queries, update board 
         /// metadata, read area and iterations paths other work item tracking related metadata, 
         /// execute queries, and to receive notifications about work item events via service hooks.
         /// </summary>
-        public static readonly VsoTokenScope WorkWrite = new VsoTokenScope("vso.work_write");
+        public static readonly VstsTokenScope WorkWrite = new VstsTokenScope("vso.work_write");
 
-        private VsoTokenScope(string value)
+        private VstsTokenScope(string value)
             : base(value)
         { }
 
-        private VsoTokenScope(string[] values)
+        private VstsTokenScope(string[] values)
             : base(values)
         { }
 
-        private VsoTokenScope(ScopeSet set)
+        private VstsTokenScope(ScopeSet set)
             : base(set)
         { }
 
-        public static IEnumerable<VsoTokenScope> EnumerateValues()
+        public static IEnumerable<VstsTokenScope> EnumerateValues()
         {
             yield return BuildAccess;
             yield return BuildExecute;
@@ -135,49 +135,49 @@ namespace Microsoft.Alm.Authentication
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static VsoTokenScope operator +(VsoTokenScope scope1, VsoTokenScope scope2)
+        public static VstsTokenScope operator +(VstsTokenScope scope1, VstsTokenScope scope2)
         {
             ScopeSet set = new ScopeSet();
             set.UnionWith(scope1._scopes);
             set.UnionWith(scope2._scopes);
 
-            return new VsoTokenScope(set);
+            return new VstsTokenScope(set);
         }
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static VsoTokenScope operator -(VsoTokenScope scope1, VsoTokenScope scope2)
+        public static VstsTokenScope operator -(VstsTokenScope scope1, VstsTokenScope scope2)
         {
             ScopeSet set = new ScopeSet();
             set.UnionWith(scope1._scopes);
             set.ExceptWith(scope2._scopes);
 
-            return new VsoTokenScope(set);
+            return new VstsTokenScope(set);
         }
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static VsoTokenScope operator |(VsoTokenScope scope1, VsoTokenScope scope2)
+        public static VstsTokenScope operator |(VstsTokenScope scope1, VstsTokenScope scope2)
         {
             ScopeSet set = new ScopeSet();
             set.UnionWith(scope1._scopes);
             set.UnionWith(scope2._scopes);
 
-            return new VsoTokenScope(set);
+            return new VstsTokenScope(set);
         }
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static VsoTokenScope operator &(VsoTokenScope scope1, VsoTokenScope scope2)
+        public static VstsTokenScope operator &(VstsTokenScope scope1, VstsTokenScope scope2)
         {
             ScopeSet set = new ScopeSet();
             set.UnionWith(scope1._scopes);
             set.IntersectWith(scope2._scopes);
 
-            return new VsoTokenScope(set);
+            return new VstsTokenScope(set);
         }
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static VsoTokenScope operator ^(VsoTokenScope scope1, VsoTokenScope scope2)
+        public static VstsTokenScope operator ^(VstsTokenScope scope1, VstsTokenScope scope2)
         {
             ScopeSet set = new ScopeSet();
             set.UnionWith(scope1._scopes);
             set.SymmetricExceptWith(scope2._scopes);
 
-            return new VsoTokenScope(set);
+            return new VstsTokenScope(set);
         }
     }
 }
