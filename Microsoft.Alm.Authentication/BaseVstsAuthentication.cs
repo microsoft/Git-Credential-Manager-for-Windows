@@ -9,7 +9,7 @@ namespace Microsoft.Alm.Authentication
     /// <summary>
     /// Base functionality for performing authentication operations against Visual Studio Online.
     /// </summary>
-    public abstract class BaseVsoAuthentication : BaseAuthentication
+    public abstract class BaseVstsAuthentication : BaseAuthentication
     {
         public const string DefaultResource = "499b84ac-1321-427f-aa17-267ca6975798";
         public const string DefaultClientId = "872cd9fa-d31f-45e0-9eab-6e460a02d1f1";
@@ -17,7 +17,7 @@ namespace Microsoft.Alm.Authentication
 
         protected const string AdalRefreshPrefx = "ada";
 
-        private BaseVsoAuthentication(VsoTokenScope tokenScope, ICredentialStore personalAccessTokenStore)
+        private BaseVstsAuthentication(VstsTokenScope tokenScope, ICredentialStore personalAccessTokenStore)
         {
             if (tokenScope == null)
                 throw new ArgumentNullException("scope", "The `scope` parameter is null or invalid.");
@@ -32,7 +32,7 @@ namespace Microsoft.Alm.Authentication
             this.TokenScope = tokenScope;
             this.PersonalAccessTokenStore = personalAccessTokenStore;
             this.AdaRefreshTokenStore = new SecretStore(AdalRefreshPrefx);
-            this.VsoAuthority = new VsoAzureAuthority();
+            this.VstsAuthority = new VstsAzureAuthority();
         }
         /// <summary>
         /// Invoked by a derived classes implementation. Allows custom back-end implementations to be used.
@@ -40,31 +40,31 @@ namespace Microsoft.Alm.Authentication
         /// <param name="tokenScope">The desired scope of the acquired personal access token(s).</param>
         /// <param name="personalAccessTokenStore">The secret store for acquired personal access token(s).</param>
         /// <param name="adaRefreshTokenStore">The secret store for acquired Azure refresh token(s).</param>
-        protected BaseVsoAuthentication(
-            VsoTokenScope tokenScope,
+        protected BaseVstsAuthentication(
+            VstsTokenScope tokenScope,
             ICredentialStore personalAccessTokenStore,
             ITokenStore adaRefreshTokenStore = null)
             : this(tokenScope, personalAccessTokenStore)
         {
             this.AdaRefreshTokenStore = adaRefreshTokenStore ?? this.AdaRefreshTokenStore;
-            this.VsoAdalTokenCache = new VsoAdalTokenCache();
-            this.VsoIdeTokenCache = new TokenRegistry();
+            this.VstsAdalTokenCache = new VstsAdalTokenCache();
+            this.VstsIdeTokenCache = new TokenRegistry();
         }
-        internal BaseVsoAuthentication(
+        internal BaseVstsAuthentication(
             ICredentialStore personalAccessTokenStore,
             ITokenStore adaRefreshTokenStore,
-            ITokenStore vsoIdeTokenCache,
-            IVsoAuthority vsoAuthority)
-            : this(VsoTokenScope.ProfileRead, personalAccessTokenStore)
+            ITokenStore vstsIdeTokenCache,
+            IVstsAuthority vstsAuthority)
+            : this(VstsTokenScope.ProfileRead, personalAccessTokenStore)
         {
             Debug.Assert(adaRefreshTokenStore != null, "The adaRefreshTokenStore paramter is null or invalid.");
-            Debug.Assert(vsoIdeTokenCache != null, "The vsoIdeTokenCache paramter is null or invalid.");
-            Debug.Assert(vsoAuthority != null, "The vsoAuthority paramter is null or invalid.");
+            Debug.Assert(vstsIdeTokenCache != null, "The vstsIdeTokenCache paramter is null or invalid.");
+            Debug.Assert(vstsAuthority != null, "The vstsAuthority paramter is null or invalid.");
 
             this.AdaRefreshTokenStore = adaRefreshTokenStore;
-            this.VsoIdeTokenCache = vsoIdeTokenCache;
-            this.VsoAuthority = vsoAuthority;
-            this.VsoAdalTokenCache = TokenCache.DefaultShared;
+            this.VstsIdeTokenCache = vstsIdeTokenCache;
+            this.VstsAuthority = vstsAuthority;
+            this.VstsAdalTokenCache = TokenCache.DefaultShared;
         }
 
         /// <summary>
@@ -78,14 +78,14 @@ namespace Microsoft.Alm.Authentication
         /// <summary>
         /// The desired scope of the authentication token to be requested.
         /// </summary>
-        public readonly VsoTokenScope TokenScope;
+        public readonly VstsTokenScope TokenScope;
 
-        internal readonly TokenCache VsoAdalTokenCache;
-        internal readonly ITokenStore VsoIdeTokenCache;
+        internal readonly TokenCache VstsAdalTokenCache;
+        internal readonly ITokenStore VstsIdeTokenCache;
 
         internal ICredentialStore PersonalAccessTokenStore { get; set; }
         internal ITokenStore AdaRefreshTokenStore { get; set; }
-        internal IVsoAuthority VsoAuthority { get; set; }
+        internal IVstsAuthority VstsAuthority { get; set; }
         internal Guid TenantId { get; set; }
 
         /// <summary>
@@ -96,7 +96,7 @@ namespace Microsoft.Alm.Authentication
         {
             BaseSecureStore.ValidateTargetUri(targetUri);
 
-            Trace.WriteLine("BaseVsoAuthentication::DeleteCredentials");
+            Trace.WriteLine("BaseVstsAuthentication::DeleteCredentials");
 
             Credential credentials = null;
             Token token = null;
@@ -121,7 +121,7 @@ namespace Microsoft.Alm.Authentication
         {
             BaseSecureStore.ValidateTargetUri(targetUri);
 
-            Trace.WriteLine("BaseVsoAuthentication::GetCredentials");
+            Trace.WriteLine("BaseVstsAuthentication::GetCredentials");
 
             if (this.PersonalAccessTokenStore.ReadCredentials(targetUri, out credentials))
             {
@@ -143,7 +143,7 @@ namespace Microsoft.Alm.Authentication
         {
             BaseSecureStore.ValidateTargetUri(targetUri);
 
-            Trace.WriteLine("BaseVsoAuthentication::RefreshCredentials");
+            Trace.WriteLine("BaseVstsAuthentication::RefreshCredentials");
 
             try
             {
@@ -153,7 +153,7 @@ namespace Microsoft.Alm.Authentication
                 // attempt to read from the local store
                 if (this.AdaRefreshTokenStore.ReadToken(targetUri, out refreshToken))
                 {
-                    if ((tokens = await this.VsoAuthority.AcquireTokenByRefreshTokenAsync(targetUri, this.ClientId, this.Resource, refreshToken)) != null)
+                    if ((tokens = await this.VstsAuthority.AcquireTokenByRefreshTokenAsync(targetUri, this.ClientId, this.Resource, refreshToken)) != null)
                     {
                         Trace.WriteLine("   Azure token found in primary cache.");
 
@@ -165,7 +165,7 @@ namespace Microsoft.Alm.Authentication
 
                 Token federatedAuthToken;
                 // attempt to utilize any fedauth tokens captured by the IDE
-                if (this.VsoIdeTokenCache.ReadToken(targetUri, out federatedAuthToken))
+                if (this.VstsIdeTokenCache.ReadToken(targetUri, out federatedAuthToken))
                 {
                     Trace.WriteLine("   federated auth token found in IDE cache.");
 
@@ -189,9 +189,9 @@ namespace Microsoft.Alm.Authentication
         /// <returns><see langword="true"/> if successful; <see langword="false"/> otherwise.</returns>
         public async Task<bool> ValidateCredentials(Uri targetUri, Credential credentials)
         {
-            Trace.WriteLine("BaseVsoAuthentication::ValidateCredentials");
+            Trace.WriteLine("BaseVstsAuthentication::ValidateCredentials");
 
-            return await this.VsoAuthority.ValidateCredentials(targetUri, credentials);
+            return await this.VstsAuthority.ValidateCredentials(targetUri, credentials);
         }
 
         /// <summary>
@@ -209,10 +209,10 @@ namespace Microsoft.Alm.Authentication
             Debug.Assert(targetUri != null, "The targetUri parameter is null");
             Debug.Assert(accessToken != null, "The accessToken parameter is null");
 
-            Trace.WriteLine("BaseVsoAuthentication::GeneratePersonalAccessToken");
+            Trace.WriteLine("BaseVstsAuthentication::GeneratePersonalAccessToken");
 
             Token personalAccessToken;
-            if ((personalAccessToken = await this.VsoAuthority.GeneratePersonalAccessToken(targetUri, accessToken, TokenScope, requestCompactToken)) != null)
+            if ((personalAccessToken = await this.VstsAuthority.GeneratePersonalAccessToken(targetUri, accessToken, TokenScope, requestCompactToken)) != null)
             {
                 this.PersonalAccessTokenStore.WriteCredentials(targetUri, (Credential)personalAccessToken);
             }
@@ -230,7 +230,7 @@ namespace Microsoft.Alm.Authentication
             Debug.Assert(targetUri != null, "The targetUri parameter is null");
             Debug.Assert(refreshToken != null, "The refreshToken parameter is null");
 
-            Trace.WriteLine("BaseVsoAuthentication::StoreRefreshToken");
+            Trace.WriteLine("BaseVstsAuthentication::StoreRefreshToken");
 
             this.AdaRefreshTokenStore.WriteToken(targetUri, refreshToken);
         }
@@ -243,14 +243,14 @@ namespace Microsoft.Alm.Authentication
         /// <returns><see langword="true"/> if the authority is Visual Studio Online; <see langword="false"/> otherwise</returns>
         public static bool DetectAuthority(Uri targetUri, out Guid tenantId)
         {
-            const string VsoBaseUrlHost = "visualstudio.com";
-            const string VsoResourceTenantHeader = "X-VSS-ResourceTenant";
+            const string VstsBaseUrlHost = "visualstudio.com";
+            const string VstsResourceTenantHeader = "X-VSS-ResourceTenant";
 
             Trace.WriteLine("BaseAuthentication::DetectTenant");
 
             tenantId = Guid.Empty;
 
-            if (targetUri.DnsSafeHost.EndsWith(VsoBaseUrlHost, StringComparison.OrdinalIgnoreCase))
+            if (targetUri.DnsSafeHost.EndsWith(VstsBaseUrlHost, StringComparison.OrdinalIgnoreCase))
             {
                 Trace.WriteLine("   detected visualstudio.com, checking AAD vs MSA");
 
@@ -277,8 +277,8 @@ namespace Microsoft.Alm.Authentication
                 {
                     Trace.WriteLine("   server has responded");
 
-                    // find the VSO resource tenant entry
-                    tenant = response.Headers[VsoResourceTenantHeader];
+                    // find the VSTS resource tenant entry
+                    tenant = response.Headers[VstsResourceTenantHeader];
 
                     return !String.IsNullOrWhiteSpace(tenant)
                         && Guid.TryParse(tenant, out tenantId);
@@ -307,12 +307,12 @@ namespace Microsoft.Alm.Authentication
         /// </returns>
         public static bool GetAuthentication(
             Uri targetUri,
-            VsoTokenScope scope,
+            VstsTokenScope scope,
             ICredentialStore personalAccessTokenStore,
             ITokenStore adaRefreshTokenStore,
             out BaseAuthentication authentication)
         {
-            Trace.WriteLine("BaseVsoAuthentication::DetectAuthority");
+            Trace.WriteLine("BaseVstsAuthentication::DetectAuthority");
 
             Guid tenantId;
             if (DetectAuthority(targetUri, out tenantId))
@@ -321,13 +321,13 @@ namespace Microsoft.Alm.Authentication
                 if (tenantId == Guid.Empty)
                 {
                     Trace.WriteLine("   MSA authority detected");
-                    authentication = new VsoMsaAuthentication(scope, personalAccessTokenStore, adaRefreshTokenStore);
+                    authentication = new VstsMsaAuthentication(scope, personalAccessTokenStore, adaRefreshTokenStore);
                 }
                 else
                 {
                     Trace.WriteLine("   AAD authority for tenant '" + tenantId + "' detected");
-                    authentication = new VsoAadAuthentication(tenantId, scope, personalAccessTokenStore, adaRefreshTokenStore);
-                    (authentication as VsoAadAuthentication).TenantId = tenantId;
+                    authentication = new VstsAadAuthentication(tenantId, scope, personalAccessTokenStore, adaRefreshTokenStore);
+                    (authentication as VstsAadAuthentication).TenantId = tenantId;
                 }
             }
             else

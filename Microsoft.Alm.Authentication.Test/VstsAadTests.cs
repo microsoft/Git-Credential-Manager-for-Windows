@@ -5,17 +5,17 @@ using Microsoft.VisualStudio.TestTools.UnitTesting;
 namespace Microsoft.Alm.Authentication.Test
 {
     [TestClass]
-    public class VsoAadTests : AuthenticationTests
+    public class VstsAadTests : AuthenticationTests
     {
-        public VsoAadTests()
+        public VstsAadTests()
             : base()
         { }
 
         [TestMethod]
-        public void VsoAadDeleteCredentialsTest()
+        public void VstsAadDeleteCredentialsTest()
         {
             Uri targetUri = DefaultTargetUri;
-            VsoAadAuthentication aadAuthentication = GetVsoAadAuthentication("aad-delete");
+            VstsAadAuthentication aadAuthentication = GetVstsAadAuthentication("aad-delete");
 
             aadAuthentication.PersonalAccessTokenStore.WriteCredentials(targetUri, DefaultPersonalAccessToken);
             aadAuthentication.AdaRefreshTokenStore.WriteToken(targetUri, DefaultAzureRefreshToken);
@@ -33,10 +33,10 @@ namespace Microsoft.Alm.Authentication.Test
         }
 
         [TestMethod]
-        public void VsoAadGetCredentialsTest()
+        public void VstsAadGetCredentialsTest()
         {
             Uri targetUri = DefaultTargetUri;
-            VsoAadAuthentication aadAuthentication = GetVsoAadAuthentication("aad-get");
+            VstsAadAuthentication aadAuthentication = GetVstsAadAuthentication("aad-get");
 
             Credential credentials;
 
@@ -49,10 +49,10 @@ namespace Microsoft.Alm.Authentication.Test
         }
 
         [TestMethod]
-        public void VsoAadInteractiveLogonTest()
+        public void VstsAadInteractiveLogonTest()
         {
             Uri targetUri = DefaultTargetUri;
-            VsoAadAuthentication aadAuthentication = GetVsoAadAuthentication("aad-logon");
+            VstsAadAuthentication aadAuthentication = GetVstsAadAuthentication("aad-logon");
 
             Credential personalAccessToken;
             Token azureToken;
@@ -67,10 +67,10 @@ namespace Microsoft.Alm.Authentication.Test
         }
 
         [TestMethod]
-        public void VsoAadNoninteractiveLogonTest()
+        public void VstsAadNoninteractiveLogonTest()
         {
             Uri targetUri = DefaultTargetUri;
-            VsoAadAuthentication aadAuthentication = GetVsoAadAuthentication("aad-noninteractive");
+            VstsAadAuthentication aadAuthentication = GetVstsAadAuthentication("aad-noninteractive");
 
             Credential personalAccessToken;
             Token azureToken;
@@ -82,10 +82,10 @@ namespace Microsoft.Alm.Authentication.Test
         }
 
         [TestMethod]
-        public void VsoAadNoninteractiveLogonWithCredentialsTest()
+        public void VstsAadNoninteractiveLogonWithCredentialsTest()
         {
             Uri targetUri = DefaultTargetUri;
-            VsoAadAuthentication aadAuthentication = GetVsoAadAuthentication("aad-noninter-creds");
+            VstsAadAuthentication aadAuthentication = GetVstsAadAuthentication("aad-noninter-creds");
 
             Credential originCreds = DefaultCredentials;
             Credential personalAccessToken;
@@ -100,11 +100,11 @@ namespace Microsoft.Alm.Authentication.Test
         }
 
         [TestMethod]
-        public void VsoAadRefreshCredentialsTest()
+        public void VstsAadRefreshCredentialsTest()
         {
             Uri targetUri = DefaultTargetUri;
             Uri invalidUri = InvalidTargetUri;
-            VsoAadAuthentication aadAuthentication = GetVsoAadAuthentication("aad-refresh");
+            VstsAadAuthentication aadAuthentication = GetVstsAadAuthentication("aad-refresh");
 
             aadAuthentication.AdaRefreshTokenStore.WriteToken(targetUri, DefaultAzureRefreshToken);
 
@@ -119,10 +119,10 @@ namespace Microsoft.Alm.Authentication.Test
         }
 
         [TestMethod]
-        public void VsoAadSetCredentialsTest()
+        public void VstsAadSetCredentialsTest()
         {
             Uri targetUri = DefaultTargetUri;
-            VsoAadAuthentication aadAuthentication = GetVsoAadAuthentication("aad-set");
+            VstsAadAuthentication aadAuthentication = GetVstsAadAuthentication("aad-set");
             Credential credentials = DefaultCredentials;
 
             Credential personalAccessToken;
@@ -135,9 +135,9 @@ namespace Microsoft.Alm.Authentication.Test
             Assert.IsFalse(aadAuthentication.GetCredentials(targetUri, out credentials), "Credentials were retrieved unexpectedly.");
         }
 
-        public void VsoAadValidateCredentialsTest()
+        public void VstsAadValidateCredentialsTest()
         {
-            VsoAadAuthentication aadAuthentication = GetVsoAadAuthentication("aad-validate");
+            VstsAadAuthentication aadAuthentication = GetVstsAadAuthentication("aad-validate");
             Credential credentials = null;
 
             Assert.IsFalse(Task.Run(async () => { return await aadAuthentication.ValidateCredentials(DefaultTargetUri, credentials); }).Result, "Credential validation unexpectedly failed.");
@@ -147,13 +147,13 @@ namespace Microsoft.Alm.Authentication.Test
             Assert.IsTrue(Task.Run(async () => { return await aadAuthentication.ValidateCredentials(DefaultTargetUri, credentials); }).Result, "Credential validation unexpectedly failed.");
         }
 
-        private VsoAadAuthentication GetVsoAadAuthentication(string @namespace)
+        private VstsAadAuthentication GetVstsAadAuthentication(string @namespace)
         {
             ICredentialStore tokenStore1 = new SecretCache(@namespace + 1);
             ITokenStore tokenStore2 = new SecretCache(@namespace + 2);
             ITokenStore tokenStore3 = new SecretCache(@namespace + 3);
-            IVsoAuthority vsoAuthority = new AuthorityFake();
-            return new VsoAadAuthentication(tokenStore1, tokenStore2, tokenStore3, vsoAuthority);
+            IVstsAuthority vstsAuthority = new AuthorityFake();
+            return new VstsAadAuthentication(tokenStore1, tokenStore2, tokenStore3, vstsAuthority);
         }
     }
 }

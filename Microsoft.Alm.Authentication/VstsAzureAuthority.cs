@@ -10,14 +10,14 @@ using System.Threading.Tasks;
 
 namespace Microsoft.Alm.Authentication
 {
-    internal class VsoAzureAuthority : AzureAuthority, IVsoAuthority
+    internal class VstsAzureAuthority : AzureAuthority, IVstsAuthority
     {
         /// <summary>
         /// The maximum wait time for a network request before timing out
         /// </summary>
         public const int RequestTimeout = 15 * 1000; // 15 second limit
 
-        public VsoAzureAuthority(string authorityHostUrl = null)
+        public VstsAzureAuthority(string authorityHostUrl = null)
             : base()
         {
             AuthorityHostUrl = authorityHostUrl ?? AuthorityHostUrl;
@@ -33,7 +33,7 @@ namespace Microsoft.Alm.Authentication
         /// <param name="tokenScope"></param>
         /// <param name="requireCompactToken"></param>
         /// <returns></returns>
-        public async Task<Token> GeneratePersonalAccessToken(Uri targetUri, Token accessToken, VsoTokenScope tokenScope, bool requireCompactToken)
+        public async Task<Token> GeneratePersonalAccessToken(Uri targetUri, Token accessToken, VstsTokenScope tokenScope, bool requireCompactToken)
         {
             const string TokenAuthHost = "app.vssps.visualstudio.com";
             const string SessionTokenUrl = "https://" + TokenAuthHost + "/_apis/token/sessiontokens?api-version=1.0";
@@ -44,7 +44,7 @@ namespace Microsoft.Alm.Authentication
             Debug.Assert(accessToken != null && !String.IsNullOrWhiteSpace(accessToken.Value) && (accessToken.Type == TokenType.Access || accessToken.Type == TokenType.Federated), "The accessToken parameter is null or invalid");
             Debug.Assert(tokenScope != null);
 
-            Trace.WriteLine("VsoAzureAuthority::GeneratePersonalAccessToken");
+            Trace.WriteLine("VstsAzureAuthority::GeneratePersonalAccessToken");
 
             try
             {
@@ -124,14 +124,14 @@ namespace Microsoft.Alm.Authentication
             Debug.Assert(targetUri != null && targetUri.IsAbsoluteUri, "The targetUri parameter is null or invalid");
             Debug.Assert(accessToken != null && !String.IsNullOrWhiteSpace(accessToken.Value) && (accessToken.Type == TokenType.Access || accessToken.Type == TokenType.Federated), "The accessToken parameter is null or invalid");
 
-            Trace.WriteLine("VsoAzureAuthority::PopulateTokenTargetId");
+            Trace.WriteLine("VstsAzureAuthority::PopulateTokenTargetId");
 
             string resultId = null;
             Guid instanceId;
 
             try
             {
-                // create an request to the VSO deployment data end-point
+                // create an request to the VSTS deployment data end-point
                 HttpWebRequest request = GetConnectionDataRequest(targetUri, accessToken);
 
                 // send the request and wait for the response
@@ -169,9 +169,9 @@ namespace Microsoft.Alm.Authentication
         /// Validates that <see cref="Credential"/> are valid to grant access to the Visual Studio 
         /// Online service represented by the <paramref name="targetUri"/> parameter.
         /// </summary>
-        /// <param name="targetUri">Uniform resource identifier for a VSO service.</param>
+        /// <param name="targetUri">Uniform resource identifier for a VSTS service.</param>
         /// <param name="credentials">
-        /// <see cref="Credential"/> expected to grant access to the VSO service.
+        /// <see cref="Credential"/> expected to grant access to the VSTS service.
         /// </param>
         /// <returns>True if successful; otherwise false.</returns>
         public async Task<bool> ValidateCredentials(Uri targetUri, Credential credentials)
@@ -179,11 +179,11 @@ namespace Microsoft.Alm.Authentication
             Debug.Assert(targetUri != null && targetUri.IsAbsoluteUri, "The targetUri parameter is null or invalid");
             Debug.Assert(credentials != null, "The credentials parameter is null or invalid");
 
-            Trace.WriteLine("VsoAzureAuthority::ValidateCredentials");
+            Trace.WriteLine("VstsAzureAuthority::ValidateCredentials");
 
             try
             {
-                // create an request to the VSO deployment data end-point
+                // create an request to the VSTS deployment data end-point
                 HttpWebRequest request = GetConnectionDataRequest(targetUri, credentials);
 
                 // send the request and wait for the response
@@ -213,9 +213,9 @@ namespace Microsoft.Alm.Authentication
         /// <para>Tokens of <see cref="TokenType.Refresh"/> cannot grant access, and
         /// therefore always fail - this does not mean the token is invalid.</para>
         /// </summary>
-        /// <param name="targetUri">Uniform resource identifier for a VSO service.</param>
+        /// <param name="targetUri">Uniform resource identifier for a VSTS service.</param>
         /// <param name="token">
-        /// <see cref="Token"/> expected to grant access to the VSO service.
+        /// <see cref="Token"/> expected to grant access to the VSTS service.
         /// </param>
         /// <returns>True if successful; otherwise false.</returns>
         public async Task<bool> ValidateToken(Uri targetUri, Token token)
@@ -223,7 +223,7 @@ namespace Microsoft.Alm.Authentication
             Debug.Assert(targetUri != null && targetUri.IsAbsoluteUri, "The targetUri parameter is null or invalid");
             Debug.Assert(token != null && (token.Type == TokenType.Access || token.Type == TokenType.Federated), "The token parameter is null or invalid");
 
-            Trace.WriteLine("VsoAzureAuthority::ValidateToken");
+            Trace.WriteLine("VstsAzureAuthority::ValidateToken");
 
             // personal access tokens are effectively credentials, treat them as such
             if (token.Type == TokenType.Personal)
@@ -231,7 +231,7 @@ namespace Microsoft.Alm.Authentication
 
             try
             {
-                // create an request to the VSO deployment data end-point
+                // create an request to the VSTS deployment data end-point
                 HttpWebRequest request = GetConnectionDataRequest(targetUri, token);
 
                 // send the request and wait for the response
@@ -255,7 +255,7 @@ namespace Microsoft.Alm.Authentication
             return false;
         }
 
-        private StringContent GetAccessTokenRequestBody(Uri targetUri, Token accessToken, VsoTokenScope tokenScope)
+        private StringContent GetAccessTokenRequestBody(Uri targetUri, Token accessToken, VstsTokenScope tokenScope)
         {
             const string ContentJsonFormat = "{{ \"scope\" : \"{0}\", \"targetAccounts\" : [\"{1}\"], \"displayName\" : \"Git: {2} on {3}\" }}";
             const string HttpJsonContentType = "application/json";
@@ -279,7 +279,7 @@ namespace Microsoft.Alm.Authentication
             Debug.Assert(targetUri != null && targetUri.IsAbsoluteUri, "The targetUri parameter is null or invalid");
             Debug.Assert(credentials != null, "The credentials parameter is null or invalid");
 
-            // create an request to the VSO deployment data end-point
+            // create an request to the VSTS deployment data end-point
             HttpWebRequest request = GetConnectionDataRequest(targetUri);
 
             // credentials are packed into the 'Authorization' header as a base64 encoded pair
@@ -299,9 +299,9 @@ namespace Microsoft.Alm.Authentication
             Debug.Assert(targetUri != null && targetUri.IsAbsoluteUri, "The targetUri parameter is null or invalid");
             Debug.Assert(token != null && (token.Type == TokenType.Access || token.Type == TokenType.Federated), "The token parameter is null or invalid");
 
-            Trace.WriteLine("VsoAzureAuthority::GetConnectionDataRequest");
+            Trace.WriteLine("VstsAzureAuthority::GetConnectionDataRequest");
 
-            // create an request to the VSO deployment data end-point
+            // create an request to the VSTS deployment data end-point
             HttpWebRequest request = GetConnectionDataRequest(targetUri);
 
             // different types of tokens are packed differently
@@ -332,12 +332,12 @@ namespace Microsoft.Alm.Authentication
 
         private HttpWebRequest GetConnectionDataRequest(Uri targetUri)
         {
-            const string VsoValidationUrlFormat = "https://{0}/_apis/connectiondata";
+            const string VstsValidationUrlFormat = "https://{0}/_apis/connectiondata";
 
             Debug.Assert(targetUri != null && targetUri.IsAbsoluteUri, "The targetUri parameter is null or invalid");
 
             // create a url to the connection data end-point, it's deployment level and "always on".
-            string validationUrl = String.Format(VsoValidationUrlFormat, targetUri.DnsSafeHost);
+            string validationUrl = String.Format(VstsValidationUrlFormat, targetUri.DnsSafeHost);
 
             // start building the request, only supports GET
             HttpWebRequest request = WebRequest.CreateHttp(validationUrl);

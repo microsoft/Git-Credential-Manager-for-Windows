@@ -6,7 +6,7 @@ using Microsoft.IdentityModel.Clients.ActiveDirectory;
 
 namespace Microsoft.Alm.Authentication
 {
-    internal class VsoAdalTokenCache : IdentityModel.Clients.ActiveDirectory.TokenCache
+    internal class VstsAdalTokenCache : IdentityModel.Clients.ActiveDirectory.TokenCache
     {
         private const string AdalCachePath = @"Microsoft\VSCommon\VSAccountManagement";
         private const string AdalCacheFile = @"AdalCache.cache";
@@ -14,7 +14,7 @@ namespace Microsoft.Alm.Authentication
         /// <summary>
         /// Default constructor.
         /// </summary>
-        public VsoAdalTokenCache()
+        public VstsAdalTokenCache()
         {
             string localAppDataPath = Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData);
             string directoryPath = Path.Combine(localAppDataPath, AdalCachePath);
@@ -32,7 +32,7 @@ namespace Microsoft.Alm.Authentication
         /// Constructor receiving state of the cache.
         /// </summary>
         /// <param name="state">Current state of the cache as a blob.</param>
-        public VsoAdalTokenCache(byte[] state)
+        public VstsAdalTokenCache(byte[] state)
             : this()
         {
             throw new NotSupportedException();
@@ -48,7 +48,7 @@ namespace Microsoft.Alm.Authentication
             {
                 if (File.Exists(_cacheFilePath) && this.HasStateChanged)
                 {
-                    Trace.WriteLine("VsoAdalTokenCache::AfterAccessNotification");
+                    Trace.WriteLine("VstsAdalTokenCache::AfterAccessNotification");
 
                     try
                     {
@@ -72,7 +72,7 @@ namespace Microsoft.Alm.Authentication
         {
             lock (@lock)
             {
-                Trace.WriteLine("VsoAdalTokenCache::BeforeAccessNotification");
+                Trace.WriteLine("VstsAdalTokenCache::BeforeAccessNotification");
 
                 if (File.Exists(_cacheFilePath))
                 {

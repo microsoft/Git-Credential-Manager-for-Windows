@@ -28,10 +28,10 @@ namespace Microsoft.Alm.Authentication
             Debug.Assert(Uri.IsWellFormedUriString(authorityHostUrl, UriKind.Absolute), "The authorityHostUrl parameter is invalid.");
 
             AuthorityHostUrl = authorityHostUrl;
-            _adalTokenCache = new VsoAdalTokenCache();
+            _adalTokenCache = new VstsAdalTokenCache();
         }
 
-        private readonly VsoAdalTokenCache _adalTokenCache;
+        private readonly VstsAdalTokenCache _adalTokenCache;
 
         /// <summary>
         /// The URL used to interact with the Azure identity service.

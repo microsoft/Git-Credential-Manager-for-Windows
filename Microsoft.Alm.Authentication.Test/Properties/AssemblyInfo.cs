@@ -10,7 +10,7 @@ using System.Runtime.InteropServices;
 [assembly: AssemblyConfiguration("")]
 [assembly: AssemblyCompany("Microsoft Corporation")]
 [assembly: AssemblyProduct("https://github.com/Microsoft/Git-Credential-Manager-for-Windows")]
-[assembly: AssemblyCopyright("Copyright © Microsoft Corporation 2015")]
+[assembly: AssemblyCopyright("Copyright © Microsoft Corporation 2016")]
 [assembly: AssemblyTrademark("Microsoft")]
 [assembly: AssemblyCulture("")]
 
