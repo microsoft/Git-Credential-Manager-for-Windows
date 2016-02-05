@@ -55,6 +55,7 @@ namespace Microsoft.Alm.CredentialHelper
             CommandUninstall,
             CommandVersion
         };
+        private static readonly char[] NewLineChars = Environment.NewLine.ToCharArray();
 
         internal static string ExecutablePath
         {
@@ -104,7 +105,7 @@ namespace Microsoft.Alm.CredentialHelper
             }
         }
         private static Version _version;
-        
+
         static void Main(string[] args)
         {
             try
@@ -144,7 +145,7 @@ namespace Microsoft.Alm.CredentialHelper
                 else
                 {
                     // display unknown command error
-                    Console.Error.WriteLine("Unknown command '{0}'. Please use {1} ? to display help.", args[0], Program.Name);
+                    Console.Error.WriteLine("Unknown command '{0}'. Please use `{1} ?` to display help.", args[0], Program.Name);
                 }
             }
             catch (AggregateException exception)
@@ -224,7 +225,6 @@ namespace Microsoft.Alm.CredentialHelper
             Console.Out.WriteLine();
             Console.Out.WriteLine("  " + ConfigUseModalPrompt + "  Forces authentication to use a modal dialog instead of");
             Console.Out.WriteLine("               asking for credentials at the command prompt.");
-            Console.Out.WriteLine("               Only used by Basic authority.");
             Console.Out.WriteLine("               Defaults to FALSE.");
             Console.Out.WriteLine();
             Console.Out.WriteLine("      `git config --global credential." + ConfigUseModalPrompt + " true`");
@@ -241,7 +241,7 @@ namespace Microsoft.Alm.CredentialHelper
             Console.Out.WriteLine("               expire and until those credentials are manually removed.");
             Console.Out.WriteLine("               Defaults to FALSE.");
             Console.Out.WriteLine();
-            Console.Out.WriteLine("      `git config --global credential.microsoft.visualstudio.com." + ConfigPreserveCredntials + " true`");
+            Console.Out.WriteLine("      `git config --global credential.visualstudio.com." + ConfigPreserveCredntials + " true`");
             Console.Out.WriteLine();
             Console.Out.WriteLine("  " + ConfigWritelogKey + "     Enables trace logging of all activities. Logs are written to");
             Console.Out.WriteLine("               the local .git/ folder at the root of the repository.");
@@ -292,13 +292,21 @@ namespace Microsoft.Alm.CredentialHelper
             {
                 default:
                 case AuthorityType.Basic:
+                    Trace.WriteLine("   deleting basic credentials");
                     authentication.DeleteCredentials(operationArguments.TargetUri);
                     break;
 
                 case AuthorityType.AzureDirectory:
                 case AuthorityType.MicrosoftAccount:
+                    Trace.WriteLine("   deleting VSO credentials");
                     BaseVsoAuthentication vsoAuth = authentication as BaseVsoAuthentication;
                     vsoAuth.DeleteCredentials(operationArguments.TargetUri);
+                    break;
+
+                case AuthorityType.GitHub:
+                    Trace.WriteLine("   deleting GitHub credentials");
+                    GithubAuthentication ghAuth = authentication as GithubAuthentication;
+                    ghAuth.DeleteCredentials(operationArguments.TargetUri);
                     break;
             }
         }
@@ -339,7 +347,7 @@ namespace Microsoft.Alm.CredentialHelper
                         // display the modal dialog
                         string username;
                         string password;
-                        if (PromptForCredentials(operationArguments.TargetUri, out username, out password))
+                        if (ModalPromptForCredentials(operationArguments.TargetUri, out username, out password))
                         {
                             // set the credentials object
                             // no need to save the credentials explicitly, as Git will call back
@@ -482,7 +490,7 @@ namespace Microsoft.Alm.CredentialHelper
 
         private static void PrintVersion()
         {
-            Trace.WriteLine("Program::Version");
+            Trace.WriteLine("Program::PrintVersion");
 
             Console.Out.WriteLine("{0} version {1}", Title, Version.ToString(3));
         }
@@ -536,8 +544,12 @@ namespace Microsoft.Alm.CredentialHelper
                         || GithubAuthentication.GetAuthentication(operationArguments.TargetUri,
                                                                   GithubCredentialScope,
                                                                   secrets,
-                                                                  operationArguments.UseModalUi ? (GithubAuthentication.AcquireCredentialsDelegate)GithubCredentialModalPrompt : GithubCredentialPrompt,
-                                                                  operationArguments.UseModalUi ? (GithubAuthentication.AcquireAuthenticationCodeDelegate)GithubAuthCodeModalPrompt : GithubAuthCodePrompt,
+                                                                  operationArguments.UseModalUi
+                                                                    ? new GithubAuthentication.AcquireCredentialsDelegate(GithubCredentialModalPrompt)
+                                                                    : new GithubAuthentication.AcquireCredentialsDelegate(GithubCredentialPrompt),
+                                                                  operationArguments.UseModalUi
+                                                                    ? new GithubAuthentication.AcquireAuthenticationCodeDelegate(GithubAuthcodeModalPrompt)
+                                                                    : new GithubAuthentication.AcquireAuthenticationCodeDelegate(GithubAuthCodePrompt),
                                                                   null,
                                                                   out authority))
                     {
@@ -582,9 +594,13 @@ namespace Microsoft.Alm.CredentialHelper
                     // return a GitHub authenitcation object
                     return authority ?? new GithubAuthentication(GithubCredentialScope,
                                                                  secrets,
-                                                                 operationArguments.UseModalUi ? (GithubAuthentication.AcquireCredentialsDelegate)GithubCredentialModalPrompt : GithubCredentialPrompt,
-                                                                  operationArguments.UseModalUi ? (GithubAuthentication.AcquireAuthenticationCodeDelegate)GithubAuthCodeModalPrompt : GithubAuthCodePrompt,
-                                                                 null );
+                                                                 operationArguments.UseModalUi
+                                                                    ? new GithubAuthentication.AcquireCredentialsDelegate(GithubCredentialModalPrompt)
+                                                                    : new GithubAuthentication.AcquireCredentialsDelegate(GithubCredentialPrompt),
+                                                                 operationArguments.UseModalUi
+                                                                    ? new GithubAuthentication.AcquireAuthenticationCodeDelegate(GithubAuthcodeModalPrompt)
+                                                                    : new GithubAuthentication.AcquireAuthenticationCodeDelegate(GithubAuthCodePrompt),
+                                                                 null);
 
                 case AuthorityType.MicrosoftAccount:
                     Trace.WriteLine("   authority is Microsoft Live");
@@ -776,129 +792,28 @@ namespace Microsoft.Alm.CredentialHelper
             }
         }
 
-        private static bool PromptForCredentialsBase( Uri targetUri, out string username, out string password, string message, string displayUsername = "") {
-            Debug.Assert(targetUri != null);
+        private static bool GithubCredentialModalPrompt(Uri targetUri, out string username, out string password)
+        {
+            Trace.WriteLine("Program::GithubCredentialModalPrompt");
 
-            Trace.WriteLine("Program::PromptForCredentials");
-
-            NativeMethods.CredentialUiInfo credUiInfo = new NativeMethods.CredentialUiInfo
-            {
-                BannerArt = IntPtr.Zero,
-                CaptionText = Title,
-                MessageText = message,
-                Parent = IntPtr.Zero,
-                Size = Marshal.SizeOf(typeof(NativeMethods.CredentialUiInfo))
-            };
-
-            bool saveCredentials = false;
-            NativeMethods.CredentialPackFlags authPackage = NativeMethods.CredentialPackFlags.None;
-
-            IntPtr inBufferPtr = IntPtr.Zero;
-            int inBufferSize = 0;
-
-            if ( !string.IsNullOrEmpty( displayUsername ) ) {
-                // Execute with ZeroPtr to determine buffer size
-                NativeMethods.CredPackAuthenticationBuffer( authPackage, displayUsername, "", inBufferPtr, ref inBufferSize );
-                inBufferPtr = Marshal.AllocCoTaskMem( inBufferSize );
-                NativeMethods.CredPackAuthenticationBuffer( authPackage, displayUsername, "", inBufferPtr, ref inBufferSize );
-            }
-
-            IntPtr packedAuthBufferPtr = IntPtr.Zero;
-            uint packedAuthBufferSize = 0;
-            NativeMethods.CredentialUiWindowsFlags flags = NativeMethods.CredentialUiWindowsFlags.Generic;
-
-            try
-            {
-                // open a standard Windows authentication dialog to acquire username + password credentials
-                int error;
-                if ((error = NativeMethods.CredUIPromptForWindowsCredentials(ref credUiInfo,
-                                                                              0,
-                                                                              ref authPackage,
-                                                                              inBufferPtr,
-                                                                              (uint)inBufferSize,
-                                                                              out packedAuthBufferPtr,
-                                                                              out packedAuthBufferSize,
-                                                                              ref saveCredentials,
-                                                                              flags)) != NativeMethods.Win32Error.Success)
-                {
-                    username = null;
-                    password = null;
-
-                    Trace.WriteLine("   credential prompt failed (" + NativeMethods.Win32Error.GetText(error) + ").");
-
-                    return false;
-                }
-
-                // use `StringBuilder` references instead of string so that they can be written to
-                StringBuilder usernameBuffer = new StringBuilder(512);
-                StringBuilder domainBuffer = new StringBuilder(256);
-                StringBuilder passwordBuffer = new StringBuilder(512);
-                int usernameLen = usernameBuffer.Capacity;
-                int passwordLen = passwordBuffer.Capacity;
-                int domainLen = domainBuffer.Capacity;
-
-                // unpack the result into locally useful data
-                if (!NativeMethods.CredUnPackAuthenticationBuffer(authPackage,
-                                                                  packedAuthBufferPtr,
-                                                                  packedAuthBufferSize,
-                                                                  usernameBuffer,
-                                                                  ref usernameLen,
-                                                                  domainBuffer,
-                                                                  ref domainLen,
-                                                                  passwordBuffer,
-                                                                  ref passwordLen))
-                {
-                    username = null;
-                    password = null;
-
-                    error = Marshal.GetLastWin32Error();
-                    Trace.WriteLine("   failed to unpack buffer (" + NativeMethods.Win32Error.GetText(error) + ").");
-
-                    return false;
-                }
-
-                username = usernameBuffer.ToString();
-                password = passwordBuffer.ToString();
-
-                return true;
-            }
-            catch { throw; }
-            finally
-            {
-                if (packedAuthBufferPtr != IntPtr.Zero)
-                {
-                    Marshal.FreeHGlobal(packedAuthBufferPtr);
-                }
-
-                if (inBufferPtr != IntPtr.Zero) 
-                {
-                    Marshal.FreeCoTaskMem( inBufferPtr );
-                }
-            }
+            return ModalPromptForCredentials(targetUri, out username, out password);
         }
 
-        private static bool GithubCredentialModalPrompt( Uri targetUri, out string username, out string password ) {
-            return PromptForCredentials( targetUri, out username, out password );
-        }
+        private static bool GithubAuthcodeModalPrompt(Uri targetUri, GithubAuthenticationResultType resultType, string username, out string authenticationCode)
+        {
+            Trace.WriteLine("Program::GithubAuthcodeModalPrompt");
 
-        private static bool GithubAuthCodeModalPrompt( Uri targetUri, GithubAuthenticationResultType resultType, string username, out string authenticationCode ) {
-            string temp;
-            string password;
+            authenticationCode = null;
 
-            var result = PromptForCredentialsBase( targetUri, out temp, out password,
-                string.Format( "Enter {0} authentication code for {1}://{2}.",
-                    resultType == GithubAuthenticationResultType.TwoFactorApp ? "app" : "sms",
-                    targetUri.Scheme, targetUri.DnsSafeHost ), username );
+            string type =
+                resultType == GithubAuthenticationResultType.TwoFactorApp
+                    ? "app"
+                    : "sms";
+            string message = String.Format("Enter {0} authentication code for {1}://{2}.", type, targetUri.Scheme, targetUri.DnsSafeHost);
 
-            authenticationCode = "";
+            Trace.WriteLine("   prompting user for authentication code.");
 
-            if ( !string.IsNullOrWhiteSpace( password ) ) {
-                authenticationCode = password;
-            } else {
-                authenticationCode = null;
-            }
-
-            return authenticationCode != null;
+            return ModalPromptForPassword(targetUri, message, username, out authenticationCode);
         }
 
         private static bool GithubCredentialPrompt(Uri targetUri, out string username, out string password)
@@ -1080,15 +995,217 @@ namespace Microsoft.Alm.CredentialHelper
                 }
 
                 authenticationCode = buffer.ToString(0, (int)read);
-                authenticationCode = authenticationCode.Trim(Environment.NewLine.ToCharArray());
+                authenticationCode = authenticationCode.Trim(NewLineChars);
             }
 
             return authenticationCode != null;
         }
 
-        private static bool PromptForCredentials( Uri targetUri, out string username, out string password ) {
-            return PromptForCredentialsBase( targetUri, out username, out password,
-                String.Format( "Enter your credentials for {0}://{1}.", targetUri.Scheme, targetUri.DnsSafeHost ) );
+        private static bool ModalPromptForCredentials(Uri targetUri, string message, out string username, out string password)
+        {
+            Debug.Assert(targetUri != null);
+            Debug.Assert(message != null);
+
+            Trace.WriteLine("Program::ModalPromptForCredemtials");
+
+            NativeMethods.CredentialUiInfo credUiInfo = new NativeMethods.CredentialUiInfo
+            {
+                BannerArt = IntPtr.Zero,
+                CaptionText = Title,
+                MessageText = message,
+                Parent = IntPtr.Zero,
+                Size = Marshal.SizeOf(typeof(NativeMethods.CredentialUiInfo))
+            };
+            NativeMethods.CredentialUiWindowsFlags flags = NativeMethods.CredentialUiWindowsFlags.Generic;
+            NativeMethods.CredentialPackFlags authPackage = NativeMethods.CredentialPackFlags.None;
+            IntPtr packedAuthBufferPtr = IntPtr.Zero;
+            IntPtr inBufferPtr = IntPtr.Zero;
+            uint packedAuthBufferSize = 0;
+            bool saveCredentials = false;
+            int inBufferSize = 0;
+
+            return ModalPromptDisplayDialog(ref credUiInfo,
+                                            ref authPackage,
+                                            packedAuthBufferPtr,
+                                            packedAuthBufferSize,
+                                            inBufferPtr,
+                                            inBufferSize,
+                                            saveCredentials,
+                                            flags,
+                                            out username,
+                                            out password);
+        }
+
+        private static bool ModalPromptForCredentials(Uri targetUri, out string username, out string password)
+        {
+            Trace.WriteLine("Program::ModalPromptForCredemtials");
+
+            string message = String.Format("Enter your credentials for {0}://{1}.", targetUri.Scheme, targetUri.DnsSafeHost);
+            return ModalPromptForCredentials(targetUri, message, out username, out password);
+        }
+
+        private static bool ModalPromptForPassword(Uri targetUri, string message, string username, out string password)
+        {
+            Debug.Assert(targetUri != null);
+            Debug.Assert(message != null);
+            Debug.Assert(username != null);
+
+            Trace.WriteLine("Program::ModalPromptForPassword");
+
+            NativeMethods.CredentialUiInfo credUiInfo = new NativeMethods.CredentialUiInfo
+            {
+                BannerArt = IntPtr.Zero,
+                CaptionText = Title,
+                MessageText = message,
+                Parent = IntPtr.Zero,
+                Size = Marshal.SizeOf(typeof(NativeMethods.CredentialUiInfo))
+            };
+            NativeMethods.CredentialUiWindowsFlags flags = NativeMethods.CredentialUiWindowsFlags.Generic;
+            NativeMethods.CredentialPackFlags authPackage = NativeMethods.CredentialPackFlags.None;
+            IntPtr packedAuthBufferPtr = IntPtr.Zero;
+            IntPtr inBufferPtr = IntPtr.Zero;
+            uint packedAuthBufferSize = 0;
+            bool saveCredentials = false;
+            int inBufferSize = 0;
+
+            try
+            {
+                int error;
+
+                // execute with `null` to determine buffer size
+                // always returns false when determining size, only fail if `inBufferSize` looks bad
+                NativeMethods.CredPackAuthenticationBuffer(flags: authPackage,
+                                                           username: username,
+                                                           password: String.Empty,
+                                                           packedCredentials: inBufferPtr,
+                                                           packedCredentialsSize: ref inBufferSize);
+                if (inBufferSize <= 0)
+                {
+                    error = Marshal.GetLastWin32Error();
+                    Trace.WriteLine("   unable to determine credential buffer size (" + NativeMethods.Win32Error.GetText(error) + ").");
+
+                    username = null;
+                    password = null;
+
+                    return false;
+                }
+
+                inBufferPtr = Marshal.AllocHGlobal(inBufferSize);
+
+                if (!NativeMethods.CredPackAuthenticationBuffer(flags: authPackage,
+                                                                username: username,
+                                                                password: String.Empty,
+                                                                packedCredentials: inBufferPtr,
+                                                                packedCredentialsSize: ref inBufferSize))
+                {
+                    error = Marshal.GetLastWin32Error();
+                    Trace.WriteLine("   unable to write to credential buffer (" + NativeMethods.Win32Error.GetText(error) + ").");
+
+                    username = null;
+                    password = null;
+
+                    return false;
+                }
+
+                return ModalPromptDisplayDialog(ref credUiInfo,
+                                                ref authPackage,
+                                                packedAuthBufferPtr,
+                                                packedAuthBufferSize,
+                                                inBufferPtr,
+                                                inBufferSize,
+                                                saveCredentials,
+                                                flags,
+                                                out username,
+                                                out password);
+            }
+            finally
+            {
+                if (inBufferPtr != IntPtr.Zero)
+                {
+                    Marshal.FreeCoTaskMem(inBufferPtr);
+                }
+            }
+        }
+
+        private static bool ModalPromptDisplayDialog(
+            ref NativeMethods.CredentialUiInfo credUiInfo,
+            ref NativeMethods.CredentialPackFlags authPackage,
+            IntPtr packedAuthBufferPtr,
+            uint packedAuthBufferSize,
+            IntPtr inBufferPtr,
+            int inBufferSize,
+            bool saveCredentials,
+            NativeMethods.CredentialUiWindowsFlags flags,
+            out string username,
+            out string password)
+        {
+            Trace.WriteLine("Program::ModalPromptDisplayDialog");
+
+            int error;
+
+            try
+            {
+                // open a standard Windows authentication dialog to acquire username + password credentials
+                if ((error = NativeMethods.CredUIPromptForWindowsCredentials(credInfo: ref credUiInfo,
+                                                                             authError: 0,
+                                                                             authPackage: ref authPackage,
+                                                                             inAuthBuffer: inBufferPtr,
+                                                                             inAuthBufferSize: (uint)inBufferSize,
+                                                                             outAuthBuffer: out packedAuthBufferPtr,
+                                                                             outAuthBufferSize: out packedAuthBufferSize,
+                                                                             saveCredentials: ref saveCredentials,
+                                                                             flags: flags)) != NativeMethods.Win32Error.Success)
+                {
+                    Trace.WriteLine("   credential prompt failed (" + NativeMethods.Win32Error.GetText(error) + ").");
+
+                    username = null;
+                    password = null;
+
+                    return false;
+                }
+
+                // use `StringBuilder` references instead of string so that they can be written to
+                StringBuilder usernameBuffer = new StringBuilder(512);
+                StringBuilder domainBuffer = new StringBuilder(256);
+                StringBuilder passwordBuffer = new StringBuilder(512);
+                int usernameLen = usernameBuffer.Capacity;
+                int passwordLen = passwordBuffer.Capacity;
+                int domainLen = domainBuffer.Capacity;
+
+                // unpack the result into locally useful data
+                if (!NativeMethods.CredUnPackAuthenticationBuffer(flags: authPackage,
+                                                                  authBuffer: packedAuthBufferPtr,
+                                                                  authBufferSize: packedAuthBufferSize,
+                                                                  username: usernameBuffer,
+                                                                  maxUsernameLen: ref usernameLen,
+                                                                  domainName: domainBuffer,
+                                                                  maxDomainNameLen: ref domainLen,
+                                                                  password: passwordBuffer,
+                                                                  maxPasswordLen: ref passwordLen))
+                {
+                    username = null;
+                    password = null;
+
+                    error = Marshal.GetLastWin32Error();
+                    Trace.WriteLine("   failed to unpack buffer (" + NativeMethods.Win32Error.GetText(error) + ").");
+
+                    return false;
+                }
+
+                Trace.WriteLine("   successfully acquired crentials from user.");
+
+                username = usernameBuffer.ToString();
+                password = passwordBuffer.ToString();
+
+                return true;
+            }
+            finally
+            {
+                if (packedAuthBufferPtr != IntPtr.Zero)
+                {
+                    Marshal.FreeHGlobal(packedAuthBufferPtr);
+                }
+            }
         }
 
         [Conditional("DEBUG")]
