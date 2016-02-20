@@ -465,13 +465,10 @@ namespace Microsoft.Alm.CredentialHelper
 
             updated = Configuration.Type.None;
 
-            if (installations == null)
+            if ((installations == null || installations.Count == 0) && !Where.FindGitInstallations(out installations))
             {
-                if (!Where.FindGitInstallations(out installations))
-                {
-                    Trace.WriteLine("   No Git installations detected to update.");
-                    return false;
-                }
+                Trace.WriteLine("   No Git installations detected to update.");
+                return false;
             }
 
             if ((type & Configuration.Type.Global) == Configuration.Type.Global)
