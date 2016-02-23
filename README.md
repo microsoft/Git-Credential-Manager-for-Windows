@@ -40,7 +40,7 @@ Frequently asked questions collected from our [issues page](<https://github.com/
 
 ### Q: Why am always prompted for my username and password?
 
-Most likely, your environment is not configured correctly. You can verify that you’re environment is configured correctly by running `git config --list` and looking for `credential.helper=manager`. If you do not see the line, then you know that Git does not know about the Git Credential Manager. You can configure Git to use the Credential Manager by running `git config credential.helper manager`.
+Most likely, your environment is not configured correctly. You can verify that your environment is configured correctly by running `git config --list` and looking for `credential.helper=manager`. If you do not see the line, then you know that Git does not know about the Git Credential Manager. You can configure Git to use the Credential Manager by running `git config credential.helper manager`.
 
 ### Q: Why does my GUI freeze when I push, pull, or fetch?
 
@@ -68,7 +68,7 @@ The Git Credential Manager does not work on Windows XP, Max OS, or Linux because
 
 We can safely say that we have no interest in supporting Windows XP. Even [Microsoft has ended support for Windows XP](<http://windows.microsoft.com/en-us/windows/end-support-help>). Support for Mac OS and Linux are very much something that we’re interesting in. We’re looking at options with [.NET Foundation cross-platform support](<https://github.com/dotnet>) and [ADAL Node.js support](<https://github.com/AzureAD/azure-activedirectory-library-for-nodejs>). Neither option is ready for a security application, and we’re not ready to port yet -- let’s at least get the ‘for Windows’ version to version 1.0 first!
 
-### Q: Why is there not support for my distribution/version of Git? Why is Git for Windows favored?
+### Q: Why is my distribution/version of Git not supported? Why is Git for Windows favored?
 
 The Credential Manager deployment helpers (`install.cmd` and `Setup.exe`) are focused on support for [Git for Windows](<https://github.com/git-for-windows>) because Git for Windows conforms to the expected/normal behavior of software on Windows. It is easy to detect, has predictable installation location, etc. This makes supporting it cheaper and more reliable.
 
