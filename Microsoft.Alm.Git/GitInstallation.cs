@@ -9,9 +9,11 @@ namespace Microsoft.Alm.Git
     {
         public static readonly StringComparer PathComparer = StringComparer.InvariantCultureIgnoreCase;
 
+        internal const string GitExeName = @"git.exe";
         internal const string AllVersionCmdPath = @"cmd";
-        internal const string AllVersionGitPath = @"cmd\git.exe";
+        internal const string AllVersionGitPath = @"cmd\" + GitExeName;
         internal const string AllVersionShPath = @"bin\sh.exe";
+        internal const string AllVersionBinGitPath = @"bin\" + GitExeName;
         internal const string Version1Config32Path = @"etc\gitconfig";
         internal const string Version2Config32Path = @"mingw32\etc\gitconfig";
         internal const string Version2Config64Path = @"mingw64\etc\gitconfig";
@@ -63,6 +65,27 @@ namespace Microsoft.Alm.Git
             Debug.Assert(CommonGitPaths.ContainsKey(version), "The `version` parameter not found in `CommonGitPaths`.");
             Debug.Assert(CommonLibexecPaths.ContainsKey(version), "The `version` parameter not found in `CommonLibExecPaths`.");
             Debug.Assert(CommonShPaths.ContainsKey(version), "The `version` parameter not found in `CommonShPaths`.");
+
+            path = path.TrimEnd('\\');
+
+            // Make sure the GitExeName isn't included as a part of the path.
+            if (path.EndsWith(AllVersionGitPath, StringComparison.InvariantCultureIgnoreCase))
+            {
+                path = path.Substring(0, path.Length - AllVersionGitPath.Length);
+            }
+            
+            // Versions of git installation could have 2 binaries. One in the `bin` directory
+            // and the other in the `cmd` directory. Handle both scenarios.
+
+            if (path.EndsWith(AllVersionBinGitPath, StringComparison.InvariantCultureIgnoreCase))
+            {
+                path = path.Substring(0, path.Length - AllVersionBinGitPath.Length);
+            }
+
+            if (path.EndsWith(GitExeName, StringComparison.InvariantCultureIgnoreCase))
+            {
+                path = path.Substring(0, path.Length - GitExeName.Length);
+            }
 
             // trim off trailing '\' characters to increase compatibility
             path = path.TrimEnd('\\');
