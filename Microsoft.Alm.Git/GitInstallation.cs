@@ -69,7 +69,7 @@ namespace Microsoft.Alm.Git
             path = path.TrimEnd('\\');
 
             // Make sure the GitExeName isn't included as a part of the path.
-            if (path.ToLower().EndsWith(AllVersionGitPath))
+            if (path.EndsWith(AllVersionGitPath, StringComparison.InvariantCultureIgnoreCase))
             {
                 path = path.Substring(0, path.Length - AllVersionGitPath.Length);
             }
@@ -77,12 +77,12 @@ namespace Microsoft.Alm.Git
             // Versions of git installation could have 2 binaries. One in the `bin` directory
             // and the other in the `cmd` directory. Handle both scenarios.
 
-            if (path.ToLower().EndsWith(AllVersionBinGitPath))
+            if (path.EndsWith(AllVersionBinGitPath, StringComparison.InvariantCultureIgnoreCase))
             {
                 path = path.Substring(0, path.Length - AllVersionBinGitPath.Length);
             }
 
-            if (path.ToLower().EndsWith(GitExeName))
+            if (path.EndsWith(GitExeName, StringComparison.InvariantCultureIgnoreCase))
             {
                 path = path.Substring(0, path.Length - GitExeName.Length);
             }
