@@ -78,6 +78,14 @@ That said, so long as your favorite version of Git supports Git’s git-credenti
 
  2. Update your Git configuration by running `git config --global credential.helper manager`.
 
+### Q: I thought Microsoft was maintaing this, why does the GCM not work as expected with TFS?
+
+Team Foundation Server, when deployed on a corporate Active Directory, uses the [Microsoft Kerberos](https://msdn.microsoft.com/en-us/library/windows/desktop/aa378747(v=vs.85).aspx) protocol for authentication. Git doesn't "speak" the Kerberos protocol.
+
+Git can be convinced to "forward" domain credentials by supplying a blank credentials (username and password). Since, by default, the GCM doesn't allow for a blank credentials, you will need to configure it to allow for them. To do so, update your Git configuration by running `git config --global credential.<url_to_TFS_here>.integrated true`.
+
+Once the updated, the new configuration tells the GCM to only forward domain credentials. If you set `credential.integrated = true`, every domain will be assumed to support domain credentials. Most likely, this is **not** what you want. Therefore, it strongly suggested that you restric the configuration setting to the URL of your TFS Git host.
+
 ## Build agents ##
 
 Build agents cannot manage modal dialogs, therefore we recommended the following configuration.
