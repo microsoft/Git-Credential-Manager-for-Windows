@@ -492,7 +492,7 @@ namespace Microsoft.Alm.CredentialHelper
             OperationArguments operationArguments = new OperationArguments(Console.In);
 
             Debug.Assert(operationArguments != null, "The operationArguments is null");
-            Debug.Assert(operationArguments.Username != null, "The operaionArgument.Username is null");
+            Debug.Assert(operationArguments.CredUsername != null, "The operaionArgument.Username is null");
             Debug.Assert(operationArguments.TargetUri != null, "The operationArgument.TargetUri is null");
 
             LoadOperationArguments(operationArguments);
@@ -502,7 +502,7 @@ namespace Microsoft.Alm.CredentialHelper
             Trace.WriteLine("   targetUri = " + operationArguments.TargetUri);
 
             BaseAuthentication authentication = CreateAuthentication(operationArguments);
-            Credential credentials = new Credential(operationArguments.Username, operationArguments.Password);
+            Credential credentials = new Credential(operationArguments.CredUsername, operationArguments.CredPassword);
             authentication.SetCredentials(operationArguments.TargetUri, credentials);
         }
 
@@ -648,7 +648,7 @@ namespace Microsoft.Alm.CredentialHelper
             Configuration config = new Configuration();
             Configuration.Entry entry;
 
-            if (config.TryGetEntry(ConfigPrefix, operationArguments.HostUri, ConfigAuthortyKey, out entry))
+            if (config.TryGetEntry(ConfigPrefix, operationArguments.QueryUri, ConfigAuthortyKey, out entry))
             {
                 Trace.WriteLine("   " + ConfigAuthortyKey + " = " + entry.Value);
 
@@ -680,7 +680,7 @@ namespace Microsoft.Alm.CredentialHelper
                 }
             }
 
-            if (config.TryGetEntry(ConfigPrefix, operationArguments.HostUri, ConfigInteractiveKey, out entry))
+            if (config.TryGetEntry(ConfigPrefix, operationArguments.QueryUri, ConfigInteractiveKey, out entry))
             {
                 Trace.WriteLine("   " + ConfigInteractiveKey + " = " + entry.Value);
 
@@ -697,7 +697,7 @@ namespace Microsoft.Alm.CredentialHelper
                 }
             }
 
-            if (config.TryGetEntry(ConfigPrefix, operationArguments.HostUri, ConfigValidateKey, out entry))
+            if (config.TryGetEntry(ConfigPrefix, operationArguments.QueryUri, ConfigValidateKey, out entry))
             {
                 Trace.WriteLine("   " + ConfigValidateKey + " = " + entry.Value);
 
@@ -719,7 +719,7 @@ namespace Microsoft.Alm.CredentialHelper
                 }
             }
 
-            if (config.TryGetEntry(ConfigPrefix, operationArguments.HostUri, ConfigWritelogKey, out entry))
+            if (config.TryGetEntry(ConfigPrefix, operationArguments.QueryUri, ConfigWritelogKey, out entry))
             {
                 Trace.WriteLine("   " + ConfigWritelogKey + " = " + entry.Value);
 
@@ -741,7 +741,7 @@ namespace Microsoft.Alm.CredentialHelper
                 }
             }
 
-            if (config.TryGetEntry(ConfigPrefix, operationArguments.HostUri, ConfigUseModalPromptKey, out entry))
+            if (config.TryGetEntry(ConfigPrefix, operationArguments.QueryUri, ConfigUseModalPromptKey, out entry))
             {
                 Trace.WriteLine("   " + ConfigUseModalPromptKey + " = " + entry.Value);
 
@@ -763,7 +763,7 @@ namespace Microsoft.Alm.CredentialHelper
                 }
             }
 
-            if (config.TryGetEntry(ConfigPrefix, operationArguments.HostUri, ConfigPreserveCredentialsKey, out entry))
+            if (config.TryGetEntry(ConfigPrefix, operationArguments.QueryUri, ConfigPreserveCredentialsKey, out entry))
             {
                 Trace.WriteLine("   " + ConfigPreserveCredentialsKey + " = " + entry.Value);
 
@@ -785,7 +785,7 @@ namespace Microsoft.Alm.CredentialHelper
                 }
             }
 
-            if (config.TryGetEntry(ConfigPrefix, operationArguments.HostUri, ConfigUseHttpPathKey, out entry))
+            if (config.TryGetEntry(ConfigPrefix, operationArguments.QueryUri, ConfigUseHttpPathKey, out entry))
             {
                 Trace.WriteLine("   " + ConfigUseHttpPathKey + " = " + entry.Value);
 
@@ -796,8 +796,8 @@ namespace Microsoft.Alm.CredentialHelper
                 }
             }
 
-            if (config.TryGetEntry(ConfigPrefix, operationArguments.HostUri, ConfigHttpProxyKey, out entry)
-                || config.TryGetEntry("http", operationArguments.HostUri, "proxy", out entry))
+            if (config.TryGetEntry(ConfigPrefix, operationArguments.QueryUri, ConfigHttpProxyKey, out entry)
+                || config.TryGetEntry("http", operationArguments.QueryUri, "proxy", out entry))
             {
                 Trace.WriteLine("   " + ConfigHttpProxyKey + " = " + entry.Value);
 
