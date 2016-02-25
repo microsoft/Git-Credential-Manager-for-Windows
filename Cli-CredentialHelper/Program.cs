@@ -874,7 +874,7 @@ namespace Microsoft.Alm.CredentialHelper
                 resultType == GithubAuthenticationResultType.TwoFactorApp
                     ? "app"
                     : "sms";
-            string message = String.Format("Enter {0} authentication code for {1}://{2}.", type, targetUri.Scheme, targetUri.DnsSafeHost);
+            string message = String.Format("Enter {0} authentication code for {1}://{2}.", type, targetUri.Scheme, targetUri);
 
             Trace.WriteLine("   prompting user for authentication code.");
 
@@ -918,10 +918,7 @@ namespace Microsoft.Alm.CredentialHelper
 
                 // instruct the user as to what they are expected to do
                 buffer.Append("Please enter your GitHub credentials for ")
-                      .Append(targetUri.Scheme)
-                      .Append("://")
-                      .Append(targetUri.DnsSafeHost)
-                      .Append(targetUri.PathAndQuery)
+                      .Append(targetUri)
                       .AppendLine();
                 if (!NativeMethods.WriteConsole(stdout, buffer, (uint)buffer.Length, out written, IntPtr.Zero))
                 {
@@ -1105,7 +1102,7 @@ namespace Microsoft.Alm.CredentialHelper
         {
             Trace.WriteLine("Program::ModalPromptForCredemtials");
 
-            string message = String.Format("Enter your credentials for {0}://{1}.", targetUri.Scheme, targetUri.DnsSafeHost);
+            string message = String.Format("Enter your credentials for {0}.", targetUri);
             return ModalPromptForCredentials(targetUri, message, out username, out password);
         }
 
