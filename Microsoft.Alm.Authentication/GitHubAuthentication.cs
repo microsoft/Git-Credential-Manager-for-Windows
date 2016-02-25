@@ -57,7 +57,7 @@ namespace Microsoft.Alm.Authentication
         /// <param name="targetUri">
         /// The uniform resource indicator used to uniquely identitfy the credentials.
         /// </param>
-        public override void DeleteCredentials(Uri targetUri)
+        public override void DeleteCredentials(TargetUri targetUri)
         {
             BaseSecureStore.ValidateTargetUri(targetUri);
 
@@ -82,7 +82,7 @@ namespace Microsoft.Alm.Authentication
         /// <param name="authentication">(out) The authenitcation object if successful.</param>
         /// <returns>True if success; otherwise false.</returns>
         public static bool GetAuthentication(
-            Uri targetUri,
+            TargetUri targetUri,
             GithubTokenScope tokenScope,
             ICredentialStore personalAccessTokenStore,
             AcquireCredentialsDelegate acquireCredentialsCallback,
@@ -98,7 +98,7 @@ namespace Microsoft.Alm.Authentication
 
             Trace.WriteLine("GithubAuthentication::GetAuthentication");
 
-            if (targetUri.DnsSafeHost.EndsWith(GitHubBaseUrlHost, StringComparison.OrdinalIgnoreCase))
+            if (targetUri.ActualUri.DnsSafeHost.EndsWith(GitHubBaseUrlHost, StringComparison.OrdinalIgnoreCase))
             {
                 authentication = new GithubAuthentication(tokenScope, personalAccessTokenStore, acquireCredentialsCallback, acquireAuthenticationCodeCallback, authenticationResultCallback);
                 Trace.WriteLine("   authentication for GitHub created");
@@ -123,7 +123,7 @@ namespace Microsoft.Alm.Authentication
         /// authority or storage; otherwise `null`, if successful.
         /// </param>
         /// <returns>True if successful; otherwise false.</returns>
-        public override bool GetCredentials(Uri targetUri, out Credential credentials)
+        public override bool GetCredentials(TargetUri targetUri, out Credential credentials)
         {
             BaseSecureStore.ValidateTargetUri(targetUri);
 
@@ -146,7 +146,7 @@ namespace Microsoft.Alm.Authentication
         /// be acquired.</param>
         /// <param name="credentials">(out) Credentials when acquision is successful; null otherwise.</param>
         /// <returns>True if success; otherwise false.</returns>
-        public bool InteractiveLogon(Uri targetUri, out Credential credentials)
+        public bool InteractiveLogon(TargetUri targetUri, out Credential credentials)
         {
             string username;
             string password;
@@ -216,7 +216,7 @@ namespace Microsoft.Alm.Authentication
         /// <param name="password">The password of the account for which access is to be acquired.</param>
         /// <param name="authenticationCode">The two-factor authentication code for use in access acquision.</param>
         /// <returns>True if success; otherwise false.</returns>
-        public async Task<bool> NoninteractiveLogonWithCredentials(Uri targetUri, string username, string password, string authenticationCode = null)
+        public async Task<bool> NoninteractiveLogonWithCredentials(TargetUri targetUri, string username, string password, string authenticationCode = null)
         {
             BaseSecureStore.ValidateTargetUri(targetUri);
             if (String.IsNullOrWhiteSpace(username))
@@ -248,7 +248,7 @@ namespace Microsoft.Alm.Authentication
         /// </param>
         /// <param name="credentials">The value to be stored.</param>
         /// <returns>True if successful; otherwise false.</returns>
-        public override bool SetCredentials(Uri targetUri, Credential credentials)
+        public override bool SetCredentials(TargetUri targetUri, Credential credentials)
         {
             BaseSecureStore.ValidateTargetUri(targetUri);
             Credential.Validate(credentials);
@@ -267,7 +267,7 @@ namespace Microsoft.Alm.Authentication
         /// are being validated against.</param>
         /// <param name="credentials">The credentials to validate.</param>
         /// <returns>True is successful; otherwise false.</returns>
-        public async Task<bool> ValidateCredentials(Uri targetUri, Credential credentials)
+        public async Task<bool> ValidateCredentials(TargetUri targetUri, Credential credentials)
         {
             BaseSecureStore.ValidateTargetUri(targetUri);
             Credential.Validate(credentials);
@@ -286,7 +286,7 @@ namespace Microsoft.Alm.Authentication
         /// <param name="username">The username supplied by the user.</param>
         /// <param name="password">The password supplied by the user.</param>
         /// <returns>True if successful; otherwise false.</returns>
-        public delegate bool AcquireCredentialsDelegate(Uri targetUri, out string username, out string password);
+        public delegate bool AcquireCredentialsDelegate(TargetUri targetUri, out string username, out string password);
 
         /// <summary>
         /// Delegate for authentication code acquisition from the UX.
@@ -300,7 +300,7 @@ namespace Microsoft.Alm.Authentication
         /// </param>
         /// <param name="authenticationCode">The authentication code provided by the user.</param>
         /// <returns>True if successful; otherwise false.</returns>
-        public delegate bool AcquireAuthenticationCodeDelegate(Uri targetUri, GithubAuthenticationResultType resultType, string username, out string authenticationCode);
+        public delegate bool AcquireAuthenticationCodeDelegate(TargetUri targetUri, GithubAuthenticationResultType resultType, string username, out string authenticationCode);
 
         /// <summary>
         /// Delegate for reporting the success, or not, of an authentiction attempt.
@@ -309,6 +309,6 @@ namespace Microsoft.Alm.Authentication
         /// The uniform resource indicator used to uniquely identitfy the credentials.
         /// </param>
         /// <param name="result">The result of the interactive authenticaiton attempt.</param>
-        public delegate void AuthenticationResultDelegate(Uri targetUri, GithubAuthenticationResultType result);
+        public delegate void AuthenticationResultDelegate(TargetUri targetUri, GithubAuthenticationResultType result);
     }
 }

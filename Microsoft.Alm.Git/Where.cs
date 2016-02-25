@@ -42,6 +42,7 @@ namespace Microsoft.Alm.Git
                         string value = String.Format("{0}\\{1}{2}", paths[i], name, exts[j]);
                         if (File.Exists(value))
                         {
+                            value = value.Replace("\\\\", "\\");
                             path = value;
                             return true;
                         }

@@ -32,7 +32,7 @@ namespace Microsoft.Alm.Authentication
         private readonly string _authorityUrl;
 
         public async Task<GithubAuthenticationResult> AcquireToken(
-            Uri targetUri,
+            TargetUri targetUri,
             string username,
             string password,
             string authenticationCode,
@@ -157,7 +157,7 @@ namespace Microsoft.Alm.Authentication
             }
         }
 
-        public async Task<bool> ValidateCredentials(Uri targetUri, Credential credentials)
+        public async Task<bool> ValidateCredentials(TargetUri targetUri, Credential credentials)
         {
             const string ValidationUrl = "https://api.github.com/user/subscriptions";
 

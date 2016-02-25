@@ -28,68 +28,125 @@ namespace Microsoft.Alm.CredentialHelper
                     switch (pair[0])
                     {
                         case "protocol":
-                            this.Protocol = pair[1];
+                            this.QueryProtocol = pair[1];
                             break;
 
                         case "host":
-                            this.Host = pair[1];
+                            this.QueryHost = pair[1];
                             break;
 
                         case "path":
-                            this.Path = pair[1];
+                            this.QueryPath = pair[1];
                             break;
 
                         case "username":
-                            this.Username = pair[1];
+                            this.CredUsername = pair[1];
                             break;
 
                         case "password":
-                            this.Password = pair[1];
+                            this.CredPassword = pair[1];
                             break;
                     }
                 }
             }
 
-            if (this.Protocol != null && this.Host != null)
-            {
-                _targetUri = new Uri(String.Format("{0}://{1}", this.Protocol, this.Host), UriKind.Absolute);
-            }
+            this.CreateTargetUri();
         }
 
-
         public AuthorityType Authority { get; set; }
-        public readonly string Host;
+        public string CredPassword { get; private set; }
+        public string CredUsername { get; private set; }
         public Interactivity Interactivity { get; set; }
-        public readonly string Path;
-        public string Password { get; private set; }
         public bool PreserveCredentials { get; set; }
-        public readonly string Protocol;
-        public Uri TargetUri { get { return _targetUri; } }
-        public string Username { get; private set; }
-
+        public string ProxyHost
+        {
+            get { return _proxyHost; }
+            set
+            {
+                _proxyHost = value;
+                CreateTargetUri();
+            }
+        }
+        public string ProxyPath
+        {
+            get { return _proxyPath; }
+            set
+            {
+                _proxyPath = value;
+                CreateTargetUri();
+            }
+        }
+        public string ProxyProtocol
+        {
+            get { return _proxyProtocol; }
+            set
+            {
+                _proxyProtocol = value;
+                CreateTargetUri();
+            }
+        }
+        public Uri ProxUri
+        {
+            get { return _proxyUri; }
+            internal set
+            {
+                if (value == null)
+                {
+                    _proxyHost = null;
+                    _proxyPath = null;
+                    _proxyProtocol = null;
+                }
+                else
+                {
+                    _proxyHost = value.DnsSafeHost;
+                    _proxyPath = value.AbsolutePath;
+                    _proxyProtocol = value.Scheme;
+                }
+                CreateTargetUri();
+            }
+        }
+        public readonly string QueryHost;
+        public readonly string QueryPath;
+        public readonly string QueryProtocol;
+        public Uri QueryUri { get { return _queryUri; } }
+        public TargetUri TargetUri
+        {
+            get { return _targetUri; }
+        }
         public bool UseHttpPath
         {
             get { return _useHttpPath; }
             set
             {
                 _useHttpPath = value;
-
-                _targetUri = _useHttpPath
-                    ? new Uri(String.Format("{0}://{1}", this.Protocol, this.Host))
-                    : new Uri(String.Format("{0}://{1}/{2}", this.Protocol, this.Host, this.Path));
+                CreateTargetUri();
             }
         }
         public bool UseModalUi { get; set; }
         public bool ValidateCredentials { get; set; }
         public bool WriteLog { get; set; }
 
-        private Uri _targetUri;
+        private Uri _queryUri;
+        private string _proxyHost;
+        private string _proxyPath;
+        private string _proxyProtocol;
+        private Uri _proxyUri;
+        private TargetUri _targetUri;
         private bool _useHttpPath;
 
         public void SetCredentials(Credential credentials)
         {
-            this.Username = credentials.Username;
-            this.Password = credentials.Password;
+            this.CredUsername = credentials.Username;
+            this.CredPassword = credentials.Password;
+        }
+
+        public void SetProxy(string url)
+        {
+            Uri tmp;
+            if (Uri.TryCreate(url, UriKind.Absolute, out tmp))
+            {
+                this.ProxUri = tmp;
+            }
         }
 
         public override string ToString()
@@ -97,30 +154,46 @@ namespace Microsoft.Alm.CredentialHelper
             StringBuilder builder = new StringBuilder();
 
             builder.Append("protocol=")
-                   .Append(this.Protocol ?? String.Empty)
+                   .Append(this.QueryProtocol ?? String.Empty)
                    .Append("\n");
             builder.Append("host=")
-                   .Append(this.Host ?? String.Empty)
+                   .Append(this.QueryHost ?? String.Empty)
                    .Append("\n");
             builder.Append("path=")
-                   .Append(this.Path ?? String.Empty)
+                   .Append(this.QueryPath ?? String.Empty)
                    .Append("\n");
             // only write out username if we know it
-            if (this.Username != null)
+            if (this.CredUsername != null)
             {
                 builder.Append("username=")
-                       .Append(this.Username)
+                       .Append(this.CredUsername)
                        .Append("\n");
             }
             // only write out password if we know it
-            if (this.Password != null)
+            if (this.CredPassword != null)
             {
                 builder.Append("password=")
-                       .Append(this.Password)
+                       .Append(this.CredPassword)
                        .Append("\n");
             }
 
             return builder.ToString();
+        }
+
+        internal void CreateTargetUri()
+        {
+            string actualUrl = _useHttpPath
+                ? String.Format("{0}://{1}/{2}", this.QueryProtocol, this.QueryHost, this.QueryPath)
+                : String.Format("{0}://{1}", this.QueryProtocol, this.QueryHost);
+            string proxyUrl = _useHttpPath
+                ? String.Format("{0}://{1}/{2}", this.ProxyProtocol, this.ProxyHost, this.ProxyPath)
+                : String.Format("{0}://{1}", this.ProxyProtocol, this.ProxyHost);
+
+            if (Uri.TryCreate(actualUrl, UriKind.Absolute, out _queryUri)
+                || Uri.TryCreate(proxyUrl, UriKind.Absolute, out _proxyUri))
+            {
+                _targetUri = new TargetUri(_queryUri, _proxyUri);
+            }
         }
     }
 }

@@ -32,13 +32,14 @@ namespace Microsoft.Alm.CredentialHelper
         internal const string CommandVersion = "version";
 
         internal const string ConfigAuthortyKey = "authority";
-        internal const string ConfigInteractiveKey = "interactive";        
-        internal const string ConfigPreserveCredentials = "preserve";
-        internal const string ConfigUseHttpPath = "useHttpPath";
-        internal const string ConfigUseModalPrompt = "modalprompt";
+        internal const string ConfigHttpProxyKey = "httpProxy";
+        internal const string ConfigInteractiveKey = "interactive";
+        internal const string ConfigPreserveCredentialsKey = "preserve";
+        internal const string ConfigUseHttpPathKey = "useHttpPath";
+        internal const string ConfigUseModalPromptKey = "modalPrompt";
         internal const string ConfigValidateKey = "validate";
         internal const string ConfigWritelogKey = "writelog";
-        
+
 
         private const string ConfigPrefix = "credential";
         private const string SecretsNamespace = "git";
@@ -226,11 +227,11 @@ namespace Microsoft.Alm.CredentialHelper
             Console.Out.WriteLine();
             Console.Out.WriteLine("      `git config --global credential.microsoft.visualstudio.com." + ConfigInteractiveKey + " never`");
             Console.Out.WriteLine();
-            Console.Out.WriteLine("  " + ConfigUseModalPrompt + "  Forces authentication to use a modal dialog instead of");
+            Console.Out.WriteLine("  " + ConfigUseModalPromptKey + "  Forces authentication to use a modal dialog instead of");
             Console.Out.WriteLine("               asking for credentials at the command prompt.");
             Console.Out.WriteLine("               Defaults to TRUE.");
             Console.Out.WriteLine();
-            Console.Out.WriteLine("      `git config --global credential." + ConfigUseModalPrompt + " true`");
+            Console.Out.WriteLine("      `git config --global credential." + ConfigUseModalPromptKey + " true`");
             Console.Out.WriteLine();
             Console.Out.WriteLine("  " + ConfigValidateKey + "     Causes validation of credentials before supplying them");
             Console.Out.WriteLine("               to Git. Invalid credentials get a refresh attempt");
@@ -239,19 +240,26 @@ namespace Microsoft.Alm.CredentialHelper
             Console.Out.WriteLine();
             Console.Out.WriteLine("      `git config --global credential.microsoft.visualstudio.com." + ConfigValidateKey + " false`");
             Console.Out.WriteLine();
-            Console.Out.WriteLine("  " + ConfigPreserveCredentials + "     Prevents the deletion of credentials even when they are");
+            Console.Out.WriteLine("  " + ConfigPreserveCredentialsKey + "     Prevents the deletion of credentials even when they are");
             Console.Out.WriteLine("               reported as invlaid by Git. Can lead to lockout situations once credentials");
             Console.Out.WriteLine("               expire and until those credentials are manually removed.");
             Console.Out.WriteLine("               Defaults to FALSE.");
             Console.Out.WriteLine();
-            Console.Out.WriteLine("      `git config --global credential.visualstudio.com." + ConfigPreserveCredentials + " true`");
+            Console.Out.WriteLine("      `git config --global credential.visualstudio.com." + ConfigPreserveCredentialsKey + " true`");
             Console.Out.WriteLine();
-            Console.Out.WriteLine("  " + ConfigUseHttpPath + "     Causes the path portion of the target URI to considered meaningful.");
+            Console.Out.WriteLine("  " + ConfigUseHttpPathKey + "     Causes the path portion of the target URI to considered meaningful.");
             Console.Out.WriteLine("               By default the path portion of the target URI is ignore, if this is set to true");
             Console.Out.WriteLine("               the path is considered meaningful and credentials will be store for each path.");
             Console.Out.WriteLine("               Defaults to FALSE.");
             Console.Out.WriteLine();
-            Console.Out.WriteLine("      `git config --global credential.bitbucket.com." + ConfigUseHttpPath + " true`");
+            Console.Out.WriteLine("      `git config --global credential.bitbucket.com." + ConfigUseHttpPathKey + " true`");
+            Console.Out.WriteLine();
+            Console.Out.WriteLine("  " + ConfigHttpProxyKey + "     Causes the proxy value to be considered when evaluating.");
+            Console.Out.WriteLine("               credential target information. A proxy setting should established if use of a");
+            Console.Out.WriteLine("               proxy is required to interact with Git remotes.");
+            Console.Out.WriteLine("               The value should the url of the proxy server.");
+            Console.Out.WriteLine();
+            Console.Out.WriteLine("      `git config --global credential.github.com." + ConfigUseHttpPathKey + " https://myproxy:8080`");
             Console.Out.WriteLine();
             Console.Out.WriteLine("  " + ConfigWritelogKey + "     Enables trace logging of all activities. Logs are written to");
             Console.Out.WriteLine("               the local .git/ folder at the root of the repository.");
@@ -291,7 +299,7 @@ namespace Microsoft.Alm.CredentialHelper
 
             if (operationArguments.PreserveCredentials)
             {
-                Trace.WriteLine("   " + ConfigPreserveCredentials + " = true");
+                Trace.WriteLine("   " + ConfigPreserveCredentialsKey + " = true");
                 Trace.WriteLine("   cancelling erase request.");
                 return;
             }
@@ -484,7 +492,7 @@ namespace Microsoft.Alm.CredentialHelper
             OperationArguments operationArguments = new OperationArguments(Console.In);
 
             Debug.Assert(operationArguments != null, "The operationArguments is null");
-            Debug.Assert(operationArguments.Username != null, "The operaionArgument.Username is null");
+            Debug.Assert(operationArguments.CredUsername != null, "The operaionArgument.Username is null");
             Debug.Assert(operationArguments.TargetUri != null, "The operationArgument.TargetUri is null");
 
             LoadOperationArguments(operationArguments);
@@ -494,7 +502,7 @@ namespace Microsoft.Alm.CredentialHelper
             Trace.WriteLine("   targetUri = " + operationArguments.TargetUri);
 
             BaseAuthentication authentication = CreateAuthentication(operationArguments);
-            Credential credentials = new Credential(operationArguments.Username, operationArguments.Password);
+            Credential credentials = new Credential(operationArguments.CredUsername, operationArguments.CredPassword);
             authentication.SetCredentials(operationArguments.TargetUri, credentials);
         }
 
@@ -640,7 +648,7 @@ namespace Microsoft.Alm.CredentialHelper
             Configuration config = new Configuration();
             Configuration.Entry entry;
 
-            if (config.TryGetEntry(ConfigPrefix, operationArguments.TargetUri, ConfigAuthortyKey, out entry))
+            if (config.TryGetEntry(ConfigPrefix, operationArguments.QueryUri, ConfigAuthortyKey, out entry))
             {
                 Trace.WriteLine("   " + ConfigAuthortyKey + " = " + entry.Value);
 
@@ -672,7 +680,7 @@ namespace Microsoft.Alm.CredentialHelper
                 }
             }
 
-            if (config.TryGetEntry(ConfigPrefix, operationArguments.TargetUri, ConfigInteractiveKey, out entry))
+            if (config.TryGetEntry(ConfigPrefix, operationArguments.QueryUri, ConfigInteractiveKey, out entry))
             {
                 Trace.WriteLine("   " + ConfigInteractiveKey + " = " + entry.Value);
 
@@ -689,7 +697,7 @@ namespace Microsoft.Alm.CredentialHelper
                 }
             }
 
-            if (config.TryGetEntry(ConfigPrefix, operationArguments.TargetUri, ConfigValidateKey, out entry))
+            if (config.TryGetEntry(ConfigPrefix, operationArguments.QueryUri, ConfigValidateKey, out entry))
             {
                 Trace.WriteLine("   " + ConfigValidateKey + " = " + entry.Value);
 
@@ -711,7 +719,7 @@ namespace Microsoft.Alm.CredentialHelper
                 }
             }
 
-            if (config.TryGetEntry(ConfigPrefix, operationArguments.TargetUri, ConfigWritelogKey, out entry))
+            if (config.TryGetEntry(ConfigPrefix, operationArguments.QueryUri, ConfigWritelogKey, out entry))
             {
                 Trace.WriteLine("   " + ConfigWritelogKey + " = " + entry.Value);
 
@@ -733,9 +741,9 @@ namespace Microsoft.Alm.CredentialHelper
                 }
             }
 
-            if (config.TryGetEntry(ConfigPrefix, operationArguments.TargetUri, ConfigUseModalPrompt, out entry))
+            if (config.TryGetEntry(ConfigPrefix, operationArguments.QueryUri, ConfigUseModalPromptKey, out entry))
             {
-                Trace.WriteLine("   " + ConfigUseModalPrompt + " = " + entry.Value);
+                Trace.WriteLine("   " + ConfigUseModalPromptKey + " = " + entry.Value);
 
                 bool usemodel = operationArguments.UseModalUi;
                 if (Boolean.TryParse(entry.Value, out usemodel))
@@ -755,9 +763,9 @@ namespace Microsoft.Alm.CredentialHelper
                 }
             }
 
-            if (config.TryGetEntry(ConfigPrefix, operationArguments.TargetUri, ConfigPreserveCredentials, out entry))
+            if (config.TryGetEntry(ConfigPrefix, operationArguments.QueryUri, ConfigPreserveCredentialsKey, out entry))
             {
-                Trace.WriteLine("   " + ConfigPreserveCredentials + " = " + entry.Value);
+                Trace.WriteLine("   " + ConfigPreserveCredentialsKey + " = " + entry.Value);
 
                 bool preserveCredentials = operationArguments.UseModalUi;
                 if (Boolean.TryParse(entry.Value, out preserveCredentials))
@@ -777,15 +785,23 @@ namespace Microsoft.Alm.CredentialHelper
                 }
             }
 
-            if (config.TryGetEntry(ConfigPrefix, operationArguments.TargetUri, ConfigUseHttpPath, out entry))
+            if (config.TryGetEntry(ConfigPrefix, operationArguments.QueryUri, ConfigUseHttpPathKey, out entry))
             {
-                Trace.WriteLine("   " + ConfigUseHttpPath + " = " + entry.Value);
+                Trace.WriteLine("   " + ConfigUseHttpPathKey + " = " + entry.Value);
 
                 bool useHttPath = operationArguments.UseHttpPath;
                 if (Boolean.TryParse(entry.Value, out useHttPath))
                 {
                     operationArguments.UseHttpPath = true;
                 }
+            }
+
+            if (config.TryGetEntry(ConfigPrefix, operationArguments.QueryUri, ConfigHttpProxyKey, out entry)
+                || config.TryGetEntry("http", operationArguments.QueryUri, "proxy", out entry))
+            {
+                Trace.WriteLine("   " + ConfigHttpProxyKey + " = " + entry.Value);
+
+                operationArguments.SetProxy(entry.Value);
             }
         }
 
@@ -857,14 +873,14 @@ namespace Microsoft.Alm.CredentialHelper
             }
         }
 
-        private static bool GithubCredentialModalPrompt(Uri targetUri, out string username, out string password)
+        private static bool GithubCredentialModalPrompt(TargetUri targetUri, out string username, out string password)
         {
             Trace.WriteLine("Program::GithubCredentialModalPrompt");
 
             return ModalPromptForCredentials(targetUri, out username, out password);
         }
 
-        private static bool GithubAuthcodeModalPrompt(Uri targetUri, GithubAuthenticationResultType resultType, string username, out string authenticationCode)
+        private static bool GithubAuthcodeModalPrompt(TargetUri targetUri, GithubAuthenticationResultType resultType, string username, out string authenticationCode)
         {
             Trace.WriteLine("Program::GithubAuthcodeModalPrompt");
 
@@ -874,14 +890,14 @@ namespace Microsoft.Alm.CredentialHelper
                 resultType == GithubAuthenticationResultType.TwoFactorApp
                     ? "app"
                     : "sms";
-            string message = String.Format("Enter {0} authentication code for {1}://{2}.", type, targetUri.Scheme, targetUri);
+            string message = String.Format("Enter {0} authentication code for {1}://{2}.", type, targetUri.ActualUri.Scheme, targetUri);
 
             Trace.WriteLine("   prompting user for authentication code.");
 
             return ModalPromptForPassword(targetUri, message, username, out authenticationCode);
         }
 
-        private static bool GithubCredentialPrompt(Uri targetUri, out string username, out string password)
+        private static bool GithubCredentialPrompt(TargetUri targetUri, out string username, out string password)
         {
             // ReadConsole 32768 fail, 32767 ok 
             // @linquize [https://github.com/Microsoft/Git-Credential-Manager-for-Windows/commit/a62b9a19f430d038dcd85a610d97e5f763980f85]
@@ -1007,7 +1023,7 @@ namespace Microsoft.Alm.CredentialHelper
                 && password != null;
         }
 
-        private static bool GithubAuthCodePrompt(Uri targetUri, GithubAuthenticationResultType resultType, string username, out string authenticationCode)
+        private static bool GithubAuthCodePrompt(TargetUri targetUri, GithubAuthenticationResultType resultType, string username, out string authenticationCode)
         {
             // ReadConsole 32768 fail, 32767 ok 
             // @linquize [https://github.com/Microsoft/Git-Credential-Manager-for-Windows/commit/a62b9a19f430d038dcd85a610d97e5f763980f85]
@@ -1063,7 +1079,7 @@ namespace Microsoft.Alm.CredentialHelper
             return authenticationCode != null;
         }
 
-        private static bool ModalPromptForCredentials(Uri targetUri, string message, out string username, out string password)
+        private static bool ModalPromptForCredentials(TargetUri targetUri, string message, out string username, out string password)
         {
             Debug.Assert(targetUri != null);
             Debug.Assert(message != null);
@@ -1098,7 +1114,7 @@ namespace Microsoft.Alm.CredentialHelper
                                             out password);
         }
 
-        private static bool ModalPromptForCredentials(Uri targetUri, out string username, out string password)
+        private static bool ModalPromptForCredentials(TargetUri targetUri, out string username, out string password)
         {
             Trace.WriteLine("Program::ModalPromptForCredemtials");
 
@@ -1106,7 +1122,7 @@ namespace Microsoft.Alm.CredentialHelper
             return ModalPromptForCredentials(targetUri, message, out username, out password);
         }
 
-        private static bool ModalPromptForPassword(Uri targetUri, string message, string username, out string password)
+        private static bool ModalPromptForPassword(TargetUri targetUri, string message, string username, out string password)
         {
             Debug.Assert(targetUri != null);
             Debug.Assert(message != null);

@@ -23,12 +23,12 @@ password=incorrect
                 cut = new OperationArguments(sr);
             }
 
-            Assert.AreEqual("https", cut.Protocol);
-            Assert.AreEqual("example.visualstudio.com", cut.Host);
+            Assert.AreEqual("https", cut.QueryProtocol);
+            Assert.AreEqual("example.visualstudio.com", cut.QueryHost);
             Assert.AreEqual("https://example.visualstudio.com/", cut.TargetUri.ToString());
-            Assert.AreEqual("path", cut.Path);
-            Assert.AreEqual("userName", cut.Username);
-            Assert.AreEqual("incorrect", cut.Password);
+            Assert.AreEqual("path", cut.QueryPath);
+            Assert.AreEqual("userName", cut.CredUsername);
+            Assert.AreEqual("incorrect", cut.CredPassword);
 
             var expected = ReadLines(input);
             var actual = ReadLines(cut.ToString());

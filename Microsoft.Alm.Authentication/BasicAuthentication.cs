@@ -30,7 +30,7 @@ namespace Microsoft.Alm.Authentication
         /// <param name="targetUri">
         /// The uniform resource indicator used to uniquely identify the credentials.
         /// </param>
-        public override void DeleteCredentials(Uri targetUri)
+        public override void DeleteCredentials(TargetUri targetUri)
         {
             BaseSecureStore.ValidateTargetUri(targetUri);
 
@@ -49,7 +49,7 @@ namespace Microsoft.Alm.Authentication
         /// authority or storage; otherwise <see langword="null"/>.
         /// </param>
         /// <returns><see langword="true"/> if successful; otherwise <see langword="false"/>.</returns>
-        public override bool GetCredentials(Uri targetUri, out Credential credentials)
+        public override bool GetCredentials(TargetUri targetUri, out Credential credentials)
         {
             BaseSecureStore.ValidateTargetUri(targetUri);
 
@@ -67,7 +67,7 @@ namespace Microsoft.Alm.Authentication
         /// </param>
         /// <param name="credentials">The value to be stored.</param>
         /// <returns><see langword="true"/> if successful; otherwise <see langword="false"/>.</returns>
-        public override bool SetCredentials(Uri targetUri, Credential credentials)
+        public override bool SetCredentials(TargetUri targetUri, Credential credentials)
         {
             BaseSecureStore.ValidateTargetUri(targetUri);
             Credential.Validate(credentials);

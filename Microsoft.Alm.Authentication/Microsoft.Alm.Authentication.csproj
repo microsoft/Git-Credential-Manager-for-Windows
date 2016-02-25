@@ -66,6 +66,7 @@
     <Compile Include="IGithubAuthority.cs" />
     <Compile Include="SecretCache.cs" />
     <Compile Include="TokenScope.cs" />
+    <Compile Include="TargetUri.cs" />
     <Compile Include="VstsAzureAuthority.cs" />
     <Compile Include="VstsTokenScope.cs" />
     <Compile Include="AzureAuthority.cs" />

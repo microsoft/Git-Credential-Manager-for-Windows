@@ -4,8 +4,8 @@ namespace Microsoft.Alm.Authentication
 {
     public interface IAuthentication
     {
-        void DeleteCredentials(Uri targetUri);
-        bool GetCredentials(Uri targetUri, out Credential credentials);
-        bool SetCredentials(Uri targetUri, Credential credentials);
+        void DeleteCredentials(TargetUri targetUri);
+        bool GetCredentials(TargetUri targetUri, out Credential credentials);
+        bool SetCredentials(TargetUri targetUri, Credential credentials);
     }
 }

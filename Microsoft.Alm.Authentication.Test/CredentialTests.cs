@@ -93,7 +93,7 @@ namespace Microsoft.Alm.Authentication.Test
         {
             try
             {
-                Uri uri = new Uri(url, UriKind.Absolute);
+                TargetUri uri = new TargetUri(url);
                 Credential writeCreds = new Credential(username, password);
                 Credential readCreds = null;
 

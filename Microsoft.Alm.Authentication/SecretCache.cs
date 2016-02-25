@@ -6,9 +6,11 @@ namespace Microsoft.Alm.Authentication
 {
     internal sealed class SecretCache : ICredentialStore, ITokenStore
     {
+        public static StringComparer KeyComparer = StringComparer.OrdinalIgnoreCase;
+
         static SecretCache()
         {
-            _cache = new Dictionary<string, Secret>(StringComparer.OrdinalIgnoreCase);
+            _cache = new Dictionary<string, Secret>(KeyComparer);
         }
 
         private static readonly Dictionary<string, Secret> _cache;
@@ -28,7 +30,7 @@ namespace Microsoft.Alm.Authentication
         /// Deletes a credential from the cache.
         /// </summary>
         /// <param name="targetUri">The URI of the target for which credentials are being deleted</param>
-        public void DeleteCredentials(Uri targetUri)
+        public void DeleteCredentials(TargetUri targetUri)
         {
             BaseSecureStore.ValidateTargetUri(targetUri);
 
@@ -49,7 +51,7 @@ namespace Microsoft.Alm.Authentication
         /// Deletes a token from the cache.
         /// </summary>
         /// <param name="targetUri">The key which to find and delete the token with.</param>
-        public void DeleteToken(Uri targetUri)
+        public void DeleteToken(TargetUri targetUri)
         {
             BaseSecureStore.ValidateTargetUri(targetUri);
 
@@ -72,7 +74,7 @@ namespace Microsoft.Alm.Authentication
         /// <param name="targetUri">The URI of the target for which credentials are being read</param>
         /// <param name="credentials">The credentials from the store; <see langword="null"/> if failure</param>
         /// <returns><see langword="true"/> if success; <see langword="false"/> if failure</returns>
-        public bool ReadCredentials(Uri targetUri, out Credential credentials)
+        public bool ReadCredentials(TargetUri targetUri, out Credential credentials)
         {
             BaseSecureStore.ValidateTargetUri(targetUri);
 
@@ -101,7 +103,7 @@ namespace Microsoft.Alm.Authentication
         /// <param name="targetUri">The key which to find the token.</param>
         /// <param name="token">The token if successful; otherwise <see langword="null"/>.</param>
         /// <returns><see langword="true"/> if successful; <see langword="false"/> otherwise.</returns>
-        public bool ReadToken(Uri targetUri, out Token token)
+        public bool ReadToken(TargetUri targetUri, out Token token)
         {
             BaseSecureStore.ValidateTargetUri(targetUri);
 
@@ -129,7 +131,7 @@ namespace Microsoft.Alm.Authentication
         /// </summary>
         /// <param name="targetUri">The URI of the target for which credentials are being stored</param>
         /// <param name="credentials">The credentials to be stored</param>
-        public void WriteCredentials(Uri targetUri, Credential credentials)
+        public void WriteCredentials(TargetUri targetUri, Credential credentials)
         {
             BaseSecureStore.ValidateTargetUri(targetUri);
             Credential.Validate(credentials);
@@ -156,7 +158,7 @@ namespace Microsoft.Alm.Authentication
         /// </summary>
         /// <param name="targetUri">The key which to index the token by.</param>
         /// <param name="token">The token to write to the cache.</param>
-        public void WriteToken(Uri targetUri, Token token)
+        public void WriteToken(TargetUri targetUri, Token token)
         {
             BaseSecureStore.ValidateTargetUri(targetUri);
             Token.Validate(token);
@@ -183,7 +185,7 @@ namespace Microsoft.Alm.Authentication
         /// </summary>
         /// <param name="targetUri">Uri of the target</param>
         /// <returns>Properly formatted TargetName string</returns>
-        private string GetTargetName(Uri targetUri)
+        private string GetTargetName(TargetUri targetUri)
         {
             Debug.Assert(targetUri != null, "The targetUri parameter is null");
 
