@@ -58,7 +58,7 @@ Most likely reason is that your GUI “shells out” to git.exe to perform Git o
 
 ### Q: Why am I not seeing my SSH keys being saved?
 
-The Git Credential Manager does not *yet* support secure storage for SSH keys. It is something we hope to implement, but it has not been a priority. If you feel otherwise, please commend on the [SSH Key support issue](<https://github.com/Microsoft/Git-Credential-Manager-for-Windows/issues/25>) which is already open.
+The Git Credential Manager does not *yet* support secure storage for SSH keys. It is something we hope to implement, but it has not been a priority. If you feel otherwise, please comment on the [SSH Key support issue](<https://github.com/Microsoft/Git-Credential-Manager-for-Windows/issues/25>) which is already open.
 
 ### Q: Why doesn’t Git Credential Manager work on Windows XP, Mac OS, or Linux?
 
