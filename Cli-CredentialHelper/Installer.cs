@@ -61,10 +61,34 @@ namespace Microsoft.Alm.CredentialHelper
             {
                 if (_userBinPath == null)
                 {
-                    // looking to install into '%ProgramData%\Git'
-                    string userBinPath = Environment.GetFolderPath(Environment.SpecialFolder.CommonApplicationData);
-                    userBinPath = Path.Combine(userBinPath, "Git");
-                    _userBinPath = userBinPath;
+                    string val1 = null;
+                    string val2 = null;
+                    string val3 = null;
+                    var vars = Environment.GetEnvironmentVariables(EnvironmentVariableTarget.Process);
+
+                    // Git for Windows checks %HOME% first
+                    if ((val1 = vars["HOME"] as string) != null
+                        && Directory.Exists(val1))
+                    {
+                        _userBinPath = val1;
+                    }
+                    // Git for Windows checks %HOMEDRIVE%%HOMEPATH% second
+                    else if ((val1 = vars["HOMEDRIVE"] as string) != null && (val2 = vars["HOMEPATH"] as string) != null
+                        && Directory.Exists(val3 = val1 + val2))
+                    {
+                        _userBinPath = val3;
+                    }
+                    // Git for Windows checks %USERPROFILE% last
+                    else if ((val1 = vars["USERPROFILE"] as string) != null)
+                    {
+                        _userBinPath = val1;
+                    }
+
+                    if (_userBinPath != null)
+                    {
+                        // Git for Windows adds %HOME%\bin to %PATH%
+                        _userBinPath = Path.Combine(_userBinPath, "bin");
+                    }
                 }
                 return _userBinPath;
             }
@@ -187,7 +211,7 @@ namespace Microsoft.Alm.CredentialHelper
                 Console.Out.WriteLine();
                 Console.Out.WriteLine("Deploying from '{0}' to '{1}'.", Program.Location, UserBinPath);
 
-                if(!Directory.Exists(UserBinPath))
+                if (!Directory.Exists(UserBinPath))
                 {
                     Directory.CreateDirectory(UserBinPath);
                 }
