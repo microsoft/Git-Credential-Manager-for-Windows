@@ -5,20 +5,20 @@
 #include <idp.iss>
 
 #define MyAppName "Microsoft Git Credential Manager for Windows"
-#define MyAppVersion "1.1.0"
+#define MyAppVersion "1.2.0"
 #define MyAppPublisher "Microsoft Corporation"
 #define MyAppPublisherURL "http://www.microsoft.com"
 #define MyAppURL "https://github.com/Microsoft/Git-Credential-Manager-for-Windows"
 #define MyAppExeName "git-credential-manager.exe"
-#define Git4WinName "Git for Windows 2.7.0"
-#define Git4WinUrl "https://github.com/git-for-windows/git/releases/download/v2.7.0.windows.2/Git-2.7.0.2-64-bit.exe"
-#define Git4WinFile "Git-2.7.0-64-bit.exe"
+#define Git4WinName "Git for Windows 2.7.2"
+#define Git4WinUrl "https://github.com/git-for-windows/git/releases/download/v2.7.2.windows.1/Git-2.7.2-64-bit.exe"
+#define Git4WinFile "Git-2.7.2-64-bit.exe"
 #define Git4WinSpace 394309632
-#define NetFxName "The Microsoft .NET Framework 4.6."
+#define NetFxName "The Microsoft .NET Framework 4.6.1"
 #define NetFxBaseFile "NetFx40Installer.exe"
 #define NetFxBaseUrl "http://download.microsoft.com/download/1/B/E/1BE39E79-7E39-46A3-96FF-047F95396215/dotNetFx40_Full_setup.exe"
 #define NetFxCoreFile "NetFx46Installer.exe"
-#define NetFxCoreUrl "http://download.microsoft.com/download/1/4/A/14A6C422-0D3C-4811-A31F-5EF91A83C368/NDP46-KB3045560-Web.exe"
+#define NetFxCoreUrl "https://download.microsoft.com/download/3/5/9/35980F81-60F4-4DE3-88FC-8F962B97253B/NDP461-KB3102438-Web.exe"
 #define NetFxSpace 381005824
 
 [Setup]
@@ -35,7 +35,7 @@ BackColor=clWhite
 BackSolid=yes
 DefaultDirName={userpf}\{#MyAppName}
 LicenseFile=..\Deploy\LICENSE.TXT
-OutputBaseFilename=GCMW-1.1.0
+OutputBaseFilename=GCMW-1.2.0
 Compression=lzma2
 InternalCompressLevel=ultra64
 SolidCompression=yes
@@ -87,7 +87,8 @@ type NetFx_Version = (
      NetFx_v45,  // .NET Framework 4.5
      NetFx_v451, // .NET Framework 4.5.1
      NetFx_v452, // .NET Framework 4.5.2
-     NetFx_v46); // .NET Framework 4.6
+     NetFx_v46   // .NET Framework 4.6
+     NetFx_v461);// .NET Framework 4.6.1 
 
 function DetectGit(): Boolean;
 var
@@ -165,6 +166,11 @@ begin
         begin
           Result := True;
         end;
+
+      if (NetFx_v461 = version) and (regVersion >= 394254) then
+        begin
+          Result := True;
+        end;
     end;
 end;
 
@@ -176,7 +182,7 @@ end;
 function InstallPrerequisites() : Boolean;
 var
   bInstallFx40: Boolean;
-  bInstallFx46: Boolean;
+  bInstallFx461: Boolean;
   bInstallGit: Boolean;
   StatusText: string;
   ResultCode: Integer;
@@ -184,7 +190,7 @@ begin
   Result := True;
 
   bInstallFx40 := FileExists(ExpandConstant('{tmp}\{#NetFxBaseFile}'));
-  bInstallFx46 := FileExists(ExpandConstant('{tmp}\{#NetFxCoreFile}'));
+  bInstallFx461 := FileExists(ExpandConstant('{tmp}\{#NetFxCoreFile}'));
   bInstallGit := FileExists(ExpandConstant('{tmp}\{#Git4WinFile}'));
 
   if bInstallFx40 or bInstallFx46 then
@@ -203,7 +209,7 @@ begin
               end;
           end;
 
-        if bInstallFx46 then
+        if bInstallFx461 then
           begin
             if not Exec(ExpandConstant('{tmp}\{#NetFxCoreFile}'), '/passive /norestart', '', SW_SHOW, ewWaitUntilTerminated, ResultCode) then
               begin
