@@ -17,6 +17,7 @@ namespace Microsoft.Alm.CredentialHelper
     {
         public const string Title = "Git Credential Manager for Windows";
         public const string SourceUrl = "https://github.com/Microsoft/Git-Credential-Manager-for-Windows";
+        public static readonly StringComparer ConfigStringComparer = StringComparer.OrdinalIgnoreCase;
 
         internal const string CommandApprove = "approve";
         internal const string CommandErase = "erase";
@@ -35,7 +36,7 @@ namespace Microsoft.Alm.CredentialHelper
         internal const string ConfigUseModalPrompt = "modalprompt";
         internal const string ConfigValidateKey = "validate";
         internal const string ConfigWritelogKey = "writelog";
-        internal const string ConfigPreserveCredntials = "preserve";
+        internal const string ConfigPreserveCredentials = "preserve";
 
         private const string ConfigPrefix = "credential";
         private const string SecretsNamespace = "git";
@@ -225,7 +226,7 @@ namespace Microsoft.Alm.CredentialHelper
             Console.Out.WriteLine();
             Console.Out.WriteLine("  " + ConfigUseModalPrompt + "  Forces authentication to use a modal dialog instead of");
             Console.Out.WriteLine("               asking for credentials at the command prompt.");
-            Console.Out.WriteLine("               Defaults to FALSE.");
+            Console.Out.WriteLine("               Defaults to TRUE.");
             Console.Out.WriteLine();
             Console.Out.WriteLine("      `git config --global credential." + ConfigUseModalPrompt + " true`");
             Console.Out.WriteLine();
@@ -236,12 +237,12 @@ namespace Microsoft.Alm.CredentialHelper
             Console.Out.WriteLine();
             Console.Out.WriteLine("      `git config --global credential.microsoft.visualstudio.com." + ConfigValidateKey + " false`");
             Console.Out.WriteLine();
-            Console.Out.WriteLine("  " + ConfigPreserveCredntials + "     Prevents the deletion of credentials even when they are");
+            Console.Out.WriteLine("  " + ConfigPreserveCredentials + "     Prevents the deletion of credentials even when they are");
             Console.Out.WriteLine("               reported as invlaid by Git. Can lead to lockout situations once credentials");
             Console.Out.WriteLine("               expire and until those credentials are manually removed.");
             Console.Out.WriteLine("               Defaults to FALSE.");
             Console.Out.WriteLine();
-            Console.Out.WriteLine("      `git config --global credential.visualstudio.com." + ConfigPreserveCredntials + " true`");
+            Console.Out.WriteLine("      `git config --global credential.visualstudio.com." + ConfigPreserveCredentials + " true`");
             Console.Out.WriteLine();
             Console.Out.WriteLine("  " + ConfigWritelogKey + "     Enables trace logging of all activities. Logs are written to");
             Console.Out.WriteLine("               the local .git/ folder at the root of the repository.");
@@ -281,7 +282,7 @@ namespace Microsoft.Alm.CredentialHelper
 
             if (operationArguments.PreserveCredentials)
             {
-                Trace.WriteLine("   " + ConfigPreserveCredntials + " = true");
+                Trace.WriteLine("   " + ConfigPreserveCredentials + " = true");
                 Trace.WriteLine("   cancelling erase request.");
                 return;
             }
@@ -634,25 +635,25 @@ namespace Microsoft.Alm.CredentialHelper
             {
                 Trace.WriteLine("   " + ConfigAuthortyKey + " = " + entry.Value);
 
-                if (String.Equals(entry.Value, "MSA", StringComparison.OrdinalIgnoreCase)
-                    || String.Equals(entry.Value, "Microsoft", StringComparison.OrdinalIgnoreCase)
-                    || String.Equals(entry.Value, "MicrosoftAccount", StringComparison.OrdinalIgnoreCase)
-                    || String.Equals(entry.Value, "Live", StringComparison.OrdinalIgnoreCase)
-                    || String.Equals(entry.Value, "LiveConnect", StringComparison.OrdinalIgnoreCase)
-                    || String.Equals(entry.Value, "LiveID", StringComparison.OrdinalIgnoreCase))
+                if (ConfigStringComparer.Equals(entry.Value, "MSA")
+                    || ConfigStringComparer.Equals(entry.Value, "Microsoft")
+                    || ConfigStringComparer.Equals(entry.Value, "MicrosoftAccount")
+                    || ConfigStringComparer.Equals(entry.Value, "Live")
+                    || ConfigStringComparer.Equals(entry.Value, "LiveConnect")
+                    || ConfigStringComparer.Equals(entry.Value, "LiveID"))
                 {
                     operationArguments.Authority = AuthorityType.MicrosoftAccount;
                 }
-                else if (String.Equals(entry.Value, "AAD", StringComparison.OrdinalIgnoreCase)
-                         || String.Equals(entry.Value, "Azure", StringComparison.OrdinalIgnoreCase)
-                         || String.Equals(entry.Value, "AzureDirectory", StringComparison.OrdinalIgnoreCase))
+                else if (ConfigStringComparer.Equals(entry.Value, "AAD")
+                         || ConfigStringComparer.Equals(entry.Value, "Azure")
+                         || ConfigStringComparer.Equals(entry.Value, "AzureDirectory"))
                 {
                     operationArguments.Authority = AuthorityType.AzureDirectory;
                 }
-                else if (String.Equals(entry.Value, "Integrated", StringComparison.OrdinalIgnoreCase)
-                         || String.Equals(entry.Value, "NTLM", StringComparison.OrdinalIgnoreCase)
-                         || String.Equals(entry.Value, "Kerberos", StringComparison.OrdinalIgnoreCase)
-                         || String.Equals(entry.Value, "SSO", StringComparison.OrdinalIgnoreCase))
+                else if (ConfigStringComparer.Equals(entry.Value, "Integrated")
+                         || ConfigStringComparer.Equals(entry.Value, "NTLM")
+                         || ConfigStringComparer.Equals(entry.Value, "Kerberos")
+                         || ConfigStringComparer.Equals(entry.Value, "SSO"))
                 {
                     operationArguments.Authority = AuthorityType.Integrated;
                 }
@@ -666,14 +667,14 @@ namespace Microsoft.Alm.CredentialHelper
             {
                 Trace.WriteLine("   " + ConfigInteractiveKey + " = " + entry.Value);
 
-                if (String.Equals("always", entry.Value, StringComparison.OrdinalIgnoreCase)
-                    || String.Equals("true", entry.Value, StringComparison.OrdinalIgnoreCase)
-                    || String.Equals("force", entry.Value, StringComparison.OrdinalIgnoreCase))
+                if (ConfigStringComparer.Equals(entry.Value, "always")
+                    || ConfigStringComparer.Equals(entry.Value, "true")
+                    || ConfigStringComparer.Equals(entry.Value, "force"))
                 {
                     operationArguments.Interactivity = Interactivity.Always;
                 }
-                else if (String.Equals("never", entry.Value, StringComparison.OrdinalIgnoreCase)
-                         || String.Equals("false", entry.Value, StringComparison.OrdinalIgnoreCase))
+                else if (ConfigStringComparer.Equals(entry.Value, "never")
+                         || ConfigStringComparer.Equals(entry.Value, "false"))
                 {
                     operationArguments.Interactivity = Interactivity.Never;
                 }
@@ -688,6 +689,17 @@ namespace Microsoft.Alm.CredentialHelper
                 {
                     operationArguments.ValidateCredentials = validate;
                 }
+                else
+                {
+                    if (ConfigStringComparer.Equals(validate, "no"))
+                    {
+                        operationArguments.ValidateCredentials = false;
+                    }
+                    else if (ConfigStringComparer.Equals(validate, "yes"))
+                    {
+                        operationArguments.ValidateCredentials = true;
+                    }
+                }
             }
 
             if (config.TryGetEntry(ConfigPrefix, operationArguments.TargetUri, ConfigWritelogKey, out entry))
@@ -698,6 +710,17 @@ namespace Microsoft.Alm.CredentialHelper
                 if (Boolean.TryParse(entry.Value, out writelog))
                 {
                     operationArguments.WriteLog = writelog;
+                }
+                else
+                {
+                    if (ConfigStringComparer.Equals(writelog, "no"))
+                    {
+                        operationArguments.WriteLog = false;
+                    }
+                    else if (ConfigStringComparer.Equals(writelog, "yes"))
+                    {
+                        operationArguments.WriteLog = true;
+                    }
                 }
             }
 
@@ -710,16 +733,38 @@ namespace Microsoft.Alm.CredentialHelper
                 {
                     operationArguments.UseModalUi = usemodel;
                 }
+                else
+                {
+                    if (ConfigStringComparer.Equals(usemodel, "no"))
+                    {
+                        operationArguments.UseModalUi = false;
+                    }
+                    else if (ConfigStringComparer.Equals(usemodel, "yes"))
+                    {
+                        operationArguments.UseModalUi = true;
+                    }
+                }
             }
 
-            if (config.TryGetEntry(ConfigPrefix, operationArguments.TargetUri, ConfigPreserveCredntials, out entry))
+            if (config.TryGetEntry(ConfigPrefix, operationArguments.TargetUri, ConfigPreserveCredentials, out entry))
             {
-                Trace.WriteLine("   " + ConfigPreserveCredntials + " = " + entry.Value);
+                Trace.WriteLine("   " + ConfigPreserveCredentials + " = " + entry.Value);
 
                 bool preserveCredentials = operationArguments.UseModalUi;
                 if (Boolean.TryParse(entry.Value, out preserveCredentials))
                 {
                     operationArguments.PreserveCredentials = preserveCredentials;
+                }
+                else
+                {
+                    if (ConfigStringComparer.Equals(preserveCredentials, "no"))
+                    {
+                        operationArguments.PreserveCredentials = false;
+                    }
+                    else if (ConfigStringComparer.Equals(preserveCredentials, "yes"))
+                    {
+                        operationArguments.PreserveCredentials = true;
+                    }
                 }
             }
         }

@@ -14,6 +14,7 @@ namespace Microsoft.Alm.CredentialHelper
 
             this.Authority = AuthorityType.Auto;
             this.Interactivity = Interactivity.Auto;
+            this.UseModalUi = true;
             this.ValidateCredentials = true;
             this.WriteLog = false;
 
