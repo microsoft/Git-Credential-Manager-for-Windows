@@ -4,6 +4,6 @@ namespace Microsoft.Alm.Authentication
 {
     public interface IVstsMsaAuthentication
     {
-        bool InteractiveLogon(Uri targetUri, bool requestCompactToken);
+        bool InteractiveLogon(TargetUri targetUri, bool requestCompactToken);
     }
 }

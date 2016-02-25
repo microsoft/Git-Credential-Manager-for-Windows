@@ -14,7 +14,7 @@ namespace Microsoft.Alm.Authentication.Test
         [TestMethod]
         public void VstsAadDeleteCredentialsTest()
         {
-            Uri targetUri = DefaultTargetUri;
+            TargetUri targetUri = DefaultTargetUri;
             VstsAadAuthentication aadAuthentication = GetVstsAadAuthentication("aad-delete");
 
             aadAuthentication.PersonalAccessTokenStore.WriteCredentials(targetUri, DefaultPersonalAccessToken);
@@ -35,7 +35,7 @@ namespace Microsoft.Alm.Authentication.Test
         [TestMethod]
         public void VstsAadGetCredentialsTest()
         {
-            Uri targetUri = DefaultTargetUri;
+            TargetUri targetUri = DefaultTargetUri;
             VstsAadAuthentication aadAuthentication = GetVstsAadAuthentication("aad-get");
 
             Credential credentials;
@@ -51,7 +51,7 @@ namespace Microsoft.Alm.Authentication.Test
         [TestMethod]
         public void VstsAadInteractiveLogonTest()
         {
-            Uri targetUri = DefaultTargetUri;
+            TargetUri targetUri = DefaultTargetUri;
             VstsAadAuthentication aadAuthentication = GetVstsAadAuthentication("aad-logon");
 
             Credential personalAccessToken;
@@ -69,7 +69,7 @@ namespace Microsoft.Alm.Authentication.Test
         [TestMethod]
         public void VstsAadNoninteractiveLogonTest()
         {
-            Uri targetUri = DefaultTargetUri;
+            TargetUri targetUri = DefaultTargetUri;
             VstsAadAuthentication aadAuthentication = GetVstsAadAuthentication("aad-noninteractive");
 
             Credential personalAccessToken;
@@ -84,7 +84,7 @@ namespace Microsoft.Alm.Authentication.Test
         [TestMethod]
         public void VstsAadNoninteractiveLogonWithCredentialsTest()
         {
-            Uri targetUri = DefaultTargetUri;
+            TargetUri targetUri = DefaultTargetUri;
             VstsAadAuthentication aadAuthentication = GetVstsAadAuthentication("aad-noninter-creds");
 
             Credential originCreds = DefaultCredentials;
@@ -102,8 +102,8 @@ namespace Microsoft.Alm.Authentication.Test
         [TestMethod]
         public void VstsAadRefreshCredentialsTest()
         {
-            Uri targetUri = DefaultTargetUri;
-            Uri invalidUri = InvalidTargetUri;
+            TargetUri targetUri = DefaultTargetUri;
+            TargetUri invalidUri = InvalidTargetUri;
             VstsAadAuthentication aadAuthentication = GetVstsAadAuthentication("aad-refresh");
 
             aadAuthentication.AdaRefreshTokenStore.WriteToken(targetUri, DefaultAzureRefreshToken);
@@ -121,7 +121,7 @@ namespace Microsoft.Alm.Authentication.Test
         [TestMethod]
         public void VstsAadSetCredentialsTest()
         {
-            Uri targetUri = DefaultTargetUri;
+            TargetUri targetUri = DefaultTargetUri;
             VstsAadAuthentication aadAuthentication = GetVstsAadAuthentication("aad-set");
             Credential credentials = DefaultCredentials;
 

@@ -47,7 +47,7 @@ namespace Microsoft.Alm.Authentication
         /// True if a compact access token is required; false if a standard token is acceptable.
         /// </param>
         /// <returns>True if successfull; otherwise false.</returns>
-        public bool InteractiveLogon(Uri targetUri, bool requireCompactToken)
+        public bool InteractiveLogon(TargetUri targetUri, bool requireCompactToken)
         {
             const string QueryParameters = "domain_hint=live.com&display=popup&site_id=501454&nux=1";
 
@@ -84,7 +84,7 @@ namespace Microsoft.Alm.Authentication
         /// </param>
         /// <param name="credentials">The credentials being set.</param>
         /// <returns>True if successful; false otherwise.</returns>
-        public override bool SetCredentials(Uri targetUri, Credential credentials)
+        public override bool SetCredentials(TargetUri targetUri, Credential credentials)
         {
             BaseSecureStore.ValidateTargetUri(targetUri);
             Credential.Validate(credentials);

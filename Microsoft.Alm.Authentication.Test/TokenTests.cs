@@ -43,7 +43,7 @@ namespace Microsoft.Alm.Authentication.Test
         {
             try
             {
-                Uri uri = new Uri(url, UriKind.Absolute);
+                TargetUri uri = new TargetUri(url);
 
                 Token writeToken = new Token(token, TokenType.Test);
                 Token readToken = null;

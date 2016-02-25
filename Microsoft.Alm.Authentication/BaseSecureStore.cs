@@ -37,7 +37,7 @@ namespace Microsoft.Alm.Authentication
             }
         }
 
-        protected abstract string GetTargetName(Uri targetUri);
+        protected abstract string GetTargetName(TargetUri targetUri);
 
         protected Credential ReadCredentials(string targetName)
         {
@@ -182,11 +182,11 @@ namespace Microsoft.Alm.Authentication
         }
 
         [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
-        internal static void ValidateTargetUri(Uri targetUri)
+        internal static void ValidateTargetUri(TargetUri targetUri)
         {
             if (targetUri == null)
                 throw new ArgumentNullException("targetUri");
-            if (!targetUri.IsAbsoluteUri)
+            if (!targetUri.IsAbsoluteUri || !targetUri.ActualUri.IsAbsoluteUri)
                 throw new ArgumentException("The target URI must be an absolute URI", "targetUri");
         }
     }

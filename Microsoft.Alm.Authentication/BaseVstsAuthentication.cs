@@ -92,7 +92,7 @@ namespace Microsoft.Alm.Authentication
         /// Deletes a set of stored credentials by their target resource.
         /// </summary>
         /// <param name="targetUri">The 'key' by which to identify credentials.</param>
-        public override void DeleteCredentials(Uri targetUri)
+        public override void DeleteCredentials(TargetUri targetUri)
         {
             BaseSecureStore.ValidateTargetUri(targetUri);
 
@@ -117,7 +117,7 @@ namespace Microsoft.Alm.Authentication
         /// <param name="credentials">Credentials associated with the URI if successful;
         /// <see langword="null"/> otherwise.</param>
         /// <returns><see langword="true"/> if successful; <see langword="false" /> otherwise.</returns>
-        public override bool GetCredentials(Uri targetUri, out Credential credentials)
+        public override bool GetCredentials(TargetUri targetUri, out Credential credentials)
         {
             BaseSecureStore.ValidateTargetUri(targetUri);
 
@@ -139,7 +139,7 @@ namespace Microsoft.Alm.Authentication
         /// <param name="requireCompactToken">Generates a compact token if <see langword="true"/>;
         /// generates a self describing token if <see langword="false"/>.</param>
         /// <returns><see langword="true"/> if successful; <see langword="false"/> otherwise.</returns>
-        public async Task<bool> RefreshCredentials(Uri targetUri, bool requireCompactToken)
+        public async Task<bool> RefreshCredentials(TargetUri targetUri, bool requireCompactToken)
         {
             BaseSecureStore.ValidateTargetUri(targetUri);
 
@@ -187,7 +187,7 @@ namespace Microsoft.Alm.Authentication
         /// <param name="targetUri">The target resource to validate against.</param>
         /// <param name="credentials">The credentials to validate.</param>
         /// <returns><see langword="true"/> if successful; <see langword="false"/> otherwise.</returns>
-        public async Task<bool> ValidateCredentials(Uri targetUri, Credential credentials)
+        public async Task<bool> ValidateCredentials(TargetUri targetUri, Credential credentials)
         {
             Trace.WriteLine("BaseVstsAuthentication::ValidateCredentials");
 
@@ -204,7 +204,7 @@ namespace Microsoft.Alm.Authentication
         /// <param name="requestCompactToken">Generates a compact token if <see langword="true"/>;
         /// generates a self describing token if <see langword="false"/>.</param>
         /// <returns><see langword="true"/> if successful; <see langword="false"/> otherwise.</returns>
-        protected async Task<bool> GeneratePersonalAccessToken(Uri targetUri, Token accessToken, bool requestCompactToken)
+        protected async Task<bool> GeneratePersonalAccessToken(TargetUri targetUri, Token accessToken, bool requestCompactToken)
         {
             Debug.Assert(targetUri != null, "The targetUri parameter is null");
             Debug.Assert(accessToken != null, "The accessToken parameter is null");
@@ -225,7 +225,7 @@ namespace Microsoft.Alm.Authentication
         /// </summary>
         /// <param name="targetUri">The 'key' by which to identify the token.</param>
         /// <param name="refreshToken">The token to be stored.</param>
-        protected void StoreRefreshToken(Uri targetUri, Token refreshToken)
+        protected void StoreRefreshToken(TargetUri targetUri, Token refreshToken)
         {
             Debug.Assert(targetUri != null, "The targetUri parameter is null");
             Debug.Assert(refreshToken != null, "The refreshToken parameter is null");
@@ -241,7 +241,7 @@ namespace Microsoft.Alm.Authentication
         /// <param name="targetUri">The resource which the authority protects.</param>
         /// <param name="tenantId">The identity of the authority tenant; <see cref="Guid.Empty"/> otherwise.</param>
         /// <returns><see langword="true"/> if the authority is Visual Studio Online; <see langword="false"/> otherwise</returns>
-        public static bool DetectAuthority(Uri targetUri, out Guid tenantId)
+        public static bool DetectAuthority(TargetUri targetUri, out Guid tenantId)
         {
             const string VstsBaseUrlHost = "visualstudio.com";
             const string VstsResourceTenantHeader = "X-VSS-ResourceTenant";
@@ -250,7 +250,7 @@ namespace Microsoft.Alm.Authentication
 
             tenantId = Guid.Empty;
 
-            if (targetUri.DnsSafeHost.EndsWith(VstsBaseUrlHost, StringComparison.OrdinalIgnoreCase))
+            if (targetUri.ActualUri.DnsSafeHost.EndsWith(VstsBaseUrlHost, StringComparison.OrdinalIgnoreCase))
             {
                 Trace.WriteLine("   detected visualstudio.com, checking AAD vs MSA");
 
@@ -306,7 +306,7 @@ namespace Microsoft.Alm.Authentication
         /// <see langword="true"/> if an authority could be determined; <see langword="false"/> otherwise.
         /// </returns>
         public static bool GetAuthentication(
-            Uri targetUri,
+            TargetUri targetUri,
             VstsTokenScope scope,
             ICredentialStore personalAccessTokenStore,
             ITokenStore adaRefreshTokenStore,

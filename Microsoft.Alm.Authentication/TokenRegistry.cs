@@ -26,7 +26,7 @@ namespace Microsoft.Alm.Authentication
         /// Not supported
         /// </summary>
         /// <param name="targetUri"></param>
-        public void DeleteToken(Uri targetUri)
+        public void DeleteToken(TargetUri targetUri)
         {
             // we've decided to not support registry delets until the rules are established
             throw new NotSupportedException("Deletes from the registry are not supported by this library.");
@@ -37,7 +37,7 @@ namespace Microsoft.Alm.Authentication
         /// <param name="targetUri">Key used to select the token.</param>
         /// <param name="token">If successful, the token from the registry; otherwise `null`.</param>
         /// <returns>True if successful; otherwise false.</returns>
-        public bool ReadToken(Uri targetUri, out Token token)
+        public bool ReadToken(TargetUri targetUri, out Token token)
         {
             BaseSecureStore.ValidateTargetUri(targetUri);
 
@@ -57,7 +57,7 @@ namespace Microsoft.Alm.Authentication
                     try
                     {
                         Uri tokenUri = new Uri(url);
-                        if (tokenUri.IsBaseOf(targetUri))
+                        if (tokenUri.IsBaseOf(targetUri.ActualUri))
                         {
                             byte[] data = Convert.FromBase64String(value);
 
@@ -95,7 +95,7 @@ namespace Microsoft.Alm.Authentication
         /// </summary>
         /// <param name="targetUri"></param>
         /// <param name="token"></param>
-        public void WriteToken(Uri targetUri, Token token)
+        public void WriteToken(TargetUri targetUri, Token token)
         {
             // we've decided to not support registry writes until the format is standardized
             throw new NotSupportedException("Writes to the registry are not supported by this library.");

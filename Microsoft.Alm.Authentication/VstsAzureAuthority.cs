@@ -33,7 +33,7 @@ namespace Microsoft.Alm.Authentication
         /// <param name="tokenScope"></param>
         /// <param name="requireCompactToken"></param>
         /// <returns></returns>
-        public async Task<Token> GeneratePersonalAccessToken(Uri targetUri, Token accessToken, VstsTokenScope tokenScope, bool requireCompactToken)
+        public async Task<Token> GeneratePersonalAccessToken(TargetUri targetUri, Token accessToken, VstsTokenScope tokenScope, bool requireCompactToken)
         {
             const string TokenAuthHost = "app.vssps.visualstudio.com";
             const string SessionTokenUrl = "https://" + TokenAuthHost + "/_apis/token/sessiontokens?api-version=1.0";
@@ -119,7 +119,7 @@ namespace Microsoft.Alm.Authentication
             return null;
         }
 
-        public async Task<bool> PopulateTokenTargetId(Uri targetUri, Token accessToken)
+        public async Task<bool> PopulateTokenTargetId(TargetUri targetUri, Token accessToken)
         {
             Debug.Assert(targetUri != null && targetUri.IsAbsoluteUri, "The targetUri parameter is null or invalid");
             Debug.Assert(accessToken != null && !String.IsNullOrWhiteSpace(accessToken.Value) && (accessToken.Type == TokenType.Access || accessToken.Type == TokenType.Federated), "The accessToken parameter is null or invalid");
@@ -174,7 +174,7 @@ namespace Microsoft.Alm.Authentication
         /// <see cref="Credential"/> expected to grant access to the VSTS service.
         /// </param>
         /// <returns>True if successful; otherwise false.</returns>
-        public async Task<bool> ValidateCredentials(Uri targetUri, Credential credentials)
+        public async Task<bool> ValidateCredentials(TargetUri targetUri, Credential credentials)
         {
             Debug.Assert(targetUri != null && targetUri.IsAbsoluteUri, "The targetUri parameter is null or invalid");
             Debug.Assert(credentials != null, "The credentials parameter is null or invalid");
@@ -218,7 +218,7 @@ namespace Microsoft.Alm.Authentication
         /// <see cref="Token"/> expected to grant access to the VSTS service.
         /// </param>
         /// <returns>True if successful; otherwise false.</returns>
-        public async Task<bool> ValidateToken(Uri targetUri, Token token)
+        public async Task<bool> ValidateToken(TargetUri targetUri, Token token)
         {
             Debug.Assert(targetUri != null && targetUri.IsAbsoluteUri, "The targetUri parameter is null or invalid");
             Debug.Assert(token != null && (token.Type == TokenType.Access || token.Type == TokenType.Federated), "The token parameter is null or invalid");
@@ -255,7 +255,7 @@ namespace Microsoft.Alm.Authentication
             return false;
         }
 
-        private StringContent GetAccessTokenRequestBody(Uri targetUri, Token accessToken, VstsTokenScope tokenScope)
+        private StringContent GetAccessTokenRequestBody(TargetUri targetUri, Token accessToken, VstsTokenScope tokenScope)
         {
             const string ContentJsonFormat = "{{ \"scope\" : \"{0}\", \"targetAccounts\" : [\"{1}\"], \"displayName\" : \"Git: {2} on {3}\" }}";
             const string HttpJsonContentType = "application/json";
@@ -271,7 +271,7 @@ namespace Microsoft.Alm.Authentication
             return content;
         }
 
-        private HttpWebRequest GetConnectionDataRequest(Uri targetUri, Credential credentials)
+        private HttpWebRequest GetConnectionDataRequest(TargetUri targetUri, Credential credentials)
         {
             const string BasicPrefix = "Basic ";
             const string UsernamePasswordFormat = "{0}:{1}";
@@ -292,7 +292,7 @@ namespace Microsoft.Alm.Authentication
             return request;
         }
 
-        private HttpWebRequest GetConnectionDataRequest(Uri targetUri, Token token)
+        private HttpWebRequest GetConnectionDataRequest(TargetUri targetUri, Token token)
         {
             const string BearerPrefix = "Bearer ";
 
@@ -330,14 +330,14 @@ namespace Microsoft.Alm.Authentication
             return request;
         }
 
-        private HttpWebRequest GetConnectionDataRequest(Uri targetUri)
+        private HttpWebRequest GetConnectionDataRequest(TargetUri targetUri)
         {
-            const string VstsValidationUrlFormat = "https://{0}/_apis/connectiondata";
+            const string VstsValidationUrlFormat = "{0}://{1}/_apis/connectiondata";
 
             Debug.Assert(targetUri != null && targetUri.IsAbsoluteUri, "The targetUri parameter is null or invalid");
 
             // create a url to the connection data end-point, it's deployment level and "always on".
-            string validationUrl = String.Format(VstsValidationUrlFormat, targetUri.DnsSafeHost);
+            string validationUrl = String.Format(VstsValidationUrlFormat, targetUri.Scheme, targetUri.DnsSafeHost);
 
             // start building the request, only supports GET
             HttpWebRequest request = WebRequest.CreateHttp(validationUrl);

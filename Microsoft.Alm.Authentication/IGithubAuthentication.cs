@@ -5,8 +5,8 @@ namespace Microsoft.Alm.Authentication
 {
     public interface IGithubAuthentication : IAuthentication
     {
-        bool InteractiveLogon(Uri targetUri, out Credential credentials);
-        Task<bool> NoninteractiveLogonWithCredentials(Uri targetUri, string username, string password, string authenticationCode = null);
-        Task<bool> ValidateCredentials(Uri targetUri, Credential credentials);
+        bool InteractiveLogon(TargetUri targetUri, out Credential credentials);
+        Task<bool> NoninteractiveLogonWithCredentials(TargetUri targetUri, string username, string password, string authenticationCode = null);
+        Task<bool> ValidateCredentials(TargetUri targetUri, Credential credentials);
     }
 }

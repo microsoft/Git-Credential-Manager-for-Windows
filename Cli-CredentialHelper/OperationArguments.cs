@@ -50,10 +50,7 @@ namespace Microsoft.Alm.CredentialHelper
                 }
             }
 
-            if (this.Protocol != null && this.Host != null)
-            {
-                _targetUri = new Uri(String.Format("{0}://{1}", this.Protocol, this.Host), UriKind.Absolute);
-            }
+            this.CreateTargetUri();
         }
 
         public AuthorityType Authority { get; set; }
@@ -75,9 +72,10 @@ namespace Microsoft.Alm.CredentialHelper
                     _proxyPath = value.AbsolutePath;
                     _proxyProtocol = value.Scheme;
                 }
-                CreateUriValues();
+                CreateTargetUri();
             }
         }
+        public Uri HostUri { get { return _actualUri; } }
         public Interactivity Interactivity { get; set; }
         public readonly string Path;
         public string Password { get; private set; }
@@ -89,7 +87,7 @@ namespace Microsoft.Alm.CredentialHelper
             set
             {
                 _proxyHost = value;
-                CreateUriValues();
+                CreateTargetUri();
             }
         }
         public string ProxyPath
@@ -98,7 +96,7 @@ namespace Microsoft.Alm.CredentialHelper
             set
             {
                 _proxyPath = value;
-                CreateUriValues();
+                CreateTargetUri();
             }
         }
         public string ProxyProtocol
@@ -107,10 +105,13 @@ namespace Microsoft.Alm.CredentialHelper
             set
             {
                 _proxyProtocol = value;
-                CreateUriValues();
+                CreateTargetUri();
             }
         }
-        public Uri TargetUri { get { return _targetUri; } }
+        public TargetUri TargetUri
+        {
+            get { return _targetUri; }
+        }
         public string Username { get; private set; }
         public bool UseHttpPath
         {
@@ -118,32 +119,19 @@ namespace Microsoft.Alm.CredentialHelper
             set
             {
                 _useHttpPath = value;
-                CreateUriValues();
+                CreateTargetUri();
             }
         }
-
-        private void CreateUriValues()
-        {
-            string targetUrl = _useHttpPath
-                ? String.Format("{0}://{1}", this.Protocol, this.Host)
-                : String.Format("{0}://{1}/{2}", this.Protocol, this.Host, this.Path);
-            string proxyUrl = _useHttpPath
-                ? String.Format("{0}://{1}", this.ProxyProtocol, this.ProxyHost)
-                : String.Format("{0}://{1}/{2}", this.ProxyProtocol, this.ProxyHost, this.ProxyPath);
-
-            Uri.TryCreate(targetUrl, UriKind.Absolute, out _targetUri);
-            Uri.TryCreate(proxyUrl, UriKind.Absolute, out _proxyUri);
-        }
-
         public bool UseModalUi { get; set; }
         public bool ValidateCredentials { get; set; }
         public bool WriteLog { get; set; }
 
+        private Uri _actualUri;
         private string _proxyHost;
         private string _proxyPath;
         private string _proxyProtocol;
         private Uri _proxyUri;
-        private Uri _targetUri;
+        private TargetUri _targetUri;
         private bool _useHttpPath;
 
         public void SetCredentials(Credential credentials)
@@ -190,6 +178,22 @@ namespace Microsoft.Alm.CredentialHelper
             }
 
             return builder.ToString();
+        }
+
+        internal void CreateTargetUri()
+        {
+            string actualUrl = _useHttpPath
+                ? String.Format("{0}://{1}/{2}", this.Protocol, this.Host, this.Path)
+                : String.Format("{0}://{1}", this.Protocol, this.Host);
+            string proxyUrl = _useHttpPath
+                ? String.Format("{0}://{1}/{2}", this.ProxyProtocol, this.ProxyHost, this.ProxyPath)
+                : String.Format("{0}://{1}", this.ProxyProtocol, this.ProxyHost);
+
+            if (Uri.TryCreate(actualUrl, UriKind.Absolute, out _actualUri)
+                || Uri.TryCreate(proxyUrl, UriKind.Absolute, out _proxyUri))
+            {
+                _targetUri = new TargetUri(_actualUri, _proxyUri);
+            }
         }
     }
 }

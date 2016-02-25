@@ -57,9 +57,9 @@ namespace Microsoft.Alm.Authentication
         /// authority.
         /// </param>
         /// <returns>If successful a <see cref="TokenPair"/>; otherwise <see langword="null"/>.</returns>
-        public TokenPair AcquireToken(Uri targetUri, string clientId, string resource, Uri redirectUri, string queryParameters = null)
+        public TokenPair AcquireToken(TargetUri targetUri, string clientId, string resource, Uri redirectUri, string queryParameters = null)
         {
-            Debug.Assert(targetUri != null && targetUri.IsAbsoluteUri, "The targetUri parameter is null or invalid");
+            Debug.Assert(targetUri != null && targetUri.IsAbsoluteUri, "The targetUri parameter is null");
             Debug.Assert(!String.IsNullOrWhiteSpace(clientId), "The clientId parameter is null or empty");
             Debug.Assert(!String.IsNullOrWhiteSpace(resource), "The resource parameter is null or empty");
             Debug.Assert(redirectUri != null, "The redirectUri parameter is null");
@@ -101,7 +101,7 @@ namespace Microsoft.Alm.Authentication
         /// </param>
         /// <param name="credentials">Optional: user credential to use for token acquisition.</param>
         /// <returns>If successful a <see cref="TokenPair"/>; otherwise <see langword="null"/>.</returns>
-        public async Task<TokenPair> AcquireTokenAsync(Uri targetUri, string clientId, string resource, Credential credentials = null)
+        public async Task<TokenPair> AcquireTokenAsync(TargetUri targetUri, string clientId, string resource, Credential credentials = null)
         {
             Debug.Assert(targetUri != null && targetUri.IsAbsoluteUri, "The targetUri parameter is null or invalid");
             Debug.Assert(!String.IsNullOrWhiteSpace(clientId), "The clientId parameter is null or empty");
@@ -143,7 +143,7 @@ namespace Microsoft.Alm.Authentication
         /// <param name="refreshToken">The <see cref="Token"/> of type <see cref="TokenType.Refresh"/>
         /// to be used to acquire the access token.</param>
         /// <returns>If successful a <see cref="TokenPair"/>; otherwise <see langword="null"/>.</returns>
-        public async Task<TokenPair> AcquireTokenByRefreshTokenAsync(Uri targetUri, string clientId, string resource, Token refreshToken)
+        public async Task<TokenPair> AcquireTokenByRefreshTokenAsync(TargetUri targetUri, string clientId, string resource, Token refreshToken)
         {
             Debug.Assert(targetUri != null && targetUri.IsAbsoluteUri, "The targetUri parameter is null or invalid");
             Debug.Assert(!String.IsNullOrWhiteSpace(clientId), "The clientId parameter is null or empty");

@@ -14,7 +14,7 @@ namespace Microsoft.Alm.Authentication.Test
         [TestMethod]
         public void VstsMsaDeleteCredentialsTest()
         {
-            Uri targetUri = DefaultTargetUri;
+            TargetUri targetUri = DefaultTargetUri;
             VstsMsaAuthentication msaAuthority = GetVstsMsaAuthentication("msa-delete");
 
             msaAuthority.PersonalAccessTokenStore.WriteCredentials(targetUri, DefaultPersonalAccessToken);
@@ -35,7 +35,7 @@ namespace Microsoft.Alm.Authentication.Test
         [TestMethod]
         public void VstsMsaGetCredentialsTest()
         {
-            Uri targetUri = DefaultTargetUri;
+            TargetUri targetUri = DefaultTargetUri;
             VstsMsaAuthentication msaAuthority = GetVstsMsaAuthentication("msa-get");
             Credential credentials;
 
@@ -50,7 +50,7 @@ namespace Microsoft.Alm.Authentication.Test
         [TestMethod]
         public void VstsMsaInteractiveLogonTest()
         {
-            Uri targetUri = DefaultTargetUri;
+            TargetUri targetUri = DefaultTargetUri;
             VstsMsaAuthentication msaAuthority = GetVstsMsaAuthentication("msa-logon");
 
             Credential personalAccessToken;
@@ -68,8 +68,8 @@ namespace Microsoft.Alm.Authentication.Test
         [TestMethod]
         public void VstsMsaRefreshCredentialsTest()
         {
-            Uri targetUri = DefaultTargetUri;
-            Uri invlaidUri = InvalidTargetUri;
+            TargetUri targetUri = DefaultTargetUri;
+            TargetUri invlaidUri = InvalidTargetUri;
             VstsMsaAuthentication msaAuthority = GetVstsMsaAuthentication("msa-refresh");
 
             msaAuthority.AdaRefreshTokenStore.WriteToken(targetUri, DefaultAzureRefreshToken);
@@ -87,7 +87,7 @@ namespace Microsoft.Alm.Authentication.Test
         [TestMethod]
         public void VstsMsaSetCredentialsTest()
         {
-            Uri targetUri = DefaultTargetUri;
+            TargetUri targetUri = DefaultTargetUri;
             VstsMsaAuthentication msaAuthority = GetVstsMsaAuthentication("msa-set");
             Credential personalAccessToken;
             Token azureToken;

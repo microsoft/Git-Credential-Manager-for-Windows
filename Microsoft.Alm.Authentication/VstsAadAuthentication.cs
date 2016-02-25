@@ -74,7 +74,7 @@ namespace Microsoft.Alm.Authentication
         /// the basic authentication header which they can create (example: Git).</para>
         /// </param>
         /// <returns><see langword="true"/> if a authentication and personal access token acquisition was successful; otherwise <see langword="false"/>.</returns>
-        public bool InteractiveLogon(Uri targetUri, bool requestCompactToken)
+        public bool InteractiveLogon(TargetUri targetUri, bool requestCompactToken)
         {
             BaseSecureStore.ValidateTargetUri(targetUri);
 
@@ -118,7 +118,7 @@ namespace Microsoft.Alm.Authentication
         /// the basic authentication header which they can create (example: Git).</para>
         /// </param>
         /// <returns><see langword="true"/> if authentication and personal access token acquisition was successful; otherwise <see langword="false"/>.</returns>
-        public async Task<bool> NoninteractiveLogonWithCredentials(Uri targetUri, Credential credentials, bool requestCompactToken)
+        public async Task<bool> NoninteractiveLogonWithCredentials(TargetUri targetUri, Credential credentials, bool requestCompactToken)
         {
             BaseSecureStore.ValidateTargetUri(targetUri);
             Credential.Validate(credentials);
@@ -162,7 +162,7 @@ namespace Microsoft.Alm.Authentication
         /// the basic authentication header which they can create (example: Git).</para>
         /// </param>
         /// <returns><see langword="true"/> if authentication and personal access token acquisition was successful; otherwise <see langword="false"/>.</returns>
-        public async Task<bool> NoninteractiveLogon(Uri targetUri, bool requestCompactToken)
+        public async Task<bool> NoninteractiveLogon(TargetUri targetUri, bool requestCompactToken)
         {
             BaseSecureStore.ValidateTargetUri(targetUri);
 
@@ -198,7 +198,7 @@ namespace Microsoft.Alm.Authentication
         /// </param>
         /// <param name="credentials">The credentials being set.</param>
         /// <returns><see langword="true"/> if successful; <see langword="false"/> otherwise.</returns>
-        public override bool SetCredentials(Uri targetUri, Credential credentials)
+        public override bool SetCredentials(TargetUri targetUri, Credential credentials)
         {
             BaseSecureStore.ValidateTargetUri(targetUri);
             Credential.Validate(credentials);

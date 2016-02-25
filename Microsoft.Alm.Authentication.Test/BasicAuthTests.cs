@@ -15,7 +15,7 @@ namespace Microsoft.Alm.Authentication.Test
         [TestMethod]
         public void BasicAuthDeleteCredentialsTest()
         {
-            Uri targetUri = new Uri("http://localhost");
+            TargetUri targetUri = new TargetUri("http://localhost");
             BasicAuthentication basicAuth = GetBasicAuthentication("basic-delete");
 
             basicAuth.CredentialStore.WriteCredentials(targetUri, new Credential("username", "password"));
@@ -30,7 +30,7 @@ namespace Microsoft.Alm.Authentication.Test
         [TestMethod]
         public void BasicAuthGetCredentialsTest()
         {
-            Uri targetUri = new Uri("http://localhost");
+            TargetUri targetUri = new TargetUri("http://localhost");
             BasicAuthentication basicAuth = GetBasicAuthentication("basic-get");
 
             Credential credentials = null;
@@ -47,7 +47,7 @@ namespace Microsoft.Alm.Authentication.Test
         [TestMethod]
         public void BasicAuthSetCredentialsTest()
         {
-            Uri targetUri = new Uri("http://localhost");
+            TargetUri targetUri = new TargetUri("http://localhost");
             BasicAuthentication basicAuth = GetBasicAuthentication("basic-set");
 
             Credential credentials = null;

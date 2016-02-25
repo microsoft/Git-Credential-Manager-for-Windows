@@ -131,7 +131,7 @@ namespace Microsoft.Alm.Authentication
         /// Gets a hash code based on the contents of the token.
         /// </summary>
         /// <returns>32-bit hash code.</returns>
-        public override Int32 GetHashCode()
+        public override int GetHashCode()
         {
             unchecked
             {

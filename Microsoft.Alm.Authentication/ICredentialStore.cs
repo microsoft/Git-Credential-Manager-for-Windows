@@ -4,8 +4,8 @@ namespace Microsoft.Alm.Authentication
 {
     public interface ICredentialStore
     {
-        void DeleteCredentials(Uri targetUri);
-        bool ReadCredentials(Uri targetUri, out Credential credentials);
-        void WriteCredentials(Uri targetUri, Credential credentials);
+        void DeleteCredentials(TargetUri targetUri);
+        bool ReadCredentials(TargetUri targetUri, out Credential credentials);
+        void WriteCredentials(TargetUri targetUri, Credential credentials);
     }
 }

@@ -648,7 +648,7 @@ namespace Microsoft.Alm.CredentialHelper
             Configuration config = new Configuration();
             Configuration.Entry entry;
 
-            if (config.TryGetEntry(ConfigPrefix, operationArguments.TargetUri, ConfigAuthortyKey, out entry))
+            if (config.TryGetEntry(ConfigPrefix, operationArguments.HostUri, ConfigAuthortyKey, out entry))
             {
                 Trace.WriteLine("   " + ConfigAuthortyKey + " = " + entry.Value);
 
@@ -680,7 +680,7 @@ namespace Microsoft.Alm.CredentialHelper
                 }
             }
 
-            if (config.TryGetEntry(ConfigPrefix, operationArguments.TargetUri, ConfigInteractiveKey, out entry))
+            if (config.TryGetEntry(ConfigPrefix, operationArguments.HostUri, ConfigInteractiveKey, out entry))
             {
                 Trace.WriteLine("   " + ConfigInteractiveKey + " = " + entry.Value);
 
@@ -697,7 +697,7 @@ namespace Microsoft.Alm.CredentialHelper
                 }
             }
 
-            if (config.TryGetEntry(ConfigPrefix, operationArguments.TargetUri, ConfigValidateKey, out entry))
+            if (config.TryGetEntry(ConfigPrefix, operationArguments.HostUri, ConfigValidateKey, out entry))
             {
                 Trace.WriteLine("   " + ConfigValidateKey + " = " + entry.Value);
 
@@ -719,7 +719,7 @@ namespace Microsoft.Alm.CredentialHelper
                 }
             }
 
-            if (config.TryGetEntry(ConfigPrefix, operationArguments.TargetUri, ConfigWritelogKey, out entry))
+            if (config.TryGetEntry(ConfigPrefix, operationArguments.HostUri, ConfigWritelogKey, out entry))
             {
                 Trace.WriteLine("   " + ConfigWritelogKey + " = " + entry.Value);
 
@@ -741,7 +741,7 @@ namespace Microsoft.Alm.CredentialHelper
                 }
             }
 
-            if (config.TryGetEntry(ConfigPrefix, operationArguments.TargetUri, ConfigUseModalPromptKey, out entry))
+            if (config.TryGetEntry(ConfigPrefix, operationArguments.HostUri, ConfigUseModalPromptKey, out entry))
             {
                 Trace.WriteLine("   " + ConfigUseModalPromptKey + " = " + entry.Value);
 
@@ -763,7 +763,7 @@ namespace Microsoft.Alm.CredentialHelper
                 }
             }
 
-            if (config.TryGetEntry(ConfigPrefix, operationArguments.TargetUri, ConfigPreserveCredentialsKey, out entry))
+            if (config.TryGetEntry(ConfigPrefix, operationArguments.HostUri, ConfigPreserveCredentialsKey, out entry))
             {
                 Trace.WriteLine("   " + ConfigPreserveCredentialsKey + " = " + entry.Value);
 
@@ -785,7 +785,7 @@ namespace Microsoft.Alm.CredentialHelper
                 }
             }
 
-            if (config.TryGetEntry(ConfigPrefix, operationArguments.TargetUri, ConfigUseHttpPathKey, out entry))
+            if (config.TryGetEntry(ConfigPrefix, operationArguments.HostUri, ConfigUseHttpPathKey, out entry))
             {
                 Trace.WriteLine("   " + ConfigUseHttpPathKey + " = " + entry.Value);
 
@@ -796,8 +796,8 @@ namespace Microsoft.Alm.CredentialHelper
                 }
             }
 
-            if (config.TryGetEntry(ConfigPrefix, operationArguments.TargetUri, ConfigHttpProxyKey, out entry)
-                || config.TryGetEntry("http", operationArguments.TargetUri, "proxy", out entry))
+            if (config.TryGetEntry(ConfigPrefix, operationArguments.HostUri, ConfigHttpProxyKey, out entry)
+                || config.TryGetEntry("http", operationArguments.HostUri, "proxy", out entry))
             {
                 Trace.WriteLine("   " + ConfigHttpProxyKey + " = " + entry.Value);
 
@@ -873,14 +873,14 @@ namespace Microsoft.Alm.CredentialHelper
             }
         }
 
-        private static bool GithubCredentialModalPrompt(Uri targetUri, out string username, out string password)
+        private static bool GithubCredentialModalPrompt(TargetUri targetUri, out string username, out string password)
         {
             Trace.WriteLine("Program::GithubCredentialModalPrompt");
 
             return ModalPromptForCredentials(targetUri, out username, out password);
         }
 
-        private static bool GithubAuthcodeModalPrompt(Uri targetUri, GithubAuthenticationResultType resultType, string username, out string authenticationCode)
+        private static bool GithubAuthcodeModalPrompt(TargetUri targetUri, GithubAuthenticationResultType resultType, string username, out string authenticationCode)
         {
             Trace.WriteLine("Program::GithubAuthcodeModalPrompt");
 
@@ -890,14 +890,14 @@ namespace Microsoft.Alm.CredentialHelper
                 resultType == GithubAuthenticationResultType.TwoFactorApp
                     ? "app"
                     : "sms";
-            string message = String.Format("Enter {0} authentication code for {1}://{2}.", type, targetUri.Scheme, targetUri);
+            string message = String.Format("Enter {0} authentication code for {1}://{2}.", type, targetUri.ActualUri.Scheme, targetUri);
 
             Trace.WriteLine("   prompting user for authentication code.");
 
             return ModalPromptForPassword(targetUri, message, username, out authenticationCode);
         }
 
-        private static bool GithubCredentialPrompt(Uri targetUri, out string username, out string password)
+        private static bool GithubCredentialPrompt(TargetUri targetUri, out string username, out string password)
         {
             // ReadConsole 32768 fail, 32767 ok 
             // @linquize [https://github.com/Microsoft/Git-Credential-Manager-for-Windows/commit/a62b9a19f430d038dcd85a610d97e5f763980f85]
@@ -1023,7 +1023,7 @@ namespace Microsoft.Alm.CredentialHelper
                 && password != null;
         }
 
-        private static bool GithubAuthCodePrompt(Uri targetUri, GithubAuthenticationResultType resultType, string username, out string authenticationCode)
+        private static bool GithubAuthCodePrompt(TargetUri targetUri, GithubAuthenticationResultType resultType, string username, out string authenticationCode)
         {
             // ReadConsole 32768 fail, 32767 ok 
             // @linquize [https://github.com/Microsoft/Git-Credential-Manager-for-Windows/commit/a62b9a19f430d038dcd85a610d97e5f763980f85]
@@ -1079,7 +1079,7 @@ namespace Microsoft.Alm.CredentialHelper
             return authenticationCode != null;
         }
 
-        private static bool ModalPromptForCredentials(Uri targetUri, string message, out string username, out string password)
+        private static bool ModalPromptForCredentials(TargetUri targetUri, string message, out string username, out string password)
         {
             Debug.Assert(targetUri != null);
             Debug.Assert(message != null);
@@ -1114,7 +1114,7 @@ namespace Microsoft.Alm.CredentialHelper
                                             out password);
         }
 
-        private static bool ModalPromptForCredentials(Uri targetUri, out string username, out string password)
+        private static bool ModalPromptForCredentials(TargetUri targetUri, out string username, out string password)
         {
             Trace.WriteLine("Program::ModalPromptForCredemtials");
 
@@ -1122,7 +1122,7 @@ namespace Microsoft.Alm.CredentialHelper
             return ModalPromptForCredentials(targetUri, message, out username, out password);
         }
 
-        private static bool ModalPromptForPassword(Uri targetUri, string message, string username, out string password)
+        private static bool ModalPromptForPassword(TargetUri targetUri, string message, string username, out string password)
         {
             Debug.Assert(targetUri != null);
             Debug.Assert(message != null);

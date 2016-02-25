@@ -44,7 +44,7 @@ namespace Microsoft.Alm.Authentication
         /// Deletes credentials for target URI from the credential store
         /// </summary>
         /// <param name="targetUri">The URI of the target for which credentials are being deleted</param>
-        public void DeleteCredentials(Uri targetUri)
+        public void DeleteCredentials(TargetUri targetUri)
         {
             ValidateTargetUri(targetUri);
 
@@ -61,7 +61,7 @@ namespace Microsoft.Alm.Authentication
         /// Deletes the token for target URI from the token store
         /// </summary>
         /// <param name="targetUri">The URI of the target for which the token is being deleted</param>
-        public void DeleteToken(Uri targetUri)
+        public void DeleteToken(TargetUri targetUri)
         {
             ValidateTargetUri(targetUri);
 
@@ -79,7 +79,7 @@ namespace Microsoft.Alm.Authentication
         /// <param name="targetUri">The URI of the target for which credentials are being read</param>
         /// <param name="credentials">The credentials from the store; <see langword="null"/> if failure</param>
         /// <returns><see langword="true"/> if success; <see langword="false"/> if failure</returns>
-        public bool ReadCredentials(Uri targetUri, out Credential credentials)
+        public bool ReadCredentials(TargetUri targetUri, out Credential credentials)
         {
             ValidateTargetUri(targetUri);
 
@@ -101,7 +101,7 @@ namespace Microsoft.Alm.Authentication
         /// <param name="targetUri">The URI of the target for which a token is being read</param>
         /// <param name="token">The token from the store; <see langword="null"/> if failure</param>
         /// <returns><see langword="true"/> if success; <see langword="false"/> if failure</returns>
-        public bool ReadToken(Uri targetUri, out Token token)
+        public bool ReadToken(TargetUri targetUri, out Token token)
         {
             ValidateTargetUri(targetUri);
 
@@ -123,7 +123,7 @@ namespace Microsoft.Alm.Authentication
         /// </summary>
         /// <param name="targetUri">The URI of the target for which credentials are being stored</param>
         /// <param name="credentials">The credentials to be stored</param>
-        public void WriteCredentials(Uri targetUri, Credential credentials)
+        public void WriteCredentials(TargetUri targetUri, Credential credentials)
         {
             ValidateTargetUri(targetUri);
             Credential.Validate(credentials);
@@ -142,7 +142,7 @@ namespace Microsoft.Alm.Authentication
         /// </summary>
         /// <param name="targetUri">The URI of the target for which a token is being stored</param>
         /// <param name="token">The token to be stored</param>
-        public void WriteToken(Uri targetUri, Token token)
+        public void WriteToken(TargetUri targetUri, Token token)
         {
             ValidateTargetUri(targetUri);
             Token.Validate(token);
@@ -161,7 +161,7 @@ namespace Microsoft.Alm.Authentication
         /// </summary>
         /// <param name="targetUri">Uri of the target</param>
         /// <returns>Properly formatted TargetName string</returns>
-        protected override string GetTargetName(Uri targetUri)
+        protected override string GetTargetName(TargetUri targetUri)
         {
             Debug.Assert(targetUri != null, "The targetUri parameter is null");
 
