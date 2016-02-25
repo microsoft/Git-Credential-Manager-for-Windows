@@ -32,13 +32,14 @@ namespace Microsoft.Alm.CredentialHelper
         internal const string CommandVersion = "version";
 
         internal const string ConfigAuthortyKey = "authority";
-        internal const string ConfigInteractiveKey = "interactive";        
-        internal const string ConfigPreserveCredentials = "preserve";
-        internal const string ConfigUseHttpPath = "useHttpPath";
-        internal const string ConfigUseModalPrompt = "modalprompt";
+        internal const string ConfigHttpProxyKey = "httpProxy";
+        internal const string ConfigInteractiveKey = "interactive";
+        internal const string ConfigPreserveCredentialsKey = "preserve";
+        internal const string ConfigUseHttpPathKey = "useHttpPath";
+        internal const string ConfigUseModalPromptKey = "modalPrompt";
         internal const string ConfigValidateKey = "validate";
         internal const string ConfigWritelogKey = "writelog";
-        
+
 
         private const string ConfigPrefix = "credential";
         private const string SecretsNamespace = "git";
@@ -226,11 +227,11 @@ namespace Microsoft.Alm.CredentialHelper
             Console.Out.WriteLine();
             Console.Out.WriteLine("      `git config --global credential.microsoft.visualstudio.com." + ConfigInteractiveKey + " never`");
             Console.Out.WriteLine();
-            Console.Out.WriteLine("  " + ConfigUseModalPrompt + "  Forces authentication to use a modal dialog instead of");
+            Console.Out.WriteLine("  " + ConfigUseModalPromptKey + "  Forces authentication to use a modal dialog instead of");
             Console.Out.WriteLine("               asking for credentials at the command prompt.");
             Console.Out.WriteLine("               Defaults to TRUE.");
             Console.Out.WriteLine();
-            Console.Out.WriteLine("      `git config --global credential." + ConfigUseModalPrompt + " true`");
+            Console.Out.WriteLine("      `git config --global credential." + ConfigUseModalPromptKey + " true`");
             Console.Out.WriteLine();
             Console.Out.WriteLine("  " + ConfigValidateKey + "     Causes validation of credentials before supplying them");
             Console.Out.WriteLine("               to Git. Invalid credentials get a refresh attempt");
@@ -239,19 +240,26 @@ namespace Microsoft.Alm.CredentialHelper
             Console.Out.WriteLine();
             Console.Out.WriteLine("      `git config --global credential.microsoft.visualstudio.com." + ConfigValidateKey + " false`");
             Console.Out.WriteLine();
-            Console.Out.WriteLine("  " + ConfigPreserveCredentials + "     Prevents the deletion of credentials even when they are");
+            Console.Out.WriteLine("  " + ConfigPreserveCredentialsKey + "     Prevents the deletion of credentials even when they are");
             Console.Out.WriteLine("               reported as invlaid by Git. Can lead to lockout situations once credentials");
             Console.Out.WriteLine("               expire and until those credentials are manually removed.");
             Console.Out.WriteLine("               Defaults to FALSE.");
             Console.Out.WriteLine();
-            Console.Out.WriteLine("      `git config --global credential.visualstudio.com." + ConfigPreserveCredentials + " true`");
+            Console.Out.WriteLine("      `git config --global credential.visualstudio.com." + ConfigPreserveCredentialsKey + " true`");
             Console.Out.WriteLine();
-            Console.Out.WriteLine("  " + ConfigUseHttpPath + "     Causes the path portion of the target URI to considered meaningful.");
+            Console.Out.WriteLine("  " + ConfigUseHttpPathKey + "     Causes the path portion of the target URI to considered meaningful.");
             Console.Out.WriteLine("               By default the path portion of the target URI is ignore, if this is set to true");
             Console.Out.WriteLine("               the path is considered meaningful and credentials will be store for each path.");
             Console.Out.WriteLine("               Defaults to FALSE.");
             Console.Out.WriteLine();
-            Console.Out.WriteLine("      `git config --global credential.bitbucket.com." + ConfigUseHttpPath + " true`");
+            Console.Out.WriteLine("      `git config --global credential.bitbucket.com." + ConfigUseHttpPathKey + " true`");
+            Console.Out.WriteLine();
+            Console.Out.WriteLine("  " + ConfigHttpProxyKey + "     Causes the proxy value to be considered when evaluating.");
+            Console.Out.WriteLine("               credential target information. A proxy setting should established if use of a");
+            Console.Out.WriteLine("               proxy is required to interact with Git remotes.");
+            Console.Out.WriteLine("               The value should the url of the proxy server.");
+            Console.Out.WriteLine();
+            Console.Out.WriteLine("      `git config --global credential.github.com." + ConfigUseHttpPathKey + " https://myproxy:8080`");
             Console.Out.WriteLine();
             Console.Out.WriteLine("  " + ConfigWritelogKey + "     Enables trace logging of all activities. Logs are written to");
             Console.Out.WriteLine("               the local .git/ folder at the root of the repository.");
@@ -291,7 +299,7 @@ namespace Microsoft.Alm.CredentialHelper
 
             if (operationArguments.PreserveCredentials)
             {
-                Trace.WriteLine("   " + ConfigPreserveCredentials + " = true");
+                Trace.WriteLine("   " + ConfigPreserveCredentialsKey + " = true");
                 Trace.WriteLine("   cancelling erase request.");
                 return;
             }
@@ -733,9 +741,9 @@ namespace Microsoft.Alm.CredentialHelper
                 }
             }
 
-            if (config.TryGetEntry(ConfigPrefix, operationArguments.TargetUri, ConfigUseModalPrompt, out entry))
+            if (config.TryGetEntry(ConfigPrefix, operationArguments.TargetUri, ConfigUseModalPromptKey, out entry))
             {
-                Trace.WriteLine("   " + ConfigUseModalPrompt + " = " + entry.Value);
+                Trace.WriteLine("   " + ConfigUseModalPromptKey + " = " + entry.Value);
 
                 bool usemodel = operationArguments.UseModalUi;
                 if (Boolean.TryParse(entry.Value, out usemodel))
@@ -755,9 +763,9 @@ namespace Microsoft.Alm.CredentialHelper
                 }
             }
 
-            if (config.TryGetEntry(ConfigPrefix, operationArguments.TargetUri, ConfigPreserveCredentials, out entry))
+            if (config.TryGetEntry(ConfigPrefix, operationArguments.TargetUri, ConfigPreserveCredentialsKey, out entry))
             {
-                Trace.WriteLine("   " + ConfigPreserveCredentials + " = " + entry.Value);
+                Trace.WriteLine("   " + ConfigPreserveCredentialsKey + " = " + entry.Value);
 
                 bool preserveCredentials = operationArguments.UseModalUi;
                 if (Boolean.TryParse(entry.Value, out preserveCredentials))
@@ -777,15 +785,23 @@ namespace Microsoft.Alm.CredentialHelper
                 }
             }
 
-            if (config.TryGetEntry(ConfigPrefix, operationArguments.TargetUri, ConfigUseHttpPath, out entry))
+            if (config.TryGetEntry(ConfigPrefix, operationArguments.TargetUri, ConfigUseHttpPathKey, out entry))
             {
-                Trace.WriteLine("   " + ConfigUseHttpPath + " = " + entry.Value);
+                Trace.WriteLine("   " + ConfigUseHttpPathKey + " = " + entry.Value);
 
                 bool useHttPath = operationArguments.UseHttpPath;
                 if (Boolean.TryParse(entry.Value, out useHttPath))
                 {
                     operationArguments.UseHttpPath = true;
                 }
+            }
+
+            if (config.TryGetEntry(ConfigPrefix, operationArguments.TargetUri, ConfigHttpProxyKey, out entry)
+                || config.TryGetEntry("http", operationArguments.TargetUri, "proxy", out entry))
+            {
+                Trace.WriteLine("   " + ConfigHttpProxyKey + " = " + entry.Value);
+
+                operationArguments.SetProxy(entry.Value);
             }
         }
 

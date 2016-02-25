@@ -56,33 +56,93 @@ namespace Microsoft.Alm.CredentialHelper
             }
         }
 
-
         public AuthorityType Authority { get; set; }
         public readonly string Host;
+        public Uri HttpProxy
+        {
+            get { return _proxyUri; }
+            internal set
+            {
+                if (value == null)
+                {
+                    _proxyHost = null;
+                    _proxyPath = null;
+                    _proxyProtocol = null;
+                }
+                else
+                {
+                    _proxyHost = value.DnsSafeHost;
+                    _proxyPath = value.AbsolutePath;
+                    _proxyProtocol = value.Scheme;
+                }
+                CreateUriValues();
+            }
+        }
         public Interactivity Interactivity { get; set; }
         public readonly string Path;
         public string Password { get; private set; }
         public bool PreserveCredentials { get; set; }
         public readonly string Protocol;
+        public string ProxyHost
+        {
+            get { return _proxyHost; }
+            set
+            {
+                _proxyHost = value;
+                CreateUriValues();
+            }
+        }
+        public string ProxyPath
+        {
+            get { return _proxyPath; }
+            set
+            {
+                _proxyPath = value;
+                CreateUriValues();
+            }
+        }
+        public string ProxyProtocol
+        {
+            get { return _proxyProtocol; }
+            set
+            {
+                _proxyProtocol = value;
+                CreateUriValues();
+            }
+        }
         public Uri TargetUri { get { return _targetUri; } }
         public string Username { get; private set; }
-
         public bool UseHttpPath
         {
             get { return _useHttpPath; }
             set
             {
                 _useHttpPath = value;
-
-                _targetUri = _useHttpPath
-                    ? new Uri(String.Format("{0}://{1}", this.Protocol, this.Host))
-                    : new Uri(String.Format("{0}://{1}/{2}", this.Protocol, this.Host, this.Path));
+                CreateUriValues();
             }
         }
+
+        private void CreateUriValues()
+        {
+            string targetUrl = _useHttpPath
+                ? String.Format("{0}://{1}", this.Protocol, this.Host)
+                : String.Format("{0}://{1}/{2}", this.Protocol, this.Host, this.Path);
+            string proxyUrl = _useHttpPath
+                ? String.Format("{0}://{1}", this.ProxyProtocol, this.ProxyHost)
+                : String.Format("{0}://{1}/{2}", this.ProxyProtocol, this.ProxyHost, this.ProxyPath);
+
+            Uri.TryCreate(targetUrl, UriKind.Absolute, out _targetUri);
+            Uri.TryCreate(proxyUrl, UriKind.Absolute, out _proxyUri);
+        }
+
         public bool UseModalUi { get; set; }
         public bool ValidateCredentials { get; set; }
         public bool WriteLog { get; set; }
 
+        private string _proxyHost;
+        private string _proxyPath;
+        private string _proxyProtocol;
+        private Uri _proxyUri;
         private Uri _targetUri;
         private bool _useHttpPath;
 
@@ -90,6 +150,15 @@ namespace Microsoft.Alm.CredentialHelper
         {
             this.Username = credentials.Username;
             this.Password = credentials.Password;
+        }
+
+        public void SetProxy(string url)
+        {
+            Uri tmp;
+            if (Uri.TryCreate(url, UriKind.Absolute, out tmp))
+            {
+                this.HttpProxy = tmp;
+            }
         }
 
         public override string ToString()
