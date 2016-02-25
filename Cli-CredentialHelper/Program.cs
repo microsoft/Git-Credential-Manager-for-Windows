@@ -32,11 +32,13 @@ namespace Microsoft.Alm.CredentialHelper
         internal const string CommandVersion = "version";
 
         internal const string ConfigAuthortyKey = "authority";
-        internal const string ConfigInteractiveKey = "interactive";
+        internal const string ConfigInteractiveKey = "interactive";        
+        internal const string ConfigPreserveCredentials = "preserve";
+        internal const string ConfigUseHttpPath = "useHttpPath";
         internal const string ConfigUseModalPrompt = "modalprompt";
         internal const string ConfigValidateKey = "validate";
         internal const string ConfigWritelogKey = "writelog";
-        internal const string ConfigPreserveCredentials = "preserve";
+        
 
         private const string ConfigPrefix = "credential";
         private const string SecretsNamespace = "git";
@@ -243,6 +245,13 @@ namespace Microsoft.Alm.CredentialHelper
             Console.Out.WriteLine("               Defaults to FALSE.");
             Console.Out.WriteLine();
             Console.Out.WriteLine("      `git config --global credential.visualstudio.com." + ConfigPreserveCredentials + " true`");
+            Console.Out.WriteLine();
+            Console.Out.WriteLine("  " + ConfigUseHttpPath + "     Causes the path portion of the target URI to considered meaningful.");
+            Console.Out.WriteLine("               By default the path portion of the target URI is ignore, if this is set to true");
+            Console.Out.WriteLine("               the path is considered meaningful and credentials will be store for each path.");
+            Console.Out.WriteLine("               Defaults to FALSE.");
+            Console.Out.WriteLine();
+            Console.Out.WriteLine("      `git config --global credential.bitbucket.com." + ConfigUseHttpPath + " true`");
             Console.Out.WriteLine();
             Console.Out.WriteLine("  " + ConfigWritelogKey + "     Enables trace logging of all activities. Logs are written to");
             Console.Out.WriteLine("               the local .git/ folder at the root of the repository.");
@@ -767,6 +776,17 @@ namespace Microsoft.Alm.CredentialHelper
                     }
                 }
             }
+
+            if (config.TryGetEntry(ConfigPrefix, operationArguments.TargetUri, ConfigUseHttpPath, out entry))
+            {
+                Trace.WriteLine("   " + ConfigUseHttpPath + " = " + entry.Value);
+
+                bool useHttPath = operationArguments.UseHttpPath;
+                if (Boolean.TryParse(entry.Value, out useHttPath))
+                {
+                    operationArguments.UseHttpPath = true;
+                }
+            }
         }
 
         private static void LogEvent(string message, EventLogEntryType eventType)
@@ -854,7 +874,7 @@ namespace Microsoft.Alm.CredentialHelper
                 resultType == GithubAuthenticationResultType.TwoFactorApp
                     ? "app"
                     : "sms";
-            string message = String.Format("Enter {0} authentication code for {1}://{2}.", type, targetUri.Scheme, targetUri.DnsSafeHost);
+            string message = String.Format("Enter {0} authentication code for {1}://{2}.", type, targetUri.Scheme, targetUri);
 
             Trace.WriteLine("   prompting user for authentication code.");
 
@@ -898,10 +918,7 @@ namespace Microsoft.Alm.CredentialHelper
 
                 // instruct the user as to what they are expected to do
                 buffer.Append("Please enter your GitHub credentials for ")
-                      .Append(targetUri.Scheme)
-                      .Append("://")
-                      .Append(targetUri.DnsSafeHost)
-                      .Append(targetUri.PathAndQuery)
+                      .Append(targetUri)
                       .AppendLine();
                 if (!NativeMethods.WriteConsole(stdout, buffer, (uint)buffer.Length, out written, IntPtr.Zero))
                 {
@@ -1085,7 +1102,7 @@ namespace Microsoft.Alm.CredentialHelper
         {
             Trace.WriteLine("Program::ModalPromptForCredemtials");
 
-            string message = String.Format("Enter your credentials for {0}://{1}.", targetUri.Scheme, targetUri.DnsSafeHost);
+            string message = String.Format("Enter your credentials for {0}.", targetUri);
             return ModalPromptForCredentials(targetUri, message, out username, out password);
         }
 

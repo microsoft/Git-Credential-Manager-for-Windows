@@ -52,22 +52,39 @@ namespace Microsoft.Alm.CredentialHelper
 
             if (this.Protocol != null && this.Host != null)
             {
-                this.TargetUri = new Uri(String.Format("{0}://{1}", this.Protocol, this.Host), UriKind.Absolute);
+                _targetUri = new Uri(String.Format("{0}://{1}", this.Protocol, this.Host), UriKind.Absolute);
             }
         }
 
-        public readonly string Protocol;
-        public readonly string Host;
-        public readonly string Path;
-        public readonly Uri TargetUri;
-        public string Username { get; private set; }
-        public string Password { get; private set; }
+
         public AuthorityType Authority { get; set; }
+        public readonly string Host;
         public Interactivity Interactivity { get; set; }
+        public readonly string Path;
+        public string Password { get; private set; }
         public bool PreserveCredentials { get; set; }
-        public bool ValidateCredentials { get; set; }
+        public readonly string Protocol;
+        public Uri TargetUri { get { return _targetUri; } }
+        public string Username { get; private set; }
+
+        public bool UseHttpPath
+        {
+            get { return _useHttpPath; }
+            set
+            {
+                _useHttpPath = value;
+
+                _targetUri = _useHttpPath
+                    ? new Uri(String.Format("{0}://{1}", this.Protocol, this.Host))
+                    : new Uri(String.Format("{0}://{1}/{2}", this.Protocol, this.Host, this.Path));
+            }
+        }
         public bool UseModalUi { get; set; }
+        public bool ValidateCredentials { get; set; }
         public bool WriteLog { get; set; }
+
+        private Uri _targetUri;
+        private bool _useHttpPath;
 
         public void SetCredentials(Credential credentials)
         {
