@@ -187,7 +187,7 @@ namespace Microsoft.Alm.Authentication
             if (targetUri == null)
                 throw new ArgumentNullException("targetUri");
             if (!targetUri.IsAbsoluteUri || !targetUri.ActualUri.IsAbsoluteUri)
-                throw new ArgumentException("The target URI must be an absolute URI", "targetUri");
+                throw new ArgumentException("The target must be an absolute URI.", "targetUri");
         }
     }
 }

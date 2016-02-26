@@ -250,7 +250,7 @@ namespace Microsoft.Alm.Authentication
 
             tenantId = Guid.Empty;
 
-            if (targetUri.ActualUri.DnsSafeHost.EndsWith(VstsBaseUrlHost, StringComparison.OrdinalIgnoreCase))
+            if (targetUri.ActualUri.Host.EndsWith(VstsBaseUrlHost, StringComparison.OrdinalIgnoreCase))
             {
                 Trace.WriteLine("   detected visualstudio.com, checking AAD vs MSA");
 

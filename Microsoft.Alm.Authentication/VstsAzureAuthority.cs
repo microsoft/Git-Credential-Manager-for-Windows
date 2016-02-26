@@ -35,9 +35,6 @@ namespace Microsoft.Alm.Authentication
         /// <returns></returns>
         public async Task<Token> GeneratePersonalAccessToken(TargetUri targetUri, Token accessToken, VstsTokenScope tokenScope, bool requireCompactToken)
         {
-            const string TokenAuthHost = "app.vssps.visualstudio.com";
-            const string SessionTokenUrl = "https://" + TokenAuthHost + "/_apis/token/sessiontokens?api-version=1.0";
-            const string CompactTokenUrl = SessionTokenUrl + "&tokentype=compact";
             const string AccessTokenHeader = "Bearer";
 
             Debug.Assert(targetUri != null, "The targetUri parameter is null");
@@ -81,27 +78,31 @@ namespace Microsoft.Alm.Authentication
 
                     if (await PopulateTokenTargetId(targetUri, accessToken))
                     {
-                        string requestUrl = requireCompactToken ? CompactTokenUrl : SessionTokenUrl;
-
-                        using (StringContent content = GetAccessTokenRequestBody(targetUri, accessToken, tokenScope))
-                        using (HttpResponseMessage response = await httpClient.PostAsync(requestUrl, content))
+                        Uri requestUri;
+                        if (TryCreateRequestUri(targetUri, requireCompactToken, out requestUri))
                         {
-                            if (response.StatusCode == HttpStatusCode.OK)
+                            Trace.WriteLine("   request url is " + requestUri);
+
+                            using (StringContent content = GetAccessTokenRequestBody(targetUri, accessToken, tokenScope))
+                            using (HttpResponseMessage response = await httpClient.PostAsync(requestUri, content))
                             {
-                                string responseText = await response.Content.ReadAsStringAsync();
-
-                                if (!String.IsNullOrWhiteSpace(responseText))
+                                if (response.StatusCode == HttpStatusCode.OK)
                                 {
-                                    // find the 'token : <value>' portion of the result content, if any
-                                    Match tokenMatch = null;
-                                    if ((tokenMatch = Regex.Match(responseText, @"\s*""token""\s*:\s*""([^\""]+)""\s*", RegexOptions.Compiled | RegexOptions.CultureInvariant | RegexOptions.IgnoreCase)).Success)
+                                    string responseText = await response.Content.ReadAsStringAsync();
+
+                                    if (!String.IsNullOrWhiteSpace(responseText))
                                     {
-                                        string tokenValue = tokenMatch.Groups[1].Value;
-                                        Token token = new Token(tokenValue, TokenType.Personal);
+                                        // find the 'token : <value>' portion of the result content, if any
+                                        Match tokenMatch = null;
+                                        if ((tokenMatch = Regex.Match(responseText, @"\s*""token""\s*:\s*""([^\""]+)""\s*", RegexOptions.Compiled | RegexOptions.CultureInvariant | RegexOptions.IgnoreCase)).Success)
+                                        {
+                                            string tokenValue = tokenMatch.Groups[1].Value;
+                                            Token token = new Token(tokenValue, TokenType.Personal);
 
-                                        Trace.WriteLine("   personal access token aquisition succeeded.");
+                                            Trace.WriteLine("   personal access token aquisition succeeded.");
 
-                                        return token;
+                                            return token;
+                                        }
                                     }
                                 }
                             }
@@ -133,6 +134,8 @@ namespace Microsoft.Alm.Authentication
             {
                 // create an request to the VSTS deployment data end-point
                 HttpWebRequest request = GetConnectionDataRequest(targetUri, accessToken);
+
+                Trace.WriteLine(String.Format("   access token end-point is {0} {1}", request.Method, request.RequestUri));
 
                 // send the request and wait for the response
                 using (var response = await request.GetResponseAsync())
@@ -186,6 +189,8 @@ namespace Microsoft.Alm.Authentication
                 // create an request to the VSTS deployment data end-point
                 HttpWebRequest request = GetConnectionDataRequest(targetUri, credentials);
 
+                Trace.WriteLine("   validating credentials against " + request.RequestUri);
+
                 // send the request and wait for the response
                 using (HttpWebResponse response = await request.GetResponseAsync() as HttpWebResponse)
                 {
@@ -233,6 +238,8 @@ namespace Microsoft.Alm.Authentication
             {
                 // create an request to the VSTS deployment data end-point
                 HttpWebRequest request = GetConnectionDataRequest(targetUri, token);
+
+                Trace.WriteLine("   validating token against " + request.Host);
 
                 // send the request and wait for the response
                 using (HttpWebResponse response = await request.GetResponseAsync() as HttpWebResponse)
@@ -344,6 +351,38 @@ namespace Microsoft.Alm.Authentication
             request.Timeout = RequestTimeout;
 
             return request;
+        }
+
+        private bool TryCreateRequestUri(TargetUri targetUri, bool requireCompactToken, out Uri requestUri)
+        {
+            const string TokenAuthHostFormat = "app.vssps.{0}";
+            const string SessionTokenUrl = "https://" + TokenAuthHostFormat + "/_apis/token/sessiontokens?api-version=1.0";
+            const string CompactTokenUrl = SessionTokenUrl + "&tokentype=compact";
+
+            Debug.Assert(targetUri != null, $"The `targetUri` parameter is null.");
+
+            requestUri = null;
+
+            if (targetUri == null)
+                return false;
+
+            // the host name can be something like foo.visualstudio.com in which case we
+            // need the "foo." prefix removed.
+            string host = targetUri.Host;
+            int first = targetUri.Host.IndexOf('.');
+            int last = targetUri.Host.LastIndexOf('.');
+
+            // since the first and last index of '.' do not agree, substring after the first
+            if (first != last)
+            {
+                host = targetUri.Host.Substring(first + 1);
+            }
+
+            host = requireCompactToken
+                ? String.Format(SessionTokenUrl, host)
+                : String.Format(CompactTokenUrl, host);
+
+            return Uri.TryCreate(host, UriKind.Absolute, out requestUri);
         }
     }
 }
