@@ -87,7 +87,7 @@ type NetFx_Version = (
      NetFx_v45,  // .NET Framework 4.5
      NetFx_v451, // .NET Framework 4.5.1
      NetFx_v452, // .NET Framework 4.5.2
-     NetFx_v46   // .NET Framework 4.6
+     NetFx_v46,  // .NET Framework 4.6
      NetFx_v461);// .NET Framework 4.6.1 
 
 function DetectGit(): Boolean;
@@ -182,7 +182,7 @@ end;
 function InstallPrerequisites() : Boolean;
 var
   bInstallFx40: Boolean;
-  bInstallFx461: Boolean;
+  bInstallFx46: Boolean;
   bInstallGit: Boolean;
   StatusText: string;
   ResultCode: Integer;
@@ -190,7 +190,7 @@ begin
   Result := True;
 
   bInstallFx40 := FileExists(ExpandConstant('{tmp}\{#NetFxBaseFile}'));
-  bInstallFx461 := FileExists(ExpandConstant('{tmp}\{#NetFxCoreFile}'));
+  bInstallFx46 := FileExists(ExpandConstant('{tmp}\{#NetFxCoreFile}'));
   bInstallGit := FileExists(ExpandConstant('{tmp}\{#Git4WinFile}'));
 
   if bInstallFx40 or bInstallFx46 then
@@ -209,7 +209,7 @@ begin
               end;
           end;
 
-        if bInstallFx461 then
+        if bInstallFx46 then
           begin
             if not Exec(ExpandConstant('{tmp}\{#NetFxCoreFile}'), '/passive /norestart', '', SW_SHOW, ewWaitUntilTerminated, ResultCode) then
               begin
