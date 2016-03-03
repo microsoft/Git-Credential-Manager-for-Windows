@@ -1,7 +1,7 @@
 Git Credential Manager for Windows
 ==================================
 
-The [Git Credential Manager for Windows (GCM)](<https://github.com/Microsoft/Git-Credential-Manager-for-Windows>) provides secure Git credential storage for Windows. It's the successor to the [Windows Credential Store for Git (git-credential-winstore)](<https://gitcredentialstore.codeplex.com/>), which is no longer maintained. Compared to Git's built-in credential storage for Windows ([wincred](<https://git-scm.com/book/en/v2/Git-Tools-Credential-Storage>)), which provides single-factor authentication support working on any HTTP enabled Git repository, GCM provides multi-factor authentication support for Visual Studio Team Services and GitHub.
+The [Git Credential Manager for Windows](https://github.com/Microsoft/Git-Credential-Manager-for-Windows) (GCM) provides secure Git credential storage for Windows. It's the successor to the [Windows Credential Store for Git](https://gitcredentialstore.codeplex.com/) (git-credential-winstore), which is no longer maintained. Compared to Git's built-in credential storage for Windows ([wincred](https://git-scm.com/book/en/v2/Git-Tools-Credential-Storage)), which provides single-factor authentication support working on any HTTP enabled Git repository, GCM provides multi-factor authentication support for [Visual Studio Team Services](http://www.visualstudio.com/), [Team Foundation Server](https://github.com/Microsoft/Git-Credential-Manager-for-Windows#q-i-thought-microsoft-was-maintaing-this-why-does-the-gcm-not-work-as-expected-with-tfs), and GitHub.
 
 This project includes:
 
@@ -10,6 +10,7 @@ This project includes:
  * Two-factor authentication support for GitHub
  * Personal Access Token generation and usage support for Visual Studio Team Services and GitHub
  * Non-interactive mode support for Visual Studio Team Services backed by Azure Directory
+ * Kerberos authentication for Team Foundation Server ([see notes](https://github.com/Microsoft/Git-Credential-Manager-for-Windows#q-i-thought-microsoft-was-maintaing-this-why-does-the-gcm-not-work-as-expected-with-tfs))
  * Optional settings for build agent optimization
 
 This is a community project so feel free to contribute ideas, submit bugs, fix bugs, or code new features. For detailed information on how the GCM works go to the [wiki](https://github.com/Microsoft/Git-Credential-Manager-for-Windows/wiki/How-the-Git-Credential-Managers-works).
@@ -82,9 +83,9 @@ That said, so long as your favorite version of Git supports Git’s git-credenti
 
 Team Foundation Server, when deployed on a corporate Active Directory, uses the [Microsoft Kerberos](https://msdn.microsoft.com/en-us/library/windows/desktop/aa378747(v=vs.85).aspx) protocol for authentication. Git doesn't "speak" the Kerberos protocol.
 
-Git can be convinced to "forward" domain credentials by supplying a blank credentials (username and password). Since, by default, the GCM doesn't allow for a blank credentials, you will need to configure it to allow for them. To do so, update your Git configuration by running `git config --global credential.<url_to_TFS_here>.integrated true`.
+Git can be convinced to "forward" domain credentials by supplying a blank credentials (username and password). Since, by default, the GCM doesn't allow for a blank credentials, you will need to configure it to allow for them. To do so, update your Git configuration by running `git config --global credential.tfs.fabrikam.com.integrated true`.
 
-Once the updated, the new configuration tells the GCM to only forward domain credentials. If you set `credential.integrated = true`, every domain will be assumed to support domain credentials. Most likely, this is **not** what you want. Therefore, it strongly suggested that you restric the configuration setting to the URL of your TFS Git host.
+Once the updated, the new configuration tells the GCM to only forward domain credentials. If you set `credential.integrated true`, every domain will be assumed to support domain credentials. Most likely, this is **not** what you want. Therefore, it strongly suggested that you restric the configuration setting to the URL of your TFS Git host.
 
 ## Build agents ##
 
