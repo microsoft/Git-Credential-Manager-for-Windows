@@ -5,7 +5,7 @@
 #include <idp.iss>
 
 #define MyAppName "Microsoft Git Credential Manager for Windows"
-#define MyAppVersion "1.2.0"
+#define MyAppVersion "1.2.1"
 #define MyAppPublisher "Microsoft Corporation"
 #define MyAppPublisherURL "http://www.microsoft.com"
 #define MyAppURL "https://github.com/Microsoft/Git-Credential-Manager-for-Windows"
@@ -35,7 +35,7 @@ BackColor=clWhite
 BackSolid=yes
 DefaultDirName={userpf}\{#MyAppName}
 LicenseFile=..\Deploy\LICENSE.TXT
-OutputBaseFilename=GCMW-1.2.0
+OutputBaseFilename=GCMW-{#MyAppVersion}
 Compression=lzma2
 InternalCompressLevel=ultra64
 SolidCompression=yes
