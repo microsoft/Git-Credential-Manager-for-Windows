@@ -20,7 +20,7 @@ namespace Microsoft.Alm.Authentication
             Debug.Assert(!String.IsNullOrWhiteSpace(@namespace), "The namespace parameter is null or invalid");
 
             _namespace = @namespace;
-            _getTargetName = getTargetName ?? Secret.UriToName;
+            _getTargetName = getTargetName ?? Secret.UriToSimpleName;
         }
 
         private readonly string _namespace;
