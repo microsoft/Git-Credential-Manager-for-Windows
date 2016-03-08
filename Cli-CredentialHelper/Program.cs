@@ -545,7 +545,12 @@ namespace Microsoft.Alm.CredentialHelper
 
             Trace.WriteLine("Program::CreateAuthentication");
 
-            var secrets = new SecretStore(SecretsNamespace);
+            Secret.UriNameConversion getTargetName = Secret.UriToSimpleName;
+            if (operationArguments.UseHttpPath)
+            {
+                getTargetName = Secret.UriToPathedName;
+            }
+            var secrets = new SecretStore(SecretsNamespace, null, null, getTargetName);
             BaseAuthentication authority = null;
 
             switch (operationArguments.Authority)
