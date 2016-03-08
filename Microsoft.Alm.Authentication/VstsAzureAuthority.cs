@@ -379,8 +379,8 @@ namespace Microsoft.Alm.Authentication
             }
 
             host = requireCompactToken
-                ? String.Format(SessionTokenUrl, host)
-                : String.Format(CompactTokenUrl, host);
+                ? String.Format(CompactTokenUrl, host)
+                : String.Format(SessionTokenUrl, host);
 
             return Uri.TryCreate(host, UriKind.Absolute, out requestUri);
         }
