@@ -67,7 +67,7 @@ The Git Credential Manager does not work on Windows XP, Max OS, or Linux because
 
 ### Q: Will there ever be support for Windows XP, Mac OS, or Linux?
 
-We can safely say that we have no interest in supporting Windows XP. Even [Microsoft has ended support for Windows XP](<http://windows.microsoft.com/en-us/windows/end-support-help>). Support for Mac OS and Linux are very much something that we’re interested in. We’re looking at options with [.NET Foundation cross-platform support](<https://github.com/dotnet>) and [ADAL Node.js support](<https://github.com/AzureAD/azure-activedirectory-library-for-nodejs>). Neither option is ready for a security application, and we’re not ready to port yet -- let’s at least get the ‘for Windows’ finished (whatever that means)!
+We can safely say that we have no interest in supporting Windows XP. Even [Microsoft has ended support for Windows XP](<http://windows.microsoft.com/en-us/windows/end-support-help>). Support for Mac OS and Linux are handled by [Microsoft Git Credential Helper for Mac and Liunx](https://github.com/Microsoft/Git-Credential-Manager-for-Mac-and-Linux).
 
 ### Q: Why is my distribution/version of Git not supported? Why is Git for Windows favored?
 
