@@ -1275,7 +1275,7 @@ namespace Microsoft.Alm.CredentialHelper
                     return false;
                 }
 
-                Trace.WriteLine("   successfully acquired crentials from user.");
+                Trace.WriteLine("   successfully acquired credentials from user.");
 
                 username = usernameBuffer.ToString();
                 password = passwordBuffer.ToString();
