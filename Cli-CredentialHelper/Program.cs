@@ -895,7 +895,7 @@ namespace Microsoft.Alm.CredentialHelper
                 resultType == GithubAuthenticationResultType.TwoFactorApp
                     ? "app"
                     : "sms";
-            string message = String.Format("Enter {0} authentication code for {1}://{2}.", type, targetUri.ActualUri.Scheme, targetUri);
+            string message = String.Format("Enter {0} authentication code for {1}.", type, targetUri);
 
             Trace.WriteLine("   prompting user for authentication code.");
 
