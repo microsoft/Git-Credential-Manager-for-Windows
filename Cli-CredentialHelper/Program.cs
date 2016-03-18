@@ -44,7 +44,7 @@ namespace Microsoft.Alm.CredentialHelper
         private const string ConfigPrefix = "credential";
         private const string SecretsNamespace = "git";
         private static readonly VstsTokenScope VstsCredentialScope = VstsTokenScope.CodeWrite | VstsTokenScope.PackagingRead;
-        private static readonly GithubTokenScope GithubCredentialScope = GithubTokenScope.Gist | GithubTokenScope.PublicKeyRead | GithubTokenScope.Repo;
+        private static readonly GithubTokenScope GithubCredentialScope = GithubTokenScope.Gist | GithubTokenScope.Repo;
         private static readonly List<string> CommandList = new List<string>
         {
             CommandApprove,
