@@ -11,7 +11,7 @@ namespace Microsoft.Alm.Authentication
     public sealed class VstsAadAuthentication : BaseVstsAuthentication, IVstsAadAuthentication
     {
         /// <summary>
-        /// 
+        ///
         /// </summary>
         /// <param name="tenantId">
         /// <para>The unique identifier for the responsible Azure tenant.</para>
@@ -19,9 +19,9 @@ namespace Microsoft.Alm.Authentication
         /// to detect the tenant identity and create the authentication object.</para>
         /// </param>
         /// <param name="tokenScope">The scope of all access tokens acquired by the authority.</param>
-        /// <param name="personalAccessTokenStore">The secure secret store for storing any personal 
+        /// <param name="personalAccessTokenStore">The secure secret store for storing any personal
         /// access tokens acquired.</param>
-        /// <param name="adaRefreshTokenStore">The secure secret store for storing any Azure tokens 
+        /// <param name="adaRefreshTokenStore">The secure secret store for storing any Azure tokens
         /// acquired.</param>
         public VstsAadAuthentication(
             Guid tenantId,
@@ -59,18 +59,18 @@ namespace Microsoft.Alm.Authentication
         { }
 
         /// <summary>
-        /// <para>Creates an interactive logon session, using ADAL secure browser GUI, which 
-        /// enables users to authenticate with the Azure tenant and acquire the necessary access 
+        /// <para>Creates an interactive logon session, using ADAL secure browser GUI, which
+        /// enables users to authenticate with the Azure tenant and acquire the necessary access
         /// tokens to exchange for a VSTS personal access token.</para>
-        /// <para>Tokens acquired are stored in the secure secret stores provided during 
+        /// <para>Tokens acquired are stored in the secure secret stores provided during
         /// initialization.</para>
         /// </summary>
-        /// <param name="targetUri">The unique identifier for the resource for which access is to 
+        /// <param name="targetUri">The unique identifier for the resource for which access is to
         /// be acquired.</param>
         /// <param name="requestCompactToken">
-        /// <para>Requests a compact format personal access token; otherwise requests a standard 
+        /// <para>Requests a compact format personal access token; otherwise requests a standard
         /// personal access token.</para>
-        /// <para>Compact tokens are necessary for clients which have restrictions on the size of 
+        /// <para>Compact tokens are necessary for clients which have restrictions on the size of
         /// the basic authentication header which they can create (example: Git).</para>
         /// </param>
         /// <returns><see langword="true"/> if a authentication and personal access token acquisition was successful; otherwise <see langword="false"/>.</returns>
@@ -102,19 +102,19 @@ namespace Microsoft.Alm.Authentication
         }
 
         /// <summary>
-        /// <para>Uses credentials to authenticate with the Azure tenant and acquire the necessary 
+        /// <para>Uses credentials to authenticate with the Azure tenant and acquire the necessary
         /// access tokens to exchange for a VSTS personal access token.</para>
-        /// <para>Tokens acquired are stored in the secure secret stores provided during 
+        /// <para>Tokens acquired are stored in the secure secret stores provided during
         /// initialization.</para>
         /// </summary>
-        /// <param name="targetUri">The unique identifier for the resource for which access is to 
+        /// <param name="targetUri">The unique identifier for the resource for which access is to
         /// be acquired.</param>
-        /// <param name="credentials">The credentials required to meet the criteria of the Azure 
+        /// <param name="credentials">The credentials required to meet the criteria of the Azure
         /// tenant authentication challenge (i.e. username + password).</param>
         /// <param name="requestCompactToken">
-        /// <para>Requests a compact format personal access token; otherwise requests a standard 
+        /// <para>Requests a compact format personal access token; otherwise requests a standard
         /// personal access token.</para>
-        /// <para>Compact tokens are necessary for clients which have restrictions on the size of 
+        /// <para>Compact tokens are necessary for clients which have restrictions on the size of
         /// the basic authentication header which they can create (example: Git).</para>
         /// </param>
         /// <returns><see langword="true"/> if authentication and personal access token acquisition was successful; otherwise <see langword="false"/>.</returns>
@@ -147,18 +147,18 @@ namespace Microsoft.Alm.Authentication
         }
 
         /// <summary>
-        /// <para>Uses Active Directory Federation Services to authenticate with the Azure tenant 
-        /// non-interactively and acquire the necessary access tokens to exchange for a VSTS personal 
+        /// <para>Uses Active Directory Federation Services to authenticate with the Azure tenant
+        /// non-interactively and acquire the necessary access tokens to exchange for a VSTS personal
         /// access token.</para>
-        /// <para>Tokens acquired are stored in the secure secret stores provided during 
+        /// <para>Tokens acquired are stored in the secure secret stores provided during
         /// initialization.</para>
         /// </summary>
-        /// <param name="targetUri">The unique identifier for the resource for which access is to 
+        /// <param name="targetUri">The unique identifier for the resource for which access is to
         /// be acquired.</param>
         /// <param name="requestCompactToken">
-        /// <para>Requests a compact format personal access token; otherwise requests a standard 
+        /// <para>Requests a compact format personal access token; otherwise requests a standard
         /// personal access token.</para>
-        /// <para>Compact tokens are necessary for clients which have restrictions on the size of 
+        /// <para>Compact tokens are necessary for clients which have restrictions on the size of
         /// the basic authentication header which they can create (example: Git).</para>
         /// </param>
         /// <returns><see langword="true"/> if authentication and personal access token acquisition was successful; otherwise <see langword="false"/>.</returns>

@@ -198,7 +198,7 @@ namespace Microsoft.Alm.Authentication
                         return false;
                     }
                 }
-            }            
+            }
         }
     }
 }

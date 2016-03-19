@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Diagnostics;
-using System.IO;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 namespace Microsoft.Alm.Git.Test
@@ -9,7 +8,7 @@ namespace Microsoft.Alm.Git.Test
     [TestClass]
     public class WhereTests
     {
-        static StringComparer PathComparer = StringComparer.InvariantCultureIgnoreCase;
+        private static StringComparer PathComparer = StringComparer.InvariantCultureIgnoreCase;
 
         [TestMethod]
         public void FindApp()

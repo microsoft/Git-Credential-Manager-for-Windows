@@ -6,7 +6,7 @@ namespace Microsoft.Alm.Authentication
     /// <summary>
     /// Azure token pair: access and refresh.
     /// </summary>
-    internal sealed class TokenPair:IEquatable<TokenPair>
+    internal sealed class TokenPair : IEquatable<TokenPair>
     {
         /// <summary>
         /// Creates a new <see cref="TokenPair"/> from raw access and refresh token data.
@@ -77,7 +77,6 @@ namespace Microsoft.Alm.Authentication
                 return AccessToken.GetHashCode() * RefeshToken.GetHashCode();
             }
         }
-
 
         /// <summary>
         /// Compares two <see cref="TokenPair"/> for equality.

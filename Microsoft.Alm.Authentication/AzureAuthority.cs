@@ -39,7 +39,7 @@ namespace Microsoft.Alm.Authentication
         public string AuthorityHostUrl { get; protected set; }
 
         /// <summary>
-        /// acquires a <see cref="TokenPair"/> from the authority via an interactive user logon 
+        /// acquires a <see cref="TokenPair"/> from the authority via an interactive user logon
         /// prompt.
         /// </summary>
         /// <param name="targetUri">
@@ -89,7 +89,7 @@ namespace Microsoft.Alm.Authentication
         }
 
         /// <summary>
-        /// acquires a <see cref="TokenPair"/> from the authority using optionally provided 
+        /// acquires a <see cref="TokenPair"/> from the authority using optionally provided
         /// credentials or via the current identity.
         /// </summary>
         /// <param name="targetUri">

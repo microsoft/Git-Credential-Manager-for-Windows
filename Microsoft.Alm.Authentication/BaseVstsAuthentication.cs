@@ -132,7 +132,7 @@ namespace Microsoft.Alm.Authentication
         }
 
         /// <summary>
-        /// Attempts to generate a new personal access token (credentials) via use of a stored 
+        /// Attempts to generate a new personal access token (credentials) via use of a stored
         /// Azure refresh token, identified by the target resource.
         /// </summary>
         /// <param name="targetUri">The 'key' by which to identify the refresh token.</param>
@@ -195,9 +195,9 @@ namespace Microsoft.Alm.Authentication
         }
 
         /// <summary>
-        /// 
+        ///
         /// </summary>
-        /// <param name="targetUri">The target resource for which to acquire the personal access 
+        /// <param name="targetUri">The target resource for which to acquire the personal access
         /// token for.</param>
         /// <param name="accessToken">Azure Directory access token with privileges to grant access
         /// to the target resource.</param>
