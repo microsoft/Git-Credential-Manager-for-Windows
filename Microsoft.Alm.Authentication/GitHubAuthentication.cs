@@ -10,7 +10,7 @@ namespace Microsoft.Alm.Authentication
     public class GithubAuthentication : BaseAuthentication, IGithubAuthentication
     {
         /// <summary>
-        /// 
+        ///
         /// </summary>
         /// <param name="tokenScope"></param>
         /// <param name="personalAccessTokenStore"></param>
@@ -74,10 +74,10 @@ namespace Microsoft.Alm.Authentication
         /// <summary>
         /// Gets a configured authentication object for 'github.com'.
         /// </summary>
-        /// <param name="targetUri">The uniform resource indicator of the resource which requires 
+        /// <param name="targetUri">The uniform resource indicator of the resource which requires
         /// authentication.</param>
         /// <param name="tokenScope">The desired scope of any personal access tokens aqcuired.</param>
-        /// <param name="personalAccessTokenStore">A secure secret store for any personal access 
+        /// <param name="personalAccessTokenStore">A secure secret store for any personal access
         /// tokens acquired.</param>
         /// <param name="authentication">(out) The authenitcation object if successful.</param>
         /// <returns>True if success; otherwise false.</returns>
@@ -119,7 +119,7 @@ namespace Microsoft.Alm.Authentication
         /// The uniform resource indicator used to uniquely identitfy the credentials.
         /// </param>
         /// <param name="credentials">
-        /// (out) A <see cref="Credential"/> object from the authentication object, 
+        /// (out) A <see cref="Credential"/> object from the authentication object,
         /// authority or storage; otherwise `null`, if successful.
         /// </param>
         /// <returns>True if successful; otherwise false.</returns>
@@ -139,10 +139,10 @@ namespace Microsoft.Alm.Authentication
 
         /// <summary>
         /// <para></para>
-        /// <para>Tokens acquired are stored in the secure secret store provided during 
+        /// <para>Tokens acquired are stored in the secure secret store provided during
         /// initialization.</para>
         /// </summary>
-        /// <param name="targetUri">The unique identifier for the resource for which access is to 
+        /// <param name="targetUri">The unique identifier for the resource for which access is to
         /// be acquired.</param>
         /// <param name="credentials">(out) Credentials when acquision is successful; null otherwise.</param>
         /// <returns>True if success; otherwise false.</returns>
@@ -162,7 +162,7 @@ namespace Microsoft.Alm.Authentication
                     this.PersonalAccessTokenStore.WriteCredentials(targetUri, credentials);
 
                     // if a result callback was registered, call it
-                    if (AuthenticationResultCallback!=null)
+                    if (AuthenticationResultCallback != null)
                     {
                         AuthenticationResultCallback(targetUri, result);
                     }
@@ -207,10 +207,10 @@ namespace Microsoft.Alm.Authentication
 
         /// <summary>
         /// <para></para>
-        /// <para>Tokens acquired are stored in the secure secret store provided during 
+        /// <para>Tokens acquired are stored in the secure secret store provided during
         /// initialization.</para>
         /// </summary>
-        /// <param name="targetUri">The unique identifier for the resource for which access is to 
+        /// <param name="targetUri">The unique identifier for the resource for which access is to
         /// be acquired.</param>
         /// <param name="username">The username of the account for which access is to be acquired.</param>
         /// <param name="password">The password of the account for which access is to be acquired.</param>
@@ -263,7 +263,7 @@ namespace Microsoft.Alm.Authentication
         /// <summary>
         /// Validates that a set of credentials grants access to the target resource.
         /// </summary>
-        /// <param name="targetUri">The unique identifier for the resource for which credentials 
+        /// <param name="targetUri">The unique identifier for the resource for which credentials
         /// are being validated against.</param>
         /// <param name="credentials">The credentials to validate.</param>
         /// <returns>True is successful; otherwise false.</returns>

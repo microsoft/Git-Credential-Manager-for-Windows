@@ -6,7 +6,7 @@
     internal enum AuthorityType
     {
         /// <summary>
-        /// Attempt to detect the authority automatically, fallback to <see cref="Basic"/> if 
+        /// Attempt to detect the authority automatically, fallback to <see cref="Basic"/> if
         /// unable to detect an authority.
         /// </summary>
         Auto,

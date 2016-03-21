@@ -1,6 +1,4 @@
-﻿using System;
-
-namespace Microsoft.Alm.Authentication
+﻿namespace Microsoft.Alm.Authentication
 {
     public interface ITokenStore
     {

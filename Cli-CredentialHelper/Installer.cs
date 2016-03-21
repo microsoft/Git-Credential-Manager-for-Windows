@@ -385,7 +385,7 @@ namespace Microsoft.Alm.CredentialHelper
                     {
                         Console.Out.WriteLine();
 
-                        // updating /etc/gitconfig should not fail installation when forced 
+                        // updating /etc/gitconfig should not fail installation when forced
                         if (!_isForced)
                         {
                             // only 'fatal' when not forced
@@ -644,7 +644,7 @@ namespace Microsoft.Alm.CredentialHelper
             }
             else
             {
-                /* cannot install while not elevated (need access to %PROGRAMFILES%), re-launch 
+                /* cannot install while not elevated (need access to %PROGRAMFILES%), re-launch
                    self as an elevated process with identical arguments. */
 
                 // build arguments
@@ -751,7 +751,7 @@ namespace Microsoft.Alm.CredentialHelper
             }
             else
             {
-                /* cannot uninstall while not elevated (need access to %PROGRAMFILES%), re-launch 
+                /* cannot uninstall while not elevated (need access to %PROGRAMFILES%), re-launch
                    self as an elevated process with identical arguments. */
 
                 // build arguments

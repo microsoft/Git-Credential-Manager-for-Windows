@@ -25,7 +25,7 @@ IF "%~1" EQU "/?" (
     IF %netfx% LSS 378675 (
         GOTO :NETFX_NOT_FOUND
     )
-    
+
     "%~dp0\git-credential-manager" install
 
 
@@ -56,5 +56,3 @@ IF "%~1" EQU "/?" (
     "%~dp0\git-credential-manager" ?
 
     EXIT /B 0
-
-

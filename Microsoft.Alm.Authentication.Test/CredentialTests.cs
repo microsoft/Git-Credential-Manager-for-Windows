@@ -100,13 +100,13 @@ namespace Microsoft.Alm.Authentication.Test
             ICredentialStoreTest(new SecretCache("test-cache", Secret.UriToSimpleName), "http://dummy.url/for/testing", "", "blank_usernames_are_illegal");
             ICredentialStoreTest(new SecretCache("test-cache", Secret.UriToPathedName), "http://dummy.url/for/testing", "", "blank_usernames_are_illegal");
         }
-        
+
         [TestMethod]
         public void SecretCachePasswordNull()
         {
             ICredentialStoreTest(new SecretCache("test-cache", Secret.UriToSimpleName), "http://dummy.url/for/testing", "null_passwords_are_illegal", null);
             ICredentialStoreTest(new SecretCache("test-cache", Secret.UriToPathedName), "http://dummy.url/for/testing", "null_passwords_are_illegal", null);
-        }        
+        }
 
         private void ICredentialStoreTest(ICredentialStore credentialStore, string url, string username, string password)
         {

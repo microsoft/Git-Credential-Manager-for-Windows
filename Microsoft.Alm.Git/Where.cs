@@ -14,7 +14,7 @@ namespace Microsoft.Alm.Git
         /// Finds the "best" path to an app of a given name.
         /// </summary>
         /// <param name="name">The name of the application, without extension, to find.</param>
-        /// <param name="path">Path to the first match file which the operating system considers 
+        /// <param name="path">Path to the first match file which the operating system considers
         /// executable.</param>
         /// <returns><see langword="True"/> if succeeds; <see langword="false"/> otherwise.</returns>
         static public bool FindApp(string name, out string path)

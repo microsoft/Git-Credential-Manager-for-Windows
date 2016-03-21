@@ -13,7 +13,7 @@ using Microsoft.Win32.SafeHandles;
 
 namespace Microsoft.Alm.CredentialHelper
 {
-    class Program
+    internal class Program
     {
         public const string Title = "Git Credential Manager for Windows";
         public const string SourceUrl = "https://github.com/Microsoft/Git-Credential-Manager-for-Windows";
@@ -110,7 +110,7 @@ namespace Microsoft.Alm.CredentialHelper
         }
         private static Version _version;
 
-        static void Main(string[] args)
+        private static void Main(string[] args)
         {
             try
             {
@@ -904,7 +904,7 @@ namespace Microsoft.Alm.CredentialHelper
 
         private static bool GithubCredentialPrompt(TargetUri targetUri, out string username, out string password)
         {
-            // ReadConsole 32768 fail, 32767 ok 
+            // ReadConsole 32768 fail, 32767 ok
             // @linquize [https://github.com/Microsoft/Git-Credential-Manager-for-Windows/commit/a62b9a19f430d038dcd85a610d97e5f763980f85]
             const int BufferReadSize = 16 * 1024;
 
@@ -1030,7 +1030,7 @@ namespace Microsoft.Alm.CredentialHelper
 
         private static bool GithubAuthCodePrompt(TargetUri targetUri, GithubAuthenticationResultType resultType, string username, out string authenticationCode)
         {
-            // ReadConsole 32768 fail, 32767 ok 
+            // ReadConsole 32768 fail, 32767 ok
             // @linquize [https://github.com/Microsoft/Git-Credential-Manager-for-Windows/commit/a62b9a19f430d038dcd85a610d97e5f763980f85]
             const int BufferReadSize = 16 * 1024;
 

@@ -169,7 +169,7 @@ namespace Microsoft.Alm.Authentication
         }
 
         /// <summary>
-        /// Validates that <see cref="Credential"/> are valid to grant access to the Visual Studio 
+        /// Validates that <see cref="Credential"/> are valid to grant access to the Visual Studio
         /// Online service represented by the <paramref name="targetUri"/> parameter.
         /// </summary>
         /// <param name="targetUri">Uniform resource identifier for a VSTS service.</param>
@@ -213,7 +213,7 @@ namespace Microsoft.Alm.Authentication
         }
 
         /// <summary>
-        /// <para>Validates that <see cref="Token"/> are valid to grant access to the Visual Studio 
+        /// <para>Validates that <see cref="Token"/> are valid to grant access to the Visual Studio
         /// Online service represented by the <paramref name="targetUri"/> parameter.</para>
         /// <para>Tokens of <see cref="TokenType.Refresh"/> cannot grant access, and
         /// therefore always fail - this does not mean the token is invalid.</para>

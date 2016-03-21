@@ -73,7 +73,7 @@ namespace Microsoft.Alm.Git
             {
                 path = path.Substring(0, path.Length - AllVersionGitPath.Length);
             }
-            
+
             // Versions of git installation could have 2 binaries. One in the `bin` directory
             // and the other in the `cmd` directory. Handle both scenarios.
 
