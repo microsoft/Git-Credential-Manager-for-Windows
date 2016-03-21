@@ -1,0 +1,23 @@
+version: "{build}"
+
+configuration:
+#  - Debug
+  - Release
+
+platform: Any CPU
+
+before_build:
+  - nuget restore
+
+build:
+  parallel: true
+  project: Microsoft.Alm.sln
+  verbosity: minimal
+
+test: off
+
+cache:
+  - packages -> **\packages.config
+
+matrix:
+  fast_finish: true
