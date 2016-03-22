@@ -2,6 +2,10 @@
 ; The Inno Setup Compiler (and IDE) can be found at http://www.jrsoftware.org/isinfo.php
 ; The IDP plugin for Inno Setup is also required and can be found at https://mitrichsoftware.wordpress.com/inno-setup-tools/inno-download-plugin/
 
+#if VER < EncodeVer(5,5,6)
+  #error Update your Inno Setup version (5.5.6 or newer)
+#endif
+
 #include <idp.iss>
 
 #define MyAppName "Microsoft Git Credential Manager for Windows"
@@ -42,6 +46,7 @@ SolidCompression=yes
 MinVersion=6.1.7600
 DisableDirPage=yes
 DisableReadyPage=yes
+UninstallDisplayIcon={app}\git-credential-manager.exe
 SetupIconFile=Assets\gcmicon.ico
 ArchitecturesInstallIn64BitMode=x64
 WizardImageBackColor=clWhite
@@ -71,14 +76,6 @@ Source: "..\Deploy\Microsoft.IdentityModel.Clients.ActiveDirectory.dll"; DestDir
 Source: "..\Deploy\Microsoft.IdentityModel.Clients.ActiveDirectory.WindowsForms.dll"; DestDir: "{app}"; Flags: ignoreversion
 Source: "..\Deploy\README.md"; DestDir: "{app}"; Flags: ignoreversion
 
-[UninstallDelete]
-Type: files; Name: "{app}\git-credential-manager.exe";
-Type: files; Name: "{app}\Microsoft.Alm.Authentication.dll";
-Type: files; Name: "{app}\Microsoft.Alm.Git.dll";
-Type: files; Name: "{app}\Microsoft.IdentityModel.Clients.ActiveDirectory.dll";
-Type: files; Name: "{app}\Microsoft.IdentityModel.Clients.ActiveDirectory.WindowsForms.dll";
-Type: files; Name: "{app}\README.md";
-
 [Code]
 type NetFx_Version = (
      NetFx_v30,  // .NET Framework 3.0
@@ -88,7 +85,8 @@ type NetFx_Version = (
      NetFx_v451, // .NET Framework 4.5.1
      NetFx_v452, // .NET Framework 4.5.2
      NetFx_v46,  // .NET Framework 4.6
-     NetFx_v461);// .NET Framework 4.6.1 
+     NetFx_v461  // .NET Framework 4.6.1
+);
 
 function DetectGit(): Boolean;
 var
@@ -261,7 +259,7 @@ begin
   finally
     WizardForm.StatusLabel.Caption := StatusText;
     WizardForm.ProgressGauge.Style := npbstNormal;
-  end;     
+  end;
 end;
 
 function UninstallManager() : Boolean;
@@ -303,6 +301,14 @@ begin
     end;
 end;
 
+procedure CurPageChanged(CurPageID: Integer);
+begin
+  if CurPageID = wpLicense then
+    begin
+      WizardForm.NextButton.Caption := SetupMessage(msgButtonInstall);
+    end;
+end;
+
 procedure CurStepChanged(CurStep: TSetupStep);
 begin
   case CurStep of
@@ -321,7 +327,7 @@ begin
             RaiseException('Fatal: An error occured when updating the local system.');
           end;
       end;
-  end;  
+  end;
 end;
 
 procedure CurUninstallStepChanged(CurStep: TUninstallStep);
@@ -334,4 +340,3 @@ begin
         end;
     end;
 end;
-
