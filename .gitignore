@@ -192,3 +192,4 @@ _Pvt_Extensions/
 ModelManifest.xml
 
 .vs/
+Cli-CredentialHelper/Output/
