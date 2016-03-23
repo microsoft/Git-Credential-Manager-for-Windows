@@ -15,6 +15,8 @@ This project includes:
 
 This is a community project so feel free to contribute ideas, submit bugs, fix bugs, or code new features. For detailed information on how the GCM works go to the [wiki](https://github.com/Microsoft/Git-Credential-Manager-for-Windows/wiki/How-the-Git-Credential-Managers-works).
 
+[![Build status](https://ci.appveyor.com/api/projects/status/jl6oe1thiwv5s52o/branch/master?svg=true)](https://ci.appveyor.com/project/whoisj/git-credential-manager-for-windows/branch/master)
+
 ## Download and Install ##
 
 To use the GCM, you can download the [latest installer](<https://github.com/Microsoft/Git-Credential-Manager-for-Windows/releases/latest>). To install, double-click Setup.exe and follow the instructions presented.
