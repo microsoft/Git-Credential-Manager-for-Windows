@@ -371,6 +371,7 @@ namespace Microsoft.Alm.CredentialHelper
                             // no need to save the credentials explicitly, as Git will call back
                             // with a store command if the credentials are valid.
                             credentials = new Credential(username, password);
+                            operationArguments.SetCredentials(credentials);
                         }
                     }
                     break;
