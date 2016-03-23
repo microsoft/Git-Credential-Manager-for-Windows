@@ -874,7 +874,7 @@ namespace Microsoft.Alm.CredentialHelper
                     // write a small header to help with identifying new log entries
                     listener.WriteLine(Environment.NewLine);
                     listener.WriteLine(String.Format("Log Start ({0:u})", DateTimeOffset.Now));
-                    listener.WriteLine(String.Format("Microsoft {0} version {0}", Program.Title, Version.ToString(3)));
+                    listener.WriteLine(String.Format("Microsoft {0} version {1}", Program.Title, Version.ToString(3)));
                 }
             }
         }
