@@ -30,7 +30,7 @@ namespace Microsoft.Alm.CredentialHelper
         internal const string CommandStore = "store";
         internal const string CommandUninstall = "uninstall";
         internal const string CommandVersion = "version";
-        internal const string CommandClear = "clear";
+        internal const string CommandDelete = "delete";
 
         internal const string ConfigAuthortyKey = "authority";
         internal const string ConfigHttpProxyKey = "httpProxy";
@@ -49,7 +49,7 @@ namespace Microsoft.Alm.CredentialHelper
         private static readonly List<string> CommandList = new List<string>
         {
             CommandApprove,
-            CommandClear,
+            CommandDelete,
             CommandDeploy,
             CommandErase,
             CommandFill,
@@ -130,19 +130,18 @@ namespace Microsoft.Alm.CredentialHelper
                 // list of arg => method associations (case-insensitive)
                 Dictionary<string, Action> actions = new Dictionary<string, Action>(StringComparer.OrdinalIgnoreCase)
                 {
-                    { "approve", Store },
-                    { "erase", Erase },
-                    { "deploy", Deploy },
-                    { "fill", Get },
-                    { "get", Get },
-                    { "install", Deploy },
-                    { "reject", Erase },
-                    { "remove", Remove },
-                    { "store", Store },
-                    { "uninstall", Remove },
-                    { "version", PrintVersion },
-                    { "clear", Clear },
-                    { "clean", Clear },
+                    { CommandApprove, Store },
+                    { CommandErase, Erase },
+                    { CommandDeploy, Deploy },
+                    { CommandFill, Get },
+                    { CommandGet, Get },
+                    { CommandInstall, Deploy },
+                    { CommandReject, Erase },
+                    { CommandRemove, Remove },
+                    { CommandStore, Store },
+                    { CommandUninstall, Remove },
+                    { CommandVersion, PrintVersion },
+                    { CommandDelete, Delete },
                 };
 
                 // invoke action specified by arg0
@@ -181,8 +180,8 @@ namespace Microsoft.Alm.CredentialHelper
             Console.Out.WriteLine();
             Console.Out.WriteLine("Command Line Options:");
             Console.Out.WriteLine();
-            Console.Out.WriteLine("  " + CommandDeploy + "       Deploys the " + Title);
-            Console.Out.WriteLine("               package and sets Git configuration to use the helper.");
+            Console.Out.WriteLine("  " + CommandDeploy + "       Deploys the " + Title + " package and sets");
+            Console.Out.WriteLine("               Git configuration to use the helper.");
             Console.Out.WriteLine();
             Console.Out.WriteLine("    " + Installer.ParamPathKey + "     Specifies a path for the installer to deploy to.");
             Console.Out.WriteLine("               If a path is provided, the installer will not seek additional");
@@ -198,8 +197,8 @@ namespace Microsoft.Alm.CredentialHelper
             Console.Out.WriteLine("               When combined with " + Installer.ParamPassiveKey + " all output is eliminated; only the");
             Console.Out.WriteLine("               return code can be used to validate success.");
             Console.Out.WriteLine();
-            Console.Out.WriteLine("  " + CommandRemove + "       Removes the " + Title);
-            Console.Out.WriteLine("               package and unsets Git configuration to no longer use the helper.");
+            Console.Out.WriteLine("  " + CommandRemove + "       Removes the " + Title + " package");
+            Console.Out.WriteLine("               and unsets Git configuration to no longer use the helper.");
             Console.Out.WriteLine();
             Console.Out.WriteLine("    " + Installer.ParamPathKey + "     Specifies a path for the installer to remove from.");
             Console.Out.WriteLine("               If a path is provided, the installer will not seek additional");
@@ -214,6 +213,12 @@ namespace Microsoft.Alm.CredentialHelper
             Console.Out.WriteLine("               prerequisites are not met or errors are encountered.");
             Console.Out.WriteLine("               When combined with " + Installer.ParamPassiveKey + " all output is eliminated; only the");
             Console.Out.WriteLine("               return code can be used to validate success.");
+            Console.Out.WriteLine();
+            Console.Out.WriteLine("  " + CommandDelete + "       Removes stored credentials for a given URL.");
+            Console.Out.WriteLine("               Any future attempts to authenticate with the remote will require");
+            Console.Out.WriteLine("               authenitcation steps to be completed again.");
+            Console.Out.WriteLine();
+            Console.Out.WriteLine("      `git credential-manager clear <url>`");
             Console.Out.WriteLine();
             Console.Out.WriteLine("  " + CommandVersion + "       Displays the current version.");
             Console.Out.WriteLine();
@@ -285,7 +290,7 @@ namespace Microsoft.Alm.CredentialHelper
             Console.Out.WriteLine();
         }
 
-        private static void Clear()
+        private static void Delete()
         {
             Trace.WriteLine("Program::Erase");
 
