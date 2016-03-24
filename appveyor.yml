@@ -9,12 +9,13 @@ platform: Any CPU
 before_build:
   - nuget restore
 
-build:
-  parallel: true
-  project: Microsoft.Alm.sln
-  verbosity: minimal
+build_script:
+  - msbuild "Microsoft.Alm.sln" /logger:"C:\Program Files\AppVeyor\BuildAgent\Appveyor.MSBuildLogger.dll" /consoleloggerparameters:Verbosity=minimal /maxcpucount /nodeReuse:true /target:"Build" /property:Configuration="%configuration%";Platform="%platform%";RunCodeAnalysis=true
 
-test: off
+test:
+  assemblies:
+    - Cli-CredentialHelper.Test\bin\$(configuration)\Microsoft.Alm.*.Test.dll
+    - Microsoft.Alm.*.Test\bin\$(configuration)\Microsoft.Alm.*.Test.dll
 
 cache:
   - packages -> **\packages.config
