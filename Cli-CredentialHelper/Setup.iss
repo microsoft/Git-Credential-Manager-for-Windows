@@ -6,10 +6,23 @@
   #error Update your Inno Setup version (5.5.6 or newer)
 #endif
 
+#define deployDir "..\Deploy\"
+
+#ifnexist deployDir + "git-credential-manager.exe"
+  #error Compile Git Credential Manager first
+#endif
+
 #include <idp.iss>
 
+#define VerMajor
+#define VerMinor
+#define VerBuild
+#define VerRevision
+
+#expr ParseVersion(deployDir + "git-credential-manager.exe", VerMajor, VerMinor, VerBuild, VerRevision)
+
 #define MyAppName "Microsoft Git Credential Manager for Windows"
-#define MyAppVersion "1.2.1"
+#define MyAppVersion str(VerMajor) + "." + str(VerMinor) + "." + str(VerBuild)
 #define MyAppPublisher "Microsoft Corporation"
 #define MyAppPublisherURL "http://www.microsoft.com"
 #define MyAppURL "https://github.com/Microsoft/Git-Credential-Manager-for-Windows"
@@ -29,16 +42,19 @@
 AppId={{9F0CBE43-690B-4C03-8845-6AC2CDB29815}
 AppName={#MyAppName}
 AppVersion={#MyAppVersion}
+AppVerName={#MyAppName} {#MyAppVersion}
 AppPublisher={#MyAppPublisher}
 AppPublisherURL={#MyAppPublisherURL}
 AppSupportURL={#MyAppURL}
 AppUpdatesURL={#MyAppURL}
+AppContact={#MyAppURL}
 AppCopyright=Copyright © Microsoft 2016
+VersionInfoVersion={#MyAppVersion}
 AppReadmeFile=https://github.com/Microsoft/Git-Credential-Manager-for-Windows/blob/master/README.md
 BackColor=clWhite
 BackSolid=yes
 DefaultDirName={userpf}\{#MyAppName}
-LicenseFile=..\Deploy\LICENSE.TXT
+LicenseFile={#deployDir}\LICENSE.TXT
 OutputBaseFilename=GCMW-{#MyAppVersion}
 Compression=lzma2
 InternalCompressLevel=ultra64
@@ -65,16 +81,13 @@ Name: "full"; Description: "Full installation"; Flags: iscustom;
 Name: "NetFx"; Description: {#NetFxName}; ExtraDiskSpaceRequired: {#NetFxSpace}; Types: full; Flags: fixed; Check: DetectNetFxChecked;
 Name: "Git4Win"; Description: {#Git4WinName}; ExtraDiskSpaceRequired: {#Git4WinSpace}; Types: full; Flags: fixed; Check: DetectGitChecked;
 
-[Dirs]
-Name: "{tmp}\gcmSetup"
-
 [Files]
-Source: "..\Deploy\git-credential-manager.exe"; DestDir: "{app}"; Flags: ignoreversion
-Source: "..\Deploy\Microsoft.Alm.Authentication.dll"; DestDir: "{app}"; Flags: ignoreversion
-Source: "..\Deploy\Microsoft.Alm.Git.dll"; DestDir: "{app}"; Flags: ignoreversion
-Source: "..\Deploy\Microsoft.IdentityModel.Clients.ActiveDirectory.dll"; DestDir: "{app}"; Flags: ignoreversion
-Source: "..\Deploy\Microsoft.IdentityModel.Clients.ActiveDirectory.WindowsForms.dll"; DestDir: "{app}"; Flags: ignoreversion
-Source: "..\Deploy\README.md"; DestDir: "{app}"; Flags: ignoreversion
+Source: "{#deployDir}\git-credential-manager.exe"; DestDir: "{app}"; Flags: ignoreversion
+Source: "{#deployDir}\Microsoft.Alm.Authentication.dll"; DestDir: "{app}"; Flags: ignoreversion
+Source: "{#deployDir}\Microsoft.Alm.Git.dll"; DestDir: "{app}"; Flags: ignoreversion
+Source: "{#deployDir}\Microsoft.IdentityModel.Clients.ActiveDirectory.dll"; DestDir: "{app}"; Flags: ignoreversion
+Source: "{#deployDir}\Microsoft.IdentityModel.Clients.ActiveDirectory.WindowsForms.dll"; DestDir: "{app}"; Flags: ignoreversion
+Source: "{#deployDir}\README.md"; DestDir: "{app}"; Flags: ignoreversion
 
 [Code]
 type NetFx_Version = (
@@ -182,7 +195,7 @@ var
   bInstallFx40: Boolean;
   bInstallFx46: Boolean;
   bInstallGit: Boolean;
-  StatusText: string;
+  StatusText: String;
   ResultCode: Integer;
 begin
   Result := True;
@@ -242,8 +255,8 @@ end;
 
 function InstallManager() : Boolean;
 var
-  ResultCode: integer;
-  StatusText: string;
+  ResultCode: Integer;
+  StatusText: String;
 begin
   Result := False;
 
@@ -264,8 +277,8 @@ end;
 
 function UninstallManager() : Boolean;
 var
-  ResultCode: integer;
-  StatusText: string;
+  ResultCode: Integer;
+  StatusText: String;
 begin
   Result := false;
 
