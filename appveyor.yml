@@ -1,5 +1,7 @@
 version: "{build}"
 
+clone_depth: 10
+
 configuration:
 #  - Debug
   - Release
