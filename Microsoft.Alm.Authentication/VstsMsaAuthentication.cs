@@ -18,6 +18,7 @@ namespace Microsoft.Alm.Authentication
         {
             this.VstsAuthority = new VstsAzureAuthority(DefaultAuthorityHost);
         }
+
         /// <summary>
         /// Test constructor which allows for using fake credential stores
         /// </summary>
