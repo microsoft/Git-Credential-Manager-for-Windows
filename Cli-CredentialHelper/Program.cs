@@ -30,6 +30,7 @@ namespace Microsoft.Alm.CredentialHelper
         internal const string CommandStore = "store";
         internal const string CommandUninstall = "uninstall";
         internal const string CommandVersion = "version";
+        internal const string CommandClear = "clear";
 
         internal const string ConfigAuthortyKey = "authority";
         internal const string ConfigHttpProxyKey = "httpProxy";
@@ -48,6 +49,7 @@ namespace Microsoft.Alm.CredentialHelper
         private static readonly List<string> CommandList = new List<string>
         {
             CommandApprove,
+            CommandClear,
             CommandDeploy,
             CommandErase,
             CommandFill,
@@ -139,6 +141,8 @@ namespace Microsoft.Alm.CredentialHelper
                     { "store", Store },
                     { "uninstall", Remove },
                     { "version", PrintVersion },
+                    { "clear", Clear },
+                    { "clean", Clear },
                 };
 
                 // invoke action specified by arg0
@@ -279,6 +283,67 @@ namespace Microsoft.Alm.CredentialHelper
             Console.Out.WriteLine(@"      helper = manager");
             Console.Out.WriteLine(@"      " + ConfigWritelogKey + " = true");
             Console.Out.WriteLine();
+        }
+
+        private static void Clear()
+        {
+            Trace.WriteLine("Program::Erase");
+
+            string[] args = Environment.GetCommandLineArgs();
+
+            if (args.Length < 3)
+                goto error_parse;
+
+            string url = args[2];
+            Uri uri = null;
+
+            if (Uri.IsWellFormedUriString(url, UriKind.Absolute))
+            {
+                if (!Uri.TryCreate(url, UriKind.Absolute, out uri))
+                    goto error_parse;
+            }
+            else
+            {
+                url = String.Format("{0}://{1}", Uri.UriSchemeHttps, url);
+                if (!Uri.TryCreate(url, UriKind.Absolute, out uri))
+                    goto error_parse;
+            }
+
+            OperationArguments operationArguments = new OperationArguments(TextReader.Null);
+            operationArguments.QueryUri = uri;
+
+            LoadOperationArguments(operationArguments);
+
+            BaseAuthentication authentication = CreateAuthentication(operationArguments);
+
+            switch (operationArguments.Authority)
+            {
+                default:
+                case AuthorityType.Basic:
+                    Trace.WriteLine("   deleting basic credentials");
+                    authentication.DeleteCredentials(operationArguments.TargetUri);
+                    break;
+
+                case AuthorityType.AzureDirectory:
+                case AuthorityType.MicrosoftAccount:
+                    Trace.WriteLine("   deleting VSTS credentials");
+                    BaseVstsAuthentication vstsAuth = authentication as BaseVstsAuthentication;
+                    vstsAuth.DeleteCredentials(operationArguments.TargetUri);
+                    // call delete twice to purge any stored ADA tokens
+                    vstsAuth.DeleteCredentials(operationArguments.TargetUri);
+                    break;
+
+                case AuthorityType.GitHub:
+                    Trace.WriteLine("   deleting GitHub credentials");
+                    GithubAuthentication ghAuth = authentication as GithubAuthentication;
+                    ghAuth.DeleteCredentials(operationArguments.TargetUri);
+                    break;
+            }
+
+            return;
+
+            error_parse:
+            Console.Out.WriteLine("Fatal: unable to parse target uri.");
         }
 
         private static void Erase()
