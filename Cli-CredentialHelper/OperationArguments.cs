@@ -18,39 +18,42 @@ namespace Microsoft.Alm.CredentialHelper
             this.ValidateCredentials = true;
             this.WriteLog = false;
 
-            string line;
-            while (!String.IsNullOrWhiteSpace((line = stdin.ReadLine())))
+            if (stdin != TextReader.Null)
             {
-                string[] pair = line.Split(new[] { '=' }, 2);
-
-                if (pair.Length == 2)
+                string line;
+                while (!String.IsNullOrWhiteSpace((line = stdin.ReadLine())))
                 {
-                    switch (pair[0])
+                    string[] pair = line.Split(new[] { '=' }, 2);
+
+                    if (pair.Length == 2)
                     {
-                        case "protocol":
-                            this.QueryProtocol = pair[1];
-                            break;
+                        switch (pair[0])
+                        {
+                            case "protocol":
+                                this.QueryProtocol = pair[1];
+                                break;
 
-                        case "host":
-                            this.QueryHost = pair[1];
-                            break;
+                            case "host":
+                                this.QueryHost = pair[1];
+                                break;
 
-                        case "path":
-                            this.QueryPath = pair[1];
-                            break;
+                            case "path":
+                                this.QueryPath = pair[1];
+                                break;
 
-                        case "username":
-                            this.CredUsername = pair[1];
-                            break;
+                            case "username":
+                                this.CredUsername = pair[1];
+                                break;
 
-                        case "password":
-                            this.CredPassword = pair[1];
-                            break;
+                            case "password":
+                                this.CredPassword = pair[1];
+                                break;
+                        }
                     }
                 }
-            }
 
-            this.CreateTargetUri();
+                this.CreateTargetUri();
+            }
         }
 
         public AuthorityType Authority { get; set; }
@@ -105,10 +108,53 @@ namespace Microsoft.Alm.CredentialHelper
                 CreateTargetUri();
             }
         }
-        public readonly string QueryHost;
-        public readonly string QueryPath;
-        public readonly string QueryProtocol;
-        public Uri QueryUri { get { return _queryUri; } }
+        public string QueryHost
+        {
+            get { return _queryHost; }
+            set
+            {
+                _queryHost = value;
+                CreateTargetUri();
+            }
+        }
+        public string QueryPath
+        {
+            get { return _queryPath; }
+            set
+            {
+                _queryPath = value;
+                CreateTargetUri();
+            }
+        }
+        public string QueryProtocol
+        {
+            get { return _queryProtocol; }
+            set
+            {
+                _queryProtocol = value;
+                CreateTargetUri();
+            }
+        }
+        public Uri QueryUri
+        {
+            get { return _queryUri; }
+            set
+            {
+                if (value == null)
+                {
+                    _queryHost = null;
+                    _queryPath = null;
+                    _queryProtocol = null;
+                }
+                else
+                {
+                    _queryHost = value.DnsSafeHost;
+                    _queryPath = value.AbsolutePath;
+                    _queryProtocol = value.Scheme;
+                }
+                CreateTargetUri();
+            }
+        }
         public TargetUri TargetUri
         {
             get { return _targetUri; }
@@ -126,6 +172,9 @@ namespace Microsoft.Alm.CredentialHelper
         public bool ValidateCredentials { get; set; }
         public bool WriteLog { get; set; }
 
+        private string _queryHost;
+        private string _queryPath;
+        private string _queryProtocol;
         private Uri _queryUri;
         private string _proxyHost;
         private string _proxyPath;
