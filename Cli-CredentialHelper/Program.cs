@@ -613,6 +613,7 @@ namespace Microsoft.Alm.CredentialHelper
         private static BaseAuthentication CreateAuthentication(OperationArguments operationArguments)
         {
             Debug.Assert(operationArguments != null, "The operationArguments is null");
+            Debug.Assert(operationArguments.TargetUri != null, "The operationArgument.TargetUri is null");
 
             Trace.WriteLine("Program::CreateAuthentication");
 
@@ -720,6 +721,12 @@ namespace Microsoft.Alm.CredentialHelper
             Debug.Assert(operationArguments != null, "The operationsArguments parameter is null.");
 
             Trace.WriteLine("Program::LoadOperationArguments");
+
+            if (operationArguments.TargetUri == null)
+            {
+                Console.Error.WriteLine("fatal: no host information, unable to continue.");
+                Environment.Exit(-1);
+            }
 
             Configuration config = new Configuration();
             Configuration.Entry entry;
