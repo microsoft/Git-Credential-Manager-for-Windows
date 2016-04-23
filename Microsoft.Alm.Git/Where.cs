@@ -267,7 +267,7 @@ namespace Microsoft.Alm.Git
         /// <returns><see langword="True"/> if succeeds; <see langword="false"/> otherwise.</returns>
         public static bool GitLocalConfig(string startingDirectory, out string path)
         {
-            const string GitOdbFolderName = ".git";
+            const string GitFolderName = ".git";
             const string LocalConfigFileName = "config";
 
             Trace.WriteLine("Where::GitLocalConfig");
@@ -277,8 +277,8 @@ namespace Microsoft.Alm.Git
             if (!String.IsNullOrWhiteSpace(startingDirectory))
             {
                 var dir = new DirectoryInfo(startingDirectory);
-                if (dir.Exists)
 
+                if (dir.Exists)
                 {
                     Func<DirectoryInfo, FileSystemInfo> hasOdb = (DirectoryInfo info) =>
                     {
@@ -290,7 +290,8 @@ namespace Microsoft.Alm.Git
                                    {
                                        return sub != null
                                            && sub.Exists
-                                           && String.Equals(sub.Name, GitOdbFolderName, StringComparison.OrdinalIgnoreCase);
+                                           && (String.Equals(sub.Name, GitFolderName, StringComparison.OrdinalIgnoreCase)
+                                              || String.Equals(sub.Name, LocalConfigFileName, StringComparison.OrdinalIgnoreCase));
                                    })
                                    .FirstOrDefault();
                     };
@@ -313,6 +314,10 @@ namespace Microsoft.Alm.Git
                             {
                                 path = localPath;
                             }
+                        }
+                        else if (result.Name == LocalConfigFileName && result is FileInfo)
+                        {
+                            path = result.FullName;
                         }
                         else
                         {
