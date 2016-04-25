@@ -5,6 +5,7 @@ clone_depth: 10
 configuration:
 #  - Debug
   - Release
+#  - Package
 
 platform: Any CPU
 
