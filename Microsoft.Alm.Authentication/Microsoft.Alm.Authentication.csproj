@@ -130,6 +130,6 @@
       Filename="$(NugetPath)"
       FileUri="https://dist.nuget.org/win-x86-commandline/latest/nuget.exe" />
     <Exec
-      Command="$(NugetPath) pack $(AssemblyName).csproj -Symbols -IncludeReferencedProjects -Prop Configuration=Release -OutputDirectory $(OutputPath)" />
+      Command="$(NugetPath) pack $(AssemblyName).csproj -Symbols -IncludeReferencedProjects -Prop Configuration=Package -OutputDirectory $(OutputPath)" />
   </Target>
 </Project>
