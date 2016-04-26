@@ -1,7 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 14
-VisualStudioVersion = 14.0.23107.0
+VisualStudioVersion = 14.0.25123.0
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Cli-CredentialHelper", "Cli-CredentialHelper\Cli-CredentialHelper.csproj", "{62F52119-63D4-40A8-A9DF-F1C4B473308A}"
 EndProject
@@ -24,31 +24,45 @@ EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
+		Package|Any CPU = Package|Any CPU
 		Release|Any CPU = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
 		{62F52119-63D4-40A8-A9DF-F1C4B473308A}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{62F52119-63D4-40A8-A9DF-F1C4B473308A}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{62F52119-63D4-40A8-A9DF-F1C4B473308A}.Package|Any CPU.ActiveCfg = Package|Any CPU
+		{62F52119-63D4-40A8-A9DF-F1C4B473308A}.Package|Any CPU.Build.0 = Package|Any CPU
+		{62F52119-63D4-40A8-A9DF-F1C4B473308A}.Package|Any CPU.Deploy.0 = Package|Any CPU
 		{62F52119-63D4-40A8-A9DF-F1C4B473308A}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{62F52119-63D4-40A8-A9DF-F1C4B473308A}.Release|Any CPU.Build.0 = Release|Any CPU
 		{C1DAABC1-B493-459D-BB4F-04FBEFB1BA13}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{C1DAABC1-B493-459D-BB4F-04FBEFB1BA13}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{C1DAABC1-B493-459D-BB4F-04FBEFB1BA13}.Package|Any CPU.ActiveCfg = Package|Any CPU
+		{C1DAABC1-B493-459D-BB4F-04FBEFB1BA13}.Package|Any CPU.Build.0 = Package|Any CPU
 		{C1DAABC1-B493-459D-BB4F-04FBEFB1BA13}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{C1DAABC1-B493-459D-BB4F-04FBEFB1BA13}.Release|Any CPU.Build.0 = Release|Any CPU
 		{0AEB1CFC-371F-415C-93C5-44CEAA0E9A34}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{0AEB1CFC-371F-415C-93C5-44CEAA0E9A34}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{0AEB1CFC-371F-415C-93C5-44CEAA0E9A34}.Package|Any CPU.ActiveCfg = Package|Any CPU
+		{0AEB1CFC-371F-415C-93C5-44CEAA0E9A34}.Package|Any CPU.Build.0 = Package|Any CPU
 		{0AEB1CFC-371F-415C-93C5-44CEAA0E9A34}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{0AEB1CFC-371F-415C-93C5-44CEAA0E9A34}.Release|Any CPU.Build.0 = Release|Any CPU
 		{FF70EB69-AE6D-4DCC-BA9F-12CB0C6581AE}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{FF70EB69-AE6D-4DCC-BA9F-12CB0C6581AE}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{FF70EB69-AE6D-4DCC-BA9F-12CB0C6581AE}.Package|Any CPU.ActiveCfg = Package|Any CPU
+		{FF70EB69-AE6D-4DCC-BA9F-12CB0C6581AE}.Package|Any CPU.Build.0 = Package|Any CPU
 		{FF70EB69-AE6D-4DCC-BA9F-12CB0C6581AE}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{FF70EB69-AE6D-4DCC-BA9F-12CB0C6581AE}.Release|Any CPU.Build.0 = Release|Any CPU
 		{4827C16D-5C58-406D-AB3F-3700BB0D06FE}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{4827C16D-5C58-406D-AB3F-3700BB0D06FE}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{4827C16D-5C58-406D-AB3F-3700BB0D06FE}.Package|Any CPU.ActiveCfg = Package|Any CPU
+		{4827C16D-5C58-406D-AB3F-3700BB0D06FE}.Package|Any CPU.Build.0 = Package|Any CPU
 		{4827C16D-5C58-406D-AB3F-3700BB0D06FE}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{4827C16D-5C58-406D-AB3F-3700BB0D06FE}.Release|Any CPU.Build.0 = Release|Any CPU
 		{5C9EF428-0D26-436A-A8BB-32E58357B36D}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{5C9EF428-0D26-436A-A8BB-32E58357B36D}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{5C9EF428-0D26-436A-A8BB-32E58357B36D}.Package|Any CPU.ActiveCfg = Package|Any CPU
+		{5C9EF428-0D26-436A-A8BB-32E58357B36D}.Package|Any CPU.Build.0 = Package|Any CPU
 		{5C9EF428-0D26-436A-A8BB-32E58357B36D}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{5C9EF428-0D26-436A-A8BB-32E58357B36D}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection

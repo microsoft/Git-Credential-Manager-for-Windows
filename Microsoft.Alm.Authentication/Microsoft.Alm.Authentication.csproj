@@ -39,6 +39,17 @@
     </WarningsAsErrors>
     <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
   </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Package|AnyCPU'">
+    <OutputPath>bin\Package\</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+    <Optimize>true</Optimize>
+    <DebugType>pdbonly</DebugType>
+    <PlatformTarget>x86</PlatformTarget>
+    <ErrorReport>prompt</ErrorReport>
+    <CodeAnalysisRuleSet>MinimumRecommendedRules.ruleset</CodeAnalysisRuleSet>
+    <Prefer32Bit>true</Prefer32Bit>
+  </PropertyGroup>
   <ItemGroup>
     <Reference Include="Microsoft.IdentityModel.Clients.ActiveDirectory, Version=2.18.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
       <HintPath>..\packages\Microsoft.IdentityModel.Clients.ActiveDirectory.2.18.206251556\lib\net45\Microsoft.IdentityModel.Clients.ActiveDirectory.dll</HintPath>
@@ -99,11 +110,26 @@
     <None Include="packages.config" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
-  <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
-       Other similar extension points exist, see Microsoft.Common.targets.
-  <Target Name="BeforeBuild">
+  <Import Project="$(PackagesDirectory)\MSBuildTasks.*\tools\MSBuild.Community.Tasks.targets" />
+
+  <!-- Produce a nuget package of this assembly -->
+  <Target Name="AfterBuild" Condition=" '$(Configuration)' == 'Package'">
+    <!-- Only download a new copy of nuget.exe if we don't have a copy available -->
+    <PropertyGroup Condition="!Exists('nuget.exe')">
+      <HaveLocalNuget>true</HaveLocalNuget>
+    </PropertyGroup>
+    <PropertyGroup Condition="!$(HaveLocalNuget)">
+      <NugetPath>$(IntermediateOutputPath)nuget.exe</NugetPath>
+    </PropertyGroup>
+    <PropertyGroup Condition="$(HaveLocalNuget)">
+      <NugetPath>nuget.exe</NugetPath>
+    </PropertyGroup>
+
+    <WebDownload
+      Condition="!$(HaveLocalNuget) And !Exists($(NugetPath))"
+      Filename="$(NugetPath)"
+      FileUri="https://dist.nuget.org/win-x86-commandline/latest/nuget.exe" />
+    <Exec
+      Command="$(NugetPath) pack $(AssemblyName).csproj -Symbols -IncludeReferencedProjects -Prop Configuration=Package -OutputDirectory $(OutputPath)" />
   </Target>
-  <Target Name="AfterBuild">
-  </Target>
-  -->
 </Project>
