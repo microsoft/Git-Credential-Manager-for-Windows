@@ -18,7 +18,12 @@ namespace Microsoft.Alm.CredentialHelper
             this.ValidateCredentials = true;
             this.WriteLog = false;
 
-            if (stdin != TextReader.Null)
+            if (stdin == TextReader.Null)
+            {
+                Console.Error.WriteLine("Unable to read from stdin");
+                Environment.Exit(-1);
+            }
+            else
             {
                 string line;
                 while (!String.IsNullOrWhiteSpace((line = stdin.ReadLine())))
@@ -88,7 +93,7 @@ namespace Microsoft.Alm.CredentialHelper
                 CreateTargetUri();
             }
         }
-        public Uri ProxUri
+        public Uri ProxyUri
         {
             get { return _proxyUri; }
             internal set
@@ -194,7 +199,7 @@ namespace Microsoft.Alm.CredentialHelper
             Uri tmp;
             if (Uri.TryCreate(url, UriKind.Absolute, out tmp))
             {
-                this.ProxUri = tmp;
+                this.ProxyUri = tmp;
             }
         }
 
