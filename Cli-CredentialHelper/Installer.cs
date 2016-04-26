@@ -55,7 +55,41 @@ namespace Microsoft.Alm.CredentialHelper
             }
         }
 
-        private static string UserBinPath
+        internal static string CygwinPath
+        {
+            get
+            {
+                if (_cygwinPath == null)
+                {
+                    const string Cygwin32GitPath = @"cygwin\usr\libexec\git-core\";
+                    const string Cygwin64GitPath = @"cygwin64\usr\libexec\git-core";
+
+                    foreach (var drive in DriveInfo.GetDrives())
+                    {
+                        string path = Path.Combine(drive.RootDirectory.FullName, Cygwin64GitPath);
+
+                        if (Directory.Exists(path))
+                        {
+                            _cygwinPath = path;
+                            break;
+                        }
+
+                        path = Path.Combine(drive.RootDirectory.FullName, Cygwin32GitPath);
+
+                        if (Directory.Exists(path))
+                        {
+                            _cygwinPath = path;
+                            break;
+                        }
+                    }
+                }
+
+                return _cygwinPath;
+            }
+        }
+        private static string _cygwinPath;
+
+        internal static string UserBinPath
         {
             get
             {
@@ -179,20 +213,20 @@ namespace Microsoft.Alm.CredentialHelper
                     return;
                 }
 
-                List<string> cleanedFiles;
+                List<string> copiedFiles;
                 foreach (var installation in installations)
                 {
                     Console.Out.WriteLine();
                     Console.Out.WriteLine("Deploying from '{0}' to '{1}'.", Program.Location, installation.Path);
 
-                    if (CopyFiles(Program.Location, installation.Libexec, out cleanedFiles))
+                    if (CopyFiles(Program.Location, installation.Libexec, out copiedFiles))
                     {
-                        foreach (var file in cleanedFiles)
+                        foreach (var file in copiedFiles)
                         {
                             Console.Out.WriteLine("  {0}", file);
                         }
 
-                        Console.Out.WriteLine("        {0} file(s) copied", cleanedFiles.Count);
+                        Console.Out.WriteLine("        {0} file(s) copied", copiedFiles.Count);
                     }
                     else if (_isForced)
                     {
@@ -203,7 +237,7 @@ namespace Microsoft.Alm.CredentialHelper
                         Console.Error.WriteLine("  deployment failed. U_U");
                         Pause();
 
-                        Result = ResultValue.RemovalFailed;
+                        Result = ResultValue.DeploymentFailed;
                         return;
                     }
                 }
@@ -216,14 +250,14 @@ namespace Microsoft.Alm.CredentialHelper
                     Directory.CreateDirectory(UserBinPath);
                 }
 
-                if (CopyFiles(Program.Location, UserBinPath, out cleanedFiles))
+                if (CopyFiles(Program.Location, UserBinPath, out copiedFiles))
                 {
-                    foreach (var file in cleanedFiles)
+                    foreach (var file in copiedFiles)
                     {
                         Console.Out.WriteLine("  {0}", file);
                     }
 
-                    Console.Out.WriteLine("        {0} file(s) copied", cleanedFiles.Count);
+                    Console.Out.WriteLine("        {0} file(s) copied", copiedFiles.Count);
                 }
                 else if (_isForced)
                 {
@@ -234,8 +268,21 @@ namespace Microsoft.Alm.CredentialHelper
                     Console.Error.WriteLine("  deployment failed. U_U");
                     Pause();
 
-                    Result = ResultValue.RemovalFailed;
+                    Result = ResultValue.DeploymentFailed;
                     return;
+                }
+
+                if (CygwinPath != null && Directory.Exists(CygwinPath))
+                {
+                    if (CopyFiles(Program.Location, UserBinPath, out copiedFiles))
+                    {
+                        foreach (var file in copiedFiles)
+                        {
+                            Console.Out.WriteLine("  {0}", file);
+                        }
+
+                        Console.Out.WriteLine("        {0} file(s) copied", copiedFiles.Count);
+                    }
                 }
 
                 Configuration.Type types = Configuration.Type.Global;
@@ -466,6 +513,19 @@ namespace Microsoft.Alm.CredentialHelper
 
                         Result = ResultValue.RemovalFailed;
                         return;
+                    }
+                }
+
+                if (CygwinPath != null && Directory.Exists(CygwinPath))
+                {
+                    if (CleanFiles(CygwinPath, out cleanedFiles))
+                    {
+                        foreach (var file in cleanedFiles)
+                        {
+                            Console.Out.WriteLine("  {0}", file);
+                        }
+
+                        Console.Out.WriteLine("        {0} file(s) cleaned", cleanedFiles.Count);
                     }
                 }
 
