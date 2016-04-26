@@ -437,6 +437,7 @@ namespace Microsoft.Alm.CredentialHelper
                         string password;
                         if (ModalPromptForCredentials(operationArguments.TargetUri, out username, out password))
                         {
+                            Trace.WriteLine("   credentials found");
                             // set the credentials object
                             // no need to save the credentials explicitly, as Git will call back
                             // with a store command if the credentials are valid.

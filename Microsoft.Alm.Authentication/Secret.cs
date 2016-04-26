@@ -19,15 +19,15 @@ namespace Microsoft.Alm.Authentication
             string trimmedHostUrl = targetUri.Host
                                              .TrimEnd('/', '\\')
                                              .TrimEnd();
-            Uri actualUri = targetUri.ActualUri;
+            Uri resolvedUri = targetUri.ResolvedUri;
 
-            if (actualUri.IsDefaultPort)
+            if (resolvedUri.IsDefaultPort)
             {
-                targetName = String.Format(TokenNameBaseFormat, @namespace, actualUri.Scheme, trimmedHostUrl);
+                targetName = String.Format(TokenNameBaseFormat, @namespace, resolvedUri.Scheme, trimmedHostUrl);
             }
             else
             {
-                targetName = String.Format(TokenNamePortFormat, @namespace, actualUri.Scheme, trimmedHostUrl, actualUri.Port);
+                targetName = String.Format(TokenNamePortFormat, @namespace, resolvedUri.Scheme, trimmedHostUrl, resolvedUri.Port);
             }
 
             Trace.WriteLine("   target name = " + targetName);
