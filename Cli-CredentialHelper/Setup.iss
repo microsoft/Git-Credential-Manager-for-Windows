@@ -27,9 +27,9 @@
 #define MyAppPublisherURL "http://www.microsoft.com"
 #define MyAppURL "https://github.com/Microsoft/Git-Credential-Manager-for-Windows"
 #define MyAppExeName "git-credential-manager.exe"
-#define Git4WinName "Git for Windows 2.7.4"
-#define Git4WinUrl "https://github.com/git-for-windows/git/releases/download/v2.7.4.windows.1/Git-2.7.4-64-bit.exe"
-#define Git4WinFile "Git-2.7.4-64-bit.exe"
+#define Git4WinName "Git for Windows 2.8.1"
+#define Git4WinUrl "https://github.com/git-for-windows/git/releases/download/v2.8.1.windows.1/Git-2.8.1-64-bit.exe"
+#define Git4WinFile "Git-2.8.1-64-bit.exe"
 #define Git4WinSpace 394309632
 #define NetFxName "The Microsoft .NET Framework 4.6.1"
 #define NetFxBaseFile "NetFx40Installer.exe"
