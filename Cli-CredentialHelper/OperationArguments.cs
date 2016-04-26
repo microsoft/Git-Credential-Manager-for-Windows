@@ -239,7 +239,7 @@ namespace Microsoft.Alm.CredentialHelper
                 : String.Format("{0}://{1}", this.ProxyProtocol, this.ProxyHost);
 
             if (Uri.TryCreate(actualUrl, UriKind.Absolute, out _queryUri)
-                || Uri.TryCreate(proxyUrl, UriKind.Absolute, out _proxyUri))
+                | Uri.TryCreate(proxyUrl, UriKind.Absolute, out _proxyUri))
             {
                 _targetUri = new TargetUri(_queryUri, _proxyUri);
             }
