@@ -27,9 +27,11 @@
 #define MyAppPublisherURL "http://www.microsoft.com"
 #define MyAppURL "https://github.com/Microsoft/Git-Credential-Manager-for-Windows"
 #define MyAppExeName "git-credential-manager.exe"
-#define Git4WinName "Git for Windows 2.8.1"
-#define Git4WinUrl "https://github.com/git-for-windows/git/releases/download/v2.8.1.windows.1/Git-2.8.1-64-bit.exe"
-#define Git4WinFile "Git-2.8.1-64-bit.exe"
+#define Git4WinVer "2.8.2"
+#define Git4WinVerLong = "v" + str(Git4WinVer) + ".windows.1"
+#define Git4WinName "Git for Windows " + str(Git4WinVer)
+#define Git4WinFile "Git-" + str(Git4WinVer) + "-64-bit.exe"
+#define Git4WinUrl "https://github.com/git-for-windows/git/releases/download/" + str(Git4WinVerLong) + "/" + str(Git4WinFile)
 #define Git4WinSpace 394309632
 #define NetFxName "The Microsoft .NET Framework 4.6.1"
 #define NetFxBaseFile "NetFx40Installer.exe"
@@ -65,7 +67,6 @@ DisableReadyPage=yes
 UninstallDisplayIcon={app}\git-credential-manager.exe
 SetupIconFile=Assets\gcmicon.ico
 ArchitecturesInstallIn64BitMode=x64
-WizardImageBackColor=clWhite
 WizardImageFile=Assets\gcmicon128.bmp
 WizardSmallImageFile=Assets\gcmicon64.bmp
 WizardImageStretch=no
