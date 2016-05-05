@@ -74,6 +74,14 @@ namespace Microsoft.Alm.Authentication
         }
 
         /// <summary>
+        /// Purges all credenitals from the store.
+        /// </summary>
+        public void PurgeCredentials()
+        {
+            PurgeCredentials(_namespace);
+        }
+
+        /// <summary>
         /// Reads credentials for a target URI from the credential store
         /// </summary>
         /// <param name="targetUri">The URI of the target for which credentials are being read</param>

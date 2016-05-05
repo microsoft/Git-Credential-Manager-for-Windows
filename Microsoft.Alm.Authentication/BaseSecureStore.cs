@@ -39,6 +39,41 @@ namespace Microsoft.Alm.Authentication
 
         protected abstract string GetTargetName(TargetUri targetUri);
 
+        protected void PurgeCredentials(string @namespace)
+        {
+            string filter = @namespace + "*";
+            int count;
+            IntPtr credentialArrayPtr;
+
+            if (NativeMethods.CredEnumerate(filter, 0, out count, out credentialArrayPtr))
+            {
+                for (int i = 0; i < count; i += 1)
+                {
+                    int offset = i * Marshal.SizeOf(typeof(IntPtr));
+                    IntPtr credentialPtr = Marshal.ReadIntPtr(credentialArrayPtr, offset);
+
+                    if (credentialPtr != IntPtr.Zero)
+                    {
+                        NativeMethods.Credential credential = Marshal.PtrToStructure<NativeMethods.Credential>(credentialPtr);
+
+                        if (!NativeMethods.CredDelete(credential.TargetName, credential.Type, 0))
+                        {
+                            int error = Marshal.GetLastWin32Error();
+                            Debug.Fail("Failed with error code " + error.ToString("X"));
+                        }
+
+                    }
+                }
+
+                NativeMethods.CredFree(credentialArrayPtr);
+            }
+            else
+            {
+                int error = Marshal.GetLastWin32Error();
+                Debug.Fail("Failed with error code " + error.ToString("X"));
+            }
+        }
+
         protected Credential ReadCredentials(string targetName)
         {
             Trace.WriteLine("BaseSecureStore::ReadCredentials");
