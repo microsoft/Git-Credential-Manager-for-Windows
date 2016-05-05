@@ -3,6 +3,8 @@ using System.Diagnostics;
 using System.Net;
 using System.Threading.Tasks;
 using Microsoft.IdentityModel.Clients.ActiveDirectory;
+using System.Text;
+using System.Runtime.InteropServices;
 
 namespace Microsoft.Alm.Authentication
 {
@@ -27,11 +29,14 @@ namespace Microsoft.Alm.Authentication
             AdalTrace.TraceSource.Switch.Level = SourceLevels.Off;
             AdalTrace.LegacyTraceSwitch.Level = TraceLevel.Off;
 
+            // attempt to purge any cached ada tokens.
+            SecurityPurgeAdaTokens(new SecretStore(AdalRefreshPrefx));
+
             this.ClientId = DefaultClientId;
             this.Resource = DefaultResource;
             this.TokenScope = tokenScope;
             this.PersonalAccessTokenStore = personalAccessTokenStore;
-            this.AdaRefreshTokenStore = new SecretStore(AdalRefreshPrefx);
+            this.AdaRefreshTokenStore = new SecretCache(AdalRefreshPrefx);
             this.VstsAuthority = new VstsAzureAuthority();
         }
         /// <summary>
@@ -336,6 +341,20 @@ namespace Microsoft.Alm.Authentication
             }
 
             return authentication != null;
+        }
+
+        /// <summary>
+        /// Attempts to enumerate and delete any and all Azure Directory Authentication
+        /// Refresh tokens caches by GCM asynchronously.
+        /// </summary>
+        /// <returns>A <see cref="Task"/> for the async action.</returns>
+        private static Task SecurityPurgeAdaTokens(SecretStore adaStore)
+        {
+            // this can and should be done asynchronously to minimize user impact 
+            return Task.Run(() =>
+            {
+                adaStore.PurgeCredentials();
+            });
         }
     }
 }
