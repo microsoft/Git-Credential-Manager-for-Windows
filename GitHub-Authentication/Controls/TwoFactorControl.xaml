@@ -1,0 +1,81 @@
+﻿<UserControl x:Class="GitHub.UI.TwoFactorControl" 
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation" 
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:ui="clr-namespace:GitHub.UI"
+    xmlns:prop="clr-namespace:GitHub.Authentication.Properties"
+    xmlns:helpers="clr-namespace:GitHub.Helpers"
+    xmlns:vm="clr-namespace:GitHub.Authentication.ViewModels"
+    mc:Ignorable="d"
+    d:DesignWidth="414"
+    d:DesignHeight="440"
+    Style="{DynamicResource DialogUserControl}">
+
+    <UserControl.DataContext>
+        <vm:TwoFactorViewModel />
+    </UserControl.DataContext>
+    
+    <StackPanel
+        Style="{DynamicResource DialogContainerStackPanel}"
+        helpers:AccessKeysManagerScoping.IsEnabled="True">
+        <ui:OcticonImage Icon="logo_github" Style="{StaticResource GitHubLogo}" />
+        <WrapPanel Orientation="Vertical" HorizontalAlignment="Center" Margin="0,0,0,12">
+            <TextBlock 
+                Text="{x:Static prop:Resources.twoFactorAuthText}" 
+                Padding="0" 
+                Margin="0,0,12,0"
+                Style="{DynamicResource GitHubH1TextBlock}"
+                Foreground="{DynamicResource GHTextBrush}" />
+        </WrapPanel>
+
+        <ui:HorizontalShadowDivider />
+
+        <TextBlock
+            Margin="30,0,30,16"
+            HorizontalAlignment="Center"
+            TextWrapping="Wrap"
+            Style="{StaticResource GitHubDescriptionTextBlock}">
+            <Run x:Name="description"
+                 Text="{x:Static prop:Resources.openTwoFactorAuthAppText}"/>
+            <Hyperlink x:Name="twoFactorReadMoreLink" ToolTip="https://help.github.com/articles/about-two-factor-authentication"><TextBlock Text="{x:Static prop:Resources.learnMoreLink}"/></Hyperlink>
+        </TextBlock>
+        <ui:TwoFactorInput
+            x:Name="authenticationCode"
+            TabIndex="1" />
+        <Grid Margin="0,12,0,0" Height="18">
+            <ui:ErrorMessageDisplay
+                x:Name="authenticationFailedLabel"
+                Message="{x:Static prop:Resources.authenticationFailedLabelMessage}"
+                Content="{x:Static prop:Resources.authenticationFailedLabelContent}"
+                Visibility="{Binding ShowErrorMessage, Converter={ui:BooleanToHiddenVisibilityConverter}}" />
+            <ui:ErrorMessageDisplay
+                x:Name="authenticationSentLabel"
+                Icon="check"
+                IconFill="{DynamicResource GitHubAccentBrush}"
+                Message="{x:Static prop:Resources.authenticationSentLabelMessage}"
+                Content="{x:Static prop:Resources.authenticationSentLabelContent}"
+                Visibility="{Binding AuthenticationCodeSent, Converter={ui:BooleanToHiddenVisibilityConverter}}" />
+        </Grid>
+        <StackPanel
+            Orientation="Horizontal"
+            HorizontalAlignment="Center"
+            Margin="0,18,0,60">
+            <ui:OcticonCircleButton
+                x:Name="okButton" 
+                TabIndex="2" 
+                Icon="check"
+                IsDefault="True"
+                ShowSpinner="{Binding IsBusy}"
+                Content="{x:Static prop:Resources.verifyText}" />
+            <ui:OcticonLinkButton 
+                x:Name="resendCodeButton"
+                TabIndex="3"
+                ToolTip="{x:Static prop:Resources.resendCodeButtonToolTip}"
+                FontSize="12"
+                Icon="sync"
+                Margin="18,0,0,0"
+                Content="{x:Static prop:Resources.resendCodeButtonContent}" />
+        </StackPanel>
+    </StackPanel>
+</UserControl>
