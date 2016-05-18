@@ -21,7 +21,7 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Microsoft.Alm.Git", "Micros
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Microsoft.Alm.Git.Test", "Microsoft.Alm.Git.Test\Microsoft.Alm.Git.Test.csproj", "{5C9EF428-0D26-436A-A8BB-32E58357B36D}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "GitHub-Authentication", "GitHub-Authentication\GitHub-Authentication.csproj", "{CF306116-BBF0-4CC7-AFCE-A506AC4752CB}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "GitHub.Authentication", "GitHub.Authentication\GitHub.Authentication.csproj", "{CF306116-BBF0-4CC7-AFCE-A506AC4752CB}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
