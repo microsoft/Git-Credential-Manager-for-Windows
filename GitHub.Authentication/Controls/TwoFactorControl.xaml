@@ -59,6 +59,15 @@
                 Command="{Binding OkCommand}"
                 IsEnabled="{Binding IsValid, Mode=OneWay}"
                 Content="{x:Static prop:Resources.VerifyText}" />
+            <ui:OcticonCircleButton 
+                x:Name="cancelButton"
+                TabIndex="3"
+                FontSize="12"
+                Icon="x"
+                IsCancel="True"
+                Command="{Binding CancelCommand}"
+                Margin="18,0,0,0"
+                Content="{x:Static prop:Resources.CancelText}" />
         </StackPanel>
     </StackPanel>
 </UserControl>

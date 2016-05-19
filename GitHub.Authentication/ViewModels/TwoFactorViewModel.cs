@@ -15,12 +15,13 @@ namespace GitHub.Authentication.ViewModels
         public TwoFactorViewModel() : this(false) { }
 
         /// <summary>
-        /// This construc
+        /// This quite obviously creates an instance of a <see cref="TwoFactorViewModel" />.
         /// </summary>
         /// <param name="isSms">True if the 2fa authentication code is sent via SMS</param>
         public TwoFactorViewModel(bool isSms)
         {
             OkCommand = new ActionCommand(_ => Result = TwoFactorResult.Ok);
+            CancelCommand = new ActionCommand(_ => Result = TwoFactorResult.Cancel);
 
             IsSms = isSms;
             PropertyChanged += (s, e) =>
@@ -88,6 +89,7 @@ namespace GitHub.Authentication.ViewModels
             = new HyperLinkCommand();
 
         public ICommand OkCommand { get; private set; }
+        public ICommand CancelCommand { get; private set; }
     }
 
     public enum TwoFactorResult

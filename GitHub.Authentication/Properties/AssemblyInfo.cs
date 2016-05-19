@@ -7,12 +7,12 @@ using System.Windows;
 // General Information about an assembly is controlled through the following 
 // set of attributes. Change these attribute values to modify the information
 // associated with an assembly.
-[assembly: AssemblyTitle("GitHub-Authentication")]
-[assembly: AssemblyDescription("")]
+[assembly: AssemblyTitle("GitHub.Authentication")]
+[assembly: AssemblyDescription("GitHub Authentication Dialogs")]
 [assembly: AssemblyConfiguration("")]
-[assembly: AssemblyCompany("")]
-[assembly: AssemblyProduct("GitHub-Authentication")]
-[assembly: AssemblyCopyright("Copyright ©  2016")]
+[assembly: AssemblyCompany("GitHub")]
+[assembly: AssemblyProduct("GitHub.Authentication")]
+[assembly: AssemblyCopyright("Copyright © GitHub 2016")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]
 

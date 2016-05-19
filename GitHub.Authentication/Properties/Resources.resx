@@ -132,4 +132,7 @@
   <data name="VerifyText" xml:space="preserve">
     <value>Ok</value>
   </data>
+  <data name="CancelText" xml:space="preserve">
+    <value>Cancel</value>
+  </data>
 </root>
