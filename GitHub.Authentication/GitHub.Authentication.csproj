@@ -58,6 +58,7 @@
       <SubType>Designer</SubType>
     </ApplicationDefinition>
     <Compile Include="Helpers\BindingProxy.cs" />
+    <Compile Include="Helpers\HyperLinkCommand.cs" />
     <Compile Include="ViewModels\TwoFactorViewModel.cs" />
     <Compile Include="ViewModels\ViewModel.cs" />
     <Page Include="AppResources.xaml">

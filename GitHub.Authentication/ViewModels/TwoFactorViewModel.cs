@@ -1,10 +1,15 @@
-﻿namespace GitHub.Authentication.ViewModels
+﻿using GitHub.Authentication.Helpers;
+
+namespace GitHub.Authentication.ViewModels
 {
+    /// <summary>
+    /// Simple view model for the GitHub Two Factor dialog.
+    /// </summary>
     public class TwoFactorViewModel : ViewModel
     {
         public TwoFactorViewModel()
         {
-            this.PropertyChanged += (s, e) =>
+            PropertyChanged += (s, e) =>
             {
                 if (e.PropertyName == nameof(AuthenticationCode))
                 {
@@ -25,6 +30,10 @@
         }
 
         string _authenticationCode;
+
+        /// <summary>
+        /// The Two-factor authentication code the user types in.
+        /// </summary>
         public string AuthenticationCode
         {
             get { return _authenticationCode; }
@@ -32,17 +41,6 @@
             {
                 _authenticationCode = value;
                 RaisePropertyChangedEvent(nameof(AuthenticationCode));
-            }
-        }
-
-        bool _AuthenticationCodeSent;
-        public bool AuthenticationCodeSent
-        {
-            get { return _AuthenticationCodeSent; }
-            private set
-            {
-                _AuthenticationCodeSent = value;
-                RaisePropertyChangedEvent(nameof(AuthenticationCodeSent));
             }
         }
 
@@ -67,5 +65,8 @@
                 RaisePropertyChangedEvent(nameof(Description));
             }
         }
+
+        public HyperLinkCommand LearnMoreCommand { get; }
+            = new HyperLinkCommand();  
     }
 }
