@@ -7,8 +7,8 @@
         mc:Ignorable="d"
         Title="GitHub Two-factor Authentication"
         Height="420"
-        Width="400">
+        Width="420">
     <Grid>
-        <github:TwoFactorControl />
+        <github:TwoFactorControl x:Name="twoFactorControl" />
     </Grid>
 </Window>

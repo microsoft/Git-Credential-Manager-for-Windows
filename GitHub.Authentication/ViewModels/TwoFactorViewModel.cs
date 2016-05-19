@@ -2,14 +2,25 @@
 {
     public class TwoFactorViewModel : ViewModel
     {
-        bool _isBusy;
-        public bool IsBusy
+        public TwoFactorViewModel()
         {
-            get { return _isBusy; }
+            this.PropertyChanged += (s, e) =>
+            {
+                if (e.PropertyName == nameof(AuthenticationCode))
+                {
+                    IsValid = AuthenticationCode.Length == 6;
+                }
+            };
+        }
+
+        bool _isValid;
+        public bool IsValid
+        {
+            get { return _isValid; }
             set
             {
-                _isBusy = value;
-                RaisePropertyChangedEvent(nameof(IsBusy));
+                _isValid = value;
+                RaisePropertyChangedEvent(nameof(IsValid));
             }
         }
 
@@ -54,17 +65,6 @@
             {
                 _description = value;
                 RaisePropertyChangedEvent(nameof(Description));
-            }
-        }
-
-        bool _showErrorMessage;
-        public bool ShowErrorMessage
-        {
-            get { return _showErrorMessage; }
-            private set
-            {
-                _showErrorMessage = value;
-                RaisePropertyChangedEvent(nameof(ShowErrorMessage));
             }
         }
     }

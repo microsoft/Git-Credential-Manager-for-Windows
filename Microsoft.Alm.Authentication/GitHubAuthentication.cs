@@ -1,6 +1,9 @@
 ﻿using System;
 using System.Diagnostics;
+using System.Threading;
 using System.Threading.Tasks;
+using System.Windows;
+using GitHub_Authentication;
 
 namespace Microsoft.Alm.Authentication
 {
@@ -138,7 +141,6 @@ namespace Microsoft.Alm.Authentication
         }
 
         /// <summary>
-        /// <para></para>
         /// <para>Tokens acquired are stored in the secure secret store provided during
         /// initialization.</para>
         /// </summary>
@@ -310,5 +312,62 @@ namespace Microsoft.Alm.Authentication
         /// </param>
         /// <param name="result">The result of the interactive authenticaiton attempt.</param>
         public delegate void AuthenticationResultDelegate(TargetUri targetUri, GithubAuthenticationResultType result);
+
+        public static bool GithubAuthcodeModalPrompt(TargetUri targetUri, GithubAuthenticationResultType resultType, string username, out string authenticationCode)
+        {
+            Trace.WriteLine("Program::GithubAuthcodeModalPrompt");
+
+            authenticationCode = null;
+
+            string type =
+                resultType == GithubAuthenticationResultType.TwoFactorApp
+                    ? "app"
+                    : "sms";
+            string message = String.Format("Enter {0} authentication code for {1}.", type, targetUri);
+
+            Trace.WriteLine("   prompting user for authentication code.");
+
+            string retrievedAuthenticationCode = null;
+            bool success = false;
+            StartSTATask(() =>
+            {
+                Debugger.Launch();
+
+                if (!UriParser.IsKnownScheme("pack"))
+                {
+                    UriParser.Register(new GenericUriParser(GenericUriParserOptions.GenericAuthority), "pack", -1);
+                }
+                var app = new Application();
+                var appResources = new Uri("pack://application:,,,/GitHub.Authentication;component/AppResources.xaml", UriKind.RelativeOrAbsolute);
+                app.Resources.MergedDictionaries.Add(new ResourceDictionary { Source = appResources });
+                var twoFactorDialog = new TwoFactorWindow();
+                app.Run(twoFactorDialog);
+                retrievedAuthenticationCode = twoFactorDialog.ViewModel.AuthenticationCode;
+                success = twoFactorDialog.ViewModel.IsValid;
+            })
+            .Wait();
+            authenticationCode = retrievedAuthenticationCode;
+            return success;
+        }
+
+        static Task StartSTATask(Action action)
+        {
+            var completionSource = new TaskCompletionSource<object>();
+            var thread = new Thread(() =>
+            {
+                try
+                {
+                    action();
+                    completionSource.SetResult(null);
+                }
+                catch (Exception e)
+                {
+                    completionSource.SetException(e);
+                }
+            });
+            thread.SetApartmentState(ApartmentState.STA);
+            thread.Start();
+            return completionSource.Task;
+        }
     }
 }

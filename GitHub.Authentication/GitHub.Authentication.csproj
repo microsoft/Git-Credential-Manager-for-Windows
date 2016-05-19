@@ -57,10 +57,13 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </ApplicationDefinition>
-    <Compile Include="Helpers\AsyncCommand.cs" />
-    <Compile Include="Helpers\IAsyncCommand.cs" />
+    <Compile Include="Helpers\BindingProxy.cs" />
     <Compile Include="ViewModels\TwoFactorViewModel.cs" />
     <Compile Include="ViewModels\ViewModel.cs" />
+    <Page Include="AppResources.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
     <Page Include="Assets\ProgressBar.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
@@ -131,7 +134,6 @@
       <DependentUpon>TwoFactorInput.xaml</DependentUpon>
     </Compile>
     <Compile Include="Converters\AspectRatioConverter.cs" />
-    <Compile Include="Helpers\BindingProxy.cs" />
     <Compile Include="Converters\BooleanToHiddenVisibilityConverter.cs" />
     <Compile Include="Converters\BooleanToInverseHiddenVisibilityConverter.cs" />
     <Compile Include="Converters\ThicknessConverter.cs" />

@@ -38,25 +38,12 @@
             Style="{StaticResource GitHubDescriptionTextBlock}">
             <Run x:Name="description"
                  Text="{x:Static prop:Resources.openTwoFactorAuthAppText}"/>
-            <Hyperlink x:Name="twoFactorReadMoreLink" ToolTip="https://help.github.com/articles/about-two-factor-authentication"><TextBlock Text="{x:Static prop:Resources.learnMoreLink}"/></Hyperlink>
+            <Hyperlink x:Name="twoFactorReadMoreLink" ToolTip="https://help.github.com/articles/about-two-factor-authentication"><TextBlock Text="{x:Static prop:Resources.learnMoreLink}" />
         </TextBlock>
         <ui:TwoFactorInput
             x:Name="authenticationCode"
+            Text="{Binding AuthenticationCode, Mode=OneWayToSource}"
             TabIndex="1" />
-        <Grid Margin="0,12,0,0" Height="18">
-            <ui:ErrorMessageDisplay
-                x:Name="authenticationFailedLabel"
-                Message="{x:Static prop:Resources.authenticationFailedLabelMessage}"
-                Content="{x:Static prop:Resources.authenticationFailedLabelContent}"
-                Visibility="{Binding ShowErrorMessage, Converter={ui:BooleanToHiddenVisibilityConverter}}" />
-            <ui:ErrorMessageDisplay
-                x:Name="authenticationSentLabel"
-                Icon="check"
-                IconFill="{DynamicResource GitHubAccentBrush}"
-                Message="{x:Static prop:Resources.authenticationSentLabelMessage}"
-                Content="{x:Static prop:Resources.authenticationSentLabelContent}"
-                Visibility="{Binding AuthenticationCodeSent, Converter={ui:BooleanToHiddenVisibilityConverter}}" />
-        </Grid>
         <StackPanel
             Orientation="Horizontal"
             HorizontalAlignment="Center"
@@ -66,16 +53,9 @@
                 TabIndex="2" 
                 Icon="check"
                 IsDefault="True"
-                ShowSpinner="{Binding IsBusy}"
+                Click="OnClose"
+                IsEnabled="{Binding IsValid, Mode=OneWay}"
                 Content="{x:Static prop:Resources.verifyText}" />
-            <ui:OcticonLinkButton 
-                x:Name="resendCodeButton"
-                TabIndex="3"
-                ToolTip="{x:Static prop:Resources.resendCodeButtonToolTip}"
-                FontSize="12"
-                Icon="sync"
-                Margin="18,0,0,0"
-                Content="{x:Static prop:Resources.resendCodeButtonContent}" />
         </StackPanel>
     </StackPanel>
 </UserControl>

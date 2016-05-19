@@ -1,4 +1,5 @@
 ﻿using System.Windows;
+using GitHub.Authentication.ViewModels;
 
 namespace GitHub_Authentication
 {
@@ -7,6 +8,14 @@ namespace GitHub_Authentication
         public TwoFactorWindow()
         {
             InitializeComponent();
+        }
+
+        public TwoFactorViewModel ViewModel
+        {
+            get
+            {
+                return twoFactorControl.DataContext as TwoFactorViewModel;
+            }
         }
     }
 }

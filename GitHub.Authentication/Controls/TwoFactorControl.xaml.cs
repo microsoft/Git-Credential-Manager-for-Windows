@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Windows;
 using System.Windows.Controls;
 
 namespace GitHub.UI
@@ -21,6 +22,11 @@ namespace GitHub.UI
         void SetFocus()
         {
             authenticationCode.TryFocus().Wait(TimeSpan.FromSeconds(1));
+        }
+
+        private void OnClose(object sender, RoutedEventArgs e)
+        {
+            Window.GetWindow(this).Close();
         }
     }
 }
