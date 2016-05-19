@@ -3,6 +3,7 @@ using System.Diagnostics;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Windows;
+using GitHub.Authentication.ViewModels;
 using GitHub_Authentication;
 
 namespace Microsoft.Alm.Authentication
@@ -317,22 +318,12 @@ namespace Microsoft.Alm.Authentication
         {
             Trace.WriteLine("Program::GithubAuthcodeModalPrompt");
 
-            authenticationCode = null;
-
-            string type =
-                resultType == GithubAuthenticationResultType.TwoFactorApp
-                    ? "app"
-                    : "sms";
-            string message = String.Format("Enter {0} authentication code for {1}.", type, targetUri);
+            var twoFactorViewModel = new TwoFactorViewModel(resultType == GithubAuthenticationResultType.TwoFactorSms);
 
             Trace.WriteLine("   prompting user for authentication code.");
 
-            string retrievedAuthenticationCode = null;
-            bool success = false;
             StartSTATask(() =>
             {
-                Debugger.Launch();
-
                 if (!UriParser.IsKnownScheme("pack"))
                 {
                     UriParser.Register(new GenericUriParser(GenericUriParserOptions.GenericAuthority), "pack", -1);
@@ -340,14 +331,20 @@ namespace Microsoft.Alm.Authentication
                 var app = new Application();
                 var appResources = new Uri("pack://application:,,,/GitHub.Authentication;component/AppResources.xaml", UriKind.RelativeOrAbsolute);
                 app.Resources.MergedDictionaries.Add(new ResourceDictionary { Source = appResources });
-                var twoFactorDialog = new TwoFactorWindow();
-                app.Run(twoFactorDialog);
-                retrievedAuthenticationCode = twoFactorDialog.ViewModel.AuthenticationCode;
-                success = twoFactorDialog.ViewModel.IsValid;
+                app.Run(new TwoFactorWindow { ViewModel = twoFactorViewModel });
             })
             .Wait();
-            authenticationCode = retrievedAuthenticationCode;
-            return success;
+
+            // If the user cancels the dialog, we need to ignore anything they've
+            // typed into the authentication code.
+            bool authenticationCodeValid = 
+                twoFactorViewModel.Result == TwoFactorResult.Ok
+                && twoFactorViewModel.IsValid;
+            
+            authenticationCode = authenticationCodeValid
+                ? twoFactorViewModel.AuthenticationCode
+                : null;
+            return authenticationCodeValid;
         }
 
         static Task StartSTATask(Action action)

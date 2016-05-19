@@ -4,27 +4,17 @@ using System.Windows.Input;
 
 namespace GitHub.Authentication.Helpers
 {
-    public class HyperLinkCommand : ICommand
+    /// <summary>
+    /// Command that opens a browser to the URL specified by the
+    /// command parameter.
+    /// </summary>
+    public class HyperLinkCommand : ActionCommand
     {
-        bool _isEnabled = true;
-        public bool IsEnabled
+        public HyperLinkCommand() : base(ExecuteNavigateUrl)
         {
-            get { return _isEnabled; }
-            set
-            {
-                _isEnabled = value;
-                CanExecuteChanged?.Invoke(this, EventArgs.Empty);
-            }
         }
 
-        public event EventHandler CanExecuteChanged;
-
-        public bool CanExecute(object parameter)
-        {
-            return _isEnabled;
-        }
-
-        public void Execute(object parameter)
+        static void ExecuteNavigateUrl(object parameter)
         {
             var commandParameter = parameter as string;
             if (string.IsNullOrWhiteSpace(commandParameter)) return;
@@ -32,14 +22,6 @@ namespace GitHub.Authentication.Helpers
             Uri navigateUrl;
 
             if (Uri.TryCreate(commandParameter, UriKind.Absolute, out navigateUrl))
-            {
-                NavigateUrl(navigateUrl);
-            }
-        }
-
-        void NavigateUrl(Uri navigateUrl)
-        {
-            if (CanExecute(navigateUrl))
             {
                 Process.Start(new ProcessStartInfo(navigateUrl.AbsoluteUri));
             }

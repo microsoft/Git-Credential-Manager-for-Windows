@@ -1,4 +1,6 @@
-﻿using GitHub.Authentication.Helpers;
+﻿using System.Windows.Input;
+using GitHub.Authentication.Helpers;
+using GitHub.Authentication.Properties;
 
 namespace GitHub.Authentication.ViewModels
 {
@@ -7,8 +9,20 @@ namespace GitHub.Authentication.ViewModels
     /// </summary>
     public class TwoFactorViewModel : ViewModel
     {
-        public TwoFactorViewModel()
+        /// <summary>
+        /// This is used by the GitHub.Authentication test application
+        /// </summary>
+        public TwoFactorViewModel() : this(false) { }
+
+        /// <summary>
+        /// This construc
+        /// </summary>
+        /// <param name="isSms">True if the 2fa authentication code is sent via SMS</param>
+        public TwoFactorViewModel(bool isSms)
         {
+            OkCommand = new ActionCommand(_ => Result = TwoFactorResult.Ok);
+
+            IsSms = isSms;
             PropertyChanged += (s, e) =>
             {
                 if (e.PropertyName == nameof(AuthenticationCode))
@@ -44,29 +58,42 @@ namespace GitHub.Authentication.ViewModels
             }
         }
 
-        bool _isSms;
         public bool IsSms
         {
-            get { return _isSms; }
-            private set
-            {
-                _isSms = value;
-                RaisePropertyChangedEvent(nameof(IsSms));
-            }
+            get; private set;
         }
 
-        string _description;
         public string Description
         {
-            get { return _description; }
-            private set
+            get
             {
-                _description = value;
-                RaisePropertyChangedEvent(nameof(Description));
+                return IsSms
+                    ? Resources.TwoFactorSms
+                    : Resources.OpenTwoFactorAuthAppText;
             }
         }
 
-        public HyperLinkCommand LearnMoreCommand { get; }
-            = new HyperLinkCommand();  
+        TwoFactorResult _result = TwoFactorResult.None;
+        public TwoFactorResult Result
+        {
+            get { return _result; }
+            set
+            {
+                _result = value;
+                RaisePropertyChangedEvent(nameof(Result));
+            }
+        }
+
+        public ICommand LearnMoreCommand { get; }
+            = new HyperLinkCommand();
+
+        public ICommand OkCommand { get; private set; }
+    }
+
+    public enum TwoFactorResult
+    {
+        None,
+        Ok,
+        Cancel
     }
 }
