@@ -59,6 +59,7 @@
       <HintPath>..\packages\Microsoft.IdentityModel.Clients.ActiveDirectory.2.18.206251556\lib\net45\Microsoft.IdentityModel.Clients.ActiveDirectory.WindowsForms.dll</HintPath>
       <Private>True</Private>
     </Reference>
+    <Reference Include="PresentationFramework" />
     <Reference Include="System" />
     <Reference Include="System.Core" />
     <Reference Include="Microsoft.CSharp" />
@@ -66,6 +67,7 @@
     <Reference Include="System.Drawing" />
     <Reference Include="System.Net.Http" />
     <Reference Include="System.Security" />
+    <Reference Include="WindowsBase" />
   </ItemGroup>
   <ItemGroup>
     <Compile Include="GitHubAuthentication.cs" />
@@ -111,7 +113,6 @@
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <Import Project="$(PackagesDirectory)\MSBuildTasks.*\tools\MSBuild.Community.Tasks.targets" />
-
   <!-- Produce a nuget package of this assembly -->
   <Target Name="AfterBuild" Condition=" '$(Configuration)' == 'Package'">
     <!-- Only download a new copy of nuget.exe if we don't have a copy available -->
@@ -124,12 +125,7 @@
     <PropertyGroup Condition="$(HaveLocalNuget)">
       <NugetPath>nuget.exe</NugetPath>
     </PropertyGroup>
-
-    <WebDownload
-      Condition="!$(HaveLocalNuget) And !Exists($(NugetPath))"
-      Filename="$(NugetPath)"
-      FileUri="https://dist.nuget.org/win-x86-commandline/latest/nuget.exe" />
-    <Exec
-      Command="$(NugetPath) pack $(AssemblyName).csproj -Symbols -IncludeReferencedProjects -Prop Configuration=Package -OutputDirectory $(OutputPath)" />
+    <WebDownload Condition="!$(HaveLocalNuget) And !Exists($(NugetPath))" Filename="$(NugetPath)" FileUri="https://dist.nuget.org/win-x86-commandline/latest/nuget.exe" />
+    <Exec Command="$(NugetPath) pack $(AssemblyName).csproj -Symbols -IncludeReferencedProjects -Prop Configuration=Package -OutputDirectory $(OutputPath)" />
   </Target>
 </Project>
