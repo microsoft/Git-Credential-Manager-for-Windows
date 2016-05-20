@@ -205,17 +205,6 @@
                                     </Path>
                                 </Viewbox>
 
-                                <ProgressBar x:Name="spinner"
-                                    Visibility="{Binding Path=ShowSpinner, 
-                                        RelativeSource={RelativeSource TemplatedParent},
-                                        Converter={ui:BooleanToHiddenVisibilityConverter}}"
-                                    Foreground="{Binding Path=IconForeground, 
-                                        RelativeSource={RelativeSource TemplatedParent}}"
-                                    Style="{DynamicResource GitHubSyncProgressBar}"
-                                    IsIndeterminate="True" 
-                                    Height="24"
-                                    Width="24"/>
-
                                 <Grid>
                                     <Grid.Resources>
                                         <ui:BindingProxy x:Key="scale" Data="{Binding Path=ActualWidth, 

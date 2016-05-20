@@ -4,10 +4,7 @@
     <ResourceDictionary.MergedDictionaries>
         <ResourceDictionary Source="Assets/Styles.xaml" />
         <ResourceDictionary Source="Assets/TextBlocks.xaml" />
-        <ResourceDictionary Source="Assets/ErrorMessageDisplay.xaml" />
-        <ResourceDictionary Source="Assets/ProgressBar.xaml" />
         <ResourceDictionary Source="Controls/Octicons/OcticonImage.xaml" />
         <ResourceDictionary Source="Controls/Buttons/OcticonCircleButton.xaml" />
-        <ResourceDictionary Source="Controls/Buttons/OcticonLinkButton.xaml" />
     </ResourceDictionary.MergedDictionaries>
 </ResourceDictionary>

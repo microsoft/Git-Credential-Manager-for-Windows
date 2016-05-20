@@ -66,14 +66,6 @@
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
-    <Page Include="Assets\ProgressBar.xaml">
-      <SubType>Designer</SubType>
-      <Generator>MSBuild:Compile</Generator>
-    </Page>
-    <Page Include="Assets\ErrorMessageDisplay.xaml">
-      <Generator>MSBuild:Compile</Generator>
-      <SubType>Designer</SubType>
-    </Page>
     <Page Include="Assets\Styles.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
@@ -83,10 +75,6 @@
       <SubType>Designer</SubType>
     </Page>
     <Page Include="Controls\Buttons\OcticonCircleButton.xaml">
-      <Generator>MSBuild:Compile</Generator>
-      <SubType>Designer</SubType>
-    </Page>
-    <Page Include="Controls\Buttons\OcticonLinkButton.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </Page>
@@ -116,11 +104,9 @@
     </Compile>
     <Compile Include="Controls\Buttons\OcticonButton.cs" />
     <Compile Include="Controls\Buttons\OcticonCircleButton.cs" />
-    <Compile Include="Controls\Buttons\OcticonLinkButton.cs" />
     <Compile Include="Controls\HorizontalShadowDivider.xaml.cs">
       <DependentUpon>HorizontalShadowDivider.xaml</DependentUpon>
     </Compile>
-    <Compile Include="Controls\Messages\ErrorMessageDisplay.cs" />
     <Compile Include="Controls\Octicons\OcticonImage.cs" />
     <Compile Include="Controls\Octicons\OcticonPath.cs" />
     <Compile Include="Controls\Octicons\OcticonPaths.Designer.cs">
