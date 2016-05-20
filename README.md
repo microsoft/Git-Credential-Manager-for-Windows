@@ -79,7 +79,13 @@ Team Foundation Server, when deployed on a corporate Active Directory, uses the 
 
 Git can be convinced to "forward" domain credentials by supplying a blank credentials (username and password). Since, by default, the GCM doesn't allow for a blank credentials, you will need to configure it to allow for them. To do so, update your Git configuration by running `git config --global credential.tfs.fabrikam.com.integrated true`.
 
-Once the updated, the new configuration tells the GCM to only forward domain credentials. If you set `credential.integrated true`, every domain will be assumed to support domain credentials. Most likely, this is **not** what you want. Therefore, it strongly suggested that you restrict the configuration setting to the URL of your TFS Git host.
+Once updated, the new configuration tells the GCM to only forward domain credentials. If you set `credential.integrated true`, every domain will be assumed to support domain credentials. Most likely, this is **not** what you want. Therefore, it strongly suggested that you restrict the configuration setting to the URL of your TFS Git host.
+
+### Q: Why doesn't SourceTree use the creds in the GCM?
+
+You need to configure SourceTree to use the version of Git installed for the entire system. By default, SourceTree uses a local copy of portable Git.
+
+To fix this go to Tools -> Options -> Git and click the "Use System Git" button. This works in v1.8.3.0 of SourceTree.
 
 ## Build agents
 
