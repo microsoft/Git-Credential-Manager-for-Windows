@@ -111,12 +111,6 @@
     <None Include="app.config" />
     <None Include="packages.config" />
   </ItemGroup>
-  <ItemGroup>
-    <ProjectReference Include="..\GitHub.Authentication\GitHub.Authentication.csproj">
-      <Project>{cf306116-bbf0-4cc7-afce-a506ac4752cb}</Project>
-      <Name>GitHub.Authentication</Name>
-    </ProjectReference>
-  </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <Import Project="$(PackagesDirectory)\MSBuildTasks.*\tools\MSBuild.Community.Tasks.targets" />
   <!-- Produce a nuget package of this assembly -->

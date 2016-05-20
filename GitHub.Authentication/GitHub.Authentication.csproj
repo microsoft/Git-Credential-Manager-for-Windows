@@ -57,6 +57,7 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </ApplicationDefinition>
+    <Compile Include="Authcode.cs" />
     <Compile Include="Helpers\ActionCommand.cs" />
     <Compile Include="Helpers\BindingProxy.cs" />
     <Compile Include="Helpers\HyperLinkCommand.cs" />
@@ -167,16 +168,13 @@
   <ItemGroup>
     <None Include="App.config" />
   </ItemGroup>
-  <ItemGroup />
+  <ItemGroup>
+    <ProjectReference Include="..\Microsoft.Alm.Authentication\Microsoft.Alm.Authentication.csproj">
+      <Project>{c1daabc1-b493-459d-bb4f-04fbefb1ba13}</Project>
+      <Name>Microsoft.Alm.Authentication</Name>
+    </ProjectReference>
+  </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
-  <PropertyGroup>
-    <PostBuildEvent>SET dst=$(SolutionDir)Deploy\
-SET src=$(TargetDir)
-
-IF NOT EXIST  "%25dst%25" mkdir  "%25dst%25"
-
-COPY /V /Y "%25src%25GitHub-Authentication.exe" /B "%25dst%25GitHub-Authentication.exe" /B</PostBuildEvent>
-  </PropertyGroup>
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.
   <Target Name="BeforeBuild">
