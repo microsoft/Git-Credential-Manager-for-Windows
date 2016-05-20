@@ -28,6 +28,7 @@
 
         <TextBlock
             Margin="30,0,30,16"
+            TextAlignment="Center"
             HorizontalAlignment="Center"
             TextWrapping="Wrap"
             Style="{StaticResource GitHubDescriptionTextBlock}">
@@ -50,7 +51,7 @@
         <StackPanel
             Orientation="Horizontal"
             HorizontalAlignment="Center"
-            Margin="0,18,0,60">
+            Margin="0,38,0,60">
             <ui:OcticonCircleButton
                 x:Name="okButton" 
                 TabIndex="2" 

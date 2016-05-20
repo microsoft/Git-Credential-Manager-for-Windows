@@ -117,6 +117,7 @@
         <Setter Property="Margin" Value="24,0" />
         <Setter Property="HorizontalAlignment" Value="Left" />
         <Setter Property="TextWrapping" Value="Wrap" />
+        <Setter Property="Foreground" Value="{DynamicResource GitHubTextSecondaryBrush}" />
     </Style>
     <!-- End Textblock -->
 

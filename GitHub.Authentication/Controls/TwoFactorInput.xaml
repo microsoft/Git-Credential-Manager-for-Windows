@@ -9,13 +9,17 @@
     d:DesignHeight="47"
     d:DesignWidth="262">
     <UserControl.Resources>
-        <Style TargetType="{x:Type TextBox}">
+        <Style TargetType="{x:Type TextBox}" BasedOn="{StaticResource GitHubTextBox}">
             <Setter Property="Width" Value="36"/>
             <Setter Property="Height" Value="46"/>
-            <Setter Property="Margin" Value="0,0,8,0"/>
+            <Setter Property="Margin" Value="0,0,5,0"/>
+            <Setter Property="Padding" Value="3,4,5,3" />
             <Setter Property="HorizontalContentAlignment" Value="Center" />
             <Setter Property="VerticalContentAlignment" Value="Center" />
-            <Setter Property="FontSize" Value="20px" />
+            <Setter Property="FontSize" Value="32px" />
+            <Setter Property="FontFamily" Value="{StaticResource GitHubFontFamilyLight}" />
+            <Setter Property="TextBlock.LineStackingStrategy" Value="BlockLineHeight" />
+            <Setter Property="TextBlock.LineHeight" Value="36px" />
         </Style>
     </UserControl.Resources>
     <StackPanel Orientation="Horizontal" UseLayoutRounding="True" SnapsToDevicePixels="True">

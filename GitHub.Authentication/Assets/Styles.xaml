@@ -16,6 +16,11 @@
     <Color x:Key="GHTextColor">#333</Color>
     <SolidColorBrush x:Key="GHTextBrush" Color="{StaticResource GHTextColor}" PresentationOptions:Freeze="true" />
 
+    <Color x:Key="GitHubTextSecondaryColor">#666</Color>
+    <SolidColorBrush x:Key="GitHubTextSecondaryBrush"
+                     Color="{StaticResource GitHubTextSecondaryColor}"
+                     PresentationOptions:Freeze="true" />
+    
     <!-- Link Button colors -->
     <Color x:Key="GHLinkButtonTextColor">#333</Color>
     <SolidColorBrush x:Key="GHLinkButtonTextBrush" Color="{StaticResource GHLinkButtonTextColor}"
@@ -177,7 +182,7 @@
         <Setter Property="Template">
             <Setter.Value>
                 <ControlTemplate>
-                    <Rectangle Margin="-2" SnapsToDevicePixels="true" Stroke="{DynamicResource {x:Static SystemColors.ControlTextBrushKey}}" StrokeThickness="1" StrokeDashArray="1 2"/>
+                    <Rectangle Margin="-5" SnapsToDevicePixels="true" Stroke="{DynamicResource {x:Static SystemColors.ControlTextBrushKey}}" StrokeThickness="1" StrokeDashArray="1 2"/>
                 </ControlTemplate>
             </Setter.Value>
         </Setter>
