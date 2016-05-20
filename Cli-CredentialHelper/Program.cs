@@ -646,7 +646,7 @@ namespace Microsoft.Alm.CredentialHelper
                                                                     ? new GithubAuthentication.AcquireCredentialsDelegate(GithubCredentialModalPrompt)
                                                                     : new GithubAuthentication.AcquireCredentialsDelegate(GithubCredentialPrompt),
                                                                   operationArguments.UseModalUi
-                                                                    ? new GithubAuthentication.AcquireAuthenticationCodeDelegate(GithubAuthentication.GithubAuthcodeModalPrompt)
+                                                                    ? new GithubAuthentication.AcquireAuthenticationCodeDelegate(GitHub.Authentication.Authcode.ModalPrompt)
                                                                     : new GithubAuthentication.AcquireAuthenticationCodeDelegate(GithubAuthCodePrompt),
                                                                   null,
                                                                   out authority))
@@ -696,7 +696,7 @@ namespace Microsoft.Alm.CredentialHelper
                                                                     ? new GithubAuthentication.AcquireCredentialsDelegate(GithubCredentialModalPrompt)
                                                                     : new GithubAuthentication.AcquireCredentialsDelegate(GithubCredentialPrompt),
                                                                  operationArguments.UseModalUi
-                                                                    ? new GithubAuthentication.AcquireAuthenticationCodeDelegate(GithubAuthentication.GithubAuthcodeModalPrompt)
+                                                                    ? new GithubAuthentication.AcquireAuthenticationCodeDelegate(GitHub.Authentication.Authcode.ModalPrompt)
                                                                     : new GithubAuthentication.AcquireAuthenticationCodeDelegate(GithubAuthCodePrompt),
                                                                  null);
 
