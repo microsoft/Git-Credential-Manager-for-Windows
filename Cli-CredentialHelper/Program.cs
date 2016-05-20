@@ -40,7 +40,8 @@ namespace Microsoft.Alm.CredentialHelper
         internal const string ConfigUseModalPromptKey = "modalPrompt";
         internal const string ConfigValidateKey = "validate";
         internal const string ConfigWritelogKey = "writelog";
-
+        internal const string ConfigEnvironmentKey = "envStoreKey";
+        internal const string ConfigPreserve = "preserve";
 
         private const string ConfigPrefix = "credential";
         private const string SecretsNamespace = "git";
@@ -256,19 +257,27 @@ namespace Microsoft.Alm.CredentialHelper
             Console.Out.WriteLine();
             Console.Out.WriteLine("      `git config --global credential.visualstudio.com." + ConfigPreserveCredentialsKey + " true`");
             Console.Out.WriteLine();
-            Console.Out.WriteLine("  " + ConfigUseHttpPathKey + "     Causes the path portion of the target URI to considered meaningful.");
+            Console.Out.WriteLine("  " + ConfigUseHttpPathKey + "  Causes the path portion of the target URI to considered meaningful.");
             Console.Out.WriteLine("               By default the path portion of the target URI is ignore, if this is set to true");
             Console.Out.WriteLine("               the path is considered meaningful and credentials will be store for each path.");
             Console.Out.WriteLine("               Defaults to FALSE.");
             Console.Out.WriteLine();
             Console.Out.WriteLine("      `git config --global credential.bitbucket.com." + ConfigUseHttpPathKey + " true`");
             Console.Out.WriteLine();
-            Console.Out.WriteLine("  " + ConfigHttpProxyKey + "     Causes the proxy value to be considered when evaluating.");
+            Console.Out.WriteLine("  " + ConfigHttpProxyKey + "    Causes the proxy value to be considered when evaluating.");
             Console.Out.WriteLine("               credential target information. A proxy setting should established if use of a");
             Console.Out.WriteLine("               proxy is required to interact with Git remotes.");
             Console.Out.WriteLine("               The value should the url of the proxy server.");
             Console.Out.WriteLine();
             Console.Out.WriteLine("      `git config --global credential.github.com." + ConfigUseHttpPathKey + " https://myproxy:8080`");
+            Console.Out.WriteLine();
+            Console.Out.WriteLine("  " + ConfigEnvironmentKey + "  Specifies using the system's environmental variables as storage mechanism for ");
+            Console.Out.WriteLine("               secrets. All secret read and write operations will be done against the supplied ");
+            Console.Out.WriteLine("               process scoped environment variable key, regardless of remote URL. This is to support");
+            Console.Out.WriteLine("               transient values and should not be used for long-term or secure storage of secrets.");
+            Console.Out.WriteLine("               The value should the envionment variable name to be used.");
+            Console.Out.WriteLine();
+            Console.Out.WriteLine("      `git config --local credential." + ConfigEnvironmentKey + " LocalSecret`");
             Console.Out.WriteLine();
             Console.Out.WriteLine("  " + ConfigWritelogKey + "     Enables trace logging of all activities. Logs are written to");
             Console.Out.WriteLine("               the local .git/ folder at the root of the repository.");
@@ -623,8 +632,11 @@ namespace Microsoft.Alm.CredentialHelper
             {
                 getTargetName = Secret.UriToPathedName;
             }
-            var secrets = new SecretStore(SecretsNamespace, null, null, getTargetName);
             BaseAuthentication authority = null;
+            // is useEnvionment is set to a value, read/write credential to the environment instead
+            var secrets = (String.IsNullOrEmpty(operationArguments.EnvironmentKey))
+                ? new SecretStore(SecretsNamespace, null, null, getTargetName) as ICredentialStore
+                : new EnvironmentStore(operationArguments.EnvironmentKey) as ICredentialStore;
 
             switch (operationArguments.Authority)
             {
@@ -886,6 +898,17 @@ namespace Microsoft.Alm.CredentialHelper
                 Trace.WriteLine("   " + ConfigHttpProxyKey + " = " + entry.Value);
 
                 operationArguments.SetProxy(entry.Value);
+            }
+
+            if (config.TryGetEntry(ConfigPrefix, operationArguments.QueryUri, ConfigEnvironmentKey, out entry))
+            {
+                Trace.WriteLine("   " + ConfigEnvironmentKey + " = " + entry.Value);
+
+                if (!String.IsNullOrWhiteSpace(entry.Value)
+                    && !String.IsNullOrWhiteSpace(Environment.GetEnvironmentVariable(entry.Value)))
+                {
+                    operationArguments.EnvironmentKey = entry.Value;
+                }
             }
         }
 

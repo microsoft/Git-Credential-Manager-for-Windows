@@ -68,6 +68,7 @@
     <Reference Include="System.Security" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="EnvironmentStore.cs" />
     <Compile Include="GitHubAuthentication.cs" />
     <Compile Include="GithubAuthenticationResult.cs" />
     <Compile Include="GithubAuthority.cs" />

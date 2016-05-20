@@ -64,6 +64,7 @@ namespace Microsoft.Alm.CredentialHelper
         public AuthorityType Authority { get; set; }
         public string CredPassword { get; private set; }
         public string CredUsername { get; private set; }
+        public string EnvironmentKey { get; set; }
         public Interactivity Interactivity { get; set; }
         public bool PreserveCredentials { get; set; }
         public string ProxyHost
