@@ -28,6 +28,8 @@ namespace GitHub.Authentication.ViewModels
             {
                 if (e.PropertyName == nameof(AuthenticationCode))
                 {
+                    // We currently rely on the UI to ensure that the authentication code
+                    // consists of digits only.
                     IsValid = AuthenticationCode.Length == 6;
                 }
             };
