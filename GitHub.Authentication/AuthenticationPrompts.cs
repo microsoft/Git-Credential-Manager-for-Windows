@@ -1,15 +1,15 @@
 ﻿using System;
+using System.Diagnostics;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Windows;
 using Microsoft.Alm.Authentication;
-using System.Diagnostics;
 
 namespace GitHub.Authentication
 {
-    public static class Authcode
+    public static class AuthenticationPrompts
     {
-        public static bool ModalPrompt(TargetUri targetUri, GithubAuthenticationResultType resultType, string username, out string authenticationCode)
+        public static bool AuthenticationCodeModalPrompt(TargetUri targetUri, GithubAuthenticationResultType resultType, string username, out string authenticationCode)
         {
             Trace.WriteLine("Program::GithubAuthcodeModalPrompt");
 

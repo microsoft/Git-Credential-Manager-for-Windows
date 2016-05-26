@@ -57,7 +57,7 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </ApplicationDefinition>
-    <Compile Include="Authcode.cs" />
+    <Compile Include="AuthenticationPrompts.cs" />
     <Compile Include="Helpers\ActionCommand.cs" />
     <Compile Include="Helpers\BindingProxy.cs" />
     <Compile Include="Helpers\HyperLinkCommand.cs" />
