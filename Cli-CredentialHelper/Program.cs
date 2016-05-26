@@ -6,6 +6,7 @@ using System.IO;
 using System.Linq;
 using System.Runtime.InteropServices;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Alm.Authentication;
 using Microsoft.Alm.Git;
@@ -112,6 +113,7 @@ namespace Microsoft.Alm.CredentialHelper
         }
         private static Version _version;
 
+        [STAThread]
         private static void Main(string[] args)
         {
             try
@@ -644,7 +646,7 @@ namespace Microsoft.Alm.CredentialHelper
                                                                     ? new GithubAuthentication.AcquireCredentialsDelegate(GithubCredentialModalPrompt)
                                                                     : new GithubAuthentication.AcquireCredentialsDelegate(GithubCredentialPrompt),
                                                                   operationArguments.UseModalUi
-                                                                    ? new GithubAuthentication.AcquireAuthenticationCodeDelegate(GithubAuthcodeModalPrompt)
+                                                                    ? new GithubAuthentication.AcquireAuthenticationCodeDelegate(GitHub.Authentication.Authcode.ModalPrompt)
                                                                     : new GithubAuthentication.AcquireAuthenticationCodeDelegate(GithubAuthCodePrompt),
                                                                   null,
                                                                   out authority))
@@ -694,7 +696,7 @@ namespace Microsoft.Alm.CredentialHelper
                                                                     ? new GithubAuthentication.AcquireCredentialsDelegate(GithubCredentialModalPrompt)
                                                                     : new GithubAuthentication.AcquireCredentialsDelegate(GithubCredentialPrompt),
                                                                  operationArguments.UseModalUi
-                                                                    ? new GithubAuthentication.AcquireAuthenticationCodeDelegate(GithubAuthcodeModalPrompt)
+                                                                    ? new GithubAuthentication.AcquireAuthenticationCodeDelegate(GitHub.Authentication.Authcode.ModalPrompt)
                                                                     : new GithubAuthentication.AcquireAuthenticationCodeDelegate(GithubAuthCodePrompt),
                                                                  null);
 
@@ -962,23 +964,6 @@ namespace Microsoft.Alm.CredentialHelper
             Trace.WriteLine("Program::GithubCredentialModalPrompt");
 
             return ModalPromptForCredentials(targetUri, out username, out password);
-        }
-
-        private static bool GithubAuthcodeModalPrompt(TargetUri targetUri, GithubAuthenticationResultType resultType, string username, out string authenticationCode)
-        {
-            Trace.WriteLine("Program::GithubAuthcodeModalPrompt");
-
-            authenticationCode = null;
-
-            string type =
-                resultType == GithubAuthenticationResultType.TwoFactorApp
-                    ? "app"
-                    : "sms";
-            string message = String.Format("Enter {0} authentication code for {1}.", type, targetUri);
-
-            Trace.WriteLine("   prompting user for authentication code.");
-
-            return ModalPromptForPassword(targetUri, message, username, out authenticationCode);
         }
 
         private static bool GithubCredentialPrompt(TargetUri targetUri, out string username, out string password)
