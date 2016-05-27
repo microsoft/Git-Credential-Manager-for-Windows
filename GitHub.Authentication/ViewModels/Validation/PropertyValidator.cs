@@ -1,19 +1,58 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.ComponentModel;
 using System.Diagnostics;
-using System.Linq;
 using System.Linq.Expressions;
 using System.Reflection;
 
 namespace GitHub.Authentication.ViewModels.Validation
 {
-    public abstract class PropertyValidator : ViewModel
+    public static class PropertyValidator
     {
+        /// <summary>
+        /// Creates a validator for a property. This validator is the starting point to attach other validations
+        /// to the property. This method itself doesn't apply any validations.
+        /// </summary>
+        /// <typeparam name="TObject">Type of the object with the property to validate.</typeparam>
+        /// <typeparam name="TProperty">The type of the property to validate.</typeparam>
+        /// <param name="source">The object with the property to validate.</param>
+        /// <param name="property">An expression for the property to validate</param>
+        /// <returns>A property validator</returns>
         public static PropertyValidator<TObject, TProperty> For<TObject, TProperty>(TObject source, Expression<Func<TObject, TProperty>> property)
             where TObject : INotifyPropertyChanged
         {
             return new PropertyValidator<TObject, TProperty>(source, property);
+        }
+    }
+
+    public class PropertyValidator<TProperty> : ViewModel
+    {
+        // This should only be used by PropertyValidator<TObject, TProperty>
+        protected PropertyValidator() { }
+
+        protected PropertyValidator(PropertyValidator<TProperty> previousValidator)
+            : this(previousValidator, _ => PropertyValidationResult.Unvalidated) {}
+
+        internal PropertyValidator(PropertyValidator<TProperty> previousValidator, Func<TProperty, PropertyValidationResult> validation)
+        {
+            if (previousValidator == null) throw new ArgumentNullException(nameof(previousValidator));
+            if (validation == null) throw new ArgumentNullException(nameof(validation));
+
+            previousValidator.PropertyChanged += (s, e) =>
+            {
+                if (e.PropertyName != nameof(CurrentPropertyValue)) return;
+
+                if (previousValidator.ValidationResult.Status == ValidationStatus.Invalid)
+                {
+                    // If any validator is invalid, we don't need to run the rest
+                    // of the chained validators.
+                    ValidationResult = previousValidator.ValidationResult;
+                }
+                else
+                {
+                    ValidationResult = validation(previousValidator.CurrentPropertyValue);
+                    NotifyNextValidator(previousValidator.CurrentPropertyValue);
+                }
+            };
         }
 
         PropertyValidationResult _validationResult = PropertyValidationResult.Unvalidated;
@@ -32,82 +71,49 @@ namespace GitHub.Authentication.ViewModels.Validation
                 RaisePropertyChangedEvent(nameof(ValidationResult));
             }
         }
-    }
 
-    public abstract class PropertyValidator<TProperty> : PropertyValidator
-    {
-        protected virtual PropertyValidationResult Validate(TProperty currentValue)
+        TProperty _currentValue;
+        protected TProperty CurrentPropertyValue
         {
-            return PropertyValidationResult.Unvalidated;
+            get { return _currentValue; }
+            set
+            {
+                _currentValue = value;
+                RaisePropertyChangedEvent(nameof(CurrentPropertyValue));
+            }
+        }
+
+        protected virtual void NotifyNextValidator(TProperty currentValue)
+        {
+            CurrentPropertyValue = currentValue;
         }
     }
 
+    /// <summary>
+    /// This validator watches the target property for changes and then 
+    /// propagates that change up the chain.
+    /// </summary>
+    /// <typeparam name="TObject"></typeparam>
+    /// <typeparam name="TProperty"></typeparam>
     public class PropertyValidator<TObject, TProperty> : PropertyValidator<TProperty> where TObject : INotifyPropertyChanged
     {
-        // List of validators applied to this property.
-        readonly List<Func<TProperty, PropertyValidationResult>> _validators =
-            new List<Func<TProperty, PropertyValidationResult>>();
-
-        public PropertyValidator(TObject source, Expression<Func<TObject, TProperty>> propertyExpression)
+        internal PropertyValidator(TObject source, Expression<Func<TObject, TProperty>> propertyExpression)
         {
+            if (source == null) throw new ArgumentNullException(nameof(source));
+            if (propertyExpression == null) throw new ArgumentNullException(nameof(propertyExpression));
+
             var compiledProperty = propertyExpression.Compile();
             var propertyInfo = GetPropertyInfo(propertyExpression);
+            // Start watching for changes to this property and propagate
+            // those changes to the chained validators.
             source.PropertyChanged += (s, e) =>
             {
                 if (e.PropertyName == propertyInfo.Name)
                 {
-                    var currentValue = compiledProperty(source);
-                    ValidationResult = Validate(currentValue);
+                    // This will propagate this chain up the validator stack.
+                    NotifyNextValidator(compiledProperty(source));
                 }
             };
-        }
-
-        /// <summary>
-        /// Adds a validator for this property that simply calls a predicate and returns the
-        /// error message if the predicate returns false for the property value.
-        /// </summary>
-        /// <param name="predicateWithMessage"></param>
-        /// <returns></returns>
-        public PropertyValidator<TObject, TProperty> Add(Func<TProperty, string> predicateWithMessage)
-        {
-            _validators.Add(propertyValue => Validate(propertyValue, predicateWithMessage));
-            return this;
-        }
-
-        public PropertyValidator<TObject, TProperty> IfTrue(Func<TProperty, bool> predicate, string errorMessage)
-        {
-            return Add(predicate, errorMessage);
-        }
-
-        PropertyValidator<TObject, TProperty> Add(Func<TProperty, bool> predicate, string errorMessage)
-        {
-            return Add(x => predicate(x) ? errorMessage : null);
-        }
-
-        protected override PropertyValidationResult Validate(TProperty currentValue)
-        {
-            var currentValidators = _validators.ToList(); // Make sure we don't mutate the list while validating.
-
-            if (!currentValidators.Any())
-            {
-                return PropertyValidationResult.Unvalidated;
-            }
-
-            var result = currentValidators
-                .Select(validator => validator(currentValue))
-                .FirstOrDefault(x => x.Status == ValidationStatus.Invalid);
-
-            return result ?? PropertyValidationResult.Success;
-        }
-
-        static PropertyValidationResult Validate(TProperty value, Func<TProperty, string> predicateWithMessage)
-        {
-            var result = predicateWithMessage(value);
-
-            if (String.IsNullOrEmpty(result))
-                return PropertyValidationResult.Success;
-
-            return new PropertyValidationResult(ValidationStatus.Invalid, result);
         }
 
         static PropertyInfo GetPropertyInfo(Expression<Func<TObject, TProperty>> propertyExpression)

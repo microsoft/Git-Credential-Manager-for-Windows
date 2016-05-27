@@ -1,4 +1,5 @@
-﻿using System.Diagnostics;
+﻿using System.Collections.Generic;
+using System.Diagnostics;
 using GitHub.Authentication.ViewModels.Validation;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
@@ -25,7 +26,7 @@ namespace GitHub.Authentication.Test.Validation
             // Validator validates that the property is equal to the string "Inigo Montoya".
             var validator = PropertyValidator
                 .For(validatableObject, o => o.SomeStringProperty)
-                .Add(value => value != "Inigo Montoya" ? "Error occurred!" : null);
+                .ValidIfTrue(value => value == "Inigo Montoya", "Error occurred!");
             validatableObject.SomeStringProperty = "Inigo Montoya";
 
             var result = validator.ValidationResult;
@@ -34,18 +35,42 @@ namespace GitHub.Authentication.Test.Validation
         }
 
         [TestMethod]
-        public void ValidationResultReturnsFailureIfValidatorsFail()
+        public void ValidationResultReturnsFailureIfAnyValidatorsFail()
         {
             var validatableObject = new ValidatableTestObject();
-            // Validator validates that the property is equal to the string "Inigo Montoya".
             var validator = PropertyValidator
                 .For(validatableObject, o => o.SomeStringProperty)
-                .Add(value => value != "Inigo Montoya" ? "Error occurred!" : null);
+                .Required("String may not be null or empty")
+                .ValidIfTrue(value => value == "Inigo Montoya", "Error occurred!")
+                .ValidIfTrue(value => value == "My name is not Inigo Montoya", "Doh!");
             validatableObject.SomeStringProperty = "My name is not Inigo Montoya";
 
             var result = validator.ValidationResult;
 
             Assert.IsFalse(result.IsValid);
+            Assert.AreEqual("Error occurred!", result.Message);
+        }
+
+        [TestMethod]
+        public void ValidatorsRunInOrderAndStopWhenInvalid()
+        {
+            List<int> results = new List<int>();
+            var validatableObject = new ValidatableTestObject();
+            var validator = PropertyValidator
+                .For(validatableObject, o => o.SomeStringProperty)
+                .ValidIfTrue(value => { results.Add(0); return true; }, "Error occurred!")
+                .ValidIfTrue(value => { results.Add(1); return true; }, "Error occurred!")
+                .ValidIfTrue(value => { results.Add(2); return true; }, "Error occurred!")
+                .ValidIfTrue(value => { results.Add(3); return false; }, "Error occurred!")
+                .ValidIfTrue(value => { results.Add(4); return true; }, "Error occurred!");
+            validatableObject.SomeStringProperty = "My name is not Inigo Montoya";
+
+            var result = validator.ValidationResult;
+
+            Assert.IsFalse(result.IsValid);
+            Assert.AreEqual("Error occurred!", result.Message);
+            Assert.AreEqual(4, results.Count);
+            for (int i = 0; i < 4; i++) Assert.AreEqual(i, results[i]);
         }
 
         [TestMethod]
@@ -55,12 +80,12 @@ namespace GitHub.Authentication.Test.Validation
             // Validator validates that the property is equal to the string "Inigo Montoya".
             var validator = PropertyValidator
                 .For(validatableObject, o => o.SomeStringProperty)
-                .Add(value => value != "Inigo Montoya" ? "Error occurred!" : null);
+                .ValidIfTrue(value => value == "Inigo Montoya", "Error occurred!");
             PropertyValidationResult validationResult = null;
             validator.PropertyChanged += (s, e) =>
             {
-                Debug.Assert(e.PropertyName == nameof(validator.ValidationResult), "There's only one property that could change");
-                validationResult = validator.ValidationResult;
+                if(e.PropertyName == nameof(validator.ValidationResult))
+                    validationResult = validator.ValidationResult;
             };
             Assert.IsNull(validationResult); // Precondition
 
