@@ -61,8 +61,9 @@
     <Compile Include="Helpers\ActionCommand.cs" />
     <Compile Include="Helpers\BindingProxy.cs" />
     <Compile Include="Helpers\HyperLinkCommand.cs" />
-    <Compile Include="ViewModels\CredentialViewModel.cs" />
+    <Compile Include="ViewModels\CredentialsViewModel.cs" />
     <Compile Include="ViewModels\TwoFactorViewModel.cs" />
+    <Compile Include="ViewModels\Validation\ModelValidator.cs" />
     <Compile Include="ViewModels\Validation\PropertyValidationResult.cs" />
     <Compile Include="ViewModels\Validation\PropertyValidator.cs" />
     <Compile Include="ViewModels\Validation\PropertyValidatorExtensions.cs" />

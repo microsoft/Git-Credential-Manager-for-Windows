@@ -6,7 +6,7 @@ using System.Reflection;
 
 namespace GitHub.Authentication.ViewModels.Validation
 {
-    public static class PropertyValidator
+    public abstract class PropertyValidator : ViewModel
     {
         /// <summary>
         /// Creates a validator for a property. This validator is the starting point to attach other validations
@@ -22,9 +22,26 @@ namespace GitHub.Authentication.ViewModels.Validation
         {
             return new PropertyValidator<TObject, TProperty>(source, property);
         }
+
+        PropertyValidationResult _validationResult = PropertyValidationResult.Unvalidated;
+        /// <summary>
+        /// The current validation result for this validator.
+        /// </summary>
+        public PropertyValidationResult ValidationResult
+        {
+            get
+            {
+                return _validationResult;
+            }
+            protected set
+            {
+                _validationResult = value;
+                RaisePropertyChangedEvent(nameof(ValidationResult));
+            }
+        }
     }
 
-    public class PropertyValidator<TProperty> : ViewModel
+    public class PropertyValidator<TProperty> : PropertyValidator
     {
         // This should only be used by PropertyValidator<TObject, TProperty>
         protected PropertyValidator() { }
@@ -53,23 +70,6 @@ namespace GitHub.Authentication.ViewModels.Validation
                     NotifyNextValidator(previousValidator.CurrentPropertyValue);
                 }
             };
-        }
-
-        PropertyValidationResult _validationResult = PropertyValidationResult.Unvalidated;
-        /// <summary>
-        /// The current validation result for this validator.
-        /// </summary>
-        public PropertyValidationResult ValidationResult
-        {
-            get
-            {
-                return _validationResult;
-            }
-            protected set
-            {
-                _validationResult = value;
-                RaisePropertyChangedEvent(nameof(ValidationResult));
-            }
         }
 
         TProperty _currentValue;

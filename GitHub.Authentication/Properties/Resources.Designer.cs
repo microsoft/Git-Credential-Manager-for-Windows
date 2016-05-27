@@ -79,11 +79,29 @@ namespace GitHub.Authentication.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Please enter your username or email address.
+        /// </summary>
+        public static string LoginRequired {
+            get {
+                return ResourceManager.GetString("LoginRequired", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Open the two-factor authentication app on your device to view your authentication code..
         /// </summary>
         public static string OpenTwoFactorAuthAppText {
             get {
                 return ResourceManager.GetString("OpenTwoFactorAuthAppText", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Please enter your password.
+        /// </summary>
+        public static string PasswordRequired {
+            get {
+                return ResourceManager.GetString("PasswordRequired", resourceCulture);
             }
         }
         

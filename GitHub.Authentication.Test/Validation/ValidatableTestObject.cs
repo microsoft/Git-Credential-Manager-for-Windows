@@ -14,5 +14,16 @@ namespace GitHub.Authentication.Test.Validation
                 RaisePropertyChangedEvent(nameof(SomeStringProperty));
             }
         }
+
+        string _anotherStringProperty;
+        public string AnotherStringProperty
+        {
+            get { return _anotherStringProperty; }
+            set
+            {
+                _anotherStringProperty = value;
+                RaisePropertyChangedEvent(nameof(AnotherStringProperty));
+            }
+        }
     }
 }

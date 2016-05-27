@@ -135,4 +135,10 @@
   <data name="CancelText" xml:space="preserve">
     <value>Cancel</value>
   </data>
+  <data name="LoginRequired" xml:space="preserve">
+    <value>Please enter your username or email address</value>
+  </data>
+  <data name="PasswordRequired" xml:space="preserve">
+    <value>Please enter your password</value>
+  </data>
 </root>
