@@ -8,16 +8,33 @@ using System.Reflection;
 
 namespace GitHub.Authentication.ViewModels.Validation
 {
-    public static class PropertyValidator
+    public abstract class PropertyValidator : ViewModel
     {
         public static PropertyValidator<TObject, TProperty> For<TObject, TProperty>(TObject source, Expression<Func<TObject, TProperty>> property)
             where TObject : INotifyPropertyChanged
         {
             return new PropertyValidator<TObject, TProperty>(source, property);
         }
+
+        PropertyValidationResult _validationResult = PropertyValidationResult.Unvalidated;
+        /// <summary>
+        /// The current validation result for this validator.
+        /// </summary>
+        public PropertyValidationResult ValidationResult
+        {
+            get
+            {
+                return _validationResult;
+            }
+            protected set
+            {
+                _validationResult = value;
+                RaisePropertyChangedEvent(nameof(ValidationResult));
+            }
+        }
     }
 
-    public class PropertyValidator<TObject, TProperty> : ViewModel  where TObject : INotifyPropertyChanged
+    public class PropertyValidator<TObject, TProperty> : PropertyValidator where TObject : INotifyPropertyChanged
     {
         // List of validators applied to this property.
         readonly List<Func<TProperty, PropertyValidationResult>> _validators =
@@ -35,23 +52,6 @@ namespace GitHub.Authentication.ViewModels.Validation
                     ValidationResult = ValidateAll(currentValue);
                 }
             };
-        }
-
-        PropertyValidationResult _validationResult = PropertyValidationResult.Unvalidated;
-        /// <summary>
-        /// The current validation result for this validator.
-        /// </summary>
-        public PropertyValidationResult ValidationResult
-        {
-            get
-            {
-                return _validationResult;
-            }
-            private set
-            {
-                _validationResult = value;
-                RaisePropertyChangedEvent(nameof(ValidationResult));
-            }
         }
 
         /// <summary>
