@@ -13,7 +13,18 @@ namespace GitHub.Authentication
         {
             Trace.WriteLine("Program::GithubCredentialModalPrompt");
 
-            MessageBox.Show("You made it!");
+            StartSTATask(() =>
+            {
+                if (!UriParser.IsKnownScheme("pack"))
+                {
+                    UriParser.Register(new GenericUriParser(GenericUriParserOptions.GenericAuthority), "pack", -1);
+                }
+                var app = new Application();
+                var appResources = new Uri("pack://application:,,,/GitHub.Authentication;component/AppResources.xaml", UriKind.RelativeOrAbsolute);
+                app.Resources.MergedDictionaries.Add(new ResourceDictionary { Source = appResources });
+                app.Run(new CredentialsWindow());
+            })
+            .Wait();
 
             username = "";
             password = "";
@@ -37,7 +48,7 @@ namespace GitHub.Authentication
                 var app = new Application();
                 var appResources = new Uri("pack://application:,,,/GitHub.Authentication;component/AppResources.xaml", UriKind.RelativeOrAbsolute);
                 app.Resources.MergedDictionaries.Add(new ResourceDictionary { Source = appResources });
-                app.Run(new GitHub_Authentication.TwoFactorWindow { ViewModel = twoFactorViewModel });
+                app.Run(new TwoFactorWindow { ViewModel = twoFactorViewModel });
             })
             .Wait();
 

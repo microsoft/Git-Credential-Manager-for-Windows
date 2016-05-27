@@ -58,9 +58,20 @@
       <SubType>Designer</SubType>
     </ApplicationDefinition>
     <Compile Include="AuthenticationPrompts.cs" />
+    <Compile Include="Controls\CredentialsControl.xaml.cs">
+      <DependentUpon>CredentialsControl.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Controls\Text\PromptTextBox.cs" />
+    <Compile Include="Controls\Text\SecurePasswordBox.cs" />
+    <Compile Include="CredentialsWindow.xaml.cs">
+      <DependentUpon>CredentialsWindow.xaml</DependentUpon>
+    </Compile>
     <Compile Include="Helpers\ActionCommand.cs" />
     <Compile Include="Helpers\BindingProxy.cs" />
     <Compile Include="Helpers\HyperLinkCommand.cs" />
+    <Compile Include="Tester.xaml.cs">
+      <DependentUpon>Tester.xaml</DependentUpon>
+    </Compile>
     <Compile Include="ViewModels\CredentialsViewModel.cs" />
     <Compile Include="ViewModels\TwoFactorViewModel.cs" />
     <Compile Include="ViewModels\Validation\ModelValidator.cs" />
@@ -85,6 +96,10 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </Page>
+    <Page Include="Controls\CredentialsControl.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
     <Page Include="Controls\HorizontalShadowDivider.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
@@ -98,6 +113,14 @@
       <Generator>MSBuild:Compile</Generator>
     </Page>
     <Page Include="Controls\TwoFactorInput.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="CredentialsWindow.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Tester.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>

@@ -79,6 +79,15 @@ namespace GitHub.Authentication.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Login.
+        /// </summary>
+        public static string LoginLabel {
+            get {
+                return ResourceManager.GetString("LoginLabel", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Please enter your username or email address.
         /// </summary>
         public static string LoginRequired {

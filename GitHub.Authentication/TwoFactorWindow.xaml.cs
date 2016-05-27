@@ -2,7 +2,7 @@
 using System.Windows;
 using GitHub.Authentication.ViewModels;
 
-namespace GitHub_Authentication
+namespace GitHub.Authentication
 {
     public partial class TwoFactorWindow : Window
     {

@@ -141,4 +141,7 @@
   <data name="PasswordRequired" xml:space="preserve">
     <value>Please enter your password</value>
   </data>
+  <data name="LoginLabel" xml:space="preserve">
+    <value>Login</value>
+  </data>
 </root>
