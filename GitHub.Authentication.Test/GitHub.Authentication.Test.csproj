@@ -44,6 +44,9 @@
     <Compile Include="ActionCommandTests.cs" />
     <Compile Include="TwoFactorViewModelTests.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Validation\PropertyValidatorTests.cs" />
+    <Compile Include="Validation\ValidatableTestObject.cs" />
+    <Compile Include="Validation\ValidationExtensionsTests.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\GitHub.Authentication\GitHub.Authentication.csproj">

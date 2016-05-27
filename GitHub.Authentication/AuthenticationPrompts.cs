@@ -9,6 +9,17 @@ namespace GitHub.Authentication
 {
     public static class AuthenticationPrompts
     {
+        public static bool CredentialModalPrompt(TargetUri targetUri, out string username, out string password)
+        {
+            Trace.WriteLine("Program::GithubCredentialModalPrompt");
+
+            MessageBox.Show("You made it!");
+
+            username = "";
+            password = "";
+            return false;
+        }
+
         public static bool AuthenticationCodeModalPrompt(TargetUri targetUri, GithubAuthenticationResultType resultType, string username, out string authenticationCode)
         {
             Trace.WriteLine("Program::GithubAuthcodeModalPrompt");
