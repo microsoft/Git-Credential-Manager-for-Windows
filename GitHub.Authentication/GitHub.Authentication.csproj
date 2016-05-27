@@ -63,6 +63,8 @@
     </Compile>
     <Compile Include="Controls\Text\PromptTextBox.cs" />
     <Compile Include="Controls\Text\SecurePasswordBox.cs" />
+    <Compile Include="Controls\Text\ValidationMessage.cs" />
+    <Compile Include="Converters\BooleanToVisibilityConverter.cs" />
     <Compile Include="CredentialsWindow.xaml.cs">
       <DependentUpon>CredentialsWindow.xaml</DependentUpon>
     </Compile>
@@ -91,6 +93,10 @@
     <Page Include="Assets\TextBlocks.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
+    </Page>
+    <Page Include="Assets\ValidationMessage.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
     </Page>
     <Page Include="Controls\Buttons\OcticonCircleButton.xaml">
       <Generator>MSBuild:Compile</Generator>

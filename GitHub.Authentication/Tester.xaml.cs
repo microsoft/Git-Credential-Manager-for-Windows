@@ -1,4 +1,5 @@
 ﻿using System.Windows;
+using GitHub.Authentication.ViewModels;
 
 namespace GitHub.Authentication
 {
@@ -14,7 +15,10 @@ namespace GitHub.Authentication
 
         private void ShowCredentials(object sender, RoutedEventArgs e)
         {
-            new CredentialsWindow().ShowDialog();
+            var credentialsWindow = new CredentialsWindow();
+            var vm = credentialsWindow.DataContext as CredentialsViewModel;
+            vm.Login = "test";
+            credentialsWindow.ShowDialog();
         }
 
         private void ShowAuthenticationCode(object sender, RoutedEventArgs e)

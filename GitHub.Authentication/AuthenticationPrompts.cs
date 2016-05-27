@@ -3,6 +3,7 @@ using System.Diagnostics;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Windows;
+using GitHub.Authentication.ViewModels;
 using Microsoft.Alm.Authentication;
 
 namespace GitHub.Authentication
@@ -22,7 +23,7 @@ namespace GitHub.Authentication
                 var app = new Application();
                 var appResources = new Uri("pack://application:,,,/GitHub.Authentication;component/AppResources.xaml", UriKind.RelativeOrAbsolute);
                 app.Resources.MergedDictionaries.Add(new ResourceDictionary { Source = appResources });
-                app.Run(new CredentialsWindow());
+                app.Run(new CredentialsWindow { DataContext = new CredentialsViewModel() });
             })
             .Wait();
 
@@ -35,7 +36,7 @@ namespace GitHub.Authentication
         {
             Trace.WriteLine("Program::GithubAuthcodeModalPrompt");
 
-            var twoFactorViewModel = new ViewModels.TwoFactorViewModel(resultType == GithubAuthenticationResultType.TwoFactorSms);
+            var twoFactorViewModel = new TwoFactorViewModel(resultType == GithubAuthenticationResultType.TwoFactorSms);
 
             Trace.WriteLine("   prompting user for authentication code.");
 
