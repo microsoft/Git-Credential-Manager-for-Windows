@@ -34,7 +34,15 @@ namespace GitHub.Authentication.ViewModels.Validation
         }
     }
 
-    public class PropertyValidator<TObject, TProperty> : PropertyValidator where TObject : INotifyPropertyChanged
+    public abstract class PropertyValidator<TProperty> : PropertyValidator
+    {
+        protected virtual PropertyValidationResult Validate(TProperty currentValue)
+        {
+            return PropertyValidationResult.Unvalidated;
+        }
+    }
+
+    public class PropertyValidator<TObject, TProperty> : PropertyValidator<TProperty> where TObject : INotifyPropertyChanged
     {
         // List of validators applied to this property.
         readonly List<Func<TProperty, PropertyValidationResult>> _validators =
@@ -49,7 +57,7 @@ namespace GitHub.Authentication.ViewModels.Validation
                 if (e.PropertyName == propertyInfo.Name)
                 {
                     var currentValue = compiledProperty(source);
-                    ValidationResult = ValidateAll(currentValue);
+                    ValidationResult = Validate(currentValue);
                 }
             };
         }
@@ -76,7 +84,7 @@ namespace GitHub.Authentication.ViewModels.Validation
             return Add(x => predicate(x) ? errorMessage : null);
         }
 
-        PropertyValidationResult ValidateAll(TProperty currentValue)
+        protected override PropertyValidationResult Validate(TProperty currentValue)
         {
             var currentValidators = _validators.ToList(); // Make sure we don't mutate the list while validating.
 
