@@ -1,19 +1,19 @@
-﻿<Window x:Class="GitHub.Authentication.TwoFactorWindow"
-        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
-        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
-        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-        xmlns:github="clr-namespace:GitHub.UI"
-        xmlns:vm="clr-namespace:GitHub.Authentication.ViewModels"
-        mc:Ignorable="d"
-        Title="GitHub Two-factor Authentication"
-        Height="420"
-        Width="420">
+﻿<github:AuthenticationDialogWindow
+    x:Class="GitHub.Authentication.TwoFactorWindow"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    xmlns:github="clr-namespace:GitHub.UI"
+    xmlns:vm="clr-namespace:GitHub.Authentication.ViewModels"
+    mc:Ignorable="d"
+    Title="GitHub Two-factor Authentication"
+    Height="420"
+    Width="420">
     <Window.DataContext>
         <vm:TwoFactorViewModel />
     </Window.DataContext>
-
     <Grid>
         <github:TwoFactorControl x:Name="twoFactorControl" />
     </Grid>
-</Window>
+</github:AuthenticationDialogWindow>

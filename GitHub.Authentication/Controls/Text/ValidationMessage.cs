@@ -56,18 +56,6 @@ namespace GitHub.UI
             set { SetValue(TextChangeThrottleProperty, value); }
         }
 
-        public static readonly DependencyProperty ValidatesControlProperty = DependencyProperty.Register(nameof(ValidatesControl), typeof(TextBox), typeof(ValidationMessage), new PropertyMetadata(default(TextBox)));
-        public TextBox ValidatesControl
-        {
-            get { return (TextBox)GetValue(ValidatesControlProperty); }
-            set
-            {
-                if (value == null) throw new ArgumentNullException(nameof(ValidatesControl));
-                Debug.Assert(ValidatesControl == null, "Only set this property once for now. If we really need it to be set more than once, we need to make sure we're not leaking event handlers");
-                SetValue(ValidatesControlProperty, value);
-            }
-        }
-
         public static readonly DependencyProperty ValidatorProperty = DependencyProperty.Register(nameof(Validator), typeof(PropertyValidator), typeof(ValidationMessage));
         public PropertyValidator Validator
         {

@@ -58,9 +58,11 @@
       <SubType>Designer</SubType>
     </ApplicationDefinition>
     <Compile Include="AuthenticationPrompts.cs" />
+    <Compile Include="Controls\AuthenticationDialogWindow.cs" />
     <Compile Include="Controls\CredentialsControl.xaml.cs">
       <DependentUpon>CredentialsControl.xaml</DependentUpon>
     </Compile>
+    <Compile Include="Controls\DialogUserControl.cs" />
     <Compile Include="Controls\Text\PromptTextBox.cs" />
     <Compile Include="Controls\Text\SecurePasswordBox.cs" />
     <Compile Include="Controls\Text\ValidationMessage.cs" />

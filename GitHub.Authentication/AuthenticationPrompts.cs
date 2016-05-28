@@ -4,6 +4,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using System.Windows;
 using GitHub.Authentication.ViewModels;
+using GitHub.UI;
 using Microsoft.Alm.Authentication;
 
 namespace GitHub.Authentication
@@ -16,15 +17,11 @@ namespace GitHub.Authentication
 
             var credentialViewModel = new CredentialsViewModel();
 
-            ShowViewModel(credentialViewModel);
-
-            // If the user cancels the dialog, we need to ignore anything they've
-            // typed into the authentication code.
-            bool credentialValid = credentialViewModel.Result == AuthenticationDialogResult.Ok
-                                        && credentialViewModel.ModelValidator.IsValid;
+            bool credentialValid = ShowViewModel(credentialViewModel, () => new CredentialsWindow());
 
             username = credentialViewModel.Login;
             password = credentialViewModel.Password;
+
             return credentialValid;
         }
 
@@ -36,12 +33,7 @@ namespace GitHub.Authentication
 
             Trace.WriteLine("   prompting user for authentication code.");
 
-            ShowViewModel(twoFactorViewModel);
-
-            // If the user cancels the dialog, we need to ignore anything they've
-            // typed into the authentication code.
-            bool authenticationCodeValid = twoFactorViewModel.Result == AuthenticationDialogResult.Ok
-                                        && twoFactorViewModel.IsValid;
+            bool authenticationCodeValid = ShowViewModel(twoFactorViewModel, () => new TwoFactorWindow());
 
             authenticationCode = authenticationCodeValid
                 ? twoFactorViewModel.AuthenticationCode
@@ -50,7 +42,7 @@ namespace GitHub.Authentication
             return authenticationCodeValid;
         }
 
-        static void ShowViewModel(ViewModel viewModel)
+        static bool ShowViewModel(DialogViewModel viewModel, Func<AuthenticationDialogWindow> windowCreator)
         {
             StartSTATask(() =>
             {
@@ -61,9 +53,14 @@ namespace GitHub.Authentication
                 var app = new Application();
                 var appResources = new Uri("pack://application:,,,/GitHub.Authentication;component/AppResources.xaml", UriKind.RelativeOrAbsolute);
                 app.Resources.MergedDictionaries.Add(new ResourceDictionary { Source = appResources });
-                app.Run(new TwoFactorWindow { DataContext = viewModel });
+                var window = windowCreator();
+                window.DataContext = viewModel;
+                app.Run(window);
             })
             .Wait();
+
+            return viewModel.Result == AuthenticationDialogResult.Ok
+                && viewModel.IsValid; ;
         }
 
         static Task StartSTATask(Action action)

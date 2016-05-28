@@ -20,7 +20,6 @@ namespace GitHub.Authentication.Test.Validation
                 .Required("Please enter some text");
             var validationMessage = new ValidationMessage();
 
-            validationMessage.ValidatesControl = textBox;
             validationMessage.Validator = testValidator;
 
             Assert.IsFalse(validationMessage.ShowError);
@@ -34,7 +33,6 @@ namespace GitHub.Authentication.Test.Validation
             var testValidator = PropertyValidator.For(viewModel, x => x.SomeStringProperty)
                 .Required("Please enter some text");
             var validationMessage = new ValidationMessage();
-            validationMessage.ValidatesControl = textBox;
             validationMessage.Validator = testValidator;
 
             viewModel.SomeStringProperty = "valid";
@@ -54,7 +52,6 @@ namespace GitHub.Authentication.Test.Validation
             var validationMessage = new ValidationMessage();
             BindControlToViewModel(viewModel, nameof(viewModel.SomeStringProperty), textBox, TextBox.TextProperty);
 
-            validationMessage.ValidatesControl = textBox;
             validationMessage.Validator = testValidator;
 
             Assert.IsFalse(validationMessage.ShowError);

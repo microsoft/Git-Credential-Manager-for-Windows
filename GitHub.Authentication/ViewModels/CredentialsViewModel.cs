@@ -19,6 +19,13 @@ namespace GitHub.Authentication.ViewModels
                 .Required(Resources.PasswordRequired);
 
             ModelValidator = new ModelValidator(LoginValidator, PasswordValidator);
+            ModelValidator.PropertyChanged += (s, e) =>
+            {
+                if (e.PropertyName == nameof(ModelValidator.IsValid))
+                {
+                    IsValid = ModelValidator.IsValid;
+                }
+            };
         }
 
         string _login;

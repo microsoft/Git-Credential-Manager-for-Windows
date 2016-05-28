@@ -1,32 +1,18 @@
 ﻿using System;
-using System.Windows;
-using System.Windows.Controls;
+using GitHub.Authentication.Controls;
 
 namespace GitHub.UI
 {
-    public partial class TwoFactorControl : UserControl
+    public partial class TwoFactorControl : DialogUserControl
     {
         public TwoFactorControl()
         {
             InitializeComponent();
-
-            IsVisibleChanged += (s, e) =>
-            {
-                if (IsVisible)
-                {
-                    SetFocus();
-                }
-            };
         }
 
-        void SetFocus()
+        protected override void SetFocus()
         {
             authenticationCode.TryFocus().Wait(TimeSpan.FromSeconds(1));
-        }
-
-        private void OnClose(object sender, RoutedEventArgs e)
-        {
-            Window.GetWindow(this).Close();
         }
     }
 }

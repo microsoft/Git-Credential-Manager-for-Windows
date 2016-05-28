@@ -1,4 +1,4 @@
-﻿<UserControl x:Class="GitHub.UI.TwoFactorControl" 
+﻿<ui:DialogUserControl x:Class="GitHub.UI.TwoFactorControl" 
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation" 
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
@@ -52,7 +52,6 @@
             HorizontalAlignment="Center"
             Margin="0,38,0,60">
             <ui:OcticonCircleButton
-                x:Name="okButton" 
                 TabIndex="2" 
                 Icon="check"
                 IsDefault="True"
@@ -60,7 +59,6 @@
                 IsEnabled="{Binding IsValid, Mode=OneWay}"
                 Content="{x:Static prop:Resources.VerifyText}" />
             <ui:OcticonCircleButton 
-                x:Name="cancelButton"
                 TabIndex="3"
                 FontSize="12"
                 Icon="x"
@@ -70,4 +68,4 @@
                 Content="{x:Static prop:Resources.CancelText}" />
         </StackPanel>
     </StackPanel>
-</UserControl>
+</ui:DialogUserControl>

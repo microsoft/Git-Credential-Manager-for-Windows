@@ -12,5 +12,16 @@
                 RaisePropertyChangedEvent(nameof(Result));
             }
         }
+
+        bool _isValid;
+        public bool IsValid
+        {
+            get { return _isValid; }
+            set
+            {
+                _isValid = value;
+                RaisePropertyChangedEvent(nameof(IsValid));
+            }
+        }
     }
 }
