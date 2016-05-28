@@ -7,7 +7,7 @@ namespace GitHub.UI
     public class PromptTextBox : TextBox
     {
         public static readonly DependencyProperty PromptTextProperty =
-            DependencyProperty.Register("PromptText", typeof(string), typeof(PromptTextBox), new UIPropertyMetadata(""));
+            DependencyProperty.Register(nameof(PromptText), typeof(string), typeof(PromptTextBox), new UIPropertyMetadata(""));
 
         [Localizability(LocalizationCategory.Text)]
         [DefaultValue("")]

@@ -64,7 +64,7 @@
     </Compile>
     <Compile Include="Controls\DialogUserControl.cs" />
     <Compile Include="Controls\Text\PromptTextBox.cs" />
-    <Compile Include="Controls\Text\SecurePasswordBox.cs" />
+    <Compile Include="Controls\Text\MaskedPasswordBox.cs" />
     <Compile Include="Controls\Text\ValidationMessage.cs" />
     <Compile Include="Converters\BooleanToVisibilityConverter.cs" />
     <Compile Include="CredentialsWindow.xaml.cs">

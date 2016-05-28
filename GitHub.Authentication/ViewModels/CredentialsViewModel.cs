@@ -53,6 +53,10 @@ namespace GitHub.Authentication.ViewModels
             get { return _password; }
             set
             {
+                // Hack: Because we're binding one way to source, we need to
+                // skip the initial value that's sent when the binding is setup
+                // by the XAML
+                if (_password == null && value == null) return;
                 _password = value;
                 RaisePropertyChangedEvent(nameof(Password));
             }

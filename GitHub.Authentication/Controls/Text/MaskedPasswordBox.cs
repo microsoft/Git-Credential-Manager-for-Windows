@@ -1,14 +1,22 @@
 ﻿using System.Diagnostics;
 using System.Globalization;
+using System.Windows;
 using System.Windows.Controls;
 
 namespace GitHub.UI
 {
     /// <summary>
-    ///   More secure PasswordBox based on TextBox control
-    ///   http://blogs.ugidotnet.org/leonardo
+    /// A masking TextBox control based on http://blogs.ugidotnet.org/leonardo
     /// </summary>
-    public class SecurePasswordBox : PromptTextBox
+    /// <remarks>
+    /// <para>
+    /// You might be wondering why we don't use SecureString. The main reason is that
+    /// the password value is passed back to the Git Credential Provider as a normal
+    /// string. So there's no point in us using a SecureString here. It needs to be a
+    /// secure string all the way down to really make a difference.
+    /// </para>
+    /// </remarks>
+    public class MaskedPasswordBox : PromptTextBox
     {
         // Fake char to display in Visual Tree
         const char pwdChar = '●';
@@ -51,6 +59,19 @@ namespace GitHub.UI
             }
         }
 
+        public static readonly DependencyProperty PasswordProperty =
+            DependencyProperty.Register(nameof(Password), typeof(string), typeof(MaskedPasswordBox), new UIPropertyMetadata(null));
+
+        /// <summary>
+        /// Copy of real password
+        /// </summary>
+        [Localizability(LocalizationCategory.Text)]
+        public string Password
+        {
+            get { return (string)GetValue(PasswordProperty); }
+            set { SetValue(PasswordProperty, value); }
+        }
+
         /// <summary>
         ///   TextChanged event handler for secure storing of password into Visual Tree,
         ///   text is replaced with pwdChar chars, clean text is kept in
@@ -85,6 +106,7 @@ namespace GitHub.UI
                 BaseText = new string(pwdChar, password.Length);
                 SelectionStart = selStart;
             }
+            Password = password ?? string.Empty;
             base.OnTextChanged(e);
         }
     }
