@@ -42,7 +42,7 @@ namespace GitHub.Authentication.ViewModels
             }
         }
 
-        public PropertyValidator<string> LoginValidator { get; private set; }
+        public PropertyValidator<string> LoginValidator { get; }
 
         string _password;
         /// <summary>
@@ -62,12 +62,12 @@ namespace GitHub.Authentication.ViewModels
             }
         }
 
-        public PropertyValidator<string> PasswordValidator { get; private set; }
+        public PropertyValidator<string> PasswordValidator { get; }
 
-        public ModelValidator ModelValidator { get; private set; }
+        public ModelValidator ModelValidator { get; }
 
-        public ICommand LoginCommand { get; private set; }
-        public ICommand CancelCommand { get; private set; }
+        public ICommand LoginCommand { get; }
+        public ICommand CancelCommand { get; }
         public ICommand SignUpCommand { get; } = new HyperLinkCommand();
     }
 }

@@ -49,10 +49,7 @@ namespace GitHub.Authentication.ViewModels
             }
         }
 
-        public bool IsSms
-        {
-            get; private set;
-        }
+        public bool IsSms { get; }
 
         public string Description
         {
@@ -67,7 +64,7 @@ namespace GitHub.Authentication.ViewModels
         public ICommand LearnMoreCommand { get; }
             = new HyperLinkCommand();
 
-        public ICommand OkCommand { get; private set; }
-        public ICommand CancelCommand { get; private set; }
+        public ICommand OkCommand { get; }
+        public ICommand CancelCommand { get; }
     }
 }

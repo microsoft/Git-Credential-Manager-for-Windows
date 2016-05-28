@@ -5,24 +5,24 @@
         /// <summary>
         /// Describes if the property passes validation
         /// </summary>
-        public bool IsValid { get; private set; }
+        public bool IsValid { get; }
 
         /// <summary>
         /// Describes which state we are in - Valid, Not Validated, or Invalid
         /// </summary>
-        public ValidationStatus Status { get; private set; }
+        public ValidationStatus Status { get; }
 
         /// <summary>
         /// An error message to display
         /// </summary>
-        public string Message { get; private set; }
+        public string Message { get; }
 
         /// <summary>
         /// Describes if we should show this error in the UI
         /// We only show errors which have been marked specifically as Invalid
         /// and we do not show errors for inputs which have not yet been validated. 
         /// </summary>
-        public bool DisplayValidationError { get; private set; }
+        public bool DisplayValidationError { get; }
 
         public static PropertyValidationResult Success { get; } = new PropertyValidationResult(ValidationStatus.Valid);
 
