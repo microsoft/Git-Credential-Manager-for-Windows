@@ -76,7 +76,7 @@ namespace GitHub.UI
         }
 
         public static readonly DependencyProperty FillProperty =
-            DependencyProperty.Register("Fill", typeof(Brush), typeof(ValidationMessage), new PropertyMetadata(new SolidColorBrush(Color.FromRgb(0xe7, 0x4c, 0x3c))));
+            DependencyProperty.Register(nameof(Fill), typeof(Brush), typeof(ValidationMessage), new PropertyMetadata(new SolidColorBrush(Color.FromRgb(0xe7, 0x4c, 0x3c))));
 
         public Brush Fill
         {
@@ -84,7 +84,7 @@ namespace GitHub.UI
             set { SetValue(FillProperty, value); }
         }
 
-        public static readonly DependencyProperty ErrorAdornerTemplateProperty = DependencyProperty.Register("ErrorAdornerTemplate", typeof(string), typeof(ValidationMessage), new PropertyMetadata("validationTemplate"));
+        public static readonly DependencyProperty ErrorAdornerTemplateProperty = DependencyProperty.Register(nameof(ErrorAdornerTemplate), typeof(string), typeof(ValidationMessage), new PropertyMetadata("validationTemplate"));
 
         public string ErrorAdornerTemplate
         {

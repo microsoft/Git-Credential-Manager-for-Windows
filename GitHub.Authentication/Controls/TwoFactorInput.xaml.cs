@@ -23,7 +23,7 @@ namespace GitHub.UI
     public partial class TwoFactorInput : UserControl
     {
         public static readonly DependencyProperty TextProperty =
-            DependencyProperty.Register("Text", typeof(string), typeof(TwoFactorInput), new PropertyMetadata(""));
+            DependencyProperty.Register(nameof(Text), typeof(string), typeof(TwoFactorInput), new PropertyMetadata(""));
 
         TextBox[] TextBoxes;
         public TextBox TextBox { get { return TextBoxes[0]; } }
