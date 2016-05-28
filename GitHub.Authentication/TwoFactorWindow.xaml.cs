@@ -37,7 +37,7 @@ namespace GitHub.Authentication
             if (viewModel == null) return;
             if (e.PropertyName == nameof(TwoFactorViewModel.Result))
             {
-                if (viewModel.Result != TwoFactorResult.None)
+                if (viewModel.Result != AuthenticationDialogResult.None)
                 {
                     Close();
                 }

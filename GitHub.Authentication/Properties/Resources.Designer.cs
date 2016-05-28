@@ -70,6 +70,15 @@ namespace GitHub.Authentication.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Don’t have an account? .
+        /// </summary>
+        public static string DoNotHaveAccountText {
+            get {
+                return ResourceManager.GetString("DoNotHaveAccountText", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Learn More.
         /// </summary>
         public static string LearnMoreLink {
@@ -84,6 +93,24 @@ namespace GitHub.Authentication.Properties {
         public static string LoginLabel {
             get {
                 return ResourceManager.GetString("LoginLabel", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Login.
+        /// </summary>
+        public static string LoginLinkText {
+            get {
+                return ResourceManager.GetString("LoginLinkText", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Username or email.
+        /// </summary>
+        public static string LoginPromptText {
+            get {
+                return ResourceManager.GetString("LoginPromptText", resourceCulture);
             }
         }
         
@@ -106,11 +133,29 @@ namespace GitHub.Authentication.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Password.
+        /// </summary>
+        public static string PasswordPromptText {
+            get {
+                return ResourceManager.GetString("PasswordPromptText", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Please enter your password.
         /// </summary>
         public static string PasswordRequired {
             get {
                 return ResourceManager.GetString("PasswordRequired", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Sign up.
+        /// </summary>
+        public static string SignUpLinkText {
+            get {
+                return ResourceManager.GetString("SignUpLinkText", resourceCulture);
             }
         }
         

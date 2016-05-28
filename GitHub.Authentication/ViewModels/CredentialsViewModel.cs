@@ -1,13 +1,17 @@
-﻿using System.Security;
+﻿using System.Windows.Input;
+using GitHub.Authentication.Helpers;
 using GitHub.Authentication.Properties;
 using GitHub.Authentication.ViewModels.Validation;
 
 namespace GitHub.Authentication.ViewModels
 {
-    public class CredentialsViewModel : ViewModel
+    public class CredentialsViewModel : DialogViewModel
     {
         public CredentialsViewModel()
         {
+            LoginCommand = new ActionCommand(_ => Result = AuthenticationDialogResult.Ok);
+            CancelCommand = new ActionCommand(_ => Result = AuthenticationDialogResult.Cancel);
+
             LoginValidator = PropertyValidator.For(this, x => x.Login)
                 .Required(Resources.LoginRequired);
 
@@ -50,5 +54,9 @@ namespace GitHub.Authentication.ViewModels
         public PropertyValidator<string> PasswordValidator { get; private set; }
 
         public ModelValidator ModelValidator { get; private set; }
+
+        public ICommand LoginCommand { get; private set; }
+        public ICommand CancelCommand { get; private set; }
+        public ICommand SignUpCommand { get; } = new HyperLinkCommand();
     }
 }

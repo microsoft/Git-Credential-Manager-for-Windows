@@ -35,7 +35,6 @@
             <Run x:Name="description"
                  Text="{Binding Description, Mode=OneWay}"/>
             <Hyperlink
-                x:Name="twoFactorReadMoreLink"
                 Command="{Binding LearnMoreCommand}"
                 CommandParameter="{Binding 
                     RelativeSource={RelativeSource Self}, 

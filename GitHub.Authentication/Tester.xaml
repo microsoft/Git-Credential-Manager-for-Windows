@@ -5,7 +5,9 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:GitHub.Authentication"
         mc:Ignorable="d"
-        Title="Tester" Height="300" Width="300">
+        Title="Tester"
+        Height="420"
+        Width="420">
     <DockPanel>
         <Button Content="Show Credentials Dialog" Padding="10" Click="ShowCredentials" />
         <Button Content="Show Authentication Code Dialog" Padding="10" Click="ShowAuthenticationCode" />

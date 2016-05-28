@@ -15,10 +15,7 @@ namespace GitHub.Authentication
 
         private void ShowCredentials(object sender, RoutedEventArgs e)
         {
-            var credentialsWindow = new CredentialsWindow();
-            var vm = credentialsWindow.DataContext as CredentialsViewModel;
-            vm.Login = "test";
-            credentialsWindow.ShowDialog();
+            new CredentialsWindow().ShowDialog();
         }
 
         private void ShowAuthenticationCode(object sender, RoutedEventArgs e)

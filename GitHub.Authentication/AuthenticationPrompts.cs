@@ -14,22 +14,18 @@ namespace GitHub.Authentication
         {
             Trace.WriteLine("Program::GithubCredentialModalPrompt");
 
-            StartSTATask(() =>
-            {
-                if (!UriParser.IsKnownScheme("pack"))
-                {
-                    UriParser.Register(new GenericUriParser(GenericUriParserOptions.GenericAuthority), "pack", -1);
-                }
-                var app = new Application();
-                var appResources = new Uri("pack://application:,,,/GitHub.Authentication;component/AppResources.xaml", UriKind.RelativeOrAbsolute);
-                app.Resources.MergedDictionaries.Add(new ResourceDictionary { Source = appResources });
-                app.Run(new CredentialsWindow { DataContext = new CredentialsViewModel() });
-            })
-            .Wait();
+            var credentialViewModel = new CredentialsViewModel();
 
-            username = "";
-            password = "";
-            return false;
+            ShowViewModel(credentialViewModel);
+
+            // If the user cancels the dialog, we need to ignore anything they've
+            // typed into the authentication code.
+            bool credentialValid = credentialViewModel.Result == AuthenticationDialogResult.Ok
+                                        && credentialViewModel.ModelValidator.IsValid;
+
+            username = credentialViewModel.Login;
+            password = credentialViewModel.Password;
+            return credentialValid;
         }
 
         public static bool AuthenticationCodeModalPrompt(TargetUri targetUri, GithubAuthenticationResultType resultType, string username, out string authenticationCode)
@@ -40,6 +36,22 @@ namespace GitHub.Authentication
 
             Trace.WriteLine("   prompting user for authentication code.");
 
+            ShowViewModel(twoFactorViewModel);
+
+            // If the user cancels the dialog, we need to ignore anything they've
+            // typed into the authentication code.
+            bool authenticationCodeValid = twoFactorViewModel.Result == AuthenticationDialogResult.Ok
+                                        && twoFactorViewModel.IsValid;
+
+            authenticationCode = authenticationCodeValid
+                ? twoFactorViewModel.AuthenticationCode
+                : null;
+
+            return authenticationCodeValid;
+        }
+
+        static void ShowViewModel(ViewModel viewModel)
+        {
             StartSTATask(() =>
             {
                 if (!UriParser.IsKnownScheme("pack"))
@@ -49,20 +61,9 @@ namespace GitHub.Authentication
                 var app = new Application();
                 var appResources = new Uri("pack://application:,,,/GitHub.Authentication;component/AppResources.xaml", UriKind.RelativeOrAbsolute);
                 app.Resources.MergedDictionaries.Add(new ResourceDictionary { Source = appResources });
-                app.Run(new TwoFactorWindow { ViewModel = twoFactorViewModel });
+                app.Run(new TwoFactorWindow { DataContext = viewModel });
             })
             .Wait();
-
-            // If the user cancels the dialog, we need to ignore anything they've
-            // typed into the authentication code.
-            bool authenticationCodeValid = twoFactorViewModel.Result == ViewModels.TwoFactorResult.Ok
-                                        && twoFactorViewModel.IsValid;
-
-            authenticationCode = authenticationCodeValid
-                ? twoFactorViewModel.AuthenticationCode
-                : null;
-
-            return authenticationCodeValid;
         }
 
         static Task StartSTATask(Action action)

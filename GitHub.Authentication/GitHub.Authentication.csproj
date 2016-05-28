@@ -74,7 +74,9 @@
     <Compile Include="Tester.xaml.cs">
       <DependentUpon>Tester.xaml</DependentUpon>
     </Compile>
+    <Compile Include="ViewModels\AuthenticationDialogResult.cs" />
     <Compile Include="ViewModels\CredentialsViewModel.cs" />
+    <Compile Include="ViewModels\DialogViewModel.cs" />
     <Compile Include="ViewModels\TwoFactorViewModel.cs" />
     <Compile Include="ViewModels\Validation\ModelValidator.cs" />
     <Compile Include="ViewModels\Validation\PropertyValidationResult.cs" />

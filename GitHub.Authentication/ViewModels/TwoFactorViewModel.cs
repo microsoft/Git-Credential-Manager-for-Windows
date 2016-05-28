@@ -7,7 +7,7 @@ namespace GitHub.Authentication.ViewModels
     /// <summary>
     /// Simple view model for the GitHub Two Factor dialog.
     /// </summary>
-    public class TwoFactorViewModel : ViewModel
+    public class TwoFactorViewModel : DialogViewModel
     {
         /// <summary>
         /// This is used by the GitHub.Authentication test application
@@ -20,8 +20,8 @@ namespace GitHub.Authentication.ViewModels
         /// <param name="isSms">True if the 2fa authentication code is sent via SMS</param>
         public TwoFactorViewModel(bool isSms)
         {
-            OkCommand = new ActionCommand(_ => Result = TwoFactorResult.Ok);
-            CancelCommand = new ActionCommand(_ => Result = TwoFactorResult.Cancel);
+            OkCommand = new ActionCommand(_ => Result = AuthenticationDialogResult.Ok);
+            CancelCommand = new ActionCommand(_ => Result = AuthenticationDialogResult.Cancel);
 
             IsSms = isSms;
             PropertyChanged += (s, e) =>
@@ -75,28 +75,10 @@ namespace GitHub.Authentication.ViewModels
             }
         }
 
-        TwoFactorResult _result = TwoFactorResult.None;
-        public TwoFactorResult Result
-        {
-            get { return _result; }
-            set
-            {
-                _result = value;
-                RaisePropertyChangedEvent(nameof(Result));
-            }
-        }
-
         public ICommand LearnMoreCommand { get; }
             = new HyperLinkCommand();
 
         public ICommand OkCommand { get; private set; }
         public ICommand CancelCommand { get; private set; }
-    }
-
-    public enum TwoFactorResult
-    {
-        None,
-        Ok,
-        Cancel
     }
 }
