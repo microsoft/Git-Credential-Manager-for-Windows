@@ -1,4 +1,7 @@
-﻿using System.Windows.Controls;
+﻿using System;
+using System.Diagnostics;
+using System.Windows.Controls;
+using System.Windows.Threading;
 
 namespace GitHub.UI
 {
@@ -10,7 +13,11 @@ namespace GitHub.UI
             {
                 if (IsVisible)
                 {
-                    SetFocus();
+                    Dispatcher.BeginInvoke(DispatcherPriority.ContextIdle,
+                        new Action(delegate ()
+                        {
+                            SetFocus();
+                        }));
                 }
             };
         }
