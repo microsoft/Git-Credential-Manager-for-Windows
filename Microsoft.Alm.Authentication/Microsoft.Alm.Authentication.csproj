@@ -110,20 +110,21 @@
     <None Include="packages.config" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
-  <Import Project="$(PackagesDirectory)\MSBuildTasks.*\tools\MSBuild.Community.Tasks.targets" />
+
   <!-- Produce a nuget package of this assembly -->
+  <Import Project="..\packages\MSBuildTasks.*\tools\MSBuild.Community.Tasks.Targets" />
   <Target Name="AfterBuild" Condition=" '$(Configuration)' == 'Package'">
     <!-- Only download a new copy of nuget.exe if we don't have a copy available -->
-    <PropertyGroup Condition="!Exists('nuget.exe')">
-      <HaveLocalNuget>true</HaveLocalNuget>
-    </PropertyGroup>
-    <PropertyGroup Condition="!$(HaveLocalNuget)">
-      <NugetPath>$(IntermediateOutputPath)nuget.exe</NugetPath>
-    </PropertyGroup>
-    <PropertyGroup Condition="$(HaveLocalNuget)">
+    <PropertyGroup>
       <NugetPath>nuget.exe</NugetPath>
     </PropertyGroup>
-    <WebDownload Condition="!$(HaveLocalNuget) And !Exists($(NugetPath))" Filename="$(NugetPath)" FileUri="https://dist.nuget.org/win-x86-commandline/latest/nuget.exe" />
+    <PropertyGroup Condition="!Exists($(NugetPath))">
+      <NugetPath>$(IntermediateOutputPath)nuget.exe</NugetPath>
+    </PropertyGroup>
+    <WebDownload
+        Condition="!Exists($(NugetPath))"
+        Filename="$(NugetPath)"
+        FileUri="https://dist.nuget.org/win-x86-commandline/latest/nuget.exe" />
     <Exec Command="$(NugetPath) pack $(AssemblyName).csproj -Symbols -IncludeReferencedProjects -Prop Configuration=Package -OutputDirectory $(OutputPath)" />
   </Target>
 </Project>
