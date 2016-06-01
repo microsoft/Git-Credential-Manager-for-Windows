@@ -7,6 +7,10 @@
     xmlns:github="clr-namespace:GitHub.UI"
     xmlns:vm="clr-namespace:GitHub.Authentication.ViewModels"
     mc:Ignorable="d"
+    Background="White"
+    ResizeMode="NoResize"
+    SnapsToDevicePixels="True"
+    UseLayoutRounding="True"
     Title="GitHub Two-factor Authentication"
     Height="420"
     Width="420">
