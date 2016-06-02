@@ -159,4 +159,7 @@
   <data name="SignUpLinkText" xml:space="preserve">
     <value>Sign up</value>
   </data>
+  <data name="ForgotPasswordText" xml:space="preserve">
+    <value>Forgot your password?</value>
+  </data>
 </root>

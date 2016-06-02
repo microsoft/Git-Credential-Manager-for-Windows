@@ -79,6 +79,15 @@ namespace GitHub.Authentication.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Forgot your password?.
+        /// </summary>
+        public static string ForgotPasswordText {
+            get {
+                return ResourceManager.GetString("ForgotPasswordText", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Learn More.
         /// </summary>
         public static string LearnMoreLink {

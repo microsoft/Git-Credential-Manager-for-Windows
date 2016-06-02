@@ -68,6 +68,7 @@ namespace GitHub.Authentication.ViewModels
 
         public ICommand LoginCommand { get; }
         public ICommand CancelCommand { get; }
-        public ICommand SignUpCommand { get; } = new HyperLinkCommand();
+        public ICommand HyperLinkCommand { get; } = new HyperLinkCommand();
+        public ICommand ForgotPasswordCommand { get; } = new HyperLinkCommand();
     }
 }
