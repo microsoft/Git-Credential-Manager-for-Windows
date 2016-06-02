@@ -12,6 +12,7 @@
     SnapsToDevicePixels="True"
     UseLayoutRounding="True"
     Title="GitHub Two-factor Authentication"
+    Icon="Assets/octocat-mark.ico"
     Height="420"
     Width="420">
     <Window.DataContext>

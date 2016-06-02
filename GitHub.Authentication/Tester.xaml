@@ -5,7 +5,12 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:GitHub.Authentication"
         mc:Ignorable="d"
-        Title="Tester"
+        Background="White"
+        SnapsToDevicePixels="True"
+        UseLayoutRounding="True"
+        ResizeMode="NoResize"
+        Title="GitHub Authentication Dialog Tester"
+        Icon="Assets/octocat-mark.ico"
         Height="420"
         Width="420">
     <DockPanel>
