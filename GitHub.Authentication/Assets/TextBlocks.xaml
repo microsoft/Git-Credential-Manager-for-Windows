@@ -49,7 +49,66 @@
     </Style>
     
     <Style TargetType="{x:Type TextBox}" BasedOn="{StaticResource GitHubTextBox}" />
-    
+
+    <!-- RoundedPromptTextBox -->
+    <Style x:Key="RoundedPromptTextBox" TargetType="{x:Type ui:PromptTextBox}" BasedOn="{StaticResource GitHubTextBox}">
+        <Setter Property="Background" Value="White"/>
+        <Setter Property="BorderBrush" Value="#D1D1D1"/>
+        <Setter Property="Foreground" Value="{DynamicResource GitHubTextBrush}"/>
+        <Setter Property="KeyboardNavigation.TabNavigation" Value="None"/>
+        <Setter Property="HorizontalContentAlignment" Value="Left"/>
+        <Setter Property="FocusVisualStyle" Value="{x:Null}"/>
+        <Setter Property="AllowDrop" Value="true"/>
+        <Setter Property="ScrollViewer.PanningMode" Value="VerticalFirst"/>
+        <Setter Property="Stylus.IsFlicksEnabled" Value="False"/>
+        <Setter Property="Height" Value="24" />
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="{x:Type ui:PromptTextBox}">
+                    <Grid>
+                        <Border x:Name="Bd" CornerRadius="2" ClipToBounds="True" BorderBrush="{TemplateBinding BorderBrush}" BorderThickness="{TemplateBinding BorderThickness}" Background="{TemplateBinding Background}" SnapsToDevicePixels="True">
+                            <Border CornerRadius="0" BorderBrush="Black" BorderThickness="0,1,0,0" Margin="2,-2,2,0" Opacity="0.4">
+                                <Border.Effect>
+                                    <DropShadowEffect Direction="270" ShadowDepth="0" BlurRadius="4" Opacity="1" />
+                                </Border.Effect>
+                            </Border>
+                        </Border>
+
+                        <Grid Margin="1,0,0,0">
+                            <ScrollViewer x:Name="PART_ContentHost" Padding="{TemplateBinding Padding}" Focusable="false" HorizontalScrollBarVisibility="Hidden" VerticalScrollBarVisibility="Hidden" VerticalAlignment="Top" Margin="0"/>
+                            <Label x:Name="PromptLabel" HorizontalAlignment="Left"
+                                 Foreground="{DynamicResource GitHubTextBrush}"
+                                 FontSize="{TemplateBinding FontSize}" Margin="2,0,0,0" Padding="{TemplateBinding Padding}" Opacity="0"
+                                 Target="{Binding ElementName=Bd}"
+                                 SnapsToDevicePixels="{TemplateBinding SnapsToDevicePixels}" Focusable="False" IsHitTestVisible="False"
+                                 VerticalAlignment="Top">
+                                <TextBlock Text="{TemplateBinding PromptText}" TextTrimming="CharacterEllipsis" />
+                            </Label>
+                        </Grid>
+                    </Grid>
+
+                    <ControlTemplate.Triggers>
+                        <Trigger Property="IsEnabled" Value="False">
+                            <Setter Property="Opacity" Value="0.5" />
+                        </Trigger>
+                        <Trigger Property="IsMouseOver" Value="True">
+                            <Setter Property="BorderBrush" TargetName="Bd" Value="{DynamicResource GitHubTextBoxMouseOverBorderBrush}" />
+                        </Trigger>
+                        <Trigger Property="IsKeyboardFocusWithin" Value="True">
+                            <Setter Property="BorderBrush" TargetName="Bd" Value="{DynamicResource GitHubAccentBrush}" />
+                        </Trigger>
+                        <DataTrigger Binding="{Binding Text.Length, RelativeSource={RelativeSource Self}}" Value="0">
+                            <Setter Property="Opacity" TargetName="PromptLabel" Value="0.7" />
+                            <Setter Property="Foreground" Value="Transparent" />
+                        </DataTrigger>
+                    </ControlTemplate.Triggers>
+
+                </ControlTemplate>
+
+            </Setter.Value>
+        </Setter>
+    </Style>
+
     <!-- PasswordBox -->
     <Style x:Key="GitHubPasswordBox" TargetType="{x:Type PasswordBox}">
         <Setter Property="BorderBrush" Value="{DynamicResource GitHubTextBoxBorderBrush}" />
@@ -89,14 +148,14 @@
 
     <!-- Label -->
     <Style x:Key="GitHubLabel" TargetType="{x:Type Label}">
-        <Setter Property="Foreground" Value="{DynamicResource GHTextBrush}" />
+        <Setter Property="Foreground" Value="{DynamicResource GitHubTextBrush}" />
     </Style>
     <Style TargetType="{x:Type Label}" BasedOn="{StaticResource GitHubLabel}" />
     <!-- End Label -->
 
     <!-- Textblock -->
     <Style x:Key="GitHubTextBlock" TargetType="{x:Type TextBlock}">
-        <Setter Property="Foreground" Value="{DynamicResource GHTextBrush}" />
+        <Setter Property="Foreground" Value="{DynamicResource GitHubTextBrush}" />
         <Setter Property="FontFamily" Value="{DynamicResource GitHubFontFamilyNormal}" />
         <Setter Property="FontWeight" Value="Normal" />
         <Setter Property="FontSize" Value="14" />
@@ -160,7 +219,7 @@
         <GradientStop Color="#E3E9EF" Offset="1" />
     </LinearGradientBrush>
     <Style x:Key="{x:Type TextBoxBase}" BasedOn="{x:Null}" TargetType="{x:Type TextBoxBase}">
-        <Setter Property="Foreground" Value="{DynamicResource GHTextBrush}" />
+        <Setter Property="Foreground" Value="{DynamicResource GitHubTextBrush}" />
         <Setter Property="Background" Value="White" />
         <Setter Property="BorderBrush" Value="{StaticResource TextBoxBorder}" />
         <Setter Property="BorderThickness" Value="1" />

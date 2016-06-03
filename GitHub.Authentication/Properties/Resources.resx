@@ -135,4 +135,31 @@
   <data name="CancelText" xml:space="preserve">
     <value>Cancel</value>
   </data>
+  <data name="LoginRequired" xml:space="preserve">
+    <value>Please enter your username or email address</value>
+  </data>
+  <data name="PasswordRequired" xml:space="preserve">
+    <value>Please enter your password</value>
+  </data>
+  <data name="LoginLabel" xml:space="preserve">
+    <value>Login</value>
+  </data>
+  <data name="LoginPromptText" xml:space="preserve">
+    <value>Username or email</value>
+  </data>
+  <data name="PasswordPromptText" xml:space="preserve">
+    <value>Password</value>
+  </data>
+  <data name="DoNotHaveAccountText" xml:space="preserve">
+    <value>Don’t have an account? </value>
+  </data>
+  <data name="LoginLinkText" xml:space="preserve">
+    <value>Login</value>
+  </data>
+  <data name="SignUpLinkText" xml:space="preserve">
+    <value>Sign up</value>
+  </data>
+  <data name="ForgotPasswordText" xml:space="preserve">
+    <value>Forgot your password?</value>
+  </data>
 </root>

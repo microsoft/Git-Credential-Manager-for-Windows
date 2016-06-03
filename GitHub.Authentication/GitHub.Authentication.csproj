@@ -57,11 +57,34 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </ApplicationDefinition>
-    <Compile Include="Authcode.cs" />
+    <Compile Include="AuthenticationPrompts.cs" />
+    <Compile Include="Controls\AuthenticationDialogWindow.cs" />
+    <Compile Include="Controls\CredentialsControl.xaml.cs">
+      <DependentUpon>CredentialsControl.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Controls\DialogUserControl.cs" />
+    <Compile Include="Controls\Text\PromptTextBox.cs" />
+    <Compile Include="Controls\Text\MaskedPasswordBox.cs" />
+    <Compile Include="Controls\Text\ValidationMessage.cs" />
+    <Compile Include="Converters\BooleanToVisibilityConverter.cs" />
+    <Compile Include="CredentialsWindow.xaml.cs">
+      <DependentUpon>CredentialsWindow.xaml</DependentUpon>
+    </Compile>
     <Compile Include="Helpers\ActionCommand.cs" />
     <Compile Include="Helpers\BindingProxy.cs" />
     <Compile Include="Helpers\HyperLinkCommand.cs" />
+    <Compile Include="Tester.xaml.cs">
+      <DependentUpon>Tester.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="ViewModels\AuthenticationDialogResult.cs" />
+    <Compile Include="ViewModels\CredentialsViewModel.cs" />
+    <Compile Include="ViewModels\DialogViewModel.cs" />
     <Compile Include="ViewModels\TwoFactorViewModel.cs" />
+    <Compile Include="ViewModels\Validation\ModelValidator.cs" />
+    <Compile Include="ViewModels\Validation\PropertyValidationResult.cs" />
+    <Compile Include="ViewModels\Validation\PropertyValidator.cs" />
+    <Compile Include="ViewModels\Validation\PropertyValidatorExtensions.cs" />
+    <Compile Include="ViewModels\Validation\ValidationStatus.cs" />
     <Compile Include="ViewModels\ViewModel.cs" />
     <Page Include="AppResources.xaml">
       <SubType>Designer</SubType>
@@ -75,9 +98,17 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </Page>
+    <Page Include="Assets\ValidationMessage.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
     <Page Include="Controls\Buttons\OcticonCircleButton.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
+    </Page>
+    <Page Include="Controls\CredentialsControl.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
     </Page>
     <Page Include="Controls\HorizontalShadowDivider.xaml">
       <Generator>MSBuild:Compile</Generator>
@@ -92,6 +123,14 @@
       <Generator>MSBuild:Compile</Generator>
     </Page>
     <Page Include="Controls\TwoFactorInput.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="CredentialsWindow.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Tester.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
@@ -173,6 +212,9 @@
       <Project>{c1daabc1-b493-459d-bb4f-04fbefb1ba13}</Project>
       <Name>Microsoft.Alm.Authentication</Name>
     </ProjectReference>
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="Assets\octocat-mark.ico" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

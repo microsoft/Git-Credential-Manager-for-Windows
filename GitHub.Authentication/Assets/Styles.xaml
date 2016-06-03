@@ -13,8 +13,8 @@
                      PresentationOptions:Freeze="true" />
 
     <!-- Default text colors -->
-    <Color x:Key="GHTextColor">#333</Color>
-    <SolidColorBrush x:Key="GHTextBrush" Color="{StaticResource GHTextColor}" PresentationOptions:Freeze="true" />
+    <Color x:Key="GitHubTextColor">#333</Color>
+    <SolidColorBrush x:Key="GitHubTextBrush" Color="{StaticResource GitHubTextColor}" PresentationOptions:Freeze="true" />
 
     <Color x:Key="GitHubTextSecondaryColor">#666</Color>
     <SolidColorBrush x:Key="GitHubTextSecondaryBrush"

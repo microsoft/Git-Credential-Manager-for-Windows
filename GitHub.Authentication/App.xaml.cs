@@ -1,6 +1,6 @@
 ﻿using System.Windows;
 
-namespace GitHub_Authentication
+namespace GitHub.Authentication
 {
     /// <summary>
     /// <para>

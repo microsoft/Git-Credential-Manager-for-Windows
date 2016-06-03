@@ -643,10 +643,10 @@ namespace Microsoft.Alm.CredentialHelper
                                                                   GithubCredentialScope,
                                                                   secrets,
                                                                   operationArguments.UseModalUi
-                                                                    ? new GithubAuthentication.AcquireCredentialsDelegate(GithubCredentialModalPrompt)
+                                                                    ? new GithubAuthentication.AcquireCredentialsDelegate(GitHub.Authentication.AuthenticationPrompts.CredentialModalPrompt)
                                                                     : new GithubAuthentication.AcquireCredentialsDelegate(GithubCredentialPrompt),
                                                                   operationArguments.UseModalUi
-                                                                    ? new GithubAuthentication.AcquireAuthenticationCodeDelegate(GitHub.Authentication.Authcode.ModalPrompt)
+                                                                    ? new GithubAuthentication.AcquireAuthenticationCodeDelegate(GitHub.Authentication.AuthenticationPrompts.AuthenticationCodeModalPrompt)
                                                                     : new GithubAuthentication.AcquireAuthenticationCodeDelegate(GithubAuthCodePrompt),
                                                                   null,
                                                                   out authority))
@@ -693,10 +693,10 @@ namespace Microsoft.Alm.CredentialHelper
                     return authority ?? new GithubAuthentication(GithubCredentialScope,
                                                                  secrets,
                                                                  operationArguments.UseModalUi
-                                                                    ? new GithubAuthentication.AcquireCredentialsDelegate(GithubCredentialModalPrompt)
+                                                                    ? new GithubAuthentication.AcquireCredentialsDelegate(GitHub.Authentication.AuthenticationPrompts.CredentialModalPrompt)
                                                                     : new GithubAuthentication.AcquireCredentialsDelegate(GithubCredentialPrompt),
                                                                  operationArguments.UseModalUi
-                                                                    ? new GithubAuthentication.AcquireAuthenticationCodeDelegate(GitHub.Authentication.Authcode.ModalPrompt)
+                                                                    ? new GithubAuthentication.AcquireAuthenticationCodeDelegate(GitHub.Authentication.AuthenticationPrompts.AuthenticationCodeModalPrompt)
                                                                     : new GithubAuthentication.AcquireAuthenticationCodeDelegate(GithubAuthCodePrompt),
                                                                  null);
 
@@ -957,13 +957,6 @@ namespace Microsoft.Alm.CredentialHelper
                     listener.WriteLine(String.Format("Microsoft {0} version {1}", Program.Title, Version.ToString(3)));
                 }
             }
-        }
-
-        private static bool GithubCredentialModalPrompt(TargetUri targetUri, out string username, out string password)
-        {
-            Trace.WriteLine("Program::GithubCredentialModalPrompt");
-
-            return ModalPromptForCredentials(targetUri, out username, out password);
         }
 
         private static bool GithubCredentialPrompt(TargetUri targetUri, out string username, out string password)
