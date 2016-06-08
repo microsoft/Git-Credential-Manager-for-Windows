@@ -27,7 +27,7 @@
 #define MyAppPublisherURL "http://www.microsoft.com"
 #define MyAppURL "https://github.com/Microsoft/Git-Credential-Manager-for-Windows"
 #define MyAppExeName "git-credential-manager.exe"
-#define Git4WinVer "2.8.2"
+#define Git4WinVer "2.8.4"
 #define Git4WinVerLong = "v" + str(Git4WinVer) + ".windows.1"
 #define Git4WinName "Git for Windows " + str(Git4WinVer)
 #define Git4WinFile "Git-" + str(Git4WinVer) + "-64-bit.exe"
@@ -88,6 +88,7 @@ Source: "{#deployDir}\Microsoft.Alm.Authentication.dll"; DestDir: "{app}"; Flags
 Source: "{#deployDir}\Microsoft.Alm.Git.dll"; DestDir: "{app}"; Flags: ignoreversion
 Source: "{#deployDir}\Microsoft.IdentityModel.Clients.ActiveDirectory.dll"; DestDir: "{app}"; Flags: ignoreversion
 Source: "{#deployDir}\Microsoft.IdentityModel.Clients.ActiveDirectory.WindowsForms.dll"; DestDir: "{app}"; Flags: ignoreversion
+Source: "{#deployDir}\GitHub.Authentication.exe"; DestDir: "{app}"; Flags: ignoreversion
 Source: "{#deployDir}\README.md"; DestDir: "{app}"; Flags: ignoreversion
 
 [Code]
