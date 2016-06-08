@@ -23,7 +23,7 @@
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
-    <PlatformTarget>x86</PlatformTarget>
+    <PlatformTarget>AnyCPU</PlatformTarget>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
     <DebugType>pdbonly</DebugType>
@@ -110,7 +110,6 @@
     <None Include="packages.config" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
-
   <!-- Produce a nuget package of this assembly -->
   <Import Project="..\packages\MSBuildTasks.*\tools\MSBuild.Community.Tasks.Targets" />
   <Target Name="AfterBuild" Condition=" '$(Configuration)' == 'Package'">
@@ -121,10 +120,7 @@
     <PropertyGroup Condition="!Exists($(NugetPath))">
       <NugetPath>$(IntermediateOutputPath)nuget.exe</NugetPath>
     </PropertyGroup>
-    <WebDownload
-        Condition="!Exists($(NugetPath))"
-        Filename="$(NugetPath)"
-        FileUri="https://dist.nuget.org/win-x86-commandline/latest/nuget.exe" />
+    <WebDownload Condition="!Exists($(NugetPath))" Filename="$(NugetPath)" FileUri="https://dist.nuget.org/win-x86-commandline/latest/nuget.exe" />
     <Exec Command="$(NugetPath) pack $(AssemblyName).csproj -Symbols -IncludeReferencedProjects -Prop Configuration=Package -OutputDirectory $(OutputPath)" />
   </Target>
 </Project>
