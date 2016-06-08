@@ -59,7 +59,10 @@ namespace Microsoft.Alm.Authentication
                         if (!NativeMethods.CredDelete(credential.TargetName, credential.Type, 0))
                         {
                             int error = Marshal.GetLastWin32Error();
-                            Debug.Fail("Failed with error code " + error.ToString("X"));
+                            if (error != NativeMethods.Win32Error.FileNotFound)
+                            {
+                                Debug.Fail("Failed with error code " + error.ToString("X"));
+                            }
                         }
 
                     }
@@ -70,7 +73,10 @@ namespace Microsoft.Alm.Authentication
             else
             {
                 int error = Marshal.GetLastWin32Error();
-                Debug.Fail("Failed with error code " + error.ToString("X"));
+                if (error != NativeMethods.Win32Error.FileNotFound)
+                {
+                    Debug.Fail("Failed with error code " + error.ToString("X"));
+                }
             }
         }
 
