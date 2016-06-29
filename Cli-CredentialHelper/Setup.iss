@@ -93,14 +93,14 @@ Source: "{#deployDir}\README.md"; DestDir: "{app}"; Flags: ignoreversion
 
 [Code]
 type NetFx_Version = (
-     NetFx_v30,  // .NET Framework 3.0
-     NetFx_v35,  // .NET Framework 3.5
-     NetFx_v40,  // .NET Framework 4.0
-     NetFx_v45,  // .NET Framework 4.5
-     NetFx_v451, // .NET Framework 4.5.1
-     NetFx_v452, // .NET Framework 4.5.2
-     NetFx_v46,  // .NET Framework 4.6
-     NetFx_v461  // .NET Framework 4.6.1
+   NetFx_v30,  // .NET Framework 3.0
+   NetFx_v35,  // .NET Framework 3.5
+   NetFx_v40,  // .NET Framework 4.0
+   NetFx_v45,  // .NET Framework 4.5
+   NetFx_v451, // .NET Framework 4.5.1
+   NetFx_v452, // .NET Framework 4.5.2
+   NetFx_v46,  // .NET Framework 4.6
+   NetFx_v461  // .NET Framework 4.6.1
 );
 
 function DetectGit(): Boolean;
@@ -108,17 +108,17 @@ var
   bSuccess: Boolean;
   strValue: String;
 begin
-    Result := True;
+  Result := True;
 
-    bSuccess := RegQueryStringValue(HKLM, 'SOFTWARE\Microsoft\Windows\CurrentVersion\Uninstall\Git_is1', 'InstallLocation', strValue)
-             or RegQueryStringValue(HKLM, 'SOFTWARE\Wow6432Node\Microsoft\Windows\CurrentVersion\Uninstall\Git_is1', 'InstallLocation', strValue)
-             or RegQueryStringValue(HKCU, 'SOFTWARE\Microsoft\Windows\CurrentVersion\Uninstall\Git_is1', 'InstallLocation', strValue)
-             or RegQueryStringValue(HKCU, 'SOFTWARE\Wow6432Node\Microsoft\Windows\CurrentVersion\Uninstall\Git_is1', 'InstallLocation', strValue);
+  bSuccess := RegQueryStringValue(HKLM, 'SOFTWARE\Microsoft\Windows\CurrentVersion\Uninstall\Git_is1', 'InstallLocation', strValue)
+           or RegQueryStringValue(HKLM, 'SOFTWARE\Wow6432Node\Microsoft\Windows\CurrentVersion\Uninstall\Git_is1', 'InstallLocation', strValue)
+           or RegQueryStringValue(HKCU, 'SOFTWARE\Microsoft\Windows\CurrentVersion\Uninstall\Git_is1', 'InstallLocation', strValue)
+           or RegQueryStringValue(HKCU, 'SOFTWARE\Wow6432Node\Microsoft\Windows\CurrentVersion\Uninstall\Git_is1', 'InstallLocation', strValue);
 
-    if not bSuccess then
-      begin
-        Result := False;
-      end;
+  if not bSuccess then
+    begin
+      Result := False;
+    end;
 end;
 
 function DetectGitChecked(): Boolean;
@@ -151,9 +151,9 @@ begin
            or RegQueryDWordValue(HKLM, 'SOFTWARE\Microsoft\NET Framework Setup\NDP\v4.0\Client', 'Install', regVersion);
 
   if (NetFx_v40 = version) and bSuccess then
-      begin
-        Result := True;
-      end;
+    begin
+      Result := True;
+    end;
 
   bSuccess := RegQueryDWordValue(HKLM, 'SOFTWARE\Microsoft\NET Framework Setup\NDP\v4\Full', 'Release', regVersion)
            or RegQueryDWordValue(HKLM, 'SOFTWARE\Microsoft\NET Framework Setup\NDP\v4\Client', 'Release', regVersion);
