@@ -1,6 +1,6 @@
 # Git Credential Manager for Windows [![Build status](https://ci.appveyor.com/api/projects/status/jl6oe1thiwv5s52o/branch/master?svg=true)](https://ci.appveyor.com/project/whoisj/git-credential-manager-for-windows/branch/master)
 
-The [Git Credential Manager for Windows](https://github.com/Microsoft/Git-Credential-Manager-for-Windows) (GCM) provides secure Git credential storage for Windows. It's the successor to the [Windows Credential Store for Git](https://gitcredentialstore.codeplex.com/) (git-credential-winstore), which is no longer maintained. Compared to Git's built-in credential storage for Windows ([wincred](https://git-scm.com/book/en/v2/Git-Tools-Credential-Storage)), which provides single-factor authentication support working on any HTTP enabled Git repository, GCM provides multi-factor authentication support for [Visual Studio Team Services](http://www.visualstudio.com/), [Team Foundation Server](#q-i-thought-microsoft-was-maintaining-this-why-does-the-gcm-not-work-as-expected-with-tfs), and GitHub.
+The [Git Credential Manager for Windows](https://github.com/Microsoft/Git-Credential-Manager-for-Windows) (GCM) provides secure Git credential storage for Windows. It's the successor to the [Windows Credential Store for Git](https://gitcredentialstore.codeplex.com/) (git-credential-winstore), which is no longer maintained. Compared to Git's built-in credential storage for Windows ([wincred](https://git-scm.com/book/en/v2/Git-Tools-Credential-Storage)), which provides single-factor authentication support working on any HTTP enabled Git repository, GCM provides multi-factor authentication support for [Visual Studio Team Services](https://www.visualstudio.com/), [Team Foundation Server](#q-i-thought-microsoft-was-maintaining-this-why-does-the-gcm-not-work-as-expected-with-tfs), and GitHub.
 
 This project includes:
 
@@ -22,7 +22,7 @@ When prompted to select your terminal emulator for Git Bash you should choose th
 
 ## How to use
 
-You don't. It [magically](https://github.com/Microsoft/Git-Credential-Manager-for-Windows/issues/31) works when credentials are needed. For example, when pushing to [Visual Studio Team Services](http://www.visualstudio.com), it automatically opens a window and initializes an oauth2 flow to get your token.
+You don't. It [magically](https://github.com/Microsoft/Git-Credential-Manager-for-Windows/issues/31) works when credentials are needed. For example, when pushing to [Visual Studio Team Services](https://www.visualstudio.com), it automatically opens a window and initializes an oauth2 flow to get your token.
 
 ### Manual Installation
 
@@ -62,7 +62,7 @@ The Git Credential Manager does not work on Windows XP, Max OS, or Linux because
 
 ### Q: Will there ever be support for Windows XP, Mac OS, or Linux?
 
-We can safely say that we have no interest in supporting Windows XP. Even [Microsoft has ended support for Windows XP](http://windows.microsoft.com/en-us/windows/end-support-help). Support for Mac OS and Linux are handled by [Microsoft Git Credential Manager for Mac and Linux](https://github.com/Microsoft/Git-Credential-Manager-for-Mac-and-Linux).
+We can safely say that we have no interest in supporting Windows XP. Even [Microsoft has ended support for Windows XP](https://windows.microsoft.com/en-us/windows/end-support-help). Support for Mac OS and Linux are handled by [Microsoft Git Credential Manager for Mac and Linux](https://github.com/Microsoft/Git-Credential-Manager-for-Mac-and-Linux).
 
 ### Q: Why is my distribution/version of Git not supported? Why is Git for Windows favored?
 
