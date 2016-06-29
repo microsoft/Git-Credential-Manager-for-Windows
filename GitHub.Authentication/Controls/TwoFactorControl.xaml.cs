@@ -1,5 +1,4 @@
 ﻿using System;
-using GitHub.Authentication.Controls;
 
 namespace GitHub.UI
 {

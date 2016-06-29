@@ -45,7 +45,7 @@ namespace GitHub.Authentication
             return authenticationCodeValid;
         }
 
-        static bool ShowViewModel(DialogViewModel viewModel, Func<AuthenticationDialogWindow> windowCreator)
+        private static bool ShowViewModel(DialogViewModel viewModel, Func<AuthenticationDialogWindow> windowCreator)
         {
             StartSTATask(() =>
             {
@@ -60,7 +60,7 @@ namespace GitHub.Authentication
                 && viewModel.IsValid;
         }
 
-        static Task StartSTATask(Action action)
+        private static Task StartSTATask(Action action)
         {
             var completionSource = new TaskCompletionSource<object>();
             var thread = new Thread(() =>
@@ -80,7 +80,7 @@ namespace GitHub.Authentication
             return completionSource.Task;
         }
 
-        static void EnsureApplicationResources()
+        private static void EnsureApplicationResources()
         {
             if (!UriParser.IsKnownScheme("pack"))
             {
@@ -89,10 +89,10 @@ namespace GitHub.Authentication
 
             var appResourcesUri = new Uri("pack://application:,,,/GitHub.Authentication;component/AppResources.xaml", UriKind.RelativeOrAbsolute);
 
-            // If we launch two dialogs in the same process (Credential followed by 2fa), calling new App() 
+            // If we launch two dialogs in the same process (Credential followed by 2fa), calling new App()
             // throws an exception stating the Application class  can't be created twice. Creating an App
             // instance happens to set Application.Current to that instance (it's weird). However, if you
-            // don't set the ShutdownMode to OnExplicitShutdown, the second time you launch a dialog, 
+            // don't set the ShutdownMode to OnExplicitShutdown, the second time you launch a dialog,
             // Application.Current is null even in the same process.
             if (Application.Current == null)
             {

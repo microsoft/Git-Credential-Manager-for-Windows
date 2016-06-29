@@ -23,7 +23,7 @@ namespace GitHub.UI
             };
         }
 
-        void HandleDialogResult(object sender, PropertyChangedEventArgs e)
+        private void HandleDialogResult(object sender, PropertyChangedEventArgs e)
         {
             var viewModel = sender as DialogViewModel;
             if (viewModel == null) return;

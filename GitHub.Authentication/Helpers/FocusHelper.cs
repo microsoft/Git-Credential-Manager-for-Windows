@@ -34,7 +34,7 @@ namespace GitHub.Extensions
             return TryFocusImpl(element, e => e.Focus());
         }
 
-        static async Task<bool> TryFocusImpl(FrameworkElement element, Func<FrameworkElement, bool> focusAction)
+        private static async Task<bool> TryFocusImpl(FrameworkElement element, Func<FrameworkElement, bool> focusAction)
         {
             if (DesignerProperties.GetIsInDesignMode(new DependencyObject()))
             {
@@ -51,12 +51,12 @@ namespace GitHub.Extensions
             return false;
         }
 
-        static Task<FrameworkElement> WaitForElementLoaded(FrameworkElement element)
+        private static Task<FrameworkElement> WaitForElementLoaded(FrameworkElement element)
         {
             if (element.IsLoaded) return Task.FromResult(element);
             var taskCompletionSource = new TaskCompletionSource<FrameworkElement>();
             element.Loaded += (s, e) => taskCompletionSource.SetResult(element);
-            return taskCompletionSource.Task; 
+            return taskCompletionSource.Task;
         }
     }
 }

@@ -1,9 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using GitHub.UI;
+﻿using GitHub.UI;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 namespace GitHub.Authentication.Test.Controls

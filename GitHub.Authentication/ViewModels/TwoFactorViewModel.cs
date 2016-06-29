@@ -35,7 +35,7 @@ namespace GitHub.Authentication.ViewModels
             };
         }
 
-        string _authenticationCode;
+        private string _authenticationCode;
         /// <summary>
         /// The Two-factor authentication code the user types in.
         /// </summary>

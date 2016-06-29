@@ -65,7 +65,7 @@ namespace GitHub.Authentication.Test.Validation
             Assert.IsTrue(validationMessage.ShowError);
         }
 
-        void BindControlToViewModel(ViewModel viewModel, string viewModelProperty, FrameworkElement control, DependencyProperty controlProperty)
+        private void BindControlToViewModel(ViewModel viewModel, string viewModelProperty, FrameworkElement control, DependencyProperty controlProperty)
         {
             var binding = new Binding
             {

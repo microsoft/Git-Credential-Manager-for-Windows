@@ -2,7 +2,7 @@
 {
     public class DialogViewModel : ViewModel
     {
-        AuthenticationDialogResult _result = AuthenticationDialogResult.None;
+        private AuthenticationDialogResult _result = AuthenticationDialogResult.None;
         public AuthenticationDialogResult Result
         {
             get { return _result; }
@@ -13,7 +13,7 @@
             }
         }
 
-        bool _isValid;
+        private bool _isValid;
         public bool IsValid
         {
             get { return _isValid; }

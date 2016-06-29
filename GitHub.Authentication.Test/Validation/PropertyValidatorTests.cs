@@ -1,5 +1,4 @@
 ﻿using System.Collections.Generic;
-using System.Diagnostics;
 using GitHub.Authentication.ViewModels.Validation;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
@@ -84,7 +83,7 @@ namespace GitHub.Authentication.Test.Validation
             PropertyValidationResult validationResult = null;
             validator.PropertyChanged += (s, e) =>
             {
-                if(e.PropertyName == nameof(validator.ValidationResult))
+                if (e.PropertyName == nameof(validator.ValidationResult))
                     validationResult = validator.ValidationResult;
             };
             Assert.IsNull(validationResult); // Precondition

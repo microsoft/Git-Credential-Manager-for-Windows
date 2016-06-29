@@ -75,24 +75,24 @@ namespace Microsoft.Alm.Authentication
         internal static extern void CredFree(IntPtr credential);
 
         /// <summary>
-        /// Enumerates the credentials from the user's credential set. The credential set used 
-        /// is the one associated with the logon session of the current token. The token must 
+        /// Enumerates the credentials from the user's credential set. The credential set used
+        /// is the one associated with the logon session of the current token. The token must
         /// not have the user's SID disabled.
         /// </summary>
         /// <param name="targetNameFilter">
-        /// <para>Pointer to a null-terminated string that contains the filter for the returned 
-        /// credentials. Only credentials with a TargetName matching the filter will be returned. 
-        /// The filter specifies a name prefix followed by an asterisk. For instance, the filter 
-        /// "FRED*" will return all credentials with a TargetName beginning with the string 
+        /// <para>Pointer to a null-terminated string that contains the filter for the returned
+        /// credentials. Only credentials with a TargetName matching the filter will be returned.
+        /// The filter specifies a name prefix followed by an asterisk. For instance, the filter
+        /// "FRED*" will return all credentials with a TargetName beginning with the string
         /// "FRED".</para>
         /// <para>If <see langword="null"/> is specified, all credentials will be returned.</para>
         /// </param>
-        /// <param name="flags">The value of this parameter can be zero or more values combined 
+        /// <param name="flags">The value of this parameter can be zero or more values combined
         /// with a bitwise-OR operation.</param>
         /// <param name="count">Count of the credentials returned in the <paramref name="credenitalsArrayPtr"/>.</param>
         /// <param name="credenitalsArrayPtr">
-        /// <para>Pointer to an array of pointers to credentials. The returned credential is a 
-        /// single allocated block. Any pointers contained within the buffer are pointers to 
+        /// <para>Pointer to an array of pointers to credentials. The returned credential is a
+        /// single allocated block. Any pointers contained within the buffer are pointers to
         /// locations within this single allocated block.</para>
         /// <para>The single returned buffer must be freed by calling <see cref="CredFree"/>.</para>
         /// </param>

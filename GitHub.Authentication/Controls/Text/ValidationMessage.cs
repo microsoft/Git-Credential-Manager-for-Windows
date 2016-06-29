@@ -9,7 +9,7 @@ namespace GitHub.UI
 {
     public class ValidationMessage : UserControl
     {
-        const double defaultTextChangeThrottle = 0.2;
+        private const double defaultTextChangeThrottle = 0.2;
 
         protected override void OnPropertyChanged(DependencyPropertyChangedEventArgs e)
         {
@@ -92,7 +92,7 @@ namespace GitHub.UI
             set { SetValue(ErrorAdornerTemplateProperty, value); }
         }
 
-        bool IsAdornerEnabled()
+        private bool IsAdornerEnabled()
         {
             return !string.IsNullOrEmpty(ErrorAdornerTemplate)
                 && !ErrorAdornerTemplate.Equals("None", StringComparison.OrdinalIgnoreCase);

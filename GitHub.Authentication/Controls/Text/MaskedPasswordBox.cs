@@ -19,10 +19,10 @@ namespace GitHub.UI
     public class MaskedPasswordBox : PromptTextBox
     {
         // Fake char to display in Visual Tree
-        const char pwdChar = '●';
+        private const char pwdChar = '●';
 
         // flag used to bypass OnTextChanged
-        bool dirtyBaseText;
+        private bool dirtyBaseText;
 
         /// <summary>
         ///   Only copy of real password
@@ -30,7 +30,7 @@ namespace GitHub.UI
         /// <remarks>
         ///   For more security use System.Security.SecureString type instead
         /// </remarks>
-        string password = string.Empty;
+        private string password = string.Empty;
 
         /// <summary>
         ///   Provide access to base.Text without call OnTextChanged

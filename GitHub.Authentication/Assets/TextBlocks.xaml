@@ -47,7 +47,7 @@
             </Setter.Value>
         </Setter>
     </Style>
-    
+
     <Style TargetType="{x:Type TextBox}" BasedOn="{StaticResource GitHubTextBox}" />
 
     <!-- RoundedPromptTextBox -->
@@ -212,7 +212,7 @@
     </Style>
     <Style TargetType="{x:Type ToolTip}" BasedOn="{StaticResource GitHubToolTip}" />
     <!-- End ToolTip -->
- 
+
     <LinearGradientBrush x:Key="TextBoxBorder" EndPoint="0,20" MappingMode="Absolute" StartPoint="0,0">
         <GradientStop Color="#ABADB3" Offset="0.05" />
         <GradientStop Color="#E2E3EA" Offset="0.07" />

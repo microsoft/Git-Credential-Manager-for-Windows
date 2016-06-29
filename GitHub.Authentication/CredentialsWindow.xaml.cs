@@ -17,5 +17,5 @@ namespace GitHub.Authentication
         {
             get { return DataContext as CredentialsViewModel; }
         }
-   }
+    }
 }

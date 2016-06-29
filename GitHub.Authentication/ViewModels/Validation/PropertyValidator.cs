@@ -23,7 +23,7 @@ namespace GitHub.Authentication.ViewModels.Validation
             return new PropertyValidator<TObject, TProperty>(source, property);
         }
 
-        PropertyValidationResult _validationResult = PropertyValidationResult.Unvalidated;
+        private PropertyValidationResult _validationResult = PropertyValidationResult.Unvalidated;
         /// <summary>
         /// The current validation result for this validator.
         /// </summary>
@@ -47,7 +47,7 @@ namespace GitHub.Authentication.ViewModels.Validation
         protected PropertyValidator() { }
 
         protected PropertyValidator(PropertyValidator<TProperty> previousValidator)
-            : this(previousValidator, _ => PropertyValidationResult.Unvalidated) {}
+            : this(previousValidator, _ => PropertyValidationResult.Unvalidated) { }
 
         internal PropertyValidator(PropertyValidator<TProperty> previousValidator, Func<TProperty, PropertyValidationResult> validation)
         {
@@ -72,7 +72,7 @@ namespace GitHub.Authentication.ViewModels.Validation
             };
         }
 
-        TProperty _currentValue;
+        private TProperty _currentValue;
         protected TProperty CurrentPropertyValue
         {
             get { return _currentValue; }
@@ -90,7 +90,7 @@ namespace GitHub.Authentication.ViewModels.Validation
     }
 
     /// <summary>
-    /// This validator watches the target property for changes and then 
+    /// This validator watches the target property for changes and then
     /// propagates that change up the chain.
     /// </summary>
     /// <typeparam name="TObject"></typeparam>
@@ -116,7 +116,7 @@ namespace GitHub.Authentication.ViewModels.Validation
             };
         }
 
-        static PropertyInfo GetPropertyInfo(Expression<Func<TObject, TProperty>> propertyExpression)
+        private static PropertyInfo GetPropertyInfo(Expression<Func<TObject, TProperty>> propertyExpression)
         {
             var member = propertyExpression.Body as MemberExpression;
             Debug.Assert(member != null, "Property expression doesn't refer to a member.");

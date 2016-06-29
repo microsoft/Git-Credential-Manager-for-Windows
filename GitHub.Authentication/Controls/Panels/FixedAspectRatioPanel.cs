@@ -40,16 +40,19 @@ namespace GitHub.UI
             set { SetValue(Control.VerticalContentAlignmentProperty, value); }
         }
 
-        static Size GetMaxSize(Size availableSize, double constraintAspectRatio)
+        private static Size GetMaxSize(Size availableSize, double constraintAspectRatio)
         {
             double h = availableSize.Height;
             double w = availableSize.Width;
 
             var availableAspectRatio = w / h;
 
-            if(constraintAspectRatio >= availableAspectRatio) {
+            if (constraintAspectRatio >= availableAspectRatio)
+            {
                 h = w / constraintAspectRatio;
-            } else {
+            }
+            else
+            {
                 w = h * constraintAspectRatio;
             }
 
@@ -88,7 +91,7 @@ namespace GitHub.UI
             return finalSize;
         }
 
-        static Point GetPosition(Size outer, Size inner, HorizontalAlignment horizontalAlignment, VerticalAlignment verticalAlignment)
+        private static Point GetPosition(Size outer, Size inner, HorizontalAlignment horizontalAlignment, VerticalAlignment verticalAlignment)
         {
             double x = 0;
             double y = 0;

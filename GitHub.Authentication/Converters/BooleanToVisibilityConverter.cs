@@ -7,7 +7,7 @@ namespace GitHub.UI
     [Localizability(LocalizationCategory.NeverLocalize)]
     public sealed class BooleanToVisibilityConverter : ValueConverterMarkupExtension<BooleanToVisibilityConverter>
     {
-        readonly System.Windows.Controls.BooleanToVisibilityConverter converter = new System.Windows.Controls.BooleanToVisibilityConverter();
+        private readonly System.Windows.Controls.BooleanToVisibilityConverter converter = new System.Windows.Controls.BooleanToVisibilityConverter();
 
         public override object Convert(
             object value,

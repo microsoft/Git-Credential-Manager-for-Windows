@@ -31,7 +31,7 @@ namespace GitHub.Helpers
             d.SetValue(IsEnabledProperty, value);
         }
 
-        static void OnIsEnabledChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
+        private static void OnIsEnabledChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
         {
             if (d == null)
                 return;
@@ -53,7 +53,7 @@ namespace GitHub.Helpers
         /// The problem is that all access key presses are scoped to the active window,
         /// regardless of what properties, handlers, scope etc. you may have set. Targets
         /// are objects that have potential to be the target of the access keys in effect.
-        /// 
+        ///
         /// If you happen to have a current object focused and you press the access keys
         /// of one of it's child's targets it will execute the child target. But, if you
         /// also have a ancestor target, the ancestor target will be executed instead.
@@ -78,13 +78,13 @@ namespace GitHub.Helpers
         /// skipped and the next target's handler will be called.
         /// If we detect the target is correct, we'll just leave everything alone so the
         /// target will be confirmed.
-        /// 
+        ///
         /// NOTE: Do not call AccessKeyManager.IsKeyRegistered as it will cause a
         /// <see cref="T:System.StackOverflowException"/> to be thrown. The key is
         /// registered otherwise this handler wouldn't be called for it, therefore
         /// there is no need to call it.
         /// </remarks>
-        static void HandleAccessKeyPressed(object sender, AccessKeyPressedEventArgs e)
+        private static void HandleAccessKeyPressed(object sender, AccessKeyPressedEventArgs e)
         {
             var focusedElement = Keyboard.FocusedElement as FrameworkElement;
             if (focusedElement == null)
