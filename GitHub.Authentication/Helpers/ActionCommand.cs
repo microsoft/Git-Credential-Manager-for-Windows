@@ -8,10 +8,10 @@ namespace GitHub.Authentication.Helpers
     /// </summary>
     public class ActionCommand : ICommand
     {
-        Action<object> _commandAction;
+        private Action<object> _commandAction;
 
         public ActionCommand(Action commandAction) : this(_ => commandAction())
-        {}
+        { }
 
         public ActionCommand(Action<object> commandAction)
         {
@@ -20,7 +20,7 @@ namespace GitHub.Authentication.Helpers
 
         public event EventHandler CanExecuteChanged;
 
-        bool _isEnabled = true;
+        private bool _isEnabled = true;
         public bool IsEnabled
         {
             get { return _isEnabled; }

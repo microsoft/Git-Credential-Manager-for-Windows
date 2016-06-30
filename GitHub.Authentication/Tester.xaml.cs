@@ -1,5 +1,4 @@
 ﻿using System.Windows;
-using GitHub.Authentication.ViewModels;
 
 namespace GitHub.Authentication
 {

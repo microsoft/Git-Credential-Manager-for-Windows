@@ -1,7 +1,7 @@
-﻿<ui:DialogUserControl x:Class="GitHub.UI.TwoFactorControl" 
-    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation" 
+﻿<ui:DialogUserControl x:Class="GitHub.UI.TwoFactorControl"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:ui="clr-namespace:GitHub.UI"
     xmlns:prop="clr-namespace:GitHub.Authentication.Properties"
@@ -16,9 +16,9 @@
         helpers:AccessKeysManagerScoping.IsEnabled="True">
         <ui:OcticonImage Icon="logo_github" Style="{StaticResource GitHubLogo}" />
         <WrapPanel Orientation="Vertical" HorizontalAlignment="Center" Margin="0,0,0,12">
-            <TextBlock 
-                Text="{x:Static prop:Resources.TwoFactorAuthText}" 
-                Padding="0" 
+            <TextBlock
+                Text="{x:Static prop:Resources.TwoFactorAuthText}"
+                Padding="0"
                 Margin="0,0,12,0"
                 Style="{DynamicResource GitHubH1TextBlock}"
                 Foreground="{DynamicResource GitHubTextBrush}" />
@@ -36,8 +36,8 @@
                  Text="{Binding Description, Mode=OneWay}"/>
             <Hyperlink
                 Command="{Binding LearnMoreCommand}"
-                CommandParameter="{Binding 
-                    RelativeSource={RelativeSource Self}, 
+                CommandParameter="{Binding
+                    RelativeSource={RelativeSource Self},
                     Path=ToolTip}"
                 ToolTip="https://help.github.com/articles/about-two-factor-authentication/">
                 <TextBlock Text="{x:Static prop:Resources.LearnMoreLink}"/>
@@ -52,13 +52,13 @@
             HorizontalAlignment="Center"
             Margin="0,38,0,60">
             <ui:OcticonCircleButton
-                TabIndex="2" 
+                TabIndex="2"
                 Icon="check"
                 IsDefault="True"
                 Command="{Binding OkCommand}"
                 IsEnabled="{Binding IsValid, Mode=OneWay}"
                 Content="{x:Static prop:Resources.VerifyText}" />
-            <ui:OcticonCircleButton 
+            <ui:OcticonCircleButton
                 TabIndex="3"
                 FontSize="12"
                 Icon="x"

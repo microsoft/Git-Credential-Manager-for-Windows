@@ -19,7 +19,7 @@ namespace GitHub.UI
     /// </summary>
     public class OcticonPath : Shape
     {
-        readonly static Lazy<Dictionary<Octicon, Lazy<Geometry>>> cache =
+        private static readonly Lazy<Dictionary<Octicon, Lazy<Geometry>>> cache =
             new Lazy<Dictionary<Octicon, Lazy<Geometry>>>(PrepareCache);
 
         public static readonly DependencyProperty IconProperty = DependencyProperty.Register(
@@ -55,14 +55,14 @@ namespace GitHub.UI
         }
 
         // Initializes the cache dictionary with lazy entries for all available octicons
-        static Dictionary<Octicon, Lazy<Geometry>> PrepareCache()
+        private static Dictionary<Octicon, Lazy<Geometry>> PrepareCache()
         {
             return Enum.GetValues(typeof(Octicon))
                 .Cast<Octicon>()
                 .ToDictionary(icon => icon, icon => new Lazy<Geometry>(() => LoadGeometry(icon), LazyThreadSafetyMode.None));
         }
 
-        static Geometry LoadGeometry(Octicon icon)
+        private static Geometry LoadGeometry(Octicon icon)
         {
             var name = Enum.GetName(typeof(Octicon), icon);
 

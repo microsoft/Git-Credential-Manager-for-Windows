@@ -20,7 +20,7 @@
         /// <summary>
         /// Describes if we should show this error in the UI
         /// We only show errors which have been marked specifically as Invalid
-        /// and we do not show errors for inputs which have not yet been validated. 
+        /// and we do not show errors for inputs which have not yet been validated.
         /// </summary>
         public bool DisplayValidationError { get; }
 

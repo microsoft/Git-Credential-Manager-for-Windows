@@ -22,9 +22,9 @@ namespace GitHub.UI
             nameof(PressedBackground), typeof(Brush), typeof(OcticonCircleButton));
 
         public static readonly DependencyProperty IconSizeProperty = DependencyProperty.Register(
-            nameof(IconSize), typeof(double), typeof(OcticonCircleButton), new FrameworkPropertyMetadata(16d, 
-                FrameworkPropertyMetadataOptions.AffectsArrange | 
-                FrameworkPropertyMetadataOptions.AffectsMeasure | 
+            nameof(IconSize), typeof(double), typeof(OcticonCircleButton), new FrameworkPropertyMetadata(16d,
+                FrameworkPropertyMetadataOptions.AffectsArrange |
+                FrameworkPropertyMetadataOptions.AffectsMeasure |
                 FrameworkPropertyMetadataOptions.AffectsRender));
 
         public static readonly DependencyProperty IconProperty = DependencyProperty.Register(
@@ -90,7 +90,7 @@ namespace GitHub.UI
             Path.DataProperty.AddOwner(typeof(OcticonCircleButton));
         }
 
-        static void OnIconChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
+        private static void OnIconChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
         {
             d.SetValue(Path.DataProperty, OcticonPath.GetGeometryForIcon((Octicon)e.NewValue));
         }

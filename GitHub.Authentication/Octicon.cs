@@ -1,6 +1,4 @@
-﻿using System;
-
-namespace GitHub.UI
+﻿namespace GitHub.UI
 {
     public enum Octicon
     {
@@ -169,6 +167,6 @@ namespace GitHub.UI
         versions,
         watch,
         x,
-        zap,
+        zap
     }
 }

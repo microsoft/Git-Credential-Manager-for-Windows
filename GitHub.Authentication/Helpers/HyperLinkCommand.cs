@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Diagnostics;
-using System.Windows.Input;
 
 namespace GitHub.Authentication.Helpers
 {
@@ -14,7 +13,7 @@ namespace GitHub.Authentication.Helpers
         {
         }
 
-        static void ExecuteNavigateUrl(object parameter)
+        private static void ExecuteNavigateUrl(object parameter)
         {
             var commandParameter = parameter as string;
             if (string.IsNullOrWhiteSpace(commandParameter)) return;

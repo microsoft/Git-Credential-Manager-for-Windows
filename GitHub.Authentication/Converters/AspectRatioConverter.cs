@@ -19,7 +19,7 @@ namespace GitHub.UI
                     double d1, d2;
                     var ci = CultureInfo.InvariantCulture;
 
-                    if (double.TryParse(split[0], NumberStyles.Float, ci, out d1) 
+                    if (double.TryParse(split[0], NumberStyles.Float, ci, out d1)
                         && double.TryParse(split[1], NumberStyles.Float, ci, out d2))
                     {
                         return d1 / d2;

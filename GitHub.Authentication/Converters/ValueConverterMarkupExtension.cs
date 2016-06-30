@@ -7,19 +7,19 @@ using System.Windows.Markup;
 namespace GitHub.UI
 {
     /// <summary>
-    /// Serves as a base class for value converters (IValueConverter) which are also markup 
+    /// Serves as a base class for value converters (IValueConverter) which are also markup
     /// extensions (MarkupExtension).
     /// </summary>
     /// <remarks>
-    /// I was curious why our value converters are all markup extensions and then I found this 
+    /// I was curious why our value converters are all markup extensions and then I found this
     /// blog post:  http://drwpf.com/blog/2009/03/17/tips-and-tricks-making-value-converters-more-accessible-in-markup/
-    /// Very clever! One of the comments suggested a base class, so I went and wrote my own without 
+    /// Very clever! One of the comments suggested a base class, so I went and wrote my own without
     /// looking at theirs because I know mine will be better. ;)
     /// </remarks>
     /// <typeparam name="T"></typeparam>
     public abstract class ValueConverterMarkupExtension<T> : MarkupExtension, IValueConverter where T : class, IValueConverter, new()
     {
-        static T converter;
+        private static T converter;
 
         public override object ProvideValue(IServiceProvider serviceProvider)
         {

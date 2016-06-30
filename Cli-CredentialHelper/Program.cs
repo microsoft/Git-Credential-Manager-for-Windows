@@ -6,7 +6,6 @@ using System.IO;
 using System.Linq;
 using System.Runtime.InteropServices;
 using System.Text;
-using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Alm.Authentication;
 using Microsoft.Alm.Git;
@@ -41,7 +40,6 @@ namespace Microsoft.Alm.CredentialHelper
         internal const string ConfigUseModalPromptKey = "modalPrompt";
         internal const string ConfigValidateKey = "validate";
         internal const string ConfigWritelogKey = "writelog";
-
 
         private const string ConfigPrefix = "credential";
         private const string SecretsNamespace = "git";
@@ -349,7 +347,7 @@ namespace Microsoft.Alm.CredentialHelper
 
             return;
 
-            error_parse:
+        error_parse:
             Console.Out.WriteLine("Fatal: unable to parse target uri.");
         }
 

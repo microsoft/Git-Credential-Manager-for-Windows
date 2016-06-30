@@ -1,6 +1,4 @@
-﻿using System.ComponentModel;
-using System.Windows;
-using GitHub.Authentication.ViewModels;
+﻿using GitHub.Authentication.ViewModels;
 using GitHub.UI;
 
 namespace GitHub.Authentication

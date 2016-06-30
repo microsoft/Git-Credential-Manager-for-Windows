@@ -25,7 +25,7 @@ namespace GitHub.UI
         public static readonly DependencyProperty TextProperty =
             DependencyProperty.Register(nameof(Text), typeof(string), typeof(TwoFactorInput), new PropertyMetadata(""));
 
-        TextBox[] TextBoxes;
+        private TextBox[] TextBoxes;
         public TextBox TextBox { get { return TextBoxes[0]; } }
 
         public TwoFactorInput()
@@ -42,7 +42,7 @@ namespace GitHub.UI
                 six
             };
 
-            foreach(var textBox in TextBoxes)
+            foreach (var textBox in TextBoxes)
             {
                 SetupTextBox(textBox);
             }
@@ -64,7 +64,7 @@ namespace GitHub.UI
             SetText(text);
         }
 
-        void SetText(string text)
+        private void SetText(string text)
         {
             if (String.IsNullOrEmpty(text))
             {
@@ -146,7 +146,7 @@ namespace GitHub.UI
                     textBox.SelectAll();
                 }
             };
-            
+
             textBox.TextChanged += (sender, args) =>
             {
                 SetValue(TextProperty, String.Join("", GetTwoFactorCode()));
@@ -155,17 +155,17 @@ namespace GitHub.UI
             };
         }
 
-        static bool MoveNext()
+        private static bool MoveNext()
         {
             return MoveFocus(FocusNavigationDirection.Next);
         }
 
-        static bool MovePrevious()
+        private static bool MovePrevious()
         {
             return MoveFocus(FocusNavigationDirection.Previous);
         }
 
-        static bool MoveFocus(FocusNavigationDirection navigationDirection)
+        private static bool MoveFocus(FocusNavigationDirection navigationDirection)
         {
             var traversalRequest = new TraversalRequest(navigationDirection);
             var keyboardFocus = Keyboard.FocusedElement as UIElement;

@@ -28,7 +28,7 @@ namespace GitHub.Authentication.ViewModels
             };
         }
 
-        string _login;
+        private string _login;
         /// <summary>
         /// GitHub login which is either the user name or email address.
         /// </summary>
@@ -44,7 +44,7 @@ namespace GitHub.Authentication.ViewModels
 
         public PropertyValidator<string> LoginValidator { get; }
 
-        string _password;
+        private string _password;
         /// <summary>
         /// GitHub login which is either the user name or email address.
         /// </summary>

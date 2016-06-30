@@ -30,7 +30,7 @@ namespace GitHub.Authentication.ViewModels.Validation
             }
         }
 
-        bool _isValid;
+        private bool _isValid;
         public bool IsValid
         {
             get { return _isValid; }

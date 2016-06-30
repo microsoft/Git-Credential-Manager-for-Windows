@@ -3,8 +3,6 @@ using System.Diagnostics;
 using System.Net;
 using System.Threading.Tasks;
 using Microsoft.IdentityModel.Clients.ActiveDirectory;
-using System.Text;
-using System.Runtime.InteropServices;
 
 namespace Microsoft.Alm.Authentication
 {
@@ -350,7 +348,7 @@ namespace Microsoft.Alm.Authentication
         /// <returns>A <see cref="Task"/> for the async action.</returns>
         private static Task SecurityPurgeAdaTokens(SecretStore adaStore)
         {
-            // this can and should be done asynchronously to minimize user impact 
+            // this can and should be done asynchronously to minimize user impact
             return Task.Run(() =>
             {
                 adaStore.PurgeCredentials();
