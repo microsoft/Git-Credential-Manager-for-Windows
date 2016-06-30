@@ -24,7 +24,7 @@
 #define MyAppName "Microsoft Git Credential Manager for Windows"
 #define MyAppVersion str(VerMajor) + "." + str(VerMinor) + "." + str(VerBuild)
 #define MyAppPublisher "Microsoft Corporation"
-#define MyAppPublisherURL "http://www.microsoft.com"
+#define MyAppPublisherURL "https://www.microsoft.com"
 #define MyAppURL "https://github.com/Microsoft/Git-Credential-Manager-for-Windows"
 #define MyAppExeName "git-credential-manager.exe"
 #define Git4WinVer "2.8.4"
@@ -35,7 +35,7 @@
 #define Git4WinSpace 394309632
 #define NetFxName "The Microsoft .NET Framework 4.6.1"
 #define NetFxBaseFile "NetFx40Installer.exe"
-#define NetFxBaseUrl "http://download.microsoft.com/download/1/B/E/1BE39E79-7E39-46A3-96FF-047F95396215/dotNetFx40_Full_setup.exe"
+#define NetFxBaseUrl "https://download.microsoft.com/download/1/B/E/1BE39E79-7E39-46A3-96FF-047F95396215/dotNetFx40_Full_setup.exe"
 #define NetFxCoreFile "NetFx46Installer.exe"
 #define NetFxCoreUrl "https://download.microsoft.com/download/3/5/9/35980F81-60F4-4DE3-88FC-8F962B97253B/NDP461-KB3102438-Web.exe"
 #define NetFxSpace 381005824
