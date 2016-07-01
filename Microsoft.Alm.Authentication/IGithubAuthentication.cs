@@ -2,7 +2,7 @@
 
 namespace Microsoft.Alm.Authentication
 {
-    public interface IGithubAuthentication : IAuthentication
+    public interface IGitHubAuthentication : IAuthentication
     {
         bool InteractiveLogon(TargetUri targetUri, out Credential credentials);
         Task<bool> NoninteractiveLogonWithCredentials(TargetUri targetUri, string username, string password, string authenticationCode = null);

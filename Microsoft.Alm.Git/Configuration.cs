@@ -23,7 +23,7 @@ namespace Microsoft.Alm.Git
             if (!Directory.Exists(directory))
                 throw new DirectoryNotFoundException(directory);
 
-            LoadGitConfiguation(directory);
+            LoadGitConfiguration(directory);
         }
 
         public Configuration()
@@ -106,19 +106,19 @@ namespace Microsoft.Alm.Git
             return false;
         }
 
-        public void LoadGitConfiguation(string directory)
+        public void LoadGitConfiguration(string directory)
         {
             string portableConfig = null;
             string systemConfig = null;
             string globalConfig = null;
             string localConfig = null;
 
-            Trace.WriteLine("Configuration::LoadGitConfiguation");
+            Trace.WriteLine("Configuration::LoadGitConfiguration");
 
             // read Git's four configs from lowest priority to highest, overwriting values as
             // higher priority configurations are parsed, storing them in a handy lookup table
 
-            // find and parse Git's protable config
+            // find and parse Git's portable config
             if (Where.GitPortableConfig(out portableConfig))
             {
                 ParseGitConfig(portableConfig);

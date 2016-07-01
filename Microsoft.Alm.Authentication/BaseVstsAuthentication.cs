@@ -15,26 +15,26 @@ namespace Microsoft.Alm.Authentication
         public const string DefaultClientId = "872cd9fa-d31f-45e0-9eab-6e460a02d1f1";
         public const string RedirectUrl = "urn:ietf:wg:oauth:2.0:oob";
 
-        protected const string AdalRefreshPrefx = "ada";
+        protected const string AdalRefreshPrefix = "ada";
 
         private BaseVstsAuthentication(VstsTokenScope tokenScope, ICredentialStore personalAccessTokenStore)
         {
             if (tokenScope == null)
                 throw new ArgumentNullException("scope", "The `scope` parameter is null or invalid.");
             if (personalAccessTokenStore == null)
-                throw new ArgumentNullException("personalAccessTokenStore", "The `personalAccessTokenStore` paramter is null or invalid.");
+                throw new ArgumentNullException("personalAccessTokenStore", "The `personalAccessTokenStore` parameter is null or invalid.");
 
             AdalTrace.TraceSource.Switch.Level = SourceLevels.Off;
             AdalTrace.LegacyTraceSwitch.Level = TraceLevel.Off;
 
             // attempt to purge any cached ada tokens.
-            SecurityPurgeAdaTokens(new SecretStore(AdalRefreshPrefx));
+            SecurityPurgeAdaTokens(new SecretStore(AdalRefreshPrefix));
 
             this.ClientId = DefaultClientId;
             this.Resource = DefaultResource;
             this.TokenScope = tokenScope;
             this.PersonalAccessTokenStore = personalAccessTokenStore;
-            this.AdaRefreshTokenStore = new SecretCache(AdalRefreshPrefx);
+            this.AdaRefreshTokenStore = new SecretCache(AdalRefreshPrefix);
             this.VstsAuthority = new VstsAzureAuthority();
         }
         /// <summary>
@@ -60,9 +60,9 @@ namespace Microsoft.Alm.Authentication
             IVstsAuthority vstsAuthority)
             : this(VstsTokenScope.ProfileRead, personalAccessTokenStore)
         {
-            Debug.Assert(adaRefreshTokenStore != null, "The adaRefreshTokenStore paramter is null or invalid.");
-            Debug.Assert(vstsIdeTokenCache != null, "The vstsIdeTokenCache paramter is null or invalid.");
-            Debug.Assert(vstsAuthority != null, "The vstsAuthority paramter is null or invalid.");
+            Debug.Assert(adaRefreshTokenStore != null, "The adaRefreshTokenStore parameter is null or invalid.");
+            Debug.Assert(vstsIdeTokenCache != null, "The vstsIdeTokenCache parameter is null or invalid.");
+            Debug.Assert(vstsAuthority != null, "The vstsAuthority parameter is null or invalid.");
 
             this.AdaRefreshTokenStore = adaRefreshTokenStore;
             this.VstsIdeTokenCache = vstsIdeTokenCache;

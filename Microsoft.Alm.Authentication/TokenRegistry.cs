@@ -28,7 +28,7 @@ namespace Microsoft.Alm.Authentication
         /// <param name="targetUri"></param>
         public void DeleteToken(TargetUri targetUri)
         {
-            // we've decided to not support registry delets until the rules are established
+            // we've decided to not support registry deletes until the rules are established
             throw new NotSupportedException("Deletes from the registry are not supported by this library.");
         }
         /// <summary>

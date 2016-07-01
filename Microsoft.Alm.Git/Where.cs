@@ -61,11 +61,11 @@ namespace Microsoft.Alm.Git
         }
 
         /// <summary>
-        /// Finds and returns paths to Git installtions in common locations.
+        /// Finds and returns paths to Git installations in common locations.
         /// </summary>
         /// <param name="hints">(optional) List of paths the caller believes Git can be found.</param>
         /// <param name="paths">
-        /// All discoverd paths to the root of Git installations, ordered by 'priority' with first
+        /// All discovered paths to the root of Git installations, ordered by 'priority' with first
         /// being the best installation to use when shelling out to Git.exe.
         /// </param>
         /// <returns><see langword="True"/> if Git was detected; <see langword="false"/> otherwise.</returns>

@@ -184,7 +184,7 @@ namespace Microsoft.Alm.CredentialHelper
                     {
                         Trace.Write("   Git found: " + installation.Path);
 
-                        // track known Git installtations
+                        // track known Git installations
                         installations = new List<GitInstallation>();
                         installations.Add(installation);
                     }
@@ -305,7 +305,7 @@ namespace Microsoft.Alm.CredentialHelper
                     }
                 }
 
-                // all necissary content has been deployed to the system
+                // all necessary content has been deployed to the system
                 Result = ResultValue.Success;
 
                 Console.Out.WriteLine();
@@ -389,7 +389,7 @@ namespace Microsoft.Alm.CredentialHelper
                     {
                         Trace.Write("   Git found: " + installation.Path);
 
-                        // track known Git installtations
+                        // track known Git installations
                         installations = new List<GitInstallation>();
                         installations.Add(installation);
                     }

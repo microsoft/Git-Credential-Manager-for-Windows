@@ -44,7 +44,7 @@ namespace Microsoft.Alm.CredentialHelper
         private const string ConfigPrefix = "credential";
         private const string SecretsNamespace = "git";
         private static readonly VstsTokenScope VstsCredentialScope = VstsTokenScope.CodeWrite | VstsTokenScope.PackagingRead;
-        private static readonly GithubTokenScope GithubCredentialScope = GithubTokenScope.Gist | GithubTokenScope.Repo;
+        private static readonly GitHubTokenScope GitHubCredentialScope = GitHubTokenScope.Gist | GitHubTokenScope.Repo;
         private static readonly List<string> CommandList = new List<string>
         {
             CommandApprove,
@@ -216,7 +216,7 @@ namespace Microsoft.Alm.CredentialHelper
             Console.Out.WriteLine();
             Console.Out.WriteLine("  " + CommandDelete + "       Removes stored credentials for a given URL.");
             Console.Out.WriteLine("               Any future attempts to authenticate with the remote will require");
-            Console.Out.WriteLine("               authenitcation steps to be completed again.");
+            Console.Out.WriteLine("               authentication steps to be completed again.");
             Console.Out.WriteLine();
             Console.Out.WriteLine("      `git credential-manager clear <url>`");
             Console.Out.WriteLine();
@@ -232,7 +232,7 @@ namespace Microsoft.Alm.CredentialHelper
             Console.Out.WriteLine();
             Console.Out.WriteLine("  " + ConfigInteractiveKey + "  Specifies if user can be prompted for credentials or not.");
             Console.Out.WriteLine("               Supports Auto, Always, or Never. Defaults to Auto.");
-            Console.Out.WriteLine("               Only used by AAD, MSA, and Github authority.");
+            Console.Out.WriteLine("               Only used by AAD, MSA, and GitHub authority.");
             Console.Out.WriteLine();
             Console.Out.WriteLine("      `git config --global credential.microsoft.visualstudio.com." + ConfigInteractiveKey + " never`");
             Console.Out.WriteLine();
@@ -250,7 +250,7 @@ namespace Microsoft.Alm.CredentialHelper
             Console.Out.WriteLine("      `git config --global credential.microsoft.visualstudio.com." + ConfigValidateKey + " false`");
             Console.Out.WriteLine();
             Console.Out.WriteLine("  " + ConfigPreserveCredentialsKey + "     Prevents the deletion of credentials even when they are");
-            Console.Out.WriteLine("               reported as invlaid by Git. Can lead to lockout situations once credentials");
+            Console.Out.WriteLine("               reported as invalid by Git. Can lead to lockout situations once credentials");
             Console.Out.WriteLine("               expire and until those credentials are manually removed.");
             Console.Out.WriteLine("               Defaults to FALSE.");
             Console.Out.WriteLine();
@@ -266,7 +266,7 @@ namespace Microsoft.Alm.CredentialHelper
             Console.Out.WriteLine("  " + ConfigHttpProxyKey + "     Causes the proxy value to be considered when evaluating.");
             Console.Out.WriteLine("               credential target information. A proxy setting should established if use of a");
             Console.Out.WriteLine("               proxy is required to interact with Git remotes.");
-            Console.Out.WriteLine("               The value should the url of the proxy server.");
+            Console.Out.WriteLine("               The value should the URL of the proxy server.");
             Console.Out.WriteLine();
             Console.Out.WriteLine("      `git config --global credential.github.com." + ConfigUseHttpPathKey + " https://myproxy:8080`");
             Console.Out.WriteLine();
@@ -340,7 +340,7 @@ namespace Microsoft.Alm.CredentialHelper
 
                 case AuthorityType.GitHub:
                     Trace.WriteLine("   deleting GitHub credentials");
-                    GithubAuthentication ghAuth = authentication as GithubAuthentication;
+                    GitHubAuthentication ghAuth = authentication as GitHubAuthentication;
                     ghAuth.DeleteCredentials(operationArguments.TargetUri);
                     break;
             }
@@ -348,7 +348,7 @@ namespace Microsoft.Alm.CredentialHelper
             return;
 
         error_parse:
-            Console.Out.WriteLine("Fatal: unable to parse target uri.");
+            Console.Out.WriteLine("Fatal: unable to parse target URI.");
         }
 
         private static void Erase()
@@ -370,7 +370,7 @@ namespace Microsoft.Alm.CredentialHelper
             if (operationArguments.PreserveCredentials)
             {
                 Trace.WriteLine("   " + ConfigPreserveCredentialsKey + " = true");
-                Trace.WriteLine("   cancelling erase request.");
+                Trace.WriteLine("   canceling erase request.");
                 return;
             }
 
@@ -393,7 +393,7 @@ namespace Microsoft.Alm.CredentialHelper
 
                 case AuthorityType.GitHub:
                     Trace.WriteLine("   deleting GitHub credentials");
-                    GithubAuthentication ghAuth = authentication as GithubAuthentication;
+                    GitHubAuthentication ghAuth = authentication as GitHubAuthentication;
                     ghAuth.DeleteCredentials(operationArguments.TargetUri);
                     break;
             }
@@ -452,7 +452,7 @@ namespace Microsoft.Alm.CredentialHelper
 
                     Task.Run(async () =>
                     {
-                        // attmempt to get cached creds -> refresh creds -> non-interactive logon -> interactive logon
+                        // attempt to get cached creds -> refresh creds -> non-interactive logon -> interactive logon
                         // note that AAD "credentials" are always scoped access tokens
                         if (((operationArguments.Interactivity != Interactivity.Always
                                 && aadAuth.GetCredentials(operationArguments.TargetUri, out credentials)
@@ -491,7 +491,7 @@ namespace Microsoft.Alm.CredentialHelper
 
                     Task.Run(async () =>
                     {
-                        // attmempt to get cached creds -> refresh creds -> interactive logon
+                        // attempt to get cached creds -> refresh creds -> interactive logon
                         // note that MSA "credentials" are always scoped access tokens
                         if (((operationArguments.Interactivity != Interactivity.Always
                                 && msaAuth.GetCredentials(operationArguments.TargetUri, out credentials)
@@ -521,7 +521,7 @@ namespace Microsoft.Alm.CredentialHelper
                     break;
 
                 case AuthorityType.GitHub:
-                    GithubAuthentication ghAuth = authentication as GithubAuthentication;
+                    GitHubAuthentication ghAuth = authentication as GitHubAuthentication;
 
                     Task.Run(async () =>
                     {
@@ -637,15 +637,15 @@ namespace Microsoft.Alm.CredentialHelper
                                                                 secrets,
                                                                 null,
                                                                 out authority)
-                        || GithubAuthentication.GetAuthentication(operationArguments.TargetUri,
-                                                                  GithubCredentialScope,
+                        || GitHubAuthentication.GetAuthentication(operationArguments.TargetUri,
+                                                                  GitHubCredentialScope,
                                                                   secrets,
                                                                   operationArguments.UseModalUi
-                                                                    ? new GithubAuthentication.AcquireCredentialsDelegate(GitHub.Authentication.AuthenticationPrompts.CredentialModalPrompt)
-                                                                    : new GithubAuthentication.AcquireCredentialsDelegate(GithubCredentialPrompt),
+                                                                    ? new GitHubAuthentication.AcquireCredentialsDelegate(GitHub.Authentication.AuthenticationPrompts.CredentialModalPrompt)
+                                                                    : new GitHubAuthentication.AcquireCredentialsDelegate(GitHubCredentialPrompt),
                                                                   operationArguments.UseModalUi
-                                                                    ? new GithubAuthentication.AcquireAuthenticationCodeDelegate(GitHub.Authentication.AuthenticationPrompts.AuthenticationCodeModalPrompt)
-                                                                    : new GithubAuthentication.AcquireAuthenticationCodeDelegate(GithubAuthCodePrompt),
+                                                                    ? new GitHubAuthentication.AcquireAuthenticationCodeDelegate(GitHub.Authentication.AuthenticationPrompts.AuthenticationCodeModalPrompt)
+                                                                    : new GitHubAuthentication.AcquireAuthenticationCodeDelegate(GitHubAuthCodePrompt),
                                                                   null,
                                                                   out authority))
                     {
@@ -660,7 +660,7 @@ namespace Microsoft.Alm.CredentialHelper
                             operationArguments.Authority = AuthorityType.AzureDirectory;
                             goto case AuthorityType.AzureDirectory;
                         }
-                        else if (authority is GithubAuthentication)
+                        else if (authority is GitHubAuthentication)
                         {
                             operationArguments.Authority = AuthorityType.GitHub;
                             goto case AuthorityType.GitHub;
@@ -687,15 +687,15 @@ namespace Microsoft.Alm.CredentialHelper
                 case AuthorityType.GitHub:
                     Trace.WriteLine("   authority it GitHub");
 
-                    // return a GitHub authenitcation object
-                    return authority ?? new GithubAuthentication(GithubCredentialScope,
+                    // return a GitHub authentication object
+                    return authority ?? new GitHubAuthentication(GitHubCredentialScope,
                                                                  secrets,
                                                                  operationArguments.UseModalUi
-                                                                    ? new GithubAuthentication.AcquireCredentialsDelegate(GitHub.Authentication.AuthenticationPrompts.CredentialModalPrompt)
-                                                                    : new GithubAuthentication.AcquireCredentialsDelegate(GithubCredentialPrompt),
+                                                                    ? new GitHubAuthentication.AcquireCredentialsDelegate(GitHub.Authentication.AuthenticationPrompts.CredentialModalPrompt)
+                                                                    : new GitHubAuthentication.AcquireCredentialsDelegate(GitHubCredentialPrompt),
                                                                  operationArguments.UseModalUi
-                                                                    ? new GithubAuthentication.AcquireAuthenticationCodeDelegate(GitHub.Authentication.AuthenticationPrompts.AuthenticationCodeModalPrompt)
-                                                                    : new GithubAuthentication.AcquireAuthenticationCodeDelegate(GithubAuthCodePrompt),
+                                                                    ? new GitHubAuthentication.AcquireAuthenticationCodeDelegate(GitHub.Authentication.AuthenticationPrompts.AuthenticationCodeModalPrompt)
+                                                                    : new GitHubAuthentication.AcquireAuthenticationCodeDelegate(GitHubAuthCodePrompt),
                                                                  null);
 
                 case AuthorityType.MicrosoftAccount:
@@ -957,7 +957,7 @@ namespace Microsoft.Alm.CredentialHelper
             }
         }
 
-        private static bool GithubCredentialPrompt(TargetUri targetUri, out string username, out string password)
+        private static bool GitHubCredentialPrompt(TargetUri targetUri, out string username, out string password)
         {
             // ReadConsole 32768 fail, 32767 ok
             // @linquize [https://github.com/Microsoft/Git-Credential-Manager-for-Windows/commit/a62b9a19f430d038dcd85a610d97e5f763980f85]
@@ -965,7 +965,7 @@ namespace Microsoft.Alm.CredentialHelper
 
             Debug.Assert(targetUri != null);
 
-            Trace.WriteLine("Program::GithubCredentialPrompt");
+            Trace.WriteLine("Program::GitHubCredentialPrompt");
 
             StringBuilder buffer = new StringBuilder(BufferReadSize);
             uint read = 0;
@@ -1083,7 +1083,7 @@ namespace Microsoft.Alm.CredentialHelper
                 && password != null;
         }
 
-        private static bool GithubAuthCodePrompt(TargetUri targetUri, GithubAuthenticationResultType resultType, string username, out string authenticationCode)
+        private static bool GitHubAuthCodePrompt(TargetUri targetUri, GitHubAuthenticationResultType resultType, string username, out string authenticationCode)
         {
             // ReadConsole 32768 fail, 32767 ok
             // @linquize [https://github.com/Microsoft/Git-Credential-Manager-for-Windows/commit/a62b9a19f430d038dcd85a610d97e5f763980f85]
@@ -1091,7 +1091,7 @@ namespace Microsoft.Alm.CredentialHelper
 
             Debug.Assert(targetUri != null);
 
-            Trace.WriteLine("Program::GithubAuthCodePrompt");
+            Trace.WriteLine("Program::GitHubAuthCodePrompt");
 
             StringBuilder buffer = new StringBuilder(BufferReadSize);
             uint read = 0;
@@ -1107,7 +1107,7 @@ namespace Microsoft.Alm.CredentialHelper
             using (SafeFileHandle stdout = NativeMethods.CreateFile(NativeMethods.ConsoleOutName, fileAccessFlags, fileShareFlags, IntPtr.Zero, fileCreationDisposition, fileAttributes, IntPtr.Zero))
             using (SafeFileHandle stdin = NativeMethods.CreateFile(NativeMethods.ConsoleInName, fileAccessFlags, fileShareFlags, IntPtr.Zero, fileCreationDisposition, fileAttributes, IntPtr.Zero))
             {
-                string type = resultType == GithubAuthenticationResultType.TwoFactorApp
+                string type = resultType == GitHubAuthenticationResultType.TwoFactorApp
                     ? "app"
                     : "sms";
 

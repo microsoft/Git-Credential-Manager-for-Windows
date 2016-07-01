@@ -593,7 +593,7 @@ namespace Microsoft.Alm.CredentialHelper
         /// in bytes, of the <paramref name="packedCredentials"/> buffer. On output, if the buffer
         /// is not of sufficient size, specifies the required size, in bytes, of the
         /// <paramref name="packedCredentials"/> buffer.</param>
-        /// <returns>Trus if success; otherwise false.</returns>
+        /// <returns>True if success; otherwise false.</returns>
         [DllImport(CredUi32, CharSet = CharSet.Unicode, EntryPoint = "CredPackAuthenticationBufferW", SetLastError = true)]
         public static extern bool CredPackAuthenticationBuffer(CredentialPackFlags flags, string username, string password, IntPtr packedCredentials, ref int packedCredentialsSize);
 

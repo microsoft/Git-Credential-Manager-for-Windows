@@ -38,7 +38,7 @@ namespace Microsoft.Alm.Authentication
             }
             else
             {
-                // create an authority host url in the format of https://login.microsoft.com/12345678-9ABC-DEF0-1234-56789ABCDEF0
+                // create an authority host URL in the format of https://login.microsoft.com/12345678-9ABC-DEF0-1234-56789ABCDEF0
                 string authorityHost = AzureAuthority.GetAuthorityUrl(tenantId);
                 this.VstsAuthority = new VstsAzureAuthority(authorityHost);
             }
@@ -85,7 +85,7 @@ namespace Microsoft.Alm.Authentication
                 TokenPair tokens;
                 if ((tokens = this.VstsAuthority.AcquireToken(targetUri, this.ClientId, this.Resource, new Uri(RedirectUrl), null)) != null)
                 {
-                    Trace.WriteLine("   token aqusition succeeded.");
+                    Trace.WriteLine("   token acquisition succeeded.");
 
                     this.StoreRefreshToken(targetUri, tokens.RefeshToken);
 
@@ -94,7 +94,7 @@ namespace Microsoft.Alm.Authentication
             }
             catch (AdalException)
             {
-                Trace.WriteLine("   token aquisition failed.");
+                Trace.WriteLine("   token acquisition failed.");
             }
 
             Trace.WriteLine("   interactive logon failed");
@@ -130,7 +130,7 @@ namespace Microsoft.Alm.Authentication
                 TokenPair tokens;
                 if ((tokens = await this.VstsAuthority.AcquireTokenAsync(targetUri, this.ClientId, this.Resource, credentials)) != null)
                 {
-                    Trace.WriteLine("   token aquisition succeeded");
+                    Trace.WriteLine("   token acquisition succeeded");
 
                     this.StoreRefreshToken(targetUri, tokens.RefeshToken);
 
@@ -139,7 +139,7 @@ namespace Microsoft.Alm.Authentication
             }
             catch (AdalException)
             {
-                Trace.WriteLine("   token aquisition failed");
+                Trace.WriteLine("   token acquisition failed");
             }
 
             Trace.WriteLine("   non-interactive logon failed");
@@ -173,7 +173,7 @@ namespace Microsoft.Alm.Authentication
                 TokenPair tokens;
                 if ((tokens = await this.VstsAuthority.AcquireTokenAsync(targetUri, this.ClientId, this.Resource)) != null)
                 {
-                    Trace.WriteLine("   token aquisition succeeded");
+                    Trace.WriteLine("   token acquisition succeeded");
 
                     this.StoreRefreshToken(targetUri, tokens.RefeshToken);
 

@@ -14,7 +14,7 @@ namespace GitHub.Authentication
     {
         public static bool CredentialModalPrompt(TargetUri targetUri, out string username, out string password)
         {
-            Trace.WriteLine("Program::GithubCredentialModalPrompt");
+            Trace.WriteLine("Program::GitHubCredentialModalPrompt");
 
             var credentialViewModel = new CredentialsViewModel();
 
@@ -28,11 +28,11 @@ namespace GitHub.Authentication
             return credentialValid;
         }
 
-        public static bool AuthenticationCodeModalPrompt(TargetUri targetUri, GithubAuthenticationResultType resultType, string username, out string authenticationCode)
+        public static bool AuthenticationCodeModalPrompt(TargetUri targetUri, GitHubAuthenticationResultType resultType, string username, out string authenticationCode)
         {
-            Trace.WriteLine("Program::GithubAuthcodeModalPrompt");
+            Trace.WriteLine("Program::GitHubAuthcodeModalPrompt");
 
-            var twoFactorViewModel = new TwoFactorViewModel(resultType == GithubAuthenticationResultType.TwoFactorSms);
+            var twoFactorViewModel = new TwoFactorViewModel(resultType == GitHubAuthenticationResultType.TwoFactorSms);
 
             Trace.WriteLine("   prompting user for authentication code.");
 
