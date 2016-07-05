@@ -68,12 +68,12 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="GitHubAuthentication.cs" />
-    <Compile Include="GithubAuthenticationResult.cs" />
-    <Compile Include="GithubAuthority.cs" />
-    <Compile Include="GithubTokenScope.cs" />
+    <Compile Include="GitHubAuthenticationResult.cs" />
+    <Compile Include="GitHubAuthority.cs" />
+    <Compile Include="GitHubTokenScope.cs" />
     <Compile Include="Global.cs" />
-    <Compile Include="IGithubAuthentication.cs" />
-    <Compile Include="IGithubAuthority.cs" />
+    <Compile Include="IGitHubAuthentication.cs" />
+    <Compile Include="IGitHubAuthority.cs" />
     <Compile Include="SecretCache.cs" />
     <Compile Include="TokenScope.cs" />
     <Compile Include="TargetUri.cs" />

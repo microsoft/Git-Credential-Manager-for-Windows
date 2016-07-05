@@ -98,7 +98,7 @@ namespace Microsoft.Alm.Authentication.Test
         }
 
         [TestMethod]
-        public void MinusOpertor()
+        public void MinusOperator()
         {
             var val1 = VstsTokenScope.BuildAccess | VstsTokenScope.BuildExecute | VstsTokenScope.ChatWrite;
             var val2 = val1 - VstsTokenScope.ChatWrite;

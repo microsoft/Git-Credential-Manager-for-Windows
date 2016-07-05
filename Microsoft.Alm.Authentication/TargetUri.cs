@@ -27,9 +27,9 @@ namespace Microsoft.Alm.Authentication
             if (actualUrl == null)
                 throw new ArgumentNullException("actualUrl");
             if (!Uri.TryCreate(actualUrl, UriKind.Absolute, out ActualUri))
-                throw new ArgumentException("Url is invalid.", "actualUrl");
+                throw new ArgumentException("URL is invalid.", "actualUrl");
             if (proxyUrl != null && !Uri.TryCreate(proxyUrl, UriKind.Absolute, out ProxyUri))
-                throw new ArgumentException("Url is invalid.", "proxyUrl");
+                throw new ArgumentException("URL is invalid.", "proxyUrl");
         }
         public TargetUri(string targetUrl)
             : this(targetUrl, null)

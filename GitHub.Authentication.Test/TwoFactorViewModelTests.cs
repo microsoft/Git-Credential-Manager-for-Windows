@@ -7,7 +7,7 @@ namespace GitHub.Authentication.Test
     public class TwoFactorViewModelTests
     {
         [TestMethod]
-        public void IsValid_IsTrueWhenAuthenticationCodeIsSixCharacters()
+        public void IsValidIsTrueWhenAuthenticationCodeIsSixCharacters()
         {
             var vm = new TwoFactorViewModel();
             vm.AuthenticationCode = "012345";
@@ -15,7 +15,7 @@ namespace GitHub.Authentication.Test
         }
 
         [TestMethod]
-        public void IsValid_IsFalseWhenAuthenticationCodeIsLessThanSixCharacters()
+        public void IsValidIsFalseWhenAuthenticationCodeIsLessThanSixCharacters()
         {
             var vm = new TwoFactorViewModel();
             vm.AuthenticationCode = "01234";

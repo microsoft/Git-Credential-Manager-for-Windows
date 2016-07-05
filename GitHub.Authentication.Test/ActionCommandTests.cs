@@ -7,21 +7,21 @@ namespace GitHub.Authentication.Test
     public class ActionCommandTests
     {
         [TestMethod]
-        public void CanExecute_IsTrueByDefault()
+        public void CanExecuteIsTrueByDefault()
         {
             var command = new ActionCommand(_ => { });
             Assert.IsTrue(command.CanExecute(null));
         }
 
         [TestMethod]
-        public void CanExecute_ReturnsFalseWhenIsEnabledIsFalse()
+        public void CanExecuteReturnsFalseWhenIsEnabledIsFalse()
         {
             var command = new ActionCommand(_ => { }) { IsEnabled = false };
             Assert.IsFalse(command.CanExecute(null));
         }
 
         [TestMethod]
-        public void Execute_CallsActionWhenExecuted()
+        public void ExecuteCallsActionWhenExecuted()
         {
             var parameter = new object();
             object suppliedParameter = null;

@@ -15,7 +15,7 @@ namespace Microsoft.Alm.Authentication
             Trace.WriteLine("Secret::UriToName");
 
             string targetName = null;
-            // trim any trailing slashes and/or whitespace for compat with git-credential-winstore
+            // trim any trailing slashes and/or whitespace for compatibility with git-credential-winstore
             string trimmedHostUrl = targetUri.Host
                                              .TrimEnd('/', '\\')
                                              .TrimEnd();
@@ -45,7 +45,7 @@ namespace Microsoft.Alm.Authentication
             Trace.WriteLine("Secret::UriToPathedName");
 
             string targetName = null;
-            // trim any trailing slashes and/or whitespace for compat with git-credential-winstore
+            // trim any trailing slashes and/or whitespace for compatibility with git-credential-winstore
             string trimmedHostUrl = targetUri.Host
                                              .TrimEnd('/', '\\')
                                              .TrimEnd();

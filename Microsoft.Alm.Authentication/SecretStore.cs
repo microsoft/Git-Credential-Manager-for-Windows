@@ -74,7 +74,7 @@ namespace Microsoft.Alm.Authentication
         }
 
         /// <summary>
-        /// Purges all credenitals from the store.
+        /// Purges all credentials from the store.
         /// </summary>
         public void PurgeCredentials()
         {

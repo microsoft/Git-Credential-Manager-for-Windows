@@ -46,7 +46,7 @@ namespace Microsoft.Alm.Authentication
         /// <param name="requireCompactToken">
         /// True if a compact access token is required; false if a standard token is acceptable.
         /// </param>
-        /// <returns>True if successfull; otherwise false.</returns>
+        /// <returns>True if successful; otherwise false.</returns>
         public bool InteractiveLogon(TargetUri targetUri, bool requireCompactToken)
         {
             const string QueryParameters = "domain_hint=live.com&display=popup&site_id=501454&nux=1";

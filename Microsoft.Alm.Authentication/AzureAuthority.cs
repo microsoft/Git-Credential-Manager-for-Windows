@@ -72,7 +72,7 @@ namespace Microsoft.Alm.Authentication
 
             try
             {
-                Trace.WriteLine(String.Format("   authority host url = '{0}'.", AuthorityHostUrl));
+                Trace.WriteLine(String.Format("   authority host URL = '{0}'.", AuthorityHostUrl));
 
                 AuthenticationContext authCtx = new AuthenticationContext(AuthorityHostUrl, _adalTokenCache);
                 AuthenticationResult authResult = authCtx.AcquireToken(resource, clientId, redirectUri, PromptBehavior.Always, UserIdentifier.AnyUser, queryParameters);
@@ -113,7 +113,7 @@ namespace Microsoft.Alm.Authentication
 
             try
             {
-                Trace.WriteLine(String.Format("   authority host url = '{0}'.", AuthorityHostUrl));
+                Trace.WriteLine(String.Format("   authority host URL = '{0}'.", AuthorityHostUrl));
 
                 UserCredential userCredential = credentials == null ? new UserCredential() : new UserCredential(credentials.Username, credentials.Password);
                 AuthenticationContext authCtx = new AuthenticationContext(AuthorityHostUrl, _adalTokenCache);
@@ -162,10 +162,10 @@ namespace Microsoft.Alm.Authentication
                 {
                     authorityHostUrl = GetAuthorityUrl(refreshToken.TargetIdentity);
 
-                    Trace.WriteLine("   authority host url set by refresh token.");
+                    Trace.WriteLine("   authority host URL set by refresh token.");
                 }
 
-                Trace.WriteLine(String.Format("   authority host url = '{0}'.", authorityHostUrl));
+                Trace.WriteLine(String.Format("   authority host URL = '{0}'.", authorityHostUrl));
 
                 AuthenticationContext authCtx = new AuthenticationContext(authorityHostUrl, _adalTokenCache);
                 AuthenticationResult authResult = await authCtx.AcquireTokenByRefreshTokenAsync(refreshToken.Value, clientId, resource);

@@ -12,7 +12,7 @@ namespace Microsoft.Alm.Git.Test
     public class ConfigurationTests
     {
         [TestMethod]
-        public void ParseGitConfig_Simple()
+        public void ParseGitConfigSimple()
         {
             const string input = @"
 [core]
@@ -25,7 +25,7 @@ namespace Microsoft.Alm.Git.Test
         }
 
         [TestMethod]
-        public void ParseGitConfig_OverwritesValues()
+        public void ParseGitConfigOverwritesValues()
         {
             // http://thedailywtf.com/articles/What_Is_Truth_0x3f_
             const string input = @"
@@ -41,7 +41,7 @@ namespace Microsoft.Alm.Git.Test
         }
 
         [TestMethod]
-        public void ParseGitConfig_PartiallyQuoted()
+        public void ParseGitConfigPartiallyQuoted()
         {
             const string input = @"
 [core ""oneQuote]
@@ -54,7 +54,7 @@ namespace Microsoft.Alm.Git.Test
         }
 
         [TestMethod]
-        public void ParseGitConfig_SampleFile()
+        public void ParseGitConfigSampleFile()
         {
             var values = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
             var me = this.GetType();

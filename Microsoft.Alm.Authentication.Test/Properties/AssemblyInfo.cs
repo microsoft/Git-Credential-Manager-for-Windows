@@ -4,7 +4,7 @@ using System.Runtime.InteropServices;
 // General Information about an assembly is controlled through the following
 // set of attributes. Change these attribute values to modify the information
 // associated with an assembly.
-[assembly: AssemblyTitle("Microsoft Application Lifecycle Management Authenitcation for Windows Test Suite")]
+[assembly: AssemblyTitle("Microsoft Application Lifecycle Management Authentication for Windows Test Suite")]
 [assembly: AssemblyDescription("Tests for the Microsoft.Alm.Authentication project.")]
 [assembly: AssemblyConfiguration("")]
 [assembly: AssemblyCompany("Microsoft Corporation")]

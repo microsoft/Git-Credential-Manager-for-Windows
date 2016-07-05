@@ -155,7 +155,7 @@ namespace Microsoft.Alm.Authentication
         {
             Debug.Assert(bytes != null, "The bytes parameter is null");
             Debug.Assert(bytes.Length > 0, "The bytes parameter is too short");
-            Debug.Assert(Enum.IsDefined(typeof(TokenType), type), "The type parameter is invlaid");
+            Debug.Assert(Enum.IsDefined(typeof(TokenType), type), "The type parameter is invalid");
 
             token = null;
 
@@ -247,7 +247,7 @@ namespace Microsoft.Alm.Authentication
         }
 
         /// <summary>
-        /// Explicity casts a personal access token token into a set of credentials
+        /// Explicitly casts a personal access token token into a set of credentials
         /// </summary>
         /// <param name="token"></param>
         /// <exception cref="InvalidCastException">

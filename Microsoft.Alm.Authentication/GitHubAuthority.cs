@@ -9,7 +9,7 @@ using System.Threading.Tasks;
 
 namespace Microsoft.Alm.Authentication
 {
-    internal class GithubAuthority : IGithubAuthority
+    internal class GitHubAuthority : IGitHubAuthority
     {
         /// <summary>
         /// The GitHub authorizations URL
@@ -24,23 +24,23 @@ namespace Microsoft.Alm.Authentication
         /// </summary>
         public const int RequestTimeout = 15 * 1000; // 15 second limit
 
-        public GithubAuthority(string authorityUrl = null)
+        public GitHubAuthority(string authorityUrl = null)
         {
             _authorityUrl = authorityUrl ?? DefaultAuthorityUrl;
         }
 
         private readonly string _authorityUrl;
 
-        public async Task<GithubAuthenticationResult> AcquireToken(
+        public async Task<GitHubAuthenticationResult> AcquireToken(
             TargetUri targetUri,
             string username,
             string password,
             string authenticationCode,
-            GithubTokenScope scope)
+            GitHubTokenScope scope)
         {
-            const string GithubOptHeader = "X-GitHub-OTP";
+            const string GitHubOptHeader = "X-GitHub-OTP";
 
-            Trace.WriteLine("GithubAuthority::AcquireToken");
+            Trace.WriteLine("GitHubAuthority::AcquireToken");
 
             Token token = null;
 
@@ -65,7 +65,7 @@ namespace Microsoft.Alm.Authentication
 
                 if (!String.IsNullOrWhiteSpace(authenticationCode))
                 {
-                    httpClient.DefaultRequestHeaders.Add(GithubOptHeader, authenticationCode);
+                    httpClient.DefaultRequestHeaders.Add(GitHubOptHeader, authenticationCode);
                 }
 
                 const string HttpJsonContentType = "application/x-www-form-urlencoded";
@@ -115,43 +115,43 @@ namespace Microsoft.Alm.Authentication
                                 if (token == null)
                                 {
                                     Trace.WriteLine("   authentication failure");
-                                    return new GithubAuthenticationResult(GithubAuthenticationResultType.Failure);
+                                    return new GitHubAuthenticationResult(GitHubAuthenticationResultType.Failure);
                                 }
                                 else
                                 {
                                     Trace.WriteLine("   authentication success: new personal acces token created.");
-                                    return new GithubAuthenticationResult(GithubAuthenticationResultType.Success, token);
+                                    return new GitHubAuthenticationResult(GitHubAuthenticationResultType.Success, token);
                                 }
                             }
 
                         case HttpStatusCode.Unauthorized:
                             {
                                 if (String.IsNullOrWhiteSpace(authenticationCode)
-                                    && response.Headers.Any(x => String.Equals(GithubOptHeader, x.Key, StringComparison.OrdinalIgnoreCase)))
+                                    && response.Headers.Any(x => String.Equals(GitHubOptHeader, x.Key, StringComparison.OrdinalIgnoreCase)))
                                 {
-                                    var mfakvp = response.Headers.First(x => String.Equals(GithubOptHeader, x.Key, StringComparison.OrdinalIgnoreCase) && x.Value != null && x.Value.Count() > 0);
+                                    var mfakvp = response.Headers.First(x => String.Equals(GitHubOptHeader, x.Key, StringComparison.OrdinalIgnoreCase) && x.Value != null && x.Value.Count() > 0);
 
                                     if (mfakvp.Value.First().Contains("app"))
                                     {
                                         Trace.WriteLine("   two-factor app authentication code required");
-                                        return new GithubAuthenticationResult(GithubAuthenticationResultType.TwoFactorApp);
+                                        return new GitHubAuthenticationResult(GitHubAuthenticationResultType.TwoFactorApp);
                                     }
                                     else
                                     {
                                         Trace.WriteLine("   two-factor sms authentication code required");
-                                        return new GithubAuthenticationResult(GithubAuthenticationResultType.TwoFactorSms);
+                                        return new GitHubAuthenticationResult(GitHubAuthenticationResultType.TwoFactorSms);
                                     }
                                 }
                                 else
                                 {
                                     Trace.WriteLine("   authentication failed");
-                                    return new GithubAuthenticationResult(GithubAuthenticationResultType.Failure);
+                                    return new GitHubAuthenticationResult(GitHubAuthenticationResultType.Failure);
                                 }
                             }
 
                         default:
                             Trace.WriteLine("   authentication failed");
-                            return new GithubAuthenticationResult(GithubAuthenticationResultType.Failure);
+                            return new GitHubAuthenticationResult(GitHubAuthenticationResultType.Failure);
                     }
                 }
             }
@@ -164,7 +164,7 @@ namespace Microsoft.Alm.Authentication
             Debug.Assert(targetUri != null && targetUri.IsAbsoluteUri, "The `targetUri` parameter is null or invalid.");
             Debug.Assert(credentials != null, "The `targetUri` parameter is null or invalid.");
 
-            Trace.WriteLine("   GithubAuthority::ValidateCredentials");
+            Trace.WriteLine("   GitHubAuthority::ValidateCredentials");
 
             string authString = String.Format("{0}:{1}", credentials.Username, credentials.Password);
             byte[] authBytes = Encoding.UTF8.GetBytes(authString);

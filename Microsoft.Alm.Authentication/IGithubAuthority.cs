@@ -2,14 +2,14 @@
 
 namespace Microsoft.Alm.Authentication
 {
-    internal interface IGithubAuthority
+    internal interface IGitHubAuthority
     {
-        Task<GithubAuthenticationResult> AcquireToken(
+        Task<GitHubAuthenticationResult> AcquireToken(
             TargetUri targetUri,
             string username,
             string password,
             string authenticationCode,
-            GithubTokenScope scope);
+            GitHubTokenScope scope);
 
         Task<bool> ValidateCredentials(TargetUri targetUri, Credential credentials);
     }

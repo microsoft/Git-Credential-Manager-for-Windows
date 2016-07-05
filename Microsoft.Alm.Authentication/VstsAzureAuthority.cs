@@ -99,7 +99,7 @@ namespace Microsoft.Alm.Authentication
                                             string tokenValue = tokenMatch.Groups[1].Value;
                                             Token token = new Token(tokenValue, TokenType.Personal);
 
-                                            Trace.WriteLine("   personal access token aquisition succeeded.");
+                                            Trace.WriteLine("   personal access token acquisition succeeded.");
 
                                             return token;
                                         }
@@ -112,10 +112,10 @@ namespace Microsoft.Alm.Authentication
             }
             catch
             {
-                Trace.WriteLine("   an error occured error.");
+                Trace.WriteLine("   an error occurred.");
             }
 
-            Trace.WriteLine("   personal access token aquisition failed.");
+            Trace.WriteLine("   personal access token acquisition failed.");
 
             return null;
         }
