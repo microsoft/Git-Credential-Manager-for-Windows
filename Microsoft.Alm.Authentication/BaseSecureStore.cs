@@ -73,7 +73,8 @@ namespace Microsoft.Alm.Authentication
             else
             {
                 int error = Marshal.GetLastWin32Error();
-                if (error != NativeMethods.Win32Error.FileNotFound)
+                if (error != NativeMethods.Win32Error.FileNotFound
+                    && error != NativeMethods.Win32Error.NotFound)
                 {
                     Debug.Fail("Failed with error code " + error.ToString("X"));
                 }
