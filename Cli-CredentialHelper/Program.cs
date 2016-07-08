@@ -347,7 +347,7 @@ namespace Microsoft.Alm.CredentialHelper
 
             return;
 
-        error_parse:
+            error_parse:
             Console.Out.WriteLine("Fatal: unable to parse target URI.");
         }
 
@@ -430,12 +430,16 @@ namespace Microsoft.Alm.CredentialHelper
                         Trace.WriteLine("   credentials found");
                         operationArguments.SetCredentials(credentials);
                     }
-                    else if (operationArguments.UseModalUi)
+                    else if (operationArguments.Interactivity != Interactivity.Never)
                     {
-                        // display the modal dialog
                         string username;
                         string password;
-                        if (ModalPromptForCredentials(operationArguments.TargetUri, out username, out password))
+
+                        // either use modal UI or command line to query for credentials
+                        if ((operationArguments.UseModalUi 
+                                && ModalPromptForCredentials(operationArguments.TargetUri, out username, out password))
+                            || (!operationArguments.UseModalUi
+                                && BasicCredentialPrompt(operationArguments.TargetUri, null, out username, out password)))
                         {
                             Trace.WriteLine("   credentials found");
                             // set the credentials object
