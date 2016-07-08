@@ -957,7 +957,7 @@ namespace Microsoft.Alm.CredentialHelper
             }
         }
 
-        private static bool GitHubCredentialPrompt(TargetUri targetUri, out string username, out string password)
+        private static bool BasicCredentialPrompt(TargetUri targetUri, string titleMessage, out string username, out string password)
         {
             // ReadConsole 32768 fail, 32767 ok
             // @linquize [https://github.com/Microsoft/Git-Credential-Manager-for-Windows/commit/a62b9a19f430d038dcd85a610d97e5f763980f85]
@@ -965,7 +965,9 @@ namespace Microsoft.Alm.CredentialHelper
 
             Debug.Assert(targetUri != null);
 
-            Trace.WriteLine("Program::GitHubCredentialPrompt");
+            Trace.WriteLine("Program::BasicCredentialPrompt");
+
+            titleMessage = titleMessage ?? "Please enter your credentials for ";
 
             StringBuilder buffer = new StringBuilder(BufferReadSize);
             uint read = 0;
@@ -993,7 +995,7 @@ namespace Microsoft.Alm.CredentialHelper
                 Trace.WriteLine("   console mode = " + consoleMode);
 
                 // instruct the user as to what they are expected to do
-                buffer.Append("Please enter your GitHub credentials for ")
+                buffer.Append(titleMessage)
                       .Append(targetUri)
                       .AppendLine();
                 if (!NativeMethods.WriteConsole(stdout, buffer, (uint)buffer.Length, out written, IntPtr.Zero))
@@ -1081,6 +1083,15 @@ namespace Microsoft.Alm.CredentialHelper
 
             return username != null
                 && password != null;
+        }
+
+        private static bool GitHubCredentialPrompt(TargetUri targetUri, out string username, out string password)
+        {
+            const string TitleMessage = "Please enter your GitHub credentials for ";
+
+            Trace.WriteLine("Program::GitHubCredentialPrompt");
+
+            return BasicCredentialPrompt(targetUri, TitleMessage, out username, out password);
         }
 
         private static bool GitHubAuthCodePrompt(TargetUri targetUri, GitHubAuthenticationResultType resultType, string username, out string authenticationCode)
