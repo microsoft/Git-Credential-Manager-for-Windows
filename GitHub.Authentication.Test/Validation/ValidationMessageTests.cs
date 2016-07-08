@@ -14,7 +14,6 @@ namespace GitHub.Authentication.Test.Validation
         [TestMethod]
         public void DoesNotShowErrorWhenUnvalidated()
         {
-            var textBox = new TextBox();
             var viewModel = new ValidatableTestObject();
             var testValidator = PropertyValidator.For(viewModel, x => x.SomeStringProperty)
                 .Required("Please enter some text");
@@ -28,7 +27,6 @@ namespace GitHub.Authentication.Test.Validation
         [TestMethod]
         public void ShowsErrorWhenValidationResultIsInvalid()
         {
-            var textBox = new TextBox();
             var viewModel = new ValidatableTestObject();
             var testValidator = PropertyValidator.For(viewModel, x => x.SomeStringProperty)
                 .Required("Please enter some text");

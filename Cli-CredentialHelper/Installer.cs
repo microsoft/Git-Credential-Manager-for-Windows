@@ -13,7 +13,7 @@ namespace Microsoft.Alm.CredentialHelper
         internal const string ParamPathKey = "--path";
         internal const string ParamPassiveKey = "--passive";
         internal const string ParamForceKey = "--force";
-        private static readonly Version NetFxMinVersion = new Version(4, 5, 1);
+        //private static readonly Version NetFxMinVersion = new Version(4, 5, 1);
         private static readonly IReadOnlyList<string> Files = new List<string>
         {
             "Microsoft.Alm.Authentication.dll",
