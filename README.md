@@ -56,6 +56,10 @@ Most likely reason is that your GUI “shells out” to git.exe to perform Git o
 
 The Git Credential Manager does not *yet* support secure storage for SSH keys. It is something we hope to implement, but it has not been a priority. If you feel otherwise, please comment on the [SSH Key support issue](https://github.com/Microsoft/Git-Credential-Manager-for-Windows/issues/25) which is already open.
 
+### Q: Is there a Nuget Package available?
+
+Yes there is: https://www.nuget.org/packages/Microsoft.Alm.Authentication. It only supports the core authentication library, but if you're looking to extend the GCM then it is likely exactly what you're after.
+
 ### Q: Why doesn’t Git Credential Manager work on Windows XP, Mac OS, or Linux?
 
 The Git Credential Manager does not work on Windows XP, Max OS, or Linux because we had to scope our work and we decided to support the same operating systems that Visual Studio support. Why Visual Studio? Well, because it is our favorite IDE and in order to support [Visual Studio Team Services](https://www.visualstudio.com/en-us/products/visual-studio-team-services-vs.aspx) we had to use the [Azure Directory Authentication Libraries](https://github.com/AzureAD) which only have multi-factor interactive logon support in their .NET libraries. Using .NET means using Visual Studio (which we love anyways) and using Visual Studio means Windows 7 or newer.
