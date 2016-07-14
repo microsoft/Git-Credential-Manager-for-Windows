@@ -35,6 +35,7 @@ namespace Microsoft.Alm.CredentialHelper
         internal const string ConfigAuthortyKey = "authority";
         internal const string ConfigHttpProxyKey = "httpProxy";
         internal const string ConfigInteractiveKey = "interactive";
+        internal const string ConfigNamespaceKey = "namespace";
         internal const string ConfigPreserveCredentialsKey = "preserve";
         internal const string ConfigUseHttpPathKey = "useHttpPath";
         internal const string ConfigUseModalPromptKey = "modalPrompt";
@@ -276,6 +277,12 @@ namespace Microsoft.Alm.CredentialHelper
             Console.Out.WriteLine();
             Console.Out.WriteLine("      `git config --global credential." + ConfigWritelogKey + " true`");
             Console.Out.WriteLine();
+            Console.Out.WriteLine("  " + ConfigNamespaceKey + "     Sets the namespace for stored credentials.");
+            Console.Out.WriteLine("               By default the GCM uses the 'git' namespace for all stored credentials, setting this");
+            Console.Out.WriteLine("               configuration value allows for control of the namespace used globally, or per host.");
+            Console.Out.WriteLine();
+            Console.Out.WriteLine("      `git config --global credential." + ConfigNamespaceKey + " name`");
+            Console.Out.WriteLine();
             Console.Out.WriteLine("Sample Configuration:");
             Console.Out.WriteLine();
             Console.Out.WriteLine(@"  [credential ""microsoft.visualstudio.com""]");
@@ -436,7 +443,7 @@ namespace Microsoft.Alm.CredentialHelper
                         string password;
 
                         // either use modal UI or command line to query for credentials
-                        if ((operationArguments.UseModalUi 
+                        if ((operationArguments.UseModalUi
                                 && ModalPromptForCredentials(operationArguments.TargetUri, out username, out password))
                             || (!operationArguments.UseModalUi
                                 && BasicCredentialPrompt(operationArguments.TargetUri, null, out username, out password)))
@@ -627,7 +634,8 @@ namespace Microsoft.Alm.CredentialHelper
             {
                 getTargetName = Secret.UriToPathedName;
             }
-            var secrets = new SecretStore(SecretsNamespace, null, null, getTargetName);
+            var secretsNamespace = operationArguments.CustomNamespace ?? SecretsNamespace;
+            var secrets = new SecretStore(secretsNamespace, null, null, getTargetName);
             BaseAuthentication authority = null;
 
             switch (operationArguments.Authority)
@@ -890,6 +898,13 @@ namespace Microsoft.Alm.CredentialHelper
                 Trace.WriteLine("   " + ConfigHttpProxyKey + " = " + entry.Value);
 
                 operationArguments.SetProxy(entry.Value);
+            }
+
+            if (config.TryGetEntry(ConfigPrefix, operationArguments.QueryUri, ConfigNamespaceKey, out entry))
+            {
+                Trace.WriteLine("   " + ConfigNamespaceKey + " = " + entry.Value);
+
+                operationArguments.CustomNamespace = entry.Value;
             }
         }
 
