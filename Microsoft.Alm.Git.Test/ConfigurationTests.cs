@@ -53,6 +53,7 @@ namespace Microsoft.Alm.Git.Test
             Assert.AreEqual("false", values["core.oneQuote.autocrlf"]);
         }
 
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2202:Do not dispose objects multiple times")]
         [TestMethod]
         public void ParseGitConfigSampleFile()
         {

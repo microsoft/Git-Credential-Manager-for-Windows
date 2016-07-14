@@ -265,6 +265,7 @@ namespace Microsoft.Alm.Git
         /// <param name="startingDirectory">A directory of the repository where the configuration file is contained.</param>
         /// <param name="path">Path to the Git local configuration</param>
         /// <returns><see langword="True"/> if succeeds; <see langword="false"/> otherwise.</returns>
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2202:Do not dispose objects multiple times")]
         public static bool GitLocalConfig(string startingDirectory, out string path)
         {
             const string GitFolderName = ".git";

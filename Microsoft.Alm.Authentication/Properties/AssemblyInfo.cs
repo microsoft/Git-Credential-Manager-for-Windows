@@ -3,7 +3,7 @@ using System.Resources;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 
-[assembly: AssemblyTitle("Microsoft.Alm.Authentication")]
+[assembly: AssemblyTitle("Microsoft Alm Authentication")]
 [assembly: AssemblyDescription("Microsoft Application Lifecycle Management Authentication Library for Windows")]
 [assembly: AssemblyConfiguration("")]
 [assembly: AssemblyCompany("Microsoft Corporation")]

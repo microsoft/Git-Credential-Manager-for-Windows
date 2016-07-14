@@ -8,8 +8,15 @@
     <owners>$author$</owners>
     <licenseUrl>https://raw.githubusercontent.com/Microsoft/Git-Credential-Manager-for-Windows/master/LICENSE.TXT</licenseUrl>
     <projectUrl>https://github.com/Microsoft/Git-Credential-Manager-for-Windows</projectUrl>
-    <requireLicenseAcceptance>false</requireLicenseAcceptance>
+    <requireLicenseAcceptance>true</requireLicenseAcceptance>
     <description>$description$</description>
-    <copyright>Copyright 2016</copyright>
+    <copyright>(C) Microsoft Corporation. All rights reserved.</copyright>
+    <language>en-US</language>
+    <dependencies>
+      <group targetFramework="net451">
+        <dependency id="Microsoft.IdentityModel.Clients.ActiveDirectory" version="2.18.206251556" />
+      </group>
+    </dependencies>
+    <tags>Git VSTS Visual Studio Team Services TFS GitHub Active Directory Authentication Library ADAL Directory Azure AD AAD Identity Authentication .NET Windows</tags>
   </metadata>
 </package>
