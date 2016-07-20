@@ -89,53 +89,14 @@ namespace Microsoft.Alm.CredentialHelper
         public AuthorityType Authority { get; set; }
         public string CredPassword { get; private set; }
         public string CredUsername { get; private set; }
-        public string CustomNamespace { get; set; }
         public Interactivity Interactivity { get; set; }
         public bool PreserveCredentials { get; set; }
-        public string ProxyHost
-        {
-            get { return _proxyHost; }
-            set
-            {
-                _proxyHost = value;
-                CreateTargetUri();
-            }
-        }
-        public string ProxyPath
-        {
-            get { return _proxyPath; }
-            set
-            {
-                _proxyPath = value;
-                CreateTargetUri();
-            }
-        }
-        public string ProxyProtocol
-        {
-            get { return _proxyProtocol; }
-            set
-            {
-                _proxyProtocol = value;
-                CreateTargetUri();
-            }
-        }
         public Uri ProxyUri
         {
             get { return _proxyUri; }
             internal set
             {
-                if (value == null)
-                {
-                    _proxyHost = null;
-                    _proxyPath = null;
-                    _proxyProtocol = null;
-                }
-                else
-                {
-                    _proxyHost = value.DnsSafeHost;
-                    _proxyPath = value.AbsolutePath;
-                    _proxyProtocol = value.Scheme;
-                }
+                _proxyUri = value;
                 CreateTargetUri();
             }
         }
@@ -207,9 +168,6 @@ namespace Microsoft.Alm.CredentialHelper
         private string _queryPath;
         private string _queryProtocol;
         private Uri _queryUri;
-        private string _proxyHost;
-        private string _proxyPath;
-        private string _proxyProtocol;
         private Uri _proxyUri;
         private TargetUri _targetUri;
         private bool _useHttpPath;
@@ -265,12 +223,8 @@ namespace Microsoft.Alm.CredentialHelper
             string actualUrl = _useHttpPath
                 ? String.Format("{0}://{1}/{2}", this.QueryProtocol, this.QueryHost, this.QueryPath)
                 : String.Format("{0}://{1}", this.QueryProtocol, this.QueryHost);
-            string proxyUrl = _useHttpPath
-                ? String.Format("{0}://{1}/{2}", this.ProxyProtocol, this.ProxyHost, this.ProxyPath)
-                : String.Format("{0}://{1}", this.ProxyProtocol, this.ProxyHost);
 
-            if (Uri.TryCreate(actualUrl, UriKind.Absolute, out _queryUri)
-                | Uri.TryCreate(proxyUrl, UriKind.Absolute, out _proxyUri))
+            if (Uri.TryCreate(actualUrl, UriKind.Absolute, out _queryUri))
             {
                 _targetUri = new TargetUri(_queryUri, _proxyUri);
             }

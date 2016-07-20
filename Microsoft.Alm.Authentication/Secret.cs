@@ -44,7 +44,7 @@ namespace Microsoft.Alm.Authentication
             string trimmedHostUrl = targetUri.Host
                                              .TrimEnd('/', '\\')
                                              .TrimEnd();
-            Uri resolvedUri = targetUri.ResolvedUri;
+            Uri resolvedUri = targetUri.ActualUri;
 
             if (resolvedUri.IsDefaultPort)
             {
