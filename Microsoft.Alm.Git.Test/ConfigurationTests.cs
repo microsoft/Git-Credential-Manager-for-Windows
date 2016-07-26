@@ -27,11 +27,10 @@ namespace Microsoft.Alm.Git.Test
         [TestMethod]
         public void ParseGitConfigOverwritesValues()
         {
-            // http://thedailywtf.com/articles/What_Is_Truth_0x3f_
             const string input = @"
 [core]
     autocrlf = true
-    autocrlf = FileNotFound
+    autocrlf = ThisShouldBeInvalidButIgnored
     autocrlf = false
 ";
 
