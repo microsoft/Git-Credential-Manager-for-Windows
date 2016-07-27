@@ -321,7 +321,7 @@ namespace Microsoft.Alm.CredentialHelper
                     goto error_parse;
             }
 
-            OperationArguments operationArguments = new OperationArguments(TextReader.Null);
+            OperationArguments operationArguments = new OperationArguments(Console.In);
             operationArguments.QueryUri = uri;
 
             LoadOperationArguments(operationArguments);
