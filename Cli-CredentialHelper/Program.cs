@@ -21,9 +21,10 @@ namespace Microsoft.Alm.CredentialHelper
         public static readonly StringComparer ConfigValueComparer = StringComparer.InvariantCultureIgnoreCase;
         public static readonly StringComparer EnvironKeyComparer = StringComparer.OrdinalIgnoreCase;
 
+        internal const string AskpassUsername = "Username";
+        internal const string AskpsssPassword = "Password";
+
         internal const string CommandApprove = "approve";
-        internal const string CommandAskpassUsername = "Username";
-        internal const string CommandAskpsssPassword = "Password";
         internal const string CommandErase = "erase";
         internal const string CommandDeploy = "deploy";
         internal const string CommandFill = "fill";
@@ -50,7 +51,7 @@ namespace Microsoft.Alm.CredentialHelper
         internal const string EnvironPreserveCredentialsKey = "GCM_PRESERVE_CREDS";
         internal const string EnvironModalPromptKey = "GCM_MODAL_PROMPT";
         internal const string EnvironValidateKey = "GCM_VALIDATE";
-        internal const string EnvironWritelogKey = "GCM_TRACE";
+        internal const string EnvironWritelogKey = "GCM_WRITELOG";
 
         private const string ConfigPrefix = "credential";
         private const string SecretsNamespace = "git";
@@ -59,8 +60,6 @@ namespace Microsoft.Alm.CredentialHelper
         private static readonly List<string> CommandList = new List<string>
         {
             CommandApprove,
-            CommandAskpsssPassword,
-            CommandAskpassUsername,
             CommandDelete,
             CommandDeploy,
             CommandErase,
@@ -173,8 +172,6 @@ namespace Microsoft.Alm.CredentialHelper
                 Dictionary<string, Action> actions = new Dictionary<string, Action>(StringComparer.OrdinalIgnoreCase)
                 {
                     { CommandApprove, Store },
-                    { CommandAskpassUsername, Askpass },
-                    { CommandAskpsssPassword, Askpass },
                     { CommandErase, Erase },
                     { CommandDeploy, Deploy },
                     { CommandFill, Get },
@@ -195,8 +192,11 @@ namespace Microsoft.Alm.CredentialHelper
                 }
                 else
                 {
-                    // display unknown command error
-                    Console.Error.WriteLine("Unknown command '{0}'. Please use `{1} ?` to display help.", args[0], Program.Name);
+                    if (!Askpass())
+                    {
+                        // display unknown command error
+                        Console.Error.WriteLine("Unknown command '{0}'. Please use `{1} ?` to display help.", args[0], Program.Name);
+                    }                    
                 }
             }
             catch (AggregateException exception)
@@ -218,13 +218,16 @@ namespace Microsoft.Alm.CredentialHelper
 
         #region Commands
 
-        private static void Askpass()
+        private static bool Askpass()
         {
             Trace.WriteLine("Program::Askpass");
 
             string[] args = Environment.GetCommandLineArgs();
-            string url = args[3]?.Trim('\'');
+            string url = args[3]?.Trim('\'', ':');
             Uri targetUri = new Uri(url);
+
+            Trace.WriteLine("   verb = " + args[1]);
+            Trace.WriteLine("   targetUri = " + targetUri);
 
             OperationArguments operationArguments = new OperationArguments(targetUri);
 
@@ -233,19 +236,25 @@ namespace Microsoft.Alm.CredentialHelper
 
             QueryCredentials(operationArguments);
 
-            if (StringComparer.InvariantCultureIgnoreCase.Equals(args[1], CommandAskpassUsername)
+            if (StringComparer.InvariantCultureIgnoreCase.Equals(args[1], AskpassUsername)
                 && operationArguments.CredUsername != null)
             {
-                Console.Out.WriteLine(operationArguments.CredUsername);
-                return;
+                Trace.WriteLine("   Username for '{0}' asked for and found.", url);
+
+                Console.Out.Write(operationArguments.CredUsername + "\n");
+                return true;
             }
 
-            if (StringComparer.InvariantCultureIgnoreCase.Equals(args[1], CommandAskpsssPassword)
+            if (StringComparer.InvariantCultureIgnoreCase.Equals(args[1], AskpsssPassword)
                 && operationArguments.CredPassword != null)
             {
-                Console.Out.WriteLine(operationArguments.CredPassword);
-                return;
+                Trace.WriteLine("   Password for '{0}' asked for and found.", url);
+
+                Console.Out.Write(operationArguments.CredPassword + "\n");
+                return true;
             }
+
+            return false;
         }
 
         private static void Delete()
