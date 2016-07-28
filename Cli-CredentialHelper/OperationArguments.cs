@@ -9,14 +9,10 @@ namespace Microsoft.Alm.CredentialHelper
     internal sealed class OperationArguments
     {
         internal OperationArguments(TextReader stdin)
+            : this()
         {
-            Debug.Assert(stdin != null, "The stdin parameter is null");
-
-            this.Authority = AuthorityType.Auto;
-            this.Interactivity = Interactivity.Auto;
-            this.UseModalUi = true;
-            this.ValidateCredentials = true;
-            this.WriteLog = false;
+            if (ReferenceEquals(stdin, null))
+                throw new ArgumentNullException("stdin");
 
             if (stdin == TextReader.Null)
             {
@@ -59,6 +55,26 @@ namespace Microsoft.Alm.CredentialHelper
 
                 this.CreateTargetUri();
             }
+        }
+        internal OperationArguments(Uri targetUri)
+            : this()
+        {
+            if (ReferenceEquals(targetUri, null))
+                throw new ArgumentNullException("targetUri");
+
+            this.QueryProtocol = targetUri.Scheme;
+            this.QueryHost = targetUri.Host;
+            this.QueryPath = targetUri.AbsolutePath;
+
+            this.CreateTargetUri();
+        }
+        private OperationArguments()
+        {
+            this.Authority = AuthorityType.Auto;
+            this.Interactivity = Interactivity.Auto;
+            this.UseModalUi = true;
+            this.ValidateCredentials = true;
+            this.WriteLog = false;
         }
 
         public AuthorityType Authority { get; set; }
