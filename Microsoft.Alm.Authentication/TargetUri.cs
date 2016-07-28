@@ -153,7 +153,7 @@ namespace Microsoft.Alm.Authentication
                     Proxy = WebProxy,
                     UseProxy = useProxy,
                     MaxAutomaticRedirections = 2,
-                    UseDefaultCredentials = !useProxy
+                    UseDefaultCredentials = true
                 };
             }
         }
@@ -167,9 +167,11 @@ namespace Microsoft.Alm.Authentication
                     WebProxy proxy = new WebProxy(ProxyUri);
 
                     int dividerIndex = ProxyUri.UserInfo.IndexOf(':');
+                    bool hasUserNameAndPassword = dividerIndex != -1;
+                    bool hasAuthenticationSpecified = !string.IsNullOrWhiteSpace(ProxyUri.UserInfo);
 
-                    if (!string.IsNullOrWhiteSpace(ProxyUri.UserInfo)
-                        && dividerIndex != -1)
+                    // check if the user has specified authentications (comes as UserInfo)
+                    if (hasAuthenticationSpecified && hasUserNameAndPassword)
                     {
                         string userName = ProxyUri.UserInfo.Substring(0, dividerIndex);
                         string password = ProxyUri.UserInfo.Substring(dividerIndex + 1);
@@ -181,6 +183,11 @@ namespace Microsoft.Alm.Authentication
 
                         proxy.UseDefaultCredentials = false;
                         proxy.Credentials = proxyCreds;
+                    }
+                    else
+                    {
+                        // if no explicit proxy authentication, set to use default (Credentials will be set to DefaultCredentials automatically)
+                        proxy.UseDefaultCredentials = true;
                     }
 
                     return proxy;
