@@ -1057,6 +1057,7 @@ namespace Microsoft.Alm.CredentialHelper
 
             Configuration.Entry entry;
 
+            // look for authority config settings
             if (Configuration.TryGetEntry(ConfigPrefix, operationArguments.QueryUri, ConfigAuthortyKey, out entry))
             {
                 Trace.WriteLine("   " + ConfigAuthortyKey + " = " + entry.Value);
@@ -1095,6 +1096,7 @@ namespace Microsoft.Alm.CredentialHelper
                 }
             }
 
+            // look for interactivity config settings
             string interativeValue = null;
             if (EnvironmentVariables.ContainsKey(EnvironInteractiveKey)
                 && !string.IsNullOrWhiteSpace(interativeValue = EnvironmentVariables[EnvironInteractiveKey]))
@@ -1123,36 +1125,42 @@ namespace Microsoft.Alm.CredentialHelper
                 }
             }
 
+            // look for credential validation config settings
             bool? validateCredentials;
             if (TryReadBoolean(operationArguments.QueryUri, ConfigValidateKey, EnvironValidateKey, operationArguments.ValidateCredentials, out validateCredentials))
             {
                 operationArguments.ValidateCredentials = validateCredentials.Value;
             }
 
+            // look for write log config settings
             bool? writeLog;
             if (TryReadBoolean(operationArguments.QueryUri, ConfigWritelogKey, EnvironWritelogKey, operationArguments.WriteLog, out writeLog))
             {
                 operationArguments.WriteLog = writeLog.Value;
             }
 
+            // look for modal prompt config settings
             bool? useModalUi = null;
             if (TryReadBoolean(operationArguments.QueryUri, ConfigUseModalPromptKey, EnvironModalPromptKey, operationArguments.UseModalUi, out useModalUi))
             {
                 operationArguments.UseModalUi = useModalUi.Value;
             }
 
+            // look for credential preservation config settings
             bool? preserveCredentials;
             if (TryReadBoolean(operationArguments.QueryUri, ConfigPreserveCredentialsKey, EnvironPreserveCredentialsKey, operationArguments.PreserveCredentials, out preserveCredentials))
             {
                 operationArguments.PreserveCredentials = preserveCredentials.Value;
             }
 
+            // look for http path usage config settings
             bool? useHttpPath;
             if (TryReadBoolean(operationArguments.QueryUri, ConfigUseHttpPathKey, null, operationArguments.UseHttpPath, out useHttpPath))
             {
                 operationArguments.UseHttpPath = useHttpPath.Value;
             }
 
+            // look for http proxy config settings
             if (Configuration.TryGetEntry(ConfigPrefix, operationArguments.QueryUri, ConfigHttpProxyKey, out entry)
                 || Configuration.TryGetEntry("http", operationArguments.QueryUri, "proxy", out entry))
             {
@@ -1161,6 +1169,7 @@ namespace Microsoft.Alm.CredentialHelper
                 operationArguments.SetProxy(entry.Value);
             }
 
+            // look for custom namespace config settings
             if (Configuration.TryGetEntry(ConfigPrefix, operationArguments.QueryUri, ConfigNamespaceKey, out entry))
             {
                 Trace.WriteLine("   " + ConfigNamespaceKey + " = " + entry.Value);

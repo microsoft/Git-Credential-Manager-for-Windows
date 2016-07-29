@@ -227,7 +227,11 @@ namespace Microsoft.Alm.CredentialHelper
             Uri tmp = null;
             if (Uri.TryCreate(url, UriKind.Absolute, out tmp))
             {
-                Trace.WriteLine("   successfully set proxy to " + tmp.AbsoluteUri);
+                Trace.WriteLine("   successfully set proxy to " + tmp.AbsoluteUri + ".");
+            }
+            else
+            {
+                Trace.WriteLine("   proxy cleared.");
             }
             this.ProxyUri = tmp;
         }
