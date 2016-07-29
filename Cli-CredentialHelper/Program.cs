@@ -1373,8 +1373,7 @@ namespace Microsoft.Alm.CredentialHelper
 
             Trace.WriteLine("Program::TryReadBoolean");
 
-            Configuration.Entry entry;
-
+            Configuration.Entry entry = new Configuration.Entry { };
             value = null;
 
             string valueString = null;
@@ -1386,7 +1385,7 @@ namespace Microsoft.Alm.CredentialHelper
             }
 
             if (!string.IsNullOrWhiteSpace(valueString)
-                && Configuration.TryGetEntry(ConfigPrefix, queryUri, configKey, out entry))
+                || Configuration.TryGetEntry(ConfigPrefix, queryUri, configKey, out entry))
             {
                 Trace.WriteLine("   " + configKey + " = " + entry.Value);
                 valueString = entry.Value;
