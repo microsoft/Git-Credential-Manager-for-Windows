@@ -50,8 +50,10 @@ namespace Microsoft.Alm.CredentialHelper
         internal const string AskpsssPassword = "Password";
 
         internal const string CommandApprove = "approve";
-        internal const string CommandErase = "erase";
+        internal const string CommandClear = "clear";
+        internal const string CommandDelete = "delete";
         internal const string CommandDeploy = "deploy";
+        internal const string CommandErase = "erase";
         internal const string CommandFill = "fill";
         internal const string CommandGet = "get";
         internal const string CommandInstall = "install";
@@ -60,7 +62,6 @@ namespace Microsoft.Alm.CredentialHelper
         internal const string CommandStore = "store";
         internal const string CommandUninstall = "uninstall";
         internal const string CommandVersion = "version";
-        internal const string CommandDelete = "delete";
 
         internal const string ConfigAuthortyKey = "authority";
         internal const string ConfigHttpProxyKey = "httpProxy";
@@ -85,6 +86,7 @@ namespace Microsoft.Alm.CredentialHelper
         private static readonly List<string> CommandList = new List<string>
         {
             CommandApprove,
+            CommandClear,
             CommandDelete,
             CommandDeploy,
             CommandErase,
@@ -99,6 +101,9 @@ namespace Microsoft.Alm.CredentialHelper
         };
         private static readonly char[] NewLineChars = Environment.NewLine.ToCharArray();
 
+        /// <summary>
+        /// Gets the process's Git configuration based on current working directory, user's folder, and Git's system directory.
+        /// </summary>
         internal static Configuration Configuration
         {
             get
@@ -111,6 +116,9 @@ namespace Microsoft.Alm.CredentialHelper
             }
         }
         private static Configuration _configuration;
+        /// <summary>
+        /// Gets a map of the process's environmental variables keyed on case-insensitive names.
+        /// </summary>
         internal static IReadOnlyDictionary<string, string> EnvironmentVariables
         {
             get
@@ -128,6 +136,9 @@ namespace Microsoft.Alm.CredentialHelper
             }
         }
         private static Dictionary<string, string> _environmentVariables;
+        /// <summary>
+        /// Gets the path to the executable.
+        /// </summary>
         internal static string ExecutablePath
         {
             get
@@ -140,6 +151,9 @@ namespace Microsoft.Alm.CredentialHelper
             }
         }
         private static string _exeutablePath;
+        /// <summary>
+        /// Gets the directory where the executable is contained.
+        /// </summary>
         internal static string Location
         {
             get
@@ -152,6 +166,9 @@ namespace Microsoft.Alm.CredentialHelper
             }
         }
         private static string _location;
+        /// <summary>
+        /// Gets the name of the application.
+        /// </summary>
         internal static string Name
         {
             get
@@ -164,6 +181,33 @@ namespace Microsoft.Alm.CredentialHelper
             }
         }
         private static string _name;
+        /// <summary>
+        /// <para>Gets <see langword="true"/> if stderr is a TTY device; otherwise <see langword="false"/>.</para>
+        /// <para>If TTY, then it is very likely stderr is attached to a console and ineractions with the user are possible.</para>
+        /// </summary>
+        public static bool StandardErrorIsTty
+        {
+            get { return StandardHandleIsTty(NativeMethods.StandardHandleType.Error); }
+        }
+        /// <summary>
+        /// <para>Gets <see langword="true"/> if stdin is a TTY device; otherwise <see langword="false"/>.</para>
+        /// <para>If TTY, then it is very likely stdin is attached to a console and ineractions with the user are possible.</para>
+        /// </summary>
+        public static bool StandardInputIsTty
+        {
+            get { return StandardHandleIsTty(NativeMethods.StandardHandleType.Input); }
+        }
+        /// <summary>
+        /// <para>Gets <see langword="true"/> if stdout is a TTY device; otherwise <see langword="false"/>.</para>
+        /// <para>If TTY, then it is very likely stdout is attached to a console and ineractions with the user are possible.</para>
+        /// </summary>
+        public static bool StandardOutputIsTty
+        {
+            get { return StandardHandleIsTty(NativeMethods.StandardHandleType.Output); }
+        }
+        /// <summary>
+        /// Gets the version of the application.
+        /// </summary>
         internal static Version Version
         {
             get
@@ -197,8 +241,10 @@ namespace Microsoft.Alm.CredentialHelper
                 Dictionary<string, Action> actions = new Dictionary<string, Action>(StringComparer.OrdinalIgnoreCase)
                 {
                     { CommandApprove, Store },
-                    { CommandErase, Erase },
+                    { CommandClear, Clear },
+                    { CommandDelete, Delete },
                     { CommandDeploy, Deploy },
+                    { CommandErase, Erase },
                     { CommandFill, Get },
                     { CommandGet, Get },
                     { CommandInstall, Deploy },
@@ -207,7 +253,6 @@ namespace Microsoft.Alm.CredentialHelper
                     { CommandStore, Store },
                     { CommandUninstall, Remove },
                     { CommandVersion, PrintVersion },
-                    { CommandDelete, Delete },
                 };
 
                 // invoke action specified by arg0
@@ -221,7 +266,7 @@ namespace Microsoft.Alm.CredentialHelper
                     {
                         // display unknown command error
                         Console.Error.WriteLine("Unknown command '{0}'. Please use `{1} ?` to display help.", args[0], Program.Name);
-                    }                    
+                    }
                 }
             }
             catch (AggregateException exception)
@@ -266,7 +311,9 @@ namespace Microsoft.Alm.CredentialHelper
             {
                 Trace.WriteLine("   Username for '{0}' asked for and found.", url);
 
-                Console.Out.Write(operationArguments.CredUsername + "\n");
+                var utf8bytes = Encoding.UTF8.GetBytes(operationArguments.CredUsername + "\n");
+                var stdout = Console.OpenStandardOutput();
+                stdout.Write(utf8bytes, 0, utf8bytes.Length);
                 return true;
             }
 
@@ -275,11 +322,91 @@ namespace Microsoft.Alm.CredentialHelper
             {
                 Trace.WriteLine("   Password for '{0}' asked for and found.", url);
 
-                Console.Out.Write(operationArguments.CredPassword + "\n");
+                var utf8bytes = Encoding.UTF8.GetBytes(operationArguments.CredPassword + "\n");
+                var stdout = Console.OpenStandardOutput();
+                stdout.Write(utf8bytes, 0, utf8bytes.Length);
                 return true;
             }
 
             return false;
+        }
+
+        private static void Clear()
+        {
+            Trace.WriteLine("Program::Clear");
+
+            var args = Environment.GetCommandLineArgs();
+            string url = null;
+            bool forced = false;
+
+            if (args.Length <= 2)
+            {
+                if (!StandardInputIsTty)
+                {
+                    Trace.WriteLine("   standard input is not TTY, abandoning prompt.");
+
+                    return;
+                }
+
+                Trace.WriteLine("   prompting user for url.");
+
+                Console.Out.WriteLine(" Target Url:");
+                url = Console.In.ReadLine();
+            }
+            else
+            {
+                url = args[2];
+
+                if (args.Length > 3)
+                {
+                    bool.TryParse(args[3], out forced);
+                }
+            }
+
+            Trace.WriteLine("   url = " + url);
+
+            Uri uri;
+            if (Uri.TryCreate(url, UriKind.Absolute, out uri))
+            {
+                Trace.WriteLine("   targetUri = " + uri.AbsoluteUri + ".");
+
+                OperationArguments operationArguments = new OperationArguments(uri);
+
+                LoadOperationArguments(operationArguments);
+                EnableTraceLogging(operationArguments);
+
+                if (operationArguments.PreserveCredentials && !forced)
+                {
+                    Trace.Write("   attempting to delete preserved credentials without force.");
+                    Trace.Write("   prompting user for interactivity.");
+
+                    if (!StandardInputIsTty || !StandardErrorIsTty)
+                    {
+                        Trace.WriteLine("   standard input is not TTY, abandoning prompt.");
+                        return;
+                    }
+
+                    Console.Error.WriteLine(" credentials are protected by perserve flag, clear anyways? [Y]es, [N]o.");
+
+                    ConsoleKeyInfo key;
+                    while ((key = Console.ReadKey(true)).Key != ConsoleKey.Escape)
+                    {
+                        if (key.KeyChar == 'N' || key.KeyChar == 'n')
+                        {
+                            Trace.Write("   use cancelled.");
+                            return;
+                        }
+
+                        if (key.KeyChar == 'Y' || key.KeyChar == 'y')
+                        {
+                            Trace.Write("   use continued.");
+                            break;
+                        }
+                    }
+                }
+
+                DeleteCredentials(operationArguments);
+            }
         }
 
         private static void Delete()
@@ -306,7 +433,8 @@ namespace Microsoft.Alm.CredentialHelper
                     goto error_parse;
             }
 
-            OperationArguments operationArguments = new OperationArguments(Console.In);
+            var stdin = Console.OpenStandardInput();
+            OperationArguments operationArguments = new OperationArguments(stdin);
             operationArguments.QueryUri = uri;
 
             LoadOperationArguments(operationArguments);
@@ -340,7 +468,7 @@ namespace Microsoft.Alm.CredentialHelper
             return;
 
             error_parse:
-            Console.Out.WriteLine("Fatal: unable to parse target URI.");
+            Console.Error.WriteLine("Fatal: unable to parse target URI.");
         }
 
         private static void Deploy()
@@ -361,7 +489,8 @@ namespace Microsoft.Alm.CredentialHelper
             // parse the operations arguments from stdin (this is how git sends commands)
             // see: https://www.kernel.org/pub/software/scm/git/docs/technical/api-credentials.html
             // see: https://www.kernel.org/pub/software/scm/git/docs/git-credential.html
-            OperationArguments operationArguments = new OperationArguments(Console.In);
+            var stdin = Console.OpenStandardInput();
+            OperationArguments operationArguments = new OperationArguments(stdin);
 
             Debug.Assert(operationArguments != null, "The operationArguments is null");
             Debug.Assert(operationArguments.TargetUri != null, "The operationArgument.TargetUri is null");
@@ -379,29 +508,7 @@ namespace Microsoft.Alm.CredentialHelper
                 return;
             }
 
-            BaseAuthentication authentication = CreateAuthentication(operationArguments);
-
-            switch (operationArguments.Authority)
-            {
-                default:
-                case AuthorityType.Basic:
-                    Trace.WriteLine("   deleting basic credentials");
-                    authentication.DeleteCredentials(operationArguments.TargetUri);
-                    break;
-
-                case AuthorityType.AzureDirectory:
-                case AuthorityType.MicrosoftAccount:
-                    Trace.WriteLine("   deleting VSTS credentials");
-                    BaseVstsAuthentication vstsAuth = authentication as BaseVstsAuthentication;
-                    vstsAuth.DeleteCredentials(operationArguments.TargetUri);
-                    break;
-
-                case AuthorityType.GitHub:
-                    Trace.WriteLine("   deleting GitHub credentials");
-                    GitHubAuthentication ghAuth = authentication as GitHubAuthentication;
-                    ghAuth.DeleteCredentials(operationArguments.TargetUri);
-                    break;
-            }
+            DeleteCredentials(operationArguments);
         }
 
         private static void Get()
@@ -409,7 +516,8 @@ namespace Microsoft.Alm.CredentialHelper
             // parse the operations arguments from stdin (this is how git sends commands)
             // see: https://www.kernel.org/pub/software/scm/git/docs/technical/api-credentials.html
             // see: https://www.kernel.org/pub/software/scm/git/docs/git-credential.html
-            OperationArguments operationArguments = new OperationArguments(Console.In);
+            var stdin = Console.OpenStandardInput();
+            OperationArguments operationArguments = new OperationArguments(stdin);
 
             if (ReferenceEquals(operationArguments, null))
                 throw new ArgumentNullException("operationArguments");
@@ -424,7 +532,8 @@ namespace Microsoft.Alm.CredentialHelper
 
             QueryCredentials(operationArguments);
 
-            Console.Out.Write(operationArguments);
+            var stdout = Console.OpenStandardOutput();
+            operationArguments.WriteToStream(stdout);
         }
 
         private static void PrintHelpMessage()
@@ -576,7 +685,8 @@ namespace Microsoft.Alm.CredentialHelper
             // parse the operations arguments from stdin (this is how git sends commands)
             // see: https://www.kernel.org/pub/software/scm/git/docs/technical/api-credentials.html
             // see: https://www.kernel.org/pub/software/scm/git/docs/git-credential.html
-            OperationArguments operationArguments = new OperationArguments(Console.In);
+            var stdin = Console.OpenStandardInput();
+            OperationArguments operationArguments = new OperationArguments(stdin);
 
             Debug.Assert(operationArguments != null, "The operationArguments is null");
             Debug.Assert(operationArguments.CredUsername != null, "The operaionArgument.Username is null");
@@ -607,14 +717,20 @@ namespace Microsoft.Alm.CredentialHelper
 
             Trace.WriteLine("Program::BasicCredentialPrompt");
 
+            username = null;
+            password = null;
+
+            if (!StandardErrorIsTty || !StandardInputIsTty)
+            {
+                Trace.WriteLine("  not a tty detected, abandoning prompt.");
+                return false;
+            }
+
             titleMessage = titleMessage ?? "Please enter your credentials for ";
 
             StringBuilder buffer = new StringBuilder(BufferReadSize);
             uint read = 0;
             uint written = 0;
-
-            username = null;
-            password = null;
 
             NativeMethods.FileAccess fileAccessFlags = NativeMethods.FileAccess.GenericRead | NativeMethods.FileAccess.GenericWrite;
             NativeMethods.FileAttributes fileAttributes = NativeMethods.FileAttributes.Normal;
@@ -818,6 +934,39 @@ namespace Microsoft.Alm.CredentialHelper
 
                     // return the allocated authority or a generic MSA backed VSTS authentication object
                     return authority ?? new VstsMsaAuthentication(VstsCredentialScope, secrets);
+            }
+        }
+
+        private static void DeleteCredentials(OperationArguments operationArguments)
+        {
+            if (ReferenceEquals(operationArguments, null))
+                throw new ArgumentNullException("operationArguments");
+
+            Trace.WriteLine("Program::DeleteCredentials");
+            Trace.WriteLine("   targetUri = " + operationArguments.TargetUri);
+
+            BaseAuthentication authentication = CreateAuthentication(operationArguments);
+
+            switch (operationArguments.Authority)
+            {
+                default:
+                case AuthorityType.Basic:
+                    Trace.WriteLine("   deleting basic credentials");
+                    authentication.DeleteCredentials(operationArguments.TargetUri);
+                    break;
+
+                case AuthorityType.AzureDirectory:
+                case AuthorityType.MicrosoftAccount:
+                    Trace.WriteLine("   deleting VSTS credentials");
+                    BaseVstsAuthentication vstsAuth = authentication as BaseVstsAuthentication;
+                    vstsAuth.DeleteCredentials(operationArguments.TargetUri);
+                    break;
+
+                case AuthorityType.GitHub:
+                    Trace.WriteLine("   deleting GitHub credentials");
+                    GitHubAuthentication ghAuth = authentication as GitHubAuthentication;
+                    ghAuth.DeleteCredentials(operationArguments.TargetUri);
+                    break;
             }
         }
 
@@ -1362,6 +1511,13 @@ namespace Microsoft.Alm.CredentialHelper
                     operationArguments.SetCredentials(credentials);
                     break;
             }
+        }
+
+        private static bool StandardHandleIsTty(NativeMethods.StandardHandleType handleType)
+        {
+            var standardHandle = NativeMethods.GetStdHandle(NativeMethods.StandardHandleType.Output);
+            var handleFileType = NativeMethods.GetFileType(standardHandle);
+            return handleFileType == NativeMethods.FileType.Char;
         }
 
         private static bool TryReadBoolean(Uri queryUri, string configKey, string environKey, bool defaultValue, out bool? value)

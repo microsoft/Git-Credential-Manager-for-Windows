@@ -11,16 +11,22 @@ namespace Microsoft.Alm.CredentialHelper.Test
         [TestMethod]
         public void Typical()
         {
-            const string input = @"protocol=https
-host=example.visualstudio.com
-path=path
-username=userName
-password=incorrect
-";
+            const string input = "protocol=https\n"
+                               + "host=example.visualstudio.com\n"
+                               + "path=path\n"
+                               + "username=userName\n"
+                               + "password=incorrect\n";
+
             OperationArguments cut;
-            using (var sr = new StringReader(input))
+            using (var memory = new MemoryStream())
+            using (var writer = new StreamWriter(memory))
             {
-                cut = new OperationArguments(sr);
+                writer.Write(input);
+                writer.Flush();
+
+                memory.Seek(0, SeekOrigin.Begin);
+
+                cut = new OperationArguments(memory);
             }
 
             Assert.AreEqual("https", cut.QueryProtocol);
