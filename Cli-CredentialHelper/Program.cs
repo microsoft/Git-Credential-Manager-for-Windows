@@ -717,14 +717,20 @@ namespace Microsoft.Alm.CredentialHelper
 
             Trace.WriteLine("Program::BasicCredentialPrompt");
 
+            username = null;
+            password = null;
+
+            if (!StandardErrorIsTty || !StandardInputIsTty)
+            {
+                Trace.WriteLine("  not a tty detected, abandoning prompt.");
+                return false;
+            }
+
             titleMessage = titleMessage ?? "Please enter your credentials for ";
 
             StringBuilder buffer = new StringBuilder(BufferReadSize);
             uint read = 0;
             uint written = 0;
-
-            username = null;
-            password = null;
 
             NativeMethods.FileAccess fileAccessFlags = NativeMethods.FileAccess.GenericRead | NativeMethods.FileAccess.GenericWrite;
             NativeMethods.FileAttributes fileAttributes = NativeMethods.FileAttributes.Normal;
