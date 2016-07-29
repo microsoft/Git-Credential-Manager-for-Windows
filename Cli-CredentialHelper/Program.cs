@@ -1415,6 +1415,13 @@ namespace Microsoft.Alm.CredentialHelper
             }
         }
 
+        private static bool StandardHandleIsTty(NativeMethods.StandardHandleType handleType)
+        {
+            var standardHandle = NativeMethods.GetStdHandle(NativeMethods.StandardHandleType.Output);
+            var handleFileType = NativeMethods.GetFileType(standardHandle);
+            return handleFileType == NativeMethods.FileType.Char;
+        }
+
         private static bool TryReadBoolean(Uri queryUri, string configKey, string environKey, bool defaultValue, out bool? value)
         {
             if (ReferenceEquals(queryUri, null))

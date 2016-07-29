@@ -332,6 +332,46 @@ namespace Microsoft.Alm.CredentialHelper
             Delete = 0x00000004
         }
 
+        public enum FileType
+        {
+            /// <summary>
+            /// Either the type of the specified file is unknown, or the function failed.
+            /// </summary>
+            Unknown = 0x0000,
+            /// <summary>
+            /// The specified file is a disk file.
+            /// </summary>
+            Disk = 0x0001,
+            /// <summary>
+            /// The specified file is a character file, typically an LPT device or a console.
+            /// </summary>
+            Char = 0x0002,
+            /// <summary>
+            /// The specified file is a socket, a named pipe, or an anonymous pipe.
+            /// </summary>
+            Pipe = 0x0003,
+            /// <summary>
+            /// Unused.
+            /// </summary>
+            Remote = 0x8000,
+        };
+
+        public enum StandardHandleType
+        {
+            /// <summary>
+            /// The standard input device. Initially, this is the console input buffer, CONIN$.
+            /// </summary>
+            Input = -10,
+            /// <summary>
+            /// The standard output device. Initially, this is the active console screen buffer, CONOUT$.
+            /// </summary>
+            Output = -11,
+            /// <summary>
+            /// The standard error device. Initially, this is the active console screen buffer, CONOUT$.
+            /// </summary>
+            Error = -12
+        };
+
         [Flags]
         public enum CredentialPackFlags : uint
         {
@@ -736,6 +776,22 @@ namespace Microsoft.Alm.CredentialHelper
         /// <returns>True if success; otherwise false.</returns>
         [DllImport(Kernel32, CallingConvention = CallingConvention.StdCall, CharSet = CharSet.Unicode, EntryPoint = "GetConsoleMode", SetLastError = true)]
         public static extern bool GetConsoleMode(SafeFileHandle consoleHandle, out ConsoleMode consoleMode);
+
+        /// <summary>
+        /// Retrieves the file type of the specified file.
+        /// </summary>
+        /// <param name="fileHandle">A handle to the file.</param>
+        /// <returns>A <see cref="FileType"/>.</returns>
+        [DllImport(Kernel32, CallingConvention = CallingConvention.StdCall, CharSet = CharSet.Unicode, EntryPoint = "GetFileType", SetLastError = true)]
+        public static extern FileType GetFileType(IntPtr fileHandle);
+
+        /// <summary>
+        /// Retrieves a handle to the specified standard device (standard input, standard output, or standard error).
+        /// </summary>
+        /// <param name="std"></param>
+        /// <returns>A Handle.</returns>
+        [DllImport(Kernel32, CallingConvention = CallingConvention.StdCall, CharSet = CharSet.Unicode, EntryPoint = "GetStdHandle", SetLastError = true)]
+        public static extern IntPtr GetStdHandle(StandardHandleType std);
 
         /// <summary>
         /// Reads character input from the console input buffer and removes it from the buffer.
