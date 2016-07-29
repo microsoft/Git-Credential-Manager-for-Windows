@@ -33,47 +33,74 @@ namespace Microsoft.Alm.CredentialHelper
 {
     internal sealed class OperationArguments
     {
-        internal OperationArguments(TextReader stdin)
+        internal OperationArguments(Stream readableStream)
             : this()
         {
-            if (ReferenceEquals(stdin, null))
+            if (ReferenceEquals(readableStream, null))
                 throw new ArgumentNullException("stdin");
 
-            if (stdin == TextReader.Null)
+            if (readableStream == Stream.Null || !readableStream.CanRead)
             {
-                Console.Error.WriteLine("Unable to read from stdin");
+                Console.Error.WriteLine("Fatal: unable to read input.");
                 Environment.Exit(-1);
             }
             else
             {
-                string line;
-                while (!String.IsNullOrWhiteSpace((line = stdin.ReadLine())))
+                // 
+                byte[] buffer = new byte[4096];
+                int read = 0;
+
+                int r;
+                while ((r = readableStream.Read(buffer, read, buffer.Length - read)) > 0)
                 {
-                    string[] pair = line.Split(new[] { '=' }, 2);
+                    read += r;
 
-                    if (pair.Length == 2)
+                    // if we've filled the buffer, make it larger
+                    // this could hit an out of memory condition, but that'd require
+                    // the called to be attempting to do so, since that's not a security
+                    // threat we can safely ignore that and allow NetFx to handle it
+                    if (read == buffer.Length)
                     {
-                        switch (pair[0])
+                        Array.Resize(ref buffer, buffer.Length * 2);
+                    }
+                }
+
+                // Git uses UTF-8 for string, don't let the OS decide how to decode it
+                // instead we'll actively decode the UTF-8 block ourselves
+                string input = Encoding.UTF8.GetString(buffer, 0, read);
+
+                // the `StringReader` is just useful
+                using (StringReader reader = new StringReader(input))
+                {
+                    string line;
+                    while (!String.IsNullOrWhiteSpace((line = reader.ReadLine())))
+                    {
+                        string[] pair = line.Split(new[] { '=' }, 2);
+
+                        if (pair.Length == 2)
                         {
-                            case "protocol":
-                                this.QueryProtocol = pair[1];
-                                break;
+                            switch (pair[0])
+                            {
+                                case "protocol":
+                                    this.QueryProtocol = pair[1];
+                                    break;
 
-                            case "host":
-                                this.QueryHost = pair[1];
-                                break;
+                                case "host":
+                                    this.QueryHost = pair[1];
+                                    break;
 
-                            case "path":
-                                this.QueryPath = pair[1];
-                                break;
+                                case "path":
+                                    this.QueryPath = pair[1];
+                                    break;
 
-                            case "username":
-                                this.CredUsername = pair[1];
-                                break;
+                                case "username":
+                                    this.CredUsername = pair[1];
+                                    break;
 
-                            case "password":
-                                this.CredPassword = pair[1];
-                                break;
+                                case "password":
+                                    this.CredPassword = pair[1];
+                                    break;
+                            }
                         }
                     }
                 }
@@ -233,6 +260,27 @@ namespace Microsoft.Alm.CredentialHelper
             }
 
             return builder.ToString();
+        }
+
+        /// <summary>
+        /// Writes the UTF-8 encoded value of <see cref="ToString"/> directly to a <see cref="Stream"/>.
+        /// </summary>
+        /// <param name="writableStream">The <see cref="Stream"/> to write to.</param>
+        public void WriteToStream(Stream writableStream)
+        {
+            if (ReferenceEquals(writableStream, null))
+                throw new ArgumentNullException("writableStream");
+            if (!writableStream.CanWrite)
+                throw new ArgumentException("writableStream");
+
+            // Git reads/writes UTF-8, we'll explicitly encode to Utf-8 to
+            // avoid NetFx or the operating system making the wrong encoding
+            // decisions.
+            string output = ToString();
+            byte[] bytes = Encoding.UTF8.GetBytes(output);
+
+            // write the bytes.
+            writableStream.Write(bytes, 0, bytes.Length);
         }
 
         internal void CreateTargetUri()

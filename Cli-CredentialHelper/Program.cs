@@ -99,6 +99,9 @@ namespace Microsoft.Alm.CredentialHelper
         };
         private static readonly char[] NewLineChars = Environment.NewLine.ToCharArray();
 
+        /// <summary>
+        /// Gets the process's Git configuration based on current working directory, user's folder, and Git's system directory.
+        /// </summary>
         internal static Configuration Configuration
         {
             get
@@ -111,6 +114,9 @@ namespace Microsoft.Alm.CredentialHelper
             }
         }
         private static Configuration _configuration;
+        /// <summary>
+        /// Gets a map of the process's environmental variables keyed on case-insensitive names.
+        /// </summary>
         internal static IReadOnlyDictionary<string, string> EnvironmentVariables
         {
             get
@@ -128,6 +134,9 @@ namespace Microsoft.Alm.CredentialHelper
             }
         }
         private static Dictionary<string, string> _environmentVariables;
+        /// <summary>
+        /// Gets the path to the executable.
+        /// </summary>
         internal static string ExecutablePath
         {
             get
@@ -140,6 +149,9 @@ namespace Microsoft.Alm.CredentialHelper
             }
         }
         private static string _exeutablePath;
+        /// <summary>
+        /// Gets the directory where the executable is contained.
+        /// </summary>
         internal static string Location
         {
             get
@@ -152,6 +164,9 @@ namespace Microsoft.Alm.CredentialHelper
             }
         }
         private static string _location;
+        /// <summary>
+        /// Gets the name of the application.
+        /// </summary>
         internal static string Name
         {
             get
@@ -164,6 +179,33 @@ namespace Microsoft.Alm.CredentialHelper
             }
         }
         private static string _name;
+        /// <summary>
+        /// <para>Gets <see langword="true"/> if stderr is a TTY device; otherwise <see langword="false"/>.</para>
+        /// <para>If TTY, then it is very likely stderr is attached to a console and ineractions with the user are possible.</para>
+        /// </summary>
+        public static bool StandardErrorIsTty
+        {
+            get { return StandardHandleIsTty(NativeMethods.StandardHandleType.Error); }
+        }
+        /// <summary>
+        /// <para>Gets <see langword="true"/> if stdin is a TTY device; otherwise <see langword="false"/>.</para>
+        /// <para>If TTY, then it is very likely stdin is attached to a console and ineractions with the user are possible.</para>
+        /// </summary>
+        public static bool StandardInputIsTty
+        {
+            get { return StandardHandleIsTty(NativeMethods.StandardHandleType.Input); }
+        }
+        /// <summary>
+        /// <para>Gets <see langword="true"/> if stdout is a TTY device; otherwise <see langword="false"/>.</para>
+        /// <para>If TTY, then it is very likely stdout is attached to a console and ineractions with the user are possible.</para>
+        /// </summary>
+        public static bool StandardOutputIsTty
+        {
+            get { return StandardHandleIsTty(NativeMethods.StandardHandleType.Output); }
+        }
+        /// <summary>
+        /// Gets the version of the application.
+        /// </summary>
         internal static Version Version
         {
             get
@@ -266,7 +308,9 @@ namespace Microsoft.Alm.CredentialHelper
             {
                 Trace.WriteLine("   Username for '{0}' asked for and found.", url);
 
-                Console.Out.Write(operationArguments.CredUsername + "\n");
+                var utf8bytes = Encoding.UTF8.GetBytes(operationArguments.CredUsername + "\n");
+                var stdout = Console.OpenStandardOutput();
+                stdout.Write(utf8bytes, 0, utf8bytes.Length);
                 return true;
             }
 
@@ -275,7 +319,9 @@ namespace Microsoft.Alm.CredentialHelper
             {
                 Trace.WriteLine("   Password for '{0}' asked for and found.", url);
 
-                Console.Out.Write(operationArguments.CredPassword + "\n");
+                var utf8bytes = Encoding.UTF8.GetBytes(operationArguments.CredPassword + "\n");
+                var stdout = Console.OpenStandardOutput();
+                stdout.Write(utf8bytes, 0, utf8bytes.Length);
                 return true;
             }
 
@@ -306,7 +352,8 @@ namespace Microsoft.Alm.CredentialHelper
                     goto error_parse;
             }
 
-            OperationArguments operationArguments = new OperationArguments(Console.In);
+            var stdin = Console.OpenStandardInput();
+            OperationArguments operationArguments = new OperationArguments(stdin);
             operationArguments.QueryUri = uri;
 
             LoadOperationArguments(operationArguments);
@@ -340,7 +387,7 @@ namespace Microsoft.Alm.CredentialHelper
             return;
 
             error_parse:
-            Console.Out.WriteLine("Fatal: unable to parse target URI.");
+            Console.Error.WriteLine("Fatal: unable to parse target URI.");
         }
 
         private static void Deploy()
@@ -361,7 +408,8 @@ namespace Microsoft.Alm.CredentialHelper
             // parse the operations arguments from stdin (this is how git sends commands)
             // see: https://www.kernel.org/pub/software/scm/git/docs/technical/api-credentials.html
             // see: https://www.kernel.org/pub/software/scm/git/docs/git-credential.html
-            OperationArguments operationArguments = new OperationArguments(Console.In);
+            var stdin = Console.OpenStandardInput();
+            OperationArguments operationArguments = new OperationArguments(stdin);
 
             Debug.Assert(operationArguments != null, "The operationArguments is null");
             Debug.Assert(operationArguments.TargetUri != null, "The operationArgument.TargetUri is null");
@@ -409,7 +457,8 @@ namespace Microsoft.Alm.CredentialHelper
             // parse the operations arguments from stdin (this is how git sends commands)
             // see: https://www.kernel.org/pub/software/scm/git/docs/technical/api-credentials.html
             // see: https://www.kernel.org/pub/software/scm/git/docs/git-credential.html
-            OperationArguments operationArguments = new OperationArguments(Console.In);
+            var stdin = Console.OpenStandardInput();
+            OperationArguments operationArguments = new OperationArguments(stdin);
 
             if (ReferenceEquals(operationArguments, null))
                 throw new ArgumentNullException("operationArguments");
@@ -424,7 +473,8 @@ namespace Microsoft.Alm.CredentialHelper
 
             QueryCredentials(operationArguments);
 
-            Console.Out.Write(operationArguments);
+            var stdout = Console.OpenStandardOutput();
+            operationArguments.WriteToStream(stdout);
         }
 
         private static void PrintHelpMessage()
@@ -576,7 +626,8 @@ namespace Microsoft.Alm.CredentialHelper
             // parse the operations arguments from stdin (this is how git sends commands)
             // see: https://www.kernel.org/pub/software/scm/git/docs/technical/api-credentials.html
             // see: https://www.kernel.org/pub/software/scm/git/docs/git-credential.html
-            OperationArguments operationArguments = new OperationArguments(Console.In);
+            var stdin = Console.OpenStandardInput();
+            OperationArguments operationArguments = new OperationArguments(stdin);
 
             Debug.Assert(operationArguments != null, "The operationArguments is null");
             Debug.Assert(operationArguments.CredUsername != null, "The operaionArgument.Username is null");
