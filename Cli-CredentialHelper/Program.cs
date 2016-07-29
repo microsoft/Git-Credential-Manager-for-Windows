@@ -221,7 +221,7 @@ namespace Microsoft.Alm.CredentialHelper
                     {
                         // display unknown command error
                         Console.Error.WriteLine("Unknown command '{0}'. Please use `{1} ?` to display help.", args[0], Program.Name);
-                    }                    
+                    }
                 }
             }
             catch (AggregateException exception)
@@ -866,11 +866,17 @@ namespace Microsoft.Alm.CredentialHelper
                     operationArguments.Authority = AuthorityType.AzureDirectory;
                 }
                 else if (ConfigKeyComparer.Equals(entry.Value, "Integrated")
-                         || ConfigKeyComparer.Equals(entry.Value, "NTLM")
+                         || ConfigKeyComparer.Equals(entry.Value, "Windows")
+                         || ConfigKeyComparer.Equals(entry.Value, "TFS")
                          || ConfigKeyComparer.Equals(entry.Value, "Kerberos")
+                         || ConfigKeyComparer.Equals(entry.Value, "NTLM")
                          || ConfigKeyComparer.Equals(entry.Value, "SSO"))
                 {
                     operationArguments.Authority = AuthorityType.Integrated;
+                }
+                else if (ConfigKeyComparer.Equals(entry.Value, "GitHub"))
+                {
+                    operationArguments.Authority = AuthorityType.GitHub;
                 }
                 else
                 {
