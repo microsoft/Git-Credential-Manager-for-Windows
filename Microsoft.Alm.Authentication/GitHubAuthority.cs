@@ -69,11 +69,7 @@ namespace Microsoft.Alm.Authentication
 
             Token token = null;
 
-            using (HttpClientHandler handler = new HttpClientHandler()
-            {
-                MaxAutomaticRedirections = 2,
-                UseDefaultCredentials = true
-            })
+            using (HttpClientHandler handler = targetUri.HttpClientHandler)
             using (HttpClient httpClient = new HttpClient(handler)
             {
                 Timeout = TimeSpan.FromMilliseconds(RequestTimeout)
@@ -196,11 +192,7 @@ namespace Microsoft.Alm.Authentication
             string authEncode = Convert.ToBase64String(authBytes);
 
             // craft the request header for the GitHub v3 API w/ credentials
-            using (HttpClientHandler handler = new HttpClientHandler()
-            {
-                MaxAutomaticRedirections = 2,
-                UseDefaultCredentials = true
-            })
+            using (HttpClientHandler handler = targetUri.HttpClientHandler)
             using (HttpClient httpClient = new HttpClient(handler)
             {
                 Timeout = TimeSpan.FromMilliseconds(RequestTimeout)

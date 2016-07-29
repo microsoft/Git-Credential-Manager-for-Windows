@@ -1,4 +1,4 @@
-﻿/**** Git Credential Manager for Windows ****
+/**** Git Credential Manager for Windows ****
  * 
  * Copyright (c) Microsoft Corporation
  * All rights reserved.
@@ -24,6 +24,8 @@
 **/
 
 using System;
+using System.Net;
+using System.Net.Http;
 
 namespace Microsoft.Alm.Authentication
 {
@@ -61,74 +63,67 @@ namespace Microsoft.Alm.Authentication
         { }
 
         /// <summary>
-        /// Gets the <see cref="Uri.AbsolutePath"/> of the <see cref="ResolvedUri"/>.
+        /// Gets the <see cref="Uri.AbsolutePath"/> of the <see cref="ActualUri"/>.
         /// </summary>
         public string AbsolutePath
         {
-            get { return ResolvedUri.AbsolutePath; }
+            get { return ActualUri.AbsolutePath; }
         }
         /// <summary>
         /// The actual <see cref="Uri"/> of the target.
         /// </summary>
         public readonly Uri ActualUri;
         /// <summary>
-        /// Gets the <see cref="Uri.DnsSafeHost"/> of the <see cref="ResolvedUri"/>.
+        /// Gets the <see cref="Uri.DnsSafeHost"/> of the <see cref="ActualUri"/>.
         /// </summary>
         public string DnsSafeHost
         {
-            get { return ResolvedUri.DnsSafeHost; }
+            get { return ActualUri.DnsSafeHost; }
         }
         /// <summary>
-        /// Gets the <see cref="Uri.Host"/> of the <see cref="ResolvedUri"/>.
+        /// Gets the <see cref="Uri.Host"/> of the <see cref="ActualUri"/>.
         /// </summary>
         public string Host
         {
-            get { return ResolvedUri.Host; }
+            get { return ActualUri.Host; }
         }
         /// <summary>
-        /// Gets whether the <see cref="ResolvedUri"/> is absolute.
+        /// Gets whether the <see cref="ActualUri"/> is absolute.
         /// </summary>
         public bool IsAbsoluteUri { get { return true; } }
         /// <summary>
-        /// Gets whether the port value of the <see cref="ResolvedUri"/> is the default for this scheme.
+        /// Gets whether the port value of the <see cref="ActualUri"/> is the default for this scheme.
         /// </summary>
-        public bool IsDefaultPort { get { return ResolvedUri.IsDefaultPort; } }
+        public bool IsDefaultPort { get { return ActualUri.IsDefaultPort; } }
         /// <summary>
-        /// Gets the <see cref="Uri.Port"/> of the <see cref="ResolvedUri"/>.
+        /// Gets the <see cref="Uri.Port"/> of the <see cref="ActualUri"/>.
         /// </summary>
         public int Port
         {
-            get { return ResolvedUri.Port; }
+            get { return ActualUri.Port; }
         }
         /// <summary>
         /// The proxy <see cref="Uri"/> of the target if it exists; otherwise <see langword="null"/>.
         /// </summary>
         public readonly Uri ProxyUri;
         /// <summary>
-        /// Gets <see cref="ProxyUri"/> if it exists; otherwise <see cref="ActualUri"/>.
-        /// </summary>
-        public Uri ResolvedUri
-        {
-            get { return (ProxyUri ?? ActualUri); }
-        }
-        /// <summary>
-        /// Gets the <see cref="Uri.Scheme"/> name of the <see cref="ResolvedUri"/>.
+        /// Gets the <see cref="Uri.Scheme"/> name of the <see cref="ActualUri"/>.
         /// </summary>
         public string Scheme
         {
-            get { return ResolvedUri.Scheme; }
+            get { return ActualUri.Scheme; }
         }
         /// <summary>
-        /// Determines whether the <see cref="ResolvedUri"/> is a base of the specified <see cref="Uri"/>.
+        /// Determines whether the <see cref="ActualUri"/> is a base of the specified <see cref="Uri"/>.
         /// </summary>
         /// <param name="uri">The <see cref="Uri"/> to test.</param>
         /// <returns><see langword="True"/> if is a base of <param name="uri"/>; otherwise, <see langword="false"/>.</returns>
         public bool IsBaseOf(Uri uri)
         {
-            return ResolvedUri.IsBaseOf(uri);
+            return ActualUri.IsBaseOf(uri);
         }
         /// <summary>
-        /// Determines whether the <see cref="ResolvedUri"/> is a base of the specified <see cref="TargetUri.ResolvedUri"/>.
+        /// Determines whether the <see cref="ActualUri"/> is a base of the specified <see cref="TargetUri.ActualUri"/>.
         /// </summary>
         /// <param name="targetUri">The <see cref="TargetUri"/> to test.</param>
         /// <returns><see langword="True"/> if is a base of <param name="targetUri"/>; otherwise, <see langword="false"/>.</returns>
@@ -137,22 +132,78 @@ namespace Microsoft.Alm.Authentication
             if (targetUri == null)
                 return false;
 
-            return ResolvedUri.IsBaseOf(targetUri.ResolvedUri);
+            return ActualUri.IsBaseOf(targetUri.ActualUri);
         }
         /// <summary>
-        /// Gets a canonical string representation for the <see cref="ResolvedUri"/>.
+        /// Gets a canonical string representation for the <see cref="ActualUri"/>.
         /// </summary>
         /// <returns></returns>
         public override String ToString()
         {
-            return ResolvedUri.ToString();
+            return ActualUri.ToString();
+        }
+
+        public HttpClientHandler HttpClientHandler
+        {
+            get
+            {
+                bool useProxy = ProxyUri != null;
+                return new HttpClientHandler()
+                {
+                    Proxy = WebProxy,
+                    UseProxy = useProxy,
+                    MaxAutomaticRedirections = 2,
+                    UseDefaultCredentials = true
+                };
+            }
+        }
+
+        public WebProxy WebProxy
+        {
+            get
+            {
+                if (ProxyUri != null)
+                {
+                    WebProxy proxy = new WebProxy(ProxyUri);
+
+                    int dividerIndex = ProxyUri.UserInfo.IndexOf(':');
+                    bool hasUserNameAndPassword = dividerIndex != -1;
+                    bool hasAuthenticationSpecified = !string.IsNullOrWhiteSpace(ProxyUri.UserInfo);
+
+                    // check if the user has specified authentications (comes as UserInfo)
+                    if (hasAuthenticationSpecified && hasUserNameAndPassword)
+                    {
+                        string userName = ProxyUri.UserInfo.Substring(0, dividerIndex);
+                        string password = ProxyUri.UserInfo.Substring(dividerIndex + 1);
+
+                        NetworkCredential proxyCreds = new NetworkCredential(
+                            userName,
+                            password
+                        );
+
+                        proxy.UseDefaultCredentials = false;
+                        proxy.Credentials = proxyCreds;
+                    }
+                    else
+                    {
+                        // if no explicit proxy authentication, set to use default (Credentials will be set to DefaultCredentials automatically)
+                        proxy.UseDefaultCredentials = true;
+                    }
+
+                    return proxy;
+                }
+                else
+                {
+                    return new WebProxy();
+                }
+            }
         }
 
         public static implicit operator Uri(TargetUri targetUri)
         {
             return ReferenceEquals(targetUri, null)
                 ? null
-                : targetUri.ResolvedUri;
+                : targetUri.ActualUri;
         }
 
         public static implicit operator TargetUri(Uri uri)
