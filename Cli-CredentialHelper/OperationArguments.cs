@@ -57,7 +57,7 @@ namespace Microsoft.Alm.CredentialHelper
 
                     // if we've filled the buffer, make it larger
                     // this could hit an out of memory condition, but that'd require
-                    // the called to be attempting to do so, since that's not a security
+                    // the called to be attempting to do so, since that's not a secyity
                     // threat we can safely ignore that and allow NetFx to handle it
                     if (read == buffer.Length)
                     {
