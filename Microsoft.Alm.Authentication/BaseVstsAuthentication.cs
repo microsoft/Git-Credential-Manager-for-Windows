@@ -285,31 +285,39 @@ namespace Microsoft.Alm.Authentication
                 string tenant = null;
                 WebResponse response;
 
-                try
+                if (StringComparer.OrdinalIgnoreCase.Equals(targetUri.Scheme, "http")
+                    || StringComparer.OrdinalIgnoreCase.Equals(targetUri.Scheme, "https"))
                 {
-                    // build a request that we expect to fail, do not allow redirect to sign in url
-                    var request = WebRequest.CreateHttp(targetUri);
-                    request.UserAgent = Global.GetUserAgent();
-                    request.Method = "HEAD";
-                    request.AllowAutoRedirect = false;
-                    // get the response from the server
-                    response = request.GetResponse();
+                    try
+                    {
+                        // build a request that we expect to fail, do not allow redirect to sign in url
+                        var request = WebRequest.CreateHttp(targetUri);
+                        request.UserAgent = Global.GetUserAgent();
+                        request.Method = "HEAD";
+                        request.AllowAutoRedirect = false;
+                        // get the response from the server
+                        response = request.GetResponse();
+                    }
+                    catch (WebException exception)
+                    {
+                        response = exception.Response;
+                    }
+
+                    // if the response exists and we have headers, parse them
+                    if (response != null && response.SupportsHeaders)
+                    {
+                        Trace.WriteLine("   server has responded");
+
+                        // find the VSTS resource tenant entry
+                        tenant = response.Headers[VstsResourceTenantHeader];
+
+                        return !String.IsNullOrWhiteSpace(tenant)
+                            && Guid.TryParse(tenant, out tenantId);
+                    }
                 }
-                catch (WebException exception)
+                else
                 {
-                    response = exception.Response;
-                }
-
-                // if the response exists and we have headers, parse them
-                if (response != null && response.SupportsHeaders)
-                {
-                    Trace.WriteLine("   server has responded");
-
-                    // find the VSTS resource tenant entry
-                    tenant = response.Headers[VstsResourceTenantHeader];
-
-                    return !String.IsNullOrWhiteSpace(tenant)
-                        && Guid.TryParse(tenant, out tenantId);
+                    Trace.Write("   detected non-https based protocol: " + targetUri.Scheme);
                 }
             }
 

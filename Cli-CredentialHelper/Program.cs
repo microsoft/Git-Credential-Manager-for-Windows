@@ -42,7 +42,12 @@ namespace Microsoft.Alm.CredentialHelper
     {
         public const string Title = "Git Credential Manager for Windows";
         public const string SourceUrl = "https://github.com/Microsoft/Git-Credential-Manager-for-Windows";
-        public static readonly StringComparer ConfigStringComparer = StringComparer.OrdinalIgnoreCase;
+        public static readonly StringComparer ConfigKeyComparer = StringComparer.OrdinalIgnoreCase;
+        public static readonly StringComparer ConfigValueComparer = StringComparer.InvariantCultureIgnoreCase;
+        public static readonly StringComparer EnvironKeyComparer = StringComparer.OrdinalIgnoreCase;
+
+        internal const string AskpassUsername = "Username";
+        internal const string AskpsssPassword = "Password";
 
         internal const string CommandApprove = "approve";
         internal const string CommandErase = "erase";
@@ -67,6 +72,12 @@ namespace Microsoft.Alm.CredentialHelper
         internal const string ConfigValidateKey = "validate";
         internal const string ConfigWritelogKey = "writelog";
 
+        internal const string EnvironInteractiveKey = "GCM_INTERACTIVE";
+        internal const string EnvironPreserveCredentialsKey = "GCM_PRESERVE_CREDS";
+        internal const string EnvironModalPromptKey = "GCM_MODAL_PROMPT";
+        internal const string EnvironValidateKey = "GCM_VALIDATE";
+        internal const string EnvironWritelogKey = "GCM_WRITELOG";
+
         private const string ConfigPrefix = "credential";
         private const string SecretsNamespace = "git";
         private static readonly VstsTokenScope VstsCredentialScope = VstsTokenScope.CodeWrite | VstsTokenScope.PackagingRead;
@@ -88,6 +99,35 @@ namespace Microsoft.Alm.CredentialHelper
         };
         private static readonly char[] NewLineChars = Environment.NewLine.ToCharArray();
 
+        internal static Configuration Configuration
+        {
+            get
+            {
+                if (_configuration == null)
+                {
+                    _configuration = new Configuration();
+                }
+                return _configuration;
+            }
+        }
+        private static Configuration _configuration;
+        internal static IReadOnlyDictionary<string, string> EnvironmentVariables
+        {
+            get
+            {
+                if (_environmentVariables == null)
+                {
+                    _environmentVariables = new Dictionary<string, string>(EnvironKeyComparer);
+                    var iter = Environment.GetEnvironmentVariables().GetEnumerator();
+                    while (iter.MoveNext())
+                    {
+                        _environmentVariables.Add(iter.Key as string, iter.Value as string);
+                    }
+                }
+                return _environmentVariables;
+            }
+        }
+        private static Dictionary<string, string> _environmentVariables;
         internal static string ExecutablePath
         {
             get
@@ -177,8 +217,11 @@ namespace Microsoft.Alm.CredentialHelper
                 }
                 else
                 {
-                    // display unknown command error
-                    Console.Error.WriteLine("Unknown command '{0}'. Please use `{1} ?` to display help.", args[0], Program.Name);
+                    if (!Askpass())
+                    {
+                        // display unknown command error
+                        Console.Error.WriteLine("Unknown command '{0}'. Please use `{1} ?` to display help.", args[0], Program.Name);
+                    }                    
                 }
             }
             catch (AggregateException exception)
@@ -196,6 +239,192 @@ namespace Microsoft.Alm.CredentialHelper
             }
 
             Trace.Flush();
+        }
+
+        #region Commands
+
+        private static bool Askpass()
+        {
+            Trace.WriteLine("Program::Askpass");
+
+            string[] args = Environment.GetCommandLineArgs();
+            string url = args[3]?.Trim('\'', ':');
+            Uri targetUri = new Uri(url);
+
+            Trace.WriteLine("   verb = " + args[1]);
+            Trace.WriteLine("   targetUri = " + targetUri);
+
+            OperationArguments operationArguments = new OperationArguments(targetUri);
+
+            LoadOperationArguments(operationArguments);
+            EnableTraceLogging(operationArguments);
+
+            QueryCredentials(operationArguments);
+
+            if (StringComparer.InvariantCultureIgnoreCase.Equals(args[1], AskpassUsername)
+                && operationArguments.CredUsername != null)
+            {
+                Trace.WriteLine("   Username for '{0}' asked for and found.", url);
+
+                Console.Out.Write(operationArguments.CredUsername + "\n");
+                return true;
+            }
+
+            if (StringComparer.InvariantCultureIgnoreCase.Equals(args[1], AskpsssPassword)
+                && operationArguments.CredPassword != null)
+            {
+                Trace.WriteLine("   Password for '{0}' asked for and found.", url);
+
+                Console.Out.Write(operationArguments.CredPassword + "\n");
+                return true;
+            }
+
+            return false;
+        }
+
+        private static void Delete()
+        {
+            Trace.WriteLine("Program::Erase");
+
+            string[] args = Environment.GetCommandLineArgs();
+
+            if (args.Length < 3)
+                goto error_parse;
+
+            string url = args[2];
+            Uri uri = null;
+
+            if (Uri.IsWellFormedUriString(url, UriKind.Absolute))
+            {
+                if (!Uri.TryCreate(url, UriKind.Absolute, out uri))
+                    goto error_parse;
+            }
+            else
+            {
+                url = String.Format("{0}://{1}", Uri.UriSchemeHttps, url);
+                if (!Uri.TryCreate(url, UriKind.Absolute, out uri))
+                    goto error_parse;
+            }
+
+            OperationArguments operationArguments = new OperationArguments(Console.In);
+            operationArguments.QueryUri = uri;
+
+            LoadOperationArguments(operationArguments);
+
+            BaseAuthentication authentication = CreateAuthentication(operationArguments);
+
+            switch (operationArguments.Authority)
+            {
+                default:
+                case AuthorityType.Basic:
+                    Trace.WriteLine("   deleting basic credentials");
+                    authentication.DeleteCredentials(operationArguments.TargetUri);
+                    break;
+
+                case AuthorityType.AzureDirectory:
+                case AuthorityType.MicrosoftAccount:
+                    Trace.WriteLine("   deleting VSTS credentials");
+                    BaseVstsAuthentication vstsAuth = authentication as BaseVstsAuthentication;
+                    vstsAuth.DeleteCredentials(operationArguments.TargetUri);
+                    // call delete twice to purge any stored ADA tokens
+                    vstsAuth.DeleteCredentials(operationArguments.TargetUri);
+                    break;
+
+                case AuthorityType.GitHub:
+                    Trace.WriteLine("   deleting GitHub credentials");
+                    GitHubAuthentication ghAuth = authentication as GitHubAuthentication;
+                    ghAuth.DeleteCredentials(operationArguments.TargetUri);
+                    break;
+            }
+
+            return;
+
+            error_parse:
+            Console.Out.WriteLine("Fatal: unable to parse target URI.");
+        }
+
+        private static void Deploy()
+        {
+            Trace.WriteLine("Program::Deploy");
+
+            var installer = new Installer();
+            installer.DeployConsole();
+
+            Trace.WriteLine(String.Format("   Installer result = {0}.", installer.Result));
+            Trace.WriteLine(String.Format("   Installer exit code = {0}.", installer.ExitCode));
+
+            Environment.Exit(installer.ExitCode);
+        }
+
+        private static void Erase()
+        {
+            // parse the operations arguments from stdin (this is how git sends commands)
+            // see: https://www.kernel.org/pub/software/scm/git/docs/technical/api-credentials.html
+            // see: https://www.kernel.org/pub/software/scm/git/docs/git-credential.html
+            OperationArguments operationArguments = new OperationArguments(Console.In);
+
+            Debug.Assert(operationArguments != null, "The operationArguments is null");
+            Debug.Assert(operationArguments.TargetUri != null, "The operationArgument.TargetUri is null");
+
+            LoadOperationArguments(operationArguments);
+            EnableTraceLogging(operationArguments);
+
+            Trace.WriteLine("Program::Erase");
+            Trace.WriteLine("   targetUri = " + operationArguments.TargetUri);
+
+            if (operationArguments.PreserveCredentials)
+            {
+                Trace.WriteLine("   " + ConfigPreserveCredentialsKey + " = true");
+                Trace.WriteLine("   canceling erase request.");
+                return;
+            }
+
+            BaseAuthentication authentication = CreateAuthentication(operationArguments);
+
+            switch (operationArguments.Authority)
+            {
+                default:
+                case AuthorityType.Basic:
+                    Trace.WriteLine("   deleting basic credentials");
+                    authentication.DeleteCredentials(operationArguments.TargetUri);
+                    break;
+
+                case AuthorityType.AzureDirectory:
+                case AuthorityType.MicrosoftAccount:
+                    Trace.WriteLine("   deleting VSTS credentials");
+                    BaseVstsAuthentication vstsAuth = authentication as BaseVstsAuthentication;
+                    vstsAuth.DeleteCredentials(operationArguments.TargetUri);
+                    break;
+
+                case AuthorityType.GitHub:
+                    Trace.WriteLine("   deleting GitHub credentials");
+                    GitHubAuthentication ghAuth = authentication as GitHubAuthentication;
+                    ghAuth.DeleteCredentials(operationArguments.TargetUri);
+                    break;
+            }
+        }
+
+        private static void Get()
+        {
+            // parse the operations arguments from stdin (this is how git sends commands)
+            // see: https://www.kernel.org/pub/software/scm/git/docs/technical/api-credentials.html
+            // see: https://www.kernel.org/pub/software/scm/git/docs/git-credential.html
+            OperationArguments operationArguments = new OperationArguments(Console.In);
+
+            if (ReferenceEquals(operationArguments, null))
+                throw new ArgumentNullException("operationArguments");
+            if (ReferenceEquals(operationArguments.TargetUri, null))
+                throw new ArgumentNullException("operationArguments.TargetUri");
+
+            Trace.WriteLine("Program::Get");
+            Trace.WriteLine("   targetUri = " + operationArguments.TargetUri);
+
+            LoadOperationArguments(operationArguments);
+            EnableTraceLogging(operationArguments);
+
+            QueryCredentials(operationArguments);
+
+            Console.Out.Write(operationArguments);
         }
 
         private static void PrintHelpMessage()
@@ -322,274 +551,24 @@ namespace Microsoft.Alm.CredentialHelper
             Console.Out.WriteLine();
         }
 
-        private static void Delete()
+        private static void PrintVersion()
         {
-            Trace.WriteLine("Program::Erase");
+            Trace.WriteLine("Program::PrintVersion");
 
-            string[] args = Environment.GetCommandLineArgs();
-
-            if (args.Length < 3)
-                goto error_parse;
-
-            string url = args[2];
-            Uri uri = null;
-
-            if (Uri.IsWellFormedUriString(url, UriKind.Absolute))
-            {
-                if (!Uri.TryCreate(url, UriKind.Absolute, out uri))
-                    goto error_parse;
-            }
-            else
-            {
-                url = String.Format("{0}://{1}", Uri.UriSchemeHttps, url);
-                if (!Uri.TryCreate(url, UriKind.Absolute, out uri))
-                    goto error_parse;
-            }
-
-            OperationArguments operationArguments = new OperationArguments(Console.In);
-            operationArguments.QueryUri = uri;
-
-            LoadOperationArguments(operationArguments);
-
-            BaseAuthentication authentication = CreateAuthentication(operationArguments);
-
-            switch (operationArguments.Authority)
-            {
-                default:
-                case AuthorityType.Basic:
-                    Trace.WriteLine("   deleting basic credentials");
-                    authentication.DeleteCredentials(operationArguments.TargetUri);
-                    break;
-
-                case AuthorityType.AzureDirectory:
-                case AuthorityType.MicrosoftAccount:
-                    Trace.WriteLine("   deleting VSTS credentials");
-                    BaseVstsAuthentication vstsAuth = authentication as BaseVstsAuthentication;
-                    vstsAuth.DeleteCredentials(operationArguments.TargetUri);
-                    // call delete twice to purge any stored ADA tokens
-                    vstsAuth.DeleteCredentials(operationArguments.TargetUri);
-                    break;
-
-                case AuthorityType.GitHub:
-                    Trace.WriteLine("   deleting GitHub credentials");
-                    GitHubAuthentication ghAuth = authentication as GitHubAuthentication;
-                    ghAuth.DeleteCredentials(operationArguments.TargetUri);
-                    break;
-            }
-
-            return;
-
-            error_parse:
-            Console.Out.WriteLine("Fatal: unable to parse target URI.");
+            Console.Out.WriteLine("{0} version {1}", Title, Version.ToString(3));
         }
 
-        private static void Erase()
+        private static void Remove()
         {
-            // parse the operations arguments from stdin (this is how git sends commands)
-            // see: https://www.kernel.org/pub/software/scm/git/docs/technical/api-credentials.html
-            // see: https://www.kernel.org/pub/software/scm/git/docs/git-credential.html
-            OperationArguments operationArguments = new OperationArguments(Console.In);
+            Trace.WriteLine("Program::Remove");
 
-            Debug.Assert(operationArguments != null, "The operationArguments is null");
-            Debug.Assert(operationArguments.TargetUri != null, "The operationArgument.TargetUri is null");
+            var installer = new Installer();
+            installer.RemoveConsole();
 
-            LoadOperationArguments(operationArguments);
-            EnableTraceLogging(operationArguments);
+            Trace.WriteLine(String.Format("   Installer result = {0}.", installer.Result));
+            Trace.WriteLine(String.Format("   Installer exit code = {0}.", installer.ExitCode));
 
-            Trace.WriteLine("Program::Erase");
-            Trace.WriteLine("   targetUri = " + operationArguments.TargetUri);
-
-            if (operationArguments.PreserveCredentials)
-            {
-                Trace.WriteLine("   " + ConfigPreserveCredentialsKey + " = true");
-                Trace.WriteLine("   canceling erase request.");
-                return;
-            }
-
-            BaseAuthentication authentication = CreateAuthentication(operationArguments);
-
-            switch (operationArguments.Authority)
-            {
-                default:
-                case AuthorityType.Basic:
-                    Trace.WriteLine("   deleting basic credentials");
-                    authentication.DeleteCredentials(operationArguments.TargetUri);
-                    break;
-
-                case AuthorityType.AzureDirectory:
-                case AuthorityType.MicrosoftAccount:
-                    Trace.WriteLine("   deleting VSTS credentials");
-                    BaseVstsAuthentication vstsAuth = authentication as BaseVstsAuthentication;
-                    vstsAuth.DeleteCredentials(operationArguments.TargetUri);
-                    break;
-
-                case AuthorityType.GitHub:
-                    Trace.WriteLine("   deleting GitHub credentials");
-                    GitHubAuthentication ghAuth = authentication as GitHubAuthentication;
-                    ghAuth.DeleteCredentials(operationArguments.TargetUri);
-                    break;
-            }
-        }
-
-        private static void Get()
-        {
-            const string AadMsaAuthFailureMessage = "Logon failed, use ctrl+c to cancel basic credential prompt.";
-            const string GitHubAuthFailureMessage = "Logon failed, use ctrl+c to cancel basic credential prompt.";
-
-            // parse the operations arguments from stdin (this is how git sends commands)
-            // see: https://www.kernel.org/pub/software/scm/git/docs/technical/api-credentials.html
-            // see: https://www.kernel.org/pub/software/scm/git/docs/git-credential.html
-            OperationArguments operationArguments = new OperationArguments(Console.In);
-
-            Debug.Assert(operationArguments != null, "The operationArguments is null");
-            Debug.Assert(operationArguments.TargetUri != null, "The operationArgument.TargetUri is null");
-
-            LoadOperationArguments(operationArguments);
-            EnableTraceLogging(operationArguments);
-
-            Trace.WriteLine("Program::Get");
-            Trace.WriteLine("   targetUri = " + operationArguments.TargetUri);
-
-            BaseAuthentication authentication = CreateAuthentication(operationArguments);
-            Credential credentials = null;
-
-            switch (operationArguments.Authority)
-            {
-                default:
-                case AuthorityType.Basic:
-                    if (authentication.GetCredentials(operationArguments.TargetUri, out credentials))
-                    {
-                        Trace.WriteLine("   credentials found");
-                        operationArguments.SetCredentials(credentials);
-                    }
-                    else if (operationArguments.Interactivity != Interactivity.Never)
-                    {
-                        string username;
-                        string password;
-
-                        // either use modal UI or command line to query for credentials
-                        if ((operationArguments.UseModalUi
-                                && ModalPromptForCredentials(operationArguments.TargetUri, out username, out password))
-                            || (!operationArguments.UseModalUi
-                                && BasicCredentialPrompt(operationArguments.TargetUri, null, out username, out password)))
-                        {
-                            Trace.WriteLine("   credentials found");
-                            // set the credentials object
-                            // no need to save the credentials explicitly, as Git will call back
-                            // with a store command if the credentials are valid.
-                            credentials = new Credential(username, password);
-                            operationArguments.SetCredentials(credentials);
-                        }
-                    }
-                    break;
-
-                case AuthorityType.AzureDirectory:
-                    VstsAadAuthentication aadAuth = authentication as VstsAadAuthentication;
-
-                    Task.Run(async () =>
-                    {
-                        // attempt to get cached creds -> refresh creds -> non-interactive logon -> interactive logon
-                        // note that AAD "credentials" are always scoped access tokens
-                        if (((operationArguments.Interactivity != Interactivity.Always
-                                && aadAuth.GetCredentials(operationArguments.TargetUri, out credentials)
-                                && (!operationArguments.ValidateCredentials
-                                    || await aadAuth.ValidateCredentials(operationArguments.TargetUri, credentials)))
-                            || (operationArguments.Interactivity != Interactivity.Always
-                                && await aadAuth.RefreshCredentials(operationArguments.TargetUri, true)
-                                && aadAuth.GetCredentials(operationArguments.TargetUri, out credentials)
-                                && (!operationArguments.ValidateCredentials
-                                    || await aadAuth.ValidateCredentials(operationArguments.TargetUri, credentials)))
-                            || (operationArguments.Interactivity != Interactivity.Always
-                                    && await aadAuth.NoninteractiveLogon(operationArguments.TargetUri, true)
-                                    && aadAuth.GetCredentials(operationArguments.TargetUri, out credentials)
-                                && (!operationArguments.ValidateCredentials
-                                    || await aadAuth.ValidateCredentials(operationArguments.TargetUri, credentials)))
-                            || (operationArguments.Interactivity != Interactivity.Never
-                                && aadAuth.InteractiveLogon(operationArguments.TargetUri, true))
-                                && aadAuth.GetCredentials(operationArguments.TargetUri, out credentials)
-                                && (!operationArguments.ValidateCredentials
-                                    || await aadAuth.ValidateCredentials(operationArguments.TargetUri, credentials))))
-                        {
-                            Trace.WriteLine("   credentials found");
-                            operationArguments.SetCredentials(credentials);
-                            LogEvent("Azure Directory credentials for " + operationArguments.TargetUri + " successfully retrieved.", EventLogEntryType.SuccessAudit);
-                        }
-                        else
-                        {
-                            Console.Error.WriteLine(AadMsaAuthFailureMessage);
-                            LogEvent("Failed to retrieve Azure Directory credentials for " + operationArguments.TargetUri + ".", EventLogEntryType.FailureAudit);
-                        }
-                    }).Wait();
-                    break;
-
-                case AuthorityType.MicrosoftAccount:
-                    VstsMsaAuthentication msaAuth = authentication as VstsMsaAuthentication;
-
-                    Task.Run(async () =>
-                    {
-                        // attempt to get cached creds -> refresh creds -> interactive logon
-                        // note that MSA "credentials" are always scoped access tokens
-                        if (((operationArguments.Interactivity != Interactivity.Always
-                                && msaAuth.GetCredentials(operationArguments.TargetUri, out credentials)
-                                && (!operationArguments.ValidateCredentials
-                                    || await msaAuth.ValidateCredentials(operationArguments.TargetUri, credentials)))
-                            || (operationArguments.Interactivity != Interactivity.Always
-                                && await msaAuth.RefreshCredentials(operationArguments.TargetUri, true)
-                                && msaAuth.GetCredentials(operationArguments.TargetUri, out credentials)
-                                && (!operationArguments.ValidateCredentials
-                                    || await msaAuth.ValidateCredentials(operationArguments.TargetUri, credentials)))
-                            || (operationArguments.Interactivity != Interactivity.Never
-                                && msaAuth.InteractiveLogon(operationArguments.TargetUri, true))
-                                && msaAuth.GetCredentials(operationArguments.TargetUri, out credentials)
-                                && (!operationArguments.ValidateCredentials
-                                    || await msaAuth.ValidateCredentials(operationArguments.TargetUri, credentials))))
-                        {
-                            Trace.WriteLine("   credentials found");
-                            operationArguments.SetCredentials(credentials);
-                            LogEvent("Microsoft Live credentials for " + operationArguments.TargetUri + " successfully retrieved.", EventLogEntryType.SuccessAudit);
-                        }
-                        else
-                        {
-                            Console.Error.WriteLine(AadMsaAuthFailureMessage);
-                            LogEvent("Failed to retrieve Microsoft Live credentials for " + operationArguments.TargetUri + ".", EventLogEntryType.FailureAudit);
-                        }
-                    }).Wait();
-                    break;
-
-                case AuthorityType.GitHub:
-                    GitHubAuthentication ghAuth = authentication as GitHubAuthentication;
-
-                    Task.Run(async () =>
-                    {
-                        if ((operationArguments.Interactivity != Interactivity.Always
-                                && ghAuth.GetCredentials(operationArguments.TargetUri, out credentials)
-                                && (!operationArguments.ValidateCredentials
-                                    || await ghAuth.ValidateCredentials(operationArguments.TargetUri, credentials)))
-                            || (operationArguments.Interactivity != Interactivity.Never
-                                && ghAuth.InteractiveLogon(operationArguments.TargetUri, out credentials)
-                                && ghAuth.GetCredentials(operationArguments.TargetUri, out credentials)
-                                && (!operationArguments.ValidateCredentials
-                                    || await ghAuth.ValidateCredentials(operationArguments.TargetUri, credentials))))
-                        {
-                            Trace.WriteLine("   credentials found");
-                            operationArguments.SetCredentials(credentials);
-                            LogEvent("GitHub credentials for " + operationArguments.TargetUri + " successfully retrieved.", EventLogEntryType.SuccessAudit);
-                        }
-                        else
-                        {
-                            Console.Error.WriteLine(GitHubAuthFailureMessage);
-                            LogEvent("Failed to retrieve GitHub credentials for " + operationArguments.TargetUri + ".", EventLogEntryType.FailureAudit);
-                        }
-                    }).Wait();
-                    break;
-
-                case AuthorityType.Integrated:
-                    credentials = new Credential(String.Empty, String.Empty);
-                    operationArguments.SetCredentials(credentials);
-                    break;
-            }
-
-            Console.Out.Write(operationArguments);
+            Environment.Exit(installer.ExitCode);
         }
 
         private static void Store()
@@ -614,392 +593,9 @@ namespace Microsoft.Alm.CredentialHelper
             authentication.SetCredentials(operationArguments.TargetUri, credentials);
         }
 
-        private static void PrintVersion()
-        {
-            Trace.WriteLine("Program::PrintVersion");
+        #endregion
 
-            Console.Out.WriteLine("{0} version {1}", Title, Version.ToString(3));
-        }
-
-        private static void Deploy()
-        {
-            Trace.WriteLine("Program::Deploy");
-
-            var installer = new Installer();
-            installer.DeployConsole();
-
-            Trace.WriteLine(String.Format("   Installer result = {0}.", installer.Result));
-            Trace.WriteLine(String.Format("   Installer exit code = {0}.", installer.ExitCode));
-
-            Environment.Exit(installer.ExitCode);
-        }
-
-        private static void Remove()
-        {
-            Trace.WriteLine("Program::Remove");
-
-            var installer = new Installer();
-            installer.RemoveConsole();
-
-            Trace.WriteLine(String.Format("   Installer result = {0}.", installer.Result));
-            Trace.WriteLine(String.Format("   Installer exit code = {0}.", installer.ExitCode));
-
-            Environment.Exit(installer.ExitCode);
-        }
-
-        private static BaseAuthentication CreateAuthentication(OperationArguments operationArguments)
-        {
-            Debug.Assert(operationArguments != null, "The operationArguments is null");
-            Debug.Assert(operationArguments.TargetUri != null, "The operationArgument.TargetUri is null");
-
-            Trace.WriteLine("Program::CreateAuthentication");
-
-            Secret.UriNameConversion getTargetName = Secret.UriToSimpleName;
-            if (operationArguments.UseHttpPath)
-            {
-                getTargetName = Secret.UriToPathedName;
-            }
-            var secretsNamespace = operationArguments.CustomNamespace ?? SecretsNamespace;
-            var secrets = new SecretStore(secretsNamespace, null, null, getTargetName);
-            BaseAuthentication authority = null;
-
-            switch (operationArguments.Authority)
-            {
-                case AuthorityType.Auto:
-                    Trace.WriteLine("   detecting authority type");
-
-                    // detect the authority
-                    if (BaseVstsAuthentication.GetAuthentication(operationArguments.TargetUri,
-                                                                VstsCredentialScope,
-                                                                secrets,
-                                                                null,
-                                                                out authority)
-                        || GitHubAuthentication.GetAuthentication(operationArguments.TargetUri,
-                                                                  GitHubCredentialScope,
-                                                                  secrets,
-                                                                  operationArguments.UseModalUi
-                                                                    ? new GitHubAuthentication.AcquireCredentialsDelegate(GitHub.Authentication.AuthenticationPrompts.CredentialModalPrompt)
-                                                                    : new GitHubAuthentication.AcquireCredentialsDelegate(GitHubCredentialPrompt),
-                                                                  operationArguments.UseModalUi
-                                                                    ? new GitHubAuthentication.AcquireAuthenticationCodeDelegate(GitHub.Authentication.AuthenticationPrompts.AuthenticationCodeModalPrompt)
-                                                                    : new GitHubAuthentication.AcquireAuthenticationCodeDelegate(GitHubAuthCodePrompt),
-                                                                  null,
-                                                                  out authority))
-                    {
-                        // set the authority type based on the returned value
-                        if (authority is VstsMsaAuthentication)
-                        {
-                            operationArguments.Authority = AuthorityType.MicrosoftAccount;
-                            goto case AuthorityType.MicrosoftAccount;
-                        }
-                        else if (authority is VstsAadAuthentication)
-                        {
-                            operationArguments.Authority = AuthorityType.AzureDirectory;
-                            goto case AuthorityType.AzureDirectory;
-                        }
-                        else if (authority is GitHubAuthentication)
-                        {
-                            operationArguments.Authority = AuthorityType.GitHub;
-                            goto case AuthorityType.GitHub;
-                        }
-                    }
-
-                    operationArguments.Authority = AuthorityType.Basic;
-                    goto case AuthorityType.Basic;
-
-                case AuthorityType.AzureDirectory:
-                    Trace.WriteLine("   authority is Azure Directory");
-
-                    Guid tenantId = Guid.Empty;
-                    // return the allocated authority or a generic AAD backed VSTS authentication object
-                    return authority ?? new VstsAadAuthentication(Guid.Empty, VstsCredentialScope, secrets);
-
-                case AuthorityType.Basic:
-                default:
-                    Trace.WriteLine("   authority is basic");
-
-                    // return a generic username + password authentication object
-                    return authority ?? new BasicAuthentication(secrets);
-
-                case AuthorityType.GitHub:
-                    Trace.WriteLine("   authority it GitHub");
-
-                    // return a GitHub authentication object
-                    return authority ?? new GitHubAuthentication(GitHubCredentialScope,
-                                                                 secrets,
-                                                                 operationArguments.UseModalUi
-                                                                    ? new GitHubAuthentication.AcquireCredentialsDelegate(GitHub.Authentication.AuthenticationPrompts.CredentialModalPrompt)
-                                                                    : new GitHubAuthentication.AcquireCredentialsDelegate(GitHubCredentialPrompt),
-                                                                 operationArguments.UseModalUi
-                                                                    ? new GitHubAuthentication.AcquireAuthenticationCodeDelegate(GitHub.Authentication.AuthenticationPrompts.AuthenticationCodeModalPrompt)
-                                                                    : new GitHubAuthentication.AcquireAuthenticationCodeDelegate(GitHubAuthCodePrompt),
-                                                                 null);
-
-                case AuthorityType.MicrosoftAccount:
-                    Trace.WriteLine("   authority is Microsoft Live");
-
-                    // return the allocated authority or a generic MSA backed VSTS authentication object
-                    return authority ?? new VstsMsaAuthentication(VstsCredentialScope, secrets);
-            }
-        }
-
-        private static void LoadAssemblyInformation()
-        {
-            var assembly = System.Reflection.Assembly.GetEntryAssembly();
-            var asseName = assembly.GetName();
-
-            _exeutablePath = assembly.Location;
-            _location = Path.GetDirectoryName(_exeutablePath);
-            _name = asseName.Name;
-            _version = asseName.Version;
-        }
-
-        private static void LoadOperationArguments(OperationArguments operationArguments)
-        {
-            Debug.Assert(operationArguments != null, "The operationsArguments parameter is null.");
-
-            Trace.WriteLine("Program::LoadOperationArguments");
-
-            if (operationArguments.TargetUri == null)
-            {
-                Console.Error.WriteLine("fatal: no host information, unable to continue.");
-                Environment.Exit(-1);
-            }
-
-            Configuration config = new Configuration();
-            Configuration.Entry entry;
-
-            if (config.TryGetEntry(ConfigPrefix, operationArguments.QueryUri, ConfigAuthortyKey, out entry))
-            {
-                Trace.WriteLine("   " + ConfigAuthortyKey + " = " + entry.Value);
-
-                if (ConfigStringComparer.Equals(entry.Value, "MSA")
-                    || ConfigStringComparer.Equals(entry.Value, "Microsoft")
-                    || ConfigStringComparer.Equals(entry.Value, "MicrosoftAccount")
-                    || ConfigStringComparer.Equals(entry.Value, "Live")
-                    || ConfigStringComparer.Equals(entry.Value, "LiveConnect")
-                    || ConfigStringComparer.Equals(entry.Value, "LiveID"))
-                {
-                    operationArguments.Authority = AuthorityType.MicrosoftAccount;
-                }
-                else if (ConfigStringComparer.Equals(entry.Value, "AAD")
-                         || ConfigStringComparer.Equals(entry.Value, "Azure")
-                         || ConfigStringComparer.Equals(entry.Value, "AzureDirectory"))
-                {
-                    operationArguments.Authority = AuthorityType.AzureDirectory;
-                }
-                else if (ConfigStringComparer.Equals(entry.Value, "Integrated")
-                         || ConfigStringComparer.Equals(entry.Value, "NTLM")
-                         || ConfigStringComparer.Equals(entry.Value, "Kerberos")
-                         || ConfigStringComparer.Equals(entry.Value, "SSO"))
-                {
-                    operationArguments.Authority = AuthorityType.Integrated;
-                }
-                else
-                {
-                    operationArguments.Authority = AuthorityType.Basic;
-                }
-            }
-
-            if (config.TryGetEntry(ConfigPrefix, operationArguments.QueryUri, ConfigInteractiveKey, out entry))
-            {
-                Trace.WriteLine("   " + ConfigInteractiveKey + " = " + entry.Value);
-
-                if (ConfigStringComparer.Equals(entry.Value, "always")
-                    || ConfigStringComparer.Equals(entry.Value, "true")
-                    || ConfigStringComparer.Equals(entry.Value, "force"))
-                {
-                    operationArguments.Interactivity = Interactivity.Always;
-                }
-                else if (ConfigStringComparer.Equals(entry.Value, "never")
-                         || ConfigStringComparer.Equals(entry.Value, "false"))
-                {
-                    operationArguments.Interactivity = Interactivity.Never;
-                }
-            }
-
-            if (config.TryGetEntry(ConfigPrefix, operationArguments.QueryUri, ConfigValidateKey, out entry))
-            {
-                Trace.WriteLine("   " + ConfigValidateKey + " = " + entry.Value);
-
-                bool validate = operationArguments.ValidateCredentials;
-                if (Boolean.TryParse(entry.Value, out validate))
-                {
-                    operationArguments.ValidateCredentials = validate;
-                }
-                else
-                {
-                    if (ConfigStringComparer.Equals(validate, "no"))
-                    {
-                        operationArguments.ValidateCredentials = false;
-                    }
-                    else if (ConfigStringComparer.Equals(validate, "yes"))
-                    {
-                        operationArguments.ValidateCredentials = true;
-                    }
-                }
-            }
-
-            if (config.TryGetEntry(ConfigPrefix, operationArguments.QueryUri, ConfigWritelogKey, out entry))
-            {
-                Trace.WriteLine("   " + ConfigWritelogKey + " = " + entry.Value);
-
-                bool writelog = operationArguments.WriteLog;
-                if (Boolean.TryParse(entry.Value, out writelog))
-                {
-                    operationArguments.WriteLog = writelog;
-                }
-                else
-                {
-                    if (ConfigStringComparer.Equals(writelog, "no"))
-                    {
-                        operationArguments.WriteLog = false;
-                    }
-                    else if (ConfigStringComparer.Equals(writelog, "yes"))
-                    {
-                        operationArguments.WriteLog = true;
-                    }
-                }
-            }
-
-            if (config.TryGetEntry(ConfigPrefix, operationArguments.QueryUri, ConfigUseModalPromptKey, out entry))
-            {
-                Trace.WriteLine("   " + ConfigUseModalPromptKey + " = " + entry.Value);
-
-                bool usemodel = operationArguments.UseModalUi;
-                if (Boolean.TryParse(entry.Value, out usemodel))
-                {
-                    operationArguments.UseModalUi = usemodel;
-                }
-                else
-                {
-                    if (ConfigStringComparer.Equals(usemodel, "no"))
-                    {
-                        operationArguments.UseModalUi = false;
-                    }
-                    else if (ConfigStringComparer.Equals(usemodel, "yes"))
-                    {
-                        operationArguments.UseModalUi = true;
-                    }
-                }
-            }
-
-            if (config.TryGetEntry(ConfigPrefix, operationArguments.QueryUri, ConfigPreserveCredentialsKey, out entry))
-            {
-                Trace.WriteLine("   " + ConfigPreserveCredentialsKey + " = " + entry.Value);
-
-                bool preserveCredentials = operationArguments.UseModalUi;
-                if (Boolean.TryParse(entry.Value, out preserveCredentials))
-                {
-                    operationArguments.PreserveCredentials = preserveCredentials;
-                }
-                else
-                {
-                    if (ConfigStringComparer.Equals(preserveCredentials, "no"))
-                    {
-                        operationArguments.PreserveCredentials = false;
-                    }
-                    else if (ConfigStringComparer.Equals(preserveCredentials, "yes"))
-                    {
-                        operationArguments.PreserveCredentials = true;
-                    }
-                }
-            }
-
-            if (config.TryGetEntry(ConfigPrefix, operationArguments.QueryUri, ConfigUseHttpPathKey, out entry))
-            {
-                Trace.WriteLine("   " + ConfigUseHttpPathKey + " = " + entry.Value);
-
-                bool useHttPath = operationArguments.UseHttpPath;
-                if (Boolean.TryParse(entry.Value, out useHttPath))
-                {
-                    operationArguments.UseHttpPath = true;
-                }
-            }
-
-            if (config.TryGetEntry(ConfigPrefix, operationArguments.QueryUri, ConfigHttpProxyKey, out entry)
-                || config.TryGetEntry("http", operationArguments.QueryUri, "proxy", out entry))
-            {
-                Trace.WriteLine("   " + ConfigHttpProxyKey + " = " + entry.Value);
-
-                operationArguments.SetProxy(entry.Value);
-            }
-
-            if (config.TryGetEntry(ConfigPrefix, operationArguments.QueryUri, ConfigNamespaceKey, out entry))
-            {
-                Trace.WriteLine("   " + ConfigNamespaceKey + " = " + entry.Value);
-
-                operationArguments.CustomNamespace = entry.Value;
-            }
-        }
-
-        private static void LogEvent(string message, EventLogEntryType eventType)
-        {
-            //const string EventSource = "Git Credential Manager";
-
-            ///*** commented out due to UAC issues which require a proper installer to work around ***/
-
-            //Trace.WriteLine("Program::LogEvent");
-
-            //if (!EventLog.SourceExists(EventSource))
-            //{
-            //    EventLog.CreateEventSource(EventSource, "Application");
-
-            //    Trace.WriteLine("   event source created");
-            //}
-
-            //EventLog.WriteEntry(EventSource, message, eventType);
-
-            //Trace.WriteLine("   " + eventType + "event written");
-        }
-
-        private static void EnableTraceLogging(OperationArguments operationArguments)
-        {
-            const int LogFileMaxLength = 8 * 1024 * 1024; // 8 MB
-
-            Trace.WriteLine("Program::EnableTraceLogging");
-
-            if (operationArguments.WriteLog)
-            {
-                Trace.WriteLine("   trace logging enabled");
-
-                string gitConfigPath;
-                if (Where.GitLocalConfig(out gitConfigPath))
-                {
-                    Trace.WriteLine("   git local config found at " + gitConfigPath);
-
-                    string dotGitPath = Path.GetDirectoryName(gitConfigPath);
-                    string logFilePath = Path.Combine(dotGitPath, Path.ChangeExtension(ConfigPrefix, ".log"));
-                    string logFileName = operationArguments.TargetUri.ToString();
-
-                    FileInfo logFileInfo = new FileInfo(logFilePath);
-                    if (logFileInfo.Exists && logFileInfo.Length > LogFileMaxLength)
-                    {
-                        for (int i = 1; i < Int32.MaxValue; i++)
-                        {
-                            string moveName = String.Format("{0}{1:000}.log", ConfigPrefix, i);
-                            string movePath = Path.Combine(dotGitPath, moveName);
-
-                            if (!File.Exists(movePath))
-                            {
-                                logFileInfo.MoveTo(movePath);
-                                break;
-                            }
-                        }
-                    }
-
-                    Trace.WriteLine("   trace log destination is " + logFilePath);
-
-                    var listener = new TextWriterTraceListener(logFilePath, logFileName);
-                    Trace.Listeners.Add(listener);
-
-                    // write a small header to help with identifying new log entries
-                    listener.WriteLine(Environment.NewLine);
-                    listener.WriteLine(String.Format("Log Start ({0:u})", DateTimeOffset.Now));
-                    listener.WriteLine(String.Format("Microsoft {0} version {1}", Program.Title, Version.ToString(3)));
-                }
-            }
-        }
+        #region Utilities
 
         private static bool BasicCredentialPrompt(TargetUri targetUri, string titleMessage, out string username, out string password)
         {
@@ -1129,13 +725,299 @@ namespace Microsoft.Alm.CredentialHelper
                 && password != null;
         }
 
-        private static bool GitHubCredentialPrompt(TargetUri targetUri, out string username, out string password)
+        private static BaseAuthentication CreateAuthentication(OperationArguments operationArguments)
         {
-            const string TitleMessage = "Please enter your GitHub credentials for ";
+            Debug.Assert(operationArguments != null, "The operationArguments is null");
+            Debug.Assert(operationArguments.TargetUri != null, "The operationArgument.TargetUri is null");
 
-            Trace.WriteLine("Program::GitHubCredentialPrompt");
+            Trace.WriteLine("Program::CreateAuthentication");
 
-            return BasicCredentialPrompt(targetUri, TitleMessage, out username, out password);
+            Secret.UriNameConversion getTargetName = Secret.UriToSimpleName;
+            if (operationArguments.UseHttpPath)
+            {
+                getTargetName = Secret.UriToPathedName;
+            }
+            var secretsNamespace = operationArguments.CustomNamespace ?? SecretsNamespace;
+            var secrets = new SecretStore(secretsNamespace, null, null, getTargetName);
+            BaseAuthentication authority = null;
+
+            switch (operationArguments.Authority)
+            {
+                case AuthorityType.Auto:
+                    Trace.WriteLine("   detecting authority type");
+
+                    // detect the authority
+                    if (BaseVstsAuthentication.GetAuthentication(operationArguments.TargetUri,
+                                                                VstsCredentialScope,
+                                                                secrets,
+                                                                null,
+                                                                out authority)
+                        || GitHubAuthentication.GetAuthentication(operationArguments.TargetUri,
+                                                                  GitHubCredentialScope,
+                                                                  secrets,
+                                                                  operationArguments.UseModalUi
+                                                                    ? new GitHubAuthentication.AcquireCredentialsDelegate(GitHub.Authentication.AuthenticationPrompts.CredentialModalPrompt)
+                                                                    : new GitHubAuthentication.AcquireCredentialsDelegate(GitHubCredentialPrompt),
+                                                                  operationArguments.UseModalUi
+                                                                    ? new GitHubAuthentication.AcquireAuthenticationCodeDelegate(GitHub.Authentication.AuthenticationPrompts.AuthenticationCodeModalPrompt)
+                                                                    : new GitHubAuthentication.AcquireAuthenticationCodeDelegate(GitHubAuthCodePrompt),
+                                                                  null,
+                                                                  out authority))
+                    {
+                        // set the authority type based on the returned value
+                        if (authority is VstsMsaAuthentication)
+                        {
+                            operationArguments.Authority = AuthorityType.MicrosoftAccount;
+                            goto case AuthorityType.MicrosoftAccount;
+                        }
+                        else if (authority is VstsAadAuthentication)
+                        {
+                            operationArguments.Authority = AuthorityType.AzureDirectory;
+                            goto case AuthorityType.AzureDirectory;
+                        }
+                        else if (authority is GitHubAuthentication)
+                        {
+                            operationArguments.Authority = AuthorityType.GitHub;
+                            goto case AuthorityType.GitHub;
+                        }
+                    }
+
+                    operationArguments.Authority = AuthorityType.Basic;
+                    goto case AuthorityType.Basic;
+
+                case AuthorityType.AzureDirectory:
+                    Trace.WriteLine("   authority is Azure Directory");
+
+                    Guid tenantId = Guid.Empty;
+                    // return the allocated authority or a generic AAD backed VSTS authentication object
+                    return authority ?? new VstsAadAuthentication(Guid.Empty, VstsCredentialScope, secrets);
+
+                case AuthorityType.Basic:
+                default:
+                    Trace.WriteLine("   authority is basic");
+
+                    // return a generic username + password authentication object
+                    return authority ?? new BasicAuthentication(secrets);
+
+                case AuthorityType.GitHub:
+                    Trace.WriteLine("   authority it GitHub");
+
+                    // return a GitHub authentication object
+                    return authority ?? new GitHubAuthentication(GitHubCredentialScope,
+                                                                 secrets,
+                                                                 operationArguments.UseModalUi
+                                                                    ? new GitHubAuthentication.AcquireCredentialsDelegate(GitHub.Authentication.AuthenticationPrompts.CredentialModalPrompt)
+                                                                    : new GitHubAuthentication.AcquireCredentialsDelegate(GitHubCredentialPrompt),
+                                                                 operationArguments.UseModalUi
+                                                                    ? new GitHubAuthentication.AcquireAuthenticationCodeDelegate(GitHub.Authentication.AuthenticationPrompts.AuthenticationCodeModalPrompt)
+                                                                    : new GitHubAuthentication.AcquireAuthenticationCodeDelegate(GitHubAuthCodePrompt),
+                                                                 null);
+
+                case AuthorityType.MicrosoftAccount:
+                    Trace.WriteLine("   authority is Microsoft Live");
+
+                    // return the allocated authority or a generic MSA backed VSTS authentication object
+                    return authority ?? new VstsMsaAuthentication(VstsCredentialScope, secrets);
+            }
+        }
+
+        private static void LoadAssemblyInformation()
+        {
+            var assembly = System.Reflection.Assembly.GetEntryAssembly();
+            var asseName = assembly.GetName();
+
+            _exeutablePath = assembly.Location;
+            _location = Path.GetDirectoryName(_exeutablePath);
+            _name = asseName.Name;
+            _version = asseName.Version;
+        }
+
+        private static void LoadOperationArguments(OperationArguments operationArguments)
+        {
+            Debug.Assert(operationArguments != null, "The operationsArguments parameter is null.");
+
+            Trace.WriteLine("Program::LoadOperationArguments");
+
+            if (operationArguments.TargetUri == null)
+            {
+                Console.Error.WriteLine("fatal: no host information, unable to continue.");
+                Environment.Exit(-1);
+            }
+
+            Configuration.Entry entry;
+
+            if (Configuration.TryGetEntry(ConfigPrefix, operationArguments.QueryUri, ConfigAuthortyKey, out entry))
+            {
+                Trace.WriteLine("   " + ConfigAuthortyKey + " = " + entry.Value);
+
+                if (ConfigKeyComparer.Equals(entry.Value, "MSA")
+                    || ConfigKeyComparer.Equals(entry.Value, "Microsoft")
+                    || ConfigKeyComparer.Equals(entry.Value, "MicrosoftAccount")
+                    || ConfigKeyComparer.Equals(entry.Value, "Live")
+                    || ConfigKeyComparer.Equals(entry.Value, "LiveConnect")
+                    || ConfigKeyComparer.Equals(entry.Value, "LiveID"))
+                {
+                    operationArguments.Authority = AuthorityType.MicrosoftAccount;
+                }
+                else if (ConfigKeyComparer.Equals(entry.Value, "AAD")
+                         || ConfigKeyComparer.Equals(entry.Value, "Azure")
+                         || ConfigKeyComparer.Equals(entry.Value, "AzureDirectory"))
+                {
+                    operationArguments.Authority = AuthorityType.AzureDirectory;
+                }
+                else if (ConfigKeyComparer.Equals(entry.Value, "Integrated")
+                         || ConfigKeyComparer.Equals(entry.Value, "NTLM")
+                         || ConfigKeyComparer.Equals(entry.Value, "Kerberos")
+                         || ConfigKeyComparer.Equals(entry.Value, "SSO"))
+                {
+                    operationArguments.Authority = AuthorityType.Integrated;
+                }
+                else
+                {
+                    operationArguments.Authority = AuthorityType.Basic;
+                }
+            }
+
+            string interativeValue = null;
+            if (EnvironmentVariables.ContainsKey(EnvironInteractiveKey)
+                && !string.IsNullOrWhiteSpace(interativeValue = EnvironmentVariables[EnvironInteractiveKey]))
+            {
+                Trace.WriteLine("   " + EnvironInteractiveKey + " = " + interativeValue);
+            }
+            else if (Configuration.TryGetEntry(ConfigPrefix, operationArguments.QueryUri, ConfigInteractiveKey, out entry))
+            {
+                Trace.WriteLine("   " + ConfigInteractiveKey + " = " + entry.Value);
+
+                interativeValue = entry.Value;
+            }
+
+            if (!string.IsNullOrWhiteSpace(interativeValue))
+            {
+                if (ConfigKeyComparer.Equals(interativeValue, "always")
+                    || ConfigKeyComparer.Equals(interativeValue, "true")
+                    || ConfigKeyComparer.Equals(interativeValue, "force"))
+                {
+                    operationArguments.Interactivity = Interactivity.Always;
+                }
+                else if (ConfigKeyComparer.Equals(interativeValue, "never")
+                         || ConfigKeyComparer.Equals(interativeValue, "false"))
+                {
+                    operationArguments.Interactivity = Interactivity.Never;
+                }
+            }
+
+            bool? validateCredentials;
+            if (TryReadBoolean(operationArguments.QueryUri, ConfigValidateKey, EnvironValidateKey, operationArguments.ValidateCredentials, out validateCredentials))
+            {
+                operationArguments.ValidateCredentials = validateCredentials.Value;
+            }
+
+            bool? writeLog;
+            if (TryReadBoolean(operationArguments.QueryUri, ConfigWritelogKey, EnvironWritelogKey, operationArguments.WriteLog, out writeLog))
+            {
+                operationArguments.WriteLog = writeLog.Value;
+            }
+
+            bool? useModalUi = null;
+            if (TryReadBoolean(operationArguments.QueryUri, ConfigUseModalPromptKey, EnvironModalPromptKey, operationArguments.UseModalUi, out useModalUi))
+            {
+                operationArguments.UseModalUi = useModalUi.Value;
+            }
+
+            bool? preserveCredentials;
+            if (TryReadBoolean(operationArguments.QueryUri, ConfigPreserveCredentialsKey, EnvironPreserveCredentialsKey, operationArguments.PreserveCredentials, out preserveCredentials))
+            {
+                operationArguments.PreserveCredentials = preserveCredentials.Value;
+            }
+
+            bool? useHttpPath;
+            if (TryReadBoolean(operationArguments.QueryUri, ConfigUseHttpPathKey, null, operationArguments.UseHttpPath, out useHttpPath))
+            {
+                operationArguments.UseHttpPath = useHttpPath.Value;
+            }
+
+            if (Configuration.TryGetEntry(ConfigPrefix, operationArguments.QueryUri, ConfigHttpProxyKey, out entry)
+                || Configuration.TryGetEntry("http", operationArguments.QueryUri, "proxy", out entry))
+            {
+                Trace.WriteLine("   " + ConfigHttpProxyKey + " = " + entry.Value);
+
+                operationArguments.SetProxy(entry.Value);
+            }
+
+            if (Configuration.TryGetEntry(ConfigPrefix, operationArguments.QueryUri, ConfigNamespaceKey, out entry))
+            {
+                Trace.WriteLine("   " + ConfigNamespaceKey + " = " + entry.Value);
+
+                operationArguments.CustomNamespace = entry.Value;
+            }
+        }
+
+        private static void LogEvent(string message, EventLogEntryType eventType)
+        {
+            //const string EventSource = "Git Credential Manager";
+
+            ///*** commented out due to UAC issues which require a proper installer to work around ***/
+
+            //Trace.WriteLine("Program::LogEvent");
+
+            //if (!EventLog.SourceExists(EventSource))
+            //{
+            //    EventLog.CreateEventSource(EventSource, "Application");
+
+            //    Trace.WriteLine("   event source created");
+            //}
+
+            //EventLog.WriteEntry(EventSource, message, eventType);
+
+            //Trace.WriteLine("   " + eventType + "event written");
+        }
+
+        private static void EnableTraceLogging(OperationArguments operationArguments)
+        {
+            const int LogFileMaxLength = 8 * 1024 * 1024; // 8 MB
+
+            Trace.WriteLine("Program::EnableTraceLogging");
+
+            if (operationArguments.WriteLog)
+            {
+                Trace.WriteLine("   trace logging enabled");
+
+                string gitConfigPath;
+                if (Where.GitLocalConfig(out gitConfigPath))
+                {
+                    Trace.WriteLine("   git local config found at " + gitConfigPath);
+
+                    string dotGitPath = Path.GetDirectoryName(gitConfigPath);
+                    string logFilePath = Path.Combine(dotGitPath, Path.ChangeExtension(ConfigPrefix, ".log"));
+                    string logFileName = operationArguments.TargetUri.ToString();
+
+                    FileInfo logFileInfo = new FileInfo(logFilePath);
+                    if (logFileInfo.Exists && logFileInfo.Length > LogFileMaxLength)
+                    {
+                        for (int i = 1; i < Int32.MaxValue; i++)
+                        {
+                            string moveName = String.Format("{0}{1:000}.log", ConfigPrefix, i);
+                            string movePath = Path.Combine(dotGitPath, moveName);
+
+                            if (!File.Exists(movePath))
+                            {
+                                logFileInfo.MoveTo(movePath);
+                                break;
+                            }
+                        }
+                    }
+
+                    Trace.WriteLine("   trace log destination is " + logFilePath);
+
+                    var listener = new TextWriterTraceListener(logFilePath, logFileName);
+                    Trace.Listeners.Add(listener);
+
+                    // write a small header to help with identifying new log entries
+                    listener.WriteLine(Environment.NewLine);
+                    listener.WriteLine(String.Format("Log Start ({0:u})", DateTimeOffset.Now));
+                    listener.WriteLine(String.Format("Microsoft {0} version {1}", Program.Title, Version.ToString(3)));
+                }
+            }
         }
 
         private static bool GitHubAuthCodePrompt(TargetUri targetUri, GitHubAuthenticationResultType resultType, string username, out string authenticationCode)
@@ -1192,6 +1074,15 @@ namespace Microsoft.Alm.CredentialHelper
             }
 
             return authenticationCode != null;
+        }
+
+        private static bool GitHubCredentialPrompt(TargetUri targetUri, out string username, out string password)
+        {
+            const string TitleMessage = "Please enter your GitHub credentials for ";
+
+            Trace.WriteLine("Program::GitHubCredentialPrompt");
+
+            return BasicCredentialPrompt(targetUri, TitleMessage, out username, out password);
         }
 
         private static bool ModalPromptForCredentials(TargetUri targetUri, string message, out string username, out string password)
@@ -1320,6 +1211,210 @@ namespace Microsoft.Alm.CredentialHelper
             }
         }
 
+        private static void QueryCredentials(OperationArguments operationArguments)
+        {
+            const string AadMsaAuthFailureMessage = "Logon failed, use ctrl+c to cancel basic credential prompt.";
+            const string GitHubAuthFailureMessage = "Logon failed, use ctrl+c to cancel basic credential prompt.";
+
+            if (ReferenceEquals(operationArguments, null))
+                throw new ArgumentNullException("operationArguments");
+            if (ReferenceEquals(operationArguments.TargetUri, null))
+                throw new ArgumentNullException("operationArguments.TargetUri");
+
+            Trace.WriteLine("Program::QueryCredentials");
+            Trace.WriteLine("   targetUri = " + operationArguments.TargetUri);
+
+            BaseAuthentication authentication = CreateAuthentication(operationArguments);
+            Credential credentials = null;
+
+            switch (operationArguments.Authority)
+            {
+                default:
+                case AuthorityType.Basic:
+                    if (authentication.GetCredentials(operationArguments.TargetUri, out credentials))
+                    {
+                        Trace.WriteLine("   credentials found");
+                        operationArguments.SetCredentials(credentials);
+                    }
+                    else if (operationArguments.Interactivity != Interactivity.Never)
+                    {
+                        string username;
+                        string password;
+
+                        // either use modal UI or command line to query for credentials
+                        if ((operationArguments.UseModalUi
+                                && ModalPromptForCredentials(operationArguments.TargetUri, out username, out password))
+                            || (!operationArguments.UseModalUi
+                                && BasicCredentialPrompt(operationArguments.TargetUri, null, out username, out password)))
+                        {
+                            Trace.WriteLine("   credentials found");
+                            // set the credentials object
+                            // no need to save the credentials explicitly, as Git will call back
+                            // with a store command if the credentials are valid.
+                            credentials = new Credential(username, password);
+                            operationArguments.SetCredentials(credentials);
+                        }
+                    }
+                    break;
+
+                case AuthorityType.AzureDirectory:
+                    VstsAadAuthentication aadAuth = authentication as VstsAadAuthentication;
+
+                    Task.Run(async () =>
+                    {
+                        // attempt to get cached creds -> refresh creds -> non-interactive logon -> interactive logon
+                        // note that AAD "credentials" are always scoped access tokens
+                        if (((operationArguments.Interactivity != Interactivity.Always
+                            && aadAuth.GetCredentials(operationArguments.TargetUri, out credentials)
+                            && (!operationArguments.ValidateCredentials
+                                || await aadAuth.ValidateCredentials(operationArguments.TargetUri, credentials)))
+                        || (operationArguments.Interactivity != Interactivity.Always
+                            && await aadAuth.RefreshCredentials(operationArguments.TargetUri, true)
+                            && aadAuth.GetCredentials(operationArguments.TargetUri, out credentials)
+                            && (!operationArguments.ValidateCredentials
+                                || await aadAuth.ValidateCredentials(operationArguments.TargetUri, credentials)))
+                        || (operationArguments.Interactivity != Interactivity.Always
+                                && await aadAuth.NoninteractiveLogon(operationArguments.TargetUri, true)
+                                && aadAuth.GetCredentials(operationArguments.TargetUri, out credentials)
+                            && (!operationArguments.ValidateCredentials
+                                || await aadAuth.ValidateCredentials(operationArguments.TargetUri, credentials)))
+                        || (operationArguments.Interactivity != Interactivity.Never
+                            && aadAuth.InteractiveLogon(operationArguments.TargetUri, true))
+                            && aadAuth.GetCredentials(operationArguments.TargetUri, out credentials)
+                            && (!operationArguments.ValidateCredentials
+                                || await aadAuth.ValidateCredentials(operationArguments.TargetUri, credentials))))
+                        {
+                            Trace.WriteLine("   credentials found");
+                            operationArguments.SetCredentials(credentials);
+                            LogEvent("Azure Directory credentials for " + operationArguments.TargetUri + " successfully retrieved.", EventLogEntryType.SuccessAudit);
+                        }
+                        else
+                        {
+                            Console.Error.WriteLine(AadMsaAuthFailureMessage);
+                            LogEvent("Failed to retrieve Azure Directory credentials for " + operationArguments.TargetUri + ".", EventLogEntryType.FailureAudit);
+                        }
+                    }).Wait();
+                    break;
+
+                case AuthorityType.MicrosoftAccount:
+                    VstsMsaAuthentication msaAuth = authentication as VstsMsaAuthentication;
+
+                    Task.Run(async () =>
+                    {
+                        // attempt to get cached creds -> refresh creds -> interactive logon
+                        // note that MSA "credentials" are always scoped access tokens
+                        if (((operationArguments.Interactivity != Interactivity.Always
+                            && msaAuth.GetCredentials(operationArguments.TargetUri, out credentials)
+                            && (!operationArguments.ValidateCredentials
+                                || await msaAuth.ValidateCredentials(operationArguments.TargetUri, credentials)))
+                        || (operationArguments.Interactivity != Interactivity.Always
+                            && await msaAuth.RefreshCredentials(operationArguments.TargetUri, true)
+                            && msaAuth.GetCredentials(operationArguments.TargetUri, out credentials)
+                            && (!operationArguments.ValidateCredentials
+                                || await msaAuth.ValidateCredentials(operationArguments.TargetUri, credentials)))
+                        || (operationArguments.Interactivity != Interactivity.Never
+                            && msaAuth.InteractiveLogon(operationArguments.TargetUri, true))
+                            && msaAuth.GetCredentials(operationArguments.TargetUri, out credentials)
+                            && (!operationArguments.ValidateCredentials
+                                || await msaAuth.ValidateCredentials(operationArguments.TargetUri, credentials))))
+                        {
+                            Trace.WriteLine("   credentials found");
+                            operationArguments.SetCredentials(credentials);
+                            LogEvent("Microsoft Live credentials for " + operationArguments.TargetUri + " successfully retrieved.", EventLogEntryType.SuccessAudit);
+                        }
+                        else
+                        {
+                            Console.Error.WriteLine(AadMsaAuthFailureMessage);
+                            LogEvent("Failed to retrieve Microsoft Live credentials for " + operationArguments.TargetUri + ".", EventLogEntryType.FailureAudit);
+                        }
+                    }).Wait();
+                    break;
+
+                case AuthorityType.GitHub:
+                    GitHubAuthentication ghAuth = authentication as GitHubAuthentication;
+
+                    Task.Run(async () =>
+                    {
+                        if ((operationArguments.Interactivity != Interactivity.Always
+                                && ghAuth.GetCredentials(operationArguments.TargetUri, out credentials)
+                                && (!operationArguments.ValidateCredentials
+                                    || await ghAuth.ValidateCredentials(operationArguments.TargetUri, credentials)))
+                            || (operationArguments.Interactivity != Interactivity.Never
+                                && ghAuth.InteractiveLogon(operationArguments.TargetUri, out credentials)
+                                && ghAuth.GetCredentials(operationArguments.TargetUri, out credentials)
+                                && (!operationArguments.ValidateCredentials
+                                    || await ghAuth.ValidateCredentials(operationArguments.TargetUri, credentials))))
+                        {
+                            Trace.WriteLine("   credentials found");
+                            operationArguments.SetCredentials(credentials);
+                            LogEvent("GitHub credentials for " + operationArguments.TargetUri + " successfully retrieved.", EventLogEntryType.SuccessAudit);
+                        }
+                        else
+                        {
+                            Console.Error.WriteLine(GitHubAuthFailureMessage);
+                            LogEvent("Failed to retrieve GitHub credentials for " + operationArguments.TargetUri + ".", EventLogEntryType.FailureAudit);
+                        }
+                    }).Wait();
+                    break;
+
+                case AuthorityType.Integrated:
+                    credentials = new Credential(String.Empty, String.Empty);
+                    operationArguments.SetCredentials(credentials);
+                    break;
+            }
+        }
+
+        private static bool TryReadBoolean(Uri queryUri, string configKey, string environKey, bool defaultValue, out bool? value)
+        {
+            if (ReferenceEquals(queryUri, null))
+                throw new ArgumentNullException("queryUri");
+            if (ReferenceEquals(configKey, null))
+                throw new ArgumentNullException("configKey");
+
+            Trace.WriteLine("Program::TryReadBoolean");
+
+            Configuration.Entry entry;
+
+            value = null;
+
+            string valueString = null;
+            if (!string.IsNullOrWhiteSpace(environKey)
+                && EnvironmentVariables.ContainsKey(environKey))
+            {
+                Trace.WriteLine("   " + environKey + " = " + valueString);
+                valueString = EnvironmentVariables[environKey];
+            }
+
+            if (!string.IsNullOrWhiteSpace(valueString)
+                && Configuration.TryGetEntry(ConfigPrefix, queryUri, configKey, out entry))
+            {
+                Trace.WriteLine("   " + configKey + " = " + entry.Value);
+                valueString = entry.Value;
+            }
+
+            if (!string.IsNullOrWhiteSpace(valueString))
+            {
+                bool result = defaultValue;
+                if (bool.TryParse(valueString, out result))
+                {
+                    value = result;
+                }
+                else
+                {
+                    if (ConfigValueComparer.Equals(valueString, "no"))
+                    {
+                        value = false;
+                    }
+                    else if (ConfigValueComparer.Equals(valueString, "yes"))
+                    {
+                        value = true;
+                    }
+                }
+            }
+
+            return value.HasValue;
+        }
+
         private static bool ModalPromptDisplayDialog(
             ref NativeMethods.CredentialUiInfo credUiInfo,
             ref NativeMethods.CredentialPackFlags authPackage,
@@ -1400,6 +1495,8 @@ namespace Microsoft.Alm.CredentialHelper
                 }
             }
         }
+
+        #endregion
 
         [Conditional("DEBUG")]
         private static void EnableDebugTrace()
