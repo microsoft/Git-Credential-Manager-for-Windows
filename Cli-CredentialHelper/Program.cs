@@ -299,40 +299,96 @@ namespace Microsoft.Alm.CredentialHelper
             Trace.WriteLine("Program::Askpass");
 
             string[] args = Environment.GetCommandLineArgs();
-            string url = args[3]?.Trim('\'', ':');
-            Uri targetUri = new Uri(url);
+            string targetUrl = args[3]?.Trim('\'', ':');
 
-            Trace.WriteLine("   verb = " + args[1]);
-            Trace.WriteLine("   targetUri = " + targetUri);
+            Uri targetUri = null;
+            Credential credential = null;
 
-            OperationArguments operationArguments = new OperationArguments(targetUri);
-
-            LoadOperationArguments(operationArguments);
-            EnableTraceLogging(operationArguments);
-
-            QueryCredentials(operationArguments);
-
-            if (StringComparer.InvariantCultureIgnoreCase.Equals(args[1], AskpassUsername)
-                && operationArguments.CredUsername != null)
+            // config stored credentials come in the format of <username>[:<password>]@<url> with password being optional
+            int tokenIndex = targetUrl.IndexOf('@');
+            if (tokenIndex > 0)
             {
-                Trace.WriteLine("   Username for '{0}' asked for and found.", url);
+                Trace.WriteLine("   '@' symbol found in URL, assuming credential prefix.");
 
-                var utf8bytes = Encoding.UTF8.GetBytes(operationArguments.CredUsername + "\n");
-                var stdout = Console.OpenStandardOutput();
-                stdout.Write(utf8bytes, 0, utf8bytes.Length);
-                return true;
+                string prefix = targetUrl.Substring(0, tokenIndex);
+                targetUrl = targetUrl.Substring(tokenIndex + 1, targetUrl.Length - tokenIndex - 1);
+
+                string username = null;
+                string password = null;
+
+                tokenIndex = prefix.IndexOf(':');
+                if (tokenIndex > 0)
+                {
+                    Trace.WriteLine("   ':' token found in credential prefix, parsing username & password.");
+
+                    username = prefix.Substring(0, tokenIndex);
+                    password = prefix.Substring(tokenIndex + 1, prefix.Length - tokenIndex - 1);
+                }
+
+                credential = new Credential(username, password);
             }
 
-            if (StringComparer.InvariantCultureIgnoreCase.Equals(args[1], AskpsssPassword)
-                && operationArguments.CredPassword != null)
+            if (Uri.TryCreate(targetUrl, UriKind.Absolute, out targetUri))
             {
-                Trace.WriteLine("   Password for '{0}' asked for and found.", url);
+                Trace.WriteLine("   success parsing URL, targetUri = " + targetUri);
 
-                var utf8bytes = Encoding.UTF8.GetBytes(operationArguments.CredPassword + "\n");
-                var stdout = Console.OpenStandardOutput();
-                stdout.Write(utf8bytes, 0, utf8bytes.Length);
-                return true;
+                OperationArguments operationArguments = new OperationArguments(targetUri);
+
+                LoadOperationArguments(operationArguments);
+                EnableTraceLogging(operationArguments);
+
+                QueryCredentials(operationArguments);
+
+                if (StringComparer.InvariantCultureIgnoreCase.Equals(args[1], AskpassUsername))
+                {
+                    if (string.IsNullOrEmpty(credential?.Username))
+                    {
+                        Trace.WriteLine("   username not supplied in config, need to query for value.");
+
+                        QueryCredentials(operationArguments);
+                        credential = new Credential(operationArguments.CredUsername, operationArguments.CredPassword);
+                    }
+
+                    if (!string.IsNullOrEmpty(credential?.Username))
+                    {
+                        Trace.WriteLine("   username for '{0}' asked for and found.", targetUrl);
+
+                        Console.Out.Write(credential.Username + "\n");
+                        return true;
+                    }
+                }
+
+                if (StringComparer.InvariantCultureIgnoreCase.Equals(args[1], AskpsssPassword))
+                {
+                    if (string.IsNullOrEmpty(credential?.Password))
+                    {
+                        Trace.WriteLine("   password not supplied in config, need to query for value.");
+
+                        QueryCredentials(operationArguments);
+
+                        // only honor the password if the stored credentials username was not supplied by or matches config
+                        if (string.IsNullOrEmpty(credential?.Username) 
+                            || StringComparer.InvariantCultureIgnoreCase.Equals(credential.Username, operationArguments.CredUsername))
+                        {
+                            credential = new Credential(operationArguments.CredUsername, operationArguments.CredPassword);
+                        }
+                    }
+
+                    if (!string.IsNullOrEmpty(credential?.Password))
+                    {
+                        Trace.WriteLine("   password for '{0}' asked for and found.", targetUrl);
+
+                        Console.Out.Write(credential.Password + "\n");
+                        return true;
+                    }
+                }
             }
+            else
+            {
+                Trace.WriteLine("   unable to parse URL.");
+            }
+
+            Trace.WriteLine("   credentials not found.");
 
             return false;
         }
