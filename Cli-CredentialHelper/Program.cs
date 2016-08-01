@@ -324,12 +324,16 @@ namespace Microsoft.Alm.Cli
                 Console.Error.WriteLine("Fatal: " + innerException.GetType().Name + " encountered.");
                 Trace.WriteLine("Fatal: " + exception.ToString());
                 LogEvent(exception.ToString(), EventLogEntryType.Error);
+
+                Environment.ExitCode = -1;
             }
             catch (Exception exception)
             {
                 Console.Error.WriteLine("Fatal: " + exception.GetType().Name + " encountered.");
                 Trace.WriteLine("Fatal: " + exception.ToString());
                 LogEvent(exception.ToString(), EventLogEntryType.Error);
+
+                Environment.ExitCode = -1;
             }
 
             Trace.Flush();
