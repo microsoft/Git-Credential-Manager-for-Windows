@@ -272,15 +272,21 @@ namespace Microsoft.Alm.CredentialHelper
             catch (AggregateException exception)
             {
                 // print out more useful information when an `AggregateException` is encountered
-                Console.Error.WriteLine("Fatal: " + exception.InnerExceptions[0].GetType().Name + " encountered.");
+                exception = exception.Flatten();
+
+                // find the first inner exception which isn't an `AggregateException` with fallback to the canonical `.InnerException`
+                Exception innerException = exception.InnerExceptions.FirstOrDefault(e => !(e is AggregateException))
+                                        ?? exception.InnerException;
+
+                Console.Error.WriteLine("Fatal: " + innerException.GetType().Name + " encountered.");
                 Trace.WriteLine("Fatal: " + exception.ToString());
-                LogEvent(exception.Message, EventLogEntryType.Error);
+                LogEvent(exception.ToString(), EventLogEntryType.Error);
             }
             catch (Exception exception)
             {
                 Console.Error.WriteLine("Fatal: " + exception.GetType().Name + " encountered.");
                 Trace.WriteLine("Fatal: " + exception.ToString());
-                LogEvent(exception.Message, EventLogEntryType.Error);
+                LogEvent(exception.ToString(), EventLogEntryType.Error);
             }
 
             Trace.Flush();
