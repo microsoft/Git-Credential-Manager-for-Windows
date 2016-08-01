@@ -23,37 +23,24 @@
  * WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE."
 **/
 
-namespace Microsoft.Alm.CredentialHelper
+namespace Microsoft.Alm.Cli
 {
     /// <summary>
-    /// Type of authentication and identity authority expected.
+    /// Level of interactivity allowed and enabled.
     /// </summary>
-    internal enum AuthorityType
+    internal enum Interactivity
     {
         /// <summary>
-        /// Attempt to detect the authority automatically, fallback to <see cref="Basic"/> if
-        /// unable to detect an authority.
+        /// Present an interactive logon prompt when necessary, otherwise use cached credentials
         /// </summary>
         Auto,
         /// <summary>
-        /// Basic username and password scheme
+        /// Always present an interactive logon prompt regardless if cached credentials exist
         /// </summary>
-        Basic,
+        Always,
         /// <summary>
-        /// Username and password scheme using Microsoft's Live system
+        /// Never present an present an interactive logon prompt, fail without cached credentials
         /// </summary>
-        MicrosoftAccount,
-        /// <summary>
-        /// Azure Directory Authentication based, including support for ADFS
-        /// </summary>
-        AzureDirectory,
-        /// <summary>
-        /// GitHub authentication
-        /// </summary>
-        GitHub,
-        /// <summary>
-        /// Operating system / network integrated authentication layer.
-        /// </summary>
-        Integrated,
+        Never
     }
 }

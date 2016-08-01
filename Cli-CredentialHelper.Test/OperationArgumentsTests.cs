@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
-namespace Microsoft.Alm.CredentialHelper.Test
+namespace Microsoft.Alm.Cli.Test
 {
     [TestClass]
     public class OperationArgumentsTests
