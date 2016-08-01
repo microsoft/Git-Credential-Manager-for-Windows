@@ -46,18 +46,21 @@ namespace Microsoft.Alm.Authentication
             ProxyUri = proxyUri;
             ActualUri = actualUri;
         }
+
         public TargetUri(Uri target)
             : this(target, null)
         { }
+
         public TargetUri(string actualUrl, string proxyUrl)
         {
-            if (actualUrl == null)
+            if (ReferenceEquals(actualUrl, null))
                 throw new ArgumentNullException("actualUrl");
             if (!Uri.TryCreate(actualUrl, UriKind.Absolute, out ActualUri))
-                throw new ArgumentException("URL is invalid.", "actualUrl");
-            if (proxyUrl != null && !Uri.TryCreate(proxyUrl, UriKind.Absolute, out ProxyUri))
-                throw new ArgumentException("URL is invalid.", "proxyUrl");
+                throw new UriFormatException("actualUrl");
+            if (!(ReferenceEquals(proxyUrl, null) || Uri.TryCreate(proxyUrl, UriKind.Absolute, out ProxyUri)))
+                throw new UriFormatException("proxyUrl");
         }
+
         public TargetUri(string targetUrl)
             : this(targetUrl, null)
         { }
@@ -73,6 +76,7 @@ namespace Microsoft.Alm.Authentication
         /// The actual <see cref="Uri"/> of the target.
         /// </summary>
         public readonly Uri ActualUri;
+
         /// <summary>
         /// Gets the <see cref="Uri.DnsSafeHost"/> of the <see cref="ActualUri"/>.
         /// </summary>
@@ -80,6 +84,7 @@ namespace Microsoft.Alm.Authentication
         {
             get { return ActualUri.DnsSafeHost; }
         }
+
         /// <summary>
         /// Gets the <see cref="Uri.Host"/> of the <see cref="ActualUri"/>.
         /// </summary>
@@ -87,14 +92,17 @@ namespace Microsoft.Alm.Authentication
         {
             get { return ActualUri.Host; }
         }
+
         /// <summary>
         /// Gets whether the <see cref="ActualUri"/> is absolute.
         /// </summary>
         public bool IsAbsoluteUri { get { return true; } }
+
         /// <summary>
         /// Gets whether the port value of the <see cref="ActualUri"/> is the default for this scheme.
         /// </summary>
         public bool IsDefaultPort { get { return ActualUri.IsDefaultPort; } }
+
         /// <summary>
         /// Gets the <see cref="Uri.Port"/> of the <see cref="ActualUri"/>.
         /// </summary>
@@ -102,10 +110,12 @@ namespace Microsoft.Alm.Authentication
         {
             get { return ActualUri.Port; }
         }
+
         /// <summary>
         /// The proxy <see cref="Uri"/> of the target if it exists; otherwise <see langword="null"/>.
         /// </summary>
         public readonly Uri ProxyUri;
+
         /// <summary>
         /// Gets the <see cref="Uri.Scheme"/> name of the <see cref="ActualUri"/>.
         /// </summary>
@@ -113,6 +123,7 @@ namespace Microsoft.Alm.Authentication
         {
             get { return ActualUri.Scheme; }
         }
+
         /// <summary>
         /// Determines whether the <see cref="ActualUri"/> is a base of the specified <see cref="Uri"/>.
         /// </summary>
@@ -122,6 +133,7 @@ namespace Microsoft.Alm.Authentication
         {
             return ActualUri.IsBaseOf(uri);
         }
+
         /// <summary>
         /// Determines whether the <see cref="ActualUri"/> is a base of the specified <see cref="TargetUri.ActualUri"/>.
         /// </summary>
@@ -134,15 +146,19 @@ namespace Microsoft.Alm.Authentication
 
             return ActualUri.IsBaseOf(targetUri.ActualUri);
         }
+
         /// <summary>
         /// Gets a canonical string representation for the <see cref="ActualUri"/>.
         /// </summary>
         /// <returns></returns>
-        public override String ToString()
+        public override string ToString()
         {
             return ActualUri.ToString();
         }
 
+        /// <summary>
+        /// Gets the client header enabled to work with proxies as necissary.
+        /// </summary>
         public HttpClientHandler HttpClientHandler
         {
             get
@@ -158,6 +174,9 @@ namespace Microsoft.Alm.Authentication
             }
         }
 
+        /// <summary>
+        /// Gets the web proxy abstraction for working with proxies as necissary.
+        /// </summary>
         public WebProxy WebProxy
         {
             get
@@ -166,15 +185,15 @@ namespace Microsoft.Alm.Authentication
                 {
                     WebProxy proxy = new WebProxy(ProxyUri);
 
-                    int dividerIndex = ProxyUri.UserInfo.IndexOf(':');
-                    bool hasUserNameAndPassword = dividerIndex != -1;
+                    int tokenIndex = ProxyUri.UserInfo.IndexOf(':');
+                    bool hasUserNameAndPassword = tokenIndex != -1;
                     bool hasAuthenticationSpecified = !string.IsNullOrWhiteSpace(ProxyUri.UserInfo);
 
                     // check if the user has specified authentications (comes as UserInfo)
                     if (hasAuthenticationSpecified && hasUserNameAndPassword)
                     {
-                        string userName = ProxyUri.UserInfo.Substring(0, dividerIndex);
-                        string password = ProxyUri.UserInfo.Substring(dividerIndex + 1);
+                        string userName = ProxyUri.UserInfo.Substring(0, tokenIndex);
+                        string password = ProxyUri.UserInfo.Substring(tokenIndex + 1);
 
                         NetworkCredential proxyCreds = new NetworkCredential(
                             userName,

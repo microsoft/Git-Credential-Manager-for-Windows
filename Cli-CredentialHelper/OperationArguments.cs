@@ -224,11 +224,16 @@ namespace Microsoft.Alm.CredentialHelper
 
         public void SetProxy(string url)
         {
-            Uri tmp;
+            Uri tmp = null;
             if (Uri.TryCreate(url, UriKind.Absolute, out tmp))
             {
-                this.ProxyUri = tmp;
+                Trace.WriteLine("   successfully set proxy to " + tmp.AbsoluteUri + ".");
             }
+            else
+            {
+                Trace.WriteLine("   proxy cleared.");
+            }
+            this.ProxyUri = tmp;
         }
 
         public override string ToString()
