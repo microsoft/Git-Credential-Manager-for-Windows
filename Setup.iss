@@ -6,7 +6,7 @@
   #error Update your Inno Setup version (5.5.6 or newer)
 #endif
 
-#define deployDir "..\Deploy\"
+#define deployDir "Deploy\"
 
 #ifnexist deployDir + "git-credential-manager.exe"
   #error Compile Git Credential Manager first
