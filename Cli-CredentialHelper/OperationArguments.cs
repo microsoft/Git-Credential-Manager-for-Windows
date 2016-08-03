@@ -63,6 +63,16 @@ namespace Microsoft.Alm.CredentialHelper
                     {
                         Array.Resize(ref buffer, buffer.Length * 2);
                     }
+
+                    // the input ends with LFLF, check for that and break the read loop
+                    // unless input is coming from CLRF system, in which case it'll be CLRFCLRF
+                    if ((buffer[read - 2] == '\n'
+                            && buffer[read - 1] == '\n')
+                        || (buffer[read - 4] == '\r'
+                            && buffer[read - 3] == '\n'
+                            && buffer[read - 2] == '\r'
+                            && buffer[read - 1] == '\n'))
+                        break;
                 }
 
                 // Git uses UTF-8 for string, don't let the OS decide how to decode it
