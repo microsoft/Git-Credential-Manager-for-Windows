@@ -81,7 +81,7 @@ namespace Microsoft.Alm.Authentication
                     Timeout = TimeSpan.FromMilliseconds(RequestTimeout)
                 })
                 {
-                    httpClient.DefaultRequestHeaders.Add("User-Agent", Global.GetUserAgent());
+                    httpClient.DefaultRequestHeaders.Add("User-Agent", Global.UserAgent);
 
                     switch (accessToken.Type)
                     {

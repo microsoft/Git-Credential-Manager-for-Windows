@@ -75,7 +75,7 @@ namespace Microsoft.Alm.Authentication
                 Timeout = TimeSpan.FromMilliseconds(RequestTimeout)
             })
             {
-                httpClient.DefaultRequestHeaders.Add("User-Agent", Global.GetUserAgent());
+                httpClient.DefaultRequestHeaders.Add("User-Agent", Global.UserAgent);
                 httpClient.DefaultRequestHeaders.Add("Accept", GitHubApiAcceptsHeaderValue);
 
                 string basicAuthValue = String.Format("{0}:{1}", username, password);
@@ -198,7 +198,7 @@ namespace Microsoft.Alm.Authentication
                 Timeout = TimeSpan.FromMilliseconds(RequestTimeout)
             })
             {
-                httpClient.DefaultRequestHeaders.Add("User-Agent", Global.GetUserAgent());
+                httpClient.DefaultRequestHeaders.Add("User-Agent", Global.UserAgent);
                 httpClient.DefaultRequestHeaders.Add("Accept", GitHubApiAcceptsHeaderValue);
                 httpClient.DefaultRequestHeaders.Add("Authorization", "Basic " + authEncode);
 

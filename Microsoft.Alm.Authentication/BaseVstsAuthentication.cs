@@ -292,7 +292,7 @@ namespace Microsoft.Alm.Authentication
                     {
                         // build a request that we expect to fail, do not allow redirect to sign in url
                         var request = WebRequest.CreateHttp(targetUri);
-                        request.UserAgent = Global.GetUserAgent();
+                        request.UserAgent = Global.UserAgent;
                         request.Method = "HEAD";
                         request.AllowAutoRedirect = false;
                         // get the response from the server
