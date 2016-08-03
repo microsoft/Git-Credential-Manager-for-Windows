@@ -6,6 +6,7 @@ namespace Microsoft.Alm.Gui
     /// <summary>
     /// Interaction logic for CredentialControl.xaml
     /// </summary>
+    [System.Runtime.InteropServices.ComVisible(false)]
     public partial class PassphraseWindow : Window
     {
         public const string MoreInformationUrl = "http://www.visualstudio.com/";

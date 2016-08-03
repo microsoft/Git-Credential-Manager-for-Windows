@@ -60,8 +60,8 @@
     <Reference Include="WindowsFormsIntegration" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="PromptWindow.xaml.cs">
-      <DependentUpon>PromptWindow.xaml</DependentUpon>
+    <Compile Include="PassphraseWindow.xaml.cs">
+      <DependentUpon>PassphraseWindow.xaml</DependentUpon>
     </Compile>
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
@@ -84,7 +84,7 @@
     <None Include="app.config" />
   </ItemGroup>
   <ItemGroup>
-    <Page Include="PromptWindow.xaml">
+    <Page Include="PassphraseWindow.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
