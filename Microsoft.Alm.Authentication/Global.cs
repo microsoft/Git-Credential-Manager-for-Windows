@@ -27,27 +27,55 @@ using System;
 
 namespace Microsoft.Alm.Authentication
 {
-    internal static class Global
+    public static class Global
     {
+        /// <summary>
+        /// <para>Gets or sets the user-agent string sent as part of the header in any HTTP operations.</para>
+        /// <para>Defaults to a value contrived based on the executing assembly.</para>
+        /// </summary>
+        public static string UserAgent
+        {
+            get
+            {
+                lock (_syncpoint)
+                {
+                    if (_useragent == null)
+                    {
+                        _useragent = DefaultUserAgent;
+                    }
+                    return _useragent;
+                }
+            }
+            set
+            {
+                lock (_syncpoint) _useragent = value;
+            }
+        }
         private static string _useragent = null;
+
+        private static readonly object _syncpoint = new object();
 
         /// <summary>
         /// Creates the correct user-agent string for HTTP calls.
         /// </summary>
         /// <returns>The `user-agent` string for "git-tools".</returns>
-        public static string GetUserAgent()
+        private static string DefaultUserAgent
         {
-            if (_useragent == null)
+            get
             {
-                Version version = System.Reflection.Assembly.GetExecutingAssembly().GetName().Version;
-                _useragent = String.Format("git-credential-manager ({0}; {1}; {2}) CLR/{3} git-tools/{4}",
-                                           Environment.OSVersion.VersionString,
-                                           Environment.OSVersion.Platform,
-                                           Environment.Is64BitOperatingSystem ? "x64" : "x86",
-                                           Environment.Version.ToString(3),
-                                           version.ToString(3));
+                var assemblyName = System.Reflection.Assembly.GetEntryAssembly().GetName();
+                var name = assemblyName.Name;
+                var version = assemblyName.Version;
+                var useragent = string.Format("{0} ({1}; {2}; {3}) CLR/{4} git-tools/{5}",
+                                              name,
+                                              Environment.OSVersion.VersionString,
+                                              Environment.OSVersion.Platform,
+                                              Environment.Is64BitOperatingSystem ? "x64" : "x86",
+                                              Environment.Version.ToString(3),
+                                              version.ToString(3));
+
+                return useragent;
             }
-            return _useragent;
         }
     }
 }
