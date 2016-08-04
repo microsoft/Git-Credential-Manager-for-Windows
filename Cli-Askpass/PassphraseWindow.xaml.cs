@@ -1,4 +1,5 @@
 ﻿using System.Windows;
+using System.Windows.Controls;
 using System.Windows.Input;
 
 namespace Microsoft.Alm.Gui
@@ -10,12 +11,20 @@ namespace Microsoft.Alm.Gui
     public partial class PassphraseWindow : Window
     {
         public const string MoreInformationUrl = "http://www.visualstudio.com/";
+        public const string HintText = "SSH Passphrase";
 
         internal PassphraseWindow(string resource)
         {
             InitializeComponent();
 
             _resource = resource;
+
+            Loaded += (sender, args) => {
+                
+                var style = Resources["FadedLabelStyle"] as Style;
+
+                _textboxAdorner = new PasswordBoxHintAdorner(PassphrasePasswordBox, HintText, style, IsAdornerVisible);
+            };
 
             DataContext = this;
         }
@@ -37,6 +46,8 @@ namespace Microsoft.Alm.Gui
             get { return _resource; }
         }
         private readonly string _resource;
+
+        private PasswordBoxHintAdorner _textboxAdorner;
 
         protected override void OnKeyUp(KeyEventArgs e)
         {
@@ -60,7 +71,7 @@ namespace Microsoft.Alm.Gui
         {
             base.OnGotFocus(e);
 
-            Keyboard.Focus(PassphraseTextBox);
+            Keyboard.Focus(PassphrasePasswordBox);
         }
 
         protected void CancelButton_Click(object sender, RoutedEventArgs e)
@@ -88,9 +99,16 @@ namespace Microsoft.Alm.Gui
             _passphrase = null;
         }
 
+        private Visibility IsAdornerVisible()
+        {
+            return (PassphrasePasswordBox.IsFocused || PassphrasePasswordBox.Password.Length > 0)
+                ? Visibility.Collapsed
+                : Visibility.Visible;
+        }
+
         private void Success()
         {
-            string passphrase = PassphraseTextBox.Text;
+            string passphrase = PassphrasePasswordBox.Password;
 
             if (string.IsNullOrWhiteSpace(passphrase))
             {

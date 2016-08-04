@@ -26,13 +26,16 @@
             <Color x:Key="ButtonBorderHoverColor">#666666</Color>
             <Color x:Key="ButtonBorderFocusedColor">#4EA6EA</Color>
             <Color x:Key="NormalColor">#1F1F1F</Color>
+            <Color x:Key="FadedColor">#D9D9D9</Color>
             <sys:Double x:Key="NormalFontSize">16</sys:Double>
             <FontFamily x:Key="NormalFontFamily">Segoe UI</FontFamily>
             <FontFamily x:Key="LightFontFamily">Segoe UI Light, Segoe UI, Global User Interface</FontFamily>
             <FontFamily x:Key="BoldFontFamily">Segoe UI Semibold</FontFamily>
             <SolidColorBrush x:Key="AccentBrush" Color="{StaticResource AccentColor}"/>
             <SolidColorBrush x:Key="BackgroundBrush" Color="{StaticResource BackgroundColor}"/>
+            <SolidColorBrush x:Key="FadedBrush" Color="{StaticResource FadedColor}" />
             <SolidColorBrush x:Key="NormalBrush" Color="{StaticResource NormalColor}" />
+            <Thickness x:Key="DoubleThickness" Bottom="1.75" Left="1.75" Right="1.75" Top="1.75"/>
             <Thickness x:Key="NormalThickness" Bottom="1" Left="1" Right="1" Top="1"/>
             <Thickness x:Key="NormalMargin" Bottom="0" Left="12" Right="12" Top="0"/>
             <Thickness x:Key="FooterMargin" Bottom="6" Left="12" Right="12" Top="0"/>
@@ -81,53 +84,35 @@
                     <Setter Property="Margin" Value="{StaticResource NormalMargin}"/>
                 </Style.Setters>
             </Style>
+            <Style x:Key="FadedLabelStyle" TargetType="Label">
+                <Setter Property="Foreground" Value="{StaticResource FadedBrush}"/>
+                <Setter Property="FontFamily" Value="{StaticResource LightFontFamily}"/>
+                <Setter Property="FontSize" Value="{StaticResource NormalFontSize}"/>
+                <Setter Property="HorizontalAlignment" Value="Stretch"/>
+                <Setter Property="HorizontalContentAlignment" Value="Left"/>
+                <Setter Property="Padding" Value="{StaticResource DoubleThickness}"/>
+                <Setter Property="VerticalAlignment" Value="Stretch"/>
+                <Setter Property="VerticalContentAlignment" Value="Bottom"/>
+            </Style>
             <Style x:Key="PassphraseBorderStyle" TargetType="Border">
                 <Style.Resources>
-                    <Color x:Key="FadedColor">#D9D9D9</Color>
-                    <SolidColorBrush x:Key="FadedBrush" Color="{StaticResource FadedColor}" />
-                    <Style x:Key="TextFadedStyle" TargetType="Label">
-                        <Setter Property="Foreground" Value="{StaticResource FadedBrush}"/>
-                        <Setter Property="FontFamily" Value="{StaticResource LightFontFamily}"/>
+                    <Style TargetType="PasswordBox">
+                        <Setter Property="BorderBrush" Value="Transparent"/>
+                        <Setter Property="BorderThickness" Value="0"/>
+                        <Setter Property="Foreground" Value="{StaticResource NormalBrush}"/>
+                        <Setter Property="FontFamily" Value="{StaticResource NormalFontFamily}"/>
                         <Setter Property="FontSize" Value="{StaticResource NormalFontSize}"/>
-                    </Style>
-                    <Style TargetType="TextBox">
-                        <Style.Resources>
-                            <VisualBrush x:Key="GhostTextBrush" AlignmentX="Left" AlignmentY="Center" Stretch="None">
-                                <VisualBrush.Visual>
-                                    <Label Content="SSH Passphrase" 
-                                           Style="{StaticResource TextFadedStyle}" />
-                                </VisualBrush.Visual>
-                            </VisualBrush>
-                        </Style.Resources>
-                        <Style.Setters>
-                            <Setter Property="BorderBrush" Value="Transparent"/>
-                            <Setter Property="BorderThickness" Value="0"/>
-                            <Setter Property="Foreground" Value="{StaticResource NormalBrush}"/>
-                            <Setter Property="FontFamily" Value="{StaticResource NormalFontFamily}"/>
-                            <Setter Property="FontSize" Value="{StaticResource NormalFontSize}"/>
-                            <Setter Property="HorizontalAlignment" Value="Stretch"/>
-                            <Setter Property="HorizontalContentAlignment" Value="Left"/>
-                            <Setter Property="Padding" Value="{StaticResource TextBoxPadding}"/>
-                            <Setter Property="VerticalAlignment" Value="Stretch"/>
-                            <Setter Property="VerticalContentAlignment" Value="Center"/>
-                        </Style.Setters>
-                        <Style.Triggers>
-                            <Trigger Property="Text" Value="{x:Static sys:String.Empty}">
-                                <Setter Property="Background" Value="{StaticResource GhostTextBrush}" />
-                            </Trigger>
-                            <Trigger Property="Text" Value="{x:Null}">
-                                <Setter Property="Background" Value="{StaticResource GhostTextBrush}" />
-                            </Trigger>
-                            <Trigger Property="IsKeyboardFocused" Value="True">
-                                <Setter Property="Background" Value="White" />
-                            </Trigger>
-                        </Style.Triggers>
+                        <Setter Property="HorizontalAlignment" Value="Stretch"/>
+                        <Setter Property="HorizontalContentAlignment" Value="Left"/>
+                        <Setter Property="Padding" Value="{StaticResource TextBoxPadding}"/>
+                        <Setter Property="VerticalAlignment" Value="Stretch"/>
+                        <Setter Property="VerticalContentAlignment" Value="Center"/>
                     </Style>
                 </Style.Resources>
                 <Style.Setters>
                     <Setter Property="Background" Value="{StaticResource BackgroundBrush}"/>
-                    <Setter Property="BorderBrush" Value="{StaticResource NormalBrush}"/>
-                    <Setter Property="BorderThickness" Value="{StaticResource NormalThickness}"/>
+                    <Setter Property="BorderBrush" Value="{StaticResource FadedBrush}"/>
+                    <Setter Property="BorderThickness" Value="{StaticResource DoubleThickness}"/>
                     <Setter Property="CornerRadius" Value="4"/>
                     <Setter Property="HorizontalAlignment" Value="Stretch"/>
                     <Setter Property="Margin" Value="{StaticResource NormalMargin}"/>
@@ -288,7 +273,7 @@
                     <Border Grid.Column="0" 
                             Grid.Row="2"
                             Style="{StaticResource PassphraseBorderStyle}">
-                        <TextBox x:Name="PassphraseTextBox"
+                        <PasswordBox x:Name="PassphrasePasswordBox"
                                  TabIndex="0"/>
                     </Border>
                     <Button x:Name="LearnMoreLink"
