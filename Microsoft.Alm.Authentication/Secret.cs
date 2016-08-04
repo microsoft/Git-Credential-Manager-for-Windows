@@ -35,7 +35,9 @@ namespace Microsoft.Alm.Authentication
             const string TokenNameBaseFormat = "{0}:{1}://{2}";
             const string TokenNamePortFormat = TokenNameBaseFormat + ":{3}";
 
-            Debug.Assert(targetUri != null, "The targetUri parameter is null");
+            BaseSecureStore.ValidateTargetUri(targetUri);
+            if (String.IsNullOrWhiteSpace(@namespace))
+                throw new ArgumentNullException(@namespace);
 
             Trace.WriteLine("Secret::UriToName");
 
@@ -65,7 +67,9 @@ namespace Microsoft.Alm.Authentication
             const string TokenNamePathFormat = "{0}:{1}://{2}{3}";
             const string TokenNamePortFormat = "{0}:{1}://{2}:{3}{4}";
 
-            Debug.Assert(targetUri != null, "The targetUri parameter is null");
+            BaseSecureStore.ValidateTargetUri(targetUri);
+            if (String.IsNullOrWhiteSpace(@namespace))
+                throw new ArgumentNullException(@namespace);
 
             Trace.WriteLine("Secret::UriToPathedName");
 

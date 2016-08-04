@@ -159,7 +159,12 @@ namespace Microsoft.Alm.Authentication
 
         private bool KeyIsValid(RegistryKey registryKey, out string url, out string type, out string value)
         {
-            Debug.Assert(registryKey != null && !registryKey.Handle.IsInvalid, "The registryKey parameter is null or invalid.");
+            if (ReferenceEquals(registryKey, null))
+                throw new ArgumentNullException(nameof(registryKey));
+            if (ReferenceEquals(registryKey.Handle, null))
+                throw new ArgumentNullException(nameof(registryKey.Handle));
+            if (registryKey.Handle.IsInvalid)
+                throw new ArgumentException(nameof(registryKey));
 
             url = registryKey.GetValue(RegistryUrlKey, null, RegistryValueOptions.DoNotExpandEnvironmentNames) as String;
             type = registryKey.GetValue(RegistryTypeKey, null, RegistryValueOptions.DoNotExpandEnvironmentNames) as String;

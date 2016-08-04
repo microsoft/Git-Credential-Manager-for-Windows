@@ -196,7 +196,7 @@ namespace Microsoft.Alm.Authentication
         /// <returns>Properly formatted TargetName string</returns>
         protected override string GetTargetName(TargetUri targetUri)
         {
-            Debug.Assert(targetUri != null, "The targetUri parameter is null");
+            BaseSecureStore.ValidateTargetUri(targetUri);
 
             Trace.WriteLine("SecretStore::GetTargetName");
 

@@ -42,7 +42,8 @@ namespace Microsoft.Alm.Authentication
 
         public SecretCache(string @namespace, Secret.UriNameConversion getTargetName = null)
         {
-            Debug.Assert(!String.IsNullOrWhiteSpace(@namespace), "The namespace parameter is null or invalid");
+            if (String.IsNullOrWhiteSpace(@namespace))
+                throw new ArgumentNullException(@namespace);
 
             _namespace = @namespace;
             _getTargetName = getTargetName ?? Secret.UriToSimpleName;
@@ -212,7 +213,7 @@ namespace Microsoft.Alm.Authentication
         /// <returns>Properly formatted TargetName string</returns>
         private string GetTargetName(TargetUri targetUri)
         {
-            Debug.Assert(targetUri != null, "The targetUri parameter is null");
+            BaseSecureStore.ValidateTargetUri(targetUri);
 
             Trace.WriteLine("SecretCache::GetTargetName");
 

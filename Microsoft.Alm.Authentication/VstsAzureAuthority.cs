@@ -62,9 +62,10 @@ namespace Microsoft.Alm.Authentication
         {
             const string AccessTokenHeader = "Bearer";
 
-            Debug.Assert(targetUri != null, "The targetUri parameter is null");
-            Debug.Assert(accessToken != null && !String.IsNullOrWhiteSpace(accessToken.Value) && (accessToken.Type == TokenType.Access || accessToken.Type == TokenType.Federated), "The accessToken parameter is null or invalid");
-            Debug.Assert(tokenScope != null);
+            BaseSecureStore.ValidateTargetUri(targetUri);
+            BaseSecureStore.ValidateToken(accessToken);
+            if (ReferenceEquals(tokenScope, null))
+                throw new ArgumentNullException(nameof(tokenScope));
 
             Trace.WriteLine("VstsAzureAuthority::GeneratePersonalAccessToken");
 
@@ -147,8 +148,8 @@ namespace Microsoft.Alm.Authentication
 
         public async Task<bool> PopulateTokenTargetId(TargetUri targetUri, Token accessToken)
         {
-            Debug.Assert(targetUri != null && targetUri.IsAbsoluteUri, "The targetUri parameter is null or invalid");
-            Debug.Assert(accessToken != null && !String.IsNullOrWhiteSpace(accessToken.Value) && (accessToken.Type == TokenType.Access || accessToken.Type == TokenType.Federated), "The accessToken parameter is null or invalid");
+            BaseSecureStore.ValidateTargetUri(targetUri);
+            BaseSecureStore.ValidateToken(accessToken);
 
             Trace.WriteLine("VstsAzureAuthority::PopulateTokenTargetId");
 
@@ -204,8 +205,8 @@ namespace Microsoft.Alm.Authentication
         /// <returns>True if successful; otherwise false.</returns>
         public async Task<bool> ValidateCredentials(TargetUri targetUri, Credential credentials)
         {
-            Debug.Assert(targetUri != null && targetUri.IsAbsoluteUri, "The targetUri parameter is null or invalid");
-            Debug.Assert(credentials != null, "The credentials parameter is null or invalid");
+            BaseSecureStore.ValidateTargetUri(targetUri);
+            BaseSecureStore.ValidateCredential(credentials);
 
             Trace.WriteLine("VstsAzureAuthority::ValidateCredentials");
 
@@ -240,8 +241,6 @@ namespace Microsoft.Alm.Authentication
         /// <summary>
         /// <para>Validates that <see cref="Token"/> are valid to grant access to the Visual Studio
         /// Online service represented by the <paramref name="targetUri"/> parameter.</para>
-        /// <para>Tokens of <see cref="TokenType.Refresh"/> cannot grant access, and
-        /// therefore always fail - this does not mean the token is invalid.</para>
         /// </summary>
         /// <param name="targetUri">Uniform resource identifier for a VSTS service.</param>
         /// <param name="token">
@@ -250,8 +249,8 @@ namespace Microsoft.Alm.Authentication
         /// <returns>True if successful; otherwise false.</returns>
         public async Task<bool> ValidateToken(TargetUri targetUri, Token token)
         {
-            Debug.Assert(targetUri != null && targetUri.IsAbsoluteUri, "The targetUri parameter is null or invalid");
-            Debug.Assert(token != null && (token.Type == TokenType.Access || token.Type == TokenType.Federated), "The token parameter is null or invalid");
+            BaseSecureStore.ValidateTargetUri(targetUri);
+            BaseSecureStore.ValidateToken(token);
 
             Trace.WriteLine("VstsAzureAuthority::ValidateToken");
 
