@@ -49,9 +49,6 @@ namespace Microsoft.Alm.Authentication
             if (ReferenceEquals(personalAccessTokenStore, null))
                 throw new ArgumentNullException(nameof(personalAccessTokenStore));
 
-            // attempt to purge any cached ada tokens.
-            SecurityPurgeAdaTokens(new SecretStore(AdalRefreshPrefix));
-
             this.ClientId = DefaultClientId;
             this.Resource = DefaultResource;
             this.TokenScope = tokenScope;
@@ -291,23 +288,6 @@ namespace Microsoft.Alm.Authentication
             }
 
             return authentication;
-        }
-
-        /// <summary>
-        /// Attempts to enumerate and delete any and all Azure Directory Authentication
-        /// Refresh tokens caches by GCM asynchronously.
-        /// </summary>
-        /// <returns>A <see cref="Task"/> for the async action.</returns>
-        private static Task SecurityPurgeAdaTokens(SecretStore adaStore)
-        {
-            if (ReferenceEquals(adaStore, null))
-                throw new ArgumentNullException(nameof(adaStore));
-
-            // this can and should be done asynchronously to minimize user impact
-            return Task.Run(() =>
-            {
-                adaStore.PurgeCredentials();
-            });
         }
     }
 }
