@@ -30,8 +30,45 @@ namespace Microsoft.Alm.Authentication
 {
     internal interface IAzureAuthority
     {
-        TokenPair AcquireToken(TargetUri targetUri, string clientId, string resource, Uri redirectUri, string queryParameters = null);
-        Task<TokenPair> AcquireTokenAsync(TargetUri targetUri, string clientId, string resource, Credential credentials = null);
-        Task<TokenPair> AcquireTokenByRefreshTokenAsync(TargetUri targetUri, string clientId, string resource, Token refreshToken);
+        /// <summary>
+        /// acquires a <see cref="Token"/> from the authority via an interactive user logon
+        /// prompt.
+        /// </summary>
+        /// <param name="targetUri">
+        /// The uniform resource indicator of the resource access tokens are being requested for.
+        /// </param>
+        /// <param name="clientId">Identifier of the client requesting the token.</param>
+        /// <param name="resource">
+        /// Identifier of the target resource that is the recipient of the requested token.
+        /// </param>
+        /// <param name="redirectUri">
+        /// Address to return to upon receiving a response from the authority.
+        /// </param>
+        /// <param name="queryParameters">
+        /// Optional: appended as-is to the query string in the HTTP authentication request to the
+        /// authority.
+        /// </param>
+        /// <returns>If successful a <see cref="TokenPair"/>; otherwise <see langword="null"/>.</returns>
+        Task<Token> InteractiveAcquireToken(TargetUri targetUri, string clientId, string resource, Uri redirectUri, string queryParameters = null);
+
+        /// <summary>
+        /// Acquires a <see cref="Token"/> from the authority via an non-interactive user logon.
+        /// </summary>
+        /// <param name="targetUri">
+        /// The uniform resource indicator of the resource access tokens are being requested for.
+        /// </param>
+        /// <param name="clientId">Identifier of the client requesting the token.</param>
+        /// <param name="resource">
+        /// Identifier of the target resource that is the recipient of the requested token.
+        /// </param>
+        /// <param name="redirectUri">
+        /// Address to return to upon receiving a response from the authority.
+        /// </param>
+        /// <param name="queryParameters">
+        /// Optional: appended as-is to the query string in the HTTP authentication request to the
+        /// authority.
+        /// </param>
+        /// <returns>If successful a <see cref="TokenPair"/>; otherwise <see langword="null"/>.</returns>
+        Task<Token> NoninteractiveAcquireToken(TargetUri targetUri, string clientId, string resource, Uri redirectUri, string queryParameters = null);
     }
 }

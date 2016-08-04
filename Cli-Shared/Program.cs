@@ -328,22 +328,21 @@ namespace Microsoft.Alm.Cli
                     Trace.WriteLine("   detecting authority type");
 
                     // detect the authority
-                    if (BaseVstsAuthentication.GetAuthentication(operationArguments.TargetUri,
-                                                                 VstsCredentialScope,
-                                                                 secrets,
-                                                                 null,
-                                                                 out authority)
-                        || GitHubAuthentication.GetAuthentication(operationArguments.TargetUri,
-                                                                  GitHubCredentialScope,
-                                                                  secrets,
-                                                                  operationArguments.UseModalUi
-                                                                    ? new GitHubAuthentication.AcquireCredentialsDelegate(GitHub.Authentication.AuthenticationPrompts.CredentialModalPrompt)
-                                                                    : new GitHubAuthentication.AcquireCredentialsDelegate(GitHubCredentialPrompt),
-                                                                  operationArguments.UseModalUi
-                                                                    ? new GitHubAuthentication.AcquireAuthenticationCodeDelegate(GitHub.Authentication.AuthenticationPrompts.AuthenticationCodeModalPrompt)
-                                                                    : new GitHubAuthentication.AcquireAuthenticationCodeDelegate(GitHubAuthCodePrompt),
-                                                                  null,
-                                                                  out authority))
+                    authority = BaseVstsAuthentication.GetAuthentication(operationArguments.TargetUri,
+                                                                         VstsCredentialScope,
+                                                                         secrets)
+                             ?? GitHubAuthentication.GetAuthentication(operationArguments.TargetUri,
+                                                                       GitHubCredentialScope,
+                                                                       secrets,
+                                                                       operationArguments.UseModalUi
+                                                                         ? new GitHubAuthentication.AcquireCredentialsDelegate(GitHub.Authentication.AuthenticationPrompts.CredentialModalPrompt)
+                                                                         : new GitHubAuthentication.AcquireCredentialsDelegate(GitHubCredentialPrompt),
+                                                                       operationArguments.UseModalUi
+                                                                         ? new GitHubAuthentication.AcquireAuthenticationCodeDelegate(GitHub.Authentication.AuthenticationPrompts.AuthenticationCodeModalPrompt)
+                                                                         : new GitHubAuthentication.AcquireAuthenticationCodeDelegate(GitHubAuthCodePrompt),
+                                                                       null);
+                    
+                    if (authority != null)
                     {
                         // set the authority type based on the returned value
                         if (authority is VstsMsaAuthentication)
@@ -985,19 +984,14 @@ namespace Microsoft.Alm.Cli
                         if (((operationArguments.Interactivity != Interactivity.Always
                             && aadAuth.GetCredentials(operationArguments.TargetUri, out credentials)
                             && (!operationArguments.ValidateCredentials
-                                || await aadAuth.ValidateCredentials(operationArguments.TargetUri, credentials)))
+                                || await aadAuth.ValidateCredentials(operationArguments.TargetUri, credentials))))
                         || (operationArguments.Interactivity != Interactivity.Always
-                            && await aadAuth.RefreshCredentials(operationArguments.TargetUri, true)
-                            && aadAuth.GetCredentials(operationArguments.TargetUri, out credentials)
-                            && (!operationArguments.ValidateCredentials
-                                || await aadAuth.ValidateCredentials(operationArguments.TargetUri, credentials)))
-                        || (operationArguments.Interactivity != Interactivity.Always
-                                && await aadAuth.NoninteractiveLogon(operationArguments.TargetUri, true)
+                                && ((credentials = await aadAuth.NoninteractiveLogon(operationArguments.TargetUri, true)) != null)
                                 && aadAuth.GetCredentials(operationArguments.TargetUri, out credentials)
                             && (!operationArguments.ValidateCredentials
                                 || await aadAuth.ValidateCredentials(operationArguments.TargetUri, credentials)))
                         || (operationArguments.Interactivity != Interactivity.Never
-                            && aadAuth.InteractiveLogon(operationArguments.TargetUri, true))
+                            && ((credentials = await aadAuth.InteractiveLogon(operationArguments.TargetUri, true)) != null)
                             && aadAuth.GetCredentials(operationArguments.TargetUri, out credentials)
                             && (!operationArguments.ValidateCredentials
                                 || await aadAuth.ValidateCredentials(operationArguments.TargetUri, credentials))))
@@ -1024,14 +1018,9 @@ namespace Microsoft.Alm.Cli
                         if (((operationArguments.Interactivity != Interactivity.Always
                             && msaAuth.GetCredentials(operationArguments.TargetUri, out credentials)
                             && (!operationArguments.ValidateCredentials
-                                || await msaAuth.ValidateCredentials(operationArguments.TargetUri, credentials)))
-                        || (operationArguments.Interactivity != Interactivity.Always
-                            && await msaAuth.RefreshCredentials(operationArguments.TargetUri, true)
-                            && msaAuth.GetCredentials(operationArguments.TargetUri, out credentials)
-                            && (!operationArguments.ValidateCredentials
-                                || await msaAuth.ValidateCredentials(operationArguments.TargetUri, credentials)))
+                                || await msaAuth.ValidateCredentials(operationArguments.TargetUri, credentials))))
                         || (operationArguments.Interactivity != Interactivity.Never
-                            && msaAuth.InteractiveLogon(operationArguments.TargetUri, true))
+                            && ((credentials = await msaAuth.InteractiveLogon(operationArguments.TargetUri, true)) != null)
                             && msaAuth.GetCredentials(operationArguments.TargetUri, out credentials)
                             && (!operationArguments.ValidateCredentials
                                 || await msaAuth.ValidateCredentials(operationArguments.TargetUri, credentials))))

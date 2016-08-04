@@ -49,13 +49,10 @@ namespace Microsoft.Alm.Authentication
         /// <param name="adaRefreshTokenStore">The secure secret store for storing any Azure tokens
         /// acquired.</param>
         public VstsAadAuthentication(
-            Guid tenantId,
-            VstsTokenScope tokenScope,
-            ICredentialStore personalAccessTokenStore,
-            ITokenStore adaRefreshTokenStore = null)
-            : base(tokenScope,
-                   personalAccessTokenStore,
-                   adaRefreshTokenStore)
+            Guid tenantId, 
+            VstsTokenScope tokenScope, 
+            ICredentialStore personalAccessTokenStore)
+            : base(tokenScope, personalAccessTokenStore)
         {
             if (tenantId == Guid.Empty)
             {
@@ -74,11 +71,9 @@ namespace Microsoft.Alm.Authentication
         /// </summary>
         internal VstsAadAuthentication(
             ICredentialStore personalAccessTokenStore,
-            ITokenStore adaRefreshTokenStore,
             ITokenStore vstsIdeTokenCache,
             IVstsAuthority vstsAuthority)
             : base(personalAccessTokenStore,
-                   adaRefreshTokenStore,
                    vstsIdeTokenCache,
                    vstsAuthority)
         { }
@@ -98,8 +93,9 @@ namespace Microsoft.Alm.Authentication
         /// <para>Compact tokens are necessary for clients which have restrictions on the size of
         /// the basic authentication header which they can create (example: Git).</para>
         /// </param>
-        /// <returns><see langword="true"/> if a authentication and personal access token acquisition was successful; otherwise <see langword="false"/>.</returns>
-        public bool InteractiveLogon(TargetUri targetUri, bool requestCompactToken)
+        /// <returns>A <see cref="Credential"/> for packing into a basic authentication header; 
+        /// otherwise <see langword="null"/>.</returns>
+        public async Task<Credential> InteractiveLogon(TargetUri targetUri, bool requestCompactToken)
         {
             BaseSecureStore.ValidateTargetUri(targetUri);
 
@@ -107,14 +103,12 @@ namespace Microsoft.Alm.Authentication
 
             try
             {
-                TokenPair tokens;
-                if ((tokens = this.VstsAuthority.AcquireToken(targetUri, this.ClientId, this.Resource, new Uri(RedirectUrl), null)) != null)
+                Token token;
+                if ((token = await this.VstsAuthority.InteractiveAcquireToken(targetUri, this.ClientId, this.Resource, new Uri(RedirectUrl), null)) != null)
                 {
                     Trace.WriteLine("   token acquisition succeeded.");
 
-                    this.StoreRefreshToken(targetUri, tokens.RefeshToken);
-
-                    return this.GeneratePersonalAccessToken(targetUri, tokens.AccessToken, requestCompactToken).Result;
+                    return await this.GeneratePersonalAccessToken(targetUri, token, requestCompactToken);
                 }
             }
             catch (AdalException)
@@ -123,52 +117,7 @@ namespace Microsoft.Alm.Authentication
             }
 
             Trace.WriteLine("   interactive logon failed");
-            return false;
-        }
-
-        /// <summary>
-        /// <para>Uses credentials to authenticate with the Azure tenant and acquire the necessary
-        /// access tokens to exchange for a VSTS personal access token.</para>
-        /// <para>Tokens acquired are stored in the secure secret stores provided during
-        /// initialization.</para>
-        /// </summary>
-        /// <param name="targetUri">The unique identifier for the resource for which access is to
-        /// be acquired.</param>
-        /// <param name="credentials">The credentials required to meet the criteria of the Azure
-        /// tenant authentication challenge (i.e. username + password).</param>
-        /// <param name="requestCompactToken">
-        /// <para>Requests a compact format personal access token; otherwise requests a standard
-        /// personal access token.</para>
-        /// <para>Compact tokens are necessary for clients which have restrictions on the size of
-        /// the basic authentication header which they can create (example: Git).</para>
-        /// </param>
-        /// <returns><see langword="true"/> if authentication and personal access token acquisition was successful; otherwise <see langword="false"/>.</returns>
-        public async Task<bool> NoninteractiveLogonWithCredentials(TargetUri targetUri, Credential credentials, bool requestCompactToken)
-        {
-            BaseSecureStore.ValidateTargetUri(targetUri);
-            Credential.Validate(credentials);
-
-            Trace.WriteLine("VstsAadAuthentication::NoninteractiveLogonWithCredentials");
-
-            try
-            {
-                TokenPair tokens;
-                if ((tokens = await this.VstsAuthority.AcquireTokenAsync(targetUri, this.ClientId, this.Resource, credentials)) != null)
-                {
-                    Trace.WriteLine("   token acquisition succeeded");
-
-                    this.StoreRefreshToken(targetUri, tokens.RefeshToken);
-
-                    return await this.GeneratePersonalAccessToken(targetUri, tokens.AccessToken, requestCompactToken);
-                }
-            }
-            catch (AdalException)
-            {
-                Trace.WriteLine("   token acquisition failed");
-            }
-
-            Trace.WriteLine("   non-interactive logon failed");
-            return false;
+            return null;
         }
 
         /// <summary>
@@ -186,8 +135,9 @@ namespace Microsoft.Alm.Authentication
         /// <para>Compact tokens are necessary for clients which have restrictions on the size of
         /// the basic authentication header which they can create (example: Git).</para>
         /// </param>
-        /// <returns><see langword="true"/> if authentication and personal access token acquisition was successful; otherwise <see langword="false"/>.</returns>
-        public async Task<bool> NoninteractiveLogon(TargetUri targetUri, bool requestCompactToken)
+        /// <returns>A <see cref="Credential"/> for packing into a basic authentication header; 
+        /// otherwise <see langword="null"/>.</returns>
+        public async Task<Credential> NoninteractiveLogon(TargetUri targetUri, bool requestCompactToken)
         {
             BaseSecureStore.ValidateTargetUri(targetUri);
 
@@ -195,14 +145,12 @@ namespace Microsoft.Alm.Authentication
 
             try
             {
-                TokenPair tokens;
-                if ((tokens = await this.VstsAuthority.AcquireTokenAsync(targetUri, this.ClientId, this.Resource)) != null)
+                Token token;
+                if ((token = await this.VstsAuthority.NoninteractiveAcquireToken(targetUri, this.ClientId, this.Resource, new Uri(RedirectUrl))) != null)
                 {
                     Trace.WriteLine("   token acquisition succeeded");
 
-                    this.StoreRefreshToken(targetUri, tokens.RefeshToken);
-
-                    return await this.GeneratePersonalAccessToken(targetUri, tokens.AccessToken, requestCompactToken);
+                    return await this.GeneratePersonalAccessToken(targetUri, token, requestCompactToken);
                 }
             }
             catch (AdalException)
@@ -211,7 +159,7 @@ namespace Microsoft.Alm.Authentication
             }
 
             Trace.WriteLine("   non-interactive logon failed");
-            return false;
+            return null;
         }
 
         /// <summary>
@@ -226,7 +174,7 @@ namespace Microsoft.Alm.Authentication
         public override bool SetCredentials(TargetUri targetUri, Credential credentials)
         {
             BaseSecureStore.ValidateTargetUri(targetUri);
-            Credential.Validate(credentials);
+            BaseSecureStore.ValidateCredential(credentials);
 
             Trace.WriteLine("VstsMsaAuthentication::SetCredentials");
             Trace.WriteLine("   setting AAD credentials is not supported");

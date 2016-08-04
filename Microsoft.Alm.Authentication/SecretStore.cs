@@ -159,7 +159,7 @@ namespace Microsoft.Alm.Authentication
         public void WriteCredentials(TargetUri targetUri, Credential credentials)
         {
             ValidateTargetUri(targetUri);
-            Credential.Validate(credentials);
+            BaseSecureStore.ValidateCredential(credentials);
 
             Trace.WriteLine("CredentialStore::WriteCredentials");
 

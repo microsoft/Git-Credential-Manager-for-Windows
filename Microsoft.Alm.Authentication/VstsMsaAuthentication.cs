@@ -25,6 +25,7 @@
 
 using System;
 using System.Diagnostics;
+using System.Threading.Tasks;
 using Microsoft.IdentityModel.Clients.ActiveDirectory;
 
 namespace Microsoft.Alm.Authentication
@@ -33,13 +34,8 @@ namespace Microsoft.Alm.Authentication
     {
         public const string DefaultAuthorityHost = AzureAuthority.AuthorityHostUrlBase + "/live.com";
 
-        public VstsMsaAuthentication(
-            VstsTokenScope tokenScope,
-            ICredentialStore personalAccessTokenStore,
-            ITokenStore adaRefreshTokenStore = null)
-            : base(tokenScope,
-                   personalAccessTokenStore,
-                   adaRefreshTokenStore)
+        public VstsMsaAuthentication(VstsTokenScope tokenScope, ICredentialStore personalAccessTokenStore)
+            : base(tokenScope, personalAccessTokenStore)
         {
             this.VstsAuthority = new VstsAzureAuthority(DefaultAuthorityHost);
         }
@@ -53,11 +49,9 @@ namespace Microsoft.Alm.Authentication
         /// <param name="liveAuthority"></param>
         internal VstsMsaAuthentication(
             ICredentialStore personalAccessTokenStore,
-            ITokenStore adaRefreshTokenStore,
             ITokenStore vstsIdeTokenCache,
             IVstsAuthority liveAuthority)
             : base(personalAccessTokenStore,
-                   adaRefreshTokenStore,
                    vstsIdeTokenCache,
                    liveAuthority)
         { }
@@ -72,8 +66,9 @@ namespace Microsoft.Alm.Authentication
         /// <param name="requireCompactToken">
         /// True if a compact access token is required; false if a standard token is acceptable.
         /// </param>
-        /// <returns>True if successful; otherwise false.</returns>
-        public bool InteractiveLogon(TargetUri targetUri, bool requireCompactToken)
+        /// <returns>A <see cref="Credential"/> for packing into a basic authentication header; 
+        /// otherwise <see langword="null"/>.</returns>
+        public async Task<Credential> InteractiveLogon(TargetUri targetUri, bool requireCompactToken)
         {
             const string QueryParameters = "domain_hint=live.com&display=popup&site_id=501454&nux=1";
 
@@ -83,14 +78,12 @@ namespace Microsoft.Alm.Authentication
 
             try
             {
-                TokenPair tokens;
-                if ((tokens = this.VstsAuthority.AcquireToken(targetUri, this.ClientId, this.Resource, new Uri(RedirectUrl), QueryParameters)) != null)
+                Token token;
+                if ((token = await this.VstsAuthority.InteractiveAcquireToken(targetUri, this.ClientId, this.Resource, new Uri(RedirectUrl), QueryParameters)) != null)
                 {
                     Trace.WriteLine("   token successfully acquired.");
 
-                    this.StoreRefreshToken(targetUri, tokens.RefeshToken);
-
-                    return this.GeneratePersonalAccessToken(targetUri, tokens.AccessToken, requireCompactToken).Result;
+                    return await this.GeneratePersonalAccessToken(targetUri, token, requireCompactToken);
                 }
             }
             catch (AdalException exception)
@@ -99,8 +92,9 @@ namespace Microsoft.Alm.Authentication
             }
 
             Trace.WriteLine("   failed to acquire token.");
-            return false;
+            return null;
         }
+
         /// <summary>
         /// Sets credentials for future use with this authentication object.
         /// </summary>
@@ -113,7 +107,7 @@ namespace Microsoft.Alm.Authentication
         public override bool SetCredentials(TargetUri targetUri, Credential credentials)
         {
             BaseSecureStore.ValidateTargetUri(targetUri);
-            Credential.Validate(credentials);
+            BaseSecureStore.ValidateCredential(credentials);
 
             Trace.WriteLine("VstsMsaAuthentication::SetCredentials");
             Trace.WriteLine("   setting MSA credentials is not supported");

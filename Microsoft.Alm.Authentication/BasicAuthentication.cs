@@ -63,6 +63,7 @@ namespace Microsoft.Alm.Authentication
 
             this.CredentialStore.DeleteCredentials(targetUri);
         }
+
         /// <summary>
         /// Gets a <see cref="Credential"/> from the storage used by the authentication object.
         /// </summary>
@@ -84,6 +85,7 @@ namespace Microsoft.Alm.Authentication
 
             return credentials != null;
         }
+
         /// <summary>
         /// Sets a <see cref="Credential"/> in the storage used by the authentication object.
         /// </summary>
@@ -95,7 +97,7 @@ namespace Microsoft.Alm.Authentication
         public override bool SetCredentials(TargetUri targetUri, Credential credentials)
         {
             BaseSecureStore.ValidateTargetUri(targetUri);
-            Credential.Validate(credentials);
+            BaseSecureStore.ValidateCredential(credentials);
 
             Trace.WriteLine("BasicAuthentication::SetCredentials");
 

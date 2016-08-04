@@ -56,6 +56,7 @@ namespace Microsoft.Alm.Authentication
         /// Secret related to the username.
         /// </summary>
         public readonly string Password;
+
         /// <summary>
         /// Unique identifier of the user.
         /// </summary>
@@ -70,6 +71,7 @@ namespace Microsoft.Alm.Authentication
         {
             return this == obj as Credential;
         }
+
         /// <summary>
         /// Compares a <see cref="Credential"/> to this <see cref="Credential"/> for equality.
         /// </summary>
@@ -79,6 +81,7 @@ namespace Microsoft.Alm.Authentication
         {
             return this == other;
         }
+
         /// <summary>
         /// Gets a hash code based on the contents of the <see cref="Credential"/>.
         /// </summary>
@@ -89,17 +92,6 @@ namespace Microsoft.Alm.Authentication
             {
                 return Username.GetHashCode() + 7 * Password.GetHashCode();
             }
-        }
-
-        [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
-        internal static void Validate(Credential credentials)
-        {
-            if (credentials == null)
-                throw new ArgumentNullException("credentials", "The Credentials object cannot be null");
-            if (credentials.Password.Length > NativeMethods.Credential.PasswordMaxLength)
-                throw new ArgumentOutOfRangeException("credentials", string.Format("The Password field of the Credentials object cannot be longer than {0} characters", NativeMethods.Credential.UsernameMaxLength));
-            if (credentials.Username.Length > NativeMethods.Credential.UsernameMaxLength)
-                throw new ArgumentOutOfRangeException("credentials", string.Format("The Username field of the Credentials object cannot be longer than {0} characters", NativeMethods.Credential.UsernameMaxLength));
         }
 
         /// <summary>
@@ -118,6 +110,7 @@ namespace Microsoft.Alm.Authentication
             return String.Equals(credential1.Username, credential2.Username, StringComparison.Ordinal)
                 && String.Equals(credential1.Password, credential2.Password, StringComparison.Ordinal);
         }
+
         /// <summary>
         /// Compares two credentials for inequality.
         /// </summary>

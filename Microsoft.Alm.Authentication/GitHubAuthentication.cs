@@ -106,16 +106,17 @@ namespace Microsoft.Alm.Authentication
         /// tokens acquired.</param>
         /// <param name="authentication">(out) The authentication object if successful.</param>
         /// <returns>True if success; otherwise false.</returns>
-        public static bool GetAuthentication(
+        public static BaseAuthentication GetAuthentication(
             TargetUri targetUri,
             GitHubTokenScope tokenScope,
             ICredentialStore personalAccessTokenStore,
             AcquireCredentialsDelegate acquireCredentialsCallback,
             AcquireAuthenticationCodeDelegate acquireAuthenticationCodeCallback,
-            AuthenticationResultDelegate authenticationResultCallback,
-            out BaseAuthentication authentication)
+            AuthenticationResultDelegate authenticationResultCallback)
         {
             const string GitHubBaseUrlHost = "github.com";
+
+            BaseAuthentication authentication = null;
 
             BaseSecureStore.ValidateTargetUri(targetUri);
             if (personalAccessTokenStore == null)
@@ -134,7 +135,7 @@ namespace Microsoft.Alm.Authentication
                 Trace.WriteLine("   not github.com, authentication creation aborted");
             }
 
-            return authentication != null;
+            return authentication;
         }
 
         /// <summary>
@@ -276,7 +277,7 @@ namespace Microsoft.Alm.Authentication
         public override bool SetCredentials(TargetUri targetUri, Credential credentials)
         {
             BaseSecureStore.ValidateTargetUri(targetUri);
-            Credential.Validate(credentials);
+            BaseSecureStore.ValidateCredential(credentials);
 
             Trace.WriteLine("GitHubAuthentication::SetCredentials");
 
@@ -295,7 +296,7 @@ namespace Microsoft.Alm.Authentication
         public async Task<bool> ValidateCredentials(TargetUri targetUri, Credential credentials)
         {
             BaseSecureStore.ValidateTargetUri(targetUri);
-            Credential.Validate(credentials);
+            BaseSecureStore.ValidateCredential(credentials);
 
             Trace.WriteLine("GitHubAuthentication::ValidateCredentials");
 

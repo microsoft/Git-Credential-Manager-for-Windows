@@ -14,7 +14,7 @@
     <language>en-US</language>
     <dependencies>
       <group targetFramework="net451">
-        <dependency id="Microsoft.IdentityModel.Clients.ActiveDirectory" version="2.18.206251556" />
+        <dependency id="Microsoft.IdentityModel.Clients.ActiveDirectory" version="3.13.1" />
       </group>
     </dependencies>
     <tags>Git VSTS Visual Studio Team Services TFS GitHub Active Directory Authentication Library ADAL Directory Azure AD AAD Identity Authentication .NET Windows</tags>
