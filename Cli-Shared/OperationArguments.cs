@@ -137,6 +137,7 @@ namespace Microsoft.Alm.Cli
             this.UseModalUi = true;
             this.ValidateCredentials = true;
             this.WriteLog = false;
+            _useHttpPath = false;
         }
 
         public AuthorityType Authority { get; set; }
