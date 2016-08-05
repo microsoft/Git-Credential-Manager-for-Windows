@@ -41,7 +41,7 @@
     <StartupObject>Microsoft.Alm.Cli.Program</StartupObject>
   </PropertyGroup>
   <PropertyGroup>
-    <ApplicationIcon>..\Cli-Shared\Assets\gcmicon.ico</ApplicationIcon>
+    <ApplicationIcon>..\Assets\gcmicon.ico</ApplicationIcon>
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="Microsoft.CSharp" />
