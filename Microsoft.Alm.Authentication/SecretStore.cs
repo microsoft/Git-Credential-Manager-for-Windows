@@ -121,7 +121,7 @@ namespace Microsoft.Alm.Authentication
 
             Trace.WriteLine("CredentialStore::ReadCredentials");
 
-            if ((credentials = _credentialCache.ReadCredentials(targetUri)) != null)
+            if ((credentials = _credentialCache.ReadCredentials(targetUri)) == null)
             {
                 credentials = this.ReadCredentials(targetName);
             }
@@ -142,7 +142,7 @@ namespace Microsoft.Alm.Authentication
 
             Token token = null;
 
-            if ((token = _tokenCache.ReadToken(targetUri)) != null)
+            if ((token = _tokenCache.ReadToken(targetUri)) == null)
             {
                 string targetName = this.GetTargetName(targetUri);
                 token = ReadToken(targetName);
