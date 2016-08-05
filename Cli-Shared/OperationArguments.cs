@@ -92,23 +92,23 @@ namespace Microsoft.Alm.Cli
                             switch (pair[0])
                             {
                                 case "protocol":
-                                    this.QueryProtocol = pair[1];
+                                    _queryProtocol = pair[1];
                                     break;
 
                                 case "host":
-                                    this.QueryHost = pair[1];
+                                    _queryHost= pair[1];
                                     break;
 
                                 case "path":
-                                    this.QueryPath = pair[1];
+                                    _queryPath = pair[1];
                                     break;
 
                                 case "username":
-                                    this.CredUsername = pair[1];
+                                    _username = pair[1];
                                     break;
 
                                 case "password":
-                                    this.CredPassword = pair[1];
+                                    _password = pair[1];
                                     break;
                             }
                         }
@@ -124,9 +124,9 @@ namespace Microsoft.Alm.Cli
             if (ReferenceEquals(targetUri, null))
                 throw new ArgumentNullException("targetUri");
 
-            this.QueryProtocol = targetUri.Scheme;
-            this.QueryHost = targetUri.Host;
-            this.QueryPath = targetUri.AbsolutePath;
+            _queryProtocol = targetUri.Scheme;
+            _queryHost = targetUri.Host;
+            _queryPath = targetUri.AbsolutePath;
 
             this.CreateTargetUri();
         }
@@ -140,8 +140,14 @@ namespace Microsoft.Alm.Cli
         }
 
         public AuthorityType Authority { get; set; }
-        public string CredPassword { get; private set; }
-        public string CredUsername { get; private set; }
+        public string CredPassword
+        {
+            get { return _password; }
+        }
+        public string CredUsername
+        {
+            get { return _username; }
+        }
         public string CustomNamespace { get; set; }
         public Interactivity Interactivity { get; set; }
         public bool PreserveCredentials { get; set; }
@@ -218,6 +224,7 @@ namespace Microsoft.Alm.Cli
         public bool ValidateCredentials { get; set; }
         public bool WriteLog { get; set; }
 
+        private string _password;
         private string _queryHost;
         private string _queryPath;
         private string _queryProtocol;
@@ -225,11 +232,12 @@ namespace Microsoft.Alm.Cli
         private Uri _proxyUri;
         private TargetUri _targetUri;
         private bool _useHttpPath;
+        private string _username;
 
         public void SetCredentials(Credential credentials)
         {
-            this.CredUsername = credentials.Username;
-            this.CredPassword = credentials.Password;
+            _username = credentials.Username;
+            _password = credentials.Password;
         }
 
         public void SetProxy(string url)
@@ -251,26 +259,26 @@ namespace Microsoft.Alm.Cli
             StringBuilder builder = new StringBuilder();
 
             builder.Append("protocol=")
-                   .Append(this.QueryProtocol ?? String.Empty)
+                   .Append(_queryProtocol ?? String.Empty)
                    .Append("\n");
             builder.Append("host=")
-                   .Append(this.QueryHost ?? String.Empty)
+                   .Append(_queryHost?? String.Empty)
                    .Append("\n");
             builder.Append("path=")
-                   .Append(this.QueryPath ?? String.Empty)
+                   .Append(_queryPath ?? String.Empty)
                    .Append("\n");
             // only write out username if we know it
-            if (this.CredUsername != null)
+            if (_username != null)
             {
                 builder.Append("username=")
-                       .Append(this.CredUsername)
+                       .Append(_username)
                        .Append("\n");
             }
             // only write out password if we know it
-            if (this.CredPassword != null)
+            if (_password != null)
             {
                 builder.Append("password=")
-                       .Append(this.CredPassword)
+                       .Append(_password)
                        .Append("\n");
             }
 
@@ -301,8 +309,8 @@ namespace Microsoft.Alm.Cli
         internal void CreateTargetUri()
         {
             string actualUrl = _useHttpPath
-                ? String.Format("{0}://{1}/{2}", this.QueryProtocol, this.QueryHost, this.QueryPath)
-                : String.Format("{0}://{1}", this.QueryProtocol, this.QueryHost);
+                ? String.Format("{0}://{1}/{2}", _queryProtocol, this.QueryHost, _queryPath)
+                : String.Format("{0}://{1}", _queryProtocol, this.QueryHost);
 
             if (Uri.TryCreate(actualUrl, UriKind.Absolute, out _queryUri))
             {
