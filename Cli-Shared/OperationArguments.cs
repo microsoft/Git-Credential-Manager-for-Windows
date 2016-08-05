@@ -29,7 +29,7 @@ using System.IO;
 using System.Text;
 using Microsoft.Alm.Authentication;
 
-namespace Microsoft.Alm.CredentialHelper
+namespace Microsoft.Alm.Cli
 {
     internal sealed class OperationArguments
     {

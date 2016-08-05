@@ -219,6 +219,21 @@
     <Resource Include="Assets\octocat-mark.ico" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+  <PropertyGroup>
+    <PostBuildEvent>
+SET dst=$(SolutionDir)Deploy\
+SET src=$(TargetDir)
+
+IF NOT EXIST  "%25dst%25" mkdir  "%25dst%25"
+
+COPY /V /Y "$(SolutionDir)LICENSE.TXT" /A "%25src%25LICENSE.TXT" /A
+COPY /V /Y "$(SolutionDir)README.md" /A "%25src%25README.md" /A
+COPY /V /Y "%25src%25github.authentication.exe" /B "%25dst%25github.authentication.exe" /B
+COPY /V /Y "%25src%25install.cmd" /A "%25dst%25install.cmd" /A
+COPY /V /Y "%25src%25README.md" /A "%25dst%25README.md" /A
+COPY /V /Y "%25src%25LICENSE.TXT" /A "%25dst%25LICENSE.TXT" /A
+    </PostBuildEvent>
+  </PropertyGroup>
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.
   <Target Name="BeforeBuild">

@@ -28,7 +28,7 @@ using System.Runtime.InteropServices;
 using System.Text;
 using Microsoft.Win32.SafeHandles;
 
-namespace Microsoft.Alm.CredentialHelper
+namespace Microsoft.Alm
 {
     internal static class NativeMethods
     {

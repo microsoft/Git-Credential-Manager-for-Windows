@@ -1,0 +1,330 @@
+﻿<Window x:Class="Microsoft.Alm.Gui.PassphraseWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+        xmlns:local="clr-namespace:Microsoft.Alm.Gui"
+        xmlns:sys="clr-namespace:System;assembly=mscorlib"
+        mc:Ignorable="d"
+        Height="280"
+        ResizeMode="NoResize" 
+        Title="Git Credential Manager for Windows" 
+        Width="420"
+        WindowStartupLocation="CenterOwner">
+    <Window.Resources>
+        <ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                            xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                            xmlns:sys="clr-namespace:System;assembly=mscorlib"
+                            xmlns:PresentationOptions="http://schemas.microsoft.com/winfx/2006/xaml/presentation/options"
+                            xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+                            xmlns:ui="clr-namespace:Microsoft.Alm.Gui"
+                            mc:Ignorable="PresentationOptions">
+            <Color x:Key="BackgroundColor">#FFFFFF</Color>
+            <Color x:Key="AccentColor">#4EA6EA</Color>
+            <Color x:Key="ButtonBackgroundHoverColor">#222222</Color>
+            <Color x:Key="ButtonBorderNormalColor">#666666</Color>
+            <Color x:Key="ButtonBorderHoverColor">#666666</Color>
+            <Color x:Key="ButtonBorderFocusedColor">#4EA6EA</Color>
+            <Color x:Key="NormalColor">#1F1F1F</Color>
+            <Color x:Key="FadedColor">#D9D9D9</Color>
+            <sys:Double x:Key="NormalFontSize">16</sys:Double>
+            <FontFamily x:Key="NormalFontFamily">Segoe UI</FontFamily>
+            <FontFamily x:Key="LightFontFamily">Segoe UI Light, Segoe UI, Global User Interface</FontFamily>
+            <FontFamily x:Key="BoldFontFamily">Segoe UI Semibold</FontFamily>
+            <SolidColorBrush x:Key="AccentBrush" Color="{StaticResource AccentColor}"/>
+            <SolidColorBrush x:Key="BackgroundBrush" Color="{StaticResource BackgroundColor}"/>
+            <SolidColorBrush x:Key="FadedBrush" Color="{StaticResource FadedColor}" />
+            <SolidColorBrush x:Key="NormalBrush" Color="{StaticResource NormalColor}" />
+            <Thickness x:Key="DoubleThickness" Bottom="1.75" Left="1.75" Right="1.75" Top="1.75"/>
+            <Thickness x:Key="NormalThickness" Bottom="1" Left="1" Right="1" Top="1"/>
+            <Thickness x:Key="NormalMargin" Bottom="0" Left="12" Right="12" Top="0"/>
+            <Thickness x:Key="FooterMargin" Bottom="6" Left="12" Right="12" Top="0"/>
+            <Thickness x:Key="ControlPadding" Bottom="6" Left="12" Right="12" Top="6"/>
+            <Thickness x:Key="TextBoxPadding" Bottom="3" Left="6" Right="6" Top="6"/>
+            <Style x:Key="ControlStyle" TargetType="Border">
+                <Setter Property="Background" Value="{StaticResource BackgroundBrush}"/>
+            </Style>
+            <Style x:Key="LabelStyle" TargetType="Label">
+                <Style.Resources>
+                    <Style TargetType="TextBlock">
+                        <Setter Property="Foreground" Value="{StaticResource NormalBrush}"/>
+                        <Setter Property="FontFamily" Value="{StaticResource NormalFontFamily}"/>
+                        <Setter Property="FontSize" Value="{StaticResource NormalFontSize}"/>
+                    </Style>
+                </Style.Resources>
+                <Style.Setters>
+                    <Setter Property="HorizontalAlignment" Value="Stretch"/>
+                    <Setter Property="HorizontalContentAlignment" Value="Center"/>
+                    <Setter Property="VerticalAlignment" Value="Stretch"/>
+                    <Setter Property="VerticalContentAlignment" Value="Center"/>
+                </Style.Setters>
+            </Style>
+            <Style x:Key="HeaderLabelStyle" TargetType="Label" BasedOn="{StaticResource LabelStyle}">
+                <Style.Resources>
+                    <sys:Double x:Key="FontSize">32</sys:Double>
+                    <Thickness x:Key="Margin" Bottom="0" Left="6" Right="6" Top="6"/>
+                    <Thickness x:Key="Padding" Bottom="0" Left="6" Right="6" Top="6"/>
+                    <Style TargetType="TextBlock">
+                        <Setter Property="FontSize" Value="{StaticResource FontSize}"/>
+                    </Style>
+                </Style.Resources>
+                <Style.Setters>
+                    <Setter Property="Margin" Value="{StaticResource Margin}"/>
+                    <Setter Property="Padding" Value="{StaticResource Padding}"/>
+                </Style.Setters>
+            </Style>
+            <Style x:Key="ResourceGridStyle" TargetType="Grid">
+                <Style.Resources>
+                    <Style TargetType="Label" BasedOn="{StaticResource LabelStyle}">
+                        <Setter Property="Margin" Value="0"/>
+                        <Setter Property="Padding" Value="0"/>
+                    </Style>
+                </Style.Resources>
+                <Style.Setters>
+                    <Setter Property="Margin" Value="{StaticResource NormalMargin}"/>
+                </Style.Setters>
+            </Style>
+            <Style x:Key="FadedLabelStyle" TargetType="Label">
+                <Setter Property="Foreground" Value="{StaticResource FadedBrush}"/>
+                <Setter Property="FontFamily" Value="{StaticResource LightFontFamily}"/>
+                <Setter Property="FontSize" Value="{StaticResource NormalFontSize}"/>
+                <Setter Property="HorizontalAlignment" Value="Stretch"/>
+                <Setter Property="HorizontalContentAlignment" Value="Left"/>
+                <Setter Property="Padding" Value="{StaticResource DoubleThickness}"/>
+                <Setter Property="VerticalAlignment" Value="Stretch"/>
+                <Setter Property="VerticalContentAlignment" Value="Bottom"/>
+            </Style>
+            <Style x:Key="PassphraseBorderStyle" TargetType="Border">
+                <Style.Resources>
+                    <Style TargetType="PasswordBox">
+                        <Setter Property="BorderBrush" Value="Transparent"/>
+                        <Setter Property="BorderThickness" Value="0"/>
+                        <Setter Property="Foreground" Value="{StaticResource NormalBrush}"/>
+                        <Setter Property="FontFamily" Value="{StaticResource NormalFontFamily}"/>
+                        <Setter Property="FontSize" Value="{StaticResource NormalFontSize}"/>
+                        <Setter Property="HorizontalAlignment" Value="Stretch"/>
+                        <Setter Property="HorizontalContentAlignment" Value="Left"/>
+                        <Setter Property="Padding" Value="{StaticResource TextBoxPadding}"/>
+                        <Setter Property="VerticalAlignment" Value="Stretch"/>
+                        <Setter Property="VerticalContentAlignment" Value="Center"/>
+                    </Style>
+                </Style.Resources>
+                <Style.Setters>
+                    <Setter Property="Background" Value="{StaticResource BackgroundBrush}"/>
+                    <Setter Property="BorderBrush" Value="{StaticResource FadedBrush}"/>
+                    <Setter Property="BorderThickness" Value="{StaticResource DoubleThickness}"/>
+                    <Setter Property="CornerRadius" Value="4"/>
+                    <Setter Property="HorizontalAlignment" Value="Stretch"/>
+                    <Setter Property="Margin" Value="{StaticResource NormalMargin}"/>
+                    <Setter Property="VerticalAlignment" Value="Center"/>
+                </Style.Setters>
+            </Style>
+            <Style x:Key="LearnMoreLinkStyle" TargetType="Button">
+                <Style.Resources>
+                    <Color x:Key="NormalColor">#1F1FF1</Color>
+                    <Color x:Key="HoverColor">#4040C0</Color>
+                    <sys:Double x:Key="FontSize">12</sys:Double>
+                    <SolidColorBrush x:Key="NormalBrush" Color="{StaticResource NormalColor}" />
+                    <SolidColorBrush x:Key="HoverBrush" Color="{StaticResource HoverColor}" />
+                    <Style TargetType="Label" BasedOn="{StaticResource LabelStyle}">
+                        <Style.Resources>
+                            <Style TargetType="TextBlock">
+                                <Style.Triggers>
+                                    <Trigger Property="Label.IsMouseOver" Value="True">
+                                        <Setter Property="Foreground" Value="{StaticResource HoverBrush}"/>
+                                        <Setter Property="TextBlock.TextDecorations" Value="Underline"/>
+                                    </Trigger>
+                                    <Trigger Property="Label.IsMouseOver" Value="False">
+                                        <Setter Property="Foreground" Value="{StaticResource NormalBrush}"/>
+                                        <Setter Property="TextBlock.TextDecorations" Value="None"/>
+                                    </Trigger>
+                                </Style.Triggers>
+                            </Style>
+                        </Style.Resources>
+                        <Style.Setters>
+                            <Setter Property="Background" Value="Transparent"/>
+                            <Setter Property="Cursor" Value="Hand"/>
+                            <Setter Property="Foreground" Value="{StaticResource NormalBrush}"/>
+                            <Setter Property="FontSize" Value="{StaticResource FontSize}"/>
+                        </Style.Setters>
+                    </Style>
+                </Style.Resources>
+                <Style.Setters>
+                    <Setter Property="Background" Value="Transparent"/>
+                    <Setter Property="BorderBrush" Value="Transparent"/>
+                    <Setter Property="BorderThickness" Value="0"/>
+                    <Setter Property="HorizontalAlignment" Value="Right"/>
+                    <Setter Property="Margin" Value="{StaticResource FooterMargin}"/>
+                    <Setter Property="Template">
+                        <Setter.Value>
+                            <ControlTemplate TargetType="Button">
+                                <Border Background="{TemplateBinding Background}" BorderBrush="Transparent" BorderThickness="0">
+                                    <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                                </Border>
+                            </ControlTemplate>
+                        </Setter.Value>
+                    </Setter>
+                </Style.Setters>
+            </Style>
+            <Style x:Key="ActionBarStyle" TargetType="Border">
+                <Style.Resources>
+                    <Color x:Key="BackgroundColor">#C6C6C6</Color>
+                    <SolidColorBrush x:Key="BackgroundBrush" Color="{StaticResource BackgroundColor}"/>
+                    <sys:Double x:Key="ButtonHeight">23</sys:Double>
+                    <sys:Double x:Key="ButtonWidth">75</sys:Double>
+                    <Thickness x:Key="BorderPadding" Bottom="12" Left="12" Right="12" Top="12"/>
+                    <Thickness x:Key="ButtonPadding" Bottom="3" Left="3" Right="3" Top="3"/>
+                    <Thickness x:Key="ButtonMargin" Bottom="0" Left="6" Right="0" Top="0"/>
+                    <Thickness x:Key="ButtonFocusedPadding" Bottom="1" Left="1" Right="1" Top="1"/>
+                    <SolidColorBrush x:Key="ButtonBackgroundHoverBrush" Color="{StaticResource ButtonBackgroundHoverColor}"/>
+                    <SolidColorBrush x:Key="ButtonBorderNormalBrush" Color="{StaticResource ButtonBorderNormalColor}"/>
+                    <SolidColorBrush x:Key="ButtonBorderHoverBrush" Color="{StaticResource ButtonBorderHoverColor}"/>
+                    <SolidColorBrush x:Key="ButtonBorderFocusedBrush" Color="{StaticResource ButtonBorderFocusedColor}"/>
+                    <Thickness x:Key="BorderFocusedBorderThickness" Bottom="3" Left="3" Right="3" Top="3"/>
+                    <Style TargetType="Button">
+                        <Style.Resources>
+                            <Style TargetType="Label" BasedOn="{StaticResource LabelStyle}"/>
+                        </Style.Resources>
+                        <Style.Setters>
+                            <Setter Property="Background" Value="{StaticResource BackgroundBrush}"/>
+                            <Setter Property="BorderBrush" Value="{StaticResource ButtonBorderNormalBrush}"/>
+                            <Setter Property="BorderThickness" Value="{StaticResource NormalThickness}"/>
+                            <Setter Property="Cursor" Value="Hand"/>
+                            <Setter Property="MinHeight" Value="{StaticResource ButtonHeight}"/>
+                            <Setter Property="HorizontalContentAlignment" Value="Center"/>
+                            <Setter Property="Padding" Value="{StaticResource ButtonPadding}"/>
+                            <Setter Property="Margin" Value="{StaticResource ButtonMargin}"/>
+                            <Setter Property="VerticalContentAlignment" Value="Center"/>
+                            <Setter Property="MinWidth" Value="{StaticResource ButtonWidth}"/>
+                        </Style.Setters>
+                        <Style.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter Property="Background" Value="{StaticResource ButtonBackgroundHoverBrush}"/>
+                                <Setter Property="BorderBrush" Value="{StaticResource ButtonBorderHoverBrush}"/>
+                            </Trigger>
+                            <Trigger Property="IsMouseOver" Value="False">
+                                <Setter Property="Background" Value="{StaticResource BackgroundBrush}"/>
+                                <Setter Property="BorderBrush" Value="{StaticResource ButtonBorderNormalBrush}"/>
+                            </Trigger>
+                            <Trigger Property="IsFocused" Value="True">
+                                <Setter Property="BorderBrush" Value="{StaticResource ButtonBorderFocusedBrush}"/>
+                                <Setter Property="BorderThickness" Value="{StaticResource BorderFocusedBorderThickness}"/>
+                                <Setter Property="Padding" Value="{StaticResource ButtonFocusedPadding}"/>
+                            </Trigger>
+                            <Trigger Property="IsFocused" Value="False">
+                                <Setter Property="BorderBrush" Value="{StaticResource ButtonBorderNormalBrush}"/>
+                                <Setter Property="BorderThickness" Value="{StaticResource NormalThickness}"/>
+                                <Setter Property="Padding" Value="{StaticResource ButtonPadding}"/>
+                            </Trigger>
+                        </Style.Triggers>
+                    </Style>
+                </Style.Resources>
+                <Style.Setters>
+                    <Setter Property="Background" Value="{StaticResource BackgroundBrush}"/>
+                    <Setter Property="Padding" Value="{StaticResource BorderPadding}"/>
+                </Style.Setters>
+            </Style>
+        </ResourceDictionary>
+    </Window.Resources>
+    <Window.Content>
+        <Border Style="{StaticResource ControlStyle}">
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="1*"/>
+                </Grid.ColumnDefinitions>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="1*"/>
+                    <RowDefinition Height="1*"/>
+                    <RowDefinition Height="1*"/>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="Auto"/>
+                </Grid.RowDefinitions>
+                <Grid.Children>
+                    <Label x:Name="HeaderLabel"
+                           Grid.Column="0" 
+                           Grid.Row="0" 
+                           Style="{StaticResource HeaderLabelStyle}">
+                        <TextBlock Text="Enter Passphrase"/>
+                    </Label>
+                    <Grid x:Name="ResourceGrid"
+                          Grid.Column="0"
+                          Grid.Row="1"
+                          HorizontalAlignment="Center"
+                          Style="{StaticResource ResourceGridStyle}">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="Auto"/>
+                            <ColumnDefinition Width="1*"/>
+                        </Grid.ColumnDefinitions>
+                        <Grid.Children>
+                            <Label x:Name="ResourceForLabel"
+                                   Grid.Column="0"
+                                   Grid.Row="0"
+                                   HorizontalContentAlignment="Right">
+                                <TextBlock Text="for: "/>
+                            </Label>
+                            <Label x:Name="ResourceLabel"
+                                   Grid.Column="1" 
+                                   Grid.Row="0" 
+                                   HorizontalContentAlignment="Left">
+                                <TextBlock Text="{Binding Path=Resource}"/>
+                            </Label>
+                        </Grid.Children>
+                    </Grid>
+                    <Border Grid.Column="0" 
+                            Grid.Row="2"
+                            Style="{StaticResource PassphraseBorderStyle}">
+                        <PasswordBox x:Name="PassphrasePasswordBox"
+                                 TabIndex="0"/>
+                    </Border>
+                    <Button x:Name="LearnMoreLink"
+                            Grid.Column="3"  
+                            Grid.Row="3" 
+                            Style="{StaticResource LearnMoreLinkStyle}"
+                            Click="MoreInfoLabel_Click"
+                            TabIndex="3">
+                        <Label>
+                            <TextBlock Text="Learn More"/>
+                        </Label>
+                    </Button>
+                    <Border x:Name="ActionBar"
+                            Grid.Column="0" 
+                            Grid.Row="4" 
+                            Style="{StaticResource ActionBarStyle}">
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="1*"/>
+                                <ColumnDefinition Width="Auto"/>
+                                <ColumnDefinition Width="Auto"/>
+                            </Grid.ColumnDefinitions>
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="*"/>
+                            </Grid.RowDefinitions>
+                            <Grid.Children>
+                                <Button x:Name="OkButton"
+                                        Click="OkButton_Click"
+                                        Grid.Column="1" 
+                                        Grid.Row="0"
+                                        IsDefault="True"
+                                        TabIndex="1">
+                                    <Label>
+                                        <TextBlock Text="OK"/>
+                                    </Label>
+                                </Button>
+                                <Button x:Name="CancelButton"
+                                        Click="CancelButton_Click"
+                                        Grid.Column="2" 
+                                        Grid.Row="0"
+                                        IsCancel="True"
+                                        TabIndex="2">
+                                    <Label>
+                                        <TextBlock Text="Cancel"/>
+                                    </Label>
+                                </Button>
+                            </Grid.Children>
+                        </Grid>
+                    </Border>
+                </Grid.Children>
+            </Grid>
+        </Border>
+    </Window.Content>
+</Window>

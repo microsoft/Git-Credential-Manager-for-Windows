@@ -31,7 +31,7 @@ using System.Linq;
 using Microsoft.Alm.Git;
 using Microsoft.Win32;
 
-namespace Microsoft.Alm.CredentialHelper
+namespace Microsoft.Alm.Cli
 {
     internal class Installer
     {
