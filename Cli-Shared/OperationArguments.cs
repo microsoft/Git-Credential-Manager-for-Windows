@@ -237,12 +237,16 @@ namespace Microsoft.Alm.Cli
 
         public void SetCredentials(Credential credentials)
         {
+            Trace.WriteLine("OperationArguments::SetCredentials");
+
             _username = credentials.Username;
             _password = credentials.Password;
         }
 
         public void SetProxy(string url)
         {
+            Trace.WriteLine("OperationArguments::SetProxy");
+
             Uri tmp = null;
             if (Uri.TryCreate(url, UriKind.Absolute, out tmp))
             {
@@ -309,6 +313,8 @@ namespace Microsoft.Alm.Cli
 
         internal void CreateTargetUri()
         {
+            Trace.WriteLine("OperationArguments::CreateTargetUri");
+
             UriBuilder builder = new UriBuilder(_queryProtocol, _queryHost);
 
             if (_useHttpPath)
@@ -317,6 +323,9 @@ namespace Microsoft.Alm.Cli
             }
 
             _queryUri = builder.Uri;
+
+            Trace.WriteLine($"   created {_queryUri}");
+
             _targetUri = new TargetUri(_queryUri, _proxyUri);
         }
     }
