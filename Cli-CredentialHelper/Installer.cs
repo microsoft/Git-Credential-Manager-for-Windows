@@ -46,7 +46,8 @@ namespace Microsoft.Alm.Cli
             "Microsoft.IdentityModel.Clients.ActiveDirectory.dll",
             "Microsoft.IdentityModel.Clients.ActiveDirectory.Platform.dll",
             "GitHub.Authentication.exe",
-            "git-credential-manager.exe"
+            "git-credential-manager.exe",
+            "git-askpass.exe",
         };
 
         public Installer()
