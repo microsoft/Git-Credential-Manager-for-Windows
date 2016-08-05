@@ -44,12 +44,9 @@ namespace Microsoft.Alm.Authentication
         /// <param name="targetUri">
         /// The uniform resource indicator used to uniquely identify the credentials.
         /// </param>
-        /// <param name="credentials">
-        /// If successful a <see cref="Credential"/> object from the authentication object,
-        /// authority or storage; otherwise <see langword="null"/>.
-        /// </param>
-        /// <returns><see langword="true"/> if successful; otherwise <see langword="false"/>.</returns>
-        public abstract bool GetCredentials(TargetUri targetUri, out Credential credentials);
+        /// <returns>If successful a <see cref="Credential"/> object from the authentication object,
+        /// authority or storage; otherwise <see langword="null"/>.</returns>
+        public abstract Credential GetCredentials(TargetUri targetUri);
 
         /// <summary>
         /// Sets a <see cref="Credential"/> in the storage used by the authentication object.
@@ -58,7 +55,6 @@ namespace Microsoft.Alm.Authentication
         /// The uniform resource indicator used to uniquely identify the credentials.
         /// </param>
         /// <param name="credentials">The value to be stored.</param>
-        /// <returns><see langword="true"/> if successful; otherwise <see langword="false"/>.</returns>
-        public abstract bool SetCredentials(TargetUri targetUri, Credential credentials);
+        public abstract void SetCredentials(TargetUri targetUri, Credential credentials);
     }
 }

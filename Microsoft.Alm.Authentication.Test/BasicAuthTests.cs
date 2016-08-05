@@ -23,7 +23,7 @@ namespace Microsoft.Alm.Authentication.Test
 
             basicAuth.DeleteCredentials(targetUri);
 
-            Assert.IsFalse(basicAuth.CredentialStore.ReadCredentials(targetUri, out credentials), "User credentials were not deleted as expected");
+            Assert.IsNull(credentials = basicAuth.CredentialStore.ReadCredentials(targetUri), "User credentials were not deleted as expected");
         }
 
         [TestMethod]
@@ -34,13 +34,13 @@ namespace Microsoft.Alm.Authentication.Test
 
             Credential credentials = null;
 
-            Assert.IsFalse(basicAuth.GetCredentials(targetUri, out credentials), "User credentials were unexpectedly retrieved.");
+            Assert.IsNull(credentials = basicAuth.GetCredentials(targetUri), "User credentials were unexpectedly retrieved.");
 
             credentials = new Credential("username", "password");
 
             basicAuth.CredentialStore.WriteCredentials(targetUri, credentials);
 
-            Assert.IsTrue(basicAuth.GetCredentials(targetUri, out credentials), "User credentials were unexpectedly not retrieved.");
+            Assert.IsNotNull(credentials = basicAuth.GetCredentials(targetUri), "User credentials were unexpectedly not retrieved.");
         }
 
         [TestMethod]
@@ -51,7 +51,7 @@ namespace Microsoft.Alm.Authentication.Test
 
             Credential credentials = null;
 
-            Assert.IsFalse(basicAuth.GetCredentials(targetUri, out credentials), "User credentials were unexpectedly retrieved.");
+            Assert.IsNull(credentials = basicAuth.GetCredentials(targetUri), "User credentials were unexpectedly retrieved.");
             try
             {
                 basicAuth.SetCredentials(targetUri, credentials);
@@ -61,8 +61,9 @@ namespace Microsoft.Alm.Authentication.Test
 
             credentials = new Credential("username", "password");
 
-            Assert.IsTrue(basicAuth.SetCredentials(targetUri, credentials), "User credentials were unexpectedly not set.");
-            Assert.IsTrue(basicAuth.GetCredentials(targetUri, out credentials), "User credentials were unexpectedly not retrieved.");
+            basicAuth.SetCredentials(targetUri, credentials);
+
+            Assert.IsNotNull(credentials = basicAuth.GetCredentials(targetUri), "User credentials were unexpectedly not retrieved.");
         }
 
         private BasicAuthentication GetBasicAuthentication(string @namespace)

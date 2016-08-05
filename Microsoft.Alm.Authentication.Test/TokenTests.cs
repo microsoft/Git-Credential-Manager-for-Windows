@@ -50,7 +50,7 @@ namespace Microsoft.Alm.Authentication.Test
 
                 tokenStore.WriteToken(uri, writeToken);
 
-                if (tokenStore.ReadToken(uri, out readToken))
+                if ((readToken = tokenStore.ReadToken(uri)) != null)
                 {
                     Assert.AreEqual(writeToken.Value, readToken.Value, "Token values did not match between written and read");
                     Assert.AreEqual(writeToken.Type, readToken.Type, "Token types did not mathc between written and read");
@@ -62,7 +62,7 @@ namespace Microsoft.Alm.Authentication.Test
 
                 tokenStore.DeleteToken(uri);
 
-                Assert.IsFalse(tokenStore.ReadToken(uri, out readToken), "Deleted token was read back");
+                Assert.IsNull(readToken = tokenStore.ReadToken(uri), "Deleted token was read back");
             }
             catch (Exception exception)
             {

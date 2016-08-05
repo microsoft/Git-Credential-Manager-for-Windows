@@ -102,7 +102,8 @@ namespace Microsoft.Alm.Authentication
             Trace.WriteLine("BaseVstsAuthentication::DeleteCredentials");
 
             Credential credentials = null;
-            if (this.PersonalAccessTokenStore.ReadCredentials(targetUri, out credentials))
+
+            if ((credentials = this.PersonalAccessTokenStore.ReadCredentials(targetUri)) != null)
             {
                 this.PersonalAccessTokenStore.DeleteCredentials(targetUri);
             }
@@ -115,18 +116,20 @@ namespace Microsoft.Alm.Authentication
         /// <param name="credentials">Credentials associated with the URI if successful;
         /// <see langword="null"/> otherwise.</param>
         /// <returns><see langword="true"/> if successful; <see langword="false" /> otherwise.</returns>
-        public override bool GetCredentials(TargetUri targetUri, out Credential credentials)
+        public override Credential GetCredentials(TargetUri targetUri)
         {
             BaseSecureStore.ValidateTargetUri(targetUri);
 
             Trace.WriteLine("BaseVstsAuthentication::GetCredentials");
 
-            if (this.PersonalAccessTokenStore.ReadCredentials(targetUri, out credentials))
+            Credential credentials = null;
+
+            if ((credentials = this.PersonalAccessTokenStore.ReadCredentials(targetUri)) != null)
             {
                 Trace.WriteLine("   successfully retrieved stored credentials, updating credential cache");
             }
 
-            return credentials != null;
+            return credentials;
         }
 
         /// <summary>

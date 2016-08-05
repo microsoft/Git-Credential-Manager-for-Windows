@@ -98,14 +98,14 @@ namespace Microsoft.Alm.Authentication
         /// Reads credentials for a target URI from the credential store
         /// </summary>
         /// <param name="targetUri">The URI of the target for which credentials are being read</param>
-        /// <param name="credentials">The credentials from the store; <see langword="null"/> if failure</param>
-        /// <returns><see langword="true"/> if success; <see langword="false"/> if failure</returns>
-        public bool ReadCredentials(TargetUri targetUri, out Credential credentials)
+        /// <returns>A <see cref="Credential"/> from the store; <see langword="null"/> if failure.</returns>
+        public Credential ReadCredentials(TargetUri targetUri)
         {
             BaseSecureStore.ValidateTargetUri(targetUri);
 
             Trace.WriteLine("SecretCache::ReadCredentials");
 
+            Credential credentials = null;
             string targetName = this.GetTargetName(targetUri);
 
             lock (_cache)
@@ -120,21 +120,21 @@ namespace Microsoft.Alm.Authentication
                 }
             }
 
-            return credentials != null;
+            return credentials ;
         }
 
         /// <summary>
         /// Gets a token from the cache.
         /// </summary>
         /// <param name="targetUri">The key which to find the token.</param>
-        /// <param name="token">The token if successful; otherwise <see langword="null"/>.</param>
-        /// <returns><see langword="true"/> if successful; <see langword="false"/> otherwise.</returns>
-        public bool ReadToken(TargetUri targetUri, out Token token)
+        /// <returns>A <see cref="Token"/> if successful;  otherwise <see langword="null"/>.</returns>
+        public Token ReadToken(TargetUri targetUri)
         {
             BaseSecureStore.ValidateTargetUri(targetUri);
 
             Trace.WriteLine("SecretCache::ReadToken");
 
+            Token token = null;
             string targetName = this.GetTargetName(targetUri);
 
             lock (_cache)
@@ -149,7 +149,7 @@ namespace Microsoft.Alm.Authentication
                 }
             }
 
-            return token != null;
+            return token;
         }
 
         /// <summary>

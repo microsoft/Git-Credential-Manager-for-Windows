@@ -341,7 +341,7 @@ namespace Microsoft.Alm.Cli
                                                                          ? new GitHubAuthentication.AcquireAuthenticationCodeDelegate(GitHub.Authentication.AuthenticationPrompts.AuthenticationCodeModalPrompt)
                                                                          : new GitHubAuthentication.AcquireAuthenticationCodeDelegate(GitHubAuthCodePrompt),
                                                                        null);
-                    
+
                     if (authority != null)
                     {
                         // set the authority type based on the returned value
@@ -948,7 +948,7 @@ namespace Microsoft.Alm.Cli
             {
                 default:
                 case AuthorityType.Basic:
-                    if (authentication.GetCredentials(operationArguments.TargetUri, out credentials))
+                    if ((credentials = authentication.GetCredentials(operationArguments.TargetUri)) != null)
                     {
                         Trace.WriteLine("   credentials found");
                         operationArguments.SetCredentials(credentials);
@@ -982,17 +982,15 @@ namespace Microsoft.Alm.Cli
                         // attempt to get cached creds -> refresh creds -> non-interactive logon -> interactive logon
                         // note that AAD "credentials" are always scoped access tokens
                         if (((operationArguments.Interactivity != Interactivity.Always
-                            && aadAuth.GetCredentials(operationArguments.TargetUri, out credentials)
+                            && ((credentials = aadAuth.GetCredentials(operationArguments.TargetUri)) != null)
                             && (!operationArguments.ValidateCredentials
                                 || await aadAuth.ValidateCredentials(operationArguments.TargetUri, credentials))))
                         || (operationArguments.Interactivity != Interactivity.Always
                                 && ((credentials = await aadAuth.NoninteractiveLogon(operationArguments.TargetUri, true)) != null)
-                                && aadAuth.GetCredentials(operationArguments.TargetUri, out credentials)
                             && (!operationArguments.ValidateCredentials
                                 || await aadAuth.ValidateCredentials(operationArguments.TargetUri, credentials)))
                         || (operationArguments.Interactivity != Interactivity.Never
                             && ((credentials = await aadAuth.InteractiveLogon(operationArguments.TargetUri, true)) != null)
-                            && aadAuth.GetCredentials(operationArguments.TargetUri, out credentials)
                             && (!operationArguments.ValidateCredentials
                                 || await aadAuth.ValidateCredentials(operationArguments.TargetUri, credentials))))
                         {
@@ -1016,12 +1014,11 @@ namespace Microsoft.Alm.Cli
                         // attempt to get cached creds -> refresh creds -> interactive logon
                         // note that MSA "credentials" are always scoped access tokens
                         if (((operationArguments.Interactivity != Interactivity.Always
-                            && msaAuth.GetCredentials(operationArguments.TargetUri, out credentials)
+                            && ((credentials = msaAuth.GetCredentials(operationArguments.TargetUri)) != null)
                             && (!operationArguments.ValidateCredentials
                                 || await msaAuth.ValidateCredentials(operationArguments.TargetUri, credentials))))
                         || (operationArguments.Interactivity != Interactivity.Never
                             && ((credentials = await msaAuth.InteractiveLogon(operationArguments.TargetUri, true)) != null)
-                            && msaAuth.GetCredentials(operationArguments.TargetUri, out credentials)
                             && (!operationArguments.ValidateCredentials
                                 || await msaAuth.ValidateCredentials(operationArguments.TargetUri, credentials))))
                         {
@@ -1043,12 +1040,11 @@ namespace Microsoft.Alm.Cli
                     Task.Run(async () =>
                     {
                         if ((operationArguments.Interactivity != Interactivity.Always
-                                && ghAuth.GetCredentials(operationArguments.TargetUri, out credentials)
+                                && ((credentials = ghAuth.GetCredentials(operationArguments.TargetUri)) != null)
                                 && (!operationArguments.ValidateCredentials
                                     || await ghAuth.ValidateCredentials(operationArguments.TargetUri, credentials)))
                             || (operationArguments.Interactivity != Interactivity.Never
-                                && ghAuth.InteractiveLogon(operationArguments.TargetUri, out credentials)
-                                && ghAuth.GetCredentials(operationArguments.TargetUri, out credentials)
+                                && ((credentials = await ghAuth.InteractiveLogon(operationArguments.TargetUri)) != null)
                                 && (!operationArguments.ValidateCredentials
                                     || await ghAuth.ValidateCredentials(operationArguments.TargetUri, credentials))))
                         {

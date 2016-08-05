@@ -89,7 +89,8 @@ namespace Microsoft.Alm.Authentication
             Trace.WriteLine("GitHubAuthentication::DeleteCredentials");
 
             Credential credentials = null;
-            if (this.PersonalAccessTokenStore.ReadCredentials(targetUri, out credentials))
+
+            if ((credentials = this.PersonalAccessTokenStore.ReadCredentials(targetUri)) != null)
             {
                 this.PersonalAccessTokenStore.DeleteCredentials(targetUri);
                 Trace.WriteLine("   credentials deleted");
@@ -144,23 +145,22 @@ namespace Microsoft.Alm.Authentication
         /// <param name="targetUri">
         /// The uniform resource indicator used to uniquely identity the credentials.
         /// </param>
-        /// <param name="credentials">
-        /// (out) A <see cref="Credential"/> object from the authentication object,
-        /// authority or storage; otherwise `null`, if successful.
-        /// </param>
-        /// <returns>True if successful; otherwise false.</returns>
-        public override bool GetCredentials(TargetUri targetUri, out Credential credentials)
+        /// <returns> <see cref="Credential"/> object from the authentication object,
+        /// authority or storage; otherwise `null`, if successful.</returns>
+        public override Credential GetCredentials(TargetUri targetUri)
         {
             BaseSecureStore.ValidateTargetUri(targetUri);
 
             Trace.WriteLine("GitHubAuthentication::GetCredentials");
 
-            if (this.PersonalAccessTokenStore.ReadCredentials(targetUri, out credentials))
+            Credential credentials = null;
+
+            if ((credentials = this.PersonalAccessTokenStore.ReadCredentials(targetUri)) != null)
             {
                 Trace.WriteLine("   successfully retrieved stored credentials, updating credential cache");
             }
 
-            return credentials != null;
+            return credentials;
         }
 
         /// <summary>
@@ -170,17 +170,20 @@ namespace Microsoft.Alm.Authentication
         /// </summary>
         /// <param name="targetUri">The unique identifier for the resource for which access is to
         /// be acquired.</param>
-        /// <param name="credentials">(out) Credentials when acquisition is successful; null otherwise.</param>
-        /// <returns>True if success; otherwise false.</returns>
-        public bool InteractiveLogon(TargetUri targetUri, out Credential credentials)
+        /// /// <returns>Acquired <see cref="Credential"/> if successful; otherwise <see langword="null"/>.</returns>
+        public async Task<Credential> InteractiveLogon(TargetUri targetUri)
         {
+            Trace.WriteLine("GitHubAuthentication::InteractiveLogon");
+
+            Credential credentials = null;
             string username;
             string password;
+
             if (AcquireCredentialsCallback(targetUri, out username, out password))
             {
                 GitHubAuthenticationResult result;
 
-                if (result = GitHubAuthority.AcquireToken(targetUri, username, password, null, this.TokenScope).Result)
+                if (result = await GitHubAuthority.AcquireToken(targetUri, username, password, null, this.TokenScope))
                 {
                     Trace.WriteLine("   token acquisition succeeded");
 
@@ -193,7 +196,7 @@ namespace Microsoft.Alm.Authentication
                         AuthenticationResultCallback(targetUri, result);
                     }
 
-                    return true;
+                    return credentials;
                 }
                 else if (result == GitHubAuthenticationResultType.TwoFactorApp
                         || result == GitHubAuthenticationResultType.TwoFactorSms)
@@ -201,7 +204,7 @@ namespace Microsoft.Alm.Authentication
                     string authenticationCode;
                     if (AcquireAuthenticationCodeCallback(targetUri, result, username, out authenticationCode))
                     {
-                        if (result = GitHubAuthority.AcquireToken(targetUri, username, password, authenticationCode, this.TokenScope).Result)
+                        if (result = await GitHubAuthority.AcquireToken(targetUri, username, password, authenticationCode, this.TokenScope))
                         {
                             Trace.WriteLine("   token acquisition succeeded");
 
@@ -214,7 +217,7 @@ namespace Microsoft.Alm.Authentication
                                 AuthenticationResultCallback(targetUri, result);
                             }
 
-                            return true;
+                            return credentials;
                         }
                     }
                 }
@@ -227,8 +230,7 @@ namespace Microsoft.Alm.Authentication
             }
 
             Trace.WriteLine("   interactive logon failed");
-            credentials = null;
-            return false;
+            return credentials;
         }
 
         /// <summary>
@@ -241,8 +243,8 @@ namespace Microsoft.Alm.Authentication
         /// <param name="username">The username of the account for which access is to be acquired.</param>
         /// <param name="password">The password of the account for which access is to be acquired.</param>
         /// <param name="authenticationCode">The two-factor authentication code for use in access acquisition.</param>
-        /// <returns>True if success; otherwise false.</returns>
-        public async Task<bool> NoninteractiveLogonWithCredentials(TargetUri targetUri, string username, string password, string authenticationCode = null)
+        /// <returns>Acquired <see cref="Credential"/> if successful; otherwise <see langword="null"/>.</returns>
+        public async Task<Credential> NoninteractiveLogonWithCredentials(TargetUri targetUri, string username, string password, string authenticationCode = null)
         {
             BaseSecureStore.ValidateTargetUri(targetUri);
             if (String.IsNullOrWhiteSpace(username))
@@ -252,18 +254,21 @@ namespace Microsoft.Alm.Authentication
 
             Trace.WriteLine("GitHubAuthentication::NoninteractiveLogonWithCredentials");
 
+            Credential credentials = null;
+
             GitHubAuthenticationResult result;
             if (result = await GitHubAuthority.AcquireToken(targetUri, username, password, authenticationCode, this.TokenScope))
             {
                 Trace.WriteLine("   token acquisition succeeded");
 
-                PersonalAccessTokenStore.WriteCredentials(targetUri, (Credential)result.Token);
+                credentials = (Credential)result.Token;
+                PersonalAccessTokenStore.WriteCredentials(targetUri, credentials);
 
-                return true;
+                return credentials;
             }
 
             Trace.WriteLine("   non-interactive logon failed");
-            return false;
+            return credentials;
         }
 
         /// <summary>
@@ -273,8 +278,7 @@ namespace Microsoft.Alm.Authentication
         /// The uniform resource indicator used to uniquely identify the credentials.
         /// </param>
         /// <param name="credentials">The value to be stored.</param>
-        /// <returns>True if successful; otherwise false.</returns>
-        public override bool SetCredentials(TargetUri targetUri, Credential credentials)
+        public override void SetCredentials(TargetUri targetUri, Credential credentials)
         {
             BaseSecureStore.ValidateTargetUri(targetUri);
             BaseSecureStore.ValidateCredential(credentials);
@@ -282,8 +286,6 @@ namespace Microsoft.Alm.Authentication
             Trace.WriteLine("GitHubAuthentication::SetCredentials");
 
             PersonalAccessTokenStore.WriteCredentials(targetUri, credentials);
-
-            return true;
         }
 
         /// <summary>

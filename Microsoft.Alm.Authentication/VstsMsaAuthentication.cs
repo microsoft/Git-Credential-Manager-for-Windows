@@ -103,17 +103,13 @@ namespace Microsoft.Alm.Authentication
         /// The uniform resource indicator of the resource access tokens are being set for.
         /// </param>
         /// <param name="credentials">The credentials being set.</param>
-        /// <returns>True if successful; false otherwise.</returns>
-        public override bool SetCredentials(TargetUri targetUri, Credential credentials)
+        public override void SetCredentials(TargetUri targetUri, Credential credentials)
         {
             BaseSecureStore.ValidateTargetUri(targetUri);
             BaseSecureStore.ValidateCredential(credentials);
 
             Trace.WriteLine("VstsMsaAuthentication::SetCredentials");
             Trace.WriteLine("   setting MSA credentials is not supported");
-
-            // does nothing with VSTS MSA backed accounts
-            return false;
         }
     }
 }

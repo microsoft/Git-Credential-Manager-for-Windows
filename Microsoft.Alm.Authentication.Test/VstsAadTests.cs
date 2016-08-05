@@ -22,10 +22,10 @@ namespace Microsoft.Alm.Authentication.Test
             Credential personalAccessToken;
 
             aadAuthentication.DeleteCredentials(targetUri);
-            Assert.IsFalse(aadAuthentication.PersonalAccessTokenStore.ReadCredentials(targetUri, out personalAccessToken), "Personal Access Tokens were not deleted as expected");
+            Assert.IsNull(personalAccessToken = aadAuthentication.PersonalAccessTokenStore.ReadCredentials(targetUri), "Personal Access Tokens were not deleted as expected");
 
             aadAuthentication.DeleteCredentials(targetUri);
-            Assert.IsFalse(aadAuthentication.PersonalAccessTokenStore.ReadCredentials(targetUri, out personalAccessToken), "Personal Access Tokens were not deleted as expected");
+            Assert.IsNull(personalAccessToken = aadAuthentication.PersonalAccessTokenStore.ReadCredentials(targetUri), "Personal Access Tokens were not deleted as expected");
         }
 
         [TestMethod]
@@ -36,11 +36,11 @@ namespace Microsoft.Alm.Authentication.Test
 
             Credential credentials;
 
-            Assert.IsFalse(aadAuthentication.GetCredentials(targetUri, out credentials), "Credentials were retrieved unexpectedly.");
+            Assert.IsNull(credentials = aadAuthentication.GetCredentials(targetUri), "Credentials were retrieved unexpectedly.");
 
             aadAuthentication.PersonalAccessTokenStore.WriteCredentials(targetUri, DefaultPersonalAccessToken);
 
-            Assert.IsTrue(aadAuthentication.GetCredentials(targetUri, out credentials), "Credentials were not retrieved as expected.");
+            Assert.IsNotNull(credentials = aadAuthentication.GetCredentials(targetUri), "Credentials were not retrieved as expected.");
         }
 
         [TestMethod]
@@ -51,11 +51,11 @@ namespace Microsoft.Alm.Authentication.Test
 
             Credential personalAccessToken;
 
-            Assert.IsFalse(aadAuthentication.PersonalAccessTokenStore.ReadCredentials(targetUri, out personalAccessToken), "Personal Access Token found in store unexpectedly.");
+            Assert.IsNull(personalAccessToken = aadAuthentication.PersonalAccessTokenStore.ReadCredentials(targetUri), "Personal Access Token found in store unexpectedly.");
 
             Assert.IsNotNull(personalAccessToken = aadAuthentication.InteractiveLogon(targetUri, false).Result, "Interactive logon failed unexpectedly.");
 
-            Assert.IsTrue(aadAuthentication.PersonalAccessTokenStore.ReadCredentials(targetUri, out personalAccessToken), "Personal Access Token not found in store as expected.");
+            Assert.IsNotNull(personalAccessToken = aadAuthentication.PersonalAccessTokenStore.ReadCredentials(targetUri), "Personal Access Token not found in store as expected.");
         }
 
         [TestMethod]
@@ -68,7 +68,7 @@ namespace Microsoft.Alm.Authentication.Test
 
             Assert.IsNotNull(personalAccessToken = Task.Run(async () => { return await aadAuthentication.NoninteractiveLogon(targetUri, false); }).Result, "Non-interactive logon unexpectedly failed.");
 
-            Assert.IsTrue(aadAuthentication.PersonalAccessTokenStore.ReadCredentials(targetUri, out personalAccessToken), "Personal Access Token not found in store as expected.");
+            Assert.IsNotNull(personalAccessToken = aadAuthentication.PersonalAccessTokenStore.ReadCredentials(targetUri), "Personal Access Token not found in store as expected.");
         }
 
 
@@ -81,10 +81,10 @@ namespace Microsoft.Alm.Authentication.Test
 
             Credential personalAccessToken;
 
-            Assert.IsFalse(aadAuthentication.SetCredentials(targetUri, credentials), "Credentials were unexpectedly set.");
+            aadAuthentication.SetCredentials(targetUri, credentials);
 
-            Assert.IsFalse(aadAuthentication.PersonalAccessTokenStore.ReadCredentials(targetUri, out personalAccessToken), "Personal Access Token unexpectedly found in store.");
-            Assert.IsFalse(aadAuthentication.GetCredentials(targetUri, out credentials), "Credentials were retrieved unexpectedly.");
+            Assert.IsNull(personalAccessToken = aadAuthentication.PersonalAccessTokenStore.ReadCredentials(targetUri), "Personal Access Token unexpectedly found in store.");
+            Assert.IsNull(credentials = aadAuthentication.GetCredentials(targetUri), "Credentials were retrieved unexpectedly.");
         }
 
         public void VstsAadValidateCredentialsTest()

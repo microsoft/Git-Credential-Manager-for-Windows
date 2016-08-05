@@ -21,10 +21,10 @@ namespace Microsoft.Alm.Authentication.Test
             Credential personalAccessToken;
 
             msaAuthority.DeleteCredentials(targetUri);
-            Assert.IsFalse(msaAuthority.PersonalAccessTokenStore.ReadCredentials(targetUri, out personalAccessToken), "Personal Access Tokens were not deleted as expected"); ;
+            Assert.IsNull(personalAccessToken = msaAuthority.PersonalAccessTokenStore.ReadCredentials(targetUri), "Personal Access Tokens were not deleted as expected"); ;
 
             msaAuthority.DeleteCredentials(targetUri);
-            Assert.IsFalse(msaAuthority.PersonalAccessTokenStore.ReadCredentials(targetUri, out personalAccessToken), "Personal Access Tokens were not deleted as expected"); ;
+            Assert.IsNull(personalAccessToken = msaAuthority.PersonalAccessTokenStore.ReadCredentials(targetUri), "Personal Access Tokens were not deleted as expected"); ;
         }
 
         [TestMethod]
@@ -34,11 +34,11 @@ namespace Microsoft.Alm.Authentication.Test
             VstsMsaAuthentication msaAuthority = GetVstsMsaAuthentication("msa-get");
             Credential credentials;
 
-            Assert.IsFalse(msaAuthority.GetCredentials(targetUri, out credentials), "Credentials were retrieved unexpectedly.");
+            Assert.IsNull(credentials = msaAuthority.GetCredentials(targetUri), "Credentials were retrieved unexpectedly.");
 
             msaAuthority.PersonalAccessTokenStore.WriteCredentials(targetUri, DefaultPersonalAccessToken);
 
-            Assert.IsTrue(msaAuthority.GetCredentials(targetUri, out credentials), "Credentials were not retrieved as expected.");
+            Assert.IsNotNull(credentials = msaAuthority.GetCredentials(targetUri), "Credentials were not retrieved as expected.");
         }
 
         [TestMethod]
@@ -48,11 +48,11 @@ namespace Microsoft.Alm.Authentication.Test
             VstsMsaAuthentication msaAuthority = GetVstsMsaAuthentication("msa-logon");
             Credential personalAccessToken;
 
-            Assert.IsFalse(msaAuthority.PersonalAccessTokenStore.ReadCredentials(targetUri, out personalAccessToken), "Personal Access Token found in store unexpectedly.");
+            Assert.IsNull(personalAccessToken = msaAuthority.PersonalAccessTokenStore.ReadCredentials(targetUri), "Personal Access Token found in store unexpectedly.");
 
             Assert.IsNotNull(personalAccessToken = msaAuthority.InteractiveLogon(targetUri, false).Result, "Interactive logon failed unexpectedly.");
 
-            Assert.IsTrue(msaAuthority.PersonalAccessTokenStore.ReadCredentials(targetUri, out personalAccessToken), "Personal Access Token not found in store as expected.");
+            Assert.IsNotNull(personalAccessToken = msaAuthority.PersonalAccessTokenStore.ReadCredentials(targetUri), "Personal Access Token not found in store as expected.");
         }
 
         [TestMethod]
@@ -69,7 +69,7 @@ namespace Microsoft.Alm.Authentication.Test
             }
             catch { }
 
-            Assert.IsFalse(msaAuthority.PersonalAccessTokenStore.ReadCredentials(targetUri, out personalAccessToken), "Personal Access Token unexpectedly found in store.");
+            Assert.IsNull(personalAccessToken = msaAuthority.PersonalAccessTokenStore.ReadCredentials(targetUri), "Personal Access Token unexpectedly found in store.");
         }
 
         [TestMethod]
