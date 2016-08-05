@@ -46,7 +46,7 @@ namespace Microsoft.Alm.Authentication
                 throw new ArgumentNullException(@namespace);
 
             _namespace = @namespace;
-            _getTargetName = getTargetName ?? Secret.UriToSimpleName;
+            _getTargetName = getTargetName ?? Secret.UriToName;
         }
 
         private readonly string _namespace;

@@ -308,14 +308,15 @@ namespace Microsoft.Alm.Cli
 
         internal void CreateTargetUri()
         {
-            string actualUrl = _useHttpPath
-                ? String.Format("{0}://{1}/{2}", _queryProtocol, this.QueryHost, _queryPath)
-                : String.Format("{0}://{1}", _queryProtocol, this.QueryHost);
+            UriBuilder builder = new UriBuilder(_queryProtocol, _queryHost);
 
-            if (Uri.TryCreate(actualUrl, UriKind.Absolute, out _queryUri))
+            if (_useHttpPath)
             {
-                _targetUri = new TargetUri(_queryUri, _proxyUri);
+                builder.Path = _queryPath;
             }
+
+            _queryUri = builder.Uri;
+            _targetUri = new TargetUri(_queryUri, _proxyUri);
         }
     }
 }

@@ -313,13 +313,8 @@ namespace Microsoft.Alm.Cli
 
             Trace.WriteLine("Program::CreateAuthentication");
 
-            Secret.UriNameConversion getTargetName = Secret.UriToSimpleName;
-            if (operationArguments.UseHttpPath)
-            {
-                getTargetName = Secret.UriToPathedName;
-            }
             var secretsNamespace = operationArguments.CustomNamespace ?? SecretsNamespace;
-            var secrets = new SecretStore(secretsNamespace, null, null, getTargetName);
+            var secrets = new SecretStore(secretsNamespace, null, null, Secret.UriToName);
             BaseAuthentication authority = null;
 
             switch (operationArguments.Authority)
