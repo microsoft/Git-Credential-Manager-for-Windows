@@ -43,9 +43,9 @@ namespace Microsoft.Alm.Cli
         {
             "Microsoft.Alm.Authentication.dll",
             "Microsoft.Alm.Git.dll",
-            "GitHub.Authentication.exe",
             "Microsoft.IdentityModel.Clients.ActiveDirectory.dll",
-            "Microsoft.IdentityModel.Clients.ActiveDirectory.WindowsForms.dll",
+            "Microsoft.IdentityModel.Clients.ActiveDirectory.Platform.dll",
+            "GitHub.Authentication.exe",
             "git-credential-manager.exe"
         };
 

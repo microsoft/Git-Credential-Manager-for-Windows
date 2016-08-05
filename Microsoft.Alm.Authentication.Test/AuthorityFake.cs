@@ -5,24 +5,19 @@ namespace Microsoft.Alm.Authentication.Test
 {
     internal class AuthorityFake : IVstsAuthority
     {
-        public TokenPair AcquireToken(TargetUri targetUri, string clientId, string resource, Uri redirectUri, string queryParameters = null)
-        {
-            return new TokenPair("token-access", "token-refresh");
-        }
-
-        public async Task<TokenPair> AcquireTokenAsync(TargetUri targetUri, string clientId, string resource, Credential credentials = null)
-        {
-            return await Task.Run(() => { return new TokenPair("token-access", "token-refresh"); });
-        }
-
-        public async Task<TokenPair> AcquireTokenByRefreshTokenAsync(TargetUri targetUri, string clientId, string resource, Token refreshToken)
-        {
-            return await Task.Run(() => { return new TokenPair("token-access", "token-refresh"); });
-        }
-
         public async Task<Token> GeneratePersonalAccessToken(TargetUri targetUri, Token accessToken, VstsTokenScope tokenScope, bool requireCompactToken)
         {
             return await Task.Run(() => { return new Token("personal-access-token", TokenType.Personal); });
+        }
+
+        public async Task<Token> InteractiveAcquireToken(TargetUri targetUri, string clientId, string resource, Uri redirectUri, string queryParameters = null)
+        {
+            return await Task.Run(() => { return new Token("token-access", TokenType.Access); });
+        }
+
+        public async Task<Token> NoninteractiveAcquireToken(TargetUri targetUri, string clientId, string resource, Uri redirectUri, string queryParameters = null)
+        {
+            return await Task.Run(() => { return new Token("token-access", TokenType.Access); });
         }
 
         public async Task<bool> ValidateCredentials(TargetUri targetUri, Credential credentials)
@@ -31,7 +26,7 @@ namespace Microsoft.Alm.Authentication.Test
             {
                 try
                 {
-                    Credential.Validate(credentials);
+                    BaseSecureStore.ValidateCredential(credentials);
                     return true;
                 }
                 catch { }

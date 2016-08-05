@@ -42,7 +42,7 @@ namespace Microsoft.Alm.Authentication
         public BasicAuthentication(ICredentialStore credentialStore)
         {
             if (credentialStore == null)
-                throw new ArgumentNullException("credentialStore", "The `credentialStore` parameter is null or invalid.");
+                throw new ArgumentNullException(nameof(credentialStore));
 
             this.CredentialStore = credentialStore;
         }
@@ -63,27 +63,24 @@ namespace Microsoft.Alm.Authentication
 
             this.CredentialStore.DeleteCredentials(targetUri);
         }
+
         /// <summary>
         /// Gets a <see cref="Credential"/> from the storage used by the authentication object.
         /// </summary>
         /// <param name="targetUri">
         /// The uniform resource indicator used to uniquely identify the credentials.
         /// </param>
-        /// <param name="credentials">
-        /// If successful a <see cref="Credential"/> object from the authentication object,
-        /// authority or storage; otherwise <see langword="null"/>.
-        /// </param>
-        /// <returns><see langword="true"/> if successful; otherwise <see langword="false"/>.</returns>
-        public override bool GetCredentials(TargetUri targetUri, out Credential credentials)
+        /// <returns>If successful a <see cref="Credential"/> object from the authentication object,
+        /// authority or storage; otherwise <see langword="null"/>.</returns>
+        public override Credential GetCredentials(TargetUri targetUri)
         {
             BaseSecureStore.ValidateTargetUri(targetUri);
 
             Trace.WriteLine("BasicAuthentication::GetCredentials");
 
-            this.CredentialStore.ReadCredentials(targetUri, out credentials);
-
-            return credentials != null;
+            return this.CredentialStore.ReadCredentials(targetUri);
         }
+
         /// <summary>
         /// Sets a <see cref="Credential"/> in the storage used by the authentication object.
         /// </summary>
@@ -92,15 +89,14 @@ namespace Microsoft.Alm.Authentication
         /// </param>
         /// <param name="credentials">The value to be stored.</param>
         /// <returns><see langword="true"/> if successful; otherwise <see langword="false"/>.</returns>
-        public override bool SetCredentials(TargetUri targetUri, Credential credentials)
+        public override void SetCredentials(TargetUri targetUri, Credential credentials)
         {
             BaseSecureStore.ValidateTargetUri(targetUri);
-            Credential.Validate(credentials);
+            BaseSecureStore.ValidateCredential(credentials);
 
             Trace.WriteLine("BasicAuthentication::SetCredentials");
 
             this.CredentialStore.WriteCredentials(targetUri, credentials);
-            return true;
         }
     }
 }

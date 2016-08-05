@@ -249,12 +249,32 @@ namespace Microsoft.Alm.Authentication
         }
 
         [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
+        internal static void ValidateCredential(Credential credentials)
+        {
+            if (ReferenceEquals(credentials, null))
+                throw new ArgumentNullException(nameof(credentials));
+            if (credentials.Password.Length > NativeMethods.Credential.PasswordMaxLength)
+                throw new ArgumentOutOfRangeException(nameof(credentials.Password));
+            if (credentials.Username.Length > NativeMethods.Credential.UsernameMaxLength)
+                throw new ArgumentOutOfRangeException(nameof(credentials.Username));
+        }
+
+        [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
         internal static void ValidateTargetUri(TargetUri targetUri)
         {
-            if (targetUri == null)
-                throw new ArgumentNullException("targetUri");
+            if (ReferenceEquals(targetUri, null))
+                throw new ArgumentNullException(nameof(targetUri));
             if (!targetUri.IsAbsoluteUri || !targetUri.ActualUri.IsAbsoluteUri)
-                throw new ArgumentException("The target must be an absolute URI.", "targetUri");
+                throw new ArgumentException(nameof(targetUri.IsAbsoluteUri));
+        }
+
+        [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
+        internal static void ValidateToken(Token token)
+        {
+            if (ReferenceEquals(token, null))
+                throw new ArgumentNullException(nameof(token));
+            if (String.IsNullOrEmpty(token.Value))
+                throw new ArgumentException(nameof(token.Value));
         }
     }
 }

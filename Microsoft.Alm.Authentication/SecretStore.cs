@@ -110,45 +110,45 @@ namespace Microsoft.Alm.Authentication
         /// Reads credentials for a target URI from the credential store
         /// </summary>
         /// <param name="targetUri">The URI of the target for which credentials are being read</param>
-        /// <param name="credentials">The credentials from the store; <see langword="null"/> if failure</param>
-        /// <returns><see langword="true"/> if success; <see langword="false"/> if failure</returns>
-        public bool ReadCredentials(TargetUri targetUri, out Credential credentials)
+        /// <param name="credentials"></param>
+        /// <returns>A <see cref="Credential"/> from the store is successful; otherwise <see langword="null"/>.</returns>
+        public Credential ReadCredentials(TargetUri targetUri)
         {
             ValidateTargetUri(targetUri);
 
+            Credential credentials = null;
             string targetName = this.GetTargetName(targetUri);
 
             Trace.WriteLine("CredentialStore::ReadCredentials");
 
-            if (!_credentialCache.ReadCredentials(targetUri, out credentials))
+            if ((credentials = _credentialCache.ReadCredentials(targetUri)) != null)
             {
                 credentials = this.ReadCredentials(targetName);
             }
 
-            return credentials != null;
+            return credentials;
         }
 
         /// <summary>
         /// Reads a token for a target URI from the token store
         /// </summary>
         /// <param name="targetUri">The URI of the target for which a token is being read</param>
-        /// <param name="token">The token from the store; <see langword="null"/> if failure</param>
-        /// <returns><see langword="true"/> if success; <see langword="false"/> if failure</returns>
-        public bool ReadToken(TargetUri targetUri, out Token token)
+        /// <returns>A <see cref="Token"/> from the store is successful; otherwise <see langword="null"/>.</returns>
+        public Token ReadToken(TargetUri targetUri)
         {
             ValidateTargetUri(targetUri);
 
             Trace.WriteLine("TokenStore::ReadToken");
 
-            token = null;
+            Token token = null;
 
-            if (!_tokenCache.ReadToken(targetUri, out token))
+            if ((token = _tokenCache.ReadToken(targetUri)) != null)
             {
                 string targetName = this.GetTargetName(targetUri);
                 token = ReadToken(targetName);
             }
 
-            return token != null;
+            return token;
         }
 
         /// <summary>
@@ -159,7 +159,7 @@ namespace Microsoft.Alm.Authentication
         public void WriteCredentials(TargetUri targetUri, Credential credentials)
         {
             ValidateTargetUri(targetUri);
-            Credential.Validate(credentials);
+            BaseSecureStore.ValidateCredential(credentials);
 
             Trace.WriteLine("CredentialStore::WriteCredentials");
 
@@ -196,7 +196,7 @@ namespace Microsoft.Alm.Authentication
         /// <returns>Properly formatted TargetName string</returns>
         protected override string GetTargetName(TargetUri targetUri)
         {
-            Debug.Assert(targetUri != null, "The targetUri parameter is null");
+            BaseSecureStore.ValidateTargetUri(targetUri);
 
             Trace.WriteLine("SecretStore::GetTargetName");
 

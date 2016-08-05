@@ -182,8 +182,8 @@ namespace Microsoft.Alm.Authentication
         {
             const string ValidationUrl = "https://api.github.com/user/subscriptions";
 
-            Debug.Assert(targetUri != null && targetUri.IsAbsoluteUri, "The `targetUri` parameter is null or invalid.");
-            Debug.Assert(credentials != null, "The `targetUri` parameter is null or invalid.");
+            BaseSecureStore.ValidateTargetUri(targetUri);
+            BaseSecureStore.ValidateCredential(credentials);
 
             Trace.WriteLine("   GitHubAuthority::ValidateCredentials");
 

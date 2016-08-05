@@ -27,8 +27,31 @@ namespace Microsoft.Alm.Authentication
 {
     public interface IAuthentication
     {
+        /// <summary>
+        /// Deletes a <see cref="Credential"/> from the storage used by the authentication object.
+        /// </summary>
+        /// <param name="targetUri">
+        /// The uniform resource indicator used to uniquely identify the credentials.
+        /// </param>
         void DeleteCredentials(TargetUri targetUri);
-        bool GetCredentials(TargetUri targetUri, out Credential credentials);
-        bool SetCredentials(TargetUri targetUri, Credential credentials);
+
+        /// <summary>
+        /// Gets a <see cref="Credential"/> from the storage used by the authentication object.
+        /// </summary>
+        /// <param name="targetUri">
+        /// The uniform resource indicator used to uniquely identify the credentials.
+        /// </param>
+        /// <returns>If successful a <see cref="Credential"/> object from the authentication object,
+        /// authority or storage; otherwise <see langword="null"/>.</returns>
+        Credential GetCredentials(TargetUri targetUri);
+
+        /// <summary>
+        /// Sets a <see cref="Credential"/> in the storage used by the authentication object.
+        /// </summary>
+        /// <param name="targetUri">
+        /// The uniform resource indicator used to uniquely identify the credentials.
+        /// </param>
+        /// <param name="credentials">The value to be stored.</param>
+        void SetCredentials(TargetUri targetUri, Credential credentials);
     }
 }

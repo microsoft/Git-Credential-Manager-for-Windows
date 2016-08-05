@@ -36,9 +36,8 @@ namespace Microsoft.Alm.Authentication
         /// Reads a <see cref="Token"/> from the underlying storage.
         /// </summary>
         /// <param name="targetUri">The key identifying which token to read.</param>
-        /// <param name="token">A <see cref="Token"/> if successful; otherwise <see langword="null"/>.</param>
-        /// <returns><see langword="true"/> if successful; otherwise <see langword="false"/>.</returns>
-        bool ReadToken(TargetUri targetUri, out Token token);
+        /// <returns>A <see cref="Token"/> from the store is successful; otherwise <see langword="null"/>.</returns>
+        Token ReadToken(TargetUri targetUri);
         /// <summary>
         /// Writes a <see cref="Token"/> to the underlying storage.
         /// </summary>

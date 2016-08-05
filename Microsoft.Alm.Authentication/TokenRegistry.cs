@@ -60,13 +60,14 @@ namespace Microsoft.Alm.Authentication
         /// Reads a token from the current user's Visual Studio hive in the Windows Registry.
         /// </summary>
         /// <param name="targetUri">Key used to select the token.</param>
-        /// <param name="token">If successful, the token from the registry; otherwise `null`.</param>
-        /// <returns>True if successful; otherwise false.</returns>
-        public bool ReadToken(TargetUri targetUri, out Token token)
+        /// <returns>A <see cref="Token"/> if successful; otherwise <see langword="null"/>.</returns>
+        public Token ReadToken(TargetUri targetUri)
         {
             BaseSecureStore.ValidateTargetUri(targetUri);
 
             Trace.WriteLine("TokenRegistry::ReadToken");
+
+            Token token = null;
 
             foreach (var key in EnumerateKeys(false))
             {
@@ -102,7 +103,7 @@ namespace Microsoft.Alm.Authentication
 
                             token = new Token(value, tokenType);
 
-                            return true;
+                            return token;
                         }
                     }
                     catch
@@ -112,8 +113,7 @@ namespace Microsoft.Alm.Authentication
                 }
             }
 
-            token = null;
-            return false;
+            return token;
         }
         /// <summary>
         /// Not supported
@@ -159,7 +159,12 @@ namespace Microsoft.Alm.Authentication
 
         private bool KeyIsValid(RegistryKey registryKey, out string url, out string type, out string value)
         {
-            Debug.Assert(registryKey != null && !registryKey.Handle.IsInvalid, "The registryKey parameter is null or invalid.");
+            if (ReferenceEquals(registryKey, null))
+                throw new ArgumentNullException(nameof(registryKey));
+            if (ReferenceEquals(registryKey.Handle, null))
+                throw new ArgumentNullException(nameof(registryKey.Handle));
+            if (registryKey.Handle.IsInvalid)
+                throw new ArgumentException(nameof(registryKey));
 
             url = registryKey.GetValue(RegistryUrlKey, null, RegistryValueOptions.DoNotExpandEnvironmentNames) as String;
             type = registryKey.GetValue(RegistryTypeKey, null, RegistryValueOptions.DoNotExpandEnvironmentNames) as String;

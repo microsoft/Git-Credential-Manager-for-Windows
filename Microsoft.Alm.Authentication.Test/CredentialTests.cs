@@ -118,7 +118,7 @@ namespace Microsoft.Alm.Authentication.Test
 
                 credentialStore.WriteCredentials(uri, writeCreds);
 
-                if (credentialStore.ReadCredentials(uri, out readCreds))
+                if ((readCreds = credentialStore.ReadCredentials(uri)) != null)
                 {
                     Assert.AreEqual(writeCreds.Password, readCreds.Password, "Passwords did not match between written and read credentials");
                     Assert.AreEqual(writeCreds.Username, readCreds.Username, "Usernames did not match between written and read credentials");
@@ -130,7 +130,7 @@ namespace Microsoft.Alm.Authentication.Test
 
                 credentialStore.DeleteCredentials(uri);
 
-                Assert.IsFalse(credentialStore.ReadCredentials(uri, out readCreds), "Deleted credentials were read back");
+                Assert.IsNull(readCreds = credentialStore.ReadCredentials(uri), "Deleted credentials were read back");
             }
             catch (Exception exception)
             {
