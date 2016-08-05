@@ -191,6 +191,7 @@ namespace Microsoft.Alm.Cli
                 {
                     if (!Directory.Exists(_customPath))
                     {
+                        Program.LogEvent($"No Git installation found, unable to continue deployment.", EventLogEntryType.Error);
                         Console.Out.WriteLine();
                         Console.Error.WriteLine("Fatal: custom path does not exist: '{0}'. U_U", _customPath);
                         Pause();
@@ -214,6 +215,8 @@ namespace Microsoft.Alm.Cli
                         installations = new List<GitInstallation>();
                         installations.Add(installation);
                     }
+
+                    Program.LogEvent($"Custom path deployed to: '{_customPath}'", EventLogEntryType.Information);
                 }
                 // since no custom installation path was supplied, use default logic
                 else
@@ -232,6 +235,7 @@ namespace Microsoft.Alm.Cli
 
                 if (installations == null)
                 {
+                    Program.LogEvent($"No Git installation found, unable to continue.", EventLogEntryType.Error);
                     Console.Out.WriteLine();
                     Console.Error.WriteLine("Fatal: Git was not detected, unable to continue. U_U");
                     Pause();
@@ -253,14 +257,17 @@ namespace Microsoft.Alm.Cli
                             Console.Out.WriteLine("  {0}", file);
                         }
 
+                        Program.LogEvent($"Deployment to '{installation.Path}' succeeded.", EventLogEntryType.Information);
                         Console.Out.WriteLine("        {0} file(s) copied", copiedFiles.Count);
                     }
                     else if (_isForced)
                     {
+                        Program.LogEvent($"Deployment to '{installation.Path}' failed.", EventLogEntryType.Warning);
                         Console.Error.WriteLine("  deployment failed. U_U");
                     }
                     else
                     {
+                        Program.LogEvent($"Deployment to '{installation.Path}' failed.", EventLogEntryType.Error);
                         Console.Error.WriteLine("  deployment failed. U_U");
                         Pause();
 
@@ -284,14 +291,17 @@ namespace Microsoft.Alm.Cli
                         Console.Out.WriteLine("  {0}", file);
                     }
 
+                    Program.LogEvent($"Deployment to '{UserBinPath}' succeeded.", EventLogEntryType.Information);
                     Console.Out.WriteLine("        {0} file(s) copied", copiedFiles.Count);
                 }
                 else if (_isForced)
                 {
+                    Program.LogEvent($"Deployment to '{UserBinPath}' failed.", EventLogEntryType.Warning);
                     Console.Error.WriteLine("  deployment failed. U_U");
                 }
                 else
                 {
+                    Program.LogEvent($"Deployment to '{UserBinPath}' failed.", EventLogEntryType.Error);
                     Console.Error.WriteLine("  deployment failed. U_U");
                     Pause();
 
@@ -301,14 +311,29 @@ namespace Microsoft.Alm.Cli
 
                 if (CygwinPath != null && Directory.Exists(CygwinPath))
                 {
-                    if (CopyFiles(Program.Location, UserBinPath, out copiedFiles))
+                    if (CopyFiles(Program.Location, CygwinPath, out copiedFiles))
                     {
                         foreach (var file in copiedFiles)
                         {
                             Console.Out.WriteLine("  {0}", file);
                         }
 
+                        Program.LogEvent($"Deployment to '{CygwinPath}' succeeded.", EventLogEntryType.Information);
                         Console.Out.WriteLine("        {0} file(s) copied", copiedFiles.Count);
+                    }
+                    else if (_isForced)
+                    {
+                        Program.LogEvent($"Deployment to '{CygwinPath}' failed.", EventLogEntryType.Warning);
+                        Console.Error.WriteLine("  deployment failed. U_U");
+                    }
+                    else
+                    {
+                        Program.LogEvent($"Deployment to '{CygwinPath}' failed.", EventLogEntryType.Error);
+                        Console.Error.WriteLine("  deployment failed. U_U");
+                        Pause();
+
+                        Result = ResultValue.DeploymentFailed;
+                        return;
                     }
                 }
 
@@ -334,6 +359,7 @@ namespace Microsoft.Alm.Cli
                 // all necessary content has been deployed to the system
                 Result = ResultValue.Success;
 
+                Program.LogEvent($"{Program.Name} v{Program.Version.ToString(3)} successfully deployed.", EventLogEntryType.Information);
                 Console.Out.WriteLine();
                 Console.Out.WriteLine("Success! {0} was deployed! ^_^", Program.Title);
                 Pause();
@@ -366,7 +392,8 @@ namespace Microsoft.Alm.Cli
                 || (netfxString = Registry.GetValue(NetFxKeyFull, ValueName, DefaultValue) as String) != null
                     && Version.TryParse(netfxString, out netfxVerson))
             {
-                Trace.WriteLine("   .NET version " + netfxVerson.ToString(3) + " detected.");
+                Program.LogEvent($"NetFx version {netfxVerson.ToString(3)} detected.", EventLogEntryType.Information);
+                Trace.WriteLine("   NetFx version " + netfxVerson.ToString(3) + " detected.");
 
                 version = netfxVerson;
             }
@@ -437,6 +464,7 @@ namespace Microsoft.Alm.Cli
 
                 if (installations == null)
                 {
+                    Program.LogEvent($"Git was not detected, unable to continue with removal.", EventLogEntryType.Error);
                     Console.Out.WriteLine();
                     Console.Error.WriteLine("Fatal: Git was not detected, unable to continue. U_U");
                     Pause();
@@ -558,6 +586,8 @@ namespace Microsoft.Alm.Cli
 
                 // all necissary content has been deployed to the system
                 Result = ResultValue.Success;
+
+                Program.LogEvent($"{Program.Name} successfully removed.", EventLogEntryType.Information);
 
                 Console.Out.WriteLine();
                 Console.Out.WriteLine("Success! {0} was removed! ^_^", Program.Title);

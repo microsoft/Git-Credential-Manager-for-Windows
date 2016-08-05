@@ -15,6 +15,7 @@ namespace Microsoft.Alm.Cli
     partial class Program
     {
         public const string SourceUrl = "https://github.com/Microsoft/Git-Credential-Manager-for-Windows";
+        public const string EventSource = "Git Credential Manager";
 
         internal const string ConfigAuthortyKey = "authority";
         internal const string ConfigHttpProxyKey = "httpProxy";
@@ -171,6 +172,31 @@ namespace Microsoft.Alm.Cli
             }
         }
         private static Version _version;
+
+        internal static void LogEvent(string message, EventLogEntryType eventType)
+        {
+            /*** commented out due to UAC issues which require a proper installer to work around ***/
+
+            try
+            {
+                Trace.WriteLine("Program::LogEvent");
+
+                if (!EventLog.SourceExists(EventSource))
+                {
+                    EventLog.CreateEventSource(EventSource, "Application");
+
+                    Trace.WriteLine("   event source created");
+                }
+
+                EventLog.WriteEntry(EventSource, message, eventType);
+
+                Trace.WriteLine("   " + eventType + "event written");
+            }
+            catch
+            {
+                Trace.WriteLine("   failed ot log event.");
+            }
+        }
 
         private static bool BasicCredentialPrompt(TargetUri targetUri, string titleMessage, out string username, out string password)
         {
@@ -567,26 +593,6 @@ namespace Microsoft.Alm.Cli
 
                 operationArguments.CustomNamespace = entry.Value;
             }
-        }
-
-        private static void LogEvent(string message, EventLogEntryType eventType)
-        {
-            //const string EventSource = "Git Credential Manager";
-
-            ///*** commented out due to UAC issues which require a proper installer to work around ***/
-
-            //Trace.WriteLine("Program::LogEvent");
-
-            //if (!EventLog.SourceExists(EventSource))
-            //{
-            //    EventLog.CreateEventSource(EventSource, "Application");
-
-            //    Trace.WriteLine("   event source created");
-            //}
-
-            //EventLog.WriteEntry(EventSource, message, eventType);
-
-            //Trace.WriteLine("   " + eventType + "event written");
         }
 
         [Conditional("DEBUG")]
