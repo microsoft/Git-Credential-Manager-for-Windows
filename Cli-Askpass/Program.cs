@@ -10,6 +10,7 @@ namespace Microsoft.Alm.Cli
     {
         public const string Title = "SSH Key Manager for Windows";
         public const string Description = "Secure SSH key helper for Windows, by Microsoft";
+        public const string DefinitionUrlPassphrase = "https://www.visualstudio.com/docs/git/gcm-ssh-passphrase";
 
         private static readonly Regex AskCredentialRegex = new Regex(@"\s+(\S+)\s+for\s+'([^']+)':\s*$", RegexOptions.Compiled | RegexOptions.CultureInvariant | RegexOptions.IgnoreCase);
         private static readonly Regex AskPassphraseRegex = new Regex(@"\s+Enter\s+passphrase\s+for\s+key\s+'([^']+)':\s*$", RegexOptions.Compiled | RegexOptions.CultureInvariant | RegexOptions.IgnoreCase);

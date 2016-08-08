@@ -10,7 +10,6 @@ namespace Microsoft.Alm.Gui
     [System.Runtime.InteropServices.ComVisible(false)]
     public partial class PassphraseWindow : Window
     {
-        public const string MoreInformationUrl = "http://www.visualstudio.com/";
         public const string HintText = "SSH Passphrase";
 
         internal PassphraseWindow(string resource)
@@ -83,7 +82,7 @@ namespace Microsoft.Alm.Gui
         {
             System.Diagnostics.Process.Start(new System.Diagnostics.ProcessStartInfo()
             {
-                FileName = MoreInformationUrl,
+                FileName = Cli.Program.DefinitionUrlPassphrase,
                 UseShellExecute = true,
             });
         }
