@@ -52,7 +52,7 @@ namespace Microsoft.Alm.Authentication
             if (String.IsNullOrWhiteSpace(@namespace) || @namespace.IndexOfAny(IllegalCharacters) != -1)
                 throw new ArgumentNullException("prefix", "The `prefix` parameter is null or invalid.");
 
-            _getTargetName = getTargetName ?? Secret.UriToSimpleName;
+            _getTargetName = getTargetName ?? Secret.UriToName;
 
             _namespace = @namespace;
             _credentialCache = credentialCache ?? new SecretCache(@namespace, _getTargetName);

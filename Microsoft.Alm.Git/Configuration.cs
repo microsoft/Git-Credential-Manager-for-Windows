@@ -74,8 +74,10 @@ namespace Microsoft.Alm.Git
 
         public bool TryGetEntry(string prefix, string key, string suffix, out Entry entry)
         {
-            Debug.Assert(prefix != null, "The prefix parameter is null");
-            Debug.Assert(suffix != null, "The suffix parameter is null");
+            if (ReferenceEquals(prefix, null))
+                throw new ArgumentNullException(nameof(prefix));
+            if (ReferenceEquals(suffix, null))
+                throw new ArgumentNullException(nameof(suffix));
 
             string match = String.IsNullOrEmpty(key)
                 ? String.Format("{0}.{1}", prefix, suffix)
@@ -95,9 +97,8 @@ namespace Microsoft.Alm.Git
 
         public bool TryGetEntry(string prefix, Uri targetUri, string key, out Entry entry)
         {
-            Debug.Assert(key != null, "The key parameter is null");
-
-            Trace.WriteLine("Configuration::TryGetEntry");
+            if (ReferenceEquals(key, null))
+                throw new ArgumentNullException(nameof(key));
 
             if (targetUri != null)
             {
