@@ -3,9 +3,7 @@ version: "{build}"
 clone_depth: 10
 
 configuration:
-#  - Debug
   - Release
-#  - Package
 
 platform: Any CPU
 
@@ -17,8 +15,7 @@ build_script:
 
 test:
   assemblies:
-    - Cli-CredentialHelper.Test\bin\$(configuration)\Microsoft.Alm.*.Test.dll
-    - Microsoft.Alm.*.Test\bin\$(configuration)\Microsoft.Alm.*.Test.dll
+    - '*.Test\bin\$(configuration)\*.Test.dll'
 
 cache:
   - packages -> **\packages.config
