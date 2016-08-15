@@ -1,8 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Documents;
@@ -47,9 +43,9 @@ namespace Microsoft.Alm.Gui
 
         protected override int VisualChildrenCount
         {
-            get { lock(_syncpoint) return _visualCollection.Count; }
+            get { lock (_syncpoint) return _visualCollection.Count; }
         }
-        
+
         private readonly ContentPresenter _contentPresenter;
         private readonly Label _label;
         private readonly object _syncpoint = new object();

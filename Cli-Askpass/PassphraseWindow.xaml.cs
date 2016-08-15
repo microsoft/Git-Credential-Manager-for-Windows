@@ -1,5 +1,4 @@
 ﻿using System.Windows;
-using System.Windows.Controls;
 using System.Windows.Input;
 
 namespace Microsoft.Alm.Gui
@@ -18,8 +17,9 @@ namespace Microsoft.Alm.Gui
 
             _resource = resource;
 
-            Loaded += (sender, args) => {
-                
+            Loaded += (sender, args) =>
+            {
+
                 var style = Resources["FadedLabelStyle"] as Style;
 
                 _textboxAdorner = new PasswordBoxHintAdorner(PassphrasePasswordBox, HintText, style, IsAdornerVisible);

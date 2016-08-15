@@ -1,48 +1,48 @@
 [push]
-	default = current
+    default = current
 [core]
-	autocrlf = false
-	editor = vim
-	filemode = false
-	fscache = true
-	preloadindex = true
-	trustctime = false
+    autocrlf = false
+    editor = vim
+    filemode = false
+    fscache = true
+    preloadindex = true
+    trustctime = false
 [color]
-	ui = true
+    ui = true
 [credential]
 [merge]
-	tool = vimdiff
+    tool = vimdiff
 [mergetool]
-	keeptemporaries = false
-	keepbackups = false
-	prompt = false
-	trustexitcode = false
+    keeptemporaries = false
+    keepbackups = false
+    prompt = false
+    trustexitcode = false
 [alias]
-	last = log -1 --stat
-	cp = cherry-pick
-	co = checkout
-	cob = "!f() { git fetch origin && git checkout -b $1 origin/master --no-track; }; f"
-	cl = clone
-	ci = commit
-	discard = checkout --
-	st = status -sb
-	br = branch
-	branches = branch -v
-	remotes = remote -v
-	unstage = reset HEAD --
-	pr = !sh -c \"git fetch origin refs/pull/$1/head:pr-$1 && git config branch.pr-$1.remote origin && git config branch.pr-$1.merge refs/pull/$1/head && git checkout pr-$1\"
-	dc = diff --cached
-	lg = log --graph --pretty=format:'%Cred%h%Creset -%C(yellow)%d%Creset %s %Cgreen(%cr) %Cblue<%an>%Creset' --abbrev-commit --date=relative --all
-	switch = !sh -c \"git branch --all | grep --invert-match remotes | cut --characters 1-2 --complement | grep --ignore-case --regexp='^$1' | head --lines=1 | xargs git checkout\"
-	wipe = !git add -A && git commit -qm 'WIPE SAVEPOINT' && git reset HEAD~1 --hard
-	up = !git pull --rebase --prune $@ && git submodule update --init --recursive
+    last = log -1 --stat
+    cp = cherry-pick
+    co = checkout
+    cob = "!f() { git fetch origin && git checkout -b $1 origin/master --no-track; }; f"
+    cl = clone
+    ci = commit
+    discard = checkout --
+    st = status -sb
+    br = branch
+    branches = branch -v
+    remotes = remote -v
+    unstage = reset HEAD --
+    pr = !sh -c \"git fetch origin refs/pull/$1/head:pr-$1 && git config branch.pr-$1.remote origin && git config branch.pr-$1.merge refs/pull/$1/head && git checkout pr-$1\"
+    dc = diff --cached
+    lg = log --graph --pretty=format:'%Cred%h%Creset -%C(yellow)%d%Creset %s %Cgreen(%cr) %Cblue<%an>%Creset' --abbrev-commit --date=relative --all
+    switch = !sh -c \"git branch --all | grep --invert-match remotes | cut --characters 1-2 --complement | grep --ignore-case --regexp='^$1' | head --lines=1 | xargs git checkout\"
+    wipe = !git add -A && git commit -qm 'WIPE SAVEPOINT' && git reset HEAD~1 --hard
+    up = !git pull --rebase --prune $@ && git submodule update --init --recursive
 [diff]
-	tool = compareit
+    tool = compareit
 [difftool "compareit"]
-	cmd = \"C:/Utils/Compare It!/wincmp3.exe\" \"$LOCAL\" \"$REMOTE\"
+    cmd = \"C:/Utils/Compare It!/wincmp3.exe\" \"$LOCAL\" \"$REMOTE\"
 [difftool "cygcompareit"]
-	cmd = \"C:/Utils/Compare It!/wincmp3.exe\" \"$(cygpath -w \"$LOCAL\")\" \"$(cygpath -w \"$REMOTE\")\"
+    cmd = \"C:/Utils/Compare It!/wincmp3.exe\" \"$(cygpath -w \"$LOCAL\")\" \"$(cygpath -w \"$REMOTE\")\"
 [difftool]
-	prompt = false
+    prompt = false
 [credential]
-	helper = !'/cygdrive/c/Utils/git-credential-winstore.exe'
+    helper = !'/cygdrive/c/Utils/git-credential-winstore.exe'
