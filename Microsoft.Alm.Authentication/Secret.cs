@@ -39,6 +39,7 @@ namespace Microsoft.Alm.Authentication
             Trace.WriteLine("Secret::UriToName");
 
             string targetName = $"{@namespace}:{targetUri}";
+            targetName = targetName.TrimEnd('/', '\\');
 
             Trace.WriteLine("   target name = " + targetName);
 
