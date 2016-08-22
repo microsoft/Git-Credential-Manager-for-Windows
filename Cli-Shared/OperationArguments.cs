@@ -33,6 +33,8 @@ namespace Microsoft.Alm.Cli
 {
     internal sealed class OperationArguments
     {
+        private static readonly char[] SeperatorCharacters = { '/', '\\' };
+
         internal OperationArguments(Stream readableStream)
             : this()
         {
@@ -327,11 +329,78 @@ namespace Microsoft.Alm.Cli
         {
             Trace.WriteLine("OperationArguments::CreateTargetUri");
 
-            string queryUrl = $"{_queryProtocol}://{_queryHost}";
+            string queryUrl = null;
 
+            // when the target requests a path...
             if (UseHttpPath)
             {
-                queryUrl = $"{queryUrl}/{_queryPath}";
+                // and lacks a protocol...
+                if (String.IsNullOrWhiteSpace(_queryProtocol))
+                {
+                    // and the target lacks a path: use just the host
+                    if ((String.IsNullOrWhiteSpace(_queryPath)))
+                    {
+                        queryUrl = _queryHost;
+                    }
+                    // combine the host + path
+                    else
+                    {
+                        queryUrl = $"{_queryHost}/{_queryPath}";
+                    }
+                }
+                // and has a protocol...
+                else
+                {
+                    // and the target lacks a path, combine protocol + host
+                    if ((String.IsNullOrWhiteSpace(_queryPath)))
+                    {
+                        queryUrl = $"{_queryProtocol}://{_queryHost}";
+                    }
+                    // combine protocol + host + path
+                    else
+                    {
+                        queryUrl = $"{_queryProtocol}://{_queryHost}/{_queryPath}";
+                    }
+                }
+            }
+            // when the target ignores paths...
+            else
+            {
+                // and lacks a protocol...
+                if (String.IsNullOrWhiteSpace(_queryProtocol))
+                {
+                    // and the host starts with "\\", strip the path...
+                    if (_queryHost.StartsWith(@"\\", StringComparison.Ordinal))
+                    {
+                        int idx = _queryHost.IndexOfAny(SeperatorCharacters, 2);
+                        queryUrl = (idx > 0)
+                            ? _queryHost.Substring(0, idx)
+                            : _queryHost;
+                    }
+                    // use just the host
+                    else
+                    {
+                        queryUrl = _queryHost;
+                    }
+                }
+                // and the protocol is "file://" strip any path
+                else if (_queryProtocol.StartsWith("file://", StringComparison.OrdinalIgnoreCase))
+                {
+                    int idx = _queryHost.IndexOfAny(SeperatorCharacters);
+
+                    // strip the host as neccisary
+                    queryUrl = (idx > 0)
+                        ? _queryHost.Substring(0, idx)
+                        : _queryHost;
+
+                    // combine with protocol
+                    queryUrl = $"{_queryProtocol}://{queryUrl}";
+                }
+                // combine the protocol + host
+                else
+                {
+                    queryUrl = $"{_queryProtocol}://{_queryHost}";
+                }
             }
 
             _queryUri = new Uri(queryUrl);

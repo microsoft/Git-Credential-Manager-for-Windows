@@ -84,7 +84,9 @@ namespace Microsoft.Alm.Cli.Test
                 Host = "github.com",
             };
 
-            CreateTargetUriTest(input);
+            CreateTargetUriTestDefault(input);
+            CreateTargetUriTestSansPath(input);
+            CreateTargetUriTestWithPath(input);
         }
 
         [TestMethod]
@@ -96,7 +98,9 @@ namespace Microsoft.Alm.Cli.Test
                 Host = "team.visualstudio.com",
             };
 
-            CreateTargetUriTest(input);
+            CreateTargetUriTestDefault(input);
+            CreateTargetUriTestSansPath(input);
+            CreateTargetUriTestWithPath(input);
         }
 
         [TestMethod]
@@ -109,7 +113,9 @@ namespace Microsoft.Alm.Cli.Test
                 Path = "Microsoft/Git-Credential-Manager-for-Windows.git"
             };
 
-            CreateTargetUriTest(input);
+            CreateTargetUriTestDefault(input);
+            CreateTargetUriTestSansPath(input);
+            CreateTargetUriTestWithPath(input);
         }
 
         [TestMethod]
@@ -121,7 +127,9 @@ namespace Microsoft.Alm.Cli.Test
                 Host = "onpremis:8080",
             };
 
-            CreateTargetUriTest(input);
+            CreateTargetUriTestDefault(input);
+            CreateTargetUriTestSansPath(input);
+            CreateTargetUriTestWithPath(input);
         }
 
         [TestMethod]
@@ -130,11 +138,13 @@ namespace Microsoft.Alm.Cli.Test
             var input = new InputArg()
             {
                 Protocol = "https",
-                Host = "foo.bar.com:8181?git-credential=manager",
+                Host = "foo.bar.com:8181",
                 Path = "this-is/a/path%20with%20spaces",
             };
 
-            CreateTargetUriTest(input);
+            CreateTargetUriTestDefault(input);
+            CreateTargetUriTestSansPath(input);
+            CreateTargetUriTestWithPath(input);
         }
 
         [TestMethod]
@@ -148,10 +158,40 @@ namespace Microsoft.Alm.Cli.Test
                 Password = "password",
             };
 
-            CreateTargetUriTest(input);
+            CreateTargetUriTestDefault(input);
+            CreateTargetUriTestSansPath(input);
+            CreateTargetUriTestWithPath(input);
         }
 
-        private void CreateTargetUriTest(InputArg input)
+        [TestMethod]
+        public void CreateTargetUri_Unc()
+        {
+            var input = new InputArg()
+            {
+                Protocol = "file",
+                Host = "unc",
+                Path = "server/path",
+            };
+
+            CreateTargetUriTestDefault(input);
+            CreateTargetUriTestSansPath(input);
+            CreateTargetUriTestWithPath(input);
+        }
+
+        [TestMethod]
+        public void CreateTargetUri_UncColloquial()
+        {
+            var input = new InputArg()
+            {
+                Host = @"\\windows\has\weird\paths",
+            };
+
+            CreateTargetUriTestDefault(input);
+            CreateTargetUriTestSansPath(input);
+            CreateTargetUriTestWithPath(input);
+        }
+
+        private void CreateTargetUriTestDefault(InputArg input)
         {
             using (var memory = new MemoryStream())
             using (var writer = new StreamWriter(memory))
@@ -164,11 +204,73 @@ namespace Microsoft.Alm.Cli.Test
                 var oparg = new OperationArguments(memory);
 
                 Assert.IsNotNull(oparg);
-                Assert.AreEqual(input.Protocol, oparg.QueryProtocol);
-                Assert.AreEqual(input.Host, oparg.QueryHost);
+                Assert.AreEqual(input.Protocol ?? string.Empty, oparg.QueryProtocol);
+                Assert.AreEqual(input.Host ?? string.Empty, oparg.QueryHost);
                 Assert.AreEqual(input.Path, oparg.QueryPath);
                 Assert.AreEqual(input.Username, oparg.CredUsername);
                 Assert.AreEqual(input.Password, oparg.CredPassword);
+
+                // file or unc paths are treated specially
+                if (oparg.QueryUri.Scheme != "file")
+                {
+                    Assert.AreEqual("/", oparg.QueryUri.AbsolutePath);
+                }
+            }
+        }
+
+        private void CreateTargetUriTestSansPath(InputArg input)
+        {
+            using (var memory = new MemoryStream())
+            using (var writer = new StreamWriter(memory))
+            {
+                writer.Write(input.ToString());
+                writer.Flush();
+
+                memory.Seek(0, SeekOrigin.Begin);
+
+                var oparg = new OperationArguments(memory);
+                oparg.UseHttpPath = false;
+
+                Assert.IsNotNull(oparg);
+                Assert.AreEqual(input.Protocol ?? string.Empty, oparg.QueryProtocol);
+                Assert.AreEqual(input.Host ?? string.Empty, oparg.QueryHost);
+                Assert.AreEqual(input.Path, oparg.QueryPath);
+                Assert.AreEqual(input.Username, oparg.CredUsername);
+                Assert.AreEqual(input.Password, oparg.CredPassword);
+
+                // file or unc paths are treated specially
+                if (oparg.QueryUri.Scheme != "file")
+                {
+                    Assert.AreEqual("/", oparg.QueryUri.AbsolutePath);
+                }
+            }
+        }
+
+        private void CreateTargetUriTestWithPath(InputArg input)
+        {
+            using (var memory = new MemoryStream())
+            using (var writer = new StreamWriter(memory))
+            {
+                writer.Write(input.ToString());
+                writer.Flush();
+
+                memory.Seek(0, SeekOrigin.Begin);
+
+                var oparg = new OperationArguments(memory);
+                oparg.UseHttpPath = true;
+
+                Assert.IsNotNull(oparg);
+                Assert.AreEqual(input.Protocol ?? string.Empty, oparg.QueryProtocol);
+                Assert.AreEqual(input.Host ?? string.Empty, oparg.QueryHost);
+                Assert.AreEqual(input.Path, oparg.QueryPath);
+                Assert.AreEqual(input.Username, oparg.CredUsername);
+                Assert.AreEqual(input.Password, oparg.CredPassword);
+
+                // file or unc paths are treated specially
+                if (oparg.QueryUri.Scheme != "file")
+                {
+                    Assert.AreEqual("/" + input.Path, oparg.QueryUri.AbsolutePath);
+                }
             }
         }
 

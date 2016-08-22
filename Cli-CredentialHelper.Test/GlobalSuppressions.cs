@@ -1,6 +1,9 @@
 ﻿[assembly: System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2202:Do not dispose objects multiple times", Scope = "member", Target = "Microsoft.Alm.Cli.Test.OperationArgumentsTests.#Typical()")]
 [assembly: System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2202:Do not dispose objects multiple times", Scope = "member", Target = "Microsoft.Alm.Cli.Test.OperationArgumentsTests.#SpecialCharacters()")]
 [assembly: System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2202:Do not dispose objects multiple times", Scope = "member", Target = "Microsoft.Alm.Cli.Test.OperationArgumentsTests.#CreateTargetUriTest(Microsoft.Alm.Cli.Test.OperationArgumentsTests+InputArg)")]
+[assembly: System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2202:Do not dispose objects multiple times", Scope = "member", Target = "Microsoft.Alm.Cli.Test.OperationArgumentsTests.#CreateTargetUriTestDefault(Microsoft.Alm.Cli.Test.OperationArgumentsTests+InputArg)")]
+[assembly: System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2202:Do not dispose objects multiple times", Scope = "member", Target = "Microsoft.Alm.Cli.Test.OperationArgumentsTests.#CreateTargetUriTestSansPath(Microsoft.Alm.Cli.Test.OperationArgumentsTests+InputArg)")]
+[assembly: System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2202:Do not dispose objects multiple times", Scope = "member", Target = "Microsoft.Alm.Cli.Test.OperationArgumentsTests.#CreateTargetUriTestWithPath(Microsoft.Alm.Cli.Test.OperationArgumentsTests+InputArg)")]
 // This file is used by Code Analysis to maintain SuppressMessage
 // attributes that are applied to this project.
 // Project-level suppressions either have no target or are given
