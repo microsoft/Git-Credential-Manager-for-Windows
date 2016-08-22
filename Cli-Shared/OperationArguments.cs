@@ -204,6 +204,18 @@ namespace Microsoft.Alm.Cli
                     _queryHost = value.DnsSafeHost;
                     _queryPath = value.AbsolutePath;
                     _queryProtocol = value.Scheme;
+
+                    // if there's a non-default port value, retain it
+                    if (!value.IsDefaultPort)
+                    {
+                        _queryHost = $"{_queryHost}:{value.Port}";
+                    }
+
+                    // if there's a query segment, retain it
+                    if (!string.IsNullOrWhiteSpace(value.Query))
+                    {
+                        _queryHost = $"{_queryHost}?{value.Query}";
+                    }
                 }
                 CreateTargetUri();
             }
@@ -315,14 +327,14 @@ namespace Microsoft.Alm.Cli
         {
             Trace.WriteLine("OperationArguments::CreateTargetUri");
 
-            UriBuilder builder = new UriBuilder(_queryProtocol, _queryHost);
+            string queryUrl = $"{_queryProtocol}://{_queryHost}";
 
-            if (_useHttpPath)
+            if (UseHttpPath)
             {
-                builder.Path = _queryPath;
+                queryUrl = $"{queryUrl}/{_queryPath}";
             }
 
-            _queryUri = builder.Uri;
+            _queryUri = new Uri(queryUrl);
 
             Trace.WriteLine($"   created {_queryUri}");
 
