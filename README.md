@@ -46,19 +46,19 @@ Most likely, your environment is not configured correctly. You can verify that y
 
 Most likely reason is that your GUI “shells out” to git.exe to perform Git operations. When it does so, it cannot respond to the command line prompts for username and password like a real user can. To avoid being asked for your credentials on the command line, and instead be asked via a modal dialog you’ll need to configure the Credential Manager.
 
-1. Decide if you want this to be a global setting (all of your repos) or a local setting (just one repo).
+1. Decide if you want this to be a global setting (all of your repositories) or a local setting (just one repository).
 2. Start your favorite shell. (cmd, powershell, bash, etc.)
 3. Update your settings, so that Git Credential Manager knows to display a dialog and not prompt at the command line:
   * If you’ve decided this is a global setting run `git config --global credential.modalprompt true`.
-  * If you’ve decided this a per repo setting, `cd` to your repo and in that repo run `git config credential.modalprompt true`.
+  * If you’ve decided this a per repository setting, `cd` to your repo and in that repo run `git config credential.modalprompt true`.
 
 ### Q: Why am I not seeing my SSH keys being saved?
 
 The Git Credential Manager does not *yet* support secure storage for SSH keys. It is something we hope to implement, but it has not been a priority. If you feel otherwise, please comment on the [SSH Key support issue](https://github.com/Microsoft/Git-Credential-Manager-for-Windows/issues/25) which is already open.
 
-### Q: Is there a Nuget Package available?
+### Q: Is there a NuGet Package available?
 
-Yes there is: https://www.nuget.org/packages/Microsoft.Alm.Authentication. It only supports the core authentication library, but if you're looking to extend the GCM then it is likely exactly what you're after.
+Yes there is: <https://www.nuget.org/packages/Microsoft.Alm.Authentication>. It only supports the core authentication library, but if you're looking to extend the GCM then it is likely exactly what you're after.
 
 ### Q: Why doesn’t Git Credential Manager work on Windows XP, Mac OS, or Linux?
 
@@ -85,7 +85,7 @@ Git can be convinced to "forward" domain credentials by supplying a blank creden
 
 Once updated, the new configuration tells the GCM to only forward domain credentials. If you set `credential.integrated true`, every domain will be assumed to support domain credentials. Most likely, this is **not** what you want. Therefore, it strongly suggested that you restrict the configuration setting to the URL of your TFS Git host.
 
-### Q: Why doesn't SourceTree use the creds in the GCM?
+### Q: Why doesn't SourceTree use the credentials in the GCM?
 
 You need to configure SourceTree to use the version of Git installed for the entire system. By default, SourceTree uses a local copy of portable Git.
 
