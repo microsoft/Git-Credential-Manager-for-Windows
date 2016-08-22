@@ -1,11 +1,92 @@
 ﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System;
+using System.Collections.Generic;
 
 namespace Microsoft.Alm.Authentication.Test
 {
     [TestClass]
     public class CredentialTests
     {
+        const string Namespace = "test";
+
+        [TestMethod]
+        public void UriToName_GitHubSimple()
+        {
+            const string Expected = Namespace + ":https://www.github.com";
+            const string Original = "https://www.github.com";
+
+            UriToNameTest(Namespace, Original, Expected);
+        }
+
+        [TestMethod]
+        public void UriToName_VstsSimple()
+        {
+            const string Expected = Namespace + ":https://account.visualstudio.com";
+            const string Original = "https://account.visualstudio.com";
+
+            UriToNameTest(Namespace, Original, Expected);
+        }
+
+        [TestMethod]
+        public void UriToName_HttpsWithPath()
+        {
+            const string Expected = Namespace + ":https://github.com/Microsoft/Git-Credential-Manager-for-Windows.git";
+            const string Original = "https://github.com/Microsoft/Git-Credential-Manager-for-Windows.git";
+
+            UriToNameTest(Namespace, Original, Expected);
+        }
+
+        [TestMethod]
+        public void UriToName_HttpsWithTrailingSlash()
+        {
+            const string Expected = Namespace + ":https://www.github.com";
+            const string Original = "https://www.github.com";
+
+            UriToNameTest(Namespace, Original, Expected);
+        }
+
+        [TestMethod]
+        public void UriToName_ComplexVsts()
+        {
+            const string Expected = Namespace + ":https://mytenant.visualstudio.com/MYTENANT/_git/App.MyApp";
+            const string Original = "https://mytenant.visualstudio.com/MYTENANT/_git/App.MyApp";
+
+            var uri = new Uri(Original);
+            var actual = Secret.UriToName(uri, Namespace);
+
+            Assert.AreEqual(Expected, actual);
+        }
+
+        [TestMethod]
+        public void UriToName_Unc()
+        {
+            const string Expected = Namespace + ":file://unc/path";
+            const string Original = @"\\unc\path";
+
+            UriToNameTest(Namespace, Original, Expected);
+        }
+
+        [TestMethod]
+        public void UriToName_UncWithPrefix()
+        {
+            const string Expected = Namespace + ":file://unc/path";
+            const string Original = @"file://unc/path";
+
+            UriToNameTest(Namespace, Original, Expected);
+        }
+
+        [TestMethod]
+        public void UriToName_UncWithTrailingSlash()
+        {
+            const string Expected = Namespace + ":file://unc/path";
+            const string Original = @"\\unc\path\";
+
+            var uri = new Uri(Original);
+            var actual = Secret.UriToName(uri, Namespace);
+
+            Assert.AreEqual(Expected, actual);
+        }
+
         [TestMethod]
         public void CredentialStoreUrl()
         {
@@ -118,6 +199,14 @@ namespace Microsoft.Alm.Authentication.Test
             {
                 Assert.Fail(exception.Message);
             }
+        }
+
+        private void UriToNameTest(string @namespace, string original, string expected)
+        {
+            var uri = new Uri(original);
+            var actual = Secret.UriToName(uri, Namespace);
+
+            Assert.AreEqual(expected, actual);
         }
     }
 }
