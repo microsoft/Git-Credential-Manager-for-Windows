@@ -1,14 +1,14 @@
 ﻿<Window x:Class="Microsoft.Alm.Gui.PassphraseWindow"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
-        xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:local="clr-namespace:Microsoft.Alm.Gui"
         xmlns:sys="clr-namespace:System;assembly=mscorlib"
         mc:Ignorable="d"
         Height="280"
-        ResizeMode="NoResize" 
-        Title="Git Credential Manager for Windows" 
+        ResizeMode="NoResize"
+        Title="Git Credential Manager for Windows"
         Width="420"
         WindowStartupLocation="CenterOwner">
     <Window.Resources>
@@ -241,8 +241,8 @@
                 </Grid.RowDefinitions>
                 <Grid.Children>
                     <Label x:Name="HeaderLabel"
-                           Grid.Column="0" 
-                           Grid.Row="0" 
+                           Grid.Column="0"
+                           Grid.Row="0"
                            Style="{StaticResource HeaderLabelStyle}">
                         <TextBlock Text="Enter Passphrase"/>
                     </Label>
@@ -263,22 +263,22 @@
                                 <TextBlock Text="for: "/>
                             </Label>
                             <Label x:Name="ResourceLabel"
-                                   Grid.Column="1" 
-                                   Grid.Row="0" 
+                                   Grid.Column="1"
+                                   Grid.Row="0"
                                    HorizontalContentAlignment="Left">
                                 <TextBlock Text="{Binding Path=Resource}"/>
                             </Label>
                         </Grid.Children>
                     </Grid>
-                    <Border Grid.Column="0" 
+                    <Border Grid.Column="0"
                             Grid.Row="2"
                             Style="{StaticResource PassphraseBorderStyle}">
                         <PasswordBox x:Name="PassphrasePasswordBox"
                                  TabIndex="0"/>
                     </Border>
                     <Button x:Name="LearnMoreLink"
-                            Grid.Column="3"  
-                            Grid.Row="3" 
+                            Grid.Column="3"
+                            Grid.Row="3"
                             Style="{StaticResource LearnMoreLinkStyle}"
                             Click="MoreInfoLabel_Click"
                             TabIndex="3">
@@ -287,8 +287,8 @@
                         </Label>
                     </Button>
                     <Border x:Name="ActionBar"
-                            Grid.Column="0" 
-                            Grid.Row="4" 
+                            Grid.Column="0"
+                            Grid.Row="4"
                             Style="{StaticResource ActionBarStyle}">
                         <Grid>
                             <Grid.ColumnDefinitions>
@@ -302,7 +302,7 @@
                             <Grid.Children>
                                 <Button x:Name="OkButton"
                                         Click="OkButton_Click"
-                                        Grid.Column="1" 
+                                        Grid.Column="1"
                                         Grid.Row="0"
                                         IsDefault="True"
                                         TabIndex="1">
@@ -312,7 +312,7 @@
                                 </Button>
                                 <Button x:Name="CancelButton"
                                         Click="CancelButton_Click"
-                                        Grid.Column="2" 
+                                        Grid.Column="2"
                                         Grid.Row="0"
                                         IsCancel="True"
                                         TabIndex="2">

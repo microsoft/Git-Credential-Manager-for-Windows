@@ -1,20 +1,20 @@
 ﻿/**** Git Credential Manager for Windows ****
- * 
+ *
  * Copyright (c) Microsoft Corporation
  * All rights reserved.
- * 
+ *
  * MIT License
- * 
+ *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the """"Software""""), to deal
  * in the Software without restriction, including without limitation the rights to
  * use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of
  * the Software, and to permit persons to whom the Software is furnished to do so,
  * subject to the following conditions:
- * 
+ *
  * The above copyright notice and this permission notice shall be included in all
  * copies or substantial portions of the Software.
- * 
+ *
  * THE SOFTWARE IS PROVIDED *AS IS*, WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
  * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS
  * FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR
@@ -46,7 +46,7 @@ namespace Microsoft.Alm.Cli
             }
             else
             {
-                // 
+                //
                 byte[] buffer = new byte[4096];
                 int read = 0;
 
@@ -96,7 +96,7 @@ namespace Microsoft.Alm.Cli
                                     break;
 
                                 case "host":
-                                    _queryHost= pair[1];
+                                    _queryHost = pair[1];
                                     break;
 
                                 case "path":
@@ -267,7 +267,7 @@ namespace Microsoft.Alm.Cli
                    .Append(_queryProtocol ?? String.Empty)
                    .Append("\n");
             builder.Append("host=")
-                   .Append(_queryHost?? String.Empty)
+                   .Append(_queryHost ?? String.Empty)
                    .Append("\n");
             builder.Append("path=")
                    .Append(_queryPath ?? String.Empty)

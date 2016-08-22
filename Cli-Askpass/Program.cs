@@ -135,7 +135,7 @@ namespace Microsoft.Alm.Cli
                 {
                     string passphase = prompt.Passphrase;
 
-                    Trace.WriteLine( "   passphase acquired");
+                    Trace.WriteLine("   passphase acquired");
 
                     Console.Out.Write(passphase + "\n");
                     return;
