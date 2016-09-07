@@ -41,7 +41,7 @@ namespace Microsoft.Alm.Git
         private static readonly Lazy<Regex> KeyValueRegex = new Lazy<Regex>(() => new Regex(@"^\s*(\w+)\s*=\s*(.+)", RegexOptions.Compiled | RegexOptions.CultureInvariant));
         private static readonly Lazy<Regex> SectionRegex = new Lazy<Regex>(() => new Regex(@"^\s*\[\s*(\w+)\s*(\""[^\]]+){0,1}\]", RegexOptions.Compiled | RegexOptions.CultureInvariant));
 
-        public Configuration(string directory)
+        public Configuration(string directory, bool loadLocal, bool loadSystem)
         {
             if (String.IsNullOrWhiteSpace(directory))
                 throw new ArgumentNullException("directory");
@@ -52,7 +52,7 @@ namespace Microsoft.Alm.Git
         }
 
         public Configuration()
-            : this(Environment.CurrentDirectory)
+            : this(Environment.CurrentDirectory, false, false)
         { }
 
         internal Configuration(TextReader configReader)
