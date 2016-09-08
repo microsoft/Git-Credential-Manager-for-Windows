@@ -35,6 +35,8 @@ namespace Microsoft.Alm.Cli
         internal const string EnvironModalPromptKey = "GCM_MODAL_PROMPT";
         internal const string EnvironValidateKey = "GCM_VALIDATE";
         internal const string EnvironWritelogKey = "GCM_WRITELOG";
+        internal const string EnvironConfigNoLocalKey = "GCM_CONFIG_NOLOCAL";
+        internal const string EnvironConfigNoSystemKey = "GCM_CONFIG_NOSYSTEM";
 
         internal static readonly StringComparer EnvironKeyComparer = StringComparer.OrdinalIgnoreCase;
 
@@ -45,42 +47,6 @@ namespace Microsoft.Alm.Cli
 
         private static readonly VstsTokenScope VstsCredentialScope = VstsTokenScope.CodeWrite | VstsTokenScope.PackagingRead;
         private static readonly GitHubTokenScope GitHubCredentialScope = GitHubTokenScope.Gist | GitHubTokenScope.Repo;
-
-        /// <summary>
-        /// Gets the process's Git configuration based on current working directory, user's folder, and Git's system directory.
-        /// </summary>
-        public static Configuration Configuration
-        {
-            get
-            {
-                if (_configuration == null)
-                {
-                    _configuration = new Configuration();
-                }
-                return _configuration;
-            }
-        }
-        private static Configuration _configuration;
-        /// <summary>
-        /// Gets a map of the process's environmental variables keyed on case-insensitive names.
-        /// </summary>
-        public static IReadOnlyDictionary<string, string> EnvironmentVariables
-        {
-            get
-            {
-                if (_environmentVariables == null)
-                {
-                    _environmentVariables = new Dictionary<string, string>(EnvironKeyComparer);
-                    var iter = Environment.GetEnvironmentVariables().GetEnumerator();
-                    while (iter.MoveNext())
-                    {
-                        _environmentVariables.Add(iter.Key as string, iter.Value as string);
-                    }
-                }
-                return _environmentVariables;
-            }
-        }
-        private static Dictionary<string, string> _environmentVariables;
 
         /// <summary>
         /// Gets the path to the executable.
@@ -467,10 +433,29 @@ namespace Microsoft.Alm.Cli
                 Environment.Exit(-1);
             }
 
+            var envars = operationArguments.EnvironmentVariables;
+
+            string value;
+            operationArguments.UseConfigLocal = !envars.TryGetValue(EnvironConfigNoLocalKey, out value)
+                                             || string.IsNullOrWhiteSpace(value)
+                                             || ConfigValueComparer.Equals(value, "0")
+                                             || ConfigValueComparer.Equals(value, "false")
+                                             || ConfigValueComparer.Equals(value, "no");
+
+            operationArguments.UseConfigSystem = !envars.TryGetValue(EnvironConfigNoSystemKey, out value)
+                                              || string.IsNullOrWhiteSpace(value)
+                                              || ConfigValueComparer.Equals(value, "0")
+                                              || ConfigValueComparer.Equals(value, "false")
+                                              || ConfigValueComparer.Equals(value, "no");
+
+            // load/re-load the Git configuration after setting the use local/system config values
+            operationArguments.LoadConfiguration();
+
+            var config = operationArguments.GitConfiguration;
             Configuration.Entry entry;
 
             // look for authority config settings
-            if (Configuration.TryGetEntry(ConfigPrefix, operationArguments.QueryUri, ConfigAuthortyKey, out entry))
+            if (config.TryGetEntry(ConfigPrefix, operationArguments.QueryUri, ConfigAuthortyKey, out entry))
             {
                 Trace.WriteLine("   " + ConfigAuthortyKey + " = " + entry.Value);
 
@@ -510,12 +495,12 @@ namespace Microsoft.Alm.Cli
 
             // look for interactivity config settings
             string interativeValue = null;
-            if (EnvironmentVariables.ContainsKey(EnvironInteractiveKey)
-                && !string.IsNullOrWhiteSpace(interativeValue = EnvironmentVariables[EnvironInteractiveKey]))
+            if (envars.TryGetValue(EnvironInteractiveKey, out interativeValue)
+                && !string.IsNullOrWhiteSpace(interativeValue))
             {
                 Trace.WriteLine("   " + EnvironInteractiveKey + " = " + interativeValue);
             }
-            else if (Configuration.TryGetEntry(ConfigPrefix, operationArguments.QueryUri, ConfigInteractiveKey, out entry))
+            else if (config.TryGetEntry(ConfigPrefix, operationArguments.QueryUri, ConfigInteractiveKey, out entry))
             {
                 Trace.WriteLine("   " + ConfigInteractiveKey + " = " + entry.Value);
 
@@ -539,42 +524,42 @@ namespace Microsoft.Alm.Cli
 
             // look for credential validation config settings
             bool? validateCredentials;
-            if (TryReadBoolean(operationArguments.QueryUri, ConfigValidateKey, EnvironValidateKey, operationArguments.ValidateCredentials, out validateCredentials))
+            if (TryReadBoolean(operationArguments, ConfigValidateKey, EnvironValidateKey, operationArguments.ValidateCredentials, out validateCredentials))
             {
                 operationArguments.ValidateCredentials = validateCredentials.Value;
             }
 
             // look for write log config settings
             bool? writeLog;
-            if (TryReadBoolean(operationArguments.QueryUri, ConfigWritelogKey, EnvironWritelogKey, operationArguments.WriteLog, out writeLog))
+            if (TryReadBoolean(operationArguments, ConfigWritelogKey, EnvironWritelogKey, operationArguments.WriteLog, out writeLog))
             {
                 operationArguments.WriteLog = writeLog.Value;
             }
 
             // look for modal prompt config settings
             bool? useModalUi = null;
-            if (TryReadBoolean(operationArguments.QueryUri, ConfigUseModalPromptKey, EnvironModalPromptKey, operationArguments.UseModalUi, out useModalUi))
+            if (TryReadBoolean(operationArguments, ConfigUseModalPromptKey, EnvironModalPromptKey, operationArguments.UseModalUi, out useModalUi))
             {
                 operationArguments.UseModalUi = useModalUi.Value;
             }
 
             // look for credential preservation config settings
             bool? preserveCredentials;
-            if (TryReadBoolean(operationArguments.QueryUri, ConfigPreserveCredentialsKey, EnvironPreserveCredentialsKey, operationArguments.PreserveCredentials, out preserveCredentials))
+            if (TryReadBoolean(operationArguments, ConfigPreserveCredentialsKey, EnvironPreserveCredentialsKey, operationArguments.PreserveCredentials, out preserveCredentials))
             {
                 operationArguments.PreserveCredentials = preserveCredentials.Value;
             }
 
             // look for http path usage config settings
             bool? useHttpPath;
-            if (TryReadBoolean(operationArguments.QueryUri, ConfigUseHttpPathKey, null, operationArguments.UseHttpPath, out useHttpPath))
+            if (TryReadBoolean(operationArguments, ConfigUseHttpPathKey, null, operationArguments.UseHttpPath, out useHttpPath))
             {
                 operationArguments.UseHttpPath = useHttpPath.Value;
             }
 
             // look for http proxy config settings
-            if (Configuration.TryGetEntry(ConfigPrefix, operationArguments.QueryUri, ConfigHttpProxyKey, out entry)
-                || Configuration.TryGetEntry("http", operationArguments.QueryUri, "proxy", out entry))
+            if (config.TryGetEntry(ConfigPrefix, operationArguments.QueryUri, ConfigHttpProxyKey, out entry)
+                || config.TryGetEntry("http", operationArguments.QueryUri, "proxy", out entry))
             {
                 Trace.WriteLine("   " + ConfigHttpProxyKey + " = " + entry.Value);
 
@@ -582,7 +567,7 @@ namespace Microsoft.Alm.Cli
             }
 
             // look for custom namespace config settings
-            if (Configuration.TryGetEntry(ConfigPrefix, operationArguments.QueryUri, ConfigNamespaceKey, out entry))
+            if (config.TryGetEntry(ConfigPrefix, operationArguments.QueryUri, ConfigNamespaceKey, out entry))
             {
                 Trace.WriteLine("   " + ConfigNamespaceKey + " = " + entry.Value);
 
@@ -1075,28 +1060,30 @@ namespace Microsoft.Alm.Cli
             return handleFileType == NativeMethods.FileType.Char;
         }
 
-        private static bool TryReadBoolean(Uri queryUri, string configKey, string environKey, bool defaultValue, out bool? value)
+        private static bool TryReadBoolean(OperationArguments operationArguments, string configKey, string environKey, bool defaultValue, out bool? value)
         {
-            if (ReferenceEquals(queryUri, null))
-                throw new ArgumentNullException("queryUri");
+            if (ReferenceEquals(operationArguments, null))
+                throw new ArgumentNullException(nameof(operationArguments));
             if (ReferenceEquals(configKey, null))
-                throw new ArgumentNullException("configKey");
+                throw new ArgumentNullException(nameof(configKey));
 
             Trace.WriteLine("Program::TryReadBoolean");
+
+            var config = operationArguments.GitConfiguration;
+            var envars = operationArguments.EnvironmentVariables;
 
             Configuration.Entry entry = new Configuration.Entry { };
             value = null;
 
             string valueString = null;
             if (!string.IsNullOrWhiteSpace(environKey)
-                && EnvironmentVariables.ContainsKey(environKey))
+                && envars.TryGetValue(environKey, out valueString))
             {
                 Trace.WriteLine("   " + environKey + " = " + valueString);
-                valueString = EnvironmentVariables[environKey];
             }
 
             if (!string.IsNullOrWhiteSpace(valueString)
-                || Configuration.TryGetEntry(ConfigPrefix, queryUri, configKey, out entry))
+                || config.TryGetEntry(ConfigPrefix, operationArguments.QueryUri, configKey, out entry))
             {
                 Trace.WriteLine("   " + configKey + " = " + entry.Value);
                 valueString = entry.Value;
