@@ -330,6 +330,11 @@ namespace Microsoft.Alm.Cli
                                         ?? exception.InnerException;
 
                 Console.Error.WriteLine("Fatal: " + innerException.GetType().Name + " encountered.");
+                if (!String.IsNullOrWhiteSpace(innerException.Message))
+                {
+                    Console.Error.WriteLine("   " + innerException.Message);
+                }
+
                 Trace.WriteLine("Fatal: " + exception.ToString());
                 LogEvent(exception.ToString(), EventLogEntryType.Error);
 
@@ -338,6 +343,11 @@ namespace Microsoft.Alm.Cli
             catch (Exception exception)
             {
                 Console.Error.WriteLine("Fatal: " + exception.GetType().Name + " encountered.");
+                if (!String.IsNullOrWhiteSpace(exception.Message))
+                {
+                    Console.Error.WriteLine("   " + exception.Message);
+                }
+
                 Trace.WriteLine("Fatal: " + exception.ToString());
                 LogEvent(exception.ToString(), EventLogEntryType.Error);
 
