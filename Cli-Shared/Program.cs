@@ -584,8 +584,6 @@ namespace Microsoft.Alm.Cli
 
         private static void EnableTraceLogging(OperationArguments operationArguments)
         {
-            const int LogFileMaxLength = 8 * 1024 * 1024; // 8 MB
-
             Trace.WriteLine("Program::EnableTraceLogging");
 
             if (operationArguments.WriteLog)
@@ -597,37 +595,58 @@ namespace Microsoft.Alm.Cli
                 {
                     Trace.WriteLine("   git local config found at " + gitConfigPath);
 
-                    string dotGitPath = Path.GetDirectoryName(gitConfigPath);
-                    string logFilePath = Path.Combine(dotGitPath, Path.ChangeExtension(ConfigPrefix, ".log"));
-                    string logFileName = operationArguments.TargetUri.ToString();
+                    string gitDirPath = Path.GetDirectoryName(gitConfigPath);
 
-                    FileInfo logFileInfo = new FileInfo(logFilePath);
-                    if (logFileInfo.Exists && logFileInfo.Length > LogFileMaxLength)
+                    if (Directory.Exists(gitDirPath))
                     {
-                        for (int i = 1; i < Int32.MaxValue; i++)
-                        {
-                            string moveName = String.Format("{0}{1:000}.log", ConfigPrefix, i);
-                            string movePath = Path.Combine(dotGitPath, moveName);
-
-                            if (!File.Exists(movePath))
-                            {
-                                logFileInfo.MoveTo(movePath);
-                                break;
-                            }
-                        }
+                        EnableTraceLogging(operationArguments, gitDirPath);
                     }
+                }
+                else if (Where.GitGlobalConfig(out gitConfigPath))
+                {
+                    Trace.WriteLine("   git global config found at " + gitConfigPath);
 
-                    Trace.WriteLine("   trace log destination is " + logFilePath);
+                    string homeDirPath = Path.GetDirectoryName(gitConfigPath);
 
-                    var listener = new TextWriterTraceListener(logFilePath, logFileName);
-                    Trace.Listeners.Add(listener);
-
-                    // write a small header to help with identifying new log entries
-                    listener.WriteLine(Environment.NewLine);
-                    listener.WriteLine(String.Format("Log Start ({0:u})", DateTimeOffset.Now));
-                    listener.WriteLine(String.Format("Microsoft {0} version {1}", Program.Title, Version.ToString(3)));
+                    if (Directory.Exists(homeDirPath))
+                    {
+                        EnableTraceLogging(operationArguments, homeDirPath);
+                    }
                 }
             }
+        }
+
+        private static void EnableTraceLogging(OperationArguments operationArguments, string logFilePath)
+        {
+            const int LogFileMaxLength = 8 * 1024 * 1024; // 8 MB
+
+            string logFileName = Path.Combine(logFilePath, Path.ChangeExtension(ConfigPrefix, ".log"));
+
+            FileInfo logFileInfo = new FileInfo(logFileName);
+            if (logFileInfo.Exists && logFileInfo.Length > LogFileMaxLength)
+            {
+                for (int i = 1; i < Int32.MaxValue; i++)
+                {
+                    string moveName = String.Format("{0}{1:000}.log", ConfigPrefix, i);
+                    string movePath = Path.Combine(logFilePath, moveName);
+
+                    if (!File.Exists(movePath))
+                    {
+                        logFileInfo.MoveTo(movePath);
+                        break;
+                    }
+                }
+            }
+
+            Trace.WriteLine("   trace log destination is " + logFilePath);
+
+            var listener = new TextWriterTraceListener(logFilePath, logFileName);
+            Trace.Listeners.Add(listener);
+
+            // write a small header to help with identifying new log entries
+            listener.WriteLine(Environment.NewLine);
+            listener.WriteLine(String.Format("Log Start ({0:u})", DateTimeOffset.Now));
+            listener.WriteLine(String.Format("Microsoft {0} version {1}", Program.Title, Version.ToString(3)));
         }
 
         private static bool GitHubAuthCodePrompt(TargetUri targetUri, GitHubAuthenticationResultType resultType, string username, out string authenticationCode)
