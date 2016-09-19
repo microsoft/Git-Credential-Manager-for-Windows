@@ -141,4 +141,4 @@ This project has adopted the [Microsoft Open Source Code of Conduct](https://ope
 
 ## License
 
-This project uses the [MIT License](https://github.com/Microsoft/Git-Credential-Manager-for-Windows/blob/master/LICENSE.txt).
+This project uses the [MIT License](https://github.com/Microsoft/Git-Credential-Manager-for-Windows/blob/master/LICENSE.TXT).
