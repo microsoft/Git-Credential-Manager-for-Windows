@@ -89,12 +89,6 @@ namespace Microsoft.Alm.Git
         public static void Flush()
             => Instance.Flush();
 
-        public static void Write(string message,
-            [System.Runtime.CompilerServices.CallerFilePath] string filePath = "",
-            [System.Runtime.CompilerServices.CallerLineNumber] int lineNumber = 0,
-            [System.Runtime.CompilerServices.CallerMemberName] string memberName = "")
-            => Instance.InternalWrite(message, filePath, lineNumber, memberName);
-
         public static void WriteLine(string message,
             [System.Runtime.CompilerServices.CallerFilePath] string filePath = "",
             [System.Runtime.CompilerServices.CallerLineNumber] int lineNumber = 0,
@@ -118,7 +112,7 @@ namespace Microsoft.Alm.Git
 
             string details = String.Format(System.Globalization.CultureInfo.InvariantCulture, "[{0}] {1}", memberName, message);
 
-            string text = String.Format(System.Globalization.CultureInfo.InvariantCulture, "{0:hh:mm:ss.ffffff} {1,-23} {2}", DateTime.Now, source, details);
+            string text = String.Format(System.Globalization.CultureInfo.InvariantCulture, "{0:hh:mm:ss.ffffff} {1,-23} trace: {2}", DateTime.Now, source, details);
 
             return text;
         }

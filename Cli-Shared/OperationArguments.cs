@@ -23,12 +23,11 @@
  * WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE."
 **/
 
+using Microsoft.Alm.Authentication;
 using System;
-using System.Diagnostics;
+using System.Collections.Generic;
 using System.IO;
 using System.Text;
-using Microsoft.Alm.Authentication;
-using System.Collections.Generic;
 
 namespace Microsoft.Alm.Cli
 {
@@ -294,20 +293,16 @@ namespace Microsoft.Alm.Cli
 
         public void SetCredentials(Credential credentials)
         {
-            Trace.WriteLine("OperationArguments::SetCredentials");
-
             _username = credentials.Username;
             _password = credentials.Password;
         }
 
         public void SetProxy(string url)
         {
-            Trace.WriteLine("OperationArguments::SetProxy");
-
             Uri tmp = null;
             if (Uri.TryCreate(url, UriKind.Absolute, out tmp))
             {
-                Trace.WriteLine("successfully set proxy to " + tmp.AbsoluteUri + ".");
+                Trace.WriteLine($"successfully set proxy to '{tmp.AbsoluteUri}'.");
             }
             else
             {
@@ -354,9 +349,9 @@ namespace Microsoft.Alm.Cli
         public void WriteToStream(Stream writableStream)
         {
             if (ReferenceEquals(writableStream, null))
-                throw new ArgumentNullException("writableStream");
+                throw new ArgumentNullException(nameof(writableStream));
             if (!writableStream.CanWrite)
-                throw new ArgumentException("writableStream");
+                throw new ArgumentException(nameof(writableStream));
 
             // Git reads/writes UTF-8, we'll explicitly encode to Utf-8 to
             // avoid NetFx or the operating system making the wrong encoding
@@ -370,8 +365,6 @@ namespace Microsoft.Alm.Cli
 
         internal void CreateTargetUri()
         {
-            Trace.WriteLine("OperationArguments::CreateTargetUri");
-
             string queryUrl = null;
 
             // when the target requests a path...
@@ -447,8 +440,6 @@ namespace Microsoft.Alm.Cli
             }
 
             _queryUri = new Uri(queryUrl);
-
-            Trace.WriteLine("created " + _queryUri);
 
             _targetUri = new TargetUri(_queryUri, _proxyUri);
         }

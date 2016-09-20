@@ -171,8 +171,6 @@ namespace Microsoft.Alm.Cli
 
         public void DeployConsole()
         {
-            Trace.WriteLine("Installer::DeployConsole");
-
             SetOutput(_isPassive, _isPassive && _isForced);
             try
             {
@@ -209,7 +207,7 @@ namespace Microsoft.Alm.Cli
                         || Where.FindGitInstallation(_customPath, KnownGitDistribution.GitForWindows32v2, out installation)
                         || Where.FindGitInstallation(_customPath, KnownGitDistribution.GitForWindows32v1, out installation))
                     {
-                        Trace.Write($"   Git found: '{installation.Path}'");
+                        Trace.WriteLine($"   Git found: '{installation.Path}'.");
 
                         // track known Git installations
                         installations = new List<GitInstallation>();
@@ -258,7 +256,7 @@ namespace Microsoft.Alm.Cli
                         }
 
                         Program.LogEvent($"Deployment to '{installation.Path}' succeeded.", EventLogEntryType.Information);
-                        Console.Out.WriteLine($"        {copiedFiles.Count} file(s) copied");
+                        Console.Out.WriteLine($"     {copiedFiles.Count} file(s) copied");
                     }
                     else if (_isForced)
                     {
@@ -292,7 +290,7 @@ namespace Microsoft.Alm.Cli
                     }
 
                     Program.LogEvent($"Deployment to '{UserBinPath}' succeeded.", EventLogEntryType.Information);
-                    Console.Out.WriteLine($"        {copiedFiles.Count} file(s) copied");
+                    Console.Out.WriteLine($"     {copiedFiles.Count} file(s) copied");
                 }
                 else if (_isForced)
                 {
@@ -319,7 +317,7 @@ namespace Microsoft.Alm.Cli
                         }
 
                         Program.LogEvent($"Deployment to '{CygwinPath}' succeeded.", EventLogEntryType.Information);
-                        Console.Out.WriteLine($"        {copiedFiles.Count} file(s) copied");
+                        Console.Out.WriteLine($"     {copiedFiles.Count} file(s) copied");
                     }
                     else if (_isForced)
                     {
@@ -378,8 +376,6 @@ namespace Microsoft.Alm.Cli
             const string ValueName = "Version";
             const string DefaultValue = "0.0.0";
 
-            Trace.WriteLine("Installer::DetectNetFx");
-
             // default to not found state
             version = null;
 
@@ -393,7 +389,7 @@ namespace Microsoft.Alm.Cli
                     && Version.TryParse(netfxString, out netfxVerson))
             {
                 Program.LogEvent($"NetFx version {netfxVerson.ToString(3)} detected.", EventLogEntryType.Information);
-                Trace.WriteLine($"   NetFx version {netfxVerson.ToString(3)} detected.");
+                Trace.WriteLine($"NetFx version {netfxVerson.ToString(3)} detected.");
 
                 version = netfxVerson;
             }
@@ -403,8 +399,6 @@ namespace Microsoft.Alm.Cli
 
         public void RemoveConsole()
         {
-            Trace.WriteLine("Installer::RemoveConsole");
-
             SetOutput(_isPassive, _isPassive && _isForced);
             try
             {
@@ -440,7 +434,7 @@ namespace Microsoft.Alm.Cli
                         || Where.FindGitInstallation(_customPath, KnownGitDistribution.GitForWindows32v2, out installation)
                         || Where.FindGitInstallation(_customPath, KnownGitDistribution.GitForWindows32v1, out installation))
                     {
-                        Trace.Write($"   Git found: {installation.Path}");
+                        Trace.WriteLine($"   Git found: '{installation.Path}'.");
 
                         // track known Git installations
                         installations = new List<GitInstallation>();
@@ -527,7 +521,7 @@ namespace Microsoft.Alm.Cli
                             Console.Out.WriteLine($"  {file}");
                         }
 
-                        Console.Out.WriteLine($"        {cleanedFiles.Count} file(s) cleaned");
+                        Console.Out.WriteLine($"     {cleanedFiles.Count} file(s) cleaned");
                     }
                     else if (_isForced)
                     {
@@ -555,7 +549,7 @@ namespace Microsoft.Alm.Cli
                             Console.Out.WriteLine($"  {file}");
                         }
 
-                        Console.Out.WriteLine($"        {cleanedFiles.Count} file(s) cleaned");
+                        Console.Out.WriteLine($"     {cleanedFiles.Count} file(s) cleaned");
                     }
                     else if (_isForced)
                     {
@@ -580,7 +574,7 @@ namespace Microsoft.Alm.Cli
                             Console.Out.WriteLine($"  {file}");
                         }
 
-                        Console.Out.WriteLine($"        {cleanedFiles.Count} file(s) cleaned");
+                        Console.Out.WriteLine($"     {cleanedFiles.Count} file(s) cleaned");
                     }
                 }
 
@@ -601,8 +595,7 @@ namespace Microsoft.Alm.Cli
 
         public bool SetGitConfig(List<GitInstallation> installations, GitConfigAction action, Configuration.Type type, out Configuration.Type updated)
         {
-            Trace.WriteLine("Installer::SetGitConfig");
-            Trace.WriteLine($"   action = {action}.");
+            Trace.WriteLine($"action = '{action}'.");
 
             updated = Configuration.Type.None;
 
@@ -674,13 +667,11 @@ namespace Microsoft.Alm.Cli
 
         private bool CleanFiles(string path, out List<string> cleanedFiles)
         {
-            Trace.WriteLine("Installer::CleanFiles");
-
             cleanedFiles = new List<string>();
 
             if (!Directory.Exists(path))
             {
-                Trace.WriteLine($"   path '{path}' does not exist.");
+                Trace.WriteLine($"path '{path}' does not exist.");
                 return false;
             }
 
@@ -690,7 +681,7 @@ namespace Microsoft.Alm.Cli
                 {
                     string target = Path.Combine(path, file);
 
-                    Trace.WriteLine($"   clean '{target}'.");
+                    Trace.WriteLine($"clean '{target}'.");
 
                     File.Delete(target);
 
@@ -708,13 +699,11 @@ namespace Microsoft.Alm.Cli
 
         private bool CopyFiles(string srcPath, string dstPath, out List<string> copiedFiles)
         {
-            Trace.WriteLine("Installer::CopyFiles");
-
             copiedFiles = new List<string>();
 
             if (!Directory.Exists(srcPath))
             {
-                Trace.WriteLine($"   source '{srcPath}' does not exist.");
+                Trace.WriteLine($"source '{srcPath}' does not exist.");
                 return false;
             }
 
@@ -724,7 +713,7 @@ namespace Microsoft.Alm.Cli
                 {
                     foreach (string file in Files)
                     {
-                        Trace.WriteLine($"   copy '{srcPath}' to '{dstPath}'.");
+                        Trace.WriteLine($"copy '{srcPath}' to '{dstPath}'.");
 
                         string src = Path.Combine(srcPath, file);
                         string dst = Path.Combine(dstPath, file);
@@ -744,7 +733,7 @@ namespace Microsoft.Alm.Cli
             }
             else
             {
-                Trace.WriteLine($"   destination '{dstPath}' does not exist.");
+                Trace.WriteLine($"destination '{dstPath}' does not exist.");
             }
 
             Trace.WriteLine("copy failed.");
@@ -753,8 +742,6 @@ namespace Microsoft.Alm.Cli
 
         private void DeployElevated()
         {
-            Trace.WriteLine("Installer::DeployElevated");
-
             if (_isPassive)
             {
                 this.Result = ResultValue.Unprivileged;
@@ -795,7 +782,7 @@ namespace Microsoft.Alm.Cli
                     WorkingDirectory = Program.Location,
                 };
 
-                Trace.WriteLine($"   cmd {options.Verb} {options.FileName} {options.Arguments}");
+                Trace.WriteLine($"create process: cmd '{options.Verb}' '{options.FileName}' '{options.Arguments}' .");
 
                 try
                 {
@@ -805,14 +792,14 @@ namespace Microsoft.Alm.Cli
                     // wait for the process to complete
                     elevated.WaitForExit();
 
-                    Trace.WriteLine($"   process exited with {elevated.ExitCode}.");
+                    Trace.WriteLine($"process exited with {elevated.ExitCode}.");
 
                     // exit with the elevated process' exit code
                     this.ExitCode = elevated.ExitCode;
                 }
                 catch (Exception exception)
                 {
-                    Trace.WriteLine($"   process failed with {exception.Message}");
+                    Trace.WriteLine($"process failed with '{exception.Message}'");
                     this.Result = ResultValue.Unprivileged;
                 }
             }
@@ -834,13 +821,13 @@ namespace Microsoft.Alm.Cli
                 UseShellExecute = false,
             };
 
-            Trace.WriteLine($"   cmd {options.FileName} {options.Arguments}.");
+            Trace.WriteLine($"create process: cmd '{options.FileName}' '{options.Arguments}' .");
 
             var gitProcess = Process.Start(options);
 
             gitProcess.WaitForExit();
 
-            Trace.WriteLine($"   Git exited with {gitProcess.ExitCode}.");
+            Trace.WriteLine($"Git exited with {gitProcess.ExitCode}.");
 
             if (allowedExitCodes != null && allowedExitCodes.Length > 0)
                 return allowedExitCodes.Contains(gitProcess.ExitCode);
@@ -860,8 +847,6 @@ namespace Microsoft.Alm.Cli
 
         private void RemoveElevated()
         {
-            Trace.WriteLine("Installer::RemoveElevated");
-
             if (_isPassive)
             {
                 this.Result = ResultValue.Unprivileged;
@@ -902,7 +887,7 @@ namespace Microsoft.Alm.Cli
                     WorkingDirectory = Program.Location,
                 };
 
-                Trace.WriteLine("cmd " + options.Verb + " " + options.FileName + " " + options.Arguments);
+                Trace.WriteLine($"create process: cmd '{options.Verb}' '{options.FileName}' '{options.Arguments}' .");
 
                 try
                 {
@@ -912,14 +897,14 @@ namespace Microsoft.Alm.Cli
                     // wait for the process to complete
                     elevated.WaitForExit();
 
-                    Trace.WriteLine($"   process exited with {elevated.ExitCode}.");
+                    Trace.WriteLine($"process exited with {elevated.ExitCode}.");
 
                     // exit with the elevated process' exit code
                     this.ExitCode = elevated.ExitCode;
                 }
                 catch (Exception exception)
                 {
-                    Trace.WriteLine($"   process failed with {exception.Message}");
+                    Trace.WriteLine($"process failed with '{exception.Message}'");
                     this.Result = ResultValue.Unprivileged;
                 }
             }

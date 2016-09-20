@@ -17,8 +17,6 @@ namespace Microsoft.Alm.Cli
 
         private static void Askpass()
         {
-            Trace.WriteLine("Program::Askpass");
-
             Match match;
             if ((match = AskCredentialRegex.Match(Environment.CommandLine)).Success)
             {
@@ -59,7 +57,7 @@ namespace Microsoft.Alm.Cli
 
                 if (Uri.TryCreate(targetUrl, UriKind.Absolute, out targetUri))
                 {
-                    Trace.WriteLine("success parsing URL, targetUri = " + targetUri);
+                    Trace.WriteLine($"success parsing URL, targetUri = '{targetUri}'.");
 
                     OperationArguments operationArguments = new OperationArguments(targetUri);
 
@@ -78,7 +76,7 @@ namespace Microsoft.Alm.Cli
 
                         if (!string.IsNullOrEmpty(credential?.Username))
                         {
-                            Trace.WriteLine("username for '" + targetUrl + "' asked for and found.");
+                            Trace.WriteLine($"username for '{targetUrl}' asked for and found.");
 
                             Console.Out.Write(credential.Username + "\n");
                             return;
@@ -103,7 +101,7 @@ namespace Microsoft.Alm.Cli
 
                         if (!string.IsNullOrEmpty(credential?.Password))
                         {
-                            Trace.WriteLine("password for '{0}' asked for and found.", targetUrl);
+                            Trace.WriteLine($"password for '{targetUrl}' asked for and found.");
 
                             Console.Out.Write(credential.Password + "\n");
                             return;
@@ -125,7 +123,7 @@ namespace Microsoft.Alm.Cli
                 string request = match.Groups[0].Value;
                 string resource = match.Groups[1].Value;
 
-                Trace.WriteLine("  open dialog for " + resource);
+                Trace.WriteLine($"open dialog for '{resource}'.");
 
                 System.Windows.Application application = new System.Windows.Application();
                 Gui.PassphraseWindow prompt = new Gui.PassphraseWindow(resource);
@@ -135,7 +133,7 @@ namespace Microsoft.Alm.Cli
                 {
                     string passphase = prompt.Passphrase;
 
-                    Trace.WriteLine("passphase acquired");
+                    Trace.WriteLine("passphase acquired.");
 
                     Console.Out.Write(passphase + "\n");
                     return;
@@ -158,6 +156,8 @@ namespace Microsoft.Alm.Cli
                 PrintHelpMessage();
                 return;
             }
+
+            PrintArgs(args);
 
             try
             {
