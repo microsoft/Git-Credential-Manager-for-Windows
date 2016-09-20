@@ -68,6 +68,10 @@
     <Compile Include="PasswordBoxHintAdorner.cs" />
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\Bitbucket.Authentication\Bitbucket.Authentication.csproj">
+      <Project>{ee663736-5bad-4ca6-a4f8-99978925ad8a}</Project>
+      <Name>Bitbucket.Authentication</Name>
+    </ProjectReference>
     <ProjectReference Include="..\GitHub.Authentication\GitHub.Authentication.csproj">
       <Project>{cf306116-bbf0-4cc7-afce-a506ac4752cb}</Project>
       <Name>GitHub.Authentication</Name>
