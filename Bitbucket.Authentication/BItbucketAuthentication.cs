@@ -35,8 +35,18 @@ namespace Bitbucket.Authentication
         /// <inheritdoc />
         public override Credential GetCredentials(TargetUri targetUri)
         {
-            Console.WriteLine("GetCredentials");
-            throw new NotImplementedException();
+            BaseSecureStore.ValidateTargetUri(targetUri);
+
+            Trace.WriteLine("BitbucketAuthentication::GetCredentials");
+
+            Credential credentials = null;
+
+            if ((credentials = this.PersonalAccessTokenStore.ReadCredentials(targetUri)) != null)
+            {
+                Trace.WriteLine("   successfully retrieved stored credentials, updating credential cache");
+            }
+
+            return credentials;
         }
 
         /// <inheritdoc />
