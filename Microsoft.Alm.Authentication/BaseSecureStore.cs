@@ -250,6 +250,7 @@ namespace Microsoft.Alm.Authentication
 
         [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
         internal static void ValidateCredential(Credential credentials)
+        public static void ValidateCredential(Credential credentials)
         {
             if (ReferenceEquals(credentials, null))
                 throw new ArgumentNullException(nameof(credentials));
