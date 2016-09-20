@@ -117,11 +117,11 @@ namespace Microsoft.Alm.Authentication
 
                 token = new Token(authResult, TokenType.Access);
 
-                Trace.WriteLine("   token acquisition succeeded.");
+                Trace.WriteLine("token acquisition succeeded.");
             }
             catch (AdalException)
             {
-                Trace.WriteLine("   token acquisition failed.");
+                Trace.WriteLine("token acquisition failed.");
             }
 
             return token;
@@ -177,11 +177,11 @@ namespace Microsoft.Alm.Authentication
 
                 token = new Token(authResult, TokenType.Access);
 
-                Trace.WriteLine("   token acquisition succeeded.");
+                Trace.WriteLine("token acquisition succeeded.");
             }
             catch (AdalException)
             {
-                Trace.WriteLine("   token acquisition failed.");
+                Trace.WriteLine("token acquisition failed.");
             }
 
             return token;

@@ -79,12 +79,12 @@ namespace Microsoft.Alm.Cli
             {
                 if (!StandardInputIsTty)
                 {
-                    Trace.WriteLine("   standard input is not TTY, abandoning prompt.");
+                    Trace.WriteLine("standard input is not TTY, abandoning prompt.");
 
                     return;
                 }
 
-                Trace.WriteLine("   prompting user for url.");
+                Trace.WriteLine("prompting user for url.");
 
                 Console.Out.WriteLine(" Target Url:");
                 url = Console.In.ReadLine();
@@ -99,12 +99,12 @@ namespace Microsoft.Alm.Cli
                 }
             }
 
-            Trace.WriteLine("   url = " + url);
+            Trace.WriteLine("url = " + url);
 
             Uri uri;
             if (Uri.TryCreate(url, UriKind.Absolute, out uri))
             {
-                Trace.WriteLine("   targetUri = " + uri.AbsoluteUri + ".");
+                Trace.WriteLine("targetUri = " + uri.AbsoluteUri + ".");
 
                 OperationArguments operationArguments = new OperationArguments(uri);
 
@@ -118,7 +118,7 @@ namespace Microsoft.Alm.Cli
 
                     if (!StandardInputIsTty || !StandardErrorIsTty)
                     {
-                        Trace.WriteLine("   standard input is not TTY, abandoning prompt.");
+                        Trace.WriteLine("standard input is not TTY, abandoning prompt.");
                         return;
                     }
 
@@ -181,13 +181,13 @@ namespace Microsoft.Alm.Cli
             {
                 default:
                 case AuthorityType.Basic:
-                    Trace.WriteLine("   deleting basic credentials");
+                    Trace.WriteLine("deleting basic credentials");
                     authentication.DeleteCredentials(operationArguments.TargetUri);
                     break;
 
                 case AuthorityType.AzureDirectory:
                 case AuthorityType.MicrosoftAccount:
-                    Trace.WriteLine("   deleting VSTS credentials");
+                    Trace.WriteLine("deleting VSTS credentials");
                     BaseVstsAuthentication vstsAuth = authentication as BaseVstsAuthentication;
                     vstsAuth.DeleteCredentials(operationArguments.TargetUri);
                     // call delete twice to purge any stored ADA tokens
@@ -195,7 +195,7 @@ namespace Microsoft.Alm.Cli
                     break;
 
                 case AuthorityType.GitHub:
-                    Trace.WriteLine("   deleting GitHub credentials");
+                    Trace.WriteLine("deleting GitHub credentials");
                     GitHubAuthentication ghAuth = authentication as GitHubAuthentication;
                     ghAuth.DeleteCredentials(operationArguments.TargetUri);
                     break;
@@ -235,12 +235,12 @@ namespace Microsoft.Alm.Cli
             EnableTraceLogging(operationArguments);
 
             Trace.WriteLine("Program::Erase");
-            Trace.WriteLine("   targetUri = " + operationArguments.TargetUri);
+            Trace.WriteLine("targetUri = " + operationArguments.TargetUri);
 
             if (operationArguments.PreserveCredentials)
             {
-                Trace.WriteLine("   " + ConfigPreserveCredentialsKey + " = true");
-                Trace.WriteLine("   canceling erase request.");
+                Trace.WriteLine("" + ConfigPreserveCredentialsKey + " = true");
+                Trace.WriteLine("canceling erase request.");
                 return;
             }
 
@@ -261,7 +261,7 @@ namespace Microsoft.Alm.Cli
                 throw new ArgumentNullException("operationArguments.TargetUri");
 
             Trace.WriteLine("Program::Get");
-            Trace.WriteLine("   targetUri = " + operationArguments.TargetUri);
+            Trace.WriteLine("targetUri = " + operationArguments.TargetUri);
 
             LoadOperationArguments(operationArguments);
             EnableTraceLogging(operationArguments);
@@ -441,7 +441,7 @@ namespace Microsoft.Alm.Cli
             EnableTraceLogging(operationArguments);
 
             Trace.WriteLine("Program::Store");
-            Trace.WriteLine("   targetUri = " + operationArguments.TargetUri);
+            Trace.WriteLine("targetUri = " + operationArguments.TargetUri);
 
             BaseAuthentication authentication = CreateAuthentication(operationArguments);
             Credential credentials = new Credential(operationArguments.CredUsername, operationArguments.CredPassword);

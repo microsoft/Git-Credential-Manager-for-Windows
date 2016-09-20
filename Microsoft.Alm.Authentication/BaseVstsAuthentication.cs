@@ -126,7 +126,7 @@ namespace Microsoft.Alm.Authentication
 
             if ((credentials = this.PersonalAccessTokenStore.ReadCredentials(targetUri)) != null)
             {
-                Trace.WriteLine("   successfully retrieved stored credentials, updating credential cache");
+                Trace.WriteLine("successfully retrieved stored credentials, updating credential cache");
             }
 
             return credentials;
@@ -197,7 +197,7 @@ namespace Microsoft.Alm.Authentication
 
             if (targetUri.ActualUri.Host.EndsWith(VstsBaseUrlHost, StringComparison.OrdinalIgnoreCase))
             {
-                Trace.WriteLine("   detected visualstudio.com, checking AAD vs MSA");
+                Trace.WriteLine("detected visualstudio.com, checking AAD vs MSA");
 
                 string tenant = null;
                 WebResponse response;
@@ -223,7 +223,7 @@ namespace Microsoft.Alm.Authentication
                     // if the response exists and we have headers, parse them
                     if (response != null && response.SupportsHeaders)
                     {
-                        Trace.WriteLine("   server has responded");
+                        Trace.WriteLine("server has responded");
 
                         // find the VSTS resource tenant entry
                         tenant = response.Headers[VstsResourceTenantHeader];
@@ -238,7 +238,7 @@ namespace Microsoft.Alm.Authentication
                 }
             }
 
-            Trace.WriteLine("   failed detection");
+            Trace.WriteLine("failed detection");
 
             // if all else fails, fallback to basic authentication
             return false;
@@ -279,12 +279,12 @@ namespace Microsoft.Alm.Authentication
                 // empty Guid is MSA, anything else is AAD
                 if (tenantId == Guid.Empty)
                 {
-                    Trace.WriteLine("   MSA authority detected");
+                    Trace.WriteLine("MSA authority detected");
                     authentication = new VstsMsaAuthentication(scope, personalAccessTokenStore);
                 }
                 else
                 {
-                    Trace.WriteLine("   AAD authority for tenant '" + tenantId + "' detected");
+                    Trace.WriteLine("AAD authority for tenant '" + tenantId + "' detected");
                     authentication = new VstsAadAuthentication(tenantId, scope, personalAccessTokenStore);
                     (authentication as VstsAadAuthentication).TenantId = tenantId;
                 }

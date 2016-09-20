@@ -116,7 +116,7 @@ namespace Microsoft.Alm.Authentication
                 using (StringContent content = new StringContent(jsonContent, Encoding.UTF8, HttpJsonContentType))
                 using (HttpResponseMessage response = await httpClient.PostAsync(_authorityUrl, content))
                 {
-                    Trace.WriteLine("   server responded with " + response.StatusCode);
+                    Trace.WriteLine("server responded with " + response.StatusCode);
 
                     switch (response.StatusCode)
                     {
@@ -135,12 +135,12 @@ namespace Microsoft.Alm.Authentication
 
                                 if (token == null)
                                 {
-                                    Trace.WriteLine("   authentication failure");
+                                    Trace.WriteLine("authentication failure");
                                     return new GitHubAuthenticationResult(GitHubAuthenticationResultType.Failure);
                                 }
                                 else
                                 {
-                                    Trace.WriteLine("   authentication success: new personal acces token created.");
+                                    Trace.WriteLine("authentication success: new personal acces token created.");
                                     return new GitHubAuthenticationResult(GitHubAuthenticationResultType.Success, token);
                                 }
                             }
@@ -154,24 +154,24 @@ namespace Microsoft.Alm.Authentication
 
                                     if (mfakvp.Value.First().Contains("app"))
                                     {
-                                        Trace.WriteLine("   two-factor app authentication code required");
+                                        Trace.WriteLine("two-factor app authentication code required");
                                         return new GitHubAuthenticationResult(GitHubAuthenticationResultType.TwoFactorApp);
                                     }
                                     else
                                     {
-                                        Trace.WriteLine("   two-factor sms authentication code required");
+                                        Trace.WriteLine("two-factor sms authentication code required");
                                         return new GitHubAuthenticationResult(GitHubAuthenticationResultType.TwoFactorSms);
                                     }
                                 }
                                 else
                                 {
-                                    Trace.WriteLine("   authentication failed");
+                                    Trace.WriteLine("authentication failed");
                                     return new GitHubAuthenticationResult(GitHubAuthenticationResultType.Failure);
                                 }
                             }
 
                         default:
-                            Trace.WriteLine("   authentication failed");
+                            Trace.WriteLine("authentication failed");
                             return new GitHubAuthenticationResult(GitHubAuthenticationResultType.Failure);
                     }
                 }
@@ -185,7 +185,7 @@ namespace Microsoft.Alm.Authentication
             BaseSecureStore.ValidateTargetUri(targetUri);
             BaseSecureStore.ValidateCredential(credentials);
 
-            Trace.WriteLine("   GitHubAuthority::ValidateCredentials");
+            Trace.WriteLine("GitHubAuthority::ValidateCredentials");
 
             string authString = String.Format("{0}:{1}", credentials.Username, credentials.Password);
             byte[] authBytes = Encoding.UTF8.GetBytes(authString);
@@ -206,12 +206,12 @@ namespace Microsoft.Alm.Authentication
                 {
                     if (response.IsSuccessStatusCode)
                     {
-                        Trace.WriteLine("   credential validation succeeded");
+                        Trace.WriteLine("credential validation succeeded");
                         return true;
                     }
                     else
                     {
-                        Trace.WriteLine("   credential validation failed");
+                        Trace.WriteLine("credential validation failed");
                         return false;
                     }
                 }

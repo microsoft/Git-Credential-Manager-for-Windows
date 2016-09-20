@@ -608,7 +608,7 @@ namespace Microsoft.Alm.Cli
 
             if ((installations == null || installations.Count == 0) && !Where.FindGitInstallations(out installations))
             {
-                Trace.WriteLine("   No Git installations detected to update.");
+                Trace.WriteLine("No Git installations detected to update.");
                 return false;
             }
 
@@ -622,13 +622,13 @@ namespace Microsoft.Alm.Cli
 
                 if (ExecuteGit(gitCmdPath, globalCmd, 0, 5))
                 {
-                    Trace.WriteLine("   updating ~/.gitconfig succeeded.");
+                    Trace.WriteLine("updating ~/.gitconfig succeeded.");
 
                     updated |= Configuration.Type.Global;
                 }
                 else
                 {
-                    Trace.WriteLine("   updating ~/.gitconfig failed.");
+                    Trace.WriteLine("updating ~/.gitconfig failed.");
 
                     Console.Out.WriteLine();
                     Console.Error.WriteLine("Fatal: Unable to update ~/.gitconfig.");
@@ -649,13 +649,13 @@ namespace Microsoft.Alm.Cli
                 {
                     if (ExecuteGit(installation.Git, systemCmd, 0, 5))
                     {
-                        Trace.WriteLine("   updating /etc/gitconfig succeeded.");
+                        Trace.WriteLine("updating /etc/gitconfig succeeded.");
 
                         successCount++;
                     }
                     else
                     {
-                        Trace.WriteLine("   updating ~/.gitconfig failed.");
+                        Trace.WriteLine("updating ~/.gitconfig failed.");
                     }
                 }
 
@@ -701,7 +701,7 @@ namespace Microsoft.Alm.Cli
             }
             catch
             {
-                Trace.WriteLine("   clean failed.");
+                Trace.WriteLine("clean failed.");
                 return false;
             }
         }
@@ -738,7 +738,7 @@ namespace Microsoft.Alm.Cli
                 }
                 catch
                 {
-                    Trace.WriteLine("   copy failed.");
+                    Trace.WriteLine("copy failed.");
                     return false;
                 }
             }
@@ -747,7 +747,7 @@ namespace Microsoft.Alm.Cli
                 Trace.WriteLine($"   destination '{dstPath}' does not exist.");
             }
 
-            Trace.WriteLine("   copy failed.");
+            Trace.WriteLine("copy failed.");
             return false;
         }
 
@@ -902,7 +902,7 @@ namespace Microsoft.Alm.Cli
                     WorkingDirectory = Program.Location,
                 };
 
-                Trace.WriteLine("   cmd " + options.Verb + " " + options.FileName + " " + options.Arguments);
+                Trace.WriteLine("cmd " + options.Verb + " " + options.FileName + " " + options.Arguments);
 
                 try
                 {

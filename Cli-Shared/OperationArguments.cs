@@ -307,11 +307,11 @@ namespace Microsoft.Alm.Cli
             Uri tmp = null;
             if (Uri.TryCreate(url, UriKind.Absolute, out tmp))
             {
-                Trace.WriteLine("   successfully set proxy to " + tmp.AbsoluteUri + ".");
+                Trace.WriteLine("successfully set proxy to " + tmp.AbsoluteUri + ".");
             }
             else
             {
-                Trace.WriteLine("   proxy cleared.");
+                Trace.WriteLine("proxy cleared.");
             }
             this.ProxyUri = tmp;
         }
@@ -448,7 +448,7 @@ namespace Microsoft.Alm.Cli
 
             _queryUri = new Uri(queryUrl);
 
-            Trace.WriteLine($"   created {_queryUri}");
+            Trace.WriteLine("created " + _queryUri);
 
             _targetUri = new TargetUri(_queryUri, _proxyUri);
         }

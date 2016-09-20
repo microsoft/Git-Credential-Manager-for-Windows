@@ -108,7 +108,7 @@ namespace Microsoft.Alm.Authentication
                     }
                     catch
                     {
-                        Trace.WriteLine("   token read from registry was corrupt");
+                        Trace.WriteLine("token read from registry was corrupt");
                     }
                 }
             }
@@ -143,7 +143,7 @@ namespace Microsoft.Alm.Authentication
                         }
                         catch
                         {
-                            Trace.WriteLine("   failed to open subkey");
+                            Trace.WriteLine("failed to open subkey");
                         }
 
                         if (nodeKey != null)

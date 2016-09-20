@@ -236,7 +236,7 @@ namespace Microsoft.Alm.Authentication
             }
             catch
             {
-                Trace.WriteLine("   token deserialization error");
+                Trace.WriteLine("token deserialization error");
             }
 
             return token != null;
@@ -268,7 +268,7 @@ namespace Microsoft.Alm.Authentication
             }
             catch
             {
-                Trace.WriteLine("   token serialization error");
+                Trace.WriteLine("token serialization error");
             }
 
             return bytes != null;

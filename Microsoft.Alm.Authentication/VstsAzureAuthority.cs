@@ -87,13 +87,13 @@ namespace Microsoft.Alm.Authentication
                     switch (accessToken.Type)
                     {
                         case TokenType.Access:
-                            Trace.WriteLine("   using Azure access token to acquire personal access token");
+                            Trace.WriteLine("using Azure access token to acquire personal access token");
 
                             httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue(AccessTokenHeader, accessToken.Value);
                             break;
 
                         case TokenType.Federated:
-                            Trace.WriteLine("   using federated authentication token to acquire personal access token");
+                            Trace.WriteLine("using federated authentication token to acquire personal access token");
 
                             httpClient.DefaultRequestHeaders.Add("Cookie", accessToken.Value);
                             break;
@@ -107,7 +107,7 @@ namespace Microsoft.Alm.Authentication
                         Uri requestUri;
                         if (TryCreateRequestUri(targetUri, requireCompactToken, out requestUri))
                         {
-                            Trace.WriteLine("   request url is " + requestUri);
+                            Trace.WriteLine("request url is " + requestUri);
 
                             using (StringContent content = GetAccessTokenRequestBody(targetUri, accessToken, tokenScope))
                             using (HttpResponseMessage response = await httpClient.PostAsync(requestUri, content))
@@ -125,7 +125,7 @@ namespace Microsoft.Alm.Authentication
                                             string tokenValue = tokenMatch.Groups[1].Value;
                                             Token token = new Token(tokenValue, TokenType.Personal);
 
-                                            Trace.WriteLine("   personal access token acquisition succeeded.");
+                                            Trace.WriteLine("personal access token acquisition succeeded.");
 
                                             return token;
                                         }
@@ -138,10 +138,10 @@ namespace Microsoft.Alm.Authentication
             }
             catch
             {
-                Trace.WriteLine("   an error occurred.");
+                Trace.WriteLine("an error occurred.");
             }
 
-            Trace.WriteLine("   personal access token acquisition failed.");
+            Trace.WriteLine("personal access token acquisition failed.");
 
             return null;
         }
@@ -180,12 +180,12 @@ namespace Microsoft.Alm.Authentication
             }
             catch (WebException webException)
             {
-                Trace.WriteLine("   server returned " + webException.Status);
+                Trace.WriteLine("server returned " + webException.Status);
             }
 
             if (Guid.TryParse(resultId, out instanceId))
             {
-                Trace.WriteLine("   target identity is " + resultId);
+                Trace.WriteLine("target identity is " + resultId);
                 accessToken.TargetIdentity = instanceId;
 
                 return true;
@@ -215,26 +215,26 @@ namespace Microsoft.Alm.Authentication
                 // create an request to the VSTS deployment data end-point
                 HttpWebRequest request = GetConnectionDataRequest(targetUri, credentials);
 
-                Trace.WriteLine("   validating credentials against " + request.RequestUri);
+                Trace.WriteLine("validating credentials against " + request.RequestUri);
 
                 // send the request and wait for the response
                 using (HttpWebResponse response = await request.GetResponseAsync() as HttpWebResponse)
                 {
                     // we're looking for 'OK 200' here, anything else is failure
-                    Trace.WriteLine("   server returned: " + response.StatusCode);
+                    Trace.WriteLine("server returned: " + response.StatusCode);
                     return response.StatusCode == HttpStatusCode.OK;
                 }
             }
             catch (WebException webException)
             {
-                Trace.WriteLine("   server returned: " + webException.Message);
+                Trace.WriteLine("server returned: " + webException.Message);
             }
             catch
             {
-                Trace.WriteLine("   unexpected error");
+                Trace.WriteLine("unexpected error");
             }
 
-            Trace.WriteLine("   credential validation failed");
+            Trace.WriteLine("credential validation failed");
             return false;
         }
 
@@ -263,26 +263,26 @@ namespace Microsoft.Alm.Authentication
                 // create an request to the VSTS deployment data end-point
                 HttpWebRequest request = GetConnectionDataRequest(targetUri, token);
 
-                Trace.WriteLine("   validating token against " + request.Host);
+                Trace.WriteLine("validating token against " + request.Host);
 
                 // send the request and wait for the response
                 using (HttpWebResponse response = await request.GetResponseAsync() as HttpWebResponse)
                 {
                     // we're looking for 'OK 200' here, anything else is failure
-                    Trace.WriteLine("   server returned: " + response.StatusCode);
+                    Trace.WriteLine("server returned: " + response.StatusCode);
                     return response.StatusCode == HttpStatusCode.OK;
                 }
             }
             catch (WebException webException)
             {
-                Trace.WriteLine("   server returned: " + webException.Message);
+                Trace.WriteLine("server returned: " + webException.Message);
             }
             catch
             {
-                Trace.WriteLine("   unexpected error");
+                Trace.WriteLine("unexpected error");
             }
 
-            Trace.WriteLine("   token validation failed");
+            Trace.WriteLine("token validation failed");
             return false;
         }
 
@@ -294,7 +294,7 @@ namespace Microsoft.Alm.Authentication
             Debug.Assert(accessToken != null && (accessToken.Type == TokenType.Access || accessToken.Type == TokenType.Federated), "The accessToken parameter is null or invalid");
             Debug.Assert(tokenScope != null, "The tokenScope parameter is null");
 
-            Trace.WriteLine("   creating access token scoped to '" + tokenScope + "' for '" + accessToken.TargetIdentity + "'");
+            Trace.WriteLine("creating access token scoped to '" + tokenScope + "' for '" + accessToken.TargetIdentity + "'");
 
             string jsonContent = String.Format(ContentJsonFormat, tokenScope, accessToken.TargetIdentity, targetUri, Environment.MachineName);
             StringContent content = new StringContent(jsonContent, Encoding.UTF8, HttpJsonContentType);
@@ -339,7 +339,7 @@ namespace Microsoft.Alm.Authentication
             switch (token.Type)
             {
                 case TokenType.Access:
-                    Trace.WriteLine("   validating adal access token");
+                    Trace.WriteLine("validating adal access token");
 
                     // adal access tokens are packed into the Authorization header
                     string sessionAuthHeader = BearerPrefix + token.Value;
@@ -347,14 +347,14 @@ namespace Microsoft.Alm.Authentication
                     break;
 
                 case TokenType.Federated:
-                    Trace.WriteLine("   validating federated authentication token");
+                    Trace.WriteLine("validating federated authentication token");
 
                     // federated authentication tokens are sent as cookie(s)
                     request.Headers.Add(HttpRequestHeader.Cookie, token.Value);
                     break;
 
                 default:
-                    Trace.WriteLine("   unsupported token type");
+                    Trace.WriteLine("unsupported token type");
                     break;
             }
 

@@ -106,17 +106,17 @@ namespace Microsoft.Alm.Authentication
                 Token token;
                 if ((token = await this.VstsAuthority.InteractiveAcquireToken(targetUri, this.ClientId, this.Resource, new Uri(RedirectUrl), null)) != null)
                 {
-                    Trace.WriteLine("   token acquisition succeeded.");
+                    Trace.WriteLine("token acquisition succeeded.");
 
                     return await this.GeneratePersonalAccessToken(targetUri, token, requestCompactToken);
                 }
             }
             catch (AdalException)
             {
-                Trace.WriteLine("   token acquisition failed.");
+                Trace.WriteLine("token acquisition failed.");
             }
 
-            Trace.WriteLine("   interactive logon failed");
+            Trace.WriteLine("interactive logon failed");
             return null;
         }
 
@@ -148,17 +148,17 @@ namespace Microsoft.Alm.Authentication
                 Token token;
                 if ((token = await this.VstsAuthority.NoninteractiveAcquireToken(targetUri, this.ClientId, this.Resource, new Uri(RedirectUrl))) != null)
                 {
-                    Trace.WriteLine("   token acquisition succeeded");
+                    Trace.WriteLine("token acquisition succeeded");
 
                     return await this.GeneratePersonalAccessToken(targetUri, token, requestCompactToken);
                 }
             }
             catch (AdalException)
             {
-                Trace.WriteLine("   failed to acquire token from VstsAuthority.");
+                Trace.WriteLine("failed to acquire token from VstsAuthority.");
             }
 
-            Trace.WriteLine("   non-interactive logon failed");
+            Trace.WriteLine("non-interactive logon failed");
             return null;
         }
 
@@ -176,7 +176,7 @@ namespace Microsoft.Alm.Authentication
             BaseSecureStore.ValidateCredential(credentials);
 
             Trace.WriteLine("VstsMsaAuthentication::SetCredentials");
-            Trace.WriteLine("   setting AAD credentials is not supported");
+            Trace.WriteLine("setting AAD credentials is not supported");
         }
     }
 }

@@ -41,7 +41,7 @@ namespace Microsoft.Alm.Authentication
             string targetName = $"{@namespace}:{targetUri}";
             targetName = targetName.TrimEnd('/', '\\');
 
-            Trace.WriteLine("   target name = " + targetName);
+            Trace.WriteLine("target name = " + targetName);
 
             return targetName;
         }

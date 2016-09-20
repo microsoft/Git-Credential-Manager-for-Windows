@@ -22,7 +22,7 @@ namespace Microsoft.Alm.Cli
             Match match;
             if ((match = AskCredentialRegex.Match(Environment.CommandLine)).Success)
             {
-                Trace.WriteLine("   querying for HTTPS credentials.");
+                Trace.WriteLine("querying for HTTPS credentials.");
 
                 if (match.Groups.Count < 3)
                     throw new ArgumentException("Unable to understand command.");
@@ -37,7 +37,7 @@ namespace Microsoft.Alm.Cli
                 int tokenIndex = targetUrl.IndexOf('@');
                 if (tokenIndex > 0)
                 {
-                    Trace.WriteLine("   '@' symbol found in URL, assuming credential prefix.");
+                    Trace.WriteLine("'@' symbol found in URL, assuming credential prefix.");
 
                     string prefix = targetUrl.Substring(0, tokenIndex);
                     targetUrl = targetUrl.Substring(tokenIndex + 1, targetUrl.Length - tokenIndex - 1);
@@ -48,7 +48,7 @@ namespace Microsoft.Alm.Cli
                     tokenIndex = prefix.IndexOf(':');
                     if (tokenIndex > 0)
                     {
-                        Trace.WriteLine("   ':' token found in credential prefix, parsing username & password.");
+                        Trace.WriteLine("':' token found in credential prefix, parsing username & password.");
 
                         username = prefix.Substring(0, tokenIndex);
                         password = prefix.Substring(tokenIndex + 1, prefix.Length - tokenIndex - 1);
@@ -59,7 +59,7 @@ namespace Microsoft.Alm.Cli
 
                 if (Uri.TryCreate(targetUrl, UriKind.Absolute, out targetUri))
                 {
-                    Trace.WriteLine("   success parsing URL, targetUri = " + targetUri);
+                    Trace.WriteLine("success parsing URL, targetUri = " + targetUri);
 
                     OperationArguments operationArguments = new OperationArguments(targetUri);
 
@@ -70,7 +70,7 @@ namespace Microsoft.Alm.Cli
                     {
                         if (string.IsNullOrEmpty(credential?.Username))
                         {
-                            Trace.WriteLine("   username not supplied in config, need to query for value.");
+                            Trace.WriteLine("username not supplied in config, need to query for value.");
 
                             QueryCredentials(operationArguments);
                             credential = new Credential(operationArguments.CredUsername, operationArguments.CredPassword);
@@ -78,7 +78,7 @@ namespace Microsoft.Alm.Cli
 
                         if (!string.IsNullOrEmpty(credential?.Username))
                         {
-                            Trace.WriteLine("   username for '" + targetUrl + "' asked for and found.");
+                            Trace.WriteLine("username for '" + targetUrl + "' asked for and found.");
 
                             Console.Out.Write(credential.Username + "\n");
                             return;
@@ -89,7 +89,7 @@ namespace Microsoft.Alm.Cli
                     {
                         if (string.IsNullOrEmpty(credential?.Password))
                         {
-                            Trace.WriteLine("   password not supplied in config, need to query for value.");
+                            Trace.WriteLine("password not supplied in config, need to query for value.");
 
                             QueryCredentials(operationArguments);
 
@@ -103,7 +103,7 @@ namespace Microsoft.Alm.Cli
 
                         if (!string.IsNullOrEmpty(credential?.Password))
                         {
-                            Trace.WriteLine("   password for '{0}' asked for and found.", targetUrl);
+                            Trace.WriteLine("password for '{0}' asked for and found.", targetUrl);
 
                             Console.Out.Write(credential.Password + "\n");
                             return;
@@ -112,12 +112,12 @@ namespace Microsoft.Alm.Cli
                 }
                 else
                 {
-                    Trace.WriteLine("   unable to parse URL.");
+                    Trace.WriteLine("unable to parse URL.");
                 }
             }
             else if ((match = AskPassphraseRegex.Match(Environment.CommandLine)).Success)
             {
-                Trace.WriteLine("   querying for passphrase key.");
+                Trace.WriteLine("querying for passphrase key.");
 
                 if (match.Groups.Count < 2)
                     throw new ArgumentException("Unable to understand command.");
@@ -135,14 +135,14 @@ namespace Microsoft.Alm.Cli
                 {
                     string passphase = prompt.Passphrase;
 
-                    Trace.WriteLine("   passphase acquired");
+                    Trace.WriteLine("passphase acquired");
 
                     Console.Out.Write(passphase + "\n");
                     return;
                 }
             }
 
-            Trace.WriteLine("   credentials not found.");
+            Trace.WriteLine("credentials not found.");
         }
 
         [STAThread]

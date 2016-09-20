@@ -93,7 +93,7 @@ namespace Microsoft.Alm.Authentication
             if ((credentials = this.PersonalAccessTokenStore.ReadCredentials(targetUri)) != null)
             {
                 this.PersonalAccessTokenStore.DeleteCredentials(targetUri);
-                Trace.WriteLine("   credentials deleted");
+                Trace.WriteLine("credentials deleted");
             }
         }
 
@@ -128,12 +128,12 @@ namespace Microsoft.Alm.Authentication
             if (targetUri.ActualUri.DnsSafeHost.EndsWith(GitHubBaseUrlHost, StringComparison.OrdinalIgnoreCase))
             {
                 authentication = new GitHubAuthentication(tokenScope, personalAccessTokenStore, acquireCredentialsCallback, acquireAuthenticationCodeCallback, authenticationResultCallback);
-                Trace.WriteLine("   authentication for GitHub created");
+                Trace.WriteLine("authentication for GitHub created");
             }
             else
             {
                 authentication = null;
-                Trace.WriteLine("   not github.com, authentication creation aborted");
+                Trace.WriteLine("not github.com, authentication creation aborted");
             }
 
             return authentication;
@@ -157,7 +157,7 @@ namespace Microsoft.Alm.Authentication
 
             if ((credentials = this.PersonalAccessTokenStore.ReadCredentials(targetUri)) != null)
             {
-                Trace.WriteLine("   successfully retrieved stored credentials, updating credential cache");
+                Trace.WriteLine("successfully retrieved stored credentials, updating credential cache");
             }
 
             return credentials;
@@ -185,7 +185,7 @@ namespace Microsoft.Alm.Authentication
 
                 if (result = await GitHubAuthority.AcquireToken(targetUri, username, password, null, this.TokenScope))
                 {
-                    Trace.WriteLine("   token acquisition succeeded");
+                    Trace.WriteLine("token acquisition succeeded");
 
                     credentials = (Credential)result.Token;
                     this.PersonalAccessTokenStore.WriteCredentials(targetUri, credentials);
@@ -206,7 +206,7 @@ namespace Microsoft.Alm.Authentication
                     {
                         if (result = await GitHubAuthority.AcquireToken(targetUri, username, password, authenticationCode, this.TokenScope))
                         {
-                            Trace.WriteLine("   token acquisition succeeded");
+                            Trace.WriteLine("token acquisition succeeded");
 
                             credentials = (Credential)result.Token;
                             this.PersonalAccessTokenStore.WriteCredentials(targetUri, credentials);
@@ -229,7 +229,7 @@ namespace Microsoft.Alm.Authentication
                 }
             }
 
-            Trace.WriteLine("   interactive logon failed");
+            Trace.WriteLine("interactive logon failed");
             return credentials;
         }
 
@@ -259,7 +259,7 @@ namespace Microsoft.Alm.Authentication
             GitHubAuthenticationResult result;
             if (result = await GitHubAuthority.AcquireToken(targetUri, username, password, authenticationCode, this.TokenScope))
             {
-                Trace.WriteLine("   token acquisition succeeded");
+                Trace.WriteLine("token acquisition succeeded");
 
                 credentials = (Credential)result.Token;
                 PersonalAccessTokenStore.WriteCredentials(targetUri, credentials);
@@ -267,7 +267,7 @@ namespace Microsoft.Alm.Authentication
                 return credentials;
             }
 
-            Trace.WriteLine("   non-interactive logon failed");
+            Trace.WriteLine("non-interactive logon failed");
             return credentials;
         }
 

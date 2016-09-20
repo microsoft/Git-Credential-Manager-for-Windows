@@ -256,7 +256,7 @@ namespace Microsoft.Alm.Git
 
             installations = pathSet.ToList();
 
-            Trace.WriteLine("   " + installations.Count + " Git installation(s) found.");
+            Trace.WriteLine("" + installations.Count + " Git installation(s) found.");
 
             return installations.Count > 0;
         }

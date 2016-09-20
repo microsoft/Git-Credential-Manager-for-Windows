@@ -81,7 +81,7 @@ namespace Microsoft.Alm.Authentication
                 Token token;
                 if ((token = await this.VstsAuthority.InteractiveAcquireToken(targetUri, this.ClientId, this.Resource, new Uri(RedirectUrl), QueryParameters)) != null)
                 {
-                    Trace.WriteLine("   token successfully acquired.");
+                    Trace.WriteLine("token successfully acquired.");
 
                     return await this.GeneratePersonalAccessToken(targetUri, token, requireCompactToken);
                 }
@@ -91,7 +91,7 @@ namespace Microsoft.Alm.Authentication
                 Debug.Write(exception);
             }
 
-            Trace.WriteLine("   failed to acquire token.");
+            Trace.WriteLine("failed to acquire token.");
             return null;
         }
 
@@ -109,7 +109,7 @@ namespace Microsoft.Alm.Authentication
             BaseSecureStore.ValidateCredential(credentials);
 
             Trace.WriteLine("VstsMsaAuthentication::SetCredentials");
-            Trace.WriteLine("   setting MSA credentials is not supported");
+            Trace.WriteLine("setting MSA credentials is not supported");
         }
     }
 }
