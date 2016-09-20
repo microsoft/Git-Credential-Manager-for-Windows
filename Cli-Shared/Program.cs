@@ -142,25 +142,15 @@ namespace Microsoft.Alm.Cli
 
         internal static void LogEvent(string message, EventLogEntryType eventType)
         {
-            /*** commented out due to UAC issues which require a proper installer to work around ***/
+            /*** try-squelch due to UAC issues which require a proper installer to work around ***/
+
+            Git.Trace.WriteLine(message);
 
             try
             {
-                if (!EventLog.SourceExists(EventSource))
-                {
-                    EventLog.CreateEventSource(EventSource, "Application");
-
-                    Trace.WriteLine("event source created.");
-                }
-
                 EventLog.WriteEntry(EventSource, message, eventType);
-
-                Trace.WriteLine($"'{eventType}' event written.");
             }
-            catch
-            {
-                Trace.WriteLine("failed ot log event.");
-            }
+            catch { /* squelch */ }
         }
 
         private static bool BasicCredentialPrompt(TargetUri targetUri, string titleMessage, out string username, out string password)
@@ -176,7 +166,7 @@ namespace Microsoft.Alm.Cli
 
             if (!StandardErrorIsTty || !StandardInputIsTty)
             {
-                Trace.WriteLine("not a tty detected, abandoning prompt.");
+                Git.Trace.WriteLine("not a tty detected, abandoning prompt.");
                 return false;
             }
 
@@ -202,7 +192,7 @@ namespace Microsoft.Alm.Cli
                     throw new Win32Exception(error, "Unable to determine console mode (" + NativeMethods.Win32Error.GetText(error) + ").");
                 }
 
-                Trace.WriteLine($"console mode = '{consoleMode}'.");
+                Git.Trace.WriteLine($"console mode = '{consoleMode}'.");
 
                 // instruct the user as to what they are expected to do
                 buffer.Append(titleMessage)
@@ -253,7 +243,7 @@ namespace Microsoft.Alm.Cli
                         throw new Win32Exception(error, "Unable to set console mode (" + NativeMethods.Win32Error.GetText(error) + ").");
                     }
 
-                    Trace.WriteLine($"console mode = '{consoleMode2}'.");
+                    Git.Trace.WriteLine($"console mode = '{consoleMode2}'.");
 
                     // prompt the user for password
                     buffer.Append("password: ");
@@ -287,7 +277,7 @@ namespace Microsoft.Alm.Cli
                         throw new Win32Exception(error, "Unable to set console mode (" + NativeMethods.Win32Error.GetText(error) + ").");
                     }
 
-                    Trace.WriteLine($"console mode = '{consoleMode}'.");
+                    Git.Trace.WriteLine($"console mode = '{consoleMode}'.");
                 }
             }
 
@@ -307,7 +297,7 @@ namespace Microsoft.Alm.Cli
             switch (operationArguments.Authority)
             {
                 case AuthorityType.Auto:
-                    Trace.WriteLine("detecting authority type.");
+                    Git.Trace.WriteLine($"detecting authority type for '{operationArguments.TargetUri}'.");
 
                     // detect the authority
                     authority = BaseVstsAuthentication.GetAuthentication(operationArguments.TargetUri,
@@ -348,7 +338,7 @@ namespace Microsoft.Alm.Cli
                     goto case AuthorityType.Basic;
 
                 case AuthorityType.AzureDirectory:
-                    Trace.WriteLine("authority is Azure Directory.");
+                    Git.Trace.WriteLine($"authority for '{operationArguments.TargetUri}' is Azure Directory.");
 
                     Guid tenantId = Guid.Empty;
                     // return the allocated authority or a generic AAD backed VSTS authentication object
@@ -356,13 +346,13 @@ namespace Microsoft.Alm.Cli
 
                 case AuthorityType.Basic:
                 default:
-                    Trace.WriteLine("authority is basic.");
+                    Git.Trace.WriteLine($"authority for '{operationArguments.TargetUri}' is basic.");
 
                     // return a generic username + password authentication object
                     return authority ?? new BasicAuthentication(secrets);
 
                 case AuthorityType.GitHub:
-                    Trace.WriteLine("authority it GitHub.");
+                    Git.Trace.WriteLine($"authority for '{operationArguments.TargetUri}' is GitHub.");
 
                     // return a GitHub authentication object
                     return authority ?? new GitHubAuthentication(GitHubCredentialScope,
@@ -376,7 +366,7 @@ namespace Microsoft.Alm.Cli
                                                                  null);
 
                 case AuthorityType.MicrosoftAccount:
-                    Trace.WriteLine("authority is Microsoft Live.");
+                    Git.Trace.WriteLine($"authority for '{operationArguments.TargetUri}' is Microsoft Live.");
 
                     // return the allocated authority or a generic MSA backed VSTS authentication object
                     return authority ?? new VstsMsaAuthentication(VstsCredentialScope, secrets);
@@ -394,19 +384,19 @@ namespace Microsoft.Alm.Cli
             {
                 default:
                 case AuthorityType.Basic:
-                    Trace.WriteLine("deleting basic credentials.");
+                    Git.Trace.WriteLine($"deleting basic credentials for '{operationArguments.TargetUri}'.");
                     authentication.DeleteCredentials(operationArguments.TargetUri);
                     break;
 
                 case AuthorityType.AzureDirectory:
                 case AuthorityType.MicrosoftAccount:
-                    Trace.WriteLine("deleting VSTS credentials.");
+                    Git.Trace.WriteLine($"deleting VSTS credentials for '{operationArguments.TargetUri}'.");
                     BaseVstsAuthentication vstsAuth = authentication as BaseVstsAuthentication;
                     vstsAuth.DeleteCredentials(operationArguments.TargetUri);
                     break;
 
                 case AuthorityType.GitHub:
-                    Trace.WriteLine("deleting GitHub credentials.");
+                    Git.Trace.WriteLine($"deleting GitHub credentials for '{operationArguments.TargetUri}'.");
                     GitHubAuthentication ghAuth = authentication as GitHubAuthentication;
                     ghAuth.DeleteCredentials(operationArguments.TargetUri);
                     break;
@@ -445,7 +435,7 @@ namespace Microsoft.Alm.Cli
             // look for authority config settings
             if (config.TryGetEntry(ConfigPrefix, operationArguments.QueryUri, ConfigAuthortyKey, out entry))
             {
-                Trace.WriteLine($"{ConfigAuthortyKey} = '{entry.Value}'.");
+                Git.Trace.WriteLine($"{ConfigAuthortyKey} = '{entry.Value}'.");
 
                 if (ConfigKeyComparer.Equals(entry.Value, "MSA")
                     || ConfigKeyComparer.Equals(entry.Value, "Microsoft")
@@ -486,11 +476,11 @@ namespace Microsoft.Alm.Cli
             if (envars.TryGetValue(EnvironInteractiveKey, out interativeValue)
                 && !string.IsNullOrWhiteSpace(interativeValue))
             {
-                Trace.WriteLine($"{EnvironInteractiveKey} = '{interativeValue}'.");
+                Git.Trace.WriteLine($"{EnvironInteractiveKey} = '{interativeValue}'.");
             }
             else if (config.TryGetEntry(ConfigPrefix, operationArguments.QueryUri, ConfigInteractiveKey, out entry))
             {
-                Trace.WriteLine($"{ConfigInteractiveKey} = '{entry.Value}'.");
+                Git.Trace.WriteLine($"{ConfigInteractiveKey} = '{entry.Value}'.");
 
                 interativeValue = entry.Value;
             }
@@ -546,10 +536,11 @@ namespace Microsoft.Alm.Cli
             }
 
             // look for http proxy config settings
-            if (config.TryGetEntry(ConfigPrefix, operationArguments.QueryUri, ConfigHttpProxyKey, out entry)
-                || config.TryGetEntry("http", operationArguments.QueryUri, "proxy", out entry))
+            if ((config.TryGetEntry(ConfigPrefix, operationArguments.QueryUri, ConfigHttpProxyKey, out entry)
+                    || config.TryGetEntry("http", operationArguments.QueryUri, "proxy", out entry))
+                && !String.IsNullOrWhiteSpace(entry.Value))
             {
-                Trace.WriteLine($"{ConfigHttpProxyKey} = '{entry.Value}'.");
+                Git.Trace.WriteLine($"{ConfigHttpProxyKey} = '{entry.Value}'.");
 
                 operationArguments.SetProxy(entry.Value);
             }
@@ -557,7 +548,7 @@ namespace Microsoft.Alm.Cli
             // look for custom namespace config settings
             if (config.TryGetEntry(ConfigPrefix, operationArguments.QueryUri, ConfigNamespaceKey, out entry))
             {
-                Trace.WriteLine($"{ConfigNamespaceKey} = '{entry.Value}'.");
+                Git.Trace.WriteLine($"{ConfigNamespaceKey} = '{entry.Value}'.");
 
                 operationArguments.CustomNamespace = entry.Value;
             }
@@ -568,7 +559,10 @@ namespace Microsoft.Alm.Cli
             Debug.Assert(args != null, $"The `{nameof(args)}` parameter is null.");
 
             StringBuilder builder = new StringBuilder();
-            builder.Append(Program.Name);
+            builder.Append(Program.Name)
+                   .Append(" (v")
+                   .Append(Program.Version.ToString(3))
+                   .Append(")");
 
             for (int i = 0; i < args.Length; i += 1)
             {
@@ -582,7 +576,8 @@ namespace Microsoft.Alm.Cli
                 }
             }
 
-            Trace.WriteLine(builder.ToString());
+            // fake being part of the Main method for clarity
+            Git.Trace.WriteLine(builder.ToString(), memberName: nameof(Main));
             builder = null;
         }
 
@@ -590,19 +585,19 @@ namespace Microsoft.Alm.Cli
         private static void EnableDebugTrace()
         {
             // use the stderr stream for the trace as stdout is used in the cross-process communications protocol
-            Trace.AddListener(Console.Error);
+            Git.Trace.AddListener(Console.Error);
         }
 
         private static void EnableTraceLogging(OperationArguments operationArguments)
         {
             if (operationArguments.WriteLog)
             {
-                Trace.WriteLine("trace logging enabled.");
+                Git.Trace.WriteLine("trace logging enabled.");
 
                 string gitConfigPath;
                 if (Where.GitLocalConfig(out gitConfigPath))
                 {
-                    Trace.WriteLine($"git local config found at '{gitConfigPath}'.");
+                    Git.Trace.WriteLine($"git local config found at '{gitConfigPath}'.");
 
                     string gitDirPath = Path.GetDirectoryName(gitConfigPath);
 
@@ -613,7 +608,7 @@ namespace Microsoft.Alm.Cli
                 }
                 else if (Where.GitGlobalConfig(out gitConfigPath))
                 {
-                    Trace.WriteLine($"git global config found at '{gitConfigPath}'.");
+                    Git.Trace.WriteLine($"git global config found at '{gitConfigPath}'.");
 
                     string homeDirPath = Path.GetDirectoryName(gitConfigPath);
 
@@ -647,16 +642,15 @@ namespace Microsoft.Alm.Cli
                 }
             }
 
-            Trace.WriteLine($"trace log destination is '{logFilePath}'.");
+            Git.Trace.WriteLine($"trace log destination is '{logFilePath}'.");
 
-            var fileStream = File.Open(logFileName, FileMode.OpenOrCreate, FileAccess.Write, FileShare.ReadWrite);
+            var fileStream = File.Open(logFileName, FileMode.Append, FileAccess.Write, FileShare.ReadWrite);
             var listener = new StreamWriter(fileStream, Encoding.UTF8);
-            Trace.AddListener(listener);
+            Git.Trace.AddListener(listener);
 
             // write a small header to help with identifying new log entries
-            listener.WriteLine(Environment.NewLine);
-            listener.WriteLine($"Log Start ({DateTimeOffset.Now:u})");
-            listener.WriteLine($"Microsoft {Program.Title} version {Version.ToString(3)}");
+            listener.Write('\n');
+            listener.Write($"{DateTime.Now:YYYY.MM.dd HH:mm:ss} Microsoft {Program.Title} version {Version.ToString(3)}\n");
         }
 
         private static bool GitHubAuthCodePrompt(TargetUri targetUri, GitHubAuthenticationResultType resultType, string username, out string authenticationCode)
@@ -685,7 +679,7 @@ namespace Microsoft.Alm.Cli
                     ? "app"
                     : "sms";
 
-                Trace.WriteLine($"2fa type = '{type}'.");
+                Git.Trace.WriteLine($"2fa type = '{type}'.");
 
                 buffer.AppendLine()
                       .Append("authcode (")
@@ -806,7 +800,7 @@ namespace Microsoft.Alm.Cli
                 if (inBufferSize <= 0)
                 {
                     error = Marshal.GetLastWin32Error();
-                    Trace.WriteLine($"unable to determine credential buffer size ('{NativeMethods.Win32Error.GetText(error)}').");
+                    Git.Trace.WriteLine($"unable to determine credential buffer size ('{NativeMethods.Win32Error.GetText(error)}').");
 
                     username = null;
                     password = null;
@@ -823,7 +817,7 @@ namespace Microsoft.Alm.Cli
                                                                 packedCredentialsSize: ref inBufferSize))
                 {
                     error = Marshal.GetLastWin32Error();
-                    Trace.WriteLine($"unable to write to credential buffer ('{NativeMethods.Win32Error.GetText(error)}').");
+                    Git.Trace.WriteLine($"unable to write to credential buffer ('{NativeMethods.Win32Error.GetText(error)}').");
 
                     username = null;
                     password = null;
@@ -950,7 +944,7 @@ namespace Microsoft.Alm.Cli
                 case AuthorityType.Basic:
                     if ((credentials = authentication.GetCredentials(operationArguments.TargetUri)) != null)
                     {
-                        Trace.WriteLine("credentials found.");
+                        Git.Trace.WriteLine("credentials found.");
                         operationArguments.SetCredentials(credentials);
                     }
                     else if (operationArguments.Interactivity != Interactivity.Never)
@@ -964,7 +958,7 @@ namespace Microsoft.Alm.Cli
                             || (!operationArguments.UseModalUi
                                 && BasicCredentialPrompt(operationArguments.TargetUri, null, out username, out password)))
                         {
-                            Trace.WriteLine("credentials found.");
+                            Git.Trace.WriteLine($"credentials for '{operationArguments.TargetUri}' found.");
                             // set the credentials object
                             // no need to save the credentials explicitly, as Git will call back
                             // with a store command if the credentials are valid.
@@ -994,14 +988,14 @@ namespace Microsoft.Alm.Cli
                             && (!operationArguments.ValidateCredentials
                                 || await aadAuth.ValidateCredentials(operationArguments.TargetUri, credentials))))
                         {
-                            Trace.WriteLine("credentials found.");
+                            Git.Trace.WriteLine($"credentials for '{operationArguments.TargetUri}' found.");
                             operationArguments.SetCredentials(credentials);
-                            LogEvent("Azure Directory credentials for " + operationArguments.TargetUri + " successfully retrieved.", EventLogEntryType.SuccessAudit);
+                            LogEvent($"Azure Directory credentials  for '{operationArguments.TargetUri}' successfully retrieved.", EventLogEntryType.SuccessAudit);
                         }
                         else
                         {
                             Console.Error.WriteLine(AadMsaAuthFailureMessage);
-                            LogEvent("Failed to retrieve Azure Directory credentials for " + operationArguments.TargetUri + ".", EventLogEntryType.FailureAudit);
+                            LogEvent($"Failed to retrieve Azure Directory credentials for '{operationArguments.TargetUri}'.", EventLogEntryType.FailureAudit);
                         }
                     }).Wait();
                     break;
@@ -1022,14 +1016,14 @@ namespace Microsoft.Alm.Cli
                             && (!operationArguments.ValidateCredentials
                                 || await msaAuth.ValidateCredentials(operationArguments.TargetUri, credentials))))
                         {
-                            Trace.WriteLine("credentials found.");
+                            Git.Trace.WriteLine($"credentials for '{operationArguments.TargetUri}' found.");
                             operationArguments.SetCredentials(credentials);
-                            LogEvent("Microsoft Live credentials for " + operationArguments.TargetUri + " successfully retrieved.", EventLogEntryType.SuccessAudit);
+                            LogEvent($"Microsoft Live credentials for '{operationArguments.TargetUri}' successfully retrieved.", EventLogEntryType.SuccessAudit);
                         }
                         else
                         {
                             Console.Error.WriteLine(AadMsaAuthFailureMessage);
-                            LogEvent("Failed to retrieve Microsoft Live credentials for " + operationArguments.TargetUri + ".", EventLogEntryType.FailureAudit);
+                            LogEvent($"Failed to retrieve Microsoft Live credentials for '{operationArguments.TargetUri}'.", EventLogEntryType.FailureAudit);
                         }
                     }).Wait();
                     break;
@@ -1048,14 +1042,14 @@ namespace Microsoft.Alm.Cli
                                 && (!operationArguments.ValidateCredentials
                                     || await ghAuth.ValidateCredentials(operationArguments.TargetUri, credentials))))
                         {
-                            Trace.WriteLine("credentials found.");
+                            Git.Trace.WriteLine($"credentials for '{operationArguments.TargetUri}' found.");
                             operationArguments.SetCredentials(credentials);
-                            LogEvent("GitHub credentials for " + operationArguments.TargetUri + " successfully retrieved.", EventLogEntryType.SuccessAudit);
+                            LogEvent($"GitHub credentials for '{operationArguments.TargetUri}' successfully retrieved.", EventLogEntryType.SuccessAudit);
                         }
                         else
                         {
                             Console.Error.WriteLine(GitHubAuthFailureMessage);
-                            LogEvent("Failed to retrieve GitHub credentials for " + operationArguments.TargetUri + ".", EventLogEntryType.FailureAudit);
+                            LogEvent($"Failed to retrieve GitHub credentials for '{operationArguments.TargetUri}'.", EventLogEntryType.FailureAudit);
                         }
                     }).Wait();
                     break;
@@ -1088,16 +1082,12 @@ namespace Microsoft.Alm.Cli
             value = null;
 
             string valueString = null;
-            if (!string.IsNullOrWhiteSpace(environKey)
-                && envars.TryGetValue(environKey, out valueString))
+            if ((!string.IsNullOrWhiteSpace(environKey)
+                    && envars.TryGetValue(environKey, out valueString))
+                || (!string.IsNullOrWhiteSpace(valueString)
+                    && config.TryGetEntry(ConfigPrefix, operationArguments.QueryUri, configKey, out entry)))
             {
-                Trace.WriteLine($"{environKey} = '{valueString}'.");
-            }
-
-            if (!string.IsNullOrWhiteSpace(valueString)
-                || config.TryGetEntry(ConfigPrefix, operationArguments.QueryUri, configKey, out entry))
-            {
-                Trace.WriteLine($"{configKey} = '{entry.Value}'.");
+                Git.Trace.WriteLine($"{configKey} = '{entry.Value}'.");
                 valueString = entry.Value;
             }
 
@@ -1151,7 +1141,7 @@ namespace Microsoft.Alm.Cli
                                                                              saveCredentials: ref saveCredentials,
                                                                              flags: flags)) != NativeMethods.Win32Error.Success)
                 {
-                    Trace.WriteLine($"credential prompt failed ('{NativeMethods.Win32Error.GetText(error)}').");
+                    Git.Trace.WriteLine($"credential prompt failed ('{NativeMethods.Win32Error.GetText(error)}').");
 
                     username = null;
                     password = null;
@@ -1182,12 +1172,12 @@ namespace Microsoft.Alm.Cli
                     password = null;
 
                     error = Marshal.GetLastWin32Error();
-                    Trace.WriteLine($"failed to unpack buffer ('{NativeMethods.Win32Error.GetText(error)}').");
+                    Git.Trace.WriteLine($"failed to unpack buffer ('{NativeMethods.Win32Error.GetText(error)}').");
 
                     return false;
                 }
 
-                Trace.WriteLine("successfully acquired credentials from user.");
+                Git.Trace.WriteLine("successfully acquired credentials from user.");
 
                 username = usernameBuffer.ToString();
                 password = passwordBuffer.ToString();

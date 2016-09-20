@@ -77,12 +77,12 @@ namespace Microsoft.Alm.Cli
             {
                 if (!StandardInputIsTty)
                 {
-                    Trace.WriteLine("standard input is not TTY, abandoning prompt.");
+                    Git.Trace.WriteLine("standard input is not TTY, abandoning prompt.");
 
                     return;
                 }
 
-                Trace.WriteLine("prompting user for url.");
+                Git.Trace.WriteLine("prompting user for url.");
 
                 Console.Out.WriteLine(" Target Url:");
                 url = Console.In.ReadLine();
@@ -97,12 +97,10 @@ namespace Microsoft.Alm.Cli
                 }
             }
 
-            Trace.WriteLine($"url = '{url}'.");
-
             Uri uri;
             if (Uri.TryCreate(url, UriKind.Absolute, out uri))
             {
-                Trace.WriteLine($"targetUri = '{uri.AbsoluteUri}'.");
+                Git.Trace.WriteLine($"converted '{url}' to '{uri.AbsoluteUri}'.");
 
                 OperationArguments operationArguments = new OperationArguments(uri);
 
@@ -111,12 +109,11 @@ namespace Microsoft.Alm.Cli
 
                 if (operationArguments.PreserveCredentials && !forced)
                 {
-                    Trace.WriteLine("attempting to delete preserved credentials without force.");
-                    Trace.WriteLine("prompting user for interactivity.");
+                    Git.Trace.WriteLine("attempting to delete preserved credentials without force, prompting user for interactivity.");
 
                     if (!StandardInputIsTty || !StandardErrorIsTty)
                     {
-                        Trace.WriteLine("standard input is not TTY, abandoning prompt.");
+                        Git.Trace.WriteLine("standard input is not TTY, abandoning prompt.");
                         return;
                     }
 
@@ -126,20 +123,18 @@ namespace Microsoft.Alm.Cli
                     while ((key = Console.ReadKey(true)).Key != ConsoleKey.Escape)
                     {
                         if (key.KeyChar == 'N' || key.KeyChar == 'n')
-                        {
-                            Trace.WriteLine("user cancelled.");
                             return;
-                        }
 
                         if (key.KeyChar == 'Y' || key.KeyChar == 'y')
-                        {
-                            Trace.WriteLine("user continued.");
                             break;
-                        }
                     }
                 }
 
                 DeleteCredentials(operationArguments);
+            }
+            else
+            {
+                Git.Trace.WriteLine($"unable to parse input '{url}'.");
             }
         }
 
@@ -177,13 +172,13 @@ namespace Microsoft.Alm.Cli
             {
                 default:
                 case AuthorityType.Basic:
-                    Trace.WriteLine("deleting basic credentials.");
+                    Git.Trace.WriteLine($"deleting basic credentials for '{operationArguments.TargetUri}'.");
                     authentication.DeleteCredentials(operationArguments.TargetUri);
                     break;
 
                 case AuthorityType.AzureDirectory:
                 case AuthorityType.MicrosoftAccount:
-                    Trace.WriteLine("deleting VSTS credentials.");
+                    Git.Trace.WriteLine("deleting VSTS credentials for '{operationArguments.TargetUri}'.");
                     BaseVstsAuthentication vstsAuth = authentication as BaseVstsAuthentication;
                     vstsAuth.DeleteCredentials(operationArguments.TargetUri);
                     // call delete twice to purge any stored ADA tokens
@@ -191,7 +186,7 @@ namespace Microsoft.Alm.Cli
                     break;
 
                 case AuthorityType.GitHub:
-                    Trace.WriteLine("deleting GitHub credentials.");
+                    Git.Trace.WriteLine("deleting GitHub credentials for '{operationArguments.TargetUri}'.");
                     GitHubAuthentication ghAuth = authentication as GitHubAuthentication;
                     ghAuth.DeleteCredentials(operationArguments.TargetUri);
                     break;
@@ -200,6 +195,7 @@ namespace Microsoft.Alm.Cli
             return;
 
             error_parse:
+            Git.Trace.WriteLine($"Fatal: unable to parse target URI.");
             Console.Error.WriteLine("Fatal: unable to parse target URI.");
         }
 
@@ -208,7 +204,7 @@ namespace Microsoft.Alm.Cli
             var installer = new Installer();
             installer.DeployConsole();
 
-            Trace.WriteLine($"Installer result = '{installer.Result}', exit code = {installer.ExitCode}.");
+            Git.Trace.WriteLine($"Installer result = '{installer.Result}', exit code = {installer.ExitCode}.");
 
             Environment.Exit(installer.ExitCode);
         }
@@ -229,7 +225,7 @@ namespace Microsoft.Alm.Cli
 
             if (operationArguments.PreserveCredentials)
             {
-                Trace.WriteLine($"{ConfigPreserveCredentialsKey} = true, canceling erase request.");
+                Git.Trace.WriteLine($"{ConfigPreserveCredentialsKey} = true, canceling erase request.");
                 return;
             }
 
@@ -323,7 +319,7 @@ namespace Microsoft.Alm.Cli
                     Console.Error.WriteLine("   " + innerException.Message);
                 }
 
-                Trace.WriteLine("Fatal: " + exception.ToString());
+                Git.Trace.WriteLine("Fatal: " + exception.ToString());
                 LogEvent(exception.ToString(), EventLogEntryType.Error);
 
                 Environment.ExitCode = -1;
@@ -336,7 +332,7 @@ namespace Microsoft.Alm.Cli
                     Console.Error.WriteLine("   " + exception.Message);
                 }
 
-                Trace.WriteLine("Fatal: " + exception.ToString());
+                Git.Trace.WriteLine("Fatal: " + exception.ToString());
                 LogEvent(exception.ToString(), EventLogEntryType.Error);
 
                 Environment.ExitCode = -1;
@@ -403,7 +399,7 @@ namespace Microsoft.Alm.Cli
             var installer = new Installer();
             installer.RemoveConsole();
 
-            Trace.WriteLine($"Installer result = {installer.Result}, exit code = {installer.ExitCode}.");
+            Git.Trace.WriteLine($"Installer result = {installer.Result}, exit code = {installer.ExitCode}.");
 
             Environment.Exit(installer.ExitCode);
         }

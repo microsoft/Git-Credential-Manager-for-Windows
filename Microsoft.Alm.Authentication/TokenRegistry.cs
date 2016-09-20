@@ -65,8 +65,6 @@ namespace Microsoft.Alm.Authentication
         {
             BaseSecureStore.ValidateTargetUri(targetUri);
 
-            Trace.WriteLine("TokenRegistry::ReadToken");
-
             Token token = null;
 
             foreach (var key in EnumerateKeys(false))
@@ -103,12 +101,14 @@ namespace Microsoft.Alm.Authentication
 
                             token = new Token(value, tokenType);
 
+                            Git.Trace.WriteLine($"token for '{targetUri}' read from registry.");
+
                             return token;
                         }
                     }
                     catch
                     {
-                        Trace.WriteLine("token read from registry was corrupt");
+                        Git.Trace.WriteLine("! token read from registry was corrupt.");
                     }
                 }
             }
@@ -128,8 +128,6 @@ namespace Microsoft.Alm.Authentication
 
         private IEnumerable<RegistryKey> EnumerateKeys(bool writeable)
         {
-            Trace.WriteLine("TokenRegistry::EnumerateKeys");
-
             foreach (var rootKey in EnumerateRootKeys())
             {
                 if (rootKey != null)
@@ -143,7 +141,7 @@ namespace Microsoft.Alm.Authentication
                         }
                         catch
                         {
-                            Trace.WriteLine("failed to open subkey");
+                            Git.Trace.WriteLine("! failed to open subkey.");
                         }
 
                         if (nodeKey != null)
@@ -177,8 +175,6 @@ namespace Microsoft.Alm.Authentication
 
         private IEnumerable<RegistryKey> EnumerateRootKeys()
         {
-            Trace.WriteLine("TokenRegistry::EnumerateRootKeys");
-
             foreach (string version in Versions)
             {
                 RegistryKey result = null;
@@ -191,7 +187,7 @@ namespace Microsoft.Alm.Authentication
                 }
                 catch (Exception exception)
                 {
-                    Trace.WriteLine(exception, "Error");
+                    Git.Trace.WriteLine($"! {exception.Message}");
                 }
 
                 yield return result;

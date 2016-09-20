@@ -302,11 +302,11 @@ namespace Microsoft.Alm.Cli
             Uri tmp = null;
             if (Uri.TryCreate(url, UriKind.Absolute, out tmp))
             {
-                Trace.WriteLine($"successfully set proxy to '{tmp.AbsoluteUri}'.");
+                Git.Trace.WriteLine($"successfully set proxy to '{tmp.AbsoluteUri}'.");
             }
             else
             {
-                Trace.WriteLine("proxy cleared.");
+                Git.Trace.WriteLine("proxy cleared.");
             }
             this.ProxyUri = tmp;
         }

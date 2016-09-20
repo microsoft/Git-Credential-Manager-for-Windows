@@ -44,8 +44,6 @@ namespace Microsoft.Alm.Git
         /// <returns><see langword="True"/> if succeeds; <see langword="false"/> otherwise.</returns>
         static public bool FindApp(string name, out string path)
         {
-            Trace.WriteLine("Where::App");
-
             if (!String.IsNullOrWhiteSpace(name))
             {
                 string pathext = Environment.GetEnvironmentVariable("PATHEXT");
@@ -99,8 +97,6 @@ namespace Microsoft.Alm.Git
             const string GitAppName = @"Git";
             const string GitSubkeyName = @"SOFTWARE\Microsoft\Windows\CurrentVersion\Uninstall\Git_is1";
             const string GitValueName = "InstallLocation";
-
-            Trace.WriteLine("Where::Git");
 
             installations = null;
 
@@ -256,7 +252,7 @@ namespace Microsoft.Alm.Git
 
             installations = pathSet.ToList();
 
-            Trace.WriteLine("" + installations.Count + " Git installation(s) found.");
+            Git.Trace.WriteLine($"found {installations.Count} Git installation(s).");
 
             return installations.Count > 0;
         }
@@ -269,8 +265,6 @@ namespace Microsoft.Alm.Git
         public static bool GitGlobalConfig(out string path)
         {
             const string GlobalConfigFileName = ".gitconfig";
-
-            Trace.WriteLine("Where::GitGlobalConfig");
 
             path = null;
 
@@ -301,8 +295,6 @@ namespace Microsoft.Alm.Git
         {
             const string GitFolderName = ".git";
             const string LocalConfigFileName = "config";
-
-            Trace.WriteLine("Where::GitLocalConfig");
 
             path = null;
 
@@ -436,8 +428,6 @@ namespace Microsoft.Alm.Git
         /// <returns><see langword="True"/> if succeeds; <see langword="false"/> otherwise.</returns>
         public static bool GitSystemConfig(GitInstallation? installation, out string path)
         {
-            Trace.WriteLine("Where::GitSystemConfig");
-
             if (installation.HasValue && File.Exists(installation.Value.Config))
             {
                 path = installation.Value.Path;

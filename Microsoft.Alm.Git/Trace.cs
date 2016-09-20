@@ -35,10 +35,7 @@ namespace Microsoft.Alm.Git
                 else if (Path.IsPathRooted(traceValue))
                 {
                     // open or create the log file
-                    var stream = File.Open(traceValue, FileMode.OpenOrCreate, FileAccess.Write, FileShare.ReadWrite);
-
-                    // seek to the end, no inserting at the front
-                    stream.Seek(0, SeekOrigin.End);
+                    var stream = File.Open(traceValue, FileMode.Append, FileAccess.Write, FileShare.ReadWrite);
 
                     // create the writer and add it to the list
                     var writer = new StreamWriter(stream, Encoding.UTF8, 4096, true);
@@ -112,7 +109,7 @@ namespace Microsoft.Alm.Git
 
             string details = String.Format(System.Globalization.CultureInfo.InvariantCulture, "[{0}] {1}", memberName, message);
 
-            string text = String.Format(System.Globalization.CultureInfo.InvariantCulture, "{0:hh:mm:ss.ffffff} {1,-23} trace: {2}", DateTime.Now, source, details);
+            string text = String.Format(System.Globalization.CultureInfo.InvariantCulture, "{0:HH:mm:ss.ffffff} {1,-23} trace: {2}", DateTime.Now, source, details);
 
             return text;
         }

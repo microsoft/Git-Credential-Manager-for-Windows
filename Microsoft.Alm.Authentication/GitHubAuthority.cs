@@ -65,8 +65,6 @@ namespace Microsoft.Alm.Authentication
         {
             const string GitHubOptHeader = "X-GitHub-OTP";
 
-            Trace.WriteLine("GitHubAuthority::AcquireToken");
-
             Token token = null;
 
             using (HttpClientHandler handler = targetUri.HttpClientHandler)
@@ -116,7 +114,7 @@ namespace Microsoft.Alm.Authentication
                 using (StringContent content = new StringContent(jsonContent, Encoding.UTF8, HttpJsonContentType))
                 using (HttpResponseMessage response = await httpClient.PostAsync(_authorityUrl, content))
                 {
-                    Trace.WriteLine("server responded with " + response.StatusCode);
+                    Git.Trace.WriteLine($"server responded with {response.StatusCode}.");
 
                     switch (response.StatusCode)
                     {
@@ -135,12 +133,12 @@ namespace Microsoft.Alm.Authentication
 
                                 if (token == null)
                                 {
-                                    Trace.WriteLine("authentication failure");
+                                    Git.Trace.WriteLine($"authentication for '{targetUri}' failed.");
                                     return new GitHubAuthenticationResult(GitHubAuthenticationResultType.Failure);
                                 }
                                 else
                                 {
-                                    Trace.WriteLine("authentication success: new personal acces token created.");
+                                    Git.Trace.WriteLine($"authentication success: new personal acces token for '{targetUri}' created.");
                                     return new GitHubAuthenticationResult(GitHubAuthenticationResultType.Success, token);
                                 }
                             }
@@ -154,24 +152,24 @@ namespace Microsoft.Alm.Authentication
 
                                     if (mfakvp.Value.First().Contains("app"))
                                     {
-                                        Trace.WriteLine("two-factor app authentication code required");
+                                        Git.Trace.WriteLine($"two-factor app authentication code required for '{targetUri}'.");
                                         return new GitHubAuthenticationResult(GitHubAuthenticationResultType.TwoFactorApp);
                                     }
                                     else
                                     {
-                                        Trace.WriteLine("two-factor sms authentication code required");
+                                        Git.Trace.WriteLine($"two-factor sms authentication code required for '{targetUri}'.");
                                         return new GitHubAuthenticationResult(GitHubAuthenticationResultType.TwoFactorSms);
                                     }
                                 }
                                 else
                                 {
-                                    Trace.WriteLine("authentication failed");
+                                    Git.Trace.WriteLine($"authentication failed for '{targetUri}'.");
                                     return new GitHubAuthenticationResult(GitHubAuthenticationResultType.Failure);
                                 }
                             }
 
                         default:
-                            Trace.WriteLine("authentication failed");
+                            Git.Trace.WriteLine($"authentication failed for '{targetUri}'.");
                             return new GitHubAuthenticationResult(GitHubAuthenticationResultType.Failure);
                     }
                 }
@@ -184,8 +182,6 @@ namespace Microsoft.Alm.Authentication
 
             BaseSecureStore.ValidateTargetUri(targetUri);
             BaseSecureStore.ValidateCredential(credentials);
-
-            Trace.WriteLine("GitHubAuthority::ValidateCredentials");
 
             string authString = String.Format("{0}:{1}", credentials.Username, credentials.Password);
             byte[] authBytes = Encoding.UTF8.GetBytes(authString);
@@ -206,12 +202,12 @@ namespace Microsoft.Alm.Authentication
                 {
                     if (response.IsSuccessStatusCode)
                     {
-                        Trace.WriteLine("credential validation succeeded");
+                        Git.Trace.WriteLine($"credential validation for '{targetUri}' succeeded.");
                         return true;
                     }
                     else
                     {
-                        Trace.WriteLine("credential validation failed");
+                        Git.Trace.WriteLine($"credential validation for '{targetUri}' failed.");
                         return false;
                     }
                 }

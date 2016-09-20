@@ -93,6 +93,18 @@ namespace Microsoft.Alm.Git
             }
         }
 
+        public int Count
+        {
+            get
+            {
+                return _values[ConfigurationLevel.Global].Count
+                     + _values[ConfigurationLevel.Local].Count
+                     + _values[ConfigurationLevel.Portable].Count
+                     + _values[ConfigurationLevel.System].Count
+                     + _values[ConfigurationLevel.Xdg].Count;
+            }
+        }
+
         public bool ContainsKey(string key)
         {
             return ContainsKey(ConfigurationLevel.All, key);
@@ -177,8 +189,6 @@ namespace Microsoft.Alm.Git
             string globalConfig = null;
             string localConfig = null;
 
-            Trace.WriteLine("Configuration::LoadGitConfiguration");
-
             // read Git's four configs from lowest priority to highest, overwriting values as
             // higher priority configurations are parsed, storing them in a handy lookup table
 
@@ -186,29 +196,32 @@ namespace Microsoft.Alm.Git
             if (Where.GitPortableConfig(out portableConfig))
             {
                 ParseGitConfig(ConfigurationLevel.Portable, portableConfig);
+
+                Git.Trace.WriteLine($"git portable config read, {Count} entries.");
             }
 
             // find and parse Git's system config
             if (Where.GitSystemConfig(null, out systemConfig))
             {
                 ParseGitConfig(ConfigurationLevel.System, systemConfig);
+
+                Git.Trace.WriteLine($"git system config read, {Count} entries.");
             }
 
             // find and parse Git's global config
             if (Where.GitGlobalConfig(out globalConfig))
             {
                 ParseGitConfig(ConfigurationLevel.Global, globalConfig);
+
+                Git.Trace.WriteLine($"git global config read, {Count} entries.");
             }
 
             // find and parse Git's local config
             if (Where.GitLocalConfig(directory, out localConfig))
             {
                 ParseGitConfig(ConfigurationLevel.Local, localConfig);
-            }
 
-            foreach (var pair in _values)
-            {
-                Trace.WriteLine(String.Format("   {0} = {1}", pair.Key, pair.Value));
+                Git.Trace.WriteLine($"git local config read, {Count} entries.");
             }
         }
 
@@ -217,8 +230,6 @@ namespace Microsoft.Alm.Git
             Debug.Assert(Enum.IsDefined(typeof(ConfigurationLevel), level), $"The `{nameof(level)}` parameter is not defined.");
             Debug.Assert(!String.IsNullOrWhiteSpace(configPath), $"The `{nameof(configPath)}` parameter is null or invalid.");
             Debug.Assert(File.Exists(configPath), $"The `{nameof(configPath)}` parameter references a non-existent file.");
-
-            Trace.WriteLine("Configuration::ParseGitConfig");
 
             if (!_values.ContainsKey(level))
                 return;

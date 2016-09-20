@@ -99,8 +99,6 @@ namespace Microsoft.Alm.Authentication
         {
             BaseSecureStore.ValidateTargetUri(targetUri);
 
-            Trace.WriteLine("BaseVstsAuthentication::DeleteCredentials");
-
             Credential credentials = null;
 
             if ((credentials = this.PersonalAccessTokenStore.ReadCredentials(targetUri)) != null)
@@ -120,13 +118,11 @@ namespace Microsoft.Alm.Authentication
         {
             BaseSecureStore.ValidateTargetUri(targetUri);
 
-            Trace.WriteLine("BaseVstsAuthentication::GetCredentials");
-
             Credential credentials = null;
 
             if ((credentials = this.PersonalAccessTokenStore.ReadCredentials(targetUri)) != null)
             {
-                Trace.WriteLine("successfully retrieved stored credentials, updating credential cache");
+                Git.Trace.WriteLine($"credentials for '{targetUri}' found.");
             }
 
             return credentials;
@@ -140,8 +136,6 @@ namespace Microsoft.Alm.Authentication
         /// <returns><see langword="true"/> if successful; <see langword="false"/> otherwise.</returns>
         public async Task<bool> ValidateCredentials(TargetUri targetUri, Credential credentials)
         {
-            Trace.WriteLine("BaseVstsAuthentication::ValidateCredentials");
-
             return await this.VstsAuthority.ValidateCredentials(targetUri, credentials);
         }
 
@@ -165,14 +159,14 @@ namespace Microsoft.Alm.Authentication
             if (ReferenceEquals(accessToken, null))
                 throw new ArgumentNullException(nameof(accessToken));
 
-            Trace.WriteLine("BaseVstsAuthentication::GeneratePersonalAccessToken");
-
             Credential credential = null;
 
             Token personalAccessToken;
             if ((personalAccessToken = await this.VstsAuthority.GeneratePersonalAccessToken(targetUri, accessToken, TokenScope, requestCompactToken)) != null)
             {
                 credential = (Credential)personalAccessToken;
+
+                Git.Trace.WriteLine($"personal access token created for '{targetUri}'.");
 
                 this.PersonalAccessTokenStore.WriteCredentials(targetUri, credential);
             }
@@ -191,13 +185,11 @@ namespace Microsoft.Alm.Authentication
             const string VstsBaseUrlHost = "visualstudio.com";
             const string VstsResourceTenantHeader = "X-VSS-ResourceTenant";
 
-            Trace.WriteLine("BaseAuthentication::DetectTenant");
-
             tenantId = Guid.Empty;
 
             if (targetUri.ActualUri.Host.EndsWith(VstsBaseUrlHost, StringComparison.OrdinalIgnoreCase))
             {
-                Trace.WriteLine("detected visualstudio.com, checking AAD vs MSA");
+                Git.Trace.WriteLine($"'{targetUri}' is subdomain of '{VstsBaseUrlHost}', checking AAD vs MSA.");
 
                 string tenant = null;
                 WebResponse response;
@@ -223,8 +215,6 @@ namespace Microsoft.Alm.Authentication
                     // if the response exists and we have headers, parse them
                     if (response != null && response.SupportsHeaders)
                     {
-                        Trace.WriteLine("server has responded");
-
                         // find the VSTS resource tenant entry
                         tenant = response.Headers[VstsResourceTenantHeader];
 
@@ -234,11 +224,9 @@ namespace Microsoft.Alm.Authentication
                 }
                 else
                 {
-                    Trace.Write("   detected non-https based protocol: " + targetUri.Scheme);
+                    Git.Trace.WriteLine($"detected non-https based protocol: {targetUri.Scheme}.");
                 }
             }
-
-            Trace.WriteLine("failed detection");
 
             // if all else fails, fallback to basic authentication
             return false;
@@ -269,8 +257,6 @@ namespace Microsoft.Alm.Authentication
             if (ReferenceEquals(personalAccessTokenStore, null))
                 throw new ArgumentNullException(nameof(personalAccessTokenStore));
 
-            Trace.WriteLine("BaseVstsAuthentication::DetectAuthority");
-
             BaseAuthentication authentication = null;
 
             Guid tenantId;
@@ -279,12 +265,12 @@ namespace Microsoft.Alm.Authentication
                 // empty Guid is MSA, anything else is AAD
                 if (tenantId == Guid.Empty)
                 {
-                    Trace.WriteLine("MSA authority detected");
+                    Git.Trace.WriteLine("MSA authority detected.");
                     authentication = new VstsMsaAuthentication(scope, personalAccessTokenStore);
                 }
                 else
                 {
-                    Trace.WriteLine("AAD authority for tenant '" + tenantId + "' detected");
+                    Git.Trace.WriteLine($"AAD authority for tenant '{tenantId}' detected.");
                     authentication = new VstsAadAuthentication(tenantId, scope, personalAccessTokenStore);
                     (authentication as VstsAadAuthentication).TenantId = tenantId;
                 }

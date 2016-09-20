@@ -98,15 +98,11 @@ namespace Microsoft.Alm.Authentication
             if (!redirectUri.IsAbsoluteUri)
                 throw new ArgumentException(nameof(redirectUri));
 
-            Trace.WriteLine("AzureAuthority::InteractiveAcquireToken");
-
             Token token = null;
             queryParameters = queryParameters ?? String.Empty;
 
             try
             {
-                Trace.WriteLine(String.Format("   authority host URL = '{0}'.", AuthorityHostUrl));
-
                 AuthenticationContext authCtx = new AuthenticationContext(AuthorityHostUrl, _adalTokenCache);
                 AuthenticationResult authResult = await authCtx.AcquireTokenAsync(resource,
                                                                                   clientId,
@@ -117,11 +113,11 @@ namespace Microsoft.Alm.Authentication
 
                 token = new Token(authResult, TokenType.Access);
 
-                Trace.WriteLine("token acquisition succeeded.");
+                Git.Trace.WriteLine($"authority host URL = '{AuthorityHostUrl}', token acquisition succeeded.");
             }
             catch (AdalException)
             {
-                Trace.WriteLine("token acquisition failed.");
+                Git.Trace.WriteLine($"authority host URL = '{AuthorityHostUrl}', token acquisition failed.");
             }
 
             return token;
@@ -158,15 +154,11 @@ namespace Microsoft.Alm.Authentication
             if (!redirectUri.IsAbsoluteUri)
                 throw new ArgumentException(nameof(redirectUri));
 
-            Trace.WriteLine("AzureAuthority::NoninteractiveAcquireToken");
-
             Token token = null;
             queryParameters = queryParameters ?? String.Empty;
 
             try
             {
-                Trace.WriteLine(String.Format("   authority host URL = '{0}'.", AuthorityHostUrl));
-
                 AuthenticationContext authCtx = new AuthenticationContext(AuthorityHostUrl, _adalTokenCache);
                 AuthenticationResult authResult = await authCtx.AcquireTokenAsync(resource,
                                                                                   clientId,
@@ -177,11 +169,11 @@ namespace Microsoft.Alm.Authentication
 
                 token = new Token(authResult, TokenType.Access);
 
-                Trace.WriteLine("token acquisition succeeded.");
+                Git.Trace.WriteLine($"token acquisition for authority host URL = '{AuthorityHostUrl}' succeeded.");
             }
             catch (AdalException)
             {
-                Trace.WriteLine("token acquisition failed.");
+                Git.Trace.WriteLine($"token acquisition for authority host URL = '{AuthorityHostUrl}' failed.");
             }
 
             return token;

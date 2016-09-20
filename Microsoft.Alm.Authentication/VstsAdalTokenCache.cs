@@ -73,8 +73,6 @@ namespace Microsoft.Alm.Authentication
             {
                 if (File.Exists(_cacheFilePath) && this.HasStateChanged)
                 {
-                    Trace.WriteLine("VstsAdalTokenCache::AfterAccessNotification");
-
                     try
                     {
                         byte[] state = this.Serialize();
@@ -87,7 +85,7 @@ namespace Microsoft.Alm.Authentication
                     }
                     catch (Exception exception)
                     {
-                        Trace.WriteLine(exception, "Error");
+                        Git.Trace.WriteLine($"! {exception.Message}");
                     }
                 }
             }
@@ -97,8 +95,6 @@ namespace Microsoft.Alm.Authentication
         {
             lock (@lock)
             {
-                Trace.WriteLine("VstsAdalTokenCache::BeforeAccessNotification");
-
                 if (File.Exists(_cacheFilePath))
                 {
                     try
@@ -111,7 +107,7 @@ namespace Microsoft.Alm.Authentication
                     }
                     catch (Exception exception)
                     {
-                        Trace.WriteLine(exception, "Error");
+                        Git.Trace.WriteLine($"! {exception.Message}");
                     }
                 }
             }
