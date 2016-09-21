@@ -392,6 +392,19 @@ namespace Microsoft.Alm.Cli
                                    : new GitHubAuthentication.AcquireAuthenticationCodeDelegate(GitHubAuthCodePrompt),
                                null);
 
+                case AuthorityType.Bitbucket:
+                    Trace.WriteLine("   authority it Bitbucket");
+
+                    // return a Bitbucket authentication object
+                    return authority ?? new BitbucketAuthentication(/*GitHubCredentialScope,*/
+                               secrets/*,
+                               operationArguments.UseModalUi
+                                   ? AuthenticationPrompts.CredentialModalPrompt
+                                   : new GitHubAuthentication.AcquireCredentialsDelegate(GitHubCredentialPrompt),
+                               operationArguments.UseModalUi
+                                   ? AuthenticationPrompts.AuthenticationCodeModalPrompt
+                                   */);
+
                 case AuthorityType.MicrosoftAccount:
                     Trace.WriteLine("   authority is Microsoft Live");
 
@@ -429,6 +442,12 @@ namespace Microsoft.Alm.Cli
                     Trace.WriteLine("   deleting GitHub credentials");
                     var ghAuth = authentication as GitHubAuthentication;
                     ghAuth.DeleteCredentials(operationArguments.TargetUri);
+                    break;
+
+                case AuthorityType.Bitbucket:
+                    Trace.WriteLine("   deleting Bitbucket credentials");
+                    var bbAuth = authentication as BitbucketAuthentication;
+                    bbAuth.DeleteCredentials(operationArguments.TargetUri);
                     break;
             }
         }

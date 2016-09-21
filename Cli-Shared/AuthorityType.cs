@@ -52,6 +52,10 @@ namespace Microsoft.Alm.Cli
         /// </summary>
         GitHub,
         /// <summary>
+        /// Bitbucket authentication
+        /// </summary>
+        Bitbucket,
+        /// <summary>
         /// Operating system / network integrated authentication layer.
         /// </summary>
         Integrated,

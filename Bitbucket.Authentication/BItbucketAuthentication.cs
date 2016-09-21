@@ -28,8 +28,17 @@ namespace Bitbucket.Authentication
         /// <inheritdoc />
         public override void DeleteCredentials(TargetUri targetUri)
         {
-            Console.WriteLine("DeleteCredentials");
-            throw new NotImplementedException();
+            BaseSecureStore.ValidateTargetUri(targetUri);
+
+            Trace.WriteLine("BitbucketAuthentication::DeleteCredentials");
+
+            Credential credentials = null;
+
+            if ((credentials = this.PersonalAccessTokenStore.ReadCredentials(targetUri)) != null)
+            {
+                this.PersonalAccessTokenStore.DeleteCredentials(targetUri);
+                Trace.WriteLine("   credentials deleted");
+            }
         }
 
         /// <inheritdoc />
