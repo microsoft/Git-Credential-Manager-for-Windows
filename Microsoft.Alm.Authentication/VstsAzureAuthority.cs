@@ -67,8 +67,6 @@ namespace Microsoft.Alm.Authentication
             if (ReferenceEquals(tokenScope, null))
                 throw new ArgumentNullException(nameof(tokenScope));
 
-            Trace.WriteLine("VstsAzureAuthority::GeneratePersonalAccessToken");
-
             try
             {
                 // create a `HttpClient` with a minimum number of redirects, default creds, and a reasonable timeout (access token generation seems to hang occasionally)
@@ -87,13 +85,13 @@ namespace Microsoft.Alm.Authentication
                     switch (accessToken.Type)
                     {
                         case TokenType.Access:
-                            Trace.WriteLine("   using Azure access token to acquire personal access token");
+                            Git.Trace.WriteLine($"using Azure access token to acquire personal access token for '{targetUri}'.");
 
                             httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue(AccessTokenHeader, accessToken.Value);
                             break;
 
                         case TokenType.Federated:
-                            Trace.WriteLine("   using federated authentication token to acquire personal access token");
+                            Git.Trace.WriteLine($"using federated authentication token to acquire personal access token for '{targetUri}'.");
 
                             httpClient.DefaultRequestHeaders.Add("Cookie", accessToken.Value);
                             break;
@@ -107,8 +105,6 @@ namespace Microsoft.Alm.Authentication
                         Uri requestUri;
                         if (TryCreateRequestUri(targetUri, requireCompactToken, out requestUri))
                         {
-                            Trace.WriteLine("   request url is " + requestUri);
-
                             using (StringContent content = GetAccessTokenRequestBody(targetUri, accessToken, tokenScope))
                             using (HttpResponseMessage response = await httpClient.PostAsync(requestUri, content))
                             {
@@ -125,7 +121,7 @@ namespace Microsoft.Alm.Authentication
                                             string tokenValue = tokenMatch.Groups[1].Value;
                                             Token token = new Token(tokenValue, TokenType.Personal);
 
-                                            Trace.WriteLine("   personal access token acquisition succeeded.");
+                                            Git.Trace.WriteLine($"personal access token acquisition for '{targetUri}' succeeded.");
 
                                             return token;
                                         }
@@ -138,10 +134,10 @@ namespace Microsoft.Alm.Authentication
             }
             catch
             {
-                Trace.WriteLine("   an error occurred.");
+                Git.Trace.WriteLine("! an error occurred.");
             }
 
-            Trace.WriteLine("   personal access token acquisition failed.");
+            Git.Trace.WriteLine($"personal access token acquisition for '{targetUri}' failed.");
 
             return null;
         }
@@ -151,8 +147,6 @@ namespace Microsoft.Alm.Authentication
             BaseSecureStore.ValidateTargetUri(targetUri);
             BaseSecureStore.ValidateToken(accessToken);
 
-            Trace.WriteLine("VstsAzureAuthority::PopulateTokenTargetId");
-
             string resultId = null;
             Guid instanceId;
 
@@ -161,7 +155,7 @@ namespace Microsoft.Alm.Authentication
                 // create an request to the VSTS deployment data end-point
                 HttpWebRequest request = GetConnectionDataRequest(targetUri, accessToken);
 
-                Trace.WriteLine(String.Format("   access token end-point is {0} {1}", request.Method, request.RequestUri));
+                Git.Trace.WriteLine($"access token end-point is '{request.Method}' '{request.RequestUri}'.");
 
                 // send the request and wait for the response
                 using (var response = await request.GetResponseAsync())
@@ -180,12 +174,12 @@ namespace Microsoft.Alm.Authentication
             }
             catch (WebException webException)
             {
-                Trace.WriteLine("   server returned " + webException.Status);
+                Git.Trace.WriteLine($"server returned '{webException.Status}'.");
             }
 
             if (Guid.TryParse(resultId, out instanceId))
             {
-                Trace.WriteLine("   target identity is " + resultId);
+                Git.Trace.WriteLine($"target identity is {resultId}.");
                 accessToken.TargetIdentity = instanceId;
 
                 return true;
@@ -208,33 +202,31 @@ namespace Microsoft.Alm.Authentication
             BaseSecureStore.ValidateTargetUri(targetUri);
             BaseSecureStore.ValidateCredential(credentials);
 
-            Trace.WriteLine("VstsAzureAuthority::ValidateCredentials");
-
             try
             {
                 // create an request to the VSTS deployment data end-point
                 HttpWebRequest request = GetConnectionDataRequest(targetUri, credentials);
 
-                Trace.WriteLine("   validating credentials against " + request.RequestUri);
+                Git.Trace.WriteLine($"validating credentials against '{request.RequestUri}'.");
 
                 // send the request and wait for the response
                 using (HttpWebResponse response = await request.GetResponseAsync() as HttpWebResponse)
                 {
                     // we're looking for 'OK 200' here, anything else is failure
-                    Trace.WriteLine("   server returned: " + response.StatusCode);
+                    Git.Trace.WriteLine($"server returned: '{response.StatusCode}'.");
                     return response.StatusCode == HttpStatusCode.OK;
                 }
             }
             catch (WebException webException)
             {
-                Trace.WriteLine("   server returned: " + webException.Message);
+                Git.Trace.WriteLine($"server returned: '{webException.Message}.");
             }
             catch
             {
-                Trace.WriteLine("   unexpected error");
+                Git.Trace.WriteLine("! unexpected error");
             }
 
-            Trace.WriteLine("   credential validation failed");
+            Git.Trace.WriteLine($"credential validation for '{targetUri}' failed.");
             return false;
         }
 
@@ -252,8 +244,6 @@ namespace Microsoft.Alm.Authentication
             BaseSecureStore.ValidateTargetUri(targetUri);
             BaseSecureStore.ValidateToken(token);
 
-            Trace.WriteLine("VstsAzureAuthority::ValidateToken");
-
             // personal access tokens are effectively credentials, treat them as such
             if (token.Type == TokenType.Personal)
                 return await this.ValidateCredentials(targetUri, (Credential)token);
@@ -263,26 +253,26 @@ namespace Microsoft.Alm.Authentication
                 // create an request to the VSTS deployment data end-point
                 HttpWebRequest request = GetConnectionDataRequest(targetUri, token);
 
-                Trace.WriteLine("   validating token against " + request.Host);
+                Git.Trace.WriteLine($"validating token against '{request.Host}'.");
 
                 // send the request and wait for the response
                 using (HttpWebResponse response = await request.GetResponseAsync() as HttpWebResponse)
                 {
                     // we're looking for 'OK 200' here, anything else is failure
-                    Trace.WriteLine("   server returned: " + response.StatusCode);
+                    Git.Trace.WriteLine($"server returned: '{response.StatusCode}'.");
                     return response.StatusCode == HttpStatusCode.OK;
                 }
             }
             catch (WebException webException)
             {
-                Trace.WriteLine("   server returned: " + webException.Message);
+                Git.Trace.WriteLine($"! server returned: '{webException.Message}'.");
             }
             catch
             {
-                Trace.WriteLine("   unexpected error");
+                Git.Trace.WriteLine("! unexpected error");
             }
 
-            Trace.WriteLine("   token validation failed");
+            Git.Trace.WriteLine($"token validation for '{targetUri}' failed.");
             return false;
         }
 
@@ -294,7 +284,7 @@ namespace Microsoft.Alm.Authentication
             Debug.Assert(accessToken != null && (accessToken.Type == TokenType.Access || accessToken.Type == TokenType.Federated), "The accessToken parameter is null or invalid");
             Debug.Assert(tokenScope != null, "The tokenScope parameter is null");
 
-            Trace.WriteLine("   creating access token scoped to '" + tokenScope + "' for '" + accessToken.TargetIdentity + "'");
+            Git.Trace.WriteLine($"creating access token scoped to '{tokenScope}' for '{accessToken.TargetIdentity}'");
 
             string jsonContent = String.Format(ContentJsonFormat, tokenScope, accessToken.TargetIdentity, targetUri, Environment.MachineName);
             StringContent content = new StringContent(jsonContent, Encoding.UTF8, HttpJsonContentType);
@@ -330,8 +320,6 @@ namespace Microsoft.Alm.Authentication
             Debug.Assert(targetUri != null && targetUri.IsAbsoluteUri, "The targetUri parameter is null or invalid");
             Debug.Assert(token != null && (token.Type == TokenType.Access || token.Type == TokenType.Federated), "The token parameter is null or invalid");
 
-            Trace.WriteLine("VstsAzureAuthority::GetConnectionDataRequest");
-
             // create an request to the VSTS deployment data end-point
             HttpWebRequest request = GetConnectionDataRequest(targetUri);
 
@@ -339,7 +327,7 @@ namespace Microsoft.Alm.Authentication
             switch (token.Type)
             {
                 case TokenType.Access:
-                    Trace.WriteLine("   validating adal access token");
+                    Git.Trace.WriteLine($"validating adal access token for '{targetUri}'.");
 
                     // adal access tokens are packed into the Authorization header
                     string sessionAuthHeader = BearerPrefix + token.Value;
@@ -347,14 +335,14 @@ namespace Microsoft.Alm.Authentication
                     break;
 
                 case TokenType.Federated:
-                    Trace.WriteLine("   validating federated authentication token");
+                    Git.Trace.WriteLine($"validating federated authentication token for '{targetUri}'.");
 
                     // federated authentication tokens are sent as cookie(s)
                     request.Headers.Add(HttpRequestHeader.Cookie, token.Value);
                     break;
 
                 default:
-                    Trace.WriteLine("   unsupported token type");
+                    Git.Trace.WriteLine("! unsupported token type.");
                     break;
             }
 

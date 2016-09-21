@@ -59,8 +59,6 @@ namespace Microsoft.Alm.Authentication
         {
             BaseSecureStore.ValidateTargetUri(targetUri);
 
-            Trace.WriteLine("BasicAuthentication::DeleteCredentials");
-
             this.CredentialStore.DeleteCredentials(targetUri);
         }
 
@@ -75,8 +73,6 @@ namespace Microsoft.Alm.Authentication
         public override Credential GetCredentials(TargetUri targetUri)
         {
             BaseSecureStore.ValidateTargetUri(targetUri);
-
-            Trace.WriteLine("BasicAuthentication::GetCredentials");
 
             return this.CredentialStore.ReadCredentials(targetUri);
         }
@@ -93,8 +89,6 @@ namespace Microsoft.Alm.Authentication
         {
             BaseSecureStore.ValidateTargetUri(targetUri);
             BaseSecureStore.ValidateCredential(credentials);
-
-            Trace.WriteLine("BasicAuthentication::SetCredentials");
 
             this.CredentialStore.WriteCredentials(targetUri, credentials);
         }

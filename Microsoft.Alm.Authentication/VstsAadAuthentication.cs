@@ -99,24 +99,22 @@ namespace Microsoft.Alm.Authentication
         {
             BaseSecureStore.ValidateTargetUri(targetUri);
 
-            Trace.WriteLine("VstsAadAuthentication::InteractiveLogon");
-
             try
             {
                 Token token;
                 if ((token = await this.VstsAuthority.InteractiveAcquireToken(targetUri, this.ClientId, this.Resource, new Uri(RedirectUrl), null)) != null)
                 {
-                    Trace.WriteLine("   token acquisition succeeded.");
+                    Git.Trace.WriteLine($"token acquisition for '{targetUri}' succeeded.");
 
                     return await this.GeneratePersonalAccessToken(targetUri, token, requestCompactToken);
                 }
             }
             catch (AdalException)
             {
-                Trace.WriteLine("   token acquisition failed.");
+                Git.Trace.WriteLine($"token acquisition for '{targetUri}' failed.");
             }
 
-            Trace.WriteLine("   interactive logon failed");
+            Git.Trace.WriteLine($"interactive logon for '{targetUri}' failed");
             return null;
         }
 
@@ -141,24 +139,22 @@ namespace Microsoft.Alm.Authentication
         {
             BaseSecureStore.ValidateTargetUri(targetUri);
 
-            Trace.WriteLine("VstsAadAuthentication::NoninteractiveLogon");
-
             try
             {
                 Token token;
                 if ((token = await this.VstsAuthority.NoninteractiveAcquireToken(targetUri, this.ClientId, this.Resource, new Uri(RedirectUrl))) != null)
                 {
-                    Trace.WriteLine("   token acquisition succeeded");
+                    Git.Trace.WriteLine($"token acquisition for '{targetUri}' succeeded");
 
                     return await this.GeneratePersonalAccessToken(targetUri, token, requestCompactToken);
                 }
             }
             catch (AdalException)
             {
-                Trace.WriteLine("   failed to acquire token from VstsAuthority.");
+                Git.Trace.WriteLine($"failed to acquire for '{targetUri}' token from VstsAuthority.");
             }
 
-            Trace.WriteLine("   non-interactive logon failed");
+            Git.Trace.WriteLine($"non-interactive logon for '{targetUri}' failed");
             return null;
         }
 
@@ -174,9 +170,6 @@ namespace Microsoft.Alm.Authentication
         {
             BaseSecureStore.ValidateTargetUri(targetUri);
             BaseSecureStore.ValidateCredential(credentials);
-
-            Trace.WriteLine("VstsMsaAuthentication::SetCredentials");
-            Trace.WriteLine("   setting AAD credentials is not supported");
         }
     }
 }

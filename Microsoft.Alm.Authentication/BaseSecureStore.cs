@@ -37,8 +37,6 @@ namespace Microsoft.Alm.Authentication
 
         protected void Delete(string targetName)
         {
-            Trace.WriteLine("BaseSecureStore::Delete");
-
             try
             {
                 if (!NativeMethods.CredDelete(targetName, NativeMethods.CredentialType.Generic, 0))
@@ -48,12 +46,16 @@ namespace Microsoft.Alm.Authentication
                     {
                         case NativeMethods.Win32Error.NotFound:
                         case NativeMethods.Win32Error.NoSuchLogonSession:
-                            Trace.WriteLine("   credentials not found for " + targetName);
+                            Git.Trace.WriteLine($"credentials not found for '{targetName}'.");
                             break;
 
                         default:
                             throw new Win32Exception(error, "Failed to delete credentials for " + targetName);
                     }
+                }
+                else
+                {
+                    Git.Trace.WriteLine($"credentials for '{targetName}' deleted from store.");
                 }
             }
             catch (Exception exception)
@@ -89,7 +91,10 @@ namespace Microsoft.Alm.Authentication
                                 Debug.Fail("Failed with error code " + error.ToString("X"));
                             }
                         }
-
+                        else
+                        {
+                            Git.Trace.WriteLine($"credentials for '{@namespace}' purged from store.");
+                        }
                     }
                 }
 
@@ -108,8 +113,6 @@ namespace Microsoft.Alm.Authentication
 
         protected Credential ReadCredentials(string targetName)
         {
-            Trace.WriteLine("BaseSecureStore::ReadCredentials");
-
             Credential credentials = null;
             IntPtr credPtr = IntPtr.Zero;
 
@@ -126,6 +129,8 @@ namespace Microsoft.Alm.Authentication
                     string username = credStruct.UserName ?? String.Empty;
 
                     credentials = new Credential(username, password);
+
+                    Git.Trace.WriteLine($"credentials for '{targetName}' read from store.");
                 }
             }
             finally
@@ -141,8 +146,6 @@ namespace Microsoft.Alm.Authentication
 
         protected Token ReadToken(string targetName)
         {
-            Trace.WriteLine("BaseSecureStore::ReadToken");
-
             Token token = null;
             IntPtr credPtr = IntPtr.Zero;
 
@@ -162,6 +165,8 @@ namespace Microsoft.Alm.Authentication
                         {
                             Token.Deserialize(bytes, type, out token);
                         }
+
+                        Git.Trace.WriteLine($"token for '{targetName}' read from store.");
                     }
                 }
             }
@@ -178,8 +183,6 @@ namespace Microsoft.Alm.Authentication
 
         protected void WriteCredential(string targetName, Credential credentials)
         {
-            Trace.WriteLine("BaseSecureStore::WriteCredential");
-
             NativeMethods.Credential credential = new NativeMethods.Credential()
             {
                 Type = NativeMethods.CredentialType.Generic,
@@ -197,6 +200,8 @@ namespace Microsoft.Alm.Authentication
                     int errorCode = Marshal.GetLastWin32Error();
                     throw new Exception("Failed to write credentials", new Win32Exception(errorCode));
                 }
+
+                Git.Trace.WriteLine($"credentials for '{targetName}' written to store.");
             }
             finally
             {
@@ -209,8 +214,6 @@ namespace Microsoft.Alm.Authentication
 
         protected void WriteToken(string targetName, Token token)
         {
-            Trace.WriteLine("BaseSecureStore::WriteToken");
-
             byte[] bytes = null;
             if (Token.Serialize(token, out bytes))
             {
@@ -236,6 +239,8 @@ namespace Microsoft.Alm.Authentication
                             int errorCode = Marshal.GetLastWin32Error();
                             throw new Exception("Failed to write credentials", new Win32Exception(errorCode));
                         }
+
+                        Git.Trace.WriteLine($"token for '{targetName}' written to store.");
                     }
                     finally
                     {

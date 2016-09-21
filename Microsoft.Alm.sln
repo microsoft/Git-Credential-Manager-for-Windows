@@ -29,10 +29,18 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Cli-Askpass", "Cli-AskPass\
 EndProject
 Project("{D954291E-2A0B-460D-934E-DC6B0785DB48}") = "Cli-Shared", "Cli-Shared\Cli-Shared.shproj", "{DBD202C3-94D5-49D3-8ED1-C72637BA7D90}"
 EndProject
+Project("{D954291E-2A0B-460D-934E-DC6B0785DB48}") = "CommonShared", "CommonShared\CommonShared.shproj", "{0E1864BD-C462-4600-9C29-06BF8562A9B2}"
+EndProject
 Global
 	GlobalSection(SharedMSBuildProjectFiles) = preSolution
 		Cli-Shared\Cli-Shared.projitems*{0653670e-b33a-4ebe-92b8-04c93f43cae0}*SharedItemsImports = 4
+		CommonShared\CommonShared.projitems*{0653670e-b33a-4ebe-92b8-04c93f43cae0}*SharedItemsImports = 4
+		CommonShared\CommonShared.projitems*{0e1864bd-c462-4600-9c29-06bf8562a9b2}*SharedItemsImports = 13
+		CommonShared\CommonShared.projitems*{4827c16d-5c58-406d-ab3f-3700bb0d06fe}*SharedItemsImports = 4
 		Cli-Shared\Cli-Shared.projitems*{62f52119-63d4-40a8-a9df-f1c4b473308a}*SharedItemsImports = 4
+		CommonShared\CommonShared.projitems*{62f52119-63d4-40a8-a9df-f1c4b473308a}*SharedItemsImports = 4
+		CommonShared\CommonShared.projitems*{c1daabc1-b493-459d-bb4f-04fbefb1ba13}*SharedItemsImports = 4
+		CommonShared\CommonShared.projitems*{cf306116-bbf0-4cc7-afce-a506ac4752cb}*SharedItemsImports = 4
 		Cli-Shared\Cli-Shared.projitems*{dbd202c3-94d5-49d3-8ed1-c72637ba7d90}*SharedItemsImports = 13
 	EndGlobalSection
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
