@@ -95,6 +95,16 @@ namespace Bitbucket.Authentication.Test
             bbAuth.SetCredentials(targetUri, credentials);
         }
 
+        [TestMethod]
+        [ExpectedException(typeof(ArgumentNullException))]
+        public void VerifyDeleteCredentialDoesNotDeleteForNullTargetUri()
+        {
+            var credentialStore = new MockCredentialStore();
+            var bbAuth = new BitbucketAuthentication(credentialStore);
+
+            bbAuth.DeleteCredentials(null);
+        }
+
     }
 
     public class MockCredentialStore : ICredentialStore
