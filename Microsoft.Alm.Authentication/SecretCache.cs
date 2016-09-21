@@ -29,7 +29,7 @@ using System.Diagnostics;
 
 namespace Microsoft.Alm.Authentication
 {
-    internal sealed class SecretCache : ICredentialStore, ITokenStore
+    public sealed class SecretCache : ICredentialStore, ITokenStore
     {
         public static StringComparer KeyComparer = StringComparer.OrdinalIgnoreCase;
 
