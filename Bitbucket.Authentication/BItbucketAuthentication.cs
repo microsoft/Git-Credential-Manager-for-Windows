@@ -23,7 +23,7 @@ namespace Bitbucket.Authentication
             PersonalAccessTokenStore = personalAccessTokenStore;
         }
 
-        internal ICredentialStore PersonalAccessTokenStore { get; set; }
+        public ICredentialStore PersonalAccessTokenStore { get; }
 
         /// <inheritdoc />
         public override void DeleteCredentials(TargetUri targetUri)
@@ -34,9 +34,9 @@ namespace Bitbucket.Authentication
 
             Credential credentials = null;
 
-            if ((credentials = this.PersonalAccessTokenStore.ReadCredentials(targetUri)) != null)
+            if ((credentials = PersonalAccessTokenStore.ReadCredentials(targetUri)) != null)
             {
-                this.PersonalAccessTokenStore.DeleteCredentials(targetUri);
+                PersonalAccessTokenStore.DeleteCredentials(targetUri);
                 Trace.WriteLine("   credentials deleted");
             }
         }
@@ -50,10 +50,8 @@ namespace Bitbucket.Authentication
 
             Credential credentials = null;
 
-            if ((credentials = this.PersonalAccessTokenStore.ReadCredentials(targetUri)) != null)
-            {
+            if ((credentials = PersonalAccessTokenStore.ReadCredentials(targetUri)) != null)
                 Trace.WriteLine("   successfully retrieved stored credentials, updating credential cache");
-            }
 
             return credentials;
         }
@@ -91,7 +89,7 @@ namespace Bitbucket.Authentication
             {
                 // TODO
                 authentication = new BitbucketAuthentication( /*tokenScope,*/ personalAccessTokenStore);
-                    //, acquireCredentialsCallback, acquireAuthenticationCodeCallback, authenticationResultCallback);
+                //, acquireCredentialsCallback, acquireAuthenticationCodeCallback, authenticationResultCallback);
                 Trace.WriteLine("   authentication for Bitbucket created");
             }
             else

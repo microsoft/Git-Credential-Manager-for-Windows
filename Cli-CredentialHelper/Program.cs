@@ -27,6 +27,7 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
+using Bitbucket.Authentication;
 using Microsoft.Alm.Authentication;
 
 namespace Microsoft.Alm.Cli
@@ -198,6 +199,12 @@ namespace Microsoft.Alm.Cli
                     Trace.WriteLine("   deleting GitHub credentials");
                     GitHubAuthentication ghAuth = authentication as GitHubAuthentication;
                     ghAuth.DeleteCredentials(operationArguments.TargetUri);
+                    break;
+
+                case AuthorityType.Bitbucket:
+                    Trace.WriteLine("   deleting Bitbucket credentials");
+                    var bbAuth = authentication as BitbucketAuthentication;
+                    bbAuth.DeleteCredentials(operationArguments.TargetUri);
                     break;
             }
 

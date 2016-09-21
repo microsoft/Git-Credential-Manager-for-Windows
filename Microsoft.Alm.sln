@@ -13,6 +13,7 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Cli-CredentialHelper.Test",
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Documents", "Documents", "{663DC05D-FDC6-4EAB-AC4B-983D486B92B9}"
 	ProjectSection(SolutionItems) = preProject
+		BITBUCKET_TODO.md = BITBUCKET_TODO.md
 		LICENSE.TXT = LICENSE.TXT
 		README.md = README.md
 	EndProjectSection
