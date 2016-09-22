@@ -91,7 +91,6 @@
     </Page>
   </ItemGroup>
   <Import Project="..\Cli-Shared\Cli-Shared.projitems" Label="Shared" />
-  <Import Project="..\CommonShared\CommonShared.projitems" Label="Shared" />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>
     <PostBuildEvent>
