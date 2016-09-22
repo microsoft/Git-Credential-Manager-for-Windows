@@ -41,7 +41,7 @@ namespace Microsoft.Alm.Cli
         internal const string FailFace = "U_U";
         internal const string TadaFace = "^_^";
         //private static readonly Version NetFxMinVersion = new Version(4, 5, 1);
-        private static readonly IReadOnlyList<string> Files = new List<string>
+        private static readonly IReadOnlyList<string> FileList = new string[]
         {
             "Microsoft.Alm.Authentication.dll",
             "Microsoft.Alm.Git.dll",
@@ -50,6 +50,11 @@ namespace Microsoft.Alm.Cli
             "GitHub.Authentication.exe",
             "git-credential-manager.exe",
             "git-askpass.exe",
+        };
+        private static readonly IReadOnlyList<string> DocsList = new string[]
+        {
+            "git-askpass.html",
+            "git-credential-manager.html",
         };
 
         public Installer()
@@ -256,15 +261,29 @@ namespace Microsoft.Alm.Cli
                     Console.Out.WriteLine();
                     Console.Out.WriteLine($"Deploying from '{Program.Location}' to '{installation.Path}'.");
 
-                    if (CopyFiles(Program.Location, installation.Libexec, out copiedFiles))
+                    if (CopyFiles(Program.Location, installation.Libexec, FileList, out copiedFiles))
                     {
+                        int copiedCount = copiedFiles.Count;
+
                         foreach (var file in copiedFiles)
                         {
                             Console.Out.WriteLine($"  {file}");
                         }
 
+                        // copy help documents
+                        if (Directory.Exists(installation.Doc) 
+                            && CopyFiles(Program.Location, installation.Doc, DocsList, out copiedFiles))
+                        {
+                            copiedCount += copiedFiles.Count;
+
+                            foreach (var file in copiedFiles)
+                            {
+                                Console.Out.WriteLine($"  {file}");
+                            }
+                        }
+
                         Program.LogEvent($"Deployment to '{installation.Path}' succeeded.", EventLogEntryType.Information);
-                        Console.Out.WriteLine($"     {copiedFiles.Count} file(s) copied");
+                        Console.Out.WriteLine($"     {copiedCount} file(s) copied");
                     }
                     else if (_isForced)
                     {
@@ -290,15 +309,27 @@ namespace Microsoft.Alm.Cli
                     Directory.CreateDirectory(UserBinPath);
                 }
 
-                if (CopyFiles(Program.Location, UserBinPath, out copiedFiles))
+                if (CopyFiles(Program.Location, UserBinPath, FileList, out copiedFiles))
                 {
+                    int copiedCount = copiedFiles.Count;
+
                     foreach (var file in copiedFiles)
                     {
                         Console.Out.WriteLine($"  {file}");
                     }
 
+                    if (CopyFiles(Program.Location, UserBinPath, DocsList, out copiedFiles))
+                    {
+                        copiedCount = copiedFiles.Count;
+
+                        foreach (var file in copiedFiles)
+                        {
+                            Console.Out.WriteLine($"  {file}");
+                        }
+                    }
+
                     Program.LogEvent($"Deployment to '{UserBinPath}' succeeded.", EventLogEntryType.Information);
-                    Console.Out.WriteLine($"     {copiedFiles.Count} file(s) copied");
+                    Console.Out.WriteLine($"     {copiedCount} file(s) copied");
                 }
                 else if (_isForced)
                 {
@@ -317,15 +348,27 @@ namespace Microsoft.Alm.Cli
 
                 if (CygwinPath != null && Directory.Exists(CygwinPath))
                 {
-                    if (CopyFiles(Program.Location, CygwinPath, out copiedFiles))
+                    if (CopyFiles(Program.Location, CygwinPath, FileList, out copiedFiles))
                     {
+                        int copiedCount = copiedFiles.Count;
+
                         foreach (var file in copiedFiles)
                         {
                             Console.Out.WriteLine($"  {file}");
                         }
 
+                        if (CopyFiles(Program.Location, CygwinPath, DocsList, out copiedFiles))
+                        {
+                            copiedCount = copiedFiles.Count;
+
+                            foreach (var file in copiedFiles)
+                            {
+                                Console.Out.WriteLine($"  {file}");
+                            }
+                        }
+
                         Program.LogEvent($"Deployment to '{CygwinPath}' succeeded.", EventLogEntryType.Information);
-                        Console.Out.WriteLine($"     {copiedFiles.Count} file(s) copied");
+                        Console.Out.WriteLine($"     {copiedCount} file(s) copied");
                     }
                     else if (_isForced)
                     {
@@ -522,14 +565,28 @@ namespace Microsoft.Alm.Cli
                     Console.Out.WriteLine();
                     Console.Out.WriteLine($"Removing from '{installation.Path}'.");
 
-                    if (CleanFiles(installation.Libexec, out cleanedFiles))
+                    if (CleanFiles(installation.Libexec, FileList, out cleanedFiles))
                     {
+                        int cleanedCount = cleanedFiles.Count;
+
                         foreach (var file in cleanedFiles)
                         {
                             Console.Out.WriteLine($"  {file}");
                         }
 
-                        Console.Out.WriteLine($"     {cleanedFiles.Count} file(s) cleaned");
+                        // clean help documents
+                        if (Directory.Exists(installation.Doc) 
+                            && CleanFiles(installation.Doc, DocsList, out cleanedFiles))
+                        {
+                            cleanedCount += cleanedFiles.Count;
+
+                            foreach (var file in cleanedFiles)
+                            {
+                                Console.Out.WriteLine($"  {file}");
+                            }
+                        }
+
+                        Console.Out.WriteLine($"     {cleanedCount} file(s) cleaned");
                     }
                     else if (_isForced)
                     {
@@ -550,14 +607,26 @@ namespace Microsoft.Alm.Cli
                     Console.Out.WriteLine();
                     Console.Out.WriteLine($"Removing from '{UserBinPath}'.");
 
-                    if (CleanFiles(UserBinPath, out cleanedFiles))
+                    if (CleanFiles(UserBinPath, FileList, out cleanedFiles))
                     {
+                        int cleanedCount = cleanedFiles.Count;
+
                         foreach (var file in cleanedFiles)
                         {
                             Console.Out.WriteLine($"  {file}");
                         }
 
-                        Console.Out.WriteLine($"     {cleanedFiles.Count} file(s) cleaned");
+                        if (CleanFiles(UserBinPath, DocsList, out cleanedFiles))
+                        {
+                            cleanedCount += cleanedFiles.Count;
+
+                            foreach (var file in cleanedFiles)
+                            {
+                                Console.Out.WriteLine($"  {file}");
+                            }
+                        }
+
+                        Console.Out.WriteLine($"     {cleanedCount} file(s) cleaned");
                     }
                     else if (_isForced)
                     {
@@ -575,14 +644,26 @@ namespace Microsoft.Alm.Cli
 
                 if (CygwinPath != null && Directory.Exists(CygwinPath))
                 {
-                    if (CleanFiles(CygwinPath, out cleanedFiles))
+                    if (CleanFiles(CygwinPath, FileList, out cleanedFiles))
                     {
+                        int cleanedCount = cleanedFiles.Count;
+
                         foreach (var file in cleanedFiles)
                         {
                             Console.Out.WriteLine($"  {file}");
                         }
 
-                        Console.Out.WriteLine($"     {cleanedFiles.Count} file(s) cleaned");
+                        if (CleanFiles(CygwinPath, DocsList, out cleanedFiles))
+                        {
+                            cleanedCount += cleanedFiles.Count;
+
+                            foreach (var file in cleanedFiles)
+                            {
+                                Console.Out.WriteLine($"  {file}");
+                            }
+                        }
+
+                        Console.Out.WriteLine($"     {cleanedCount} file(s) cleaned");
                     }
                 }
 
@@ -673,7 +754,7 @@ namespace Microsoft.Alm.Cli
             return true;
         }
 
-        private bool CleanFiles(string path, out List<string> cleanedFiles)
+        private bool CleanFiles(string path, IReadOnlyList<string> files, out List<string> cleanedFiles)
         {
             cleanedFiles = new List<string>();
 
@@ -685,7 +766,7 @@ namespace Microsoft.Alm.Cli
 
             try
             {
-                foreach (string file in Files)
+                foreach (string file in files)
                 {
                     string target = Path.Combine(path, file);
 
@@ -705,7 +786,7 @@ namespace Microsoft.Alm.Cli
             }
         }
 
-        private bool CopyFiles(string srcPath, string dstPath, out List<string> copiedFiles)
+        private bool CopyFiles(string srcPath, string dstPath, IReadOnlyList<string> files, out List<string> copiedFiles)
         {
             copiedFiles = new List<string>();
 
@@ -719,7 +800,7 @@ namespace Microsoft.Alm.Cli
             {
                 try
                 {
-                    foreach (string file in Files)
+                    foreach (string file in files)
                     {
                         Git.Trace.WriteLine($"copy '{file}' from '{srcPath}' to '{dstPath}'.");
 
