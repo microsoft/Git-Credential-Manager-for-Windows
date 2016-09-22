@@ -65,6 +65,7 @@
     <Compile Include="Global.cs" />
     <Compile Include="IGitHubAuthentication.cs" />
     <Compile Include="IGitHubAuthority.cs" />
+    <Compile Include="VstsLocationServiceException.cs" />
     <Compile Include="SecretCache.cs" />
     <Compile Include="TokenScope.cs" />
     <Compile Include="TargetUri.cs" />
