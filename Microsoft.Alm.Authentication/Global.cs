@@ -30,6 +30,16 @@ namespace Microsoft.Alm.Authentication
     public static class Global
     {
         /// <summary>
+        /// The maximum number of redirects that the request follows.
+        /// </summary>
+        public const int MaxAutomaticRedirections = 16;
+
+        /// <summary>
+        /// The maximum wait time for a network request before timing out
+        /// </summary>
+        public const int RequestTimeout = 15 * 1000; // 15 second limit
+
+        /// <summary>
         /// <para>Gets or sets the user-agent string sent as part of the header in any HTTP operations.</para>
         /// <para>Defaults to a value contrived based on the executing assembly.</para>
         /// </summary>
