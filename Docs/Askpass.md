@@ -4,7 +4,7 @@
 
 # Usage
 
- Generally speaking, Git will use Git Askpass for Windows and you will only need to interact with any authentication dialogs asking for credentials. As much as possible, Askpass attempts to stay out of sight and out of mind. We believe that Askpass is doing its best job when you forget you're depending on it at all.
+ After installation and configuration, Git will use the Git Askpass and you will only need to interact with any authentication dialogs asking for credentials. The Askpass stays invisible as much as possible, so ideally you’ll forget that you’re depending on Askpass at all.
 
      git askpass
 

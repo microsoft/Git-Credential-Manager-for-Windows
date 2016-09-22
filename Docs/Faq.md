@@ -1,6 +1,6 @@
 # FAQ
 
- Frequently asked questions collected from our [issues page](https://github.com/Microsoft/Git-Credential-Manager-for-Windows/issues), our [Twitter feed](https://twitter.com/microsoftgit), and other sources. Please look through this list of questions-and-answers before posting a new issue on a topic.
+ If you have an issue using GCM or Askpass, please review the following FAQ and check our [issue history](https://github.com/Microsoft/Git-Credential-Manager-for-Windows/issues) or our [Twitter feed](https://twitter.com/microsoftgit) before opening up an item on our issues page on Github.
 
 ## Q: Why am always prompted for my username and password?
 
