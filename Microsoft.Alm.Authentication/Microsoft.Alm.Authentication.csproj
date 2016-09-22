@@ -104,7 +104,6 @@
       <Name>Microsoft.Alm.Git</Name>
     </ProjectReference>
   </ItemGroup>
-  <Import Project="..\CommonShared\CommonShared.projitems" Label="Shared" />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- Produce a nuget package of this assembly -->
   <Import Project="..\packages\MSBuildTasks.*\tools\MSBuild.Community.Tasks.Targets" />

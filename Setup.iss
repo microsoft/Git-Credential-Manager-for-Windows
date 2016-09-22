@@ -41,7 +41,7 @@
 #define NetFxSpace 381005824
 
 [Setup]
-AppId={{9F0CBE43-690B-4C03-8845-6AC2CDB29815}
+AppId={{9F0CBE43-690B-4C03-8845-6AC2CDB29815}}
 AppName={#MyAppName}
 AppVersion={#MyAppVersion}
 AppVerName={#MyAppName} {#MyAppVersion}
@@ -90,6 +90,8 @@ Source: "{#deployDir}\Microsoft.IdentityModel.Clients.ActiveDirectory.dll"; Dest
 Source: "{#deployDir}\Microsoft.IdentityModel.Clients.ActiveDirectory.Platform.dll"; DestDir: "{app}"; Flags: ignoreversion
 Source: "{#deployDir}\GitHub.Authentication.exe"; DestDir: "{app}"; Flags: ignoreversion
 Source: "{#deployDir}\README.md"; DestDir: "{app}"; Flags: ignoreversion
+Source: "{#deployDir}\git-credential-manager.html"; DestDir: "{app}"; Flags: ignoreversion
+Source: "{#deployDir}\git-askpass.html"; DestDir: "{app}"; Flags: ignoreversion
 
 [Code]
 type NetFx_Version = (

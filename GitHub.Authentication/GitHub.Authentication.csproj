@@ -222,7 +222,6 @@
   <ItemGroup>
     <Resource Include="Assets\octocat-mark.ico" />
   </ItemGroup>
-  <Import Project="..\CommonShared\CommonShared.projitems" Label="Shared" />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>
     <PostBuildEvent>

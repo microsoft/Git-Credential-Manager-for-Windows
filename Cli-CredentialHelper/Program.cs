@@ -23,11 +23,12 @@
  * WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE."
 **/
 
+using Microsoft.Alm.Authentication;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.IO;
 using System.Linq;
-using Microsoft.Alm.Authentication;
 
 namespace Microsoft.Alm.Cli
 {
@@ -50,7 +51,7 @@ namespace Microsoft.Alm.Cli
         internal const string CommandUninstall = "uninstall";
         internal const string CommandVersion = "version";
 
-        private static readonly List<string> CommandList = new List<string>
+        private static readonly IReadOnlyList<string> CommandList = new string[]
         {
             CommandApprove,
             CommandClear,
@@ -343,55 +344,34 @@ namespace Microsoft.Alm.Cli
 
         private static void PrintHelpMessage()
         {
-            Console.Out.WriteLine("usage: git credential-manager [" + String.Join("|", CommandList) + "] [<args>]");
-            Console.Out.WriteLine();
-            Console.Out.WriteLine("Command Line Options:");
-            Console.Out.WriteLine();
-            Console.Out.WriteLine("  " + CommandDeploy + "       Deploys the " + Title + " package and sets");
-            Console.Out.WriteLine("               Git configuration to use the helper.");
-            Console.Out.WriteLine();
-            Console.Out.WriteLine("    " + Installer.ParamPathKey + "     Specifies a path for the installer to deploy to.");
-            Console.Out.WriteLine("               If a path is provided, the installer will not seek additional");
-            Console.Out.WriteLine("               Git installations to modify.");
-            Console.Out.WriteLine();
-            Console.Out.WriteLine("    " + Installer.ParamPassiveKey + "  Instructs the installer to not prompt the user for input");
-            Console.Out.WriteLine("               during deployment and restricts output to error messages only.");
-            Console.Out.WriteLine("               When combined with " + Installer.ParamForceKey + " all output is eliminated; only the");
-            Console.Out.WriteLine("               return code can be used to validate success.");
-            Console.Out.WriteLine();
-            Console.Out.WriteLine("    " + Installer.ParamForceKey + "    Instructs the installer to proceed with deployment even if");
-            Console.Out.WriteLine("               prerequisites are not met or errors are encountered.");
-            Console.Out.WriteLine("               When combined with " + Installer.ParamPassiveKey + " all output is eliminated; only the");
-            Console.Out.WriteLine("               return code can be used to validate success.");
-            Console.Out.WriteLine();
-            Console.Out.WriteLine("  " + CommandRemove + "       Removes the " + Title + " package");
-            Console.Out.WriteLine("               and unsets Git configuration to no longer use the helper.");
-            Console.Out.WriteLine();
-            Console.Out.WriteLine("    " + Installer.ParamPathKey + "     Specifies a path for the installer to remove from.");
-            Console.Out.WriteLine("               If a path is provided, the installer will not seek additional");
-            Console.Out.WriteLine("               Git installations to modify.");
-            Console.Out.WriteLine();
-            Console.Out.WriteLine("    " + Installer.ParamPassiveKey + "  Instructs the installer to not prompt the user for input");
-            Console.Out.WriteLine("               during removal and restricts output to error messages only.");
-            Console.Out.WriteLine("               When combined with " + Installer.ParamForceKey + " all output is eliminated; only the");
-            Console.Out.WriteLine("               return code can be used to validate success.");
-            Console.Out.WriteLine();
-            Console.Out.WriteLine("    " + Installer.ParamForceKey + "    Instructs the installer to proceed with removal even if");
-            Console.Out.WriteLine("               prerequisites are not met or errors are encountered.");
-            Console.Out.WriteLine("               When combined with " + Installer.ParamPassiveKey + " all output is eliminated; only the");
-            Console.Out.WriteLine("               return code can be used to validate success.");
-            Console.Out.WriteLine();
-            Console.Out.WriteLine("  " + CommandDelete + "       Removes stored credentials for a given URL.");
-            Console.Out.WriteLine("               Any future attempts to authenticate with the remote will require");
-            Console.Out.WriteLine("               authentication steps to be completed again.");
-            Console.Out.WriteLine();
-            Console.Out.WriteLine("      `git credential-manager clear <url>`");
-            Console.Out.WriteLine();
-            Console.Out.WriteLine("  " + CommandVersion + "       Displays the current version.");
+            const string HelpFileName = "git-credential-manager.html";
 
-            Console.Out.WriteLine();
-            PrintConfigurationHelp();
-            Console.Out.WriteLine();
+            Console.Out.WriteLine("usage: git credential-manager [" + String.Join("|", CommandList) + "] [<args>]");
+
+            List<Git.GitInstallation> installations;
+            if (Git.Where.FindGitInstallations(out installations))
+            {
+                foreach (var installation in installations)
+                {
+                    if (Directory.Exists(installation.Doc))
+                    {
+                        string doc = Path.Combine(installation.Doc, HelpFileName);
+
+                        // if the help file exists, send it to the operating system to display to the user
+                        if (File.Exists(doc))
+                        {
+                            Git.Trace.WriteLine($"opening help documentation '{doc}'.");
+
+                            Process.Start(doc);
+
+                            return;
+                        }
+                    }
+                }
+            }
+
+            Console.Error.WriteLine("Unable to open help documentation.");
+            Git.Trace.WriteLine("failed to open help documentation.");
         }
 
         private static void Remove()
