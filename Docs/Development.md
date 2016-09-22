@@ -1,6 +1,6 @@
 # Development and Debugging
 
- Development on the GCM geenrally requires Visual Studio 2015 or newer. Luckily, Visual Studio offers a free [Community Edition](https://www.visualstudio.com/products/visual-studio-community-vs), for those of us who do not have an enterpise copy installed.
+ Developing for GCM and/or Askpass requires Visual Studio 2015 or newer, any version (including the free [Community Edition](https://www.visualstudio.com/products/visual-studio-community-vs)).
 
 ## Getting Started
 

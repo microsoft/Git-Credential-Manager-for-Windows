@@ -1,6 +1,6 @@
 # Configuration Options
 
- For the majority of users, the default configuration is the correct configuration. There will always be those who need special features or the ability to tweak how a service operates.
+ GCM/Askpass work out of the box for most users. Configuration options are available to customize or tweak behavior(s).
  
  The Git Credential Manager for Windows [GCM] can be configured using Git's configuration files, and follows all of the same rules Git does when consuming the files. Global configuration settings override system configuration settings, and local configuration settings override global settings; and because the configuration details exist within Git's configuration files you can use Git's `git config` utility to set, unset, and alter the setting values.
  

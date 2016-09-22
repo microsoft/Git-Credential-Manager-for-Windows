@@ -4,7 +4,7 @@
 
 # Usage
 
- Generally speaking, Git will use the Git Credential Manager for Windows and you will only need to interact with any authentication dialogs asking for credentials. As much as possible, the GCM attempts to stay out of sight and out of mind. We believe that the GCM is doing its best job when you forget you're depending on it at all.
+ After installation, Git will use the Git Credential Manager for Windows and you will only need to interact with any authentication dialogs asking for credentials. The GCM stays invisible as much as possible, so ideally you’ll forget that you’re depending on GCM at all.
 
  Assuming the GCM has been installed, using your favorite Windows console (Command Prompt, PowerShell, ConEmu, etc), use the following command to interact directly with the GCM.
 
@@ -15,7 +15,6 @@
 ### delete
 
  Removes stored credentials for a given URL. Any future attempts to authenticate with the remote will require authentication steps to be completed again.
-
 
 ### deploy _[--path \<installion_path\>] [--passive] [--force]_
 
