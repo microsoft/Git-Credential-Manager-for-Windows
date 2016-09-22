@@ -1,8 +1,10 @@
-﻿using System;
+﻿using Microsoft.Alm.Authentication;
+using System;
+using System.Collections.Generic;
 using System.Diagnostics;
+using System.IO;
 using System.Linq;
 using System.Text.RegularExpressions;
-using Microsoft.Alm.Authentication;
 
 namespace Microsoft.Alm.Cli
 {
@@ -192,11 +194,34 @@ namespace Microsoft.Alm.Cli
 
         private static void PrintHelpMessage()
         {
+            const string HelpFileName = "git-askpass.html";
+
             Console.Out.WriteLine("usage: git askpass '<user_prompt_text>'");
 
-            Console.Out.WriteLine();
-            PrintConfigurationHelp();
-            Console.Out.WriteLine();
+            List<Git.GitInstallation> installations;
+            if (Git.Where.FindGitInstallations(out installations))
+            {
+                foreach (var installation in installations)
+                {
+                    if (Directory.Exists(installation.Doc))
+                    {
+                        string doc = Path.Combine(installation.Doc, HelpFileName);
+
+                        // if the help file exists, send it to the operating system to display to the user
+                        if (File.Exists(doc))
+                        {
+                            Git.Trace.WriteLine($"opening help documentation '{doc}'.");
+
+                            Process.Start(doc);
+
+                            return;
+                        }
+                    }
+                }
+            }
+
+            Console.Error.WriteLine("Unable to open help documentation.");
+            Git.Trace.WriteLine("failed to open help documentation.");
         }
     }
 }
