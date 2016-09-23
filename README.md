@@ -9,7 +9,7 @@
  * Two-factor authentication support for GitHub
  * Personal Access Token generation and usage support for Visual Studio Team Services and GitHub
  * Non-interactive mode support for Visual Studio Team Services backed by Azure Directory
- * Kerberos authentication for Team Foundation Server ([see notes](#q-i-thought-microsoft-was-maintaining-this-why-does-the-gcm-not-work-as-expected-with-tfs))
+ * Kerberos authentication for Team Foundation Server ([see notes](Docs/Faq.md#q-i-thought-microsoft-was-maintaining-this-why-does-the-gcm-not-work-as-expected-with-tfs))
  * Optional settings for [build agent optimization](Docs/Automation.md)
 
 ### Community
