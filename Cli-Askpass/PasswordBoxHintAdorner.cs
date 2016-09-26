@@ -34,6 +34,8 @@ namespace Microsoft.Alm.Gui
 
             AdornerLayer adornerLayer = AdornerLayer.GetAdornerLayer(adornedElement);
             adornerLayer?.Add(this);
+
+            IsHitTestVisible = false;
         }
 
         public object Content
