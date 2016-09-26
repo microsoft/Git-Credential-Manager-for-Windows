@@ -148,15 +148,6 @@ namespace Microsoft.Alm.Authentication
         }
 
         /// <summary>
-        /// Gets a canonical string representation for the <see cref="ActualUri"/>.
-        /// </summary>
-        /// <returns></returns>
-        public override string ToString()
-        {
-            return ActualUri.ToString();
-        }
-
-        /// <summary>
         /// Gets the client header enabled to work with proxies as necissary.
         /// </summary>
         public HttpClientHandler HttpClientHandler
@@ -164,14 +155,32 @@ namespace Microsoft.Alm.Authentication
             get
             {
                 bool useProxy = ProxyUri != null;
-                return new HttpClientHandler()
+
+                var client = new HttpClientHandler()
                 {
-                    Proxy = WebProxy,
+                    AllowAutoRedirect = true,
+                    UseCookies = true,
                     UseProxy = useProxy,
-                    MaxAutomaticRedirections = 2,
-                    UseDefaultCredentials = true
+                    MaxAutomaticRedirections = Global.MaxAutomaticRedirections,
+                    UseDefaultCredentials = true,
                 };
+
+                if (useProxy)
+                {
+                    client.Proxy = WebProxy;
+                }
+
+                return client;
             }
+        }
+
+        /// <summary>
+        /// Gets a canonical string representation for the <see cref="ActualUri"/>.
+        /// </summary>
+        /// <returns></returns>
+        public override string ToString()
+        {
+            return ActualUri.ToString();
         }
 
         /// <summary>

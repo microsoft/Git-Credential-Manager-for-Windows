@@ -37,11 +37,6 @@ namespace Microsoft.Alm.Authentication
 {
     internal class VstsAzureAuthority : AzureAuthority, IVstsAuthority
     {
-        /// <summary>
-        /// The maximum wait time for a network request before timing out
-        /// </summary>
-        public const int RequestTimeout = 15 * 1000; // 15 second limit
-
         public VstsAzureAuthority(string authorityHostUrl = null)
             : base()
         {
@@ -60,8 +55,6 @@ namespace Microsoft.Alm.Authentication
         /// <returns></returns>
         public async Task<Token> GeneratePersonalAccessToken(TargetUri targetUri, Token accessToken, VstsTokenScope tokenScope, bool requireCompactToken)
         {
-            const string AccessTokenHeader = "Bearer";
-
             BaseSecureStore.ValidateTargetUri(targetUri);
             BaseSecureStore.ValidateToken(accessToken);
             if (ReferenceEquals(tokenScope, null))
@@ -69,62 +62,31 @@ namespace Microsoft.Alm.Authentication
 
             try
             {
-                // create a `HttpClient` with a minimum number of redirects, default creds, and a reasonable timeout (access token generation seems to hang occasionally)
-                using (HttpClientHandler handler = new HttpClientHandler()
+                using (HttpClient httpClient = CreateHttpClient(targetUri, accessToken))
                 {
-                    MaxAutomaticRedirections = 2,
-                    UseDefaultCredentials = true
-                })
-                using (HttpClient httpClient = new HttpClient(handler)
-                {
-                    Timeout = TimeSpan.FromMilliseconds(RequestTimeout)
-                })
-                {
-                    httpClient.DefaultRequestHeaders.Add("User-Agent", Global.UserAgent);
-
-                    switch (accessToken.Type)
-                    {
-                        case TokenType.Access:
-                            Git.Trace.WriteLine($"using Azure access token to acquire personal access token for '{targetUri}'.");
-
-                            httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue(AccessTokenHeader, accessToken.Value);
-                            break;
-
-                        case TokenType.Federated:
-                            Git.Trace.WriteLine($"using federated authentication token to acquire personal access token for '{targetUri}'.");
-
-                            httpClient.DefaultRequestHeaders.Add("Cookie", accessToken.Value);
-                            break;
-
-                        default:
-                            return null;
-                    }
-
                     if (await PopulateTokenTargetId(targetUri, accessToken))
                     {
-                        Uri requestUri;
-                        if (TryCreateRequestUri(targetUri, requireCompactToken, out requestUri))
+                        Uri requestUri = await CreatePersonalAccessTokenRequestUri(httpClient, targetUri, requireCompactToken);
+
+                        using (StringContent content = GetAccessTokenRequestBody(targetUri, accessToken, tokenScope))
+                        using (HttpResponseMessage response = await httpClient.PostAsync(requestUri, content))
                         {
-                            using (StringContent content = GetAccessTokenRequestBody(targetUri, accessToken, tokenScope))
-                            using (HttpResponseMessage response = await httpClient.PostAsync(requestUri, content))
+                            if (response.IsSuccessStatusCode)
                             {
-                                if (response.StatusCode == HttpStatusCode.OK)
+                                string responseText = await response.Content.ReadAsStringAsync();
+
+                                if (!String.IsNullOrWhiteSpace(responseText))
                                 {
-                                    string responseText = await response.Content.ReadAsStringAsync();
-
-                                    if (!String.IsNullOrWhiteSpace(responseText))
+                                    // find the 'token : <value>' portion of the result content, if any
+                                    Match tokenMatch = null;
+                                    if ((tokenMatch = Regex.Match(responseText, @"\s*""token""\s*:\s*""([^\""]+)""\s*", RegexOptions.Compiled | RegexOptions.CultureInvariant | RegexOptions.IgnoreCase)).Success)
                                     {
-                                        // find the 'token : <value>' portion of the result content, if any
-                                        Match tokenMatch = null;
-                                        if ((tokenMatch = Regex.Match(responseText, @"\s*""token""\s*:\s*""([^\""]+)""\s*", RegexOptions.Compiled | RegexOptions.CultureInvariant | RegexOptions.IgnoreCase)).Success)
-                                        {
-                                            string tokenValue = tokenMatch.Groups[1].Value;
-                                            Token token = new Token(tokenValue, TokenType.Personal);
+                                        string tokenValue = tokenMatch.Groups[1].Value;
+                                        Token token = new Token(tokenValue, TokenType.Personal);
 
-                                            Git.Trace.WriteLine($"personal access token acquisition for '{targetUri}' succeeded.");
+                                        Git.Trace.WriteLine($"personal access token acquisition for '{targetUri}' succeeded.");
 
-                                            return token;
-                                        }
+                                        return token;
                                     }
                                 }
                             }
@@ -276,7 +238,147 @@ namespace Microsoft.Alm.Authentication
             return false;
         }
 
-        private StringContent GetAccessTokenRequestBody(TargetUri targetUri, Token accessToken, VstsTokenScope tokenScope)
+        internal static HttpClient CreateHttpClient(TargetUri targetUri, Token accessToken)
+        {
+            const string AccessTokenHeader = "Bearer";
+            const string FederatedTokenHeader = "Cookie";
+
+            Debug.Assert(targetUri != null, $"The `{nameof(targetUri)}` parameter is null.");
+            Debug.Assert(accessToken != null && !String.IsNullOrWhiteSpace(accessToken.Value), $"The `{nameof(accessToken)}' is null or invalid.");
+
+            HttpClient httpClient = CreateHttpClient(targetUri);
+
+            switch (accessToken.Type)
+            {
+                case TokenType.Access:
+                    httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue(AccessTokenHeader, accessToken.Value);
+                    break;
+
+                case TokenType.Federated:
+                    httpClient.DefaultRequestHeaders.Add(FederatedTokenHeader, accessToken.Value);
+                    break;
+
+                default:
+                    return null;
+            }
+
+            return httpClient;
+        }
+
+        internal static HttpClient CreateHttpClient(TargetUri targetUri, Credential credentials)
+        {
+            const string CredentialHeader = "Basic";
+
+            Debug.Assert(targetUri != null, $"The `{nameof(targetUri)}` parameter is null.");
+
+            HttpClient httpClient = CreateHttpClient(targetUri);
+            
+            httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue(CredentialHeader, GetBase64EncodedCredentials(credentials));
+
+            return httpClient;
+        }
+
+        internal static HttpWebRequest GetConnectionDataRequest(Uri uri, Token token)
+        {
+            const string BearerPrefix = "Bearer ";
+
+            Debug.Assert(uri != null && uri.IsAbsoluteUri, $"The `{nameof(uri)}` parameter is null or invalid");
+            Debug.Assert(token != null && (token.Type == TokenType.Access || token.Type == TokenType.Federated), $"The `{nameof(token)}` parameter is null or invalid");
+
+            // create an request to the VSTS deployment data end-point
+            HttpWebRequest request = GetConnectionDataRequest(uri);
+
+            // different types of tokens are packed differently
+            switch (token.Type)
+            {
+                case TokenType.Access:
+                    Git.Trace.WriteLine($"validating adal access token for '{uri}'.");
+
+                    // adal access tokens are packed into the Authorization header
+                    string sessionAuthHeader = BearerPrefix + token.Value;
+                    request.Headers.Add(HttpRequestHeader.Authorization, sessionAuthHeader);
+                    break;
+
+                case TokenType.Federated:
+                    Git.Trace.WriteLine($"validating federated authentication token for '{uri}'.");
+
+                    // federated authentication tokens are sent as cookie(s)
+                    request.Headers.Add(HttpRequestHeader.Cookie, token.Value);
+                    break;
+
+                default:
+                    Git.Trace.WriteLine("! unsupported token type.");
+                    break;
+            }
+
+            return request;
+        }
+
+        internal static HttpWebRequest GetConnectionDataRequest(TargetUri targetUri, Credential credentials)
+        {
+            Debug.Assert(targetUri != null && targetUri.IsAbsoluteUri, "The targetUri parameter is null or invalid");
+            Debug.Assert(credentials != null, "The credentials parameter is null or invalid");
+
+            // create an request to the VSTS deployment data end-point
+            HttpWebRequest request = GetConnectionDataRequest(targetUri);
+
+            // credentials are packed into the 'Authorization' header as a base64 encoded pair
+            string basicAuthHeader = GetBasicAuthorizationHeader(credentials);
+            request.Headers.Add(HttpRequestHeader.Authorization, basicAuthHeader);
+
+            return request;
+        }
+
+        internal static HttpWebRequest GetConnectionDataRequest(TargetUri targetUri)
+        {
+            const string VstsValidationUrlFormat = "{0}://{1}/_apis/connectiondata";
+
+            Debug.Assert(targetUri != null && targetUri.IsAbsoluteUri, "The targetUri parameter is null or invalid");
+
+            // create a url to the connection data end-point, it's deployment level and "always on".
+            string validationUrl = String.Format(System.Globalization.CultureInfo.InvariantCulture, VstsValidationUrlFormat, targetUri.Scheme, targetUri.DnsSafeHost);
+
+            // start building the request, only supports GET
+            HttpWebRequest request = WebRequest.CreateHttp(validationUrl);
+            request.Timeout = Global.RequestTimeout;
+            request.UserAgent = Global.UserAgent;
+            request.MaximumAutomaticRedirections = Global.MaxAutomaticRedirections;
+
+            return request;
+        }
+
+        internal static async Task<Uri> GetIdentityServiceUri(HttpClient client, TargetUri targetUri)
+        {
+            const string LocationServiceUrlFormat = "https://{0}/_apis/ServiceDefinitions/LocationService2/951917AC-A960-4999-8464-E3F0AA25B381?api-version=1.0";
+
+            Debug.Assert(client != null, $"The `{nameof(client)}` parameter is null.");
+            Debug.Assert(targetUri != null && targetUri.IsAbsoluteUri, $"The `{nameof(targetUri)}` parameter is null or invalid");
+
+            string locationServiceUrl = String.Format(System.Globalization.CultureInfo.InvariantCulture, LocationServiceUrlFormat, targetUri.Host);
+            Uri idenitityServiceUri = null;
+
+            using (HttpResponseMessage response = await client.GetAsync(locationServiceUrl))
+            {
+                if (response.IsSuccessStatusCode)
+                {
+                    using (HttpContent content = response.Content)
+                    {
+                        string responseText = await content.ReadAsStringAsync();
+
+                        Match match;
+                        if ((match = Regex.Match(responseText, @"\""location\""\:\""([^\""]+)\""", RegexOptions.Compiled | RegexOptions.CultureInvariant | RegexOptions.IgnoreCase)).Success)
+                        {
+                            string identityServiceUrl = match.Groups[1].Value;
+                            idenitityServiceUri = new Uri(identityServiceUrl, UriKind.Absolute);
+                        }
+                    }
+                }
+            }
+
+            return idenitityServiceUri;
+        }
+
+        private static StringContent GetAccessTokenRequestBody(TargetUri targetUri, Token accessToken, VstsTokenScope tokenScope)
         {
             const string ContentJsonFormat = "{{ \"scope\" : \"{0}\", \"targetAccounts\" : [\"{1}\"], \"displayName\" : \"Git: {2} on {3}\" }}";
             const string HttpJsonContentType = "application/json";
@@ -292,109 +394,66 @@ namespace Microsoft.Alm.Authentication
             return content;
         }
 
-        private HttpWebRequest GetConnectionDataRequest(TargetUri targetUri, Credential credentials)
+        private static HttpClient CreateHttpClient(TargetUri targetUri)
         {
-            const string BasicPrefix = "Basic ";
+            Debug.Assert(targetUri != null, $"The `{nameof(targetUri)}` is null.");
+
+            HttpClient httpClient = new HttpClient(targetUri.HttpClientHandler)
+            {
+                Timeout = TimeSpan.FromMilliseconds(Global.RequestTimeout),
+            };
+
+            httpClient.DefaultRequestHeaders.Add("User-Agent", Global.UserAgent);
+
+            return httpClient;
+        }
+
+        private async Task<Uri> CreatePersonalAccessTokenRequestUri(HttpClient client, TargetUri targetUri, bool requireCompactToken)
+        {
+            const string SessionTokenUrl = "_apis/token/sessiontokens?api-version=1.0";
+            const string CompactTokenUrl = SessionTokenUrl + "&tokentype=compact";
+
+            if (client == null)
+                throw new ArgumentNullException(nameof(client));
+            BaseSecureStore.ValidateTargetUri(targetUri);
+
+            Uri idenityServiceUri = await GetIdentityServiceUri(client, targetUri);
+
+            if (idenityServiceUri == null)
+                throw new VstsLocationServiceException($"Failed to find Identity Service for {targetUri}");
+
+            string url = idenityServiceUri.ToString();
+
+            url += requireCompactToken
+                ? CompactTokenUrl
+                : SessionTokenUrl;
+
+            return new Uri(url, UriKind.Absolute);
+        }
+
+        private static string GetBase64EncodedCredentials(Credential credentials)
+        {
             const string UsernamePasswordFormat = "{0}:{1}";
 
-            Debug.Assert(targetUri != null && targetUri.IsAbsoluteUri, "The targetUri parameter is null or invalid");
             Debug.Assert(credentials != null, "The credentials parameter is null or invalid");
 
-            // create an request to the VSTS deployment data end-point
-            HttpWebRequest request = GetConnectionDataRequest(targetUri);
-
-            // credentials are packed into the 'Authorization' header as a base64 encoded pair
             string credPair = String.Format(UsernamePasswordFormat, credentials.Username, credentials.Password);
             byte[] credBytes = Encoding.ASCII.GetBytes(credPair);
             string base64enc = Convert.ToBase64String(credBytes);
+
+            return base64enc;
+        }
+
+        private static string GetBasicAuthorizationHeader(Credential credentials)
+        {
+            const string BasicPrefix = "Basic ";
+
+
+            // credentials are packed into the 'Authorization' header as a base64 encoded pair
+            string base64enc = GetBase64EncodedCredentials(credentials);
             string basicAuthHeader = BasicPrefix + base64enc;
-            request.Headers.Add(HttpRequestHeader.Authorization, basicAuthHeader);
 
-            return request;
-        }
-
-        private HttpWebRequest GetConnectionDataRequest(TargetUri targetUri, Token token)
-        {
-            const string BearerPrefix = "Bearer ";
-
-            Debug.Assert(targetUri != null && targetUri.IsAbsoluteUri, "The targetUri parameter is null or invalid");
-            Debug.Assert(token != null && (token.Type == TokenType.Access || token.Type == TokenType.Federated), "The token parameter is null or invalid");
-
-            // create an request to the VSTS deployment data end-point
-            HttpWebRequest request = GetConnectionDataRequest(targetUri);
-
-            // different types of tokens are packed differently
-            switch (token.Type)
-            {
-                case TokenType.Access:
-                    Git.Trace.WriteLine($"validating adal access token for '{targetUri}'.");
-
-                    // adal access tokens are packed into the Authorization header
-                    string sessionAuthHeader = BearerPrefix + token.Value;
-                    request.Headers.Add(HttpRequestHeader.Authorization, sessionAuthHeader);
-                    break;
-
-                case TokenType.Federated:
-                    Git.Trace.WriteLine($"validating federated authentication token for '{targetUri}'.");
-
-                    // federated authentication tokens are sent as cookie(s)
-                    request.Headers.Add(HttpRequestHeader.Cookie, token.Value);
-                    break;
-
-                default:
-                    Git.Trace.WriteLine("! unsupported token type.");
-                    break;
-            }
-
-            return request;
-        }
-
-        private HttpWebRequest GetConnectionDataRequest(TargetUri targetUri)
-        {
-            const string VstsValidationUrlFormat = "{0}://{1}/_apis/connectiondata";
-
-            Debug.Assert(targetUri != null && targetUri.IsAbsoluteUri, "The targetUri parameter is null or invalid");
-
-            // create a url to the connection data end-point, it's deployment level and "always on".
-            string validationUrl = String.Format(VstsValidationUrlFormat, targetUri.Scheme, targetUri.DnsSafeHost);
-
-            // start building the request, only supports GET
-            HttpWebRequest request = WebRequest.CreateHttp(validationUrl);
-            request.Timeout = RequestTimeout;
-
-            return request;
-        }
-
-        private bool TryCreateRequestUri(TargetUri targetUri, bool requireCompactToken, out Uri requestUri)
-        {
-            const string TokenAuthHostFormat = "app.vssps.{0}";
-            const string SessionTokenUrl = "https://" + TokenAuthHostFormat + "/_apis/token/sessiontokens?api-version=1.0";
-            const string CompactTokenUrl = SessionTokenUrl + "&tokentype=compact";
-
-            Debug.Assert(targetUri != null, $"The `targetUri` parameter is null.");
-
-            requestUri = null;
-
-            if (targetUri == null)
-                return false;
-
-            // the host name can be something like foo.visualstudio.com in which case we
-            // need the "foo." prefix removed.
-            string host = targetUri.Host;
-            int first = targetUri.Host.IndexOf('.');
-            int last = targetUri.Host.LastIndexOf('.');
-
-            // since the first and last index of '.' do not agree, substring after the first
-            if (first != last)
-            {
-                host = targetUri.Host.Substring(first + 1);
-            }
-
-            host = requireCompactToken
-                ? String.Format(CompactTokenUrl, host)
-                : String.Format(SessionTokenUrl, host);
-
-            return Uri.TryCreate(host, UriKind.Absolute, out requestUri);
+            return basicAuthHeader;
         }
     }
 }
