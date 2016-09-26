@@ -14,8 +14,9 @@ namespace Microsoft.Alm.Cli
         public const string Description = "Secure SSH key helper for Windows, by Microsoft";
         public const string DefinitionUrlPassphrase = "https://www.visualstudio.com/docs/git/gcm-ssh-passphrase";
 
-        private static readonly Regex AskCredentialRegex = new Regex(@"\s+(\S+)\s+for\s+'([^']+)':\s*$", RegexOptions.Compiled | RegexOptions.CultureInvariant | RegexOptions.IgnoreCase);
-        private static readonly Regex AskPassphraseRegex = new Regex(@"\s+Enter\s+passphrase\s+for\s+key\s+'([^']+)':\s*$", RegexOptions.Compiled | RegexOptions.CultureInvariant | RegexOptions.IgnoreCase);
+        private static readonly Regex AskCredentialRegex = new Regex(@"\s*(\S+)\s+for\s+'([^']+)':\s*$", RegexOptions.Compiled | RegexOptions.CultureInvariant | RegexOptions.IgnoreCase);
+        private static readonly Regex AskPassphraseRegex = new Regex(@"\s*\""Enter\s+passphrase\s+for\s+key\s+'([^']+)':\s+\""\s*$", RegexOptions.Compiled | RegexOptions.CultureInvariant | RegexOptions.IgnoreCase);
+        private static readonly Regex AskPasswordRegex = new Regex(@"\s*\""([^']+)'s\s+password:\s+\""\s*$", RegexOptions.Compiled | RegexOptions.CultureInvariant | RegexOptions.IgnoreCase);
 
         private static void Askpass()
         {
@@ -115,7 +116,8 @@ namespace Microsoft.Alm.Cli
                     Git.Trace.WriteLine("unable to parse URL.");
                 }
             }
-            else if ((match = AskPassphraseRegex.Match(Environment.CommandLine)).Success)
+            else if ((match = AskPasswordRegex.Match(Environment.CommandLine)).Success
+                || (match = AskPassphraseRegex.Match(Environment.CommandLine)).Success)
             {
                 Git.Trace.WriteLine("querying for passphrase key.");
 
@@ -150,10 +152,10 @@ namespace Microsoft.Alm.Cli
         {
             EnableDebugTrace();
 
-            if (args.Length == 0
-                    || String.Equals(args[0], "--help", StringComparison.OrdinalIgnoreCase)
+            if (args.Length > 0
+                && (String.Equals(args[0], "--help", StringComparison.OrdinalIgnoreCase)
                     || String.Equals(args[0], "-h", StringComparison.OrdinalIgnoreCase)
-                    || args[0].Contains('?'))
+                    || args[0].Contains('?')))
             {
                 PrintHelpMessage();
                 return;
