@@ -23,11 +23,11 @@
  * WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE."
 **/
 
+using Microsoft.Alm.Authentication;
 using System;
-using System.Diagnostics;
+using System.Collections.Generic;
 using System.IO;
 using System.Text;
-using Microsoft.Alm.Authentication;
 
 namespace Microsoft.Alm.Cli
 {
@@ -152,6 +152,39 @@ namespace Microsoft.Alm.Cli
             get { return _username; }
         }
         public string CustomNamespace { get; set; }
+        /// <summary>
+        /// Gets a map of the process's environmental variables keyed on case-insensitive names.
+        /// </summary>
+        public IReadOnlyDictionary<string, string> EnvironmentVariables
+        {
+            get
+            {
+                if (_environmentVariables == null)
+                {
+                    _environmentVariables = new Dictionary<string, string>(Program.EnvironKeyComparer);
+                    var iter = Environment.GetEnvironmentVariables().GetEnumerator();
+                    while (iter.MoveNext())
+                    {
+                        _environmentVariables[iter.Key as string] = iter.Value as string;
+                    }
+                }
+                return _environmentVariables;
+            }
+        }
+        /// <summary>
+        /// Gets the process's Git configuration based on current working directory, user's folder, and Git's system directory.
+        /// </summary>
+        public Git.Configuration GitConfiguration
+        {
+            get
+            {
+                if (_configuration == null)
+                {
+                    LoadConfiguration();
+                }
+                return _configuration;
+            }
+        }
         public Interactivity Interactivity { get; set; }
         public bool PreserveCredentials { get; set; }
         public Uri ProxyUri
@@ -222,6 +255,8 @@ namespace Microsoft.Alm.Cli
                 CreateTargetUri();
             }
         }
+        public bool UseConfigLocal { get; set; }
+        public bool UseConfigSystem { get; set; }
         public TargetUri TargetUri
         {
             get { return _targetUri; }
@@ -239,6 +274,8 @@ namespace Microsoft.Alm.Cli
         public bool ValidateCredentials { get; set; }
         public bool WriteLog { get; set; }
 
+        private Git.Configuration _configuration;
+        private Dictionary<string, string> _environmentVariables;
         private string _password;
         private string _queryHost;
         private string _queryPath;
@@ -249,26 +286,27 @@ namespace Microsoft.Alm.Cli
         private bool _useHttpPath;
         private string _username;
 
+        public void LoadConfiguration()
+        {
+            _configuration = new Git.Configuration(Environment.CurrentDirectory, UseConfigLocal, UseConfigSystem);
+        }
+
         public void SetCredentials(Credential credentials)
         {
-            Trace.WriteLine("OperationArguments::SetCredentials");
-
             _username = credentials.Username;
             _password = credentials.Password;
         }
 
         public void SetProxy(string url)
         {
-            Trace.WriteLine("OperationArguments::SetProxy");
-
             Uri tmp = null;
             if (Uri.TryCreate(url, UriKind.Absolute, out tmp))
             {
-                Trace.WriteLine("   successfully set proxy to " + tmp.AbsoluteUri + ".");
+                Git.Trace.WriteLine($"successfully set proxy to '{tmp.AbsoluteUri}'.");
             }
             else
             {
-                Trace.WriteLine("   proxy cleared.");
+                Git.Trace.WriteLine("proxy cleared.");
             }
             this.ProxyUri = tmp;
         }
@@ -311,9 +349,9 @@ namespace Microsoft.Alm.Cli
         public void WriteToStream(Stream writableStream)
         {
             if (ReferenceEquals(writableStream, null))
-                throw new ArgumentNullException("writableStream");
+                throw new ArgumentNullException(nameof(writableStream));
             if (!writableStream.CanWrite)
-                throw new ArgumentException("writableStream");
+                throw new ArgumentException(nameof(writableStream));
 
             // Git reads/writes UTF-8, we'll explicitly encode to Utf-8 to
             // avoid NetFx or the operating system making the wrong encoding
@@ -327,8 +365,6 @@ namespace Microsoft.Alm.Cli
 
         internal void CreateTargetUri()
         {
-            Trace.WriteLine("OperationArguments::CreateTargetUri");
-
             string queryUrl = null;
 
             // when the target requests a path...
@@ -404,8 +440,6 @@ namespace Microsoft.Alm.Cli
             }
 
             _queryUri = new Uri(queryUrl);
-
-            Trace.WriteLine($"   created {_queryUri}");
 
             _targetUri = new TargetUri(_queryUri, _proxyUri);
         }

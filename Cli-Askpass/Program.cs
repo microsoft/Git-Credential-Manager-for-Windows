@@ -1,8 +1,10 @@
-﻿using System;
+﻿using Microsoft.Alm.Authentication;
+using System;
+using System.Collections.Generic;
 using System.Diagnostics;
+using System.IO;
 using System.Linq;
 using System.Text.RegularExpressions;
-using Microsoft.Alm.Authentication;
 
 namespace Microsoft.Alm.Cli
 {
@@ -12,17 +14,16 @@ namespace Microsoft.Alm.Cli
         public const string Description = "Secure SSH key helper for Windows, by Microsoft";
         public const string DefinitionUrlPassphrase = "https://www.visualstudio.com/docs/git/gcm-ssh-passphrase";
 
-        private static readonly Regex AskCredentialRegex = new Regex(@"\s+(\S+)\s+for\s+'([^']+)':\s*$", RegexOptions.Compiled | RegexOptions.CultureInvariant | RegexOptions.IgnoreCase);
-        private static readonly Regex AskPassphraseRegex = new Regex(@"\s+Enter\s+passphrase\s+for\s+key\s+'([^']+)':\s*$", RegexOptions.Compiled | RegexOptions.CultureInvariant | RegexOptions.IgnoreCase);
+        private static readonly Regex AskCredentialRegex = new Regex(@"\s*(\S+)\s+for\s+'([^']+)':\s*$", RegexOptions.Compiled | RegexOptions.CultureInvariant | RegexOptions.IgnoreCase);
+        private static readonly Regex AskPassphraseRegex = new Regex(@"\s*\""Enter\s+passphrase\s+for\s+key\s+'([^']+)':\s+\""\s*$", RegexOptions.Compiled | RegexOptions.CultureInvariant | RegexOptions.IgnoreCase);
+        private static readonly Regex AskPasswordRegex = new Regex(@"\s*\""([^']+)'s\s+password:\s+\""\s*$", RegexOptions.Compiled | RegexOptions.CultureInvariant | RegexOptions.IgnoreCase);
 
         private static void Askpass()
         {
-            Trace.WriteLine("Program::Askpass");
-
             Match match;
             if ((match = AskCredentialRegex.Match(Environment.CommandLine)).Success)
             {
-                Trace.WriteLine("   querying for HTTPS credentials.");
+                Git.Trace.WriteLine("querying for HTTPS credentials.");
 
                 if (match.Groups.Count < 3)
                     throw new ArgumentException("Unable to understand command.");
@@ -37,7 +38,7 @@ namespace Microsoft.Alm.Cli
                 int tokenIndex = targetUrl.IndexOf('@');
                 if (tokenIndex > 0)
                 {
-                    Trace.WriteLine("   '@' symbol found in URL, assuming credential prefix.");
+                    Git.Trace.WriteLine("'@' symbol found in URL, assuming credential prefix.");
 
                     string prefix = targetUrl.Substring(0, tokenIndex);
                     targetUrl = targetUrl.Substring(tokenIndex + 1, targetUrl.Length - tokenIndex - 1);
@@ -48,7 +49,7 @@ namespace Microsoft.Alm.Cli
                     tokenIndex = prefix.IndexOf(':');
                     if (tokenIndex > 0)
                     {
-                        Trace.WriteLine("   ':' token found in credential prefix, parsing username & password.");
+                        Git.Trace.WriteLine("':' token found in credential prefix, parsing username & password.");
 
                         username = prefix.Substring(0, tokenIndex);
                         password = prefix.Substring(tokenIndex + 1, prefix.Length - tokenIndex - 1);
@@ -59,7 +60,7 @@ namespace Microsoft.Alm.Cli
 
                 if (Uri.TryCreate(targetUrl, UriKind.Absolute, out targetUri))
                 {
-                    Trace.WriteLine("   success parsing URL, targetUri = " + targetUri);
+                    Git.Trace.WriteLine($"success parsing URL, targetUri = '{targetUri}'.");
 
                     OperationArguments operationArguments = new OperationArguments(targetUri);
 
@@ -70,7 +71,7 @@ namespace Microsoft.Alm.Cli
                     {
                         if (string.IsNullOrEmpty(credential?.Username))
                         {
-                            Trace.WriteLine("   username not supplied in config, need to query for value.");
+                            Git.Trace.WriteLine("username not supplied in config, need to query for value.");
 
                             QueryCredentials(operationArguments);
                             credential = new Credential(operationArguments.CredUsername, operationArguments.CredPassword);
@@ -78,7 +79,7 @@ namespace Microsoft.Alm.Cli
 
                         if (!string.IsNullOrEmpty(credential?.Username))
                         {
-                            Trace.WriteLine("   username for '" + targetUrl + "' asked for and found.");
+                            Git.Trace.WriteLine($"username for '{targetUrl}' asked for and found.");
 
                             Console.Out.Write(credential.Username + "\n");
                             return;
@@ -89,7 +90,7 @@ namespace Microsoft.Alm.Cli
                     {
                         if (string.IsNullOrEmpty(credential?.Password))
                         {
-                            Trace.WriteLine("   password not supplied in config, need to query for value.");
+                            Git.Trace.WriteLine("password not supplied in config, need to query for value.");
 
                             QueryCredentials(operationArguments);
 
@@ -103,7 +104,7 @@ namespace Microsoft.Alm.Cli
 
                         if (!string.IsNullOrEmpty(credential?.Password))
                         {
-                            Trace.WriteLine("   password for '{0}' asked for and found.", targetUrl);
+                            Git.Trace.WriteLine($"password for '{targetUrl}' asked for and found.");
 
                             Console.Out.Write(credential.Password + "\n");
                             return;
@@ -112,12 +113,13 @@ namespace Microsoft.Alm.Cli
                 }
                 else
                 {
-                    Trace.WriteLine("   unable to parse URL.");
+                    Git.Trace.WriteLine("unable to parse URL.");
                 }
             }
-            else if ((match = AskPassphraseRegex.Match(Environment.CommandLine)).Success)
+            else if ((match = AskPasswordRegex.Match(Environment.CommandLine)).Success
+                || (match = AskPassphraseRegex.Match(Environment.CommandLine)).Success)
             {
-                Trace.WriteLine("   querying for passphrase key.");
+                Git.Trace.WriteLine("querying for passphrase key.");
 
                 if (match.Groups.Count < 2)
                     throw new ArgumentException("Unable to understand command.");
@@ -125,7 +127,7 @@ namespace Microsoft.Alm.Cli
                 string request = match.Groups[0].Value;
                 string resource = match.Groups[1].Value;
 
-                Trace.WriteLine("  open dialog for " + resource);
+                Git.Trace.WriteLine($"open dialog for '{resource}'.");
 
                 System.Windows.Application application = new System.Windows.Application();
                 Gui.PassphraseWindow prompt = new Gui.PassphraseWindow(resource);
@@ -135,14 +137,14 @@ namespace Microsoft.Alm.Cli
                 {
                     string passphase = prompt.Passphrase;
 
-                    Trace.WriteLine("   passphase acquired");
+                    Git.Trace.WriteLine("passphase acquired.");
 
                     Console.Out.Write(passphase + "\n");
                     return;
                 }
             }
 
-            Trace.WriteLine("   credentials not found.");
+            Git.Trace.WriteLine("failed to acquire credentials.");
         }
 
         [STAThread]
@@ -150,14 +152,16 @@ namespace Microsoft.Alm.Cli
         {
             EnableDebugTrace();
 
-            if (args.Length == 0
-                    || String.Equals(args[0], "--help", StringComparison.OrdinalIgnoreCase)
+            if (args.Length > 0
+                && (String.Equals(args[0], "--help", StringComparison.OrdinalIgnoreCase)
                     || String.Equals(args[0], "-h", StringComparison.OrdinalIgnoreCase)
-                    || args[0].Contains('?'))
+                    || args[0].Contains('?')))
             {
                 PrintHelpMessage();
                 return;
             }
+
+            PrintArgs(args);
 
             try
             {
@@ -173,7 +177,7 @@ namespace Microsoft.Alm.Cli
                                         ?? exception.InnerException;
 
                 Console.Error.WriteLine("Fatal: " + innerException.GetType().Name + " encountered.");
-                Trace.WriteLine("Fatal: " + exception.ToString());
+                Git.Trace.WriteLine("Fatal: " + exception.ToString());
                 LogEvent(exception.ToString(), EventLogEntryType.Error);
 
                 Environment.ExitCode = -1;
@@ -181,7 +185,7 @@ namespace Microsoft.Alm.Cli
             catch (Exception exception)
             {
                 Console.Error.WriteLine("Fatal: " + exception.GetType().Name + " encountered.");
-                Trace.WriteLine("Fatal: " + exception.ToString());
+                Git.Trace.WriteLine("Fatal: " + exception.ToString());
                 LogEvent(exception.ToString(), EventLogEntryType.Error);
 
                 Environment.ExitCode = -1;
@@ -192,11 +196,34 @@ namespace Microsoft.Alm.Cli
 
         private static void PrintHelpMessage()
         {
+            const string HelpFileName = "git-askpass.html";
+
             Console.Out.WriteLine("usage: git askpass '<user_prompt_text>'");
 
-            Console.Out.WriteLine();
-            PrintConfigurationHelp();
-            Console.Out.WriteLine();
+            List<Git.GitInstallation> installations;
+            if (Git.Where.FindGitInstallations(out installations))
+            {
+                foreach (var installation in installations)
+                {
+                    if (Directory.Exists(installation.Doc))
+                    {
+                        string doc = Path.Combine(installation.Doc, HelpFileName);
+
+                        // if the help file exists, send it to the operating system to display to the user
+                        if (File.Exists(doc))
+                        {
+                            Git.Trace.WriteLine($"opening help documentation '{doc}'.");
+
+                            Process.Start(doc);
+
+                            return;
+                        }
+                    }
+                }
+            }
+
+            Console.Error.WriteLine("Unable to open help documentation.");
+            Git.Trace.WriteLine("failed to open help documentation.");
         }
     }
 }

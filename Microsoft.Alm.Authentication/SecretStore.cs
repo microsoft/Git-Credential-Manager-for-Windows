@@ -49,8 +49,10 @@ namespace Microsoft.Alm.Authentication
         /// </param>
         public SecretStore(string @namespace, ICredentialStore credentialCache = null, ITokenStore tokenCache = null, Secret.UriNameConversion getTargetName = null)
         {
-            if (String.IsNullOrWhiteSpace(@namespace) || @namespace.IndexOfAny(IllegalCharacters) != -1)
-                throw new ArgumentNullException("prefix", "The `prefix` parameter is null or invalid.");
+            if (String.IsNullOrWhiteSpace(@namespace))
+                throw new ArgumentNullException(nameof(@namespace));
+            if (@namespace.IndexOfAny(IllegalCharacters) != -1)
+                throw new ArgumentException(nameof(@namespace));
 
             _getTargetName = getTargetName ?? Secret.UriToName;
 
@@ -73,8 +75,6 @@ namespace Microsoft.Alm.Authentication
         {
             ValidateTargetUri(targetUri);
 
-            Trace.WriteLine("CredentialStore::DeleteCredentials");
-
             string targetName = this.GetTargetName(targetUri);
 
             this.Delete(targetName);
@@ -89,8 +89,6 @@ namespace Microsoft.Alm.Authentication
         public void DeleteToken(TargetUri targetUri)
         {
             ValidateTargetUri(targetUri);
-
-            Trace.WriteLine("TokenStore::ReadToken");
 
             string targetName = this.GetTargetName(targetUri);
 
@@ -119,8 +117,6 @@ namespace Microsoft.Alm.Authentication
             Credential credentials = null;
             string targetName = this.GetTargetName(targetUri);
 
-            Trace.WriteLine("CredentialStore::ReadCredentials");
-
             if ((credentials = _credentialCache.ReadCredentials(targetUri)) == null)
             {
                 credentials = this.ReadCredentials(targetName);
@@ -137,8 +133,6 @@ namespace Microsoft.Alm.Authentication
         public Token ReadToken(TargetUri targetUri)
         {
             ValidateTargetUri(targetUri);
-
-            Trace.WriteLine("TokenStore::ReadToken");
 
             Token token = null;
 
@@ -161,8 +155,6 @@ namespace Microsoft.Alm.Authentication
             ValidateTargetUri(targetUri);
             BaseSecureStore.ValidateCredential(credentials);
 
-            Trace.WriteLine("CredentialStore::WriteCredentials");
-
             string targetName = this.GetTargetName(targetUri);
 
             this.WriteCredential(targetName, credentials);
@@ -180,8 +172,6 @@ namespace Microsoft.Alm.Authentication
             ValidateTargetUri(targetUri);
             Token.Validate(token);
 
-            Trace.WriteLine("TokenStore::ReadToken");
-
             string targetName = this.GetTargetName(targetUri);
 
             _tokenCache.WriteToken(targetUri, token);
@@ -197,8 +187,6 @@ namespace Microsoft.Alm.Authentication
         protected override string GetTargetName(TargetUri targetUri)
         {
             BaseSecureStore.ValidateTargetUri(targetUri);
-
-            Trace.WriteLine("SecretStore::GetTargetName");
 
             return _getTargetName(targetUri, _namespace);
         }

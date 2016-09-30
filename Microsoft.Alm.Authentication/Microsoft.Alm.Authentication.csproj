@@ -65,6 +65,7 @@
     <Compile Include="Global.cs" />
     <Compile Include="IGitHubAuthentication.cs" />
     <Compile Include="IGitHubAuthority.cs" />
+    <Compile Include="VstsLocationServiceException.cs" />
     <Compile Include="SecretCache.cs" />
     <Compile Include="TokenScope.cs" />
     <Compile Include="TargetUri.cs" />
@@ -97,6 +98,12 @@
   <ItemGroup>
     <None Include="app.config" />
     <None Include="packages.config" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\Microsoft.Alm.Git\Microsoft.Alm.Git.csproj">
+      <Project>{4827c16d-5c58-406d-ab3f-3700bb0d06fe}</Project>
+      <Name>Microsoft.Alm.Git</Name>
+    </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- Produce a nuget package of this assembly -->

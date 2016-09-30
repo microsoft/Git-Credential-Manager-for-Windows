@@ -99,9 +99,9 @@ namespace Microsoft.Alm.Git.Test
                     "";
             Configuration cut;
 
-            using (var sr = new StringReader(input))
+            using (var reader = new StringReader(input))
             {
-                cut = new Configuration(sr);
+                cut = new Configuration(reader);
             }
 
             Assert.AreEqual(true, cut.ContainsKey("CoRe.AuToCrLf"));

@@ -24,24 +24,23 @@
 **/
 
 using System;
-using System.Diagnostics;
 
-namespace Microsoft.Alm.Authentication
+namespace Microsoft.Alm.Git
 {
-    public abstract class Secret
+    [Flags]
+    public enum ConfigurationLevel
     {
-        public static string UriToName(TargetUri targetUri, string @namespace)
-        {
-            BaseSecureStore.ValidateTargetUri(targetUri);
-            if (String.IsNullOrWhiteSpace(@namespace))
-                throw new ArgumentNullException(@namespace);
+        Unknown = 0,
 
-            string targetName = $"{@namespace}:{targetUri}";
-            targetName = targetName.TrimEnd('/', '\\');
+        Portable = 1 << 0,
+        System = 1 << 1,
+        Xdg = 1 << 2,
+        Global = 1 << 3,
+        Local = 1 << 4,
 
-            return targetName;
-        }
-
-        public delegate string UriNameConversion(TargetUri targetUri, string @namespace);
+        All = Portable | System | Xdg | Global | Local,
+        NoLocal = All & ~Local,
+        NoSystem = All & ~(Portable | System),
+        UserOnly = All & ~(Portable | System | Local)
     }
 }

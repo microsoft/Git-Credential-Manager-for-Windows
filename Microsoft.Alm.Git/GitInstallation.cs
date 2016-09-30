@@ -42,6 +42,9 @@ namespace Microsoft.Alm.Git
         internal const string Version1Config32Path = @"etc\gitconfig";
         internal const string Version2Config32Path = @"mingw32\etc\gitconfig";
         internal const string Version2Config64Path = @"mingw64\etc\gitconfig";
+        internal const string Version1Doc32Path = @"doc\git\html";
+        internal const string Version2Doc32Path = @"mingw32\share\doc\git-doc";
+        internal const string Version2Doc64Path = @"mingw64\share\doc\git-doc";
         internal const string Version1Libexec32Path = @"libexec\git-core\";
         internal const string Version2Libexec32Path = @"mingw32\libexec\git-core";
         internal const string Version2Libexec64Path = @"mingw64\libexec\git-core";
@@ -81,15 +84,23 @@ namespace Microsoft.Alm.Git
                 { KnownGitDistribution.GitForWindows32v2, AllVersionShPath },
                 { KnownGitDistribution.GitForWindows64v2, AllVersionShPath },
             };
+        public static readonly IReadOnlyDictionary<KnownGitDistribution, string> CommonDocPaths
+            = new Dictionary<KnownGitDistribution, string>
+            {
+                { KnownGitDistribution.GitForWindows32v1, Version1Doc32Path },
+                { KnownGitDistribution.GitForWindows32v2, Version2Doc32Path },
+                { KnownGitDistribution.GitForWindows64v2, Version2Doc64Path },
+            };
 
         internal GitInstallation(string path, KnownGitDistribution version)
         {
-            Debug.Assert(!String.IsNullOrWhiteSpace(path), "The `path` parameter is null or invalid.");
-            Debug.Assert(CommonConfigPaths.ContainsKey(version), "The `version` parameter not found in `CommonConfigPaths`.");
-            Debug.Assert(CommonCmdPaths.ContainsKey(version), "The `version` parameter not found in `CommonCmdPaths`.");
-            Debug.Assert(CommonGitPaths.ContainsKey(version), "The `version` parameter not found in `CommonGitPaths`.");
-            Debug.Assert(CommonLibexecPaths.ContainsKey(version), "The `version` parameter not found in `CommonLibExecPaths`.");
-            Debug.Assert(CommonShPaths.ContainsKey(version), "The `version` parameter not found in `CommonShPaths`.");
+            Debug.Assert(!String.IsNullOrWhiteSpace(path), $"The `{nameof(path)}` parameter is null or invalid.");
+            Debug.Assert(CommonConfigPaths.ContainsKey(version), $"The `{nameof(version)}` parameter not found in `{nameof(CommonConfigPaths)}`.");
+            Debug.Assert(CommonCmdPaths.ContainsKey(version), $"The `{nameof(version)}` parameter not found in `{nameof(CommonCmdPaths)}`.");
+            Debug.Assert(CommonGitPaths.ContainsKey(version), $"The `{nameof(version)}` parameter not found in `{nameof(CommonGitPaths)}`.");
+            Debug.Assert(CommonLibexecPaths.ContainsKey(version), $"The `{nameof(version)}` parameter not found in `{nameof(CommonLibexecPaths)}`.");
+            Debug.Assert(CommonShPaths.ContainsKey(version), $"The `{nameof(version)}` parameter not found in `{nameof(CommonShPaths)}`.");
+            Debug.Assert(CommonDocPaths.ContainsKey(version), $"The `{nameof(version)}` parameter not found in `{nameof(CommonDocPaths)}`.");
 
             path = path.TrimEnd('\\');
 
@@ -119,6 +130,7 @@ namespace Microsoft.Alm.Git
             Version = version;
             _cmd = null;
             _config = null;
+            _doc = null;
             _git = null;
             _libexec = null;
             _sh = null;
@@ -148,6 +160,18 @@ namespace Microsoft.Alm.Git
             }
         }
         private string _cmd;
+        public string Doc
+        {
+            get
+            {
+                if (_doc == null)
+                {
+                    _doc = System.IO.Path.Combine(Path, CommonDocPaths[Version]);
+                }
+                return _doc;
+            }
+        }
+        private string _doc;
         public string Git
         {
             get

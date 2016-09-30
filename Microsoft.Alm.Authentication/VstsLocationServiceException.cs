@@ -24,24 +24,22 @@
 **/
 
 using System;
-using System.Diagnostics;
 
 namespace Microsoft.Alm.Authentication
 {
-    public abstract class Secret
+    public sealed class VstsLocationServiceException : Exception
     {
-        public static string UriToName(TargetUri targetUri, string @namespace)
-        {
-            BaseSecureStore.ValidateTargetUri(targetUri);
-            if (String.IsNullOrWhiteSpace(@namespace))
-                throw new ArgumentNullException(@namespace);
+        internal VstsLocationServiceException(string message)
+            : base(message)
+        { }
 
-            string targetName = $"{@namespace}:{targetUri}";
-            targetName = targetName.TrimEnd('/', '\\');
+        internal VstsLocationServiceException(string message, Exception innerException)
+            : base(message, innerException)
+        { }
 
-            return targetName;
-        }
-
-        public delegate string UriNameConversion(TargetUri targetUri, string @namespace);
+        [System.Security.SecuritySafeCritical]
+        internal VstsLocationServiceException(System.Runtime.Serialization.SerializationInfo info, System.Runtime.Serialization.StreamingContext context)
+            : base(info, context)
+        { }
     }
 }

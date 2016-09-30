@@ -266,7 +266,15 @@
                                    Grid.Column="1"
                                    Grid.Row="0"
                                    HorizontalContentAlignment="Left">
-                                <TextBlock Text="{Binding Path=Resource}"/>
+                                <ScrollViewer BorderThickness="0"
+                                              HorizontalAlignment="Stretch"
+                                              HorizontalContentAlignment="Left"
+                                              HorizontalScrollBarVisibility="Hidden"
+                                              VerticalAlignment="Stretch"
+                                              VerticalContentAlignment="Center"
+                                              VerticalScrollBarVisibility="Disabled">
+                                    <TextBlock Text="{Binding Path=Resource}"/>
+                                </ScrollViewer>
                             </Label>
                         </Grid.Children>
                     </Grid>
@@ -274,7 +282,8 @@
                             Grid.Row="2"
                             Style="{StaticResource PassphraseBorderStyle}">
                         <PasswordBox x:Name="PassphrasePasswordBox"
-                                 TabIndex="0"/>
+                                     Focusable="True"
+                                     TabIndex="0"/>
                     </Border>
                     <Button x:Name="LearnMoreLink"
                             Grid.Column="3"
