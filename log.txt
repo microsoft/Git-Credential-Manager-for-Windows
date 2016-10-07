@@ -1,0 +1,276 @@
+[00:00:00] Build started
+[00:00:01] git clone -q --depth=10 --branch=master https://github.com/Microsoft/Git-Credential-Manager-for-Windows.git C:\projects\git-credential-manager-for-windows
+[00:00:08] git checkout -qf 7c6b35852807fc8e867c284f1b1bafce073372b1
+[00:00:11] Restoring build cache
+[00:00:11] Restoring "packages"...
+[00:00:14] OK
+[00:00:14] nuget restore
+[00:00:16] MSBuild auto-detection: using msbuild version '14.0' from 'C:\Program Files (x86)\MSBuild\14.0\bin'.
+[00:00:17] All packages listed in packages.config are already installed.
+[00:00:17] msbuild "Microsoft.Alm.sln" /logger:"C:\Program Files\AppVeyor\BuildAgent\Appveyor.MSBuildLogger.dll" /consoleloggerparameters:Verbosity=minimal /maxcpucount /nodeReuse:true /target:"Build" /property:Configuration="%configuration%";Platform="%platform%";RunCodeAnalysis=true
+[00:00:17] Microsoft (R) Build Engine version 14.0.25420.1
+[00:00:17] Copyright (C) Microsoft Corporation. All rights reserved.
+[00:00:17] 
+[00:00:19]   Microsoft.Alm.Git -> C:\projects\git-credential-manager-for-windows\Microsoft.Alm.Git\bin\Release\Microsoft.Alm.Git.dll
+[00:00:19]   Microsoft.Alm.Authentication -> C:\projects\git-credential-manager-for-windows\Microsoft.Alm.Authentication\bin\Release\Microsoft.Alm.Authentication.dll
+[00:00:19]   Running Code Analysis...
+[00:00:19]   Running Code Analysis...
+[00:00:24]   Code Analysis Complete -- 0 error(s), 0 warning(s)
+[00:00:24]   Code Analysis Complete -- 0 error(s), 0 warning(s)
+[00:00:24]   Microsoft.Alm.Git.Test -> C:\projects\git-credential-manager-for-windows\Microsoft.Alm.Git.Test\bin\Release\Microsoft.Alm.Git.Test.dll
+[00:00:24]   Running Code Analysis...
+[00:00:26]   Attempting to build package from 'Microsoft.Alm.Authentication.csproj'.
+[00:00:26]   MSBuild auto-detection: using msbuild version '14.0' from 'C:\Program Files (x86)\MSBuild\14.0\bin'.
+[00:00:26]   Unable to find 'Microsoft.Alm.Authentication.dll'. Make sure the project has been built.
+[00:00:27]   Code Analysis Complete -- 0 error(s), 0 warning(s)
+[00:00:29]   Microsoft.Alm.Authentication.Test -> C:\projects\git-credential-manager-for-windows\Microsoft.Alm.Authentication.Test\bin\Release\Microsoft.Alm.Authentication.Test.dll
+[00:00:29]   Running Code Analysis...
+[00:00:32]   Code Analysis Complete -- 0 error(s), 0 warning(s)
+[00:00:33]   GitHub.Authentication -> C:\projects\git-credential-manager-for-windows\GitHub.Authentication\bin\Release\GitHub.Authentication.exe
+[00:00:33]   Running Code Analysis...
+[00:00:37]   Code Analysis Complete -- 0 error(s), 0 warning(s)
+[00:00:37]           1 file(s) copied.
+[00:00:37]           1 file(s) copied.
+[00:00:37]           1 file(s) copied.
+[00:00:37]   The system cannot find the file specified.
+[00:00:37]           1 file(s) copied.
+[00:00:37]           1 file(s) copied.
+[00:00:37]   Cli-CredentialHelper -> C:\projects\git-credential-manager-for-windows\Cli-CredentialHelper\bin\Release\git-credential-manager.exe
+[00:00:37]   Running Code Analysis...
+[00:00:38]   GitHub.Authentication.Test -> C:\projects\git-credential-manager-for-windows\GitHub.Authentication.Test\bin\Release\GitHub.Authentication.Test.dll
+[00:00:38]   Running Code Analysis...
+[00:00:41]   Code Analysis Complete -- 0 error(s), 0 warning(s)
+[00:00:41]   Code Analysis Complete -- 0 error(s), 0 warning(s)
+[00:00:41]           1 file(s) copied.
+[00:00:41]           1 file(s) copied.
+[00:00:41]           1 file(s) copied.
+[00:00:41]           1 file(s) copied.
+[00:00:41]           1 file(s) copied.
+[00:00:41]           1 file(s) copied.
+[00:00:41]           1 file(s) copied.
+[00:00:41]           1 file(s) copied.
+[00:00:41]           1 file(s) copied.
+[00:00:41]           1 file(s) copied.
+[00:00:41]           1 file(s) copied.
+[00:00:41]           1 file(s) copied.
+[00:00:41]   Cli-CredentialHelper.Test -> C:\projects\git-credential-manager-for-windows\Cli-CredentialHelper.Test\bin\Release\Microsoft.Alm.CredentialHelper.Test.dll
+[00:00:41]   Running Code Analysis...
+[00:00:42]   Cli-Askpass -> C:\projects\git-credential-manager-for-windows\Cli-AskPass\bin\Release\git-askpass.exe
+[00:00:42]   Running Code Analysis...
+[00:00:44]   Code Analysis Complete -- 0 error(s), 0 warning(s)
+[00:00:46]   Code Analysis Complete -- 0 error(s), 0 warning(s)
+[00:00:46]           1 file(s) copied.
+[00:00:46]           1 file(s) copied.
+[00:00:46]   The system cannot find the file specified.
+[00:00:46]           1 file(s) copied.
+[00:00:46]   The system cannot find the file specified.
+[00:00:46]           1 file(s) copied.
+[00:00:46]           1 file(s) copied.
+[00:00:46]   The system cannot find the file specified.
+[00:00:46]           1 file(s) copied.
+[00:00:46]   The system cannot find the file specified.
+[00:00:46]           1 file(s) copied.
+[00:00:46]           1 file(s) copied.
+[00:00:46] Discovering tests...
+[00:00:46] OK
+[00:00:46] vstest.console /logger:Appveyor "C:\projects\git-credential-manager-for-windows\Cli-CredentialHelper.Test\bin\Release\Microsoft.Alm.CredentialHelper.Test.dll" "C:\projects\git-credential-manager-for-windows\GitHub.Authentication.Test\bin\Release\GitHub.Authentication.Test.dll" "C:\projects\git-credential-manager-for-windows\Microsoft.Alm.Authentication.Test\bin\Release\Microsoft.Alm.Authentication.Test.dll" "C:\projects\git-credential-manager-for-windows\Microsoft.Alm.Git.Test\bin\Release\Microsoft.Alm.Git.Test.dll"
+[00:00:47] Microsoft (R) Test Execution Command Line Tool Version 14.0.25420.1
+[00:00:47] 
+[00:00:47] Copyright (c) Microsoft Corporation.  All rights reserved.
+[00:00:47] 
+[00:00:47] Starting test execution, please wait...
+[00:00:47] 
+[00:00:49] Passed   Typical
+[00:00:49] 
+[00:00:49] Passed   SpecialCharacters
+[00:00:49] 
+[00:00:49] Passed   CreateTargetUri_GithubSimple
+[00:00:49] 
+[00:00:49] Passed   CreateTargetUri_VstsSimple
+[00:00:49] 
+[00:00:49] Passed   CreateTargetUri_GithubComplex
+[00:00:49] 
+[00:00:49] Passed   CreateTargetUri_WithPortNumber
+[00:00:49] 
+[00:00:49] Passed   CreateTargetUri_ComplexAndMessy
+[00:00:49] 
+[00:00:49] Passed   CreateTargetUri_WithCredentials
+[00:00:49] 
+[00:00:49] Passed   CreateTargetUri_Unc
+[00:00:49] 
+[00:00:49] Passed   CreateTargetUri_UncColloquial
+[00:00:49] 
+[00:00:49] Passed   CanExecuteIsTrueByDefault
+[00:00:49] 
+[00:00:49] Passed   CanExecuteReturnsFalseWhenIsEnabledIsFalse
+[00:00:49] 
+[00:00:49] Passed   ExecuteCallsActionWhenExecuted
+[00:00:49] 
+[00:00:49] Passed   ValidatesLoginAndPassword
+[00:00:49] 
+[00:00:49] Passed   IsValidWhenBothLoginAndPasswordIsValid
+[00:00:49] 
+[00:00:49] Passed   IsValidIsTrueWhenAuthenticationCodeIsSixCharacters
+[00:00:49] 
+[00:00:49] Passed   IsValidIsFalseWhenAuthenticationCodeIsLessThanSixCharacters
+[00:00:49] 
+[00:00:49] Passed   IsValidWhenAllValidatorsAreValid
+[00:00:49] 
+[00:00:49] Passed   ValidationResultReturnsUnvalidatedIfNoValidators
+[00:00:49] 
+[00:00:49] Passed   ValidationResultReturnsSuccessIfValidatorsPass
+[00:00:49] 
+[00:00:49] Passed   ValidationResultReturnsFailureIfAnyValidatorsFail
+[00:00:49] 
+[00:00:49] Passed   ValidatorsRunInOrderAndStopWhenInvalid
+[00:00:49] 
+[00:00:49] Passed   ValidationResultNotifiesWhenValidationStateChanges
+[00:00:49] 
+[00:00:49] Passed   RequiredIsUnvalidatedAndNotValidIfPropertyNeverChanges
+[00:00:49] 
+[00:00:49] Passed   RequiredValidatesPropertyNotNull
+[00:00:49] 
+[00:00:49] Passed   RequiredValidatesPropertyNotEmpty
+[00:00:49] 
+[00:00:49] Passed   DoesNotShowErrorWhenUnvalidated
+[00:00:49] 
+[00:00:49] Passed   ShowsErrorWhenValidationResultIsInvalid
+[00:00:49] 
+[00:00:49] Passed   EndToEndTestShowsErrorMessageWhenReactiveValidatorIsNotValid
+[00:00:49] 
+[00:00:49] Passed   TextReplacedWithMaskCharacterAndPasswordPropertyContainsRealPassword
+[00:00:49] 
+[00:00:49] Passed   BasicAuthDeleteCredentialsTest
+[00:00:49] 
+[00:00:49] Passed   BasicAuthGetCredentialsTest
+[00:00:49] 
+[00:00:49] Passed   BasicAuthSetCredentialsTest
+[00:00:49] 
+[00:00:49] Passed   UriToName_GitHubSimple
+[00:00:49] 
+[00:00:49] Passed   UriToName_VstsSimple
+[00:00:49] 
+[00:00:49] Passed   UriToName_HttpsWithPath
+[00:00:49] 
+[00:00:49] Passed   UriToName_HttpsWithTrailingSlash
+[00:00:49] 
+[00:00:49] Passed   UriToName_ComplexVsts
+[00:00:49] 
+[00:00:49] Passed   UriToName_Unc
+[00:00:49] 
+[00:00:49] Passed   UriToName_UncWithPrefix
+[00:00:49] 
+[00:00:49] Passed   UriToName_UncWithTrailingSlash
+[00:00:49] 
+[00:00:49] Passed   CredentialStoreUrl
+[00:00:49] 
+[00:00:49] Passed   CredentialStoreUrlWithParams
+[00:00:49] 
+[00:00:49] Passed   CredentialStoreUnc
+[00:00:49] 
+[00:00:49] Passed   CredentialStoreUsernameNullReject
+[00:00:49] 
+[00:00:49] Passed   CredentialStoreUsernameBlank
+[00:00:49] 
+[00:00:49] Passed   CredentialStorePasswordNull
+[00:00:49] 
+[00:00:49] Passed   CredentialStorePassswordBlank
+[00:00:49] 
+[00:00:49] Passed   SecretCacheUrl
+[00:00:49] 
+[00:00:49] Passed   SecretCacheUrlWithParams
+[00:00:49] 
+[00:00:49] Passed   SecretCacheUnc
+[00:00:49] 
+[00:00:49] Passed   SecretCacheUsernameNull
+[00:00:49] 
+[00:00:49] Passed   SecretCacheUsernameBlankReject
+[00:00:49] 
+[00:00:49] Passed   SecretCachePasswordNull
+[00:00:49] 
+[00:00:49] Passed   AddOperator
+[00:00:49] 
+[00:00:49] Passed   AndOperator
+[00:00:49] 
+[00:00:49] Passed   Equality
+[00:00:49] 
+[00:00:49] Passed   HashCode
+[00:00:49] 
+[00:00:49] Passed   OrOperator
+[00:00:49] 
+[00:00:49] Passed   MinusOperator
+[00:00:49] 
+[00:00:49] Passed   XorOperator
+[00:00:49] 
+[00:00:49] Passed   TokenStoreUrl
+[00:00:49] 
+[00:00:49] Passed   TokenStoreUrlWithParams
+[00:00:49] 
+[00:00:49] Passed   TokenStoreUnc
+[00:00:49] 
+[00:00:49] Passed   TokenCacheUrl
+[00:00:49] 
+[00:00:49] Passed   TokenCacheUrlWithParams
+[00:00:49] 
+[00:00:49] Passed   TokenCacheUnc
+[00:00:49] 
+[00:00:49] Passed   VstsAadDeleteCredentialsTest
+[00:00:49] 
+[00:00:49] Passed   VstsAadGetCredentialsTest
+[00:00:49] 
+[00:00:49] Passed   VstsAadInteractiveLogonTest
+[00:00:49] 
+[00:00:49] Passed   VstsAadNoninteractiveLogonTest
+[00:00:49] 
+[00:00:49] Passed   VstsAadSetCredentialsTest
+[00:00:49] 
+[00:00:49] Passed   VstsMsaDeleteCredentialsTest
+[00:00:49] 
+[00:00:49] Passed   VstsMsaGetCredentialsTest
+[00:00:49] 
+[00:00:49] Passed   VstsMsaInteractiveLogonTest
+[00:00:49] 
+[00:00:49] Passed   VstsMsaSetCredentialsTest
+[00:00:49] 
+[00:00:49] Passed   VstsMsaValidateCredentialsTest
+[00:00:49] 
+[00:00:49] Passed   AddOperator
+[00:00:49] 
+[00:00:49] Passed   AndOperator
+[00:00:49] 
+[00:00:49] Passed   Equality
+[00:00:49] 
+[00:00:49] Passed   HashCode
+[00:00:49] 
+[00:00:49] Passed   OrOperator
+[00:00:49] 
+[00:00:49] Passed   MinusOperator
+[00:00:49] 
+[00:00:49] Passed   XorOperator
+[00:00:49] 
+[00:00:49] Passed   ParseGitConfigSimple
+[00:00:49] 
+[00:00:49] Passed   ParseGitConfigOverwritesValues
+[00:00:49] 
+[00:00:49] Passed   ParseGitConfigPartiallyQuoted
+[00:00:49] 
+[00:00:49] Passed   ParseGitConfigSampleFile
+[00:00:49] 
+[00:00:49] Passed   ReadThroughPublicMethods
+[00:00:49] 
+[00:00:49] Passed   CaseInsensitiveComparison
+[00:00:49] 
+[00:00:50] Passed   FindApp
+[00:00:50] 
+[00:00:50] Passed   FindGit
+[00:00:50] 
+[00:00:50] 
+[00:00:50] Total tests: 92. Passed: 92. Failed: 0. Skipped: 0.
+[00:00:50] 
+[00:00:50] Test Run Successful.
+[00:00:50] 
+[00:00:50] Test execution time: 2.4672 Seconds
+[00:00:50] 
+[00:00:50] Updating build cache
+[00:00:50] All cache items are up to date.
+[00:00:50] Build success
