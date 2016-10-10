@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Diagnostics;
@@ -1009,7 +1009,7 @@ namespace Microsoft.Alm.Cli
             string valueString = null;
             if ((!string.IsNullOrWhiteSpace(environKey)
                     && envars.TryGetValue(environKey, out valueString))
-                || (!string.IsNullOrWhiteSpace(valueString)
+                || (!string.IsNullOrWhiteSpace(configKey)
                     && config.TryGetEntry(ConfigPrefix, operationArguments.QueryUri, configKey, out entry)))
             {
                 Git.Trace.WriteLine($"{configKey} = '{entry.Value}'.");
