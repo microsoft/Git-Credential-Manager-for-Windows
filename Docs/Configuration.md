@@ -35,7 +35,7 @@
 
  The value should the URL of the proxy server.
 
-     git config --global credential.github.com.useHttpPath https://myproxy:8080
+     git config --global credential.github.com.httpProxy https://myproxy:8080
 
 
 ### interactive
