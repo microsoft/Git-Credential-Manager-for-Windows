@@ -94,22 +94,33 @@ namespace Microsoft.Alm.Git
 
         private static string FormatText(string message, string filePath, int lineNumber, string memberName)
         {
-            string source = Path.GetFileName(filePath);
+            const int SourceColumnMaxWidth = 23;
 
-            // the source:line column is 23 characters wide, we need to live within that limit
-            string lnNumStr = Convert.ToString(lineNumber);
-            int maxWidth = 23 - lnNumStr.Length - 1;
+            // source column format is file:line
+            string source = String.Format(System.Globalization.CultureInfo.InvariantCulture, "{0}:{1}", filePath, lineNumber);            
 
-            if (source.Length > maxWidth)
+            if (source.Length > SourceColumnMaxWidth)
             {
-                source = source.Substring(0, maxWidth);
+                int idx = 0;
+                int maxlen = SourceColumnMaxWidth - 3;
+                int srclen = source.Length;
+
+                while (idx >= 0 && (srclen - idx) > maxlen)
+                {
+                    idx = source.IndexOf('\\', idx + 1);
+                }
+
+                // if we cannot find a path seperator which allows the path to be long enough, just truncate the file name
+                if (idx < 0)
+                {
+                    idx = srclen - maxlen;
+                }
+
+                source = "..." + source.Substring(idx);
             }
 
-            source = String.Format(System.Globalization.CultureInfo.InvariantCulture, "{0}:{1}", source, lineNumber);
-
-            string details = String.Format(System.Globalization.CultureInfo.InvariantCulture, "[{0}] {1}", memberName, message);
-
-            string text = String.Format(System.Globalization.CultureInfo.InvariantCulture, "{0:HH:mm:ss.ffffff} {1,-23} trace: {2}", DateTime.Now, source, details);
+            // Git's trace format is "{timestamp,-15} {source,-23} trace: {details}"
+            string text = String.Format(System.Globalization.CultureInfo.InvariantCulture, "{0:HH:mm:ss.ffffff} {1,-23} trace: [{2}] {3}", DateTime.Now, source, memberName, message);
 
             return text;
         }
