@@ -850,7 +850,7 @@ namespace Microsoft.Alm.Cli
             Console.Out.WriteLine("{0} version {1}", Title, Version.ToString(3));
         }
 
-        private static void QueryCredentials(OperationArguments operationArguments)
+        private static bool QueryCredentials(OperationArguments operationArguments)
         {
             const string AadMsaAuthFailureMessage = "Logon failed, use ctrl+c to cancel basic credential prompt.";
             const string GitHubAuthFailureMessage = "Logon failed, use ctrl+c to cancel basic credential prompt.";
@@ -860,6 +860,7 @@ namespace Microsoft.Alm.Cli
             if (ReferenceEquals(operationArguments.TargetUri, null))
                 throw new ArgumentNullException("operationArguments.TargetUri");
 
+            bool credentialsFound = false;
             BaseAuthentication authentication = CreateAuthentication(operationArguments);
             Credential credentials = null;
 
@@ -871,6 +872,7 @@ namespace Microsoft.Alm.Cli
                     {
                         Git.Trace.WriteLine("credentials found.");
                         operationArguments.SetCredentials(credentials);
+                        credentialsFound = true;
                     }
                     else if (operationArguments.Interactivity != Interactivity.Never)
                     {
@@ -889,6 +891,7 @@ namespace Microsoft.Alm.Cli
                             // with a store command if the credentials are valid.
                             credentials = new Credential(username, password);
                             operationArguments.SetCredentials(credentials);
+                            credentialsFound = true;
                         }
                     }
                     break;
@@ -915,11 +918,13 @@ namespace Microsoft.Alm.Cli
                         {
                             Git.Trace.WriteLine($"credentials for '{operationArguments.TargetUri}' found.");
                             operationArguments.SetCredentials(credentials);
+                            credentialsFound = true;
                             LogEvent($"Azure Directory credentials  for '{operationArguments.TargetUri}' successfully retrieved.", EventLogEntryType.SuccessAudit);
                         }
                         else
                         {
                             Console.Error.WriteLine(AadMsaAuthFailureMessage);
+                            credentialsFound = true;
                             LogEvent($"Failed to retrieve Azure Directory credentials for '{operationArguments.TargetUri}'.", EventLogEntryType.FailureAudit);
                         }
                     }).Wait();
@@ -943,6 +948,7 @@ namespace Microsoft.Alm.Cli
                         {
                             Git.Trace.WriteLine($"credentials for '{operationArguments.TargetUri}' found.");
                             operationArguments.SetCredentials(credentials);
+                            credentialsFound = true;
                             LogEvent($"Microsoft Live credentials for '{operationArguments.TargetUri}' successfully retrieved.", EventLogEntryType.SuccessAudit);
                         }
                         else
@@ -969,6 +975,7 @@ namespace Microsoft.Alm.Cli
                         {
                             Git.Trace.WriteLine($"credentials for '{operationArguments.TargetUri}' found.");
                             operationArguments.SetCredentials(credentials);
+                            credentialsFound = true;
                             LogEvent($"GitHub credentials for '{operationArguments.TargetUri}' successfully retrieved.", EventLogEntryType.SuccessAudit);
                         }
                         else
@@ -982,8 +989,11 @@ namespace Microsoft.Alm.Cli
                 case AuthorityType.Integrated:
                     credentials = new Credential(String.Empty, String.Empty);
                     operationArguments.SetCredentials(credentials);
+                    credentialsFound = true;
                     break;
             }
+
+            return credentialsFound;
         }
 
         private static bool StandardHandleIsTty(NativeMethods.StandardHandleType handleType)
