@@ -85,7 +85,7 @@ namespace Microsoft.Alm.Cli
 
                 Git.Trace.WriteLine("prompting user for url.");
 
-                Console.Out.WriteLine(" Target Url:");
+                Program.WriteLine(" Target Url:");
                 url = Console.In.ReadLine();
             }
             else
@@ -118,10 +118,10 @@ namespace Microsoft.Alm.Cli
                         return;
                     }
 
-                    Console.Error.WriteLine(" credentials are protected by perserve flag, clear anyways? [Y]es, [N]o.");
+                    Program.WriteLine(" credentials are protected by perserve flag, clear anyways? [Y]es, [N]o.");
 
                     ConsoleKeyInfo key;
-                    while ((key = Console.ReadKey(true)).Key != ConsoleKey.Escape)
+                    while ((key = Program.ReadKey(true)).Key != ConsoleKey.Escape)
                     {
                         if (key.KeyChar == 'N' || key.KeyChar == 'n')
                             return;
@@ -196,8 +196,7 @@ namespace Microsoft.Alm.Cli
             return;
 
             error_parse:
-            Git.Trace.WriteLine($"Fatal: unable to parse target URI.");
-            Console.Error.WriteLine("Fatal: unable to parse target URI.");
+            Die("Unable to parse target URI.");
         }
 
         private static void Deploy()
@@ -207,7 +206,7 @@ namespace Microsoft.Alm.Cli
 
             Git.Trace.WriteLine($"Installer result = '{installer.Result}', exit code = {installer.ExitCode}.");
 
-            Environment.Exit(installer.ExitCode);
+            Program.Exit(installer.ExitCode);
         }
 
         private static void Erase()
@@ -314,39 +313,19 @@ namespace Microsoft.Alm.Cli
                 Exception innerException = exception.InnerExceptions.FirstOrDefault(e => !(e is AggregateException))
                                         ?? exception.InnerException;
 
-                Console.Error.WriteLine("Fatal: " + innerException.GetType().Name + " encountered.");
-                if (!String.IsNullOrWhiteSpace(innerException.Message))
-                {
-                    Console.Error.WriteLine("   " + innerException.Message);
-                }
-
-                Git.Trace.WriteLine("Fatal: " + exception.ToString());
-                LogEvent(exception.ToString(), EventLogEntryType.Error);
-
-                Environment.ExitCode = -1;
+                Die(exception);
             }
             catch (Exception exception)
             {
-                Console.Error.WriteLine("Fatal: " + exception.GetType().Name + " encountered.");
-                if (!String.IsNullOrWhiteSpace(exception.Message))
-                {
-                    Console.Error.WriteLine("   " + exception.Message);
-                }
-
-                Git.Trace.WriteLine("Fatal: " + exception.ToString());
-                LogEvent(exception.ToString(), EventLogEntryType.Error);
-
-                Environment.ExitCode = -1;
+                Die(exception);
             }
-
-            Trace.Flush();
         }
 
         private static void PrintHelpMessage()
         {
             const string HelpFileName = "git-credential-manager.html";
 
-            Console.Out.WriteLine("usage: git credential-manager [" + String.Join("|", CommandList) + "] [<args>]");
+            Program.WriteLine("usage: git credential-manager [" + String.Join("|", CommandList) + "] [<args>]");
 
             List<Git.GitInstallation> installations;
             if (Git.Where.FindGitInstallations(out installations))
@@ -370,8 +349,7 @@ namespace Microsoft.Alm.Cli
                 }
             }
 
-            Console.Error.WriteLine("Unable to open help documentation.");
-            Git.Trace.WriteLine("failed to open help documentation.");
+            Die("Unable to open help documentation.");
         }
 
         private static void Remove()
@@ -381,7 +359,7 @@ namespace Microsoft.Alm.Cli
 
             Git.Trace.WriteLine($"Installer result = {installer.Result}, exit code = {installer.ExitCode}.");
 
-            Environment.Exit(installer.ExitCode);
+            Program.Exit(installer.ExitCode);
         }
 
         private static void Store()

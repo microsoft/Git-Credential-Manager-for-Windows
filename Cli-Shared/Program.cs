@@ -1,5 +1,4 @@
 using System;
-using System.Collections.Generic;
 using System.ComponentModel;
 using System.Diagnostics;
 using System.IO;
@@ -141,6 +140,45 @@ namespace Microsoft.Alm.Cli
         }
         private static Version _version;
 
+        internal static void Die(Exception exception)
+        {
+            Git.Trace.WriteLine(exception.ToString());
+            LogEvent(exception.ToString(), EventLogEntryType.Error);
+
+            string message;
+            if (!String.IsNullOrWhiteSpace(exception.Message))
+            {
+                message = $"{exception.GetType().Name} encountered.\n   {exception.Message}";
+            }
+            else
+            {
+                message = $"{exception.GetType().Name}  encountered.";
+            }
+
+            Die(message);
+        }
+
+        internal static void Die(string message)
+        {
+            Git.Trace.WriteLine($"fatal: {message}");
+            Program.WriteLine($"fatal: {message}");
+
+            Git.Trace.Flush();
+
+            Environment.Exit(-1);
+        }
+
+        internal static void Exit(int exitcode = 0, string message = null)
+        {
+            if (!String.IsNullOrWhiteSpace(message))
+            {
+                Git.Trace.WriteLine(message);
+                Program.WriteLine(message);
+            }
+
+            Environment.Exit(exitcode);
+        }
+
         internal static void LogEvent(string message, EventLogEntryType eventType)
         {
             /*** try-squelch due to UAC issues which require a proper installer to work around ***/
@@ -152,6 +190,26 @@ namespace Microsoft.Alm.Cli
                 EventLog.WriteEntry(EventSource, message, eventType);
             }
             catch { /* squelch */ }
+        }
+
+        internal static ConsoleKeyInfo ReadKey(bool intercept = true)
+        {
+            return (StandardInputIsTty)
+                ? Console.ReadKey(intercept)
+                : new ConsoleKeyInfo(' ', ConsoleKey.Escape, false, false, false);
+        }
+
+        internal static void Write(string message)
+        {
+            if (message == null)
+                return;
+
+            Console.Error.WriteLine(message);
+        }
+
+        internal static void WriteLine(string message = null)
+        {
+            Console.Error.WriteLine(message);
         }
 
         private static bool BasicCredentialPrompt(TargetUri targetUri, string titleMessage, out string username, out string password)
@@ -408,8 +466,7 @@ namespace Microsoft.Alm.Cli
         {
             if (operationArguments.TargetUri == null)
             {
-                Console.Error.WriteLine("fatal: no host information, unable to continue.");
-                Environment.Exit(-1);
+                Die("No host information, unable to continue.");
             }
 
             var envars = operationArguments.EnvironmentVariables;
@@ -854,7 +911,7 @@ namespace Microsoft.Alm.Cli
 
         private static void PrintVersion()
         {
-            Console.Out.WriteLine("{0} version {1}", Title, Version.ToString(3));
+            Program.WriteLine($"{Title} version {Version.ToString(3)}");
         }
 
         private static bool QueryCredentials(OperationArguments operationArguments)
@@ -930,7 +987,7 @@ namespace Microsoft.Alm.Cli
                         }
                         else
                         {
-                            Console.Error.WriteLine(AadMsaAuthFailureMessage);
+                            Program.WriteLine(AadMsaAuthFailureMessage);
                             credentialsFound = true;
                             LogEvent($"Failed to retrieve Azure Directory credentials for '{operationArguments.TargetUri}'.", EventLogEntryType.FailureAudit);
                         }
@@ -960,7 +1017,7 @@ namespace Microsoft.Alm.Cli
                         }
                         else
                         {
-                            Console.Error.WriteLine(AadMsaAuthFailureMessage);
+                            Program.WriteLine(AadMsaAuthFailureMessage);
                             LogEvent($"Failed to retrieve Microsoft Live credentials for '{operationArguments.TargetUri}'.", EventLogEntryType.FailureAudit);
                         }
                     }).Wait();
@@ -987,7 +1044,7 @@ namespace Microsoft.Alm.Cli
                         }
                         else
                         {
-                            Console.Error.WriteLine(GitHubAuthFailureMessage);
+                            Program.WriteLine(GitHubAuthFailureMessage);
                             LogEvent($"Failed to retrieve GitHub credentials for '{operationArguments.TargetUri}'.", EventLogEntryType.FailureAudit);
                         }
                     }).Wait();

@@ -43,8 +43,7 @@ namespace Microsoft.Alm.Cli
 
             if (readableStream == Stream.Null || !readableStream.CanRead)
             {
-                Console.Error.WriteLine("Fatal: unable to read input.");
-                Environment.Exit(-1);
+                Program.Die("Unable to read input.");
             }
             else
             {
@@ -64,6 +63,11 @@ namespace Microsoft.Alm.Cli
                     if (read == buffer.Length)
                     {
                         Array.Resize(ref buffer, buffer.Length * 2);
+                    }
+
+                    if ((read > 0 && read < 3 && buffer[read - 1] == '\n'))
+                    {
+                        Program.Die("Invalid input, please see 'https://www.kernel.org/pub/software/scm/git/docs/git-credential.html'.");
                     }
 
                     // the input ends with LFLF, check for that and break the read loop
