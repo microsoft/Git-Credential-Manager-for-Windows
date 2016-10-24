@@ -200,19 +200,11 @@ namespace Microsoft.Alm.Cli
                 Exception innerException = exception.InnerExceptions.FirstOrDefault(e => !(e is AggregateException))
                                         ?? exception.InnerException;
 
-                Console.Error.WriteLine("Fatal: " + innerException.GetType().Name + " encountered.");
-                Git.Trace.WriteLine("Fatal: " + exception.ToString());
-                LogEvent(exception.ToString(), EventLogEntryType.Error);
-
-                Environment.ExitCode = -1;
+                Die(innerException);
             }
             catch (Exception exception)
             {
-                Console.Error.WriteLine("Fatal: " + exception.GetType().Name + " encountered.");
-                Git.Trace.WriteLine("Fatal: " + exception.ToString());
-                LogEvent(exception.ToString(), EventLogEntryType.Error);
-
-                Environment.ExitCode = -1;
+                Die(exception);
             }
 
             Trace.Flush();
@@ -246,8 +238,7 @@ namespace Microsoft.Alm.Cli
                 }
             }
 
-            Console.Error.WriteLine("Unable to open help documentation.");
-            Git.Trace.WriteLine("failed to open help documentation.");
+            Die("Unable to open help documentation.");
         }
     }
 }

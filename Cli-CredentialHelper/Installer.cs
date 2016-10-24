@@ -204,7 +204,7 @@ namespace Microsoft.Alm.Cli
                     {
                         Program.LogEvent("No Git installation found, unable to continue deployment.", EventLogEntryType.Error);
                         Console.Out.WriteLine();
-                        Console.Error.WriteLine($"Fatal: custom path does not exist: '{_customPath}'. {FailFace}");
+                        Program.WriteLine($"Fatal: custom path does not exist: '{_customPath}'. {FailFace}");
                         Pause();
 
                         Result = ResultValue.InvalidCustomPath;
@@ -248,7 +248,7 @@ namespace Microsoft.Alm.Cli
                 {
                     Program.LogEvent("No Git installation found, unable to continue.", EventLogEntryType.Error);
                     Console.Out.WriteLine();
-                    Console.Error.WriteLine("Fatal: Git was not detected, unable to continue. {FailFace}");
+                    Program.WriteLine("Fatal: Git was not detected, unable to continue. {FailFace}");
                     Pause();
 
                     Result = ResultValue.GitNotFound;
@@ -288,12 +288,12 @@ namespace Microsoft.Alm.Cli
                     else if (_isForced)
                     {
                         Program.LogEvent($"Deployment to '{installation.Path}' failed.", EventLogEntryType.Warning);
-                        Console.Error.WriteLine($"  deployment failed. {FailFace}");
+                        Program.WriteLine($"  deployment failed. {FailFace}");
                     }
                     else
                     {
                         Program.LogEvent($"Deployment to '{installation.Path}' failed.", EventLogEntryType.Error);
-                        Console.Error.WriteLine($"  deployment failed. {FailFace}");
+                        Program.WriteLine($"  deployment failed. {FailFace}");
                         Pause();
 
                         Result = ResultValue.DeploymentFailed;
@@ -334,12 +334,12 @@ namespace Microsoft.Alm.Cli
                 else if (_isForced)
                 {
                     Program.LogEvent($"Deployment to '{UserBinPath}' failed.", EventLogEntryType.Warning);
-                    Console.Error.WriteLine($"  deployment failed. {FailFace}");
+                    Program.WriteLine($"  deployment failed. {FailFace}");
                 }
                 else
                 {
                     Program.LogEvent($"Deployment to '{UserBinPath}' failed.", EventLogEntryType.Error);
-                    Console.Error.WriteLine($"  deployment failed. {FailFace}");
+                    Program.WriteLine($"  deployment failed. {FailFace}");
                     Pause();
 
                     Result = ResultValue.DeploymentFailed;
@@ -373,12 +373,12 @@ namespace Microsoft.Alm.Cli
                     else if (_isForced)
                     {
                         Program.LogEvent($"Deployment to '{CygwinPath}' failed.", EventLogEntryType.Warning);
-                        Console.Error.WriteLine($"  deployment failed. {FailFace}");
+                        Program.WriteLine($"  deployment failed. {FailFace}");
                     }
                     else
                     {
                         Program.LogEvent($"Deployment to '{CygwinPath}' failed.", EventLogEntryType.Error);
-                        Console.Error.WriteLine($"  deployment failed. {FailFace}");
+                        Program.WriteLine($"  deployment failed. {FailFace}");
                         Pause();
 
                         Result = ResultValue.DeploymentFailed;
@@ -398,7 +398,7 @@ namespace Microsoft.Alm.Cli
                     else
                     {
                         Console.Out.WriteLine();
-                        Console.Error.WriteLine("Fatal: Unable to update your ~/.gitconfig correctly.");
+                        Program.WriteLine("Fatal: Unable to update your ~/.gitconfig correctly.");
 
                         Result = ResultValue.GitConfigGlobalFailed;
                         return;
@@ -469,7 +469,7 @@ namespace Microsoft.Alm.Cli
                     if (!Directory.Exists(_customPath))
                     {
                         Console.Out.WriteLine();
-                        Console.Error.WriteLine($"Fatal: custom path does not exist: '{_customPath}'. U_U");
+                        Program.WriteLine($"fatal: custom path does not exist: '{_customPath}'. U_U");
                         Pause();
 
                         Result = ResultValue.InvalidCustomPath;
@@ -511,7 +511,7 @@ namespace Microsoft.Alm.Cli
                 {
                     Program.LogEvent($"Git was not detected, unable to continue with removal.", EventLogEntryType.Error);
                     Console.Out.WriteLine();
-                    Console.Error.WriteLine("Fatal: Git was not detected, unable to continue. U_U");
+                    Program.WriteLine("fatal: Git was not detected, unable to continue. U_U");
                     Pause();
 
                     Result = ResultValue.GitNotFound;
@@ -536,13 +536,13 @@ namespace Microsoft.Alm.Cli
                         if (!_isForced)
                         {
                             // only 'fatal' when not forced
-                            Console.Error.Write("Fatal: ");
+                            Program.Write("Fatal: ");
 
                             Result = ResultValue.GitConfigSystemFailed;
                             return;
                         }
 
-                        Console.Error.WriteLine("Unable to update your /etc/gitconfig correctly.");
+                        Program.WriteLine("Unable to update your /etc/gitconfig correctly.");
                     }
 
                     if ((updateTypes & Configuration.Type.Global) == Configuration.Type.Global)
@@ -552,7 +552,7 @@ namespace Microsoft.Alm.Cli
                     else
                     {
                         Console.Out.WriteLine();
-                        Console.Error.WriteLine("Fatal: Unable to update your ~/.gitconfig correctly.");
+                        Program.WriteLine("Fatal: Unable to update your ~/.gitconfig correctly.");
 
                         Result = ResultValue.GitConfigGlobalFailed;
                         return;
