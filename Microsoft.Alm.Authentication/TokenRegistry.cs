@@ -81,7 +81,7 @@ namespace Microsoft.Alm.Authentication
                     try
                     {
                         Uri tokenUri = new Uri(url);
-                        if (tokenUri.IsBaseOf(targetUri.ActualUri))
+                        if (tokenUri.IsBaseOf(targetUri))
                         {
                             byte[] data = Convert.FromBase64String(value);
 

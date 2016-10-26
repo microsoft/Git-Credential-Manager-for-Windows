@@ -187,7 +187,7 @@ namespace Microsoft.Alm.Authentication
 
             tenantId = Guid.Empty;
 
-            if (targetUri.ActualUri.Host.EndsWith(VstsBaseUrlHost, StringComparison.OrdinalIgnoreCase))
+            if (targetUri.Host.EndsWith(VstsBaseUrlHost, StringComparison.OrdinalIgnoreCase))
             {
                 Git.Trace.WriteLine($"'{targetUri}' is subdomain of '{VstsBaseUrlHost}', checking AAD vs MSA.");
 

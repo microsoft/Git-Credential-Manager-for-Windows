@@ -120,7 +120,7 @@ namespace Microsoft.Alm.Authentication
             if (personalAccessTokenStore == null)
                 throw new ArgumentNullException("personalAccessTokenStore", "The `personalAccessTokenStore` is null or invalid.");
 
-            if (targetUri.ActualUri.DnsSafeHost.EndsWith(GitHubBaseUrlHost, StringComparison.OrdinalIgnoreCase))
+            if (targetUri.DnsSafeHost.EndsWith(GitHubBaseUrlHost, StringComparison.OrdinalIgnoreCase))
             {
                 authentication = new GitHubAuthentication(tokenScope, personalAccessTokenStore, acquireCredentialsCallback, acquireAuthenticationCodeCallback, authenticationResultCallback);
                 Git.Trace.WriteLine($"created GitHub authentication for '{targetUri}'.");

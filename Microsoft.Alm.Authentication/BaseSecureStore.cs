@@ -269,7 +269,7 @@ namespace Microsoft.Alm.Authentication
         {
             if (ReferenceEquals(targetUri, null))
                 throw new ArgumentNullException(nameof(targetUri));
-            if (!targetUri.IsAbsoluteUri || !targetUri.ActualUri.IsAbsoluteUri)
+            if (!targetUri.IsAbsoluteUri)
                 throw new ArgumentException(nameof(targetUri.IsAbsoluteUri));
         }
 
