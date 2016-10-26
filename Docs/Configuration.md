@@ -22,7 +22,13 @@
 
  Defines the type of authentication to be used.
 
- Supports Auto, Basic, AAD, MSA, and Integrated.
+ Supports Auto, Basic, AAD, MSA, GitHub, and Integrated.
+
+ Use AAD or MSA if the host is visualstudio.com Azure Domain or Live Account authentication, relatively.
+
+ Use GitHub if the host is github.com.
+
+ Use Integrated if the host is a Team Foundation, or other NTLM authentication based, server.
 
  Defaults to _Auto_.
 
@@ -43,8 +49,6 @@
  Specifies if user can be prompted for credentials or not.
 
  Supports Auto, Always, or Never. Defaults to Auto.
-
- Only used by AAD, MSA, and GitHub authority.
 
   `git config --global credential.microsoft.visualstudio.com.interactive never`
 
