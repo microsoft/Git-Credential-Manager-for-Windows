@@ -37,6 +37,7 @@ namespace Microsoft.Alm.Cli
         internal const string EnvironWritelogKey = "GCM_WRITELOG";
         internal const string EnvironConfigNoLocalKey = "GCM_CONFIG_NOLOCAL";
         internal const string EnvironConfigNoSystemKey = "GCM_CONFIG_NOSYSTEM";
+        internal const string EnvironHttpUserAgent = "GCM_HTTP_USER_AGENT";
         internal const string EnvironConfigTraceKey = Git.Trace.EnvironmentVariableKey;
 
         internal static readonly StringComparer EnvironKeyComparer = StringComparer.OrdinalIgnoreCase;
@@ -425,6 +426,12 @@ namespace Microsoft.Alm.Cli
                                               || ConfigValueComparer.Equals(value, "0")
                                               || ConfigValueComparer.Equals(value, "false")
                                               || ConfigValueComparer.Equals(value, "no");
+
+            // if a user-agent has been specified in the environment, set it globally
+            if (envars.ContainsKey(EnvironHttpUserAgent))
+            {
+                Global.UserAgent = envars[EnvironHttpUserAgent];
+            }
 
             // load/re-load the Git configuration after setting the use local/system config values
             operationArguments.LoadConfiguration();
