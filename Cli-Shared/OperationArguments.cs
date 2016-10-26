@@ -193,7 +193,7 @@ namespace Microsoft.Alm.Cli
         public bool PreserveCredentials { get; set; }
         public Uri ProxyUri
         {
-            get { return _proxyUri; }
+            get { return _targetUri.ProxyUri; }
             internal set
             {
                 _proxyUri = value;
@@ -229,7 +229,7 @@ namespace Microsoft.Alm.Cli
         }
         public Uri QueryUri
         {
-            get { return _queryUri; }
+            get { return _targetUri.QueryUri; }
             set
             {
                 if (value == null)
@@ -281,11 +281,10 @@ namespace Microsoft.Alm.Cli
         private Git.Configuration _configuration;
         private Dictionary<string, string> _environmentVariables;
         private string _password;
+        private Uri _proxyUri;
         private string _queryHost;
         private string _queryPath;
         private string _queryProtocol;
-        private Uri _queryUri;
-        private Uri _proxyUri;
         private TargetUri _targetUri;
         private bool _useHttpPath;
         private string _username;
@@ -369,7 +368,9 @@ namespace Microsoft.Alm.Cli
 
         internal void CreateTargetUri()
         {
+            string actualUrl = null;
             string queryUrl = null;
+            string proxyUrl = _proxyUri?.ToString();
 
             // when the target requests a path...
             if (UseHttpPath)
@@ -392,7 +393,7 @@ namespace Microsoft.Alm.Cli
                 else
                 {
                     // and the target lacks a path, combine protocol + host
-                    if ((String.IsNullOrWhiteSpace(_queryPath)))
+                    if (String.IsNullOrWhiteSpace(_queryPath))
                     {
                         queryUrl = $"{_queryProtocol}://{_queryHost}";
                     }
@@ -402,6 +403,8 @@ namespace Microsoft.Alm.Cli
                         queryUrl = $"{_queryProtocol}://{_queryHost}/{_queryPath}";
                     }
                 }
+
+                actualUrl = queryUrl;
             }
             // when the target ignores paths...
             else
@@ -422,9 +425,18 @@ namespace Microsoft.Alm.Cli
                     {
                         queryUrl = _queryHost;
                     }
+
+                    if (String.IsNullOrWhiteSpace(_queryPath))
+                    {
+                        actualUrl = queryUrl;
+                    }
+                    else
+                    {
+                        actualUrl = $"{queryUrl}/{_queryPath}";
+                    }
                 }
                 // and the protocol is "file://" strip any path
-                else if (_queryProtocol.StartsWith("file://", StringComparison.OrdinalIgnoreCase))
+                else if (_queryProtocol.StartsWith(Uri.UriSchemeFile, StringComparison.OrdinalIgnoreCase))
                 {
                     int idx = _queryHost.IndexOfAny(SeperatorCharacters);
 
@@ -435,17 +447,26 @@ namespace Microsoft.Alm.Cli
 
                     // combine with protocol
                     queryUrl = $"{_queryProtocol}://{queryUrl}";
+
+                    actualUrl = queryUrl;
                 }
                 // combine the protocol + host
                 else
                 {
                     queryUrl = $"{_queryProtocol}://{_queryHost}";
+
+                    if (String.IsNullOrWhiteSpace(_queryPath))
+                    {
+                        actualUrl = queryUrl;
+                    }
+                    else
+                    {
+                        actualUrl = $"{queryUrl}/{_queryPath}";
+                    }
                 }
             }
 
-            _queryUri = new Uri(queryUrl);
-
-            _targetUri = new TargetUri(_queryUri, _proxyUri);
+            _targetUri = new TargetUri(actualUrl, queryUrl, proxyUrl);
         }
     }
 }

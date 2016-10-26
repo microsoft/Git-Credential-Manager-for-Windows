@@ -49,6 +49,25 @@ namespace Microsoft.Alm.Authentication
             _getTargetName = getTargetName ?? Secret.UriToName;
         }
 
+        internal SecretCache(ICredentialStore credentialStore)
+        {
+            if (credentialStore == null)
+                throw new ArgumentNullException(nameof(credentialStore));
+
+            _namespace = credentialStore.Namespace;
+            _getTargetName = credentialStore.UriNameConversion;
+        }
+
+        public string Namespace
+        {
+            get { return _namespace; }
+        }
+
+        public Secret.UriNameConversion UriNameConversion
+        {
+            get { return _getTargetName; }
+        }
+
         private readonly string _namespace;
         private readonly Secret.UriNameConversion _getTargetName;
 

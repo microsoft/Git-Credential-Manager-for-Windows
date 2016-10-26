@@ -212,7 +212,13 @@ namespace Microsoft.Alm.Cli
             Console.Error.WriteLine(message);
         }
 
-        private static bool BasicCredentialPrompt(TargetUri targetUri, string titleMessage, out string username, out string password)
+        private static Credential BasicCredentialPrompt(TargetUri targetUri)
+        {
+            string message = "Please enter your credentials for ";
+            return BasicCredentialPrompt(targetUri, message);
+        }
+
+        private static Credential BasicCredentialPrompt(TargetUri targetUri, string titleMessage)
         {
             // ReadConsole 32768 fail, 32767 ok
             // @linquize [https://github.com/Microsoft/Git-Credential-Manager-for-Windows/commit/a62b9a19f430d038dcd85a610d97e5f763980f85]
@@ -220,13 +226,10 @@ namespace Microsoft.Alm.Cli
 
             Debug.Assert(targetUri != null);
 
-            username = null;
-            password = null;
-
             if (!StandardErrorIsTty || !StandardInputIsTty)
             {
                 Git.Trace.WriteLine("not a tty detected, abandoning prompt.");
-                return false;
+                return null;
             }
 
             titleMessage = titleMessage ?? "Please enter your credentials for ";
@@ -243,6 +246,9 @@ namespace Microsoft.Alm.Cli
             using (SafeFileHandle stdout = NativeMethods.CreateFile(NativeMethods.ConsoleOutName, fileAccessFlags, fileShareFlags, IntPtr.Zero, fileCreationDisposition, fileAttributes, IntPtr.Zero))
             using (SafeFileHandle stdin = NativeMethods.CreateFile(NativeMethods.ConsoleInName, fileAccessFlags, fileShareFlags, IntPtr.Zero, fileCreationDisposition, fileAttributes, IntPtr.Zero))
             {
+                string username = null;
+                string password = null;
+
                 // read the current console mode
                 NativeMethods.ConsoleMode consoleMode;
                 if (!NativeMethods.GetConsoleMode(stdin, out consoleMode))
@@ -338,10 +344,12 @@ namespace Microsoft.Alm.Cli
 
                     Git.Trace.WriteLine($"console mode = '{consoleMode}'.");
                 }
+
+                if (username != null && password != null)
+                    return new Credential(username, password);
             }
 
-            return username != null
-                && password != null;
+            return null;
         }
 
         private static BaseAuthentication CreateAuthentication(OperationArguments operationArguments)
@@ -371,7 +379,7 @@ namespace Microsoft.Alm.Cli
                                                                        operationArguments.UseModalUi
                                                                          ? new GitHubAuthentication.AcquireAuthenticationCodeDelegate(GitHub.Authentication.AuthenticationPrompts.AuthenticationCodeModalPrompt)
                                                                          : new GitHubAuthentication.AcquireAuthenticationCodeDelegate(GitHubAuthCodePrompt),
-                                                                       null);
+                                                                       null); ;
 
                     if (authority != null)
                     {
@@ -408,7 +416,11 @@ namespace Microsoft.Alm.Cli
                     Git.Trace.WriteLine($"authority for '{operationArguments.TargetUri}' is basic.");
 
                     // return a generic username + password authentication object
-                    return authority ?? new BasicAuthentication(secrets);
+                    return authority ?? new BasicAuthentication(secrets,
+                                                                operationArguments.UseModalUi
+                                                                  ? new AcquireCredentialsDelegate(Program.ModalPromptForCredentials)
+                                                                  : new AcquireCredentialsDelegate(Program.BasicCredentialPrompt),
+                                                                null);
 
                 case AuthorityType.GitHub:
                     Git.Trace.WriteLine($"authority for '{operationArguments.TargetUri}' is GitHub.");
@@ -523,7 +535,7 @@ namespace Microsoft.Alm.Cli
                          || ConfigKeyComparer.Equals(entry.Value, "NTLM")
                          || ConfigKeyComparer.Equals(entry.Value, "SSO"))
                 {
-                    operationArguments.Authority = AuthorityType.Integrated;
+                    operationArguments.Authority = AuthorityType.Ntlm;
                 }
                 else if (ConfigKeyComparer.Equals(entry.Value, "GitHub"))
                 {
@@ -775,7 +787,19 @@ namespace Microsoft.Alm.Cli
         {
             const string TitleMessage = "Please enter your GitHub credentials for ";
 
-            return BasicCredentialPrompt(targetUri, TitleMessage, out username, out password);
+            Credential credential;
+            if ((credential = BasicCredentialPrompt(targetUri, TitleMessage)) != null)
+            {
+                username = credential.Username;
+                password = credential.Password;
+
+                return true;
+            }
+
+            username = null;
+            password = null;
+
+            return false;
         }
 
         private static void LoadAssemblyInformation()
@@ -789,7 +813,7 @@ namespace Microsoft.Alm.Cli
             _version = asseName.Version;
         }
 
-        private static bool ModalPromptForCredentials(TargetUri targetUri, string message, out string username, out string password)
+        private static Credential ModalPromptForCredentials(TargetUri targetUri, string message)
         {
             Debug.Assert(targetUri != null);
             Debug.Assert(message != null);
@@ -809,26 +833,33 @@ namespace Microsoft.Alm.Cli
             uint packedAuthBufferSize = 0;
             bool saveCredentials = false;
             int inBufferSize = 0;
+            string username;
+            string password;
 
-            return ModalPromptDisplayDialog(ref credUiInfo,
-                                            ref authPackage,
-                                            packedAuthBufferPtr,
-                                            packedAuthBufferSize,
-                                            inBufferPtr,
-                                            inBufferSize,
-                                            saveCredentials,
-                                            flags,
-                                            out username,
-                                            out password);
+            if (ModalPromptDisplayDialog(ref credUiInfo,
+                                         ref authPackage,
+                                         packedAuthBufferPtr,
+                                         packedAuthBufferSize,
+                                         inBufferPtr,
+                                         inBufferSize,
+                                         saveCredentials,
+                                         flags,
+                                         out username,
+                                         out password))
+            {
+                return new Credential(username, password);
+            }
+
+            return null;
         }
 
-        private static bool ModalPromptForCredentials(TargetUri targetUri, out string username, out string password)
+        private static Credential ModalPromptForCredentials(TargetUri targetUri)
         {
             string message = String.Format("Enter your credentials for {0}.", targetUri);
-            return ModalPromptForCredentials(targetUri, message, out username, out password);
+            return ModalPromptForCredentials(targetUri, message);
         }
 
-        private static bool ModalPromptForPassword(TargetUri targetUri, string message, string username, out string password)
+        private static Credential ModalPromptForPassword(TargetUri targetUri, string message, string username)
         {
             Debug.Assert(targetUri != null);
             Debug.Assert(message != null);
@@ -849,6 +880,7 @@ namespace Microsoft.Alm.Cli
             uint packedAuthBufferSize = 0;
             bool saveCredentials = false;
             int inBufferSize = 0;
+            string password;
 
             try
             {
@@ -866,10 +898,7 @@ namespace Microsoft.Alm.Cli
                     error = Marshal.GetLastWin32Error();
                     Git.Trace.WriteLine($"unable to determine credential buffer size ('{NativeMethods.Win32Error.GetText(error)}').");
 
-                    username = null;
-                    password = null;
-
-                    return false;
+                    return null;
                 }
 
                 inBufferPtr = Marshal.AllocHGlobal(inBufferSize);
@@ -883,22 +912,22 @@ namespace Microsoft.Alm.Cli
                     error = Marshal.GetLastWin32Error();
                     Git.Trace.WriteLine($"unable to write to credential buffer ('{NativeMethods.Win32Error.GetText(error)}').");
 
-                    username = null;
-                    password = null;
-
-                    return false;
+                    return null;
                 }
 
-                return ModalPromptDisplayDialog(ref credUiInfo,
-                                                ref authPackage,
-                                                packedAuthBufferPtr,
-                                                packedAuthBufferSize,
-                                                inBufferPtr,
-                                                inBufferSize,
-                                                saveCredentials,
-                                                flags,
-                                                out username,
-                                                out password);
+                if (ModalPromptDisplayDialog(ref credUiInfo,
+                                             ref authPackage,
+                                             packedAuthBufferPtr,
+                                             packedAuthBufferSize,
+                                             inBufferPtr,
+                                             inBufferSize,
+                                             saveCredentials,
+                                             flags,
+                                             out username,
+                                             out password))
+                {
+                    return new Credential(username, password);
+                }
             }
             finally
             {
@@ -907,6 +936,8 @@ namespace Microsoft.Alm.Cli
                     Marshal.FreeCoTaskMem(inBufferPtr);
                 }
             }
+
+            return null;
         }
 
         private static void PrintVersion()
@@ -917,6 +948,7 @@ namespace Microsoft.Alm.Cli
         private static bool QueryCredentials(OperationArguments operationArguments)
         {
             const string AadMsaAuthFailureMessage = "Logon failed, use ctrl+c to cancel basic credential prompt.";
+            const string BasicAuthFaulureMessage = "Logon failed, use ctrl+c to cancel basic credential prompt.";
             const string GitHubAuthFailureMessage = "Logon failed, use ctrl+c to cancel basic credential prompt.";
 
             if (ReferenceEquals(operationArguments, null))
@@ -932,128 +964,137 @@ namespace Microsoft.Alm.Cli
             {
                 default:
                 case AuthorityType.Basic:
-                    if ((credentials = authentication.GetCredentials(operationArguments.TargetUri)) != null)
                     {
-                        Git.Trace.WriteLine("credentials found.");
-                        operationArguments.SetCredentials(credentials);
-                        credentialsFound = true;
-                    }
-                    else if (operationArguments.Interactivity != Interactivity.Never)
-                    {
-                        string username;
-                        string password;
+                        BasicAuthentication basicAuth = authentication as BasicAuthentication;
 
-                        // either use modal UI or command line to query for credentials
-                        if ((operationArguments.UseModalUi
-                                && ModalPromptForCredentials(operationArguments.TargetUri, out username, out password))
-                            || (!operationArguments.UseModalUi
-                                && BasicCredentialPrompt(operationArguments.TargetUri, null, out username, out password)))
+                        Task.Run(async () =>
                         {
-                            Git.Trace.WriteLine($"credentials for '{operationArguments.TargetUri}' found.");
-                            // set the credentials object
-                            // no need to save the credentials explicitly, as Git will call back
-                            // with a store command if the credentials are valid.
-                            credentials = new Credential(username, password);
-                            operationArguments.SetCredentials(credentials);
-                            credentialsFound = true;
-                        }
+                            // attempt to get cached creds or acquire creds if interactivity is allowed
+                            if ((credentials = authentication.GetCredentials(operationArguments.TargetUri)) != null
+                                || (operationArguments.Interactivity != Interactivity.Never
+                                    && (credentials = await basicAuth.AcquireCredentials(operationArguments.TargetUri)) != null))
+                            {
+                                Git.Trace.WriteLine("credentials found.");
+                                // set the credentials object
+                                // no need to save the credentials explicitly, as Git will call back
+                                // with a store command if the credentials are valid.
+                                operationArguments.SetCredentials(credentials);
+                                credentialsFound = true;
+                            }
+                            else
+                            {
+                                Git.Trace.WriteLine($"credentials for '{operationArguments.TargetUri}' not found.");
+                                Program.WriteLine(BasicAuthFaulureMessage);
+                                LogEvent($"Failed to retrieve credentials for '{operationArguments.TargetUri}'.", EventLogEntryType.FailureAudit);
+                            }
+                        }).Wait();
                     }
                     break;
 
                 case AuthorityType.AzureDirectory:
-                    VstsAadAuthentication aadAuth = authentication as VstsAadAuthentication;
-
-                    Task.Run(async () =>
                     {
-                        // attempt to get cached creds -> refresh creds -> non-interactive logon -> interactive logon
-                        // note that AAD "credentials" are always scoped access tokens
-                        if (((operationArguments.Interactivity != Interactivity.Always
-                            && ((credentials = aadAuth.GetCredentials(operationArguments.TargetUri)) != null)
-                            && (!operationArguments.ValidateCredentials
-                                || await aadAuth.ValidateCredentials(operationArguments.TargetUri, credentials))))
-                        || (operationArguments.Interactivity != Interactivity.Always
-                                && ((credentials = await aadAuth.NoninteractiveLogon(operationArguments.TargetUri, true)) != null)
-                            && (!operationArguments.ValidateCredentials
-                                || await aadAuth.ValidateCredentials(operationArguments.TargetUri, credentials)))
-                        || (operationArguments.Interactivity != Interactivity.Never
-                            && ((credentials = await aadAuth.InteractiveLogon(operationArguments.TargetUri, true)) != null)
-                            && (!operationArguments.ValidateCredentials
-                                || await aadAuth.ValidateCredentials(operationArguments.TargetUri, credentials))))
+                        VstsAadAuthentication aadAuth = authentication as VstsAadAuthentication;
+
+                        Task.Run(async () =>
                         {
-                            Git.Trace.WriteLine($"credentials for '{operationArguments.TargetUri}' found.");
-                            operationArguments.SetCredentials(credentials);
-                            credentialsFound = true;
-                            LogEvent($"Azure Directory credentials  for '{operationArguments.TargetUri}' successfully retrieved.", EventLogEntryType.SuccessAudit);
-                        }
-                        else
-                        {
-                            Program.WriteLine(AadMsaAuthFailureMessage);
-                            credentialsFound = true;
-                            LogEvent($"Failed to retrieve Azure Directory credentials for '{operationArguments.TargetUri}'.", EventLogEntryType.FailureAudit);
-                        }
-                    }).Wait();
+                            // attempt to get cached creds -> non-interactive logon -> interactive logon
+                            // note that AAD "credentials" are always scoped access tokens
+                            if (((operationArguments.Interactivity != Interactivity.Always
+                                    && ((credentials = aadAuth.GetCredentials(operationArguments.TargetUri)) != null)
+                                    && (!operationArguments.ValidateCredentials
+                                        || await aadAuth.ValidateCredentials(operationArguments.TargetUri, credentials))))
+                                || (operationArguments.Interactivity != Interactivity.Always
+                                        && ((credentials = await aadAuth.NoninteractiveLogon(operationArguments.TargetUri, true)) != null)
+                                    && (!operationArguments.ValidateCredentials
+                                        || await aadAuth.ValidateCredentials(operationArguments.TargetUri, credentials)))
+                                || (operationArguments.Interactivity != Interactivity.Never
+                                    && ((credentials = await aadAuth.InteractiveLogon(operationArguments.TargetUri, true)) != null)
+                                    && (!operationArguments.ValidateCredentials
+                                        || await aadAuth.ValidateCredentials(operationArguments.TargetUri, credentials))))
+                            {
+                                Git.Trace.WriteLine($"credentials for '{operationArguments.TargetUri}' found.");
+                                operationArguments.SetCredentials(credentials);
+                                credentialsFound = true;
+                                LogEvent($"Azure Directory credentials  for '{operationArguments.TargetUri}' successfully retrieved.", EventLogEntryType.SuccessAudit);
+                            }
+                            else
+                            {
+                                Git.Trace.WriteLine($"credentials for '{operationArguments.TargetUri}' not found.");
+                                Program.WriteLine(AadMsaAuthFailureMessage);
+                                LogEvent($"Failed to retrieve Azure Directory credentials for '{operationArguments.TargetUri}'.", EventLogEntryType.FailureAudit);
+                            }
+                        }).Wait();
+                    }
                     break;
 
                 case AuthorityType.MicrosoftAccount:
-                    VstsMsaAuthentication msaAuth = authentication as VstsMsaAuthentication;
-
-                    Task.Run(async () =>
                     {
-                        // attempt to get cached creds -> refresh creds -> interactive logon
-                        // note that MSA "credentials" are always scoped access tokens
-                        if (((operationArguments.Interactivity != Interactivity.Always
-                            && ((credentials = msaAuth.GetCredentials(operationArguments.TargetUri)) != null)
-                            && (!operationArguments.ValidateCredentials
-                                || await msaAuth.ValidateCredentials(operationArguments.TargetUri, credentials))))
-                        || (operationArguments.Interactivity != Interactivity.Never
-                            && ((credentials = await msaAuth.InteractiveLogon(operationArguments.TargetUri, true)) != null)
-                            && (!operationArguments.ValidateCredentials
-                                || await msaAuth.ValidateCredentials(operationArguments.TargetUri, credentials))))
+                        VstsMsaAuthentication msaAuth = authentication as VstsMsaAuthentication;
+
+                        Task.Run(async () =>
                         {
-                            Git.Trace.WriteLine($"credentials for '{operationArguments.TargetUri}' found.");
-                            operationArguments.SetCredentials(credentials);
-                            credentialsFound = true;
-                            LogEvent($"Microsoft Live credentials for '{operationArguments.TargetUri}' successfully retrieved.", EventLogEntryType.SuccessAudit);
-                        }
-                        else
-                        {
-                            Program.WriteLine(AadMsaAuthFailureMessage);
-                            LogEvent($"Failed to retrieve Microsoft Live credentials for '{operationArguments.TargetUri}'.", EventLogEntryType.FailureAudit);
-                        }
-                    }).Wait();
+                            // attempt to get cached creds -> interactive logon
+                            // note that MSA "credentials" are always scoped access tokens
+                            if (((operationArguments.Interactivity != Interactivity.Always
+                                    && ((credentials = msaAuth.GetCredentials(operationArguments.TargetUri)) != null)
+                                    && (!operationArguments.ValidateCredentials
+                                        || await msaAuth.ValidateCredentials(operationArguments.TargetUri, credentials))))
+                                || (operationArguments.Interactivity != Interactivity.Never
+                                    && ((credentials = await msaAuth.InteractiveLogon(operationArguments.TargetUri, true)) != null)
+                                    && (!operationArguments.ValidateCredentials
+                                        || await msaAuth.ValidateCredentials(operationArguments.TargetUri, credentials))))
+                            {
+                                Git.Trace.WriteLine($"credentials for '{operationArguments.TargetUri}' found.");
+                                operationArguments.SetCredentials(credentials);
+                                credentialsFound = true;
+                                LogEvent($"Microsoft Live credentials for '{operationArguments.TargetUri}' successfully retrieved.", EventLogEntryType.SuccessAudit);
+                            }
+                            else
+                            {
+                                Git.Trace.WriteLine($"credentials for '{operationArguments.TargetUri}' not found.");
+                                Program.WriteLine(AadMsaAuthFailureMessage);
+                                LogEvent($"Failed to retrieve Microsoft Live credentials for '{operationArguments.TargetUri}'.", EventLogEntryType.FailureAudit);
+                            }
+                        }).Wait();
+                    }
                     break;
 
                 case AuthorityType.GitHub:
-                    GitHubAuthentication ghAuth = authentication as GitHubAuthentication;
-
-                    Task.Run(async () =>
                     {
-                        if ((operationArguments.Interactivity != Interactivity.Always
-                                && ((credentials = ghAuth.GetCredentials(operationArguments.TargetUri)) != null)
-                                && (!operationArguments.ValidateCredentials
-                                    || await ghAuth.ValidateCredentials(operationArguments.TargetUri, credentials)))
-                            || (operationArguments.Interactivity != Interactivity.Never
-                                && ((credentials = await ghAuth.InteractiveLogon(operationArguments.TargetUri)) != null)
-                                && (!operationArguments.ValidateCredentials
-                                    || await ghAuth.ValidateCredentials(operationArguments.TargetUri, credentials))))
+                        GitHubAuthentication ghAuth = authentication as GitHubAuthentication;
+
+                        Task.Run(async () =>
                         {
-                            Git.Trace.WriteLine($"credentials for '{operationArguments.TargetUri}' found.");
-                            operationArguments.SetCredentials(credentials);
-                            credentialsFound = true;
-                            LogEvent($"GitHub credentials for '{operationArguments.TargetUri}' successfully retrieved.", EventLogEntryType.SuccessAudit);
-                        }
-                        else
-                        {
-                            Program.WriteLine(GitHubAuthFailureMessage);
-                            LogEvent($"Failed to retrieve GitHub credentials for '{operationArguments.TargetUri}'.", EventLogEntryType.FailureAudit);
-                        }
-                    }).Wait();
+                            if ((operationArguments.Interactivity != Interactivity.Always
+                                    && ((credentials = ghAuth.GetCredentials(operationArguments.TargetUri)) != null)
+                                    && (!operationArguments.ValidateCredentials
+                                        || await ghAuth.ValidateCredentials(operationArguments.TargetUri, credentials)))
+                                || (operationArguments.Interactivity != Interactivity.Never
+                                    && ((credentials = await ghAuth.InteractiveLogon(operationArguments.TargetUri)) != null)
+                                    && (!operationArguments.ValidateCredentials
+                                        || await ghAuth.ValidateCredentials(operationArguments.TargetUri, credentials))))
+                            {
+                                Git.Trace.WriteLine($"credentials for '{operationArguments.TargetUri}' found.");
+                                operationArguments.SetCredentials(credentials);
+                                credentialsFound = true;
+                                LogEvent($"GitHub credentials for '{operationArguments.TargetUri}' successfully retrieved.", EventLogEntryType.SuccessAudit);
+                            }
+                            else
+                            {
+                                Git.Trace.WriteLine($"credentials for '{operationArguments.TargetUri}' not found.");
+                                Program.WriteLine(GitHubAuthFailureMessage);
+                                LogEvent($"Failed to retrieve GitHub credentials for '{operationArguments.TargetUri}'.", EventLogEntryType.FailureAudit);
+                            }
+                        }).Wait();
+                    }
                     break;
 
-                case AuthorityType.Integrated:
-                    credentials = new Credential(String.Empty, String.Empty);
-                    operationArguments.SetCredentials(credentials);
-                    credentialsFound = true;
+                case AuthorityType.Ntlm:
+                    {
+                        Git.Trace.WriteLine($"'{operationArguments.TargetUri}' is NTLM.");
+                        operationArguments.SetCredentials(BasicAuthentication.NtlmCredentials);
+                        credentialsFound = true;
+                    }
                     break;
             }
 

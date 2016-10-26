@@ -57,4 +57,31 @@ namespace Microsoft.Alm.Authentication
         /// <param name="credentials">The value to be stored.</param>
         public abstract void SetCredentials(TargetUri targetUri, Credential credentials);
     }
+
+    public enum AcquireCredentialResult
+    {
+        Unknown,
+
+        Failed,
+        Suceeded,
+    }
+
+    /// <summary>
+    /// Delegate for interactively acquiring credentials.
+    /// </summary>
+    /// <param name="targetUri">
+    /// The uniform resource indicator used to uniquely identify the credentials.
+    /// </param>
+    /// <returns>If successful a <see cref="Credential"/> object from the authentication object,
+    /// authority or storage; otherwise <see langword="null"/>.</returns>
+    public delegate Credential AcquireCredentialsDelegate(TargetUri targetUri);
+
+    /// <summary>
+    /// Delegate for interactivity related to credential acquisition. 
+    /// </summary>
+    /// <param name="targetUri">
+    /// The uniform resource indicator used to uniquely identify the credentials.
+    /// </param>
+    /// <param name="result">Result of previous attempt to acquire credentials.</param>
+    public delegate void AcquireResultDelegate(TargetUri targetUri, AcquireCredentialResult result);
 }

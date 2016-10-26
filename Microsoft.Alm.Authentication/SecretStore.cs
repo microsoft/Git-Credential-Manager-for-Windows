@@ -61,6 +61,16 @@ namespace Microsoft.Alm.Authentication
             _tokenCache = tokenCache ?? new SecretCache(@namespace, _getTargetName);
         }
 
+        public string Namespace
+        {
+            get { return _namespace; }
+        }
+
+        public Secret.UriNameConversion UriNameConversion
+        {
+            get { return _getTargetName; }
+        }
+
         private string _namespace;
         private ICredentialStore _credentialCache;
         private ITokenStore _tokenCache;
@@ -114,15 +124,10 @@ namespace Microsoft.Alm.Authentication
         {
             ValidateTargetUri(targetUri);
 
-            Credential credentials = null;
             string targetName = this.GetTargetName(targetUri);
 
-            if ((credentials = _credentialCache.ReadCredentials(targetUri)) == null)
-            {
-                credentials = this.ReadCredentials(targetName);
-            }
-
-            return credentials;
+            return _credentialCache.ReadCredentials(targetUri)
+                ?? this.ReadCredentials(targetName);
         }
 
         /// <summary>
@@ -134,15 +139,10 @@ namespace Microsoft.Alm.Authentication
         {
             ValidateTargetUri(targetUri);
 
-            Token token = null;
+            string targetName = this.GetTargetName(targetUri);
 
-            if ((token = _tokenCache.ReadToken(targetUri)) == null)
-            {
-                string targetName = this.GetTargetName(targetUri);
-                token = ReadToken(targetName);
-            }
-
-            return token;
+            return _tokenCache.ReadToken(targetUri)
+                ?? ReadToken(targetName);
         }
 
         /// <summary>
@@ -174,9 +174,9 @@ namespace Microsoft.Alm.Authentication
 
             string targetName = this.GetTargetName(targetUri);
 
-            _tokenCache.WriteToken(targetUri, token);
-
             this.WriteToken(targetName, token);
+
+            _tokenCache.WriteToken(targetUri, token);
         }
 
         /// <summary>
