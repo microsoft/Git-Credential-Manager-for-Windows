@@ -52,8 +52,8 @@ namespace Microsoft.Alm.Cli
         /// </summary>
         GitHub,
         /// <summary>
-        /// Operating system / network integrated authentication layer.
+        /// Windows network integrated authentication layer.
         /// </summary>
-        Integrated,
+        Ntlm,
     }
 }
