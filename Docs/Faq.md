@@ -45,7 +45,9 @@
 
  Team Foundation Server, when deployed on a corporate Active Directory, uses the [Microsoft Kerberos](https://msdn.microsoft.com/en-us/library/windows/desktop/aa378747(v=vs.85).aspx) protocol for authentication. Git doesn't "speak" the Kerberos protocol.
 
- Git can be convinced to "forward" domain credentials by supplying a blank credentials (username and password). Since, by default, the GCM doesn't allow for a blank credentials, you will need to configure it to allow for them. To do so, update your Git configuration by running `git config --global credential.tfs.fabrikam.com.integrated true`, where `tfs` can be replaced by the name of your TFS server, and `fabrikam.com` can be replaced by the name of your domain (e.g., `mydomain.local`).
+ Git can be convinced to "forward" credentials by supplying a blank credentials (username and password). The GCM will attempt to detect the Team Foundation Server via the HTTP headers returned when an unauthenticated request is handled by the server. If the server is configured to allow NTLM as a supported authentication protocol, the GCM will detect the setting and instruct Git to use NTLM instead of basic authentication.
+
+ Alternatively, you can configure the GCM to assume a host supports NTLM without checking. To do so, update your Git configuration by running `git config --global credential.my-tfs.integrated true`, where `my-tfs` can be replaced by the name of your TFS server; the port number is not required for GCM configuration but you will want it for the Git remote.
 
  Once updated, the new configuration tells the GCM to only forward domain credentials. If you set `credential.integrated true`, every domain will be assumed to support domain credentials. Most likely, this is **not** what you want. Therefore, it strongly suggested that you restrict the configuration setting to the URL of your TFS Git host.
 
