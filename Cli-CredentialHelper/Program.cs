@@ -174,24 +174,23 @@ namespace Microsoft.Alm.Cli
                 default:
                 case AuthorityType.Basic:
                     Git.Trace.WriteLine($"deleting basic credentials for '{operationArguments.TargetUri}'.");
-                    authentication.DeleteCredentials(operationArguments.TargetUri);
                     break;
 
                 case AuthorityType.AzureDirectory:
                 case AuthorityType.MicrosoftAccount:
-                    Git.Trace.WriteLine("deleting VSTS credentials for '{operationArguments.TargetUri}'.");
-                    BaseVstsAuthentication vstsAuth = authentication as BaseVstsAuthentication;
-                    vstsAuth.DeleteCredentials(operationArguments.TargetUri);
-                    // call delete twice to purge any stored ADA tokens
-                    vstsAuth.DeleteCredentials(operationArguments.TargetUri);
+                    Git.Trace.WriteLine($"deleting VSTS credentials for '{operationArguments.TargetUri}'.");
                     break;
 
                 case AuthorityType.GitHub:
-                    Git.Trace.WriteLine("deleting GitHub credentials for '{operationArguments.TargetUri}'.");
-                    GitHubAuthentication ghAuth = authentication as GitHubAuthentication;
-                    ghAuth.DeleteCredentials(operationArguments.TargetUri);
+                    Git.Trace.WriteLine($"deleting GitHub credentials for '{operationArguments.TargetUri}'.");
+                    break;
+
+                case AuthorityType.Ntlm:
+                    Git.Trace.WriteLine($"deleting NTLM credentials for '{operationArguments.TargetUri}'.");
                     break;
             }
+
+            authentication.DeleteCredentials(operationArguments.TargetUri);
 
             return;
 
@@ -377,8 +376,30 @@ namespace Microsoft.Alm.Cli
             LoadOperationArguments(operationArguments);
             EnableTraceLogging(operationArguments);
 
-            BaseAuthentication authentication = CreateAuthentication(operationArguments);
             Credential credentials = new Credential(operationArguments.CredUsername, operationArguments.CredPassword);
+            BaseAuthentication authentication = CreateAuthentication(operationArguments);
+
+            switch (operationArguments.Authority)
+            {
+                default:
+                case AuthorityType.Basic:
+                    Git.Trace.WriteLine($"storing basic credentials for '{operationArguments.TargetUri}'.");
+                    break;
+
+                case AuthorityType.AzureDirectory:
+                case AuthorityType.MicrosoftAccount:
+                    Git.Trace.WriteLine($"storing VSTS credentials for '{operationArguments.TargetUri}'.");
+                    break;
+
+                case AuthorityType.GitHub:
+                    Git.Trace.WriteLine($"storing GitHub credentials for '{operationArguments.TargetUri}'.");
+                    break;
+
+                case AuthorityType.Ntlm:
+                    Git.Trace.WriteLine($"storing NTLM credentials for '{operationArguments.TargetUri}'.");
+                    break;
+            }
+
             authentication.SetCredentials(operationArguments.TargetUri, credentials);
         }
     }
