@@ -1,4 +1,28 @@
-﻿using Microsoft.Alm.Authentication;
+﻿/**** Git Credential Manager for Windows ****
+ *
+ * Copyright (c) Microsoft Corporation
+ * All rights reserved.
+ *
+ * MIT License
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy
+ * of this software and associated documentation files (the """"Software""""), to deal
+ * in the Software without restriction, including without limitation the rights to
+ * use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of
+ * the Software, and to permit persons to whom the Software is furnished to do so,
+ * subject to the following conditions:
+ *
+ * The above copyright notice and this permission notice shall be included in all
+ * copies or substantial portions of the Software.
+ *
+ * THE SOFTWARE IS PROVIDED *AS IS*, WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS
+ * FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR
+ * COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN
+ * AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
+ * WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE."
+**/
+
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -14,9 +38,9 @@ namespace Microsoft.Alm.Cli
         public const string Description = "Secure SSH key helper for Windows, by Microsoft";
         public const string DefinitionUrlPassphrase = "https://www.visualstudio.com/docs/git/gcm-ssh-passphrase";
 
-        private static readonly Regex AskCredentialRegex = new Regex(@"\s*(\S+)\s+for\s+'([^']+)':\s*$", RegexOptions.Compiled | RegexOptions.CultureInvariant | RegexOptions.IgnoreCase);
-        private static readonly Regex AskPassphraseRegex = new Regex(@"\s*\""Enter\s+passphrase\s+for\s+key\s+'([^']+)':\s+\""\s*$", RegexOptions.Compiled | RegexOptions.CultureInvariant | RegexOptions.IgnoreCase);
-        private static readonly Regex AskPasswordRegex = new Regex(@"\s*\""([^']+)'s\s+password:\s+\""\s*$", RegexOptions.Compiled | RegexOptions.CultureInvariant | RegexOptions.IgnoreCase);
+        private static readonly Regex AskCredentialRegex = new Regex(@"(\S+)\s+for\s+['""]([^'""]+)['""]:\s*", RegexOptions.Compiled | RegexOptions.CultureInvariant | RegexOptions.IgnoreCase);
+        private static readonly Regex AskPassphraseRegex = new Regex(@"Enter\s+passphrase\s*for\s*key\s*['""]([^'""]+)['""]\:\s*", RegexOptions.Compiled | RegexOptions.CultureInvariant | RegexOptions.IgnoreCase);
+        private static readonly Regex AskPasswordRegex = new Regex(@"(\S+)'s\s+password:\s*", RegexOptions.Compiled | RegexOptions.CultureInvariant | RegexOptions.IgnoreCase);
 
         private static void Askpass(string[] args)
         {
@@ -24,6 +48,36 @@ namespace Microsoft.Alm.Cli
                 throw new ArgumentException("Arguments cannot be empty.");
 
             Match match;
+            if ((match = AskPasswordRegex.Match(args[0])).Success
+                || (match = AskPassphraseRegex.Match(args[0])).Success)
+            {
+                Git.Trace.WriteLine("querying for passphrase key.");
+
+                if (match.Groups.Count < 2)
+                    throw new ArgumentException("Unable to understand command.");
+
+                string request = match.Groups[0].Value;
+                string resource = match.Groups[1].Value;
+
+                Git.Trace.WriteLine($"open dialog for '{resource}'.");
+
+                System.Windows.Application application = new System.Windows.Application();
+                Gui.PassphraseWindow prompt = new Gui.PassphraseWindow(resource);
+                application.Run(prompt);
+
+                if (!prompt.Cancelled && !string.IsNullOrEmpty(prompt.Passphrase))
+                {
+                    string passphase = prompt.Passphrase;
+
+                    Git.Trace.WriteLine("passphase acquired.");
+
+                    Console.Out.Write(passphase + "\n");
+                    return;
+                }
+
+                Git.Trace.WriteLine("failed to interactively acquire credentials.");
+            }
+
             if ((match = AskCredentialRegex.Match(args[0])).Success)
             {
                 Git.Trace.WriteLine("querying for HTTPS credentials.");
@@ -136,36 +190,6 @@ namespace Microsoft.Alm.Cli
                 }
 
                 Git.Trace.WriteLine($"failed to detect {seeking} in target URL.");
-            }
-
-            if ((match = AskPasswordRegex.Match(args[0])).Success
-                || (match = AskPassphraseRegex.Match(args[0])).Success)
-            {
-                Git.Trace.WriteLine("querying for passphrase key.");
-
-                if (match.Groups.Count < 2)
-                    throw new ArgumentException("Unable to understand command.");
-
-                string request = match.Groups[0].Value;
-                string resource = match.Groups[1].Value;
-
-                Git.Trace.WriteLine($"open dialog for '{resource}'.");
-
-                System.Windows.Application application = new System.Windows.Application();
-                Gui.PassphraseWindow prompt = new Gui.PassphraseWindow(resource);
-                application.Run(prompt);
-
-                if (!prompt.Cancelled && !string.IsNullOrEmpty(prompt.Passphrase))
-                {
-                    string passphase = prompt.Passphrase;
-
-                    Git.Trace.WriteLine("passphase acquired.");
-
-                    Console.Out.Write(passphase + "\n");
-                    return;
-                }
-
-                Git.Trace.WriteLine("failed to interactively acquire credentials.");
             }
 
             Git.Trace.WriteLine("failed to acquire credentials.");
