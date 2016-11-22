@@ -78,7 +78,7 @@ namespace Bitbucket.Authentication.Test
         {
             ICredentialStore credentialStore = new SecretCache(@namespace);
 
-            return new BitbucketAuthentication(credentialStore);
+            return new BitbucketAuthentication(credentialStore, null, null);
         }
     }
 }

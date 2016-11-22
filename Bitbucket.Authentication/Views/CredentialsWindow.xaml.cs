@@ -1,7 +1,9 @@
-﻿using GitHub.Authentication.ViewModels;
-using GitHub.UI;
+﻿
 
-namespace GitHub.Authentication
+using Bitbucket.Authentication.ViewModels;
+using Core.Controls;
+
+namespace Bitbucket.Authentication.Views
 {
     /// <summary>
     /// Interaction logic for CredentialsWindow.xaml

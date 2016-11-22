@@ -335,14 +335,20 @@ namespace Microsoft.Alm.Cli
                                     GitHubCredentialScope,
                                     secrets,
                                     operationArguments.UseModalUi
-                                        ? AuthenticationPrompts.CredentialModalPrompt
+                                        ? GitHub.Authentication.AuthenticationPrompts.CredentialModalPrompt
                                         : new GitHubAuthentication.AcquireCredentialsDelegate(GitHubCredentialPrompt),
                                     operationArguments.UseModalUi
-                                        ? AuthenticationPrompts.AuthenticationCodeModalPrompt
+                                        ? GitHub.Authentication.AuthenticationPrompts.AuthenticationCodeModalPrompt
                                         : new GitHubAuthentication.AcquireAuthenticationCodeDelegate(
                                             GitHubAuthCodePrompt),
                                     null)
-                                ?? BitbucketAuthentication.GetAuthentication(operationArguments.TargetUri, secrets);
+                                ?? BitbucketAuthentication.GetAuthentication(operationArguments.TargetUri, secrets,
+                                operationArguments.UseModalUi
+                                        ? Bitbucket.Authentication.AuthenticationPrompts.CredentialModalPrompt
+                                        : new BitbucketAuthentication.AcquireCredentialsDelegate(CredentialPrompt),
+                                operationArguments.UseModalUi
+                                        ? Bitbucket.Authentication.AuthenticationPrompts.AuthenticationOAuthModalPrompt
+                                        : new BitbucketAuthentication.AcquireAuthenticationOAuthDelegate(OAuthPrompt));
 
                     if (authority != null)
                         if (authority is VstsMsaAuthentication)
@@ -359,6 +365,11 @@ namespace Microsoft.Alm.Cli
                         {
                             operationArguments.Authority = AuthorityType.GitHub;
                             goto case AuthorityType.GitHub;
+                        }
+                        else if (authority is BitbucketAuthentication)
+                        {
+                            operationArguments.Authority = AuthorityType.Bitbucket;
+                            goto case AuthorityType.Bitbucket;
                         }
 
                     operationArguments.Authority = AuthorityType.Basic;
@@ -385,25 +396,25 @@ namespace Microsoft.Alm.Cli
                     return authority ?? new GitHubAuthentication(GitHubCredentialScope,
                                secrets,
                                operationArguments.UseModalUi
-                                   ? AuthenticationPrompts.CredentialModalPrompt
+                                   ? GitHub.Authentication.AuthenticationPrompts.CredentialModalPrompt
                                    : new GitHubAuthentication.AcquireCredentialsDelegate(GitHubCredentialPrompt),
                                operationArguments.UseModalUi
-                                   ? AuthenticationPrompts.AuthenticationCodeModalPrompt
+                                   ? GitHub.Authentication.AuthenticationPrompts.AuthenticationCodeModalPrompt
                                    : new GitHubAuthentication.AcquireAuthenticationCodeDelegate(GitHubAuthCodePrompt),
                                null);
 
                 case AuthorityType.Bitbucket:
-                    Trace.WriteLine("   authority it Bitbucket");
+                    Trace.WriteLine("   authority is Bitbucket");
 
                     // return a Bitbucket authentication object
                     return authority ?? new BitbucketAuthentication(/*GitHubCredentialScope,*/
-                               secrets/*,
+                               secrets,
                                operationArguments.UseModalUi
-                                   ? AuthenticationPrompts.CredentialModalPrompt
-                                   : new GitHubAuthentication.AcquireCredentialsDelegate(GitHubCredentialPrompt),
-                               operationArguments.UseModalUi
-                                   ? AuthenticationPrompts.AuthenticationCodeModalPrompt
-                                   */);
+                                   ? Bitbucket.Authentication.AuthenticationPrompts.CredentialModalPrompt
+                                   : new BitbucketAuthentication.AcquireCredentialsDelegate(CredentialPrompt),
+                                operationArguments.UseModalUi
+                                        ? Bitbucket.Authentication.AuthenticationPrompts.AuthenticationOAuthModalPrompt
+                                        : new BitbucketAuthentication.AcquireAuthenticationOAuthDelegate(OAuthPrompt));
 
                 case AuthorityType.MicrosoftAccount:
                     Trace.WriteLine("   authority is Microsoft Live");
@@ -718,6 +729,63 @@ namespace Microsoft.Alm.Cli
             return authenticationCode != null;
         }
 
+        private static bool OAuthPrompt(string title, TargetUri targetUri, BitbucketAuthenticationResultType resultType,
+            string username)
+        {
+            const int BufferReadSize = 16 * 1024;
+
+            Debug.Assert(targetUri != null);
+
+            Trace.WriteLine("Program::BitbucketOAuthPrompt");
+
+            var buffer = new StringBuilder(BufferReadSize);
+            uint read = 0;
+            uint written = 0;
+
+            string accessToken = null;
+
+            var fileAccessFlags = NativeMethods.FileAccess.GenericRead | NativeMethods.FileAccess.GenericWrite;
+            var fileAttributes = NativeMethods.FileAttributes.Normal;
+            var fileCreationDisposition = NativeMethods.FileCreationDisposition.OpenExisting;
+            var fileShareFlags = NativeMethods.FileShare.Read | NativeMethods.FileShare.Write;
+
+            using (
+                var stdout = NativeMethods.CreateFile(NativeMethods.ConsoleOutName, fileAccessFlags, fileShareFlags,
+                    IntPtr.Zero, fileCreationDisposition, fileAttributes, IntPtr.Zero))
+            {
+                using (
+                    var stdin = NativeMethods.CreateFile(NativeMethods.ConsoleInName, fileAccessFlags, fileShareFlags,
+                        IntPtr.Zero, fileCreationDisposition, fileAttributes, IntPtr.Zero))
+                {
+                    Trace.WriteLine("   OAuth");
+
+                    buffer.AppendLine()
+                        .Append(title)
+                        .Append(" OAuth Access Token: ");
+
+                    if (!NativeMethods.WriteConsole(stdout, buffer, (uint)buffer.Length, out written, IntPtr.Zero))
+                    {
+                        var error = Marshal.GetLastWin32Error();
+                        throw new Win32Exception(error,
+                            "Unable to write to standard output (" + NativeMethods.Win32Error.GetText(error) + ").");
+                    }
+                    buffer.Clear();
+
+                    // read input from the user
+                    if (!NativeMethods.ReadConsole(stdin, buffer, BufferReadSize, out read, IntPtr.Zero))
+                    {
+                        var error = Marshal.GetLastWin32Error();
+                        throw new Win32Exception(error,
+                            "Unable to read from standard input (" + NativeMethods.Win32Error.GetText(error) + ").");
+                    }
+
+                    accessToken = buffer.ToString(0, (int)read);
+                    accessToken = accessToken.Trim(NewLineChars);
+                }
+            }
+            return accessToken != null;
+        }
+
         private static bool GitHubCredentialPrompt(TargetUri targetUri, out string username, out string password)
         {
             const string TitleMessage = "Please enter your GitHub credentials for ";
@@ -725,6 +793,13 @@ namespace Microsoft.Alm.Cli
             Trace.WriteLine("Program::GitHubCredentialPrompt");
 
             return BasicCredentialPrompt(targetUri, TitleMessage, out username, out password);
+        }
+
+        public static bool CredentialPrompt(string titleMessage, TargetUri targetUri, out string username, out string password)
+        {
+            Trace.WriteLine("Program::CredentialPrompt");
+
+            return BasicCredentialPrompt(targetUri, titleMessage, out username, out password);
         }
 
         private static void LoadAssemblyInformation()
@@ -971,6 +1046,8 @@ namespace Microsoft.Alm.Cli
         {
             const string AadMsaAuthFailureMessage = "Logon failed, use ctrl+c to cancel basic credential prompt.";
             const string GitHubAuthFailureMessage = "Logon failed, use ctrl+c to cancel basic credential prompt.";
+            // TODO bitbucket
+            const string BitbucketAuthFailureMessage = "TODO review wording: Logon failed, use ctrl+c to cancel basic credential prompt.";
 
             if (ReferenceEquals(operationArguments, null))
                 throw new ArgumentNullException("operationArguments");
@@ -1111,6 +1188,36 @@ namespace Microsoft.Alm.Cli
                         {
                             Console.Error.WriteLine(GitHubAuthFailureMessage);
                             LogEvent("Failed to retrieve GitHub credentials for " + operationArguments.TargetUri + ".",
+                                EventLogEntryType.FailureAudit);
+                        }
+                    }).Wait();
+                    break;
+
+                case AuthorityType.Bitbucket:
+                    var bbcAuth = authentication as BitbucketAuthentication;
+
+                    Task.Run(async () =>
+                    {
+                        if (((operationArguments.Interactivity != Interactivity.Always)
+                             && ((credentials = bbcAuth.GetCredentials(operationArguments.TargetUri)) != null)
+                             && (!operationArguments.ValidateCredentials
+                                 || await bbcAuth.ValidateCredentials(operationArguments.TargetUri, operationArguments.CredUsername, credentials)))
+                            || ((operationArguments.Interactivity != Interactivity.Never)
+                                && ((credentials = await bbcAuth.InteractiveLogon(operationArguments.TargetUri)) != null)
+                                && (!operationArguments.ValidateCredentials
+                                    || await bbcAuth.ValidateCredentials(operationArguments.TargetUri, operationArguments.CredUsername, credentials))))
+                        {
+                            Trace.WriteLine("   credentials found");
+                            var c2 = new Credential(operationArguments.CredUsername, credentials.Password);
+                            operationArguments.SetCredentials(c2);
+                            LogEvent(
+                                "Bitbucket credentials for " + operationArguments.TargetUri + " successfully retrieved.",
+                                EventLogEntryType.SuccessAudit);
+                        }
+                        else
+                        {
+                            Console.Error.WriteLine(BitbucketAuthFailureMessage);
+                            LogEvent("Failed to retrieve Bitbucket credentials for " + operationArguments.TargetUri + ".",
                                 EventLogEntryType.FailureAudit);
                         }
                     }).Wait();

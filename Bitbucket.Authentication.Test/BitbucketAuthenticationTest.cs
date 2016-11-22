@@ -14,7 +14,7 @@ namespace Bitbucket.Authentication.Test
         public void VerifyBitbucketOrgIsIdentified()
         {
             var targetUri = new TargetUri("https://bitbucket.org");
-            var bbAuth = BitbucketAuthentication.GetAuthentication(targetUri, new MockCredentialStore());
+            var bbAuth = BitbucketAuthentication.GetAuthentication(targetUri, new MockCredentialStore(), null, null);
 
             Assert.IsNotNull(bbAuth);
         }
@@ -23,7 +23,7 @@ namespace Bitbucket.Authentication.Test
         public void VerifyNonBitbucketOrgIsIgnored()
         {
             var targetUri = new TargetUri("https://example.com");
-            var bbAuth = BitbucketAuthentication.GetAuthentication(targetUri, new MockCredentialStore());
+            var bbAuth = BitbucketAuthentication.GetAuthentication(targetUri, new MockCredentialStore(), null, null);
 
             Assert.IsNull(bbAuth);
         }
@@ -34,7 +34,7 @@ namespace Bitbucket.Authentication.Test
             var targetUri = new TargetUri("https://example.com");
             var credentialStore = new MockCredentialStore();
             var credentials = new Credential("a", "b");
-            var bbAuth = new BitbucketAuthentication(credentialStore);
+            var bbAuth = new BitbucketAuthentication(credentialStore, null, null);
 
             bbAuth.SetCredentials(targetUri, credentials);
 
@@ -55,7 +55,7 @@ namespace Bitbucket.Authentication.Test
             
             var credentialStore = new MockCredentialStore();
             var credentials = new Credential("a", "b");
-            var bbAuth = new BitbucketAuthentication(credentialStore);
+            var bbAuth = new BitbucketAuthentication(credentialStore, null, null);
 
             bbAuth.SetCredentials(null, credentials);
         }
@@ -66,7 +66,7 @@ namespace Bitbucket.Authentication.Test
         {
             var targetUri = new TargetUri("https://example.com");
             var credentialStore = new MockCredentialStore();
-            var bbAuth = new BitbucketAuthentication(credentialStore);
+            var bbAuth = new BitbucketAuthentication(credentialStore, null, null);
 
             bbAuth.SetCredentials(targetUri, null);
         }
@@ -78,7 +78,7 @@ namespace Bitbucket.Authentication.Test
             var targetUri = new TargetUri("https://example.com");
             var credentialStore = new MockCredentialStore();
             var credentials = new Credential("a", new string('x', 2047 + 1));
-            var bbAuth = new BitbucketAuthentication(credentialStore);
+            var bbAuth = new BitbucketAuthentication(credentialStore, null, null);
 
             bbAuth.SetCredentials(targetUri, credentials);
         }
@@ -90,7 +90,7 @@ namespace Bitbucket.Authentication.Test
             var targetUri = new TargetUri("https://example.com");
             var credentialStore = new MockCredentialStore();
             var credentials = new Credential(new string('x', 2047 + 1), "b");
-            var bbAuth = new BitbucketAuthentication(credentialStore);
+            var bbAuth = new BitbucketAuthentication(credentialStore, null, null);
 
             bbAuth.SetCredentials(targetUri, credentials);
         }
@@ -100,7 +100,7 @@ namespace Bitbucket.Authentication.Test
         public void VerifyDeleteCredentialDoesNotDeleteForNullTargetUri()
         {
             var credentialStore = new MockCredentialStore();
-            var bbAuth = new BitbucketAuthentication(credentialStore);
+            var bbAuth = new BitbucketAuthentication(credentialStore, null, null);
 
             bbAuth.DeleteCredentials(null);
         }

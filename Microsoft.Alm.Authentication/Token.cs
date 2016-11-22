@@ -76,7 +76,7 @@ namespace Microsoft.Alm.Authentication
             return false;
         }
 
-        internal Token(string value, TokenType type)
+        public Token(string value, TokenType type)
         {
             if (String.IsNullOrWhiteSpace(value))
                 throw new ArgumentNullException(nameof(value));
@@ -86,7 +86,7 @@ namespace Microsoft.Alm.Authentication
             this.Type = type;
             this.Value = value;
         }
-        internal Token(string value, string typeName)
+        public Token(string value, string typeName)
         {
             if (String.IsNullOrWhiteSpace(value))
                 throw new ArgumentNullException(nameof(value));
@@ -97,7 +97,7 @@ namespace Microsoft.Alm.Authentication
             if (!GetTypeFromFriendlyName(typeName, out type))
                 throw new ArgumentException(nameof(typeName));
         }
-        internal Token(IdentityModel.Clients.ActiveDirectory.AuthenticationResult authResult, TokenType type)
+        public Token(IdentityModel.Clients.ActiveDirectory.AuthenticationResult authResult, TokenType type)
         {
             if (ReferenceEquals(authResult, null))
                 throw new ArgumentNullException(nameof(authResult));

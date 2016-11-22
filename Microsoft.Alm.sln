@@ -34,6 +34,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Bitbucket.Authentication", 
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Bitbucket.Authentication.Test", "Bitbucket.Authentication.Test\Bitbucket.Authentication.Test.csproj", "{AECD6D57-F900-4D43-A01A-4AA3C68F39C2}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Core.Authentication", "Core.Authentication\Core.Authentication.csproj", "{3CB99B39-DBE5-4A1C-8AE3-775C15E6D54C}"
+EndProject
 Global
 	GlobalSection(SharedMSBuildProjectFiles) = preSolution
 		Cli-Shared\Cli-Shared.projitems*{0653670e-b33a-4ebe-92b8-04c93f43cae0}*SharedItemsImports = 4
@@ -89,6 +91,10 @@ Global
 		{AECD6D57-F900-4D43-A01A-4AA3C68F39C2}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{AECD6D57-F900-4D43-A01A-4AA3C68F39C2}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{AECD6D57-F900-4D43-A01A-4AA3C68F39C2}.Release|Any CPU.Build.0 = Release|Any CPU
+		{3CB99B39-DBE5-4A1C-8AE3-775C15E6D54C}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{3CB99B39-DBE5-4A1C-8AE3-775C15E6D54C}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{3CB99B39-DBE5-4A1C-8AE3-775C15E6D54C}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{3CB99B39-DBE5-4A1C-8AE3-775C15E6D54C}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
