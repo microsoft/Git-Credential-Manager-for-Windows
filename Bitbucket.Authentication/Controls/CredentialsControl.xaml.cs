@@ -2,7 +2,7 @@
 using Core.Controls;
 using System;
 
-namespace Bitbucket.Controls
+namespace Bitbucket.Authentication.Controls
 {
     /// <summary>
     /// Interaction logic for CredentialsControl.xaml

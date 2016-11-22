@@ -15,7 +15,12 @@
     <StackPanel
         Style="{DynamicResource DialogContainerStackPanel}"
         helpers:AccessKeysManagerScoping.IsEnabled="True">
-        <!--<ui:OcticonImage Icon="logo_Bitbucket" Style="{StaticResource BitbucketLogo}" />-->
+        <StackPanel DockPanel.Dock="Top">
+            <Image Style="{StaticResource AtlassianLogo}"/>
+            <controls:HorizontalShadowDivider />
+            <Image Style="{StaticResource BitbucketLogo}"/>
+            <Image Style="{StaticResource SourceTreeLogo}"/>
+        </StackPanel>
         <WrapPanel Orientation="Vertical" HorizontalAlignment="Center" Margin="0,0,0,12">
             <TextBlock
                 Text="{x:Static prop:Resources.OAuthAuthText}"
@@ -40,7 +45,7 @@
                 CommandParameter="{Binding
                     RelativeSource={RelativeSource Self},
                     Path=ToolTip}"
-                ToolTip="https://help.Bitbucket.com/articles/about-two-factor-authentication/">
+                ToolTip="https://confluence.atlassian.com/bitbucket/two-step-verification-777023203.html">
                 <TextBlock Text="{x:Static prop:Resources.LearnMoreLink}"/>
             </Hyperlink>
         </TextBlock>
@@ -52,35 +57,20 @@
             Orientation="Horizontal"
             HorizontalAlignment="Center"
             Margin="0,38,0,60">
-            <!--<ui:OcticonCircleButton
-                TabIndex="2"
-                Icon="check"
-                IsDefault="True"
-                Command="{Binding OkCommand}"
-                IsEnabled="{Binding IsValid, Mode=OneWay}"
-                Content="{x:Static prop:Resources.VerifyText}" />-->
             <Button
                 TabIndex="2"
                 IsDefault="True"
                 Command="{Binding OkCommand}"
                 IsEnabled="{Binding IsValid, Mode=OneWay}"
                 Content="{x:Static prop:Resources.VerifyText}"
+                Style="{StaticResource PrimaryButton}"
                 />
-            <!--<ui:OcticonCircleButton
-                TabIndex="3"
-                FontSize="12"
-                Icon="x"
-                IsCancel="True"
-                Command="{Binding CancelCommand}"
-                Margin="18,0,0,0"
-                Content="{x:Static prop:Resources.CancelText}" />-->
             <Button
                 TabIndex="3"
-                FontSize="12"
                 IsCancel="True"
                 Command="{Binding CancelCommand}"
-                Margin="18,0,0,0"
                 Content="{x:Static prop:Resources.CancelText}"
+                Style="{StaticResource SecondaryButton}"
                 />
         </StackPanel>
     </StackPanel>

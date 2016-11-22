@@ -5,7 +5,7 @@ using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Media;
 
-namespace Bitbucket.Controls
+namespace Bitbucket.Authentication.Controls.Text
 {
     public class ValidationMessage : UserControl
     {

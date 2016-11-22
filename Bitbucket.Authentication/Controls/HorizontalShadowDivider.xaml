@@ -18,18 +18,6 @@
             Fill="{StaticResource HorizontalDividerBorderBrush}"
             VerticalAlignment="Top"
             IsHitTestVisible="False" />
-        <Rectangle
-            x:Name="shadow"
-            Height="4"
-            StrokeThickness="0"
-            VerticalAlignment="Top"
-            Margin="0,-2,0,0"
-            Opacity="0.25"
-            IsHitTestVisible="False"
-            Fill="{StaticResource HorizontalDividerShadowBrush}">
-            <Rectangle.Clip>
-                <RectangleGeometry Rect="0,2,10000,2" />
-            </Rectangle.Clip>
-        </Rectangle>
+        
     </Grid>
 </UserControl>

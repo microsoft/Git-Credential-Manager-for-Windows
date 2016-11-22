@@ -118,39 +118,39 @@
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
   <data name="CancelText" xml:space="preserve">
-    <value>TODO Cancel</value>
+    <value>Cancel</value>
   </data>
   <data name="DoNotHaveAccountText" xml:space="preserve">
-    <value>TODO DoNotHaveAccountText</value>
+    <value>Need an account?</value>
   </data>
   <data name="ForgotPasswordText" xml:space="preserve">
-    <value>TODO ForgotPasswordText</value>
+    <value>Forgot your password?</value>
   </data>
   <data name="LearnMoreLink" xml:space="preserve">
-    <value>TODO LearnMoreLink</value>
+    <value>Learn more about 2-Factor Authentication</value>
   </data>
   <data name="LoginLabel" xml:space="preserve">
-    <value>TODO LoginLabel</value>
+    <value>Log in</value>
   </data>
   <data name="LoginPromptText" xml:space="preserve">
-    <value>TODO LoginPromptText</value>
+    <value>Email or username</value>
   </data>
   <data name="LoginRequired" xml:space="preserve">
-    <value>TODO LoginRequired</value>
+    <value>A username or email is required</value>
   </data>
   <data name="OAuthAuthText" xml:space="preserve">
-    <value>TODO OAuthAuthText</value>
+    <value>OAuth Authentication</value>
   </data>
   <data name="PasswordPromptText" xml:space="preserve">
-    <value>TODO PasswordPromptText</value>
+    <value>Password</value>
   </data>
   <data name="PasswordRequired" xml:space="preserve">
-    <value>TODO PasswordRequired</value>
+    <value>A password is required</value>
   </data>
   <data name="SignUpLinkText" xml:space="preserve">
-    <value>TODO SignUpLinkText</value>
+    <value>Sign up.</value>
   </data>
   <data name="VerifyText" xml:space="preserve">
-    <value>TODO VerifyText</value>
+    <value>Authorize</value>
   </data>
 </root>

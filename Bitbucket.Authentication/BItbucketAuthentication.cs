@@ -3,6 +3,7 @@ using System.Diagnostics;
 using System.Threading.Tasks;
 using Microsoft.Alm.Authentication;
 using System.Threading;
+using System.Windows;
 
 namespace Bitbucket.Authentication
 {
@@ -18,7 +19,6 @@ namespace Bitbucket.Authentication
             AcquireCredentialsDelegate acquireCredentialsCallback,
             AcquireAuthenticationOAuthDelegate acquireAuthenticationOAuthCallback)
         {
-
             if (personalAccessTokenStore == null)
                 throw new ArgumentNullException("personalAccessTokenStore",
                     "The parameter `personalAccessTokenStore` is null or invalid.");

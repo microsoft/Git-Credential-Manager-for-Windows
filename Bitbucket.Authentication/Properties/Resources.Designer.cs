@@ -61,7 +61,7 @@ namespace Bitbucket.Authentication.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to TODO Cancel.
+        ///   Looks up a localized string similar to Cancel.
         /// </summary>
         public static string CancelText {
             get {
@@ -70,7 +70,7 @@ namespace Bitbucket.Authentication.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to TODO DoNotHaveAccountText.
+        ///   Looks up a localized string similar to Need an account?.
         /// </summary>
         public static string DoNotHaveAccountText {
             get {
@@ -79,7 +79,7 @@ namespace Bitbucket.Authentication.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to TODO ForgotPasswordText.
+        ///   Looks up a localized string similar to Forgot your password?.
         /// </summary>
         public static string ForgotPasswordText {
             get {
@@ -88,7 +88,7 @@ namespace Bitbucket.Authentication.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to TODO LearnMoreLink.
+        ///   Looks up a localized string similar to Learn more about 2-Factor Authentication.
         /// </summary>
         public static string LearnMoreLink {
             get {
@@ -97,7 +97,7 @@ namespace Bitbucket.Authentication.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to TODO LoginLabel.
+        ///   Looks up a localized string similar to Log in.
         /// </summary>
         public static string LoginLabel {
             get {
@@ -106,7 +106,7 @@ namespace Bitbucket.Authentication.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to TODO LoginPromptText.
+        ///   Looks up a localized string similar to Email or username.
         /// </summary>
         public static string LoginPromptText {
             get {
@@ -115,7 +115,7 @@ namespace Bitbucket.Authentication.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to TODO LoginRequired.
+        ///   Looks up a localized string similar to A username or email is required.
         /// </summary>
         public static string LoginRequired {
             get {
@@ -124,7 +124,7 @@ namespace Bitbucket.Authentication.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to TODO OAuthAuthText.
+        ///   Looks up a localized string similar to OAuth Authentication.
         /// </summary>
         public static string OAuthAuthText {
             get {
@@ -133,7 +133,7 @@ namespace Bitbucket.Authentication.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to TODO PasswordPromptText.
+        ///   Looks up a localized string similar to Password.
         /// </summary>
         public static string PasswordPromptText {
             get {
@@ -142,7 +142,7 @@ namespace Bitbucket.Authentication.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to TODO PasswordRequired.
+        ///   Looks up a localized string similar to A password is required.
         /// </summary>
         public static string PasswordRequired {
             get {
@@ -151,7 +151,7 @@ namespace Bitbucket.Authentication.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to TODO SignUpLinkText.
+        ///   Looks up a localized string similar to Sign up..
         /// </summary>
         public static string SignUpLinkText {
             get {
@@ -160,7 +160,7 @@ namespace Bitbucket.Authentication.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to TODO VerifyText.
+        ///   Looks up a localized string similar to Authorize.
         /// </summary>
         public static string VerifyText {
             get {

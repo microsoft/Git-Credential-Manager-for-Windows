@@ -2,7 +2,7 @@
 using System.Windows;
 using System.Windows.Controls;
 
-namespace Bitbucket.Controls
+namespace Bitbucket.Authentication.Controls.Text
 {
     public class PromptTextBox : TextBox
     {

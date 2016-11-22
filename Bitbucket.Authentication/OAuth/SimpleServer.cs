@@ -7,6 +7,7 @@ using System.Net;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
+using System.Windows;
 
 namespace Bitbucket.Authentication.OAuth
 {
@@ -70,9 +71,18 @@ namespace Bitbucket.Authentication.OAuth
 
             try
             {
-                using (StreamReader reader = new StreamReader("Resources/auth.html"))
+                if (!UriParser.IsKnownScheme("pack"))
+                    new System.Windows.Application();
+
+
+                var html = Application.GetResourceStream(
+            new Uri("pack://application:,,,/Bitbucket.Authentication;component/Assets/auth.html", UriKind.Absolute));
+                if (html != null)
                 {
-                    result = reader.ReadToEnd();
+                    using (StreamReader reader = new StreamReader(html.Stream))
+                    {
+                        result = reader.ReadToEnd();
+                    }
                 }
             }
             catch (Exception e)
