@@ -166,6 +166,10 @@ namespace Microsoft.Alm.Cli
                     var iter = Environment.GetEnvironmentVariables().GetEnumerator();
                     while (iter.MoveNext())
                     {
+                        if (_environmentVariables.ContainsKey(iter.Key as string))
+                        {
+                            continue;
+                        }
                         _environmentVariables.Add(iter.Key as string, iter.Value as string);
                     }
                 }
