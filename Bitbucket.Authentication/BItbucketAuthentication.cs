@@ -40,6 +40,8 @@ namespace Bitbucket.Authentication
         internal AcquireAuthenticationOAuthDelegate AcquireAuthenticationOAuthCallback { get; set; }
         internal AuthenticationResultDelegate AuthenticationResultCallback { get; set; }
 
+        private const string refreshTokenSuffix = "-token";
+
         /// <inheritdoc />
         public override void DeleteCredentials(TargetUri targetUri)
         {
@@ -56,11 +58,17 @@ namespace Bitbucket.Authentication
             }
 
             // tidy up and refresh tokens
-            if ((credentials = PersonalAccessTokenStore.ReadCredentials(new TargetUri(targetUri.ActualUri + "?refresh"))) != null)
+            if ((credentials = PersonalAccessTokenStore.ReadCredentials(GetRefreshTokenTargetUri(targetUri))) != null)
             {
                 PersonalAccessTokenStore.DeleteCredentials(targetUri);
                 Trace.WriteLine("   refresh credentials deleted");
             }
+        }
+
+        private static TargetUri GetRefreshTokenTargetUri(TargetUri targetUri)
+        {
+            // TODO make more resiliant
+            return new TargetUri(targetUri.ActualUri.AbsoluteUri.Substring(0, targetUri.ActualUri.AbsoluteUri.Length - 1) + refreshTokenSuffix);
         }
 
         /// <inheritdoc />
@@ -163,7 +171,7 @@ namespace Bitbucket.Authentication
 
                             credentials = (Credential)result.Token;
                             this.PersonalAccessTokenStore.WriteCredentials(targetUri, credentials);
-                            this.PersonalAccessTokenStore.WriteCredentials(new TargetUri(targetUri.ActualUri + "?refresh"), new Credential(result.RefreshToken.Type.ToString(), result.RefreshToken.Value));
+                            this.PersonalAccessTokenStore.WriteCredentials(GetRefreshTokenTargetUri(targetUri), new Credential(result.RefreshToken.Type.ToString(), result.RefreshToken.Value));
 
                             // if a result callback was registered, call it
                             if (AuthenticationResultCallback != null)
@@ -193,7 +201,7 @@ namespace Bitbucket.Authentication
                 return true;
             }
 
-            var refreshCredentials = this.PersonalAccessTokenStore.ReadCredentials(new TargetUri(targetUri.ActualUri + "?refresh"));
+            var refreshCredentials = this.PersonalAccessTokenStore.ReadCredentials(GetRefreshTokenTargetUri(targetUri));
             // if there are refresh credentials it suggests it might be OAuth so we can try and refresh the access_token and try again.
             if (refreshCredentials == null)
             {
@@ -207,7 +215,7 @@ namespace Bitbucket.Authentication
 
                 credentials = (Credential)result.Token;
                 this.PersonalAccessTokenStore.WriteCredentials(targetUri, credentials);
-                this.PersonalAccessTokenStore.WriteCredentials(new TargetUri(targetUri.ActualUri + "?refresh"), new Credential(result.RefreshToken.Type.ToString(), result.RefreshToken.Value));
+                this.PersonalAccessTokenStore.WriteCredentials(GetRefreshTokenTargetUri(targetUri), new Credential(result.RefreshToken.Type.ToString(), result.RefreshToken.Value));
 
                 if (await BitbucketAuthority.ValidateCredentials(targetUri, username, credentials))
                 {
