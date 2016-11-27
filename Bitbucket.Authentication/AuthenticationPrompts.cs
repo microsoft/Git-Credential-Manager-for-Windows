@@ -9,16 +9,34 @@ using Microsoft.Alm.Authentication;
 using Core.Authentication.ViewModels;
 using Core.Controls;
 using Bitbucket.Authentication.Views;
+using System.Text.RegularExpressions;
 
 namespace Bitbucket.Authentication
 {
     public static class AuthenticationPrompts
     {
+        public static string GetUserFromTargetUri(TargetUri targetUri)
+        {
+            var url = targetUri.ActualUri.AbsoluteUri;
+            if (!url.Contains("@"))
+            {
+                return null;
+            }
+
+            var match = Regex.Match(url, @"\/\/(.+)@");
+            if (!match.Success)
+            {
+                return null;
+            }
+
+            return match.Groups[1].Value;
+        }
+
         public static bool CredentialModalPrompt(string title, TargetUri targetUri, out string username, out string password)
         {
             Trace.WriteLine("Program::BitbucketCredentialModalPrompt");
 
-            var credentialViewModel = new CredentialsViewModel();
+            var credentialViewModel = new CredentialsViewModel(GetUserFromTargetUri(targetUri));
 
             Trace.WriteLine("   prompting user for credentials.");
 

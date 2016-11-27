@@ -204,7 +204,7 @@ namespace Microsoft.Alm.Cli
                 case AuthorityType.Bitbucket:
                     Trace.WriteLine("   deleting Bitbucket credentials");
                     var bbAuth = authentication as BitbucketAuthentication;
-                    bbAuth.DeleteCredentials(operationArguments.TargetUri);
+                    bbAuth.DeleteCredentials(operationArguments.TargetUri, operationArguments.CredUsername);
                     break;
             }
 

@@ -458,7 +458,7 @@ namespace Microsoft.Alm.Cli
                 case AuthorityType.Bitbucket:
                     Trace.WriteLine("   deleting Bitbucket credentials");
                     var bbAuth = authentication as BitbucketAuthentication;
-                    bbAuth.DeleteCredentials(operationArguments.TargetUri);
+                    bbAuth.DeleteCredentials(operationArguments.TargetUri, operationArguments.CredUsername);
                     break;
             }
         }
@@ -1199,11 +1199,11 @@ namespace Microsoft.Alm.Cli
                     Task.Run(async () =>
                     {
                         if (((operationArguments.Interactivity != Interactivity.Always)
-                             && ((credentials = bbcAuth.GetCredentials(operationArguments.TargetUri)) != null)
+                             && ((credentials = bbcAuth.GetCredentials(operationArguments.TargetUri, operationArguments.CredUsername)) != null)
                              && (!operationArguments.ValidateCredentials
                                  || await bbcAuth.ValidateCredentials(operationArguments.TargetUri, operationArguments.CredUsername, credentials)))
                             || ((operationArguments.Interactivity != Interactivity.Never)
-                                && ((credentials = await bbcAuth.InteractiveLogon(operationArguments.TargetUri)) != null)
+                                && ((credentials = await bbcAuth.InteractiveLogon(operationArguments.TargetUri, operationArguments.CredUsername)) != null)
                                 && (!operationArguments.ValidateCredentials
                                     || await bbcAuth.ValidateCredentials(operationArguments.TargetUri, operationArguments.CredUsername, credentials))))
                         {

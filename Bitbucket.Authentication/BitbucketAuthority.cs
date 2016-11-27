@@ -122,9 +122,10 @@ namespace Bitbucket.Authentication
         {
             BaseSecureStore.ValidateTargetUri(targetUri);
             BaseSecureStore.ValidateCredential(credentials);
-            
+
             // Try the simplest Basic Auth first
-            string authString = String.Format("{0}:{1}", username, credentials.Password);
+            var user = string.IsNullOrWhiteSpace(username) ? credentials.Username : username;
+            string authString = String.Format("{0}:{1}", user, credentials.Password);
             byte[] authBytes = Encoding.UTF8.GetBytes(authString);
             string authEncode = Convert.ToBase64String(authBytes);
 

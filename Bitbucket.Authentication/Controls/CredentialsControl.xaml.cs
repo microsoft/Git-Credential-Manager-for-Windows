@@ -16,7 +16,14 @@ namespace Bitbucket.Authentication.Controls
 
         protected override void SetFocus()
         {
-            loginTextBox.TryFocus().Wait(TimeSpan.FromSeconds(1));
+            if (string.IsNullOrWhiteSpace(loginTextBox.Text))
+            {
+                loginTextBox.TryFocus().Wait(TimeSpan.FromSeconds(1));
+            }
+            else
+            {
+                passwordTextBox.TryFocus().Wait(TimeSpan.FromSeconds(1));
+            }
         }
     }
 }

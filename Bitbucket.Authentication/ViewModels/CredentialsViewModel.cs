@@ -8,7 +8,12 @@ namespace Bitbucket.Authentication.ViewModels
 {
     public class CredentialsViewModel : DialogViewModel
     {
-        public CredentialsViewModel()
+        public CredentialsViewModel() : this(string.Empty)
+        {
+            // without this default constructor get nullreferenceexceptions during binding
+            // i guess 'cos the view is built before the 'official' viewmodel and hence generates it own viewmodel while building?
+        }
+        public CredentialsViewModel(string username)
         {
             LoginCommand = new ActionCommand(_ => Result = AuthenticationDialogResult.Ok);
             CancelCommand = new ActionCommand(_ => Result = AuthenticationDialogResult.Cancel);
@@ -27,6 +32,12 @@ namespace Bitbucket.Authentication.ViewModels
                     IsValid = ModelValidator.IsValid;
                 }
             };
+
+            // set last to allow validator to run
+            if (!string.IsNullOrWhiteSpace(username))
+            {
+                Login = username;
+            }
         }
 
         private string _login;
