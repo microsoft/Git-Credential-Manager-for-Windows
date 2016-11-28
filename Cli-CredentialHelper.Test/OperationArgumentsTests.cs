@@ -191,6 +191,49 @@ namespace Microsoft.Alm.Cli.Test
             CreateTargetUriTestWithPath(input);
         }
 
+        [TestMethod]
+        public void CreateTargetUri_GithubUseUsername()
+        {
+            var input = new InputArg()
+            {
+                Protocol = "https",
+                Host = "github.com",
+                Username = "username",
+                Path = "server/path",
+            };
+
+            CreateTargetUriTestUseUsername(input, false, false, "https://github.com/");
+            CreateTargetUriTestUseUsername(input, false, true, "https://username@github.com/");
+            CreateTargetUriTestUseUsername(input, true, false, "https://github.com/server/path");
+            CreateTargetUriTestUseUsername(input, true, true, "https://username@github.com/server/path");
+        }
+
+
+        private void CreateTargetUriTestUseUsername(InputArg input, bool useHttpPath, bool useHttpUsername, string expectedUri)
+        {
+            using (var memory = new MemoryStream())
+            using (var writer = new StreamWriter(memory))
+            {
+                writer.Write(input.ToString());
+                writer.Flush();
+
+                memory.Seek(0, SeekOrigin.Begin);
+
+                var oparg = new OperationArguments(memory);
+                oparg.UseHttpPath = useHttpPath;
+                oparg.UseHttpUsername = useHttpUsername;
+
+                Assert.IsNotNull(oparg);
+                Assert.AreEqual(input.Protocol ?? string.Empty, oparg.QueryProtocol);
+                Assert.AreEqual(input.Host ?? string.Empty, oparg.QueryHost);
+                Assert.AreEqual(input.Path, oparg.QueryPath);
+                Assert.AreEqual(input.Username, oparg.CredUsername);
+                Assert.AreEqual(input.Password, oparg.CredPassword);
+
+                Assert.AreEqual(expectedUri, oparg.TargetUri.ToString());
+            }
+        }
+
         private void CreateTargetUriTestDefault(InputArg input)
         {
             using (var memory = new MemoryStream())
