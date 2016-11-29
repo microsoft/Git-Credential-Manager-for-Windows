@@ -148,7 +148,7 @@ namespace Microsoft.Alm.Cli
 
         private static void Delete()
         {
-            Trace.WriteLine("Program::Erase");
+            Trace.WriteLine("Program::Delete");
 
             string[] args = Environment.GetCommandLineArgs();
 
@@ -175,6 +175,8 @@ namespace Microsoft.Alm.Cli
             operationArguments.QueryUri = uri;
 
             LoadOperationArguments(operationArguments);
+            Trace.WriteLine("   targetUri = " + operationArguments.TargetUri);
+            Trace.WriteLine("   username = " + operationArguments.CredUsername);
 
             BaseAuthentication authentication = CreateAuthentication(operationArguments);
 
@@ -243,6 +245,7 @@ namespace Microsoft.Alm.Cli
 
             Trace.WriteLine("Program::Erase");
             Trace.WriteLine("   targetUri = " + operationArguments.TargetUri);
+            Trace.WriteLine("   username = " + operationArguments.CredUsername);
 
             if (operationArguments.PreserveCredentials)
             {
@@ -269,6 +272,7 @@ namespace Microsoft.Alm.Cli
 
             Trace.WriteLine("Program::Get");
             Trace.WriteLine("   targetUri = " + operationArguments.TargetUri);
+            Trace.WriteLine("   username = " + operationArguments.CredUsername);
 
             LoadOperationArguments(operationArguments);
             EnableTraceLogging(operationArguments);
@@ -449,6 +453,7 @@ namespace Microsoft.Alm.Cli
 
             Trace.WriteLine("Program::Store");
             Trace.WriteLine("   targetUri = " + operationArguments.TargetUri);
+            Trace.WriteLine("   username = " + operationArguments.CredUsername);
 
             BaseAuthentication authentication = CreateAuthentication(operationArguments);
             Credential credentials = new Credential(operationArguments.CredUsername, operationArguments.CredPassword);

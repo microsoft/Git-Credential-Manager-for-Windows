@@ -221,7 +221,7 @@ namespace Bitbucket.Authentication.OAuth
                     Timeout = TimeSpan.FromMilliseconds(RequestTimeout)
                 })
                 {
-                    var url = new Uri(TokenUri).AbsoluteUri;
+                    var url = new Uri(new Uri("https://bitbucket.org"), TokenUri).AbsoluteUri;
 
                     var content = new MultipartFormDataContent();
                     content.Add(new StringContent("refresh_token"), "grant_type");

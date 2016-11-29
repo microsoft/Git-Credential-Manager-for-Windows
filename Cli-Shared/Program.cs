@@ -431,6 +431,7 @@ namespace Microsoft.Alm.Cli
 
             Trace.WriteLine("Program::DeleteCredentials");
             Trace.WriteLine("   targetUri = " + operationArguments.TargetUri);
+            Trace.WriteLine("   username = " + operationArguments.CredUsername);
 
             var authentication = CreateAuthentication(operationArguments);
 
@@ -1056,6 +1057,7 @@ namespace Microsoft.Alm.Cli
 
             Trace.WriteLine("Program::QueryCredentials");
             Trace.WriteLine("   targetUri = " + operationArguments.TargetUri);
+            Trace.WriteLine("   username = " + operationArguments.CredUsername);
 
             var authentication = CreateAuthentication(operationArguments);
             Credential credentials = null;
@@ -1208,8 +1210,16 @@ namespace Microsoft.Alm.Cli
                                     || await bbcAuth.ValidateCredentials(operationArguments.TargetUri, operationArguments.CredUsername, credentials))))
                         {
                             Trace.WriteLine("   credentials found");
-                            var c2 = new Credential(operationArguments.CredUsername, credentials.Password);
-                            operationArguments.SetCredentials(c2);
+                            if (operationArguments.CredUsername != null)
+                            {
+                                var c2 = new Credential(operationArguments.CredUsername, credentials.Password);
+                                operationArguments.SetCredentials(c2);
+                            }
+                            else
+                            {
+                                operationArguments.SetCredentials(credentials);
+                            }
+                            
                             LogEvent(
                                 "Bitbucket credentials for " + operationArguments.TargetUri + " successfully retrieved.",
                                 EventLogEntryType.SuccessAudit);
