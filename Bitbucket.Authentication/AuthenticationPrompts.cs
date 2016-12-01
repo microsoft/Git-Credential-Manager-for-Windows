@@ -32,7 +32,8 @@ namespace Bitbucket.Authentication
             return match.Groups[1].Value;
         }
 
-        public static bool CredentialModalPrompt(string title, TargetUri targetUri, out string username, out string password)
+        public static bool CredentialModalPrompt(string title, TargetUri targetUri, out string username,
+            out string password)
         {
             Trace.WriteLine("Program::BitbucketCredentialModalPrompt");
 
@@ -47,8 +48,10 @@ namespace Bitbucket.Authentication
 
             return credentialValid;
         }
+
         // TODO add Oauth
-        public static bool AuthenticationOAuthModalPrompt(string title, TargetUri targetUri, BitbucketAuthenticationResultType resultType,
+        public static bool AuthenticationOAuthModalPrompt(string title, TargetUri targetUri,
+            BitbucketAuthenticationResultType resultType,
             string username)
         {
             Trace.WriteLine("Program::BitbucketAuthenticationOAuthModalPrompt");
@@ -65,16 +68,16 @@ namespace Bitbucket.Authentication
         private static bool ShowViewModel(DialogViewModel viewModel, Func<AuthenticationDialogWindow> windowCreator)
         {
             StartSTATask(() =>
-            {
-                EnsureApplicationResources();
-                var window = windowCreator();
-                window.DataContext = viewModel;
-                window.ShowDialog();
-            })
-            .Wait();
+                {
+                    EnsureApplicationResources();
+                    var window = windowCreator();
+                    window.DataContext = viewModel;
+                    window.ShowDialog();
+                })
+                .Wait();
 
             return viewModel.Result == AuthenticationDialogResult.Ok
-                && viewModel.IsValid;
+                   && viewModel.IsValid;
         }
 
         private static Task StartSTATask(Action action)
@@ -104,7 +107,9 @@ namespace Bitbucket.Authentication
                 UriParser.Register(new GenericUriParser(GenericUriParserOptions.GenericAuthority), "pack", -1);
             }
 
-            var appResourcesUri = new Uri("pack://application:,,,/Bitbucket.Authentication;component/AppResources.xaml", UriKind.RelativeOrAbsolute);
+            var appResourcesUri = new Uri(
+                "pack://application:,,,/Bitbucket.Authentication;component/AppResources.xaml",
+                UriKind.RelativeOrAbsolute);
 
             // If we launch two dialogs in the same process (Credential followed by 2fa), calling new App()
             // throws an exception stating the Application class  can't be created twice. Creating an App
@@ -116,19 +121,22 @@ namespace Bitbucket.Authentication
                 var app = new Application();
                 Debug.Assert(Application.Current == app, "Current application not set");
                 app.ShutdownMode = ShutdownMode.OnExplicitShutdown;
-                app.Resources.MergedDictionaries.Add(new ResourceDictionary { Source = appResourcesUri });
+                app.Resources.MergedDictionaries.Add(new ResourceDictionary {Source = appResourcesUri});
             }
             else
             {
                 // Application.Current exists, but what if in the future, some other code created
                 // the singleton. Let's make sure our resources are still loaded.
-                var resourcesExist = Application.Current.Resources.MergedDictionaries.Any(r => r.Source == appResourcesUri);
+                var resourcesExist =
+                    Application.Current.Resources.MergedDictionaries.Any(r => r.Source == appResourcesUri);
                 if (!resourcesExist)
                 {
-                    Application.Current.Resources.MergedDictionaries.Add(new ResourceDictionary { Source = appResourcesUri });
+                    Application.Current.Resources.MergedDictionaries.Add(new ResourceDictionary
+                    {
+                        Source = appResourcesUri
+                    });
                 }
             }
-
         }
     }
 }

@@ -27,10 +27,12 @@ namespace Bitbucket.Authentication
             PersonalAccessTokenStore = personalAccessTokenStore;
 
             BitbucketAuthority = new BitbucketAuthority();
-            TokenScope = BitbucketTokenScope.SnippetWrite | BitbucketTokenScope.RepositoryWrite; ;
+            TokenScope = BitbucketTokenScope.SnippetWrite | BitbucketTokenScope.RepositoryWrite;
+            ;
             AcquireCredentialsCallback = acquireCredentialsCallback;
             AcquireAuthenticationOAuthCallback = acquireAuthenticationOAuthCallback;
         }
+
         /// <summary>
         /// The desired scope of the authentication token to be requested.
         /// </summary>
@@ -89,12 +91,14 @@ namespace Bitbucket.Authentication
         private static TargetUri GetRefreshTokenTargetUri(TargetUri targetUri)
         {
             // TODO make more resiliant
-            return new TargetUri(targetUri.ActualUri.AbsoluteUri.Substring(0, targetUri.ActualUri.AbsoluteUri.Length - 1) + refreshTokenSuffix);
+            return
+                new TargetUri(targetUri.ActualUri.AbsoluteUri.Substring(0, targetUri.ActualUri.AbsoluteUri.Length - 1) +
+                              refreshTokenSuffix);
         }
 
         public Credential GetCredentials(TargetUri targetUri, string username)
         {
-            if(string.IsNullOrWhiteSpace(username))
+            if (string.IsNullOrWhiteSpace(username))
             {
                 return GetCredentials(targetUri);
             }
@@ -104,7 +108,8 @@ namespace Bitbucket.Authentication
 
         private TargetUri GetPerUserTargetUri(TargetUri targetUri, string username)
         {
-            return new TargetUri(targetUri.ActualUri.AbsoluteUri.Replace(targetUri.Host, username + "@" + targetUri.Host));
+            return
+                new TargetUri(targetUri.ActualUri.AbsoluteUri.Replace(targetUri.Host, username + "@" + targetUri.Host));
         }
 
         private bool TargetUriContainsUsername(TargetUri targetUri)
@@ -135,7 +140,8 @@ namespace Bitbucket.Authentication
                 return credentials;
             }
 
-            Credential refreshedCredentials = Task.Run(() => RefreshCredentials(targetUri, refreshCredentials.Password, null)).Result;
+            Credential refreshedCredentials =
+                Task.Run(() => RefreshCredentials(targetUri, refreshCredentials.Password, null)).Result;
             if (refreshedCredentials == null)
             {
                 // refresh failed return null
@@ -200,7 +206,7 @@ namespace Bitbucket.Authentication
             {
                 // TODO
                 authentication = new BitbucketAuthentication( /*tokenScope,*/ personalAccessTokenStore
-                , acquireCredentialsCallback, acquireAuthenticationOAuthCallback);
+                    , acquireCredentialsCallback, acquireAuthenticationOAuthCallback);
                 //acquireAuthenticationCodeCallback, authenticationResultCallback);
                 Trace.WriteLine("   authentication for Bitbucket created");
             }
@@ -212,9 +218,10 @@ namespace Bitbucket.Authentication
 
             return authentication;
         }
+
         public async Task<Credential> InteractiveLogon(TargetUri targetUri, string username)
         {
-            if(string.IsNullOrWhiteSpace(username))
+            if (string.IsNullOrWhiteSpace(username))
             {
                 return await InteractiveLogon(targetUri);
             }
@@ -230,11 +237,16 @@ namespace Bitbucket.Authentication
             string username;
             string password;
 
-            if (AcquireCredentialsCallback("Please enter your Bitbucket credentials for ",targetUri, out username, out password))
+            if (AcquireCredentialsCallback("Please enter your Bitbucket credentials for ", targetUri, out username,
+                out password))
             {
                 BitbucketAuthenticationResult result;
 
-                if (result = await BitbucketAuthority.AcquireToken(targetUri, username, password, BitbucketAuthenticationResultType.None, this.TokenScope))
+                if (
+                    result =
+                        await
+                            BitbucketAuthority.AcquireToken(targetUri, username, password,
+                                BitbucketAuthenticationResultType.None, this.TokenScope))
                 {
                     Trace.WriteLine("   token acquisition succeeded");
 
@@ -254,14 +266,19 @@ namespace Bitbucket.Authentication
                 {
                     if (AcquireAuthenticationOAuthCallback("", targetUri, result, username))
                     {
-                        if (result = await BitbucketAuthority.AcquireToken(targetUri, username, password, BitbucketAuthenticationResultType.TwoFactor, this.TokenScope))
+                        if (
+                            result =
+                                await
+                                    BitbucketAuthority.AcquireToken(targetUri, username, password,
+                                        BitbucketAuthenticationResultType.TwoFactor, this.TokenScope))
                         {
                             Trace.WriteLine("   token acquisition succeeded");
 
                             credentials = GenerateCredentials(targetUri, username, ref result);
                             SetCredentials(targetUri, credentials, username);
                             //this.PersonalAccessTokenStore.WriteCredentials(targetUri, credentials);
-                            SetCredentials(GetRefreshTokenTargetUri(targetUri), new Credential(result.RefreshToken.Type.ToString(), result.RefreshToken.Value), username);
+                            SetCredentials(GetRefreshTokenTargetUri(targetUri),
+                                new Credential(result.RefreshToken.Type.ToString(), result.RefreshToken.Value), username);
                             //this.PersonalAccessTokenStore.WriteCredentials(GetRefreshTokenTargetUri(targetUri), new Credential(result.RefreshToken.Type.ToString(), result.RefreshToken.Value));
 
                             // if a result callback was registered, call it
@@ -280,9 +297,10 @@ namespace Bitbucket.Authentication
             return credentials;
         }
 
-        private Credential GenerateCredentials(TargetUri targetUri, string username, ref BitbucketAuthenticationResult result)
+        private Credential GenerateCredentials(TargetUri targetUri, string username,
+            ref BitbucketAuthenticationResult result)
         {
-            Credential credentials = (Credential)result.Token;
+            Credential credentials = (Credential) result.Token;
             if (!TargetUriContainsUsername(targetUri))
             {
                 // no user info in uri so personalize the credentials
@@ -292,9 +310,10 @@ namespace Bitbucket.Authentication
             return credentials;
         }
 
-        public Credential GenerateRefreshCredentials(TargetUri targetUri, string username, ref BitbucketAuthenticationResult result)
+        public Credential GenerateRefreshCredentials(TargetUri targetUri, string username,
+            ref BitbucketAuthenticationResult result)
         {
-            Credential credentials = (Credential)result.Token;
+            Credential credentials = (Credential) result.Token;
             if (!TargetUriContainsUsername(targetUri))
             {
                 // no user info in uri so personalize the credentials
@@ -302,7 +321,6 @@ namespace Bitbucket.Authentication
             }
 
             return credentials;
-            
         }
 
         public async Task<bool> ValidateCredentials(TargetUri targetUri, string username, Credential credentials)
@@ -314,7 +332,7 @@ namespace Bitbucket.Authentication
 
             var userSpecificTargetUri = GetPerUserTargetUri(targetUri, username);
 
-            if(await BitbucketAuthority.ValidateCredentials(userSpecificTargetUri, username, credentials))
+            if (await BitbucketAuthority.ValidateCredentials(userSpecificTargetUri, username, credentials))
             {
                 return true;
             }
@@ -380,6 +398,7 @@ namespace Bitbucket.Authentication
 
             return credentials;
         }
+
         private IBitbucketAuthority BitbucketAuthority { get; }
 
         /// <summary>
@@ -392,7 +411,8 @@ namespace Bitbucket.Authentication
         /// <param name="username">The username supplied by the user.</param>
         /// <param name="password">The password supplied by the user.</param>
         /// <returns>True if successful; otherwise false.</returns>
-        public delegate bool AcquireCredentialsDelegate(string titleMessage, TargetUri targetUri, out string username, out string password);
+        public delegate bool AcquireCredentialsDelegate(
+            string titleMessage, TargetUri targetUri, out string username, out string password);
 
         /// <summary>
         /// Delegate for authentication oauth acquisition from the UX.
@@ -406,7 +426,8 @@ namespace Bitbucket.Authentication
         /// </param>
         /// <param name="authenticationCode">The authentication code provided by the user.</param>
         /// <returns>True if successful; otherwise false.</returns>
-        public delegate bool AcquireAuthenticationOAuthDelegate(string title, TargetUri targetUri, BitbucketAuthenticationResultType resultType,
+        public delegate bool AcquireAuthenticationOAuthDelegate(
+            string title, TargetUri targetUri, BitbucketAuthenticationResultType resultType,
             string username);
 
         /// <summary>

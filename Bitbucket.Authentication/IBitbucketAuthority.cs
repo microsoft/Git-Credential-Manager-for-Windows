@@ -11,17 +11,16 @@ namespace Bitbucket.Authentication
     internal interface IBitbucketAuthority
     {
         Task<BitbucketAuthenticationResult> AcquireToken(
-    TargetUri targetUri,
-    string username,
-    string password,
-    BitbucketAuthenticationResultType resultType,
-    BitbucketTokenScope scope);
+            TargetUri targetUri,
+            string username,
+            string password,
+            BitbucketAuthenticationResultType resultType,
+            BitbucketTokenScope scope);
 
         Task<BitbucketAuthenticationResult> RefreshToken(
-TargetUri targetUri,
-string refreshToken);
+            TargetUri targetUri,
+            string refreshToken);
 
         Task<bool> ValidateCredentials(TargetUri targetUri, string username, Credential credentials);
-
     }
 }

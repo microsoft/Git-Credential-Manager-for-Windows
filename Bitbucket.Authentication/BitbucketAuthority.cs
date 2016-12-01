@@ -22,16 +22,22 @@ namespace Bitbucket.Authentication
         /// <summary>
         /// The maximum wait time for a network request before timing out
         /// </summary>
-        public const int RequestTimeout = 15 * 1000; // 15 second limit
+        public const int RequestTimeout = 15*1000; // 15 second limit
 
         public BitbucketAuthority(string restRootUrl = null)
         {
             _restRootUrl = restRootUrl ?? DefaultRestRoot;
         }
+
         private readonly string _restRootUrl;
 
-        public string UserUrl { get { return "/2.0/user"; } }
-        public async Task<BitbucketAuthenticationResult> AcquireToken(TargetUri targetUri, string username, string password, BitbucketAuthenticationResultType resultType, BitbucketTokenScope scope)
+        public string UserUrl
+        {
+            get { return "/2.0/user"; }
+        }
+
+        public async Task<BitbucketAuthenticationResult> AcquireToken(TargetUri targetUri, string username,
+            string password, BitbucketAuthenticationResultType resultType, BitbucketTokenScope scope)
         {
             if (resultType == BitbucketAuthenticationResultType.TwoFactor)
             {
@@ -71,27 +77,26 @@ namespace Bitbucket.Authentication
                             {
                                 case HttpStatusCode.OK:
                                 case HttpStatusCode.Created:
-                                    {
-                                        // Success with username/passord indicates 2FA is not on so the 'token' is actually the password
-                                        // if we had a successful call then the password is good.
-                                        token = new Token(password, TokenType.Personal);
+                                {
+                                    // Success with username/passord indicates 2FA is not on so the 'token' is actually the password
+                                    // if we had a successful call then the password is good.
+                                    token = new Token(password, TokenType.Personal);
 
-                                        Trace.WriteLine("   authentication success: new password token created.");
-                                        return new BitbucketAuthenticationResult(BitbucketAuthenticationResultType.Success, token);
-                                    }
+                                    Trace.WriteLine("   authentication success: new password token created.");
+                                    return new BitbucketAuthenticationResult(BitbucketAuthenticationResultType.Success,
+                                        token);
+                                }
 
                                 case HttpStatusCode.Forbidden:
-                                    {
-                                        Trace.WriteLine("   two-factor app authentication code required");
-                                        return new BitbucketAuthenticationResult(BitbucketAuthenticationResultType.TwoFactor);
-                                    }
+                                {
+                                    Trace.WriteLine("   two-factor app authentication code required");
+                                    return new BitbucketAuthenticationResult(BitbucketAuthenticationResultType.TwoFactor);
+                                }
                                 case HttpStatusCode.Unauthorized:
-                                    {
-
-                                        Trace.WriteLine("   authentication failed");
-                                        return new BitbucketAuthenticationResult(BitbucketAuthenticationResultType.Failure);
-
-                                    }
+                                {
+                                    Trace.WriteLine("   authentication failed");
+                                    return new BitbucketAuthenticationResult(BitbucketAuthenticationResultType.Failure);
+                                }
 
                                 default:
                                     Trace.WriteLine("   authentication failed");
@@ -100,7 +105,6 @@ namespace Bitbucket.Authentication
                         }
                     }
                 }
-
             }
         }
 
@@ -134,11 +138,11 @@ namespace Bitbucket.Authentication
                 return true;
             }
 
-            if(await ValidateCredentials(targetUri, username, "Bearer " + credentials.Password))
+            if (await ValidateCredentials(targetUri, username, "Bearer " + credentials.Password))
             {
-                return true; 
+                return true;
             }
-            
+
             return false;
         }
 
@@ -166,28 +170,28 @@ namespace Bitbucket.Authentication
                     {
                         case HttpStatusCode.OK:
                         case HttpStatusCode.Created:
-                            {
-                                Trace.WriteLine("   credential validation succeeded");
-                                return true;
-                            }
+                        {
+                            Trace.WriteLine("   credential validation succeeded");
+                            return true;
+                        }
                         case HttpStatusCode.Forbidden:
-                            {
-                                Trace.WriteLine("   credential validation failed: Forbidden");
-                                return false;
-                            }
+                        {
+                            Trace.WriteLine("   credential validation failed: Forbidden");
+                            return false;
+                        }
                         case HttpStatusCode.Unauthorized:
-                            {
-                                Trace.WriteLine("   credential validation failed: Unauthorized");
-                                return false;
-                            }
+                        {
+                            Trace.WriteLine("   credential validation failed: Unauthorized");
+                            return false;
+                        }
                         default:
-                            {
-                                Trace.WriteLine("   credential validation failed");
-                                return false;
-                            }
+                        {
+                            Trace.WriteLine("   credential validation failed");
+                            return false;
+                        }
                     }
                 }
             }
         }
-     }
+    }
 }

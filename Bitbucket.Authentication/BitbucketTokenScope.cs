@@ -39,86 +39,106 @@ namespace Bitbucket.Authentication
         /// Access accounts
         /// </summary>
         public static readonly BitbucketTokenScope Account = new BitbucketTokenScope("account");
+
         /// <summary>
         /// Modify accounts
         /// </summary>
         public static readonly BitbucketTokenScope AccountWrite = new BitbucketTokenScope("account:write");
+
         /// <summary>
         /// Access teams
         /// </summary>
         public static readonly BitbucketTokenScope Team = new BitbucketTokenScope("team");
+
         /// <summary>
         /// Modify Teams
         /// </summary>
         public static readonly BitbucketTokenScope TeamWrite = new BitbucketTokenScope("team:write");
+
         /// <summary>
         /// Access repositories
         /// </summary>
         public static readonly BitbucketTokenScope Repository = new BitbucketTokenScope("repository");
+
         /// <summary>
         /// Modify repositories
         /// </summary>
         public static readonly BitbucketTokenScope RepositoryWrite = new BitbucketTokenScope("repository:write");
+
         /// <summary>
         /// Manage repositories
         /// </summary>
         public static readonly BitbucketTokenScope RepositoryAdmin = new BitbucketTokenScope("repository:admin");
+
         /// <summary>
         /// Access pullrequests
         /// </summary>
         public static readonly BitbucketTokenScope PullRequest = new BitbucketTokenScope("pullrequest");
+
         /// <summary>
         /// Modify pullrequests
         /// </summary>
         public static readonly BitbucketTokenScope PullRequestWrite = new BitbucketTokenScope("pullrequest:write");
+
         /// <summary>
         /// Access snippets
         /// </summary>
         public static readonly BitbucketTokenScope Snippet = new BitbucketTokenScope("snippet");
+
         /// <summary>
         /// Modify snippets
         /// </summary>
         public static readonly BitbucketTokenScope SnippetWrite = new BitbucketTokenScope("snippet:write");
+
         /// <summary>
         /// Access issues
         /// </summary>
         public static readonly BitbucketTokenScope Issue = new BitbucketTokenScope("issue");
+
         /// <summary>
         /// Modify issues
         /// </summary>
         public static readonly BitbucketTokenScope IssueWrite = new BitbucketTokenScope("issue:write");
+
         /// <summary>
         /// Access wiki
         /// </summary>
         public static readonly BitbucketTokenScope Wiki = new BitbucketTokenScope("wiki");
+
         /// <summary>
         /// Access email
         /// </summary>
         public static readonly BitbucketTokenScope Email = new BitbucketTokenScope("email");
+
         /// <summary>
         /// Access webhooks
         /// </summary>
         public static readonly BitbucketTokenScope Webhook = new BitbucketTokenScope("webhook");
+
         /// <summary>
         /// Access projects
         /// </summary>
         public static readonly BitbucketTokenScope Project = new BitbucketTokenScope("project");
+
         /// <summary>
         /// Modify projects
         /// </summary>
         public static readonly BitbucketTokenScope ProjectWrite = new BitbucketTokenScope("project:write");
-        
+
         private BitbucketTokenScope(string value)
             : base(value)
-        { }
+        {
+        }
 
         private BitbucketTokenScope(string[] values)
             : base(values)
-        { }
+        {
+        }
 
         private BitbucketTokenScope(ScopeSet set)
             : base(set)
-        { }
+        {
+        }
 
         public static IEnumerable<BitbucketTokenScope> EnumerateValues()
         {
@@ -152,6 +172,7 @@ namespace Bitbucket.Authentication
 
             return new BitbucketTokenScope(set);
         }
+
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static BitbucketTokenScope operator -(BitbucketTokenScope scope1, BitbucketTokenScope scope2)
         {
@@ -161,6 +182,7 @@ namespace Bitbucket.Authentication
 
             return new BitbucketTokenScope(set);
         }
+
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static BitbucketTokenScope operator |(BitbucketTokenScope scope1, BitbucketTokenScope scope2)
         {
@@ -170,6 +192,7 @@ namespace Bitbucket.Authentication
 
             return new BitbucketTokenScope(set);
         }
+
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static BitbucketTokenScope operator &(BitbucketTokenScope scope1, BitbucketTokenScope scope2)
         {
@@ -179,6 +202,7 @@ namespace Bitbucket.Authentication
 
             return new BitbucketTokenScope(set);
         }
+
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static BitbucketTokenScope operator ^(BitbucketTokenScope scope1, BitbucketTokenScope scope2)
         {

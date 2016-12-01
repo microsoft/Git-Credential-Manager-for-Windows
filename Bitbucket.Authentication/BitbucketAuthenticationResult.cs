@@ -1,5 +1,4 @@
-﻿
-using Microsoft.Alm.Authentication;
+﻿using Microsoft.Alm.Authentication;
 using System;
 using System.Diagnostics;
 
@@ -22,7 +21,8 @@ namespace Bitbucket.Authentication
             RefreshToken = null;
         }
 
-        public BitbucketAuthenticationResult(BitbucketAuthenticationResultType type, Token accessToken, Token refreshToken)
+        public BitbucketAuthenticationResult(BitbucketAuthenticationResultType type, Token accessToken,
+            Token refreshToken)
         {
             Type = type;
             Token = accessToken;
