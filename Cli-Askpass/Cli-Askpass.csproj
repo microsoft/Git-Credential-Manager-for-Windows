@@ -112,10 +112,11 @@ COPY /V /Y "%25src%25Microsoft.Alm.Authentication.dll" /B "%25dst%25Microsoft.Al
 COPY /V /Y "%25src%25Microsoft.Alm.Git.dll" /B "%25dst%25Microsoft.Alm.Git.dll" /B
 COPY /V /Y "%25src%25GitHub.Authentication.dll" /B "%25dst%25GitHub.Authentication.dll" /B
 COPY /V /Y "%25src%25git-askpass.exe" /B "%25dst%25git-askpass.exe" /B
+COPY /V /Y "%25src%25git-askpass.exe" /B "%25dst%25git-askpass-st.exe" /B
 COPY /V /Y "%25src%25install.cmd" /A "%25dst%25install.cmd" /A
 COPY /V /Y "%25src%25README.md" /A "%25dst%25README.md" /A
 COPY /V /Y "%25src%25LICENSE.TXT" /A "%25dst%25LICENSE.TXT" /A
-    </PostBuildEvent>
+</PostBuildEvent>
   </PropertyGroup>
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it.
        Other similar extension points exist, see Microsoft.Common.targets.
