@@ -124,8 +124,10 @@ COPY /V /Y "%25src%25Microsoft.IdentityModel.Clients.ActiveDirectory.Platform.dl
 COPY /V /Y "%25src%25Microsoft.Alm.Authentication.dll" "%25dst%25Microsoft.Alm.Authentication.dll"
 COPY /V /Y "%25src%25Microsoft.Alm.Git.dll" "%25dst%25Microsoft.Alm.Git.dll"
 COPY /V /Y "%25src%25Microsoft.Vsts.Authentication.dll" "%25dst%25Microsoft.Vsts.Authentication.dll"
+COPY /V /Y "%25src%25Bitbucket.Authentication.exe" "%25dst%25Bitbucket.Authentication.exe"
 COPY /V /Y "%25src%25GitHub.Authentication.exe" "%25dst%25GitHub.Authentication.exe"
 COPY /V /Y "%25src%25git-askpass.exe" "%25dst%25git-askpass.exe"
+COPY /V /Y "%25src%25git-askpass-st.exe" "%25dst%25git-askpass-st.exe"
 COPY /V /Y "%25src%25README.md" "%25dst%25README.md"
 COPY /V /Y "%25src%25LICENSE.txt" "%25dst%25LICENSE.txt"
 

@@ -369,6 +369,14 @@ namespace Microsoft.Alm.Cli
                     ? new AcquireCredentialsDelegate(Program.ModalPromptForCredentials)
                     : new AcquireCredentialsDelegate(Program.BasicCredentialPrompt);
 
+            var bitbucketCredentialCallback = (operationArguments.UseModalUi)
+                    ? Bitbucket.Authentication.AuthenticationPrompts.CredentialModalPrompt
+                    : new BitbucketAuthentication.AcquireCredentialsDelegate(BitbucketCredentialPrompt);
+
+            var bitbucketOauthCallback = (operationArguments.UseModalUi)
+                    ? Bitbucket.Authentication.AuthenticationPrompts.AuthenticationOAuthModalPrompt
+                    : new BitbucketAuthentication.AcquireAuthenticationOAuthDelegate(BitbucketOAuthPrompt);
+
             var githubCredentialCallback = (operationArguments.UseModalUi)
                     ? new Github.Authentication.AcquireCredentialsDelegate(Github.AuthenticationPrompts.CredentialModalPrompt)
                     : new Github.Authentication.AcquireCredentialsDelegate(Program.GitHubCredentialPrompt);
@@ -395,12 +403,8 @@ namespace Microsoft.Alm.Cli
                                                                        githubAuthcodeCallback,
                                                                        null)
 							?? BitbucketAuthentication.GetAuthentication(operationArguments.TargetUri, secrets,
-										                                 operationArguments.UseModalUi
-																			? Bitbucket.Authentication.AuthenticationPrompts.CredentialModalPrompt
-										                                    : new BitbucketAuthentication.AcquireCredentialsDelegate(CredentialPrompt),
-										                                 operationArguments.UseModalUi
-										                                    ? Bitbucket.Authentication.AuthenticationPrompts.AuthenticationOAuthModalPrompt
-										                                    : new BitbucketAuthentication.AcquireAuthenticationOAuthDelegate(OAuthPrompt));
+                                                                         bitbucketCredentialCallback,
+                                                                         bitbucketOauthCallback);
 
                     if (authority != null)
                     {
@@ -465,7 +469,9 @@ namespace Microsoft.Alm.Cli
                     Git.Trace.WriteLine($"authority for '{operationArguments.TargetUri}'  is Bitbucket");
 
                     // return a Bitbucket authentication object
-                    return authority ?? new BitbucketAuthentication(secrets);
+                    return authority ?? new BitbucketAuthentication(secrets,
+                                                                    bitbucketCredentialCallback,
+                                                                    bitbucketOauthCallback);
 
                 case AuthorityType.MicrosoftAccount:
                     Git.Trace.WriteLine($"authority for '{operationArguments.TargetUri}' is Microsoft Live.");
@@ -772,6 +778,76 @@ namespace Microsoft.Alm.Cli
             }
         }
 
+        private static bool BitbucketCredentialPrompt(string titleMessage, TargetUri targetUri, out string username, out string password)
+        {
+            Credential credential;
+            if ((credential = BasicCredentialPrompt(targetUri, titleMessage)) != null)
+            {
+                username = credential.Username;
+                password = credential.Password;
+
+                return true;
+            }
+
+            username = null;
+            password = null;
+
+            return false;
+        }
+
+        private static bool BitbucketOAuthPrompt(string title, TargetUri targetUri, BitbucketAuthenticationResultType resultType,
+            string username)
+        {
+            const int BufferReadSize = 16 * 1024;
+
+            Debug.Assert(targetUri != null);
+
+            var buffer = new StringBuilder(BufferReadSize);
+            uint read = 0;
+            uint written = 0;
+
+            string accessToken = null;
+
+            var fileAccessFlags = NativeMethods.FileAccess.GenericRead | NativeMethods.FileAccess.GenericWrite;
+            var fileAttributes = NativeMethods.FileAttributes.Normal;
+            var fileCreationDisposition = NativeMethods.FileCreationDisposition.OpenExisting;
+            var fileShareFlags = NativeMethods.FileShare.Read | NativeMethods.FileShare.Write;
+
+            using (
+                var stdout = NativeMethods.CreateFile(NativeMethods.ConsoleOutName, fileAccessFlags, fileShareFlags,
+                    IntPtr.Zero, fileCreationDisposition, fileAttributes, IntPtr.Zero))
+            {
+                using (
+                    var stdin = NativeMethods.CreateFile(NativeMethods.ConsoleInName, fileAccessFlags, fileShareFlags,
+                        IntPtr.Zero, fileCreationDisposition, fileAttributes, IntPtr.Zero))
+                {
+                    buffer.AppendLine()
+                        .Append(title)
+                        .Append(" OAuth Access Token: ");
+
+                    if (!NativeMethods.WriteConsole(stdout, buffer, (uint)buffer.Length, out written, IntPtr.Zero))
+                    {
+                        var error = Marshal.GetLastWin32Error();
+                        throw new Win32Exception(error,
+                            "Unable to write to standard output (" + NativeMethods.Win32Error.GetText(error) + ").");
+                    }
+                    buffer.Clear();
+
+                    // read input from the user
+                    if (!NativeMethods.ReadConsole(stdin, buffer, BufferReadSize, out read, IntPtr.Zero))
+                    {
+                        var error = Marshal.GetLastWin32Error();
+                        throw new Win32Exception(error,
+                            "Unable to read from standard input (" + NativeMethods.Win32Error.GetText(error) + ").");
+                    }
+
+                    accessToken = buffer.ToString(0, (int)read);
+                    accessToken = accessToken.Trim(NewLineChars);
+                }
+            }
+            return accessToken != null;
+        }
+
         private static bool GitHubAuthCodePrompt(TargetUri targetUri, Github.GitHubAuthenticationResultType resultType, string username, out string authenticationCode)
         {
             // ReadConsole 32768 fail, 32767 ok
@@ -824,63 +900,6 @@ namespace Microsoft.Alm.Cli
             }
 
             return authenticationCode != null;
-        }
-
-        private static bool OAuthPrompt(string title, TargetUri targetUri, BitbucketAuthenticationResultType resultType,
-            string username)
-        {
-            const int BufferReadSize = 16 * 1024;
-
-            Debug.Assert(targetUri != null);
-
-            Trace.WriteLine("Program::BitbucketOAuthPrompt");
-
-            var buffer = new StringBuilder(BufferReadSize);
-            uint read = 0;
-            uint written = 0;
-
-            string accessToken = null;
-
-            var fileAccessFlags = NativeMethods.FileAccess.GenericRead | NativeMethods.FileAccess.GenericWrite;
-            var fileAttributes = NativeMethods.FileAttributes.Normal;
-            var fileCreationDisposition = NativeMethods.FileCreationDisposition.OpenExisting;
-            var fileShareFlags = NativeMethods.FileShare.Read | NativeMethods.FileShare.Write;
-
-            using (
-                var stdout = NativeMethods.CreateFile(NativeMethods.ConsoleOutName, fileAccessFlags, fileShareFlags,
-                    IntPtr.Zero, fileCreationDisposition, fileAttributes, IntPtr.Zero))
-            {
-                using (
-                    var stdin = NativeMethods.CreateFile(NativeMethods.ConsoleInName, fileAccessFlags, fileShareFlags,
-                        IntPtr.Zero, fileCreationDisposition, fileAttributes, IntPtr.Zero))
-                {
-                    Trace.WriteLine("   OAuth");
-
-                    buffer.AppendLine()
-                        .Append(title)
-                        .Append(" OAuth Access Token: ");
-
-                    if (!NativeMethods.WriteConsole(stdout, buffer, (uint)buffer.Length, out written, IntPtr.Zero))
-                    {
-                        var error = Marshal.GetLastWin32Error();
-                        throw new Win32Exception(error,
-                            "Unable to write to standard output (" + NativeMethods.Win32Error.GetText(error) + ").");
-                    }
-                    buffer.Clear();
-
-                    // read input from the user
-                    if (!NativeMethods.ReadConsole(stdin, buffer, BufferReadSize, out read, IntPtr.Zero))
-                    {
-                        var error = Marshal.GetLastWin32Error();
-                        throw new Win32Exception(error,
-                            "Unable to read from standard input (" + NativeMethods.Win32Error.GetText(error) + ").");
-                    }
-
-                    accessToken = buffer.ToString(0, (int)read);
-                    accessToken = accessToken.Trim(NewLineChars);
-                }
-            }
-            return accessToken != null;
         }
 
         private static bool GitHubCredentialPrompt(TargetUri targetUri, out string username, out string password)

@@ -111,6 +111,11 @@ namespace Bitbucket.Authentication.Test
     {
         public Dictionary<string, Dictionary<List<string>, int>> MethodCalls =
             new Dictionary<string, Dictionary<List<string>, int>>();
+
+        public string Namespace => throw new NotImplementedException();
+
+        public Secret.UriNameConversion UriNameConversion => throw new NotImplementedException();
+
         public void DeleteCredentials(TargetUri targetUri)
         {
             // do nothing

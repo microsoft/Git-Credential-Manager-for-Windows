@@ -810,8 +810,6 @@ namespace Microsoft.Alm.Cli
                         string src = Path.Combine(srcPath, file);
                         string dst = Path.Combine(dstPath, file);
 
-                        Trace.WriteLine($"   copy '{src}' to '{dst}'.");
-
                         File.Copy(src, dst, true);
 
                         copiedFiles.Add(file);

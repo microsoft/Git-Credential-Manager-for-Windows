@@ -10,6 +10,8 @@ using System.Threading;
 using System.Net;
 using System.Text.RegularExpressions;
 
+using Trace = Microsoft.Alm.Git.Trace;
+
 namespace Bitbucket.Authentication
 {
     internal class BitbucketAuthority : IBitbucketAuthority

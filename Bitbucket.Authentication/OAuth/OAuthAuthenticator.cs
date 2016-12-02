@@ -10,6 +10,8 @@ using System.Text.RegularExpressions;
 using System.Threading;
 using System.Threading.Tasks;
 
+using Trace = Microsoft.Alm.Git.Trace;
+
 namespace Bitbucket.Authentication.OAuth
 {
     
