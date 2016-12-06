@@ -6,6 +6,8 @@ using System.Threading;
 using System.Windows;
 using System.Text.RegularExpressions;
 
+using Trace = Microsoft.Alm.Git.Trace;
+
 namespace Bitbucket.Authentication
 {
     /// <summary>

@@ -98,6 +98,10 @@
       <Project>{C1DAABC1-B493-459D-BB4F-04FBEFB1BA13}</Project>
       <Name>Microsoft.Alm.Authentication</Name>
     </ProjectReference>
+    <ProjectReference Include="..\Microsoft.Alm.Git\Microsoft.Alm.Git.csproj">
+      <Project>{4827c16d-5c58-406d-ab3f-3700bb0d06fe}</Project>
+      <Name>Microsoft.Alm.Git</Name>
+    </ProjectReference>
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Controls\Icon\" />

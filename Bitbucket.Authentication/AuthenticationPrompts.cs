@@ -10,6 +10,7 @@ using Core.Authentication.ViewModels;
 using Core.Controls;
 using Bitbucket.Authentication.Views;
 using System.Text.RegularExpressions;
+using Trace = Microsoft.Alm.Git.Trace;
 
 namespace Bitbucket.Authentication
 {
