@@ -13,6 +13,7 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Cli-CredentialHelper.Test",
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Documents", "Documents", "{663DC05D-FDC6-4EAB-AC4B-983D486B92B9}"
 	ProjectSection(SolutionItems) = preProject
+		BITBUCKET_TODO.md = BITBUCKET_TODO.md
 		LICENSE.TXT = LICENSE.TXT
 		README.md = README.md
 	EndProjectSection
@@ -28,6 +29,12 @@ EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Cli-Askpass", "Cli-AskPass\Cli-Askpass.csproj", "{0653670E-B33A-4EBE-92B8-04C93F43CAE0}"
 EndProject
 Project("{D954291E-2A0B-460D-934E-DC6B0785DB48}") = "Cli-Shared", "Cli-Shared\Cli-Shared.shproj", "{DBD202C3-94D5-49D3-8ED1-C72637BA7D90}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Bitbucket.Authentication", "Bitbucket.Authentication\Bitbucket.Authentication.csproj", "{EE663736-5BAD-4CA6-A4F8-99978925AD8A}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Bitbucket.Authentication.Test", "Bitbucket.Authentication.Test\Bitbucket.Authentication.Test.csproj", "{AECD6D57-F900-4D43-A01A-4AA3C68F39C2}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Core.Authentication", "Core.Authentication\Core.Authentication.csproj", "{3CB99B39-DBE5-4A1C-8AE3-775C15E6D54C}"
 EndProject
 Global
 	GlobalSection(SharedMSBuildProjectFiles) = preSolution
@@ -76,6 +83,18 @@ Global
 		{0653670E-B33A-4EBE-92B8-04C93F43CAE0}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{0653670E-B33A-4EBE-92B8-04C93F43CAE0}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{0653670E-B33A-4EBE-92B8-04C93F43CAE0}.Release|Any CPU.Build.0 = Release|Any CPU
+		{EE663736-5BAD-4CA6-A4F8-99978925AD8A}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{EE663736-5BAD-4CA6-A4F8-99978925AD8A}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{EE663736-5BAD-4CA6-A4F8-99978925AD8A}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{EE663736-5BAD-4CA6-A4F8-99978925AD8A}.Release|Any CPU.Build.0 = Release|Any CPU
+		{AECD6D57-F900-4D43-A01A-4AA3C68F39C2}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{AECD6D57-F900-4D43-A01A-4AA3C68F39C2}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{AECD6D57-F900-4D43-A01A-4AA3C68F39C2}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{AECD6D57-F900-4D43-A01A-4AA3C68F39C2}.Release|Any CPU.Build.0 = Release|Any CPU
+		{3CB99B39-DBE5-4A1C-8AE3-775C15E6D54C}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{3CB99B39-DBE5-4A1C-8AE3-775C15E6D54C}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{3CB99B39-DBE5-4A1C-8AE3-775C15E6D54C}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{3CB99B39-DBE5-4A1C-8AE3-775C15E6D54C}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

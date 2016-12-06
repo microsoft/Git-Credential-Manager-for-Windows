@@ -29,6 +29,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
+using Bitbucket.Authentication;
 
 namespace Microsoft.Alm.Cli
 {
@@ -141,6 +142,7 @@ namespace Microsoft.Alm.Cli
 
         private static void Delete()
         {
+            Trace.WriteLine("Program::Delete");
             string[] args = Environment.GetCommandLineArgs();
 
             if (args.Length < 3)
@@ -166,6 +168,8 @@ namespace Microsoft.Alm.Cli
             operationArguments.QueryUri = uri;
 
             LoadOperationArguments(operationArguments);
+            Trace.WriteLine("   targetUri = " + operationArguments.TargetUri);
+            Trace.WriteLine("   username = " + operationArguments.CredUsername);
 
             BaseAuthentication authentication = CreateAuthentication(operationArguments);
 
@@ -187,6 +191,12 @@ namespace Microsoft.Alm.Cli
 
                 case AuthorityType.Ntlm:
                     Git.Trace.WriteLine($"deleting NTLM credentials for '{operationArguments.TargetUri}'.");
+                    break;
+
+                case AuthorityType.Bitbucket:
+                    Trace.WriteLine("   deleting Bitbucket credentials");
+                    var bbAuth = authentication as BitbucketAuthentication;
+                    bbAuth.DeleteCredentials(operationArguments.TargetUri, operationArguments.CredUsername);
                     break;
             }
 
@@ -222,6 +232,7 @@ namespace Microsoft.Alm.Cli
             LoadOperationArguments(operationArguments);
             EnableTraceLogging(operationArguments);
 
+            Trace.WriteLine("   username = " + operationArguments.CredUsername);
             if (operationArguments.PreserveCredentials)
             {
                 Git.Trace.WriteLine($"{ConfigPreserveCredentialsKey} = true, canceling erase request.");
@@ -244,6 +255,7 @@ namespace Microsoft.Alm.Cli
             if (ReferenceEquals(operationArguments.TargetUri, null))
                 throw new ArgumentNullException("operationArguments.TargetUri");
 
+            Trace.WriteLine("   username = " + operationArguments.CredUsername);
             LoadOperationArguments(operationArguments);
             EnableTraceLogging(operationArguments);
 
@@ -376,6 +388,7 @@ namespace Microsoft.Alm.Cli
             LoadOperationArguments(operationArguments);
             EnableTraceLogging(operationArguments);
 
+            Trace.WriteLine("   username = " + operationArguments.CredUsername);
             Credential credentials = new Credential(operationArguments.CredUsername, operationArguments.CredPassword);
             BaseAuthentication authentication = CreateAuthentication(operationArguments);
 
