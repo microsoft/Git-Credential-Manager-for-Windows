@@ -27,6 +27,9 @@ namespace Microsoft.Alm.Authentication
 {
     public interface ICredentialStore
     {
+        string Namespace { get; }
+        Secret.UriNameConversion UriNameConversion { get; }
+
         void DeleteCredentials(TargetUri targetUri);
         Credential ReadCredentials(TargetUri targetUri);
         void WriteCredentials(TargetUri targetUri, Credential credentials);

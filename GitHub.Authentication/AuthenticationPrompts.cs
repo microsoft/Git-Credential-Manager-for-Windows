@@ -7,6 +7,7 @@ using System.Windows;
 using GitHub.Authentication.ViewModels;
 using GitHub.UI;
 using Microsoft.Alm.Authentication;
+using Git = Microsoft.Alm.Git;
 
 namespace GitHub.Authentication
 {
@@ -14,11 +15,9 @@ namespace GitHub.Authentication
     {
         public static bool CredentialModalPrompt(TargetUri targetUri, out string username, out string password)
         {
-            Trace.WriteLine("Program::GitHubCredentialModalPrompt");
-
             var credentialViewModel = new CredentialsViewModel();
 
-            Trace.WriteLine("   prompting user for credentials.");
+            Git.Trace.WriteLine($"prompting user for credentials for '{targetUri}'.");
 
             bool credentialValid = ShowViewModel(credentialViewModel, () => new CredentialsWindow());
 
@@ -30,11 +29,9 @@ namespace GitHub.Authentication
 
         public static bool AuthenticationCodeModalPrompt(TargetUri targetUri, GitHubAuthenticationResultType resultType, string username, out string authenticationCode)
         {
-            Trace.WriteLine("Program::GitHubAuthcodeModalPrompt");
-
             var twoFactorViewModel = new TwoFactorViewModel(resultType == GitHubAuthenticationResultType.TwoFactorSms);
 
-            Trace.WriteLine("   prompting user for authentication code.");
+            Git.Trace.WriteLine($"prompting user for authentication code for '{targetUri}'.");
 
             bool authenticationCodeValid = ShowViewModel(twoFactorViewModel, () => new TwoFactorWindow());
 

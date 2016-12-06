@@ -23,12 +23,13 @@
  * WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE."
 **/
 
+using Microsoft.Alm.Authentication;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.IO;
 using System.Linq;
 using Bitbucket.Authentication;
-using Microsoft.Alm.Authentication;
 
 namespace Microsoft.Alm.Cli
 {
@@ -51,7 +52,7 @@ namespace Microsoft.Alm.Cli
         internal const string CommandUninstall = "uninstall";
         internal const string CommandVersion = "version";
 
-        private static readonly List<string> CommandList = new List<string>
+        private static readonly IReadOnlyList<string> CommandList = new string[]
         {
             CommandApprove,
             CommandClear,
@@ -70,8 +71,6 @@ namespace Microsoft.Alm.Cli
 
         private static void Clear()
         {
-            Trace.WriteLine("Program::Clear");
-
             var args = Environment.GetCommandLineArgs();
             string url = null;
             bool forced = false;
@@ -80,14 +79,14 @@ namespace Microsoft.Alm.Cli
             {
                 if (!StandardInputIsTty)
                 {
-                    Trace.WriteLine("   standard input is not TTY, abandoning prompt.");
+                    Git.Trace.WriteLine("standard input is not TTY, abandoning prompt.");
 
                     return;
                 }
 
-                Trace.WriteLine("   prompting user for url.");
+                Git.Trace.WriteLine("prompting user for url.");
 
-                Console.Out.WriteLine(" Target Url:");
+                Program.WriteLine(" Target Url:");
                 url = Console.In.ReadLine();
             }
             else
@@ -100,12 +99,10 @@ namespace Microsoft.Alm.Cli
                 }
             }
 
-            Trace.WriteLine("   url = " + url);
-
             Uri uri;
             if (Uri.TryCreate(url, UriKind.Absolute, out uri))
             {
-                Trace.WriteLine("   targetUri = " + uri.AbsoluteUri + ".");
+                Git.Trace.WriteLine($"converted '{url}' to '{uri.AbsoluteUri}'.");
 
                 OperationArguments operationArguments = new OperationArguments(uri);
 
@@ -114,42 +111,38 @@ namespace Microsoft.Alm.Cli
 
                 if (operationArguments.PreserveCredentials && !forced)
                 {
-                    Trace.Write("   attempting to delete preserved credentials without force.");
-                    Trace.Write("   prompting user for interactivity.");
+                    Git.Trace.WriteLine("attempting to delete preserved credentials without force, prompting user for interactivity.");
 
                     if (!StandardInputIsTty || !StandardErrorIsTty)
                     {
-                        Trace.WriteLine("   standard input is not TTY, abandoning prompt.");
+                        Git.Trace.WriteLine("standard input is not TTY, abandoning prompt.");
                         return;
                     }
 
-                    Console.Error.WriteLine(" credentials are protected by perserve flag, clear anyways? [Y]es, [N]o.");
+                    Program.WriteLine(" credentials are protected by perserve flag, clear anyways? [Y]es, [N]o.");
 
                     ConsoleKeyInfo key;
-                    while ((key = Console.ReadKey(true)).Key != ConsoleKey.Escape)
+                    while ((key = Program.ReadKey(true)).Key != ConsoleKey.Escape)
                     {
                         if (key.KeyChar == 'N' || key.KeyChar == 'n')
-                        {
-                            Trace.Write("   use cancelled.");
                             return;
-                        }
 
                         if (key.KeyChar == 'Y' || key.KeyChar == 'y')
-                        {
-                            Trace.Write("   use continued.");
                             break;
-                        }
                     }
                 }
 
                 DeleteCredentials(operationArguments);
+            }
+            else
+            {
+                Git.Trace.WriteLine($"unable to parse input '{url}'.");
             }
         }
 
         private static void Delete()
         {
             Trace.WriteLine("Program::Delete");
-
             string[] args = Environment.GetCommandLineArgs();
 
             if (args.Length < 3)
@@ -184,23 +177,20 @@ namespace Microsoft.Alm.Cli
             {
                 default:
                 case AuthorityType.Basic:
-                    Trace.WriteLine("   deleting basic credentials");
-                    authentication.DeleteCredentials(operationArguments.TargetUri);
+                    Git.Trace.WriteLine($"deleting basic credentials for '{operationArguments.TargetUri}'.");
                     break;
 
                 case AuthorityType.AzureDirectory:
                 case AuthorityType.MicrosoftAccount:
-                    Trace.WriteLine("   deleting VSTS credentials");
-                    BaseVstsAuthentication vstsAuth = authentication as BaseVstsAuthentication;
-                    vstsAuth.DeleteCredentials(operationArguments.TargetUri);
-                    // call delete twice to purge any stored ADA tokens
-                    vstsAuth.DeleteCredentials(operationArguments.TargetUri);
+                    Git.Trace.WriteLine($"deleting VSTS credentials for '{operationArguments.TargetUri}'.");
                     break;
 
                 case AuthorityType.GitHub:
-                    Trace.WriteLine("   deleting GitHub credentials");
-                    GitHubAuthentication ghAuth = authentication as GitHubAuthentication;
-                    ghAuth.DeleteCredentials(operationArguments.TargetUri);
+                    Git.Trace.WriteLine($"deleting GitHub credentials for '{operationArguments.TargetUri}'.");
+                    break;
+
+                case AuthorityType.Ntlm:
+                    Git.Trace.WriteLine($"deleting NTLM credentials for '{operationArguments.TargetUri}'.");
                     break;
 
                 case AuthorityType.Bitbucket:
@@ -210,23 +200,22 @@ namespace Microsoft.Alm.Cli
                     break;
             }
 
+            authentication.DeleteCredentials(operationArguments.TargetUri);
+
             return;
 
             error_parse:
-            Console.Error.WriteLine("Fatal: unable to parse target URI.");
+            Die("Unable to parse target URI.");
         }
 
         private static void Deploy()
         {
-            Trace.WriteLine("Program::Deploy");
-
             var installer = new Installer();
             installer.DeployConsole();
 
-            Trace.WriteLine(String.Format("   Installer result = {0}.", installer.Result));
-            Trace.WriteLine(String.Format("   Installer exit code = {0}.", installer.ExitCode));
+            Git.Trace.WriteLine($"Installer result = '{installer.Result}', exit code = {installer.ExitCode}.");
 
-            Environment.Exit(installer.ExitCode);
+            Program.Exit(installer.ExitCode);
         }
 
         private static void Erase()
@@ -243,14 +232,10 @@ namespace Microsoft.Alm.Cli
             LoadOperationArguments(operationArguments);
             EnableTraceLogging(operationArguments);
 
-            Trace.WriteLine("Program::Erase");
-            Trace.WriteLine("   targetUri = " + operationArguments.TargetUri);
             Trace.WriteLine("   username = " + operationArguments.CredUsername);
-
             if (operationArguments.PreserveCredentials)
             {
-                Trace.WriteLine("   " + ConfigPreserveCredentialsKey + " = true");
-                Trace.WriteLine("   canceling erase request.");
+                Git.Trace.WriteLine($"{ConfigPreserveCredentialsKey} = true, canceling erase request.");
                 return;
             }
 
@@ -270,10 +255,7 @@ namespace Microsoft.Alm.Cli
             if (ReferenceEquals(operationArguments.TargetUri, null))
                 throw new ArgumentNullException("operationArguments.TargetUri");
 
-            Trace.WriteLine("Program::Get");
-            Trace.WriteLine("   targetUri = " + operationArguments.TargetUri);
             Trace.WriteLine("   username = " + operationArguments.CredUsername);
-
             LoadOperationArguments(operationArguments);
             EnableTraceLogging(operationArguments);
 
@@ -306,6 +288,8 @@ namespace Microsoft.Alm.Cli
                     PrintHelpMessage();
                     return;
                 }
+
+                PrintArgs(args);
 
                 // list of arg => method associations (case-insensitive)
                 Dictionary<string, Action> actions = new Dictionary<string, Action>(StringComparer.OrdinalIgnoreCase)
@@ -340,100 +324,53 @@ namespace Microsoft.Alm.Cli
                 Exception innerException = exception.InnerExceptions.FirstOrDefault(e => !(e is AggregateException))
                                         ?? exception.InnerException;
 
-                Console.Error.WriteLine("Fatal: " + innerException.GetType().Name + " encountered.");
-                if (!String.IsNullOrWhiteSpace(innerException.Message))
-                {
-                    Console.Error.WriteLine("   " + innerException.Message);
-                }
-
-                Trace.WriteLine("Fatal: " + exception.ToString());
-                LogEvent(exception.ToString(), EventLogEntryType.Error);
-
-                Environment.ExitCode = -1;
+                Die(exception);
             }
             catch (Exception exception)
             {
-                Console.Error.WriteLine("Fatal: " + exception.GetType().Name + " encountered.");
-                if (!String.IsNullOrWhiteSpace(exception.Message))
-                {
-                    Console.Error.WriteLine("   " + exception.Message);
-                }
-
-                Trace.WriteLine("Fatal: " + exception.ToString());
-                LogEvent(exception.ToString(), EventLogEntryType.Error);
-
-                Environment.ExitCode = -1;
+                Die(exception);
             }
-
-            Trace.Flush();
         }
 
         private static void PrintHelpMessage()
         {
-            Trace.WriteLine("Program::PrintHelpMessage");
+            const string HelpFileName = "git-credential-manager.html";
 
-            Console.Out.WriteLine("usage: git credential-manager [" + String.Join("|", CommandList) + "] [<args>]");
-            Console.Out.WriteLine();
-            Console.Out.WriteLine("Command Line Options:");
-            Console.Out.WriteLine();
-            Console.Out.WriteLine("  " + CommandDeploy + "       Deploys the " + Title + " package and sets");
-            Console.Out.WriteLine("               Git configuration to use the helper.");
-            Console.Out.WriteLine();
-            Console.Out.WriteLine("    " + Installer.ParamPathKey + "     Specifies a path for the installer to deploy to.");
-            Console.Out.WriteLine("               If a path is provided, the installer will not seek additional");
-            Console.Out.WriteLine("               Git installations to modify.");
-            Console.Out.WriteLine();
-            Console.Out.WriteLine("    " + Installer.ParamPassiveKey + "  Instructs the installer to not prompt the user for input");
-            Console.Out.WriteLine("               during deployment and restricts output to error messages only.");
-            Console.Out.WriteLine("               When combined with " + Installer.ParamForceKey + " all output is eliminated; only the");
-            Console.Out.WriteLine("               return code can be used to validate success.");
-            Console.Out.WriteLine();
-            Console.Out.WriteLine("    " + Installer.ParamForceKey + "    Instructs the installer to proceed with deployment even if");
-            Console.Out.WriteLine("               prerequisites are not met or errors are encountered.");
-            Console.Out.WriteLine("               When combined with " + Installer.ParamPassiveKey + " all output is eliminated; only the");
-            Console.Out.WriteLine("               return code can be used to validate success.");
-            Console.Out.WriteLine();
-            Console.Out.WriteLine("  " + CommandRemove + "       Removes the " + Title + " package");
-            Console.Out.WriteLine("               and unsets Git configuration to no longer use the helper.");
-            Console.Out.WriteLine();
-            Console.Out.WriteLine("    " + Installer.ParamPathKey + "     Specifies a path for the installer to remove from.");
-            Console.Out.WriteLine("               If a path is provided, the installer will not seek additional");
-            Console.Out.WriteLine("               Git installations to modify.");
-            Console.Out.WriteLine();
-            Console.Out.WriteLine("    " + Installer.ParamPassiveKey + "  Instructs the installer to not prompt the user for input");
-            Console.Out.WriteLine("               during removal and restricts output to error messages only.");
-            Console.Out.WriteLine("               When combined with " + Installer.ParamForceKey + " all output is eliminated; only the");
-            Console.Out.WriteLine("               return code can be used to validate success.");
-            Console.Out.WriteLine();
-            Console.Out.WriteLine("    " + Installer.ParamForceKey + "    Instructs the installer to proceed with removal even if");
-            Console.Out.WriteLine("               prerequisites are not met or errors are encountered.");
-            Console.Out.WriteLine("               When combined with " + Installer.ParamPassiveKey + " all output is eliminated; only the");
-            Console.Out.WriteLine("               return code can be used to validate success.");
-            Console.Out.WriteLine();
-            Console.Out.WriteLine("  " + CommandDelete + "       Removes stored credentials for a given URL.");
-            Console.Out.WriteLine("               Any future attempts to authenticate with the remote will require");
-            Console.Out.WriteLine("               authentication steps to be completed again.");
-            Console.Out.WriteLine();
-            Console.Out.WriteLine("      `git credential-manager clear <url>`");
-            Console.Out.WriteLine();
-            Console.Out.WriteLine("  " + CommandVersion + "       Displays the current version.");
+            Program.WriteLine("usage: git credential-manager [" + String.Join("|", CommandList) + "] [<args>]");
 
-            Console.Out.WriteLine();
-            PrintConfigurationHelp();
-            Console.Out.WriteLine();
+            List<Git.GitInstallation> installations;
+            if (Git.Where.FindGitInstallations(out installations))
+            {
+                foreach (var installation in installations)
+                {
+                    if (Directory.Exists(installation.Doc))
+                    {
+                        string doc = Path.Combine(installation.Doc, HelpFileName);
+
+                        // if the help file exists, send it to the operating system to display to the user
+                        if (File.Exists(doc))
+                        {
+                            Git.Trace.WriteLine($"opening help documentation '{doc}'.");
+
+                            Process.Start(doc);
+
+                            return;
+                        }
+                    }
+                }
+            }
+
+            Die("Unable to open help documentation.");
         }
 
         private static void Remove()
         {
-            Trace.WriteLine("Program::Remove");
-
             var installer = new Installer();
             installer.RemoveConsole();
 
-            Trace.WriteLine(String.Format("   Installer result = {0}.", installer.Result));
-            Trace.WriteLine(String.Format("   Installer exit code = {0}.", installer.ExitCode));
+            Git.Trace.WriteLine($"Installer result = {installer.Result}, exit code = {installer.ExitCode}.");
 
-            Environment.Exit(installer.ExitCode);
+            Program.Exit(installer.ExitCode);
         }
 
         private static void Store()
@@ -451,12 +388,31 @@ namespace Microsoft.Alm.Cli
             LoadOperationArguments(operationArguments);
             EnableTraceLogging(operationArguments);
 
-            Trace.WriteLine("Program::Store");
-            Trace.WriteLine("   targetUri = " + operationArguments.TargetUri);
             Trace.WriteLine("   username = " + operationArguments.CredUsername);
-
-            BaseAuthentication authentication = CreateAuthentication(operationArguments);
             Credential credentials = new Credential(operationArguments.CredUsername, operationArguments.CredPassword);
+            BaseAuthentication authentication = CreateAuthentication(operationArguments);
+
+            switch (operationArguments.Authority)
+            {
+                default:
+                case AuthorityType.Basic:
+                    Git.Trace.WriteLine($"storing basic credentials for '{operationArguments.TargetUri}'.");
+                    break;
+
+                case AuthorityType.AzureDirectory:
+                case AuthorityType.MicrosoftAccount:
+                    Git.Trace.WriteLine($"storing VSTS credentials for '{operationArguments.TargetUri}'.");
+                    break;
+
+                case AuthorityType.GitHub:
+                    Git.Trace.WriteLine($"storing GitHub credentials for '{operationArguments.TargetUri}'.");
+                    break;
+
+                case AuthorityType.Ntlm:
+                    Git.Trace.WriteLine($"storing NTLM credentials for '{operationArguments.TargetUri}'.");
+                    break;
+            }
+
             authentication.SetCredentials(operationArguments.TargetUri, credentials);
         }
     }

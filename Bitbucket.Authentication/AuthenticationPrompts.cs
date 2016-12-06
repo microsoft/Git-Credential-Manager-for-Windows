@@ -32,8 +32,7 @@ namespace Bitbucket.Authentication
             return match.Groups[1].Value;
         }
 
-        public static bool CredentialModalPrompt(string title, TargetUri targetUri, out string username,
-            out string password)
+        public static bool CredentialModalPrompt(string title, TargetUri targetUri, out string username, out string password)
         {
             Trace.WriteLine("Program::BitbucketCredentialModalPrompt");
 
@@ -42,7 +41,6 @@ namespace Bitbucket.Authentication
             Trace.WriteLine("   prompting user for credentials.");
 
             bool credentialValid = ShowViewModel(credentialViewModel, () => new CredentialsWindow());
-
             username = credentialViewModel.Login;
             password = credentialViewModel.Password;
 

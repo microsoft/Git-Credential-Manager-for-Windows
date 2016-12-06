@@ -76,6 +76,7 @@ namespace Microsoft.Alm.Gui
         protected void CancelButton_Click(object sender, RoutedEventArgs e)
         {
             Failure();
+            Close();
         }
 
         protected void MoreInfoLabel_Click(object sender, RoutedEventArgs e)
@@ -90,6 +91,7 @@ namespace Microsoft.Alm.Gui
         protected void OkButton_Click(object sender, RoutedEventArgs e)
         {
             Success();
+            Close();
         }
 
         private void Failure()

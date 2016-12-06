@@ -23,41 +23,23 @@
  * WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE."
 **/
 
-namespace Microsoft.Alm.Cli
+using System;
+
+namespace Microsoft.Alm.Authentication
 {
-    /// <summary>
-    /// Type of authentication and identity authority expected.
-    /// </summary>
-    internal enum AuthorityType
+    public sealed class VstsLocationServiceException : Exception
     {
-        /// <summary>
-        /// Attempt to detect the authority automatically, fallback to <see cref="Basic"/> if
-        /// unable to detect an authority.
-        /// </summary>
-        Auto,
-        /// <summary>
-        /// Basic username and password scheme
-        /// </summary>
-        Basic,
-        /// <summary>
-        /// Username and password scheme using Microsoft's Live system
-        /// </summary>
-        MicrosoftAccount,
-        /// <summary>
-        /// Azure Directory Authentication based, including support for ADFS
-        /// </summary>
-        AzureDirectory,
-        /// <summary>
-        /// GitHub authentication
-        /// </summary>
-        GitHub,
-        /// <summary>
-        /// Bitbucket authentication
-        /// </summary>
-        Bitbucket,
-        /// <summary>
-        /// Windows network integrated authentication layer.
-        /// </summary>
-        Ntlm,
+        internal VstsLocationServiceException(string message)
+            : base(message)
+        { }
+
+        internal VstsLocationServiceException(string message, Exception innerException)
+            : base(message, innerException)
+        { }
+
+        [System.Security.SecuritySafeCritical]
+        internal VstsLocationServiceException(System.Runtime.Serialization.SerializationInfo info, System.Runtime.Serialization.StreamingContext context)
+            : base(info, context)
+        { }
     }
 }

@@ -23,12 +23,11 @@
  * WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE."
 **/
 
+using Microsoft.Alm.Authentication;
 using System;
-using System.Diagnostics;
+using System.Collections.Generic;
 using System.IO;
 using System.Text;
-using Microsoft.Alm.Authentication;
-using System.Collections.Generic;
 
 namespace Microsoft.Alm.Cli
 {
@@ -44,8 +43,7 @@ namespace Microsoft.Alm.Cli
 
             if (readableStream == Stream.Null || !readableStream.CanRead)
             {
-                Console.Error.WriteLine("Fatal: unable to read input.");
-                Environment.Exit(-1);
+                Program.Die("Unable to read input.");
             }
             else
             {
@@ -65,6 +63,11 @@ namespace Microsoft.Alm.Cli
                     if (read == buffer.Length)
                     {
                         Array.Resize(ref buffer, buffer.Length * 2);
+                    }
+
+                    if ((read > 0 && read < 3 && buffer[read - 1] == '\n'))
+                    {
+                        Program.Die("Invalid input, please see 'https://www.kernel.org/pub/software/scm/git/docs/git-credential.html'.");
                     }
 
                     // the input ends with LFLF, check for that and break the read loop
@@ -166,11 +169,7 @@ namespace Microsoft.Alm.Cli
                     var iter = Environment.GetEnvironmentVariables().GetEnumerator();
                     while (iter.MoveNext())
                     {
-                        if (_environmentVariables.ContainsKey(iter.Key as string))
-                        {
-                            continue;
-                        }
-                        _environmentVariables.Add(iter.Key as string, iter.Value as string);
+                        _environmentVariables[iter.Key as string] = iter.Value as string;
                     }
                 }
                 return _environmentVariables;
@@ -194,7 +193,7 @@ namespace Microsoft.Alm.Cli
         public bool PreserveCredentials { get; set; }
         public Uri ProxyUri
         {
-            get { return _proxyUri; }
+            get { return _targetUri.ProxyUri; }
             internal set
             {
                 _proxyUri = value;
@@ -230,7 +229,7 @@ namespace Microsoft.Alm.Cli
         }
         public Uri QueryUri
         {
-            get { return _queryUri; }
+            get { return _targetUri.QueryUri; }
             set
             {
                 if (value == null)
@@ -282,11 +281,10 @@ namespace Microsoft.Alm.Cli
         private Git.Configuration _configuration;
         private Dictionary<string, string> _environmentVariables;
         private string _password;
+        private Uri _proxyUri;
         private string _queryHost;
         private string _queryPath;
         private string _queryProtocol;
-        private Uri _queryUri;
-        private Uri _proxyUri;
         private TargetUri _targetUri;
         private bool _useHttpPath;
         private string _username;
@@ -298,24 +296,20 @@ namespace Microsoft.Alm.Cli
 
         public void SetCredentials(Credential credentials)
         {
-            Trace.WriteLine("OperationArguments::SetCredentials");
-
             _username = credentials.Username;
             _password = credentials.Password;
         }
 
         public void SetProxy(string url)
         {
-            Trace.WriteLine("OperationArguments::SetProxy");
-
             Uri tmp = null;
             if (Uri.TryCreate(url, UriKind.Absolute, out tmp))
             {
-                Trace.WriteLine("   successfully set proxy to " + tmp.AbsoluteUri + ".");
+                Git.Trace.WriteLine($"successfully set proxy to '{tmp.AbsoluteUri}'.");
             }
             else
             {
-                Trace.WriteLine("   proxy cleared.");
+                Git.Trace.WriteLine("proxy cleared.");
             }
             this.ProxyUri = tmp;
         }
@@ -358,9 +352,9 @@ namespace Microsoft.Alm.Cli
         public void WriteToStream(Stream writableStream)
         {
             if (ReferenceEquals(writableStream, null))
-                throw new ArgumentNullException("writableStream");
+                throw new ArgumentNullException(nameof(writableStream));
             if (!writableStream.CanWrite)
-                throw new ArgumentException("writableStream");
+                throw new ArgumentException(nameof(writableStream));
 
             // Git reads/writes UTF-8, we'll explicitly encode to Utf-8 to
             // avoid NetFx or the operating system making the wrong encoding
@@ -374,9 +368,9 @@ namespace Microsoft.Alm.Cli
 
         internal void CreateTargetUri()
         {
-            Trace.WriteLine("OperationArguments::CreateTargetUri");
-
+            string actualUrl = null;
             string queryUrl = null;
+            string proxyUrl = _proxyUri?.ToString();
 
             // when the target requests a path...
             if (UseHttpPath)
@@ -399,7 +393,7 @@ namespace Microsoft.Alm.Cli
                 else
                 {
                     // and the target lacks a path, combine protocol + host
-                    if ((String.IsNullOrWhiteSpace(_queryPath)))
+                    if (String.IsNullOrWhiteSpace(_queryPath))
                     {
                         queryUrl = $"{_queryProtocol}://{_queryHost}";
                     }
@@ -409,6 +403,8 @@ namespace Microsoft.Alm.Cli
                         queryUrl = $"{_queryProtocol}://{_queryHost}/{_queryPath}";
                     }
                 }
+
+                actualUrl = queryUrl;
             }
             // when the target ignores paths...
             else
@@ -429,9 +425,18 @@ namespace Microsoft.Alm.Cli
                     {
                         queryUrl = _queryHost;
                     }
+
+                    if (String.IsNullOrWhiteSpace(_queryPath))
+                    {
+                        actualUrl = queryUrl;
+                    }
+                    else
+                    {
+                        actualUrl = $"{queryUrl}/{_queryPath}";
+                    }
                 }
                 // and the protocol is "file://" strip any path
-                else if (_queryProtocol.StartsWith("file://", StringComparison.OrdinalIgnoreCase))
+                else if (_queryProtocol.StartsWith(Uri.UriSchemeFile, StringComparison.OrdinalIgnoreCase))
                 {
                     int idx = _queryHost.IndexOfAny(SeperatorCharacters);
 
@@ -442,19 +447,26 @@ namespace Microsoft.Alm.Cli
 
                     // combine with protocol
                     queryUrl = $"{_queryProtocol}://{queryUrl}";
+
+                    actualUrl = queryUrl;
                 }
                 // combine the protocol + host
                 else
                 {
                     queryUrl = $"{_queryProtocol}://{_queryHost}";
+
+                    if (String.IsNullOrWhiteSpace(_queryPath))
+                    {
+                        actualUrl = queryUrl;
+                    }
+                    else
+                    {
+                        actualUrl = $"{queryUrl}/{_queryPath}";
+                    }
                 }
             }
 
-            _queryUri = new Uri(queryUrl);
-
-            Trace.WriteLine($"   created {_queryUri}");
-
-            _targetUri = new TargetUri(_queryUri, _proxyUri);
+            _targetUri = new TargetUri(actualUrl, queryUrl, proxyUrl);
         }
     }
 }
