@@ -1,6 +1,6 @@
 # Build Agents and Automation
 
- Build agents, and other automation, often require specialized setup and configuration. While there is detailed documentation on [GCM configuration options](Docs/Configuration.md), below are common recommendations for settings agents often require to operate.
+ Build agents, and other automation, often require specialized setup and configuration. While there is detailed documentation on [GCM configuration options](Configuration.md), below are common recommendations for settings agents often require to operate.
  
 ## Recommendations
 
