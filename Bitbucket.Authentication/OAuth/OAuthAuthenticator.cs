@@ -32,8 +32,8 @@ namespace Bitbucket.Authentication.OAuth
         public string AuthorizeUri { get { return "/site/oauth2/authorize"; } }
         public string TokenUri { get { return "/site/oauth2/access_token"; } }
 
-        public string ConsumerKey { get { return "be3meVMVdgwa99Pvfz"; } }
-        public string ConsumerSecret { get { return "56prGJPJ4JVqXDDDaQf2AvUxpPdJxnkH"; } }
+        public string ConsumerKey { get { return "HJdmKXV87DsmC9zSWB"; } }
+        public string ConsumerSecret { get { return "wwWw47VB9ZHwMsD4Q4rAveHkbxNrMp3n"; } }
         public string CallbackUri { get { return "http://localhost:34107/"; } }
 
         /// <summary>
