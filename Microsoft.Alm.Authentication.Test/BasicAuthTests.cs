@@ -70,7 +70,7 @@ namespace Microsoft.Alm.Authentication.Test
         {
             ICredentialStore credentialStore = new SecretCache(@namespace);
 
-            return new BasicAuthentication(credentialStore, null, null);
+            return new BasicAuthentication(credentialStore, NtlmSupport.Auto, null, null);
         }
     }
 }

@@ -65,6 +65,7 @@
     <Compile Include="Global.cs" />
     <Compile Include="IGitHubAuthentication.cs" />
     <Compile Include="IGitHubAuthority.cs" />
+    <Compile Include="NtlmSupport.cs" />
     <Compile Include="WwwAuthenticateHelper.cs" />
     <Compile Include="VstsLocationServiceException.cs" />
     <Compile Include="SecretCache.cs" />
