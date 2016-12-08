@@ -34,7 +34,7 @@ namespace Bitbucket.Authentication.OAuth
 
         public string ConsumerKey { get { return "HJdmKXV87DsmC9zSWB"; } }
         public string ConsumerSecret { get { return "wwWw47VB9ZHwMsD4Q4rAveHkbxNrMp3n"; } }
-        public string CallbackUri { get { return "http://localhost:34107/"; } }
+        public string CallbackUri { get { return "http://localhost:34106/"; } }
 
         /// <summary>
         ///     Gets the OAuth access token
