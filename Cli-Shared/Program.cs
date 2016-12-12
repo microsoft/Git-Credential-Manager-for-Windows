@@ -365,6 +365,20 @@ namespace Microsoft.Alm.Cli
             var secrets = new SecretStore(secretsNamespace, null, null, Secret.UriToName);
             BaseAuthentication authority = null;
 
+            var basicCredentialCallback = (operationArguments.UseModalUi)
+                    ? new AcquireCredentialsDelegate(Program.ModalPromptForCredentials)
+                    : new AcquireCredentialsDelegate(Program.BasicCredentialPrompt);
+
+            var githubCredentialCallback = (operationArguments.UseModalUi)
+                    ? new GitHubAuthentication.AcquireCredentialsDelegate(GitHub.Authentication.AuthenticationPrompts.CredentialModalPrompt)
+                    : new GitHubAuthentication.AcquireCredentialsDelegate(Program.GitHubCredentialPrompt);
+
+            var githubAuthcodeCallback = (operationArguments.UseModalUi)
+                    ? new GitHubAuthentication.AcquireAuthenticationCodeDelegate(GitHub.Authentication.AuthenticationPrompts.AuthenticationCodeModalPrompt)
+                    : new GitHubAuthentication.AcquireAuthenticationCodeDelegate(Program.GitHubAuthCodePrompt);
+
+            NtlmSupport basicNtlmSupport = NtlmSupport.Auto;
+
             switch (operationArguments.Authority)
             {
                 case AuthorityType.Auto:
@@ -377,13 +391,9 @@ namespace Microsoft.Alm.Cli
                              ?? GitHubAuthentication.GetAuthentication(operationArguments.TargetUri,
                                                                        GitHubCredentialScope,
                                                                        secrets,
-                                                                       operationArguments.UseModalUi
-                                                                         ? new GitHubAuthentication.AcquireCredentialsDelegate(GitHub.Authentication.AuthenticationPrompts.CredentialModalPrompt)
-                                                                         : new GitHubAuthentication.AcquireCredentialsDelegate(GitHubCredentialPrompt),
-                                                                       operationArguments.UseModalUi
-                                                                         ? new GitHubAuthentication.AcquireAuthenticationCodeDelegate(GitHub.Authentication.AuthenticationPrompts.AuthenticationCodeModalPrompt)
-                                                                         : new GitHubAuthentication.AcquireAuthenticationCodeDelegate(GitHubAuthCodePrompt),
-                                                                       null); ;
+                                                                       githubCredentialCallback,
+                                                                       githubAuthcodeCallback,
+                                                                       null);
 
                     if (authority != null)
                     {
@@ -416,28 +426,20 @@ namespace Microsoft.Alm.Cli
                     return authority ?? new VstsAadAuthentication(Guid.Empty, VstsCredentialScope, secrets);
 
                 case AuthorityType.Basic:
-                default:
-                    Git.Trace.WriteLine($"authority for '{operationArguments.TargetUri}' is basic.");
-
-                    // return a generic username + password authentication object
-                    return authority ?? new BasicAuthentication(secrets,
-                                                                operationArguments.UseModalUi
-                                                                  ? new AcquireCredentialsDelegate(Program.ModalPromptForCredentials)
-                                                                  : new AcquireCredentialsDelegate(Program.BasicCredentialPrompt),
-                                                                null);
+                    // enforce basic authentication only
+                    basicNtlmSupport = NtlmSupport.Never;
+                    goto default;                    
 
                 case AuthorityType.GitHub:
                     Git.Trace.WriteLine($"authority for '{operationArguments.TargetUri}' is GitHub.");
 
+                    
+
                     // return a GitHub authentication object
                     return authority ?? new GitHubAuthentication(GitHubCredentialScope,
                                                                  secrets,
-                                                                 operationArguments.UseModalUi
-                                                                    ? new GitHubAuthentication.AcquireCredentialsDelegate(GitHub.Authentication.AuthenticationPrompts.CredentialModalPrompt)
-                                                                    : new GitHubAuthentication.AcquireCredentialsDelegate(GitHubCredentialPrompt),
-                                                                 operationArguments.UseModalUi
-                                                                    ? new GitHubAuthentication.AcquireAuthenticationCodeDelegate(GitHub.Authentication.AuthenticationPrompts.AuthenticationCodeModalPrompt)
-                                                                    : new GitHubAuthentication.AcquireAuthenticationCodeDelegate(GitHubAuthCodePrompt),
+                                                                 githubCredentialCallback,
+                                                                 githubAuthcodeCallback,
                                                                  null);
 
                 case AuthorityType.MicrosoftAccount:
@@ -445,6 +447,17 @@ namespace Microsoft.Alm.Cli
 
                     // return the allocated authority or a generic MSA backed VSTS authentication object
                     return authority ?? new VstsMsaAuthentication(VstsCredentialScope, secrets);
+
+                case AuthorityType.Ntlm:
+                    // enforce NTLM authentication only
+                    basicNtlmSupport = NtlmSupport.Always;
+                    goto default;
+
+                default:
+                    Git.Trace.WriteLine($"authority for '{operationArguments.TargetUri}' is basic with NTLM={basicNtlmSupport}.");
+
+                    // return a generic username + password authentication object
+                    return authority ?? new BasicAuthentication(secrets, basicNtlmSupport, basicCredentialCallback, null);
             }
         }
 
@@ -963,7 +976,8 @@ namespace Microsoft.Alm.Cli
                         Task.Run(async () =>
                         {
                             // attempt to get cached creds or acquire creds if interactivity is allowed
-                            if ((credentials = authentication.GetCredentials(operationArguments.TargetUri)) != null
+                            if ((operationArguments.Interactivity != Interactivity.Always
+                                    &&(credentials = authentication.GetCredentials(operationArguments.TargetUri)) != null)
                                 || (operationArguments.Interactivity != Interactivity.Never
                                     && (credentials = await basicAuth.AcquireCredentials(operationArguments.TargetUri)) != null))
                             {
