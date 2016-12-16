@@ -288,7 +288,7 @@ namespace Microsoft.Alm.Cli.Test
             return result;
         }
 
-        struct InputArg
+        private struct InputArg
         {
             public string Protocol;
             public string Host;

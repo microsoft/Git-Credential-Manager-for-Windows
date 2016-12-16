@@ -428,12 +428,10 @@ namespace Microsoft.Alm.Cli
                 case AuthorityType.Basic:
                     // enforce basic authentication only
                     basicNtlmSupport = NtlmSupport.Never;
-                    goto default;                    
+                    goto default;
 
                 case AuthorityType.GitHub:
                     Git.Trace.WriteLine($"authority for '{operationArguments.TargetUri}' is GitHub.");
-
-                    
 
                     // return a GitHub authentication object
                     return authority ?? new GitHubAuthentication(GitHubCredentialScope,
@@ -977,7 +975,7 @@ namespace Microsoft.Alm.Cli
                         {
                             // attempt to get cached creds or acquire creds if interactivity is allowed
                             if ((operationArguments.Interactivity != Interactivity.Always
-                                    &&(credentials = authentication.GetCredentials(operationArguments.TargetUri)) != null)
+                                    && (credentials = authentication.GetCredentials(operationArguments.TargetUri)) != null)
                                 || (operationArguments.Interactivity != Interactivity.Never
                                     && (credentials = await basicAuth.AcquireCredentials(operationArguments.TargetUri)) != null))
                             {
