@@ -141,8 +141,23 @@ namespace Microsoft.Alm.Authentication
 
             try
             {
+                string hint = null;
+
+                // non-interactive authentication flows benefit greatly from user and domain hints
+                // if the user's domain is not the same as their machine name, assume it is the authoritative
+                // domain and send the username + domain hint along with the request
+                if (!String.IsNullOrWhiteSpace(Environment.UserDomainName) 
+                    && !String.IsNullOrWhiteSpace(Environment.UserName)
+                    && !StringComparer.OrdinalIgnoreCase.Equals(Environment.UserDomainName, Environment.MachineName))
+                {
+                    hint = String.Format(System.Globalization.CultureInfo.InvariantCulture, 
+                                         "login_hint={0}&domain_hint={1}", 
+                                         Uri.EscapeDataString(Environment.UserName), 
+                                         Uri.EscapeDataString(Environment.UserDomainName));
+                }
+
                 Token token;
-                if ((token = await this.VstsAuthority.NoninteractiveAcquireToken(targetUri, this.ClientId, this.Resource, new Uri(RedirectUrl))) != null)
+                if ((token = await this.VstsAuthority.NoninteractiveAcquireToken(targetUri, this.ClientId, this.Resource, new Uri(RedirectUrl), hint)) != null)
                 {
                     Git.Trace.WriteLine($"token acquisition for '{targetUri}' succeeded");
 
