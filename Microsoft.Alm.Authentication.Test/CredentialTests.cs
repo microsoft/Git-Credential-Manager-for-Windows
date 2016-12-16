@@ -1,13 +1,12 @@
 ﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System;
-using System.Collections.Generic;
 
 namespace Microsoft.Alm.Authentication.Test
 {
     [TestClass]
     public class CredentialTests
     {
-        const string Namespace = "test";
+        private const string Namespace = "test";
 
         [TestMethod]
         public void UriToName_GitHubSimple()

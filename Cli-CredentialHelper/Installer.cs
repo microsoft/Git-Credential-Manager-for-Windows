@@ -271,7 +271,7 @@ namespace Microsoft.Alm.Cli
                         }
 
                         // copy help documents
-                        if (Directory.Exists(installation.Doc) 
+                        if (Directory.Exists(installation.Doc)
                             && CopyFiles(Program.Location, installation.Doc, DocsList, out copiedFiles))
                         {
                             copiedCount += copiedFiles.Count;
@@ -575,7 +575,7 @@ namespace Microsoft.Alm.Cli
                         }
 
                         // clean help documents
-                        if (Directory.Exists(installation.Doc) 
+                        if (Directory.Exists(installation.Doc)
                             && CleanFiles(installation.Doc, DocsList, out cleanedFiles))
                         {
                             cleanedCount += cleanedFiles.Count;

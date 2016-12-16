@@ -97,7 +97,7 @@ namespace Microsoft.Alm.Git
             const int SourceColumnMaxWidth = 23;
 
             // source column format is file:line
-            string source = String.Format(System.Globalization.CultureInfo.InvariantCulture, "{0}:{1}", filePath, lineNumber);            
+            string source = String.Format(System.Globalization.CultureInfo.InvariantCulture, "{0}:{1}", filePath, lineNumber);
 
             if (source.Length > SourceColumnMaxWidth)
             {
