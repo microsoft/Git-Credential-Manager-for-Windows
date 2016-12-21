@@ -27,3 +27,7 @@
  To avoid unnecessary service account credential validation, when relying on Microsoft Account or Azure Active Directory use:
 
      git config --global credential.validate false
+
+ If your Azure Directory uses an ADFS authority other than visualstudio.com, use:
+	
+	 git config --global authority.microsoft.visualstudio.com.loginhint microsoft.com
