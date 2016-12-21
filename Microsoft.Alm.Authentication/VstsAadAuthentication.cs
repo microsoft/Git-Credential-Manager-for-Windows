@@ -48,12 +48,15 @@ namespace Microsoft.Alm.Authentication
         /// access tokens acquired.</param>
         /// <param name="adaRefreshTokenStore">The secure secret store for storing any Azure tokens
         /// acquired.</param>
+        /// <param name="loginhint">An optional login username and/or domain for guiding non-interactive logon.</param>
         public VstsAadAuthentication(
             Guid tenantId,
             VstsTokenScope tokenScope,
-            ICredentialStore personalAccessTokenStore)
+            ICredentialStore personalAccessTokenStore,
+            string loginhint = null)
             : base(tokenScope, personalAccessTokenStore)
         {
+            this.LoginHint = loginhint;
             if (tenantId == Guid.Empty)
             {
                 this.VstsAuthority = new VstsAzureAuthority(AzureAuthority.DefaultAuthorityHostUrl);
@@ -77,6 +80,8 @@ namespace Microsoft.Alm.Authentication
                    vstsIdeTokenCache,
                    vstsAuthority)
         { }
+
+        public String LoginHint { get; set; }
 
         /// <summary>
         /// <para>Creates an interactive logon session, using ADAL secure browser GUI, which
@@ -141,8 +146,18 @@ namespace Microsoft.Alm.Authentication
 
             try
             {
+                string hint = null;
+                if (!String.IsNullOrWhiteSpace(this.LoginHint))
+                {
+                    hint = String.Format(System.Globalization.CultureInfo.InvariantCulture, 
+                                         "login_hint={0}", 
+                                         this.LoginHint);
+
+                    Git.Trace.WriteLine($"AAD extra query parameters ='{hint}'");
+                }
+
                 Token token;
-                if ((token = await this.VstsAuthority.NoninteractiveAcquireToken(targetUri, this.ClientId, this.Resource, new Uri(RedirectUrl))) != null)
+                if ((token = await this.VstsAuthority.NoninteractiveAcquireToken(targetUri, this.ClientId, this.Resource, new Uri(RedirectUrl), hint)) != null)
                 {
                     Git.Trace.WriteLine($"token acquisition for '{targetUri}' succeeded");
 

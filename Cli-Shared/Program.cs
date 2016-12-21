@@ -16,7 +16,8 @@ namespace Microsoft.Alm.Cli
         public const string SourceUrl = "https://github.com/Microsoft/Git-Credential-Manager-for-Windows";
         public const string EventSource = "Git Credential Manager";
 
-        internal const string ConfigAuthortyKey = "authority";
+        internal const string ConfigAuthorityKey = "authority";
+        internal const string ConfigLoginHintKey = "loginhint";
         internal const string ConfigHttpProxyKey = "httpProxy";
         internal const string ConfigInteractiveKey = "interactive";
         internal const string ConfigNamespaceKey = "namespace";
@@ -420,10 +421,17 @@ namespace Microsoft.Alm.Cli
 
                 case AuthorityType.AzureDirectory:
                     Git.Trace.WriteLine($"authority for '{operationArguments.TargetUri}' is Azure Directory.");
+                    
+                    Configuration.Entry loginHint;
+                    if (operationArguments.GitConfiguration.TryGetEntry(ConfigPrefix, operationArguments.TargetUri, ConfigLoginHintKey, out loginHint)
+                        && authority != null)
+                    {
+                        ((VstsAadAuthentication)authority).LoginHint = loginHint.Value;
+                    }
 
                     Guid tenantId = Guid.Empty;
                     // return the allocated authority or a generic AAD backed VSTS authentication object
-                    return authority ?? new VstsAadAuthentication(Guid.Empty, VstsCredentialScope, secrets);
+                    return authority ?? new VstsAadAuthentication(Guid.Empty, VstsCredentialScope, secrets, loginHint.Value);
 
                 case AuthorityType.Basic:
                     // enforce basic authentication only
@@ -519,9 +527,9 @@ namespace Microsoft.Alm.Cli
             }
 
             // look for authority settings
-            if (TryReadString(operationArguments, ConfigAuthortyKey, EnvironAuthorityKey, out value))
+            if (TryReadString(operationArguments, ConfigAuthorityKey, EnvironAuthorityKey, out value))
             {
-                Git.Trace.WriteLine($"{ConfigAuthortyKey} = '{value}'.");
+                Git.Trace.WriteLine($"{ConfigAuthorityKey} = '{value}'.");
 
                 if (ConfigKeyComparer.Equals(value, "MSA")
                         || ConfigKeyComparer.Equals(value, "Microsoft")
