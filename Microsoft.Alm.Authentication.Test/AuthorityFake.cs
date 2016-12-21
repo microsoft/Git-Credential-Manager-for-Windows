@@ -1,10 +1,18 @@
-﻿using System;
+﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
+using System;
 using System.Threading.Tasks;
 
 namespace Microsoft.Alm.Authentication.Test
 {
     internal class AuthorityFake : IVstsAuthority
     {
+        public AuthorityFake(string expectedQueryParameters)
+        {
+            this.ExpectedQueryParameters = expectedQueryParameters;
+        }
+
+        internal readonly string ExpectedQueryParameters; 
+
         public async Task<Token> GeneratePersonalAccessToken(TargetUri targetUri, Token accessToken, VstsTokenScope tokenScope, bool requireCompactToken)
         {
             return await Task.Run(() => { return new Token("personal-access-token", TokenType.Personal); });
@@ -12,11 +20,15 @@ namespace Microsoft.Alm.Authentication.Test
 
         public async Task<Token> InteractiveAcquireToken(TargetUri targetUri, string clientId, string resource, Uri redirectUri, string queryParameters = null)
         {
+            Assert.AreEqual(this.ExpectedQueryParameters, queryParameters);
+
             return await Task.Run(() => { return new Token("token-access", TokenType.Access); });
         }
 
         public async Task<Token> NoninteractiveAcquireToken(TargetUri targetUri, string clientId, string resource, Uri redirectUri, string queryParameters = null)
         {
+            Assert.AreEqual(this.ExpectedQueryParameters, queryParameters);
+
             return await Task.Run(() => { return new Token("token-access", TokenType.Access); });
         }
 

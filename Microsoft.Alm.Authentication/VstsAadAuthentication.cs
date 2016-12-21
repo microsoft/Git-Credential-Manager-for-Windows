@@ -24,7 +24,6 @@
 **/
 
 using System;
-using System.Diagnostics;
 using System.Threading.Tasks;
 using Microsoft.IdentityModel.Clients.ActiveDirectory;
 
@@ -48,15 +47,15 @@ namespace Microsoft.Alm.Authentication
         /// access tokens acquired.</param>
         /// <param name="adaRefreshTokenStore">The secure secret store for storing any Azure tokens
         /// acquired.</param>
-        /// <param name="loginhint">An optional login username and/or domain for guiding non-interactive logon.</param>
+        /// <param name="loginHint">An optional login username and/or domain for guiding non-interactive logon.</param>
         public VstsAadAuthentication(
             Guid tenantId,
             VstsTokenScope tokenScope,
             ICredentialStore personalAccessTokenStore,
-            string loginhint = null)
+            string loginHint)
             : base(tokenScope, personalAccessTokenStore)
         {
-            this.LoginHint = loginhint;
+            this.loginHint = loginHint;
             if (tenantId == Guid.Empty)
             {
                 this.VstsAuthority = new VstsAzureAuthority(AzureAuthority.DefaultAuthorityHostUrl);
@@ -75,13 +74,16 @@ namespace Microsoft.Alm.Authentication
         internal VstsAadAuthentication(
             ICredentialStore personalAccessTokenStore,
             ITokenStore vstsIdeTokenCache,
-            IVstsAuthority vstsAuthority)
+            IVstsAuthority vstsAuthority,
+            string loginHint)
             : base(personalAccessTokenStore,
                    vstsIdeTokenCache,
                    vstsAuthority)
-        { }
+        {
+            this.loginHint = loginHint;
+        }
 
-        public String LoginHint { get; set; }
+        internal readonly String loginHint;
 
         /// <summary>
         /// <para>Creates an interactive logon session, using ADAL secure browser GUI, which
@@ -147,11 +149,12 @@ namespace Microsoft.Alm.Authentication
             try
             {
                 string hint = null;
-                if (!String.IsNullOrWhiteSpace(this.LoginHint))
+                if (!String.IsNullOrWhiteSpace(this.loginHint))
                 {
-                    hint = String.Format(System.Globalization.CultureInfo.InvariantCulture, 
-                                         "login_hint={0}", 
-                                         this.LoginHint);
+                    // Do not escape these parameters. Hints such as 'username@domain' will stop working.
+                    hint = String.Format(System.Globalization.CultureInfo.InvariantCulture,
+                                         "login_hint={0}",
+                                         this.loginHint);
 
                     Git.Trace.WriteLine($"AAD extra query parameters ='{hint}'");
                 }

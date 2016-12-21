@@ -190,6 +190,7 @@ namespace Microsoft.Alm.Cli
             }
         }
         public Interactivity Interactivity { get; set; }
+        public string LoginHint  { get; set; }
         public bool PreserveCredentials { get; set; }
         public Uri ProxyUri
         {

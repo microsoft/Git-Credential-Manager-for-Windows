@@ -89,7 +89,7 @@ namespace Microsoft.Alm.Authentication.Test
         {
             ICredentialStore tokenStore1 = new SecretCache(@namespace + 1);
             ITokenStore tokenStore2 = new SecretCache(@namespace + 2);
-            IVstsAuthority liveAuthority = new AuthorityFake();
+            IVstsAuthority liveAuthority = new AuthorityFake(VstsMsaAuthentication.QueryParameters);
             return new VstsMsaAuthentication(tokenStore1, tokenStore2, liveAuthority);
         }
     }

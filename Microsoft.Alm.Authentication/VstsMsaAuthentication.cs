@@ -33,6 +33,7 @@ namespace Microsoft.Alm.Authentication
     public sealed class VstsMsaAuthentication : BaseVstsAuthentication, IVstsMsaAuthentication
     {
         public const string DefaultAuthorityHost = AzureAuthority.AuthorityHostUrlBase + "/live.com";
+        internal const string QueryParameters = "domain_hint=live.com&display=popup&site_id=501454&nux=1";
 
         public VstsMsaAuthentication(VstsTokenScope tokenScope, ICredentialStore personalAccessTokenStore)
             : base(tokenScope, personalAccessTokenStore)
@@ -70,8 +71,6 @@ namespace Microsoft.Alm.Authentication
         /// otherwise <see langword="null"/>.</returns>
         public async Task<Credential> InteractiveLogon(TargetUri targetUri, bool requireCompactToken)
         {
-            const string QueryParameters = "domain_hint=live.com&display=popup&site_id=501454&nux=1";
-
             BaseSecureStore.ValidateTargetUri(targetUri);
 
             try

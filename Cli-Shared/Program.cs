@@ -17,9 +17,9 @@ namespace Microsoft.Alm.Cli
         public const string EventSource = "Git Credential Manager";
 
         internal const string ConfigAuthorityKey = "authority";
-        internal const string ConfigLoginHintKey = "loginhint";
         internal const string ConfigHttpProxyKey = "httpProxy";
         internal const string ConfigInteractiveKey = "interactive";
+        internal const string ConfigLoginHintKey = "loginhint";
         internal const string ConfigNamespaceKey = "namespace";
         internal const string ConfigPreserveCredentialsKey = "preserve";
         internal const string ConfigUseHttpPathKey = "useHttpPath";
@@ -36,6 +36,7 @@ namespace Microsoft.Alm.Cli
         internal const string EnvironHttpProxyKey = "GCM_HTTP_PROXY";
         internal const string EnvironHttpUserAgent = "GCM_HTTP_USER_AGENT";
         internal const string EnvironInteractiveKey = "GCM_INTERACTIVE";
+        internal const string EnvironLoginHintKey = "GCM_LOGINHINT";
         internal const string EnvironModalPromptKey = "GCM_MODAL_PROMPT";
         internal const string EnvironNamespaceKey = "GCM_NAMESPACE";
         internal const string EnvironPreserveCredentialsKey = "GCM_PRESERVE_CREDS";
@@ -388,7 +389,8 @@ namespace Microsoft.Alm.Cli
                     // detect the authority
                     authority = BaseVstsAuthentication.GetAuthentication(operationArguments.TargetUri,
                                                                          VstsCredentialScope,
-                                                                         secrets)
+                                                                         secrets,
+                                                                         operationArguments.LoginHint)
                              ?? GitHubAuthentication.GetAuthentication(operationArguments.TargetUri,
                                                                        GitHubCredentialScope,
                                                                        secrets,
@@ -422,16 +424,9 @@ namespace Microsoft.Alm.Cli
                 case AuthorityType.AzureDirectory:
                     Git.Trace.WriteLine($"authority for '{operationArguments.TargetUri}' is Azure Directory.");
                     
-                    Configuration.Entry loginHint;
-                    if (operationArguments.GitConfiguration.TryGetEntry(ConfigPrefix, operationArguments.TargetUri, ConfigLoginHintKey, out loginHint)
-                        && authority != null)
-                    {
-                        ((VstsAadAuthentication)authority).LoginHint = loginHint.Value;
-                    }
-
                     Guid tenantId = Guid.Empty;
                     // return the allocated authority or a generic AAD backed VSTS authentication object
-                    return authority ?? new VstsAadAuthentication(Guid.Empty, VstsCredentialScope, secrets, loginHint.Value);
+                    return authority ?? new VstsAadAuthentication(Guid.Empty, VstsCredentialScope, secrets, operationArguments.LoginHint );
 
                 case AuthorityType.Basic:
                     // enforce basic authentication only
@@ -639,6 +634,24 @@ namespace Microsoft.Alm.Cli
                 Git.Trace.WriteLine($"{ConfigNamespaceKey} = '{value}'.");
 
                 operationArguments.CustomNamespace = value;
+            }
+
+            // look for an AAD login hint
+            if (TryReadString(operationArguments, ConfigPrefix, EnvironLoginHintKey, out value))
+            {
+                Git.Trace.WriteLine($"{EnvironLoginHintKey} = '{value}'.");
+                operationArguments.LoginHint = value;
+            }
+            else
+            {
+                Configuration.Entry loginHint;
+                if (operationArguments.GitConfiguration.TryGetEntry(ConfigPrefix, operationArguments.QueryUri, ConfigLoginHintKey, out loginHint)
+                    && !String.IsNullOrWhiteSpace(loginHint.Value))
+                {
+                    Git.Trace.WriteLine($"{ConfigLoginHintKey} = '{loginHint}'.");
+
+                    operationArguments.LoginHint = loginHint.Value;
+                }
             }
         }
 
