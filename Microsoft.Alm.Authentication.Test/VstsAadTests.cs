@@ -86,6 +86,7 @@ namespace Microsoft.Alm.Authentication.Test
             Assert.IsNull(credentials = aadAuthentication.GetCredentials(targetUri), "Credentials were retrieved unexpectedly.");
         }
 
+        [TestMethod]
         public void VstsAadValidateCredentialsTest()
         {
             VstsAadAuthentication aadAuthentication = GetVstsAadAuthentication("aad-validate", null);
@@ -98,6 +99,7 @@ namespace Microsoft.Alm.Authentication.Test
             Assert.IsTrue(Task.Run(async () => { return await aadAuthentication.ValidateCredentials(DefaultTargetUri, credentials); }).Result, "Credential validation unexpectedly failed.");
         }
 
+        [TestMethod]
         public void VstsAadValidateLoginHintTest()
         {
             TargetUri targetUri = DefaultTargetUri;

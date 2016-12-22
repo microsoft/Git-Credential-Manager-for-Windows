@@ -60,7 +60,7 @@
 
  Hints are typically of the form: "username@domain" or "domain" without quotes.
 
-  `git config --global authority.microsoft.visualstudio.com.loginhint microsoft.com`
+  `git config --global credential.microsoft.visualstudio.com.loginhint microsoft.com`
 
 ### modalPrompt
 

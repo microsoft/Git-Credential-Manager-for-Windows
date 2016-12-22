@@ -30,4 +30,4 @@
 
  If your Azure Directory uses an ADFS authority other than visualstudio.com, use:
 	
-	 git config --global authority.microsoft.visualstudio.com.loginhint microsoft.com
+	 git config --global credential.microsoft.visualstudio.com.loginhint microsoft.com
