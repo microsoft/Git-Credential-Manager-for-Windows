@@ -1,80 +1,77 @@
 # Git Credential Manager for Windows
 
- The [Git Credential Manager for Windows](https://github.com/Microsoft/Git-Credential-Manager-for-Windows) (GCM) provides secure Git credential storage for Windows. GCM provides multi-factor authentication support for [Visual Studio Team Services](https://www.visualstudio.com/), [Team Foundation Server](https://www.visualstudio.com/en-us/products/tfs-overview-vs.aspx), and [GitHub](https://www.github.com).
+The [Git Credential Manager for Windows](https://github.com/Microsoft/Git-Credential-Manager-for-Windows) (GCM) provides secure Git credential storage for Windows. GCM provides multi-factor authentication support for [Visual Studio Team Services](https://www.visualstudio.com/), [Team Foundation Server](https://www.visualstudio.com/en-us/products/tfs-overview-vs.aspx), and [GitHub](https://github.com/).
 
-# Usage
+## Usage
 
- After installation, Git will use the Git Credential Manager for Windows and you will only need to interact with any authentication dialogs asking for credentials. The GCM stays invisible as much as possible, so ideally you’ll forget that you’re depending on GCM at all.
+After installation, Git will use the Git Credential Manager for Windows and you will only need to interact with any authentication dialogs asking for credentials. The GCM stays invisible as much as possible, so ideally you’ll forget that you’re depending on GCM at all.
 
- Assuming the GCM has been installed, using your favorite Windows console (Command Prompt, PowerShell, ConEmu, etc), use the following command to interact directly with the GCM.
+Assuming the GCM has been installed, using your favorite Windows console (Command Prompt, PowerShell, ConEmu, etc), use the following command to interact directly with the GCM.
 
-     git credential-manager [<command> [<args>]]
+    git credential-manager [<command> [<args>]]
 
 ## Commands
 
 ### delete
 
- Removes stored credentials for a given URL. Any future attempts to authenticate with the remote will require authentication steps to be completed again.
+Removes stored credentials for a given URL. Any future attempts to authenticate with the remote will require authentication steps to be completed again.
 
-### deploy _[--path \<installion_path\>] [--passive] [--force]_
+### deploy _[--path \<installation_path\>] [--passive] [--force]_
 
- Deploys the Git Credential Manager for Windows package and sets Git configuration to use the helper.
+Deploys the Git Credential Manager for Windows package and sets Git configuration to use the helper.
 
- **--path \<installion_path\>**
+#### --path \<installation_path\>
 
- Specifies a path (\<installion_path\>) for the installer to deploy to. If a path is provided, the installer will not seek additional Git installations to modify.
+Specifies a path (\<installation_path\>) for the installer to deploy to. If a path is provided, the installer will not seek additional Git installations to modify.
 
- **--passive**
+#### --passive
 
- Instructs the installer to not prompt the user for input during deployment and restricts output to error messages only.
+Instructs the installer to not prompt the user for input during deployment and restricts output to error messages only.
 
- When combined with *--force* all output is eliminated; only the return code can be used to validate success.
+When combined with *--force* all output is eliminated; only the return code can be used to validate success.
 
- **--force**
+#### --force
 
- Instructs the installer to proceed with deployment even if prerequisites are not met or errors are encountered.
+Instructs the installer to proceed with deployment even if prerequisites are not met or errors are encountered.
 
- When combined with *--passive* all output is eliminated; only the return code can be used to validate success.
+When combined with *--passive* all output is eliminated; only the return code can be used to validate success.
 
-### remove _[--path \<installion_path\>] [--passive] [--force]_
+### remove _[--path \<installation_path\>] [--passive] [--force]_
 
- Removes the Git Credential Manager for Windows package and unsets Git configuration to no longer use the helper.
+Removes the Git Credential Manager for Windows package and unsets Git configuration to no longer use the helper.
 
- **--path \<installion_path\>**
+#### --path \<installation_path\>
 
- Specifies a path (\<installion_path\>) for the installer to remove from. If a path is provided, the installer will not seek additional Git installations to modify.
+Specifies a path (\<installation_path\>) for the installer to remove from. If a path is provided, the installer will not seek additional Git installations to modify.
 
- **--passive**
+#### --passive
 
- Instructs the installer to not prompt the user for input during removal and restricts output to error messages only.
+Instructs the installer to not prompt the user for input during removal and restricts output to error messages only.
 
- When combined with *--force* all output is eliminated; only the return code can be used to validate success.
+When combined with *--force* all output is eliminated; only the return code can be used to validate success.
 
- **--force**
+#### --force
 
- Instructs the installer to proceed with removal even if prerequisites are not met or errors are encountered.
+Instructs the installer to proceed with removal even if prerequisites are not met or errors are encountered.
 
- When combined with *--passive* all output is eliminated; only the return code can be used to validate success.
+When combined with *--passive* all output is eliminated; only the return code can be used to validate success.
 
 ### version
 
- Displays the current version.
+Displays the current version.
 
 ### clear
 
- Synonym for **delete**.
-
+Synonym for **delete**.
 
 ### install
 
- Synonym for **deploy**.
-
+Synonym for **deploy**.
 
 ### uninstall
 
- Synonym for **remove**.
- 
- 
+Synonym for **remove**.
+
 ### get / store / erase / fill / approve / reject
- 
- Commands for interaction with Git.
+
+Commands for interaction with Git.
