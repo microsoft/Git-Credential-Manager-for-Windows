@@ -6,7 +6,7 @@
     <title>$title$</title>
     <authors>$author$</authors>
     <owners>$author$</owners>
-    <licenseUrl>https://raw.githubusercontent.com/Microsoft/Git-Credential-Manager-for-Windows/master/LICENSE.TXT</licenseUrl>
+    <licenseUrl>https://raw.githubusercontent.com/Microsoft/Git-Credential-Manager-for-Windows/master/LICENSE.txt</licenseUrl>
     <projectUrl>https://github.com/Microsoft/Git-Credential-Manager-for-Windows</projectUrl>
     <requireLicenseAcceptance>true</requireLicenseAcceptance>
     <description>$description$</description>
