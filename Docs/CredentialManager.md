@@ -16,7 +16,7 @@ Assuming the GCM has been installed, using your favorite Windows console (Comman
 
 Removes stored credentials for a given URL. Any future attempts to authenticate with the remote will require authentication steps to be completed again.
 
-### deploy _[--path \<installation_path\>] [--passive] [--force]_
+### deploy _\[--path \<installation_path\>\] \[--passive\] \[--force\]_
 
 Deploys the Git Credential Manager for Windows package and sets Git configuration to use the helper.
 
@@ -36,7 +36,7 @@ Instructs the installer to proceed with deployment even if prerequisites are not
 
 When combined with *--passive* all output is eliminated; only the return code can be used to validate success.
 
-### remove _[--path \<installation_path\>] [--passive] [--force]_
+### remove _\[--path \<installation_path\>\] \[--passive\] \[--force\]_
 
 Removes the Git Credential Manager for Windows package and unsets Git configuration to no longer use the helper.
 
