@@ -106,7 +106,12 @@ namespace Microsoft.Alm.Cli
                         string username = null;
                         string password = null;
 
-                        int passwordTerminator = targetUrl.IndexOf(':', schemeTerminator + 1);
+                        // only check within the credential portion of the url, don't look past the '@' because the port token
+                        // is the same as the username / password seperator.
+                        int credentialLength = credentialTerminator - schemeTerminator;
+                        credentialLength = Math.Max(0, credentialLength);
+
+                        int passwordTerminator = targetUrl.IndexOf(':', schemeTerminator + 1, credentialLength);
 
                         if (passwordTerminator > 0)
                         {
