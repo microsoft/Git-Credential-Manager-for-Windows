@@ -46,7 +46,10 @@ namespace Microsoft.Alm.Authentication
         /// <param name="flags">Flags that control the function's operation. Must be set to 0.</param>
         /// <returns>True if success; false otherwise.</returns>
         [DllImport(Advapi32, CharSet = CharSet.Unicode, EntryPoint = "CredWriteW", SetLastError = true)]
-        internal static extern bool CredWrite(ref Credential credential, UInt32 flags);
+        [return: MarshalAs(UnmanagedType.Bool)]
+        internal static extern bool CredWrite(
+            [In] ref Credential credential, 
+            [In] uint flags);
 
         /// <summary>
         /// <para>Reads a credential from the user's credential set. </para>
@@ -67,7 +70,12 @@ namespace Microsoft.Alm.Authentication
         /// </param>
         /// <returns>True if success; false otherwise.</returns>
         [DllImport(Advapi32, CharSet = CharSet.Unicode, EntryPoint = "CredReadW", SetLastError = true)]
-        internal static extern bool CredRead(string targetName, CredentialType type, uint flags, out IntPtr credential);
+        [return: MarshalAs(UnmanagedType.Bool)]
+        internal static extern bool CredRead(
+            [In][MarshalAs(UnmanagedType.LPWStr)] string targetName, 
+            [In][MarshalAs(UnmanagedType.U4)] CredentialType type, 
+            [In] uint flags, 
+            [Out] out IntPtr credential);
 
         /// <summary>
         /// <para>The CredDelete function deletes a credential from the user's credential set.</para>
@@ -89,7 +97,11 @@ namespace Microsoft.Alm.Authentication
         /// <param name="flags">Reserved and must be zero.</param>
         /// <returns>True if success; false otherwise.</returns>
         [DllImport(Advapi32, CharSet = CharSet.Unicode, EntryPoint = "CredDeleteW", SetLastError = true)]
-        internal static extern bool CredDelete(string targetName, CredentialType type, uint flags);
+        [return: MarshalAs(UnmanagedType.Bool)]
+        internal static extern bool CredDelete(
+            [In][MarshalAs(UnmanagedType.LPWStr)] string targetName, 
+            [In][MarshalAs(UnmanagedType.U4)] CredentialType type, 
+            [In] uint flags);
 
         /// <summary>
         /// The CredFree function frees a buffer returned by any of the credentials management
@@ -97,7 +109,8 @@ namespace Microsoft.Alm.Authentication
         /// </summary>
         /// <param name="buffer"Pointer to the buffer to be freed.></param>
         [DllImport(Advapi32, CharSet = CharSet.Unicode, EntryPoint = "CredFree", SetLastError = true)]
-        internal static extern void CredFree(IntPtr credential);
+        internal static extern void CredFree(
+            [In] IntPtr credential);
 
         /// <summary>
         /// Enumerates the credentials from the user's credential set. The credential set used
@@ -123,7 +136,12 @@ namespace Microsoft.Alm.Authentication
         /// </param>
         /// <returns></returns>
         [DllImport(Advapi32, CharSet = CharSet.Unicode, EntryPoint = "CredEnumerateW", SetLastError = true)]
-        internal static extern bool CredEnumerate(string targetNameFilter, CredentialEnumerateFlags flags, out int count, out IntPtr credenitalsArrayPtr);
+        [return: MarshalAs(UnmanagedType.Bool)]
+        internal static extern bool CredEnumerate(
+            [In][MarshalAs(UnmanagedType.LPWStr)] string targetNameFilter, 
+            [In][MarshalAs(UnmanagedType.U4)] CredentialEnumerateFlags flags, 
+            [Out] out int count, 
+            [Out] out IntPtr credenitalsArrayPtr);
 
         [Flags]
         internal enum CredentialEnumerateFlags : uint
@@ -274,11 +292,13 @@ namespace Microsoft.Alm.Authentication
             /// <para>Undefined bits should be initialized as zero and not otherwise altered to
             /// permit future enhancement.</para>
             /// </summary>
+            [MarshalAs(UnmanagedType.U4)]
             public CredentialFlags Flags;
             /// <summary>
             /// <para>The type of the credential. This member cannot be changed after the credential
             /// is created. </para>
             /// </summary>
+            [MarshalAs(UnmanagedType.U4)]
             public CredentialType Type;
             [MarshalAs(UnmanagedType.LPWStr)]
             public string TargetName;
@@ -318,11 +338,13 @@ namespace Microsoft.Alm.Authentication
             /// <para>Credentials are expected to be portable. Applications should ensure that the
             /// data in `<see cref="CredentialBlob"/>` is portable.</para>
             /// </summary>
+            [SuppressMessage("Microsoft.Reliability", "CA2006:UseSafeHandleToEncapsulateNativeResources")]
             public IntPtr CredentialBlob;
             /// <summary>
             /// <para>Defines the persistence of this credential. This member can be read and
             /// written.</para>
             /// </summary>
+            [MarshalAs(UnmanagedType.U4)]
             public CredentialPersist Persist;
             /// <summary>
             /// <para>The number of application-defined attributes to be associated with the
@@ -366,7 +388,9 @@ namespace Microsoft.Alm.Authentication
         /// <param name="handle">A valid handle to an open object.</param>
         /// <returns>True is successful; otherwise false.</returns>
         [DllImport(Kernel32, CallingConvention = CallingConvention.StdCall, CharSet = CharSet.Unicode, EntryPoint = "CloseHandle", SetLastError = true)]
-        public static extern bool CloseHandle(IntPtr handle);
+        [return: MarshalAs(UnmanagedType.Bool)]
+        public static extern bool CloseHandle(
+            [In] IntPtr handle);
 
         /// <summary>
         /// Closes an open object handle.
@@ -374,7 +398,9 @@ namespace Microsoft.Alm.Authentication
         /// <param name="handle">A valid handle to an open object.</param>
         /// <returns>True is successful; otherwise false.</returns>
         [DllImport(Kernel32, CallingConvention = CallingConvention.StdCall, CharSet = CharSet.Unicode, EntryPoint = "CloseHandle", SetLastError = true)]
-        public static extern bool CloseHandle(SafeHandle handle);
+        [return: MarshalAs(UnmanagedType.Bool)]
+        public static extern bool CloseHandle(
+            [In] SafeHandle handle);
         #endregion kernel32.dll
 
         /// <summary>

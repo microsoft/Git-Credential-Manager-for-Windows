@@ -54,23 +54,26 @@ namespace Microsoft.Alm.Authentication
                     // Try the actual uri
                     string actualUrl = targetUri.ActualUri.ToString();
 
-                    // Send off the HTTP requests and wait for them to complete
-                    var results = await Task.WhenAll(RequestAuthenticate(queryUrl, targetUri.HttpClientHandler),
-                                                     RequestAuthenticate(actualUrl, targetUri.HttpClientHandler));
-
-                    // If any of then returned true, then we're looking at a TFS server
-                    HashSet<AuthenticationHeaderValue> set = new HashSet<AuthenticationHeaderValue>();
-
-                    // combine the results into a unique set
-                    foreach (var result in results)
+                    using (var httpClientHandler = targetUri.HttpClientHandler)
                     {
-                        foreach (var item in result)
-                        {
-                            set.Add(item);
-                        }
-                    }
+                        // Send off the HTTP requests and wait for them to complete
+                        var results = await Task.WhenAll(RequestAuthenticate(queryUrl, httpClientHandler),
+                                                         RequestAuthenticate(actualUrl, httpClientHandler));
 
-                    return set.ToArray();
+                        // If any of then returned true, then we're looking at a TFS server
+                        HashSet<AuthenticationHeaderValue> set = new HashSet<AuthenticationHeaderValue>();
+
+                        // combine the results into a unique set
+                        foreach (var result in results)
+                        {
+                            foreach (var item in result)
+                            {
+                                set.Add(item);
+                            }
+                        }
+
+                        return set.ToArray();
+                    }
                 }
                 catch (Exception exception)
                 {

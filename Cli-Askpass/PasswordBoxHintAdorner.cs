@@ -48,9 +48,12 @@ namespace Microsoft.Alm.Gui
             IsHitTestVisible = true;
             Visibility = Visibility.Visible;
 
-            adornedElement.GotFocus += Invalidate;
-            adornedElement.LostFocus += Invalidate;
-            adornedElement.IsVisibleChanged += Invalidate;
+            if (adornedElement!=null)
+            {
+                adornedElement.GotFocus += Invalidate;
+                adornedElement.LostFocus += Invalidate;
+                adornedElement.IsVisibleChanged += Invalidate;
+            }
 
             _visualCollection = new VisualCollection(this);
             _contentPresenter = new ContentPresenter();

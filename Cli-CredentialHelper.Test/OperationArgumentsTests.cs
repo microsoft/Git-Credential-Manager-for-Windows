@@ -76,7 +76,7 @@ namespace Microsoft.Alm.Cli.Test
         }
 
         [TestMethod]
-        public void CreateTargetUri_GithubSimple()
+        public void CreateTargetUriGitHubSimple()
         {
             var input = new InputArg()
             {
@@ -104,7 +104,7 @@ namespace Microsoft.Alm.Cli.Test
         }
 
         [TestMethod]
-        public void CreateTargetUri_GithubComplex()
+        public void CreateTargetUriGitHubComplex()
         {
             var input = new InputArg()
             {
@@ -119,7 +119,7 @@ namespace Microsoft.Alm.Cli.Test
         }
 
         [TestMethod]
-        public void CreateTargetUri_WithPortNumber()
+        public void CreateTargetUriWithPortNumber()
         {
             var input = new InputArg()
             {
@@ -133,7 +133,7 @@ namespace Microsoft.Alm.Cli.Test
         }
 
         [TestMethod]
-        public void CreateTargetUri_ComplexAndMessy()
+        public void CreateTargetUriComplexAndMessy()
         {
             var input = new InputArg()
             {
@@ -148,7 +148,7 @@ namespace Microsoft.Alm.Cli.Test
         }
 
         [TestMethod]
-        public void CreateTargetUri_WithCredentials()
+        public void CreateTargetUriWithCredentials()
         {
             var input = new InputArg()
             {
@@ -164,7 +164,7 @@ namespace Microsoft.Alm.Cli.Test
         }
 
         [TestMethod]
-        public void CreateTargetUri_Unc()
+        public void CreateTargetUriUnc()
         {
             var input = new InputArg()
             {
@@ -179,7 +179,7 @@ namespace Microsoft.Alm.Cli.Test
         }
 
         [TestMethod]
-        public void CreateTargetUri_UncColloquial()
+        public void CreateTargetUriUncColloquial()
         {
             var input = new InputArg()
             {

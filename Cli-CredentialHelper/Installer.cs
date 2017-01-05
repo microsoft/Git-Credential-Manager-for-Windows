@@ -386,12 +386,12 @@ namespace Microsoft.Alm.Cli
                     }
                 }
 
-                Configuration.Type types = Configuration.Type.Global;
+                ConfigurationLevel types = ConfigurationLevel.Global;
 
-                Configuration.Type updateTypes;
+                ConfigurationLevel updateTypes;
                 if (SetGitConfig(installations, GitConfigAction.Set, types, out updateTypes))
                 {
-                    if ((updateTypes & Configuration.Type.Global) == Configuration.Type.Global)
+                    if ((updateTypes & ConfigurationLevel.Global) == ConfigurationLevel.Global)
                     {
                         Console.Out.WriteLine("Updated your ~/.gitconfig [git config --global]");
                     }
@@ -419,7 +419,7 @@ namespace Microsoft.Alm.Cli
             }
         }
 
-        public bool DetectNetFx(out Version version)
+        public static bool DetectNetFx(out Version version)
         {
             const string NetFxKeyBase = @"HKEY_LOCAL_MACHINE\Software\Microsoft\Net Framework Setup\NDP\v4\";
             const string NetFxKeyClient = NetFxKeyBase + @"\Client";
@@ -518,12 +518,12 @@ namespace Microsoft.Alm.Cli
                     return;
                 }
 
-                Configuration.Type types = Configuration.Type.Global | Configuration.Type.System;
+                ConfigurationLevel types = ConfigurationLevel.Global | ConfigurationLevel.System;
 
-                Configuration.Type updateTypes;
+                ConfigurationLevel updateTypes;
                 if (SetGitConfig(installations, GitConfigAction.Unset, types, out updateTypes))
                 {
-                    if ((updateTypes & Configuration.Type.System) == Configuration.Type.System)
+                    if ((updateTypes & ConfigurationLevel.System) == ConfigurationLevel.System)
                     {
                         Console.Out.WriteLine();
                         Console.Out.WriteLine("Updated your /etc/gitconfig [git config --system]");
@@ -545,7 +545,7 @@ namespace Microsoft.Alm.Cli
                         Program.WriteLine("Unable to update your /etc/gitconfig correctly.");
                     }
 
-                    if ((updateTypes & Configuration.Type.Global) == Configuration.Type.Global)
+                    if ((updateTypes & ConfigurationLevel.Global) == ConfigurationLevel.Global)
                     {
                         Console.Out.WriteLine("Updated your ~/.gitconfig [git config --global]");
                     }
@@ -682,11 +682,11 @@ namespace Microsoft.Alm.Cli
             }
         }
 
-        public bool SetGitConfig(List<GitInstallation> installations, GitConfigAction action, Configuration.Type type, out Configuration.Type updated)
+        public bool SetGitConfig(List<GitInstallation> installations, GitConfigAction action, ConfigurationLevel type, out ConfigurationLevel updated)
         {
             Git.Trace.WriteLine($"action = '{action}'.");
 
-            updated = Configuration.Type.None;
+            updated = ConfigurationLevel.None;
 
             if ((installations == null || installations.Count == 0) && !Where.FindGitInstallations(out installations))
             {
@@ -694,7 +694,7 @@ namespace Microsoft.Alm.Cli
                 return false;
             }
 
-            if ((type & Configuration.Type.Global) == Configuration.Type.Global)
+            if ((type & ConfigurationLevel.Global) == ConfigurationLevel.Global)
             {
                 // the 0 entry in the installations list is the "preferred" instance of Git
                 string gitCmdPath = installations[0].Git;
@@ -706,7 +706,7 @@ namespace Microsoft.Alm.Cli
                 {
                     Git.Trace.WriteLine("updating ~/.gitconfig succeeded.");
 
-                    updated |= Configuration.Type.Global;
+                    updated |= ConfigurationLevel.Global;
                 }
                 else
                 {
@@ -719,7 +719,7 @@ namespace Microsoft.Alm.Cli
                 }
             }
 
-            if ((type & Configuration.Type.System) == Configuration.Type.System)
+            if ((type & ConfigurationLevel.System) == ConfigurationLevel.System)
             {
                 string systemCmd = action == GitConfigAction.Set
                     ? "config --system credential.helper manager"
@@ -743,7 +743,7 @@ namespace Microsoft.Alm.Cli
 
                 if (successCount == installations.Count)
                 {
-                    updated |= Configuration.Type.System;
+                    updated |= ConfigurationLevel.System;
                 }
                 else
                 {
@@ -754,7 +754,7 @@ namespace Microsoft.Alm.Cli
             return true;
         }
 
-        private bool CleanFiles(string path, IReadOnlyList<string> files, out List<string> cleanedFiles)
+        private static bool CleanFiles(string path, IReadOnlyList<string> files, out List<string> cleanedFiles)
         {
             cleanedFiles = new List<string>();
 
@@ -786,7 +786,7 @@ namespace Microsoft.Alm.Cli
             }
         }
 
-        private bool CopyFiles(string srcPath, string dstPath, IReadOnlyList<string> files, out List<string> copiedFiles)
+        private static bool CopyFiles(string srcPath, string dstPath, IReadOnlyList<string> files, out List<string> copiedFiles)
         {
             copiedFiles = new List<string>();
 
@@ -894,7 +894,7 @@ namespace Microsoft.Alm.Cli
             }
         }
 
-        private bool ExecuteGit(string gitCmdPath, string command, params int[] allowedExitCodes)
+        private static bool ExecuteGit(string gitCmdPath, string command, params int[] allowedExitCodes)
         {
             if (String.IsNullOrEmpty(gitCmdPath) || String.IsNullOrEmpty(command))
                 return false;

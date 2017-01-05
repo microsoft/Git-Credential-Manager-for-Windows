@@ -33,12 +33,7 @@ namespace Microsoft.Alm.Authentication
     {
         public static StringComparer KeyComparer = StringComparer.OrdinalIgnoreCase;
 
-        static SecretCache()
-        {
-            _cache = new Dictionary<string, Secret>(KeyComparer);
-        }
-
-        private static readonly Dictionary<string, Secret> _cache;
+        private static readonly Dictionary<string, Secret> _cache = new Dictionary<string, Secret>(KeyComparer);
 
         public SecretCache(string @namespace, Secret.UriNameConversion getTargetName = null)
         {

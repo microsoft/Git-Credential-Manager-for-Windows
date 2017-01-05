@@ -24,7 +24,6 @@
 **/
 
 using System;
-using System.Diagnostics;
 using System.IO;
 using System.Security.Cryptography;
 using Microsoft.IdentityModel.Clients.ActiveDirectory;
@@ -53,23 +52,13 @@ namespace Microsoft.Alm.Authentication
 
             BeforeAccessNotification(null);
         }
-        /// <summary>
-        /// Constructor receiving state of the cache.
-        /// </summary>
-        /// <param name="state">Current state of the cache as a blob.</param>
-        public VstsAdalTokenCache(byte[] state)
-            : this()
-        {
-            throw new NotSupportedException();
-        }
 
         private readonly string _cacheFilePath;
-
-        private readonly object @lock = new object();
+        private readonly object _syncpoint = new object();
 
         private void AfterAccessNotification(TokenCacheNotificationArgs args)
         {
-            lock (@lock)
+            lock (_syncpoint)
             {
                 if (File.Exists(_cacheFilePath) && this.HasStateChanged)
                 {
@@ -93,7 +82,7 @@ namespace Microsoft.Alm.Authentication
 
         private void BeforeAccessNotification(TokenCacheNotificationArgs args)
         {
-            lock (@lock)
+            lock (_syncpoint)
             {
                 if (File.Exists(_cacheFilePath))
                 {

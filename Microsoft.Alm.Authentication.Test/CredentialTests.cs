@@ -105,14 +105,10 @@ namespace Microsoft.Alm.Authentication.Test
         }
 
         [TestMethod]
+        [ExpectedException(typeof(ArgumentNullException))]
         public void CredentialStoreUsernameNullReject()
         {
-            try
-            {
-                ICredentialStoreTest(new SecretStore("test", null, null, Secret.UriToName), "http://dummy.url/for/testing", null, "null_usernames_are_illegal");
-                Assert.Fail("Null username was accepted");
-            }
-            catch { }
+            ICredentialStoreTest(new SecretStore("test", null, null, Secret.UriToName), "http://dummy.url/for/testing", null, "null_usernames_are_illegal");
         }
 
         [TestMethod]
@@ -153,6 +149,7 @@ namespace Microsoft.Alm.Authentication.Test
         }
 
         [TestMethod]
+        [ExpectedException(typeof(ArgumentNullException))]
         public void SecretCacheUsernameNull()
         {
             ICredentialStoreTest(new SecretCache("test-cache", Secret.UriToName), "http://dummy.url/for/testing", null, "null_usernames_are_illegal");
@@ -170,40 +167,33 @@ namespace Microsoft.Alm.Authentication.Test
             ICredentialStoreTest(new SecretCache("test-cache", Secret.UriToName), "http://dummy.url/for/testing", "null_passwords_are_illegal", null);
         }
 
-        private void ICredentialStoreTest(ICredentialStore credentialStore, string url, string username, string password)
+        private static void ICredentialStoreTest(ICredentialStore credentialStore, string url, string username, string password)
         {
-            try
+            TargetUri uri = new TargetUri(url);
+            Credential writeCreds = new Credential(username, password);
+            Credential readCreds = null;
+
+            credentialStore.WriteCredentials(uri, writeCreds);
+
+            if ((readCreds = credentialStore.ReadCredentials(uri)) != null)
             {
-                TargetUri uri = new TargetUri(url);
-                Credential writeCreds = new Credential(username, password);
-                Credential readCreds = null;
-
-                credentialStore.WriteCredentials(uri, writeCreds);
-
-                if ((readCreds = credentialStore.ReadCredentials(uri)) != null)
-                {
-                    Assert.AreEqual(writeCreds.Password, readCreds.Password, "Passwords did not match between written and read credentials");
-                    Assert.AreEqual(writeCreds.Username, readCreds.Username, "Usernames did not match between written and read credentials");
-                }
-                else
-                {
-                    Assert.Fail("Failed to read credentials");
-                }
-
-                credentialStore.DeleteCredentials(uri);
-
-                Assert.IsNull(readCreds = credentialStore.ReadCredentials(uri), "Deleted credentials were read back");
+                Assert.AreEqual(writeCreds.Password, readCreds.Password, "Passwords did not match between written and read credentials");
+                Assert.AreEqual(writeCreds.Username, readCreds.Username, "Usernames did not match between written and read credentials");
             }
-            catch (Exception exception)
+            else
             {
-                Assert.Fail(exception.Message);
+                Assert.Fail("Failed to read credentials");
             }
+
+            credentialStore.DeleteCredentials(uri);
+
+            Assert.IsNull(readCreds = credentialStore.ReadCredentials(uri), "Deleted credentials were read back");
         }
 
-        private void UriToNameTest(string @namespace, string original, string expected)
+        private static void UriToNameTest(string @namespace, string original, string expected)
         {
             var uri = new Uri(original);
-            var actual = Secret.UriToName(uri, Namespace);
+            var actual = Secret.UriToName(uri, @namespace);
 
             Assert.AreEqual(expected, actual);
         }

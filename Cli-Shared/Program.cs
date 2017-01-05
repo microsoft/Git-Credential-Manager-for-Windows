@@ -342,11 +342,7 @@ namespace Microsoft.Alm.Cli
                 finally
                 {
                     // restore the console mode to its original value
-                    if (!NativeMethods.SetConsoleMode(stdin, consoleMode))
-                    {
-                        int error = Marshal.GetLastWin32Error();
-                        throw new Win32Exception(error, "Unable to set console mode (" + NativeMethods.Win32Error.GetText(error) + ").");
-                    }
+                    NativeMethods.SetConsoleMode(stdin, consoleMode);
 
                     Git.Trace.WriteLine($"console mode = '{consoleMode}'.");
                 }
@@ -424,7 +420,6 @@ namespace Microsoft.Alm.Cli
                 case AuthorityType.AzureDirectory:
                     Git.Trace.WriteLine($"authority for '{operationArguments.TargetUri}' is Azure Directory.");
                     
-                    Guid tenantId = Guid.Empty;
                     // return the allocated authority or a generic AAD backed VSTS authentication object
                     return authority ?? new VstsAadAuthentication(Guid.Empty, VstsCredentialScope, secrets, operationArguments.LoginHint );
 
@@ -462,6 +457,7 @@ namespace Microsoft.Alm.Cli
             }
         }
 
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Performance", "CA1811:AvoidUncalledPrivateCode")]
         private static void DeleteCredentials(OperationArguments operationArguments)
         {
             if (ReferenceEquals(operationArguments, null))
@@ -721,6 +717,7 @@ namespace Microsoft.Alm.Cli
             }
         }
 
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA1801:ReviewUnusedParameters", MessageId = "operationArguments")]
         private static void EnableTraceLogging(OperationArguments operationArguments, string logFilePath)
         {
             const int LogFileMaxLength = 8 * 1024 * 1024; // 8 MB
@@ -745,13 +742,15 @@ namespace Microsoft.Alm.Cli
 
             Git.Trace.WriteLine($"trace log destination is '{logFilePath}'.");
 
-            var fileStream = File.Open(logFileName, FileMode.Append, FileAccess.Write, FileShare.ReadWrite);
-            var listener = new StreamWriter(fileStream, Encoding.UTF8);
-            Git.Trace.AddListener(listener);
+            using (var fileStream = File.Open(logFileName, FileMode.Append, FileAccess.Write, FileShare.ReadWrite))
+            {
+                var listener = new StreamWriter(fileStream, Encoding.UTF8);
+                Git.Trace.AddListener(listener);
 
-            // write a small header to help with identifying new log entries
-            listener.Write('\n');
-            listener.Write($"{DateTime.Now:YYYY.MM.dd HH:mm:ss} Microsoft {Program.Title} version {Version.ToString(3)}\n");
+                // write a small header to help with identifying new log entries
+                listener.Write('\n');
+                listener.Write($"{DateTime.Now:YYYY.MM.dd HH:mm:ss} Microsoft {Program.Title} version {Version.ToString(3)}\n");
+            }
         }
 
         private static bool GitHubAuthCodePrompt(TargetUri targetUri, GitHubAuthenticationResultType resultType, string username, out string authenticationCode)
@@ -884,6 +883,7 @@ namespace Microsoft.Alm.Cli
             return ModalPromptForCredentials(targetUri, message);
         }
 
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Performance", "CA1811:AvoidUncalledPrivateCode")]
         private static Credential ModalPromptForPassword(TargetUri targetUri, string message, string username)
         {
             Debug.Assert(targetUri != null);
@@ -965,6 +965,7 @@ namespace Microsoft.Alm.Cli
             return null;
         }
 
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Performance", "CA1811:AvoidUncalledPrivateCode")]
         private static void PrintVersion()
         {
             Program.WriteLine($"{Title} version {Version.ToString(3)}");
@@ -977,9 +978,9 @@ namespace Microsoft.Alm.Cli
             const string GitHubAuthFailureMessage = "Logon failed, use ctrl+c to cancel basic credential prompt.";
 
             if (ReferenceEquals(operationArguments, null))
-                throw new ArgumentNullException("operationArguments");
+                throw new ArgumentNullException(nameof(operationArguments));
             if (ReferenceEquals(operationArguments.TargetUri, null))
-                throw new ArgumentNullException("operationArguments.TargetUri");
+                throw new ArgumentException("TargetUri property returned null", nameof(operationArguments));
 
             bool credentialsFound = false;
             BaseAuthentication authentication = CreateAuthentication(operationArguments);
@@ -1129,7 +1130,7 @@ namespace Microsoft.Alm.Cli
 
         private static bool StandardHandleIsTty(NativeMethods.StandardHandleType handleType)
         {
-            var standardHandle = NativeMethods.GetStdHandle(NativeMethods.StandardHandleType.Output);
+            var standardHandle = NativeMethods.GetStdHandle(handleType);
             var handleFileType = NativeMethods.GetFileType(standardHandle);
             return handleFileType == NativeMethods.FileType.Char;
         }

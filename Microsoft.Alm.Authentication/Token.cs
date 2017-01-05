@@ -95,14 +95,14 @@ namespace Microsoft.Alm.Authentication
 
             TokenType type;
             if (!GetTypeFromFriendlyName(typeName, out type))
-                throw new ArgumentException(nameof(typeName));
+                throw new ArgumentException("Unknown type name.", nameof(typeName));
         }
         internal Token(IdentityModel.Clients.ActiveDirectory.AuthenticationResult authResult, TokenType type)
         {
             if (ReferenceEquals(authResult, null))
                 throw new ArgumentNullException(nameof(authResult));
             if (String.IsNullOrWhiteSpace(authResult.AccessToken))
-                throw new ArgumentException(nameof(authResult));
+                throw new ArgumentException("AccessToken property returned null or empty.", nameof(authResult));
 
             Debug.Assert(Enum.IsDefined(typeof(TokenType), type), "The type parameter is invalid");
 
@@ -113,7 +113,7 @@ namespace Microsoft.Alm.Authentication
                     break;
 
                 default:
-                    throw new ArgumentException(nameof(type));
+                    throw new ArgumentException("Unexpected type.", nameof(type));
             }
 
             Guid tenantId = Guid.Empty;
@@ -189,7 +189,7 @@ namespace Microsoft.Alm.Authentication
             if (ReferenceEquals(bytes, null))
                 throw new ArgumentNullException(nameof(bytes));
             if (bytes.Length == 0)
-                throw new ArgumentException(nameof(bytes));
+                throw new ArgumentException("Zero length byte array.", nameof(bytes));
 
             Debug.Assert(Enum.IsDefined(typeof(TokenType), type), "The type parameter is invalid");
 
@@ -247,7 +247,7 @@ namespace Microsoft.Alm.Authentication
             if (ReferenceEquals(token, null))
                 throw new ArgumentNullException(nameof(token));
             if (String.IsNullOrWhiteSpace(token.Value))
-                throw new ArgumentException(nameof(token));
+                throw new ArgumentException("Value property returned null or empty.", nameof(token));
 
             bytes = null;
 
@@ -255,7 +255,6 @@ namespace Microsoft.Alm.Authentication
             {
                 byte[] utf8bytes = Encoding.UTF8.GetBytes(token.Value);
                 bytes = new byte[utf8bytes.Length + sizeof(TokenType) + sizeof(Guid)];
-                byte[] guid = new byte[sizeof(Guid)];
 
                 fixed (byte* p = bytes)
                 {
@@ -279,7 +278,7 @@ namespace Microsoft.Alm.Authentication
             if (token == null)
                 throw new ArgumentNullException(nameof(token));
             if (String.IsNullOrWhiteSpace(token.Value))
-                throw new ArgumentException(nameof(token));
+                throw new ArgumentException("Value propertry returned null or empty.", nameof(token));
             if (token.Value.Length > NativeMethods.Credential.PasswordMaxLength)
                 throw new ArgumentOutOfRangeException(nameof(token));
         }

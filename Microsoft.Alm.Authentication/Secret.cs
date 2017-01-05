@@ -30,6 +30,7 @@ namespace Microsoft.Alm.Authentication
 {
     public abstract class Secret
     {
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Design", "CA1055:UriReturnValuesShouldNotBeStrings")]
         public static string UriToName(TargetUri targetUri, string @namespace)
         {
             BaseSecureStore.ValidateTargetUri(targetUri);

@@ -68,6 +68,7 @@ namespace Microsoft.Alm.Cli
             CommandVersion
         };
 
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA1806:DoNotIgnoreMethodResults", MessageId = "System.Boolean.TryParse(System.String,System.Boolean@)")]
         private static void Clear()
         {
             var args = Environment.GetCommandLineArgs();
@@ -161,36 +162,38 @@ namespace Microsoft.Alm.Cli
                     goto error_parse;
             }
 
-            var stdin = Console.OpenStandardInput();
-            OperationArguments operationArguments = new OperationArguments(stdin);
-            operationArguments.QueryUri = uri;
-
-            LoadOperationArguments(operationArguments);
-
-            BaseAuthentication authentication = CreateAuthentication(operationArguments);
-
-            switch (operationArguments.Authority)
+            using (var stdin = Console.OpenStandardInput())
             {
-                default:
-                case AuthorityType.Basic:
-                    Git.Trace.WriteLine($"deleting basic credentials for '{operationArguments.TargetUri}'.");
-                    break;
+                OperationArguments operationArguments = new OperationArguments(stdin);
+                operationArguments.QueryUri = uri;
 
-                case AuthorityType.AzureDirectory:
-                case AuthorityType.MicrosoftAccount:
-                    Git.Trace.WriteLine($"deleting VSTS credentials for '{operationArguments.TargetUri}'.");
-                    break;
+                LoadOperationArguments(operationArguments);
 
-                case AuthorityType.GitHub:
-                    Git.Trace.WriteLine($"deleting GitHub credentials for '{operationArguments.TargetUri}'.");
-                    break;
+                BaseAuthentication authentication = CreateAuthentication(operationArguments);
 
-                case AuthorityType.Ntlm:
-                    Git.Trace.WriteLine($"deleting NTLM credentials for '{operationArguments.TargetUri}'.");
-                    break;
+                switch (operationArguments.Authority)
+                {
+                    default:
+                    case AuthorityType.Basic:
+                        Git.Trace.WriteLine($"deleting basic credentials for '{operationArguments.TargetUri}'.");
+                        break;
+
+                    case AuthorityType.AzureDirectory:
+                    case AuthorityType.MicrosoftAccount:
+                        Git.Trace.WriteLine($"deleting VSTS credentials for '{operationArguments.TargetUri}'.");
+                        break;
+
+                    case AuthorityType.GitHub:
+                        Git.Trace.WriteLine($"deleting GitHub credentials for '{operationArguments.TargetUri}'.");
+                        break;
+
+                    case AuthorityType.Ntlm:
+                        Git.Trace.WriteLine($"deleting NTLM credentials for '{operationArguments.TargetUri}'.");
+                        break;
+                }
+
+                authentication.DeleteCredentials(operationArguments.TargetUri);
             }
-
-            authentication.DeleteCredentials(operationArguments.TargetUri);
 
             return;
 
@@ -213,22 +216,24 @@ namespace Microsoft.Alm.Cli
             // parse the operations arguments from stdin (this is how git sends commands)
             // see: https://www.kernel.org/pub/software/scm/git/docs/technical/api-credentials.html
             // see: https://www.kernel.org/pub/software/scm/git/docs/git-credential.html
-            var stdin = Console.OpenStandardInput();
-            OperationArguments operationArguments = new OperationArguments(stdin);
-
-            Debug.Assert(operationArguments != null, "The operationArguments is null");
-            Debug.Assert(operationArguments.TargetUri != null, "The operationArgument.TargetUri is null");
-
-            LoadOperationArguments(operationArguments);
-            EnableTraceLogging(operationArguments);
-
-            if (operationArguments.PreserveCredentials)
+            using (var stdin = Console.OpenStandardInput())
             {
-                Git.Trace.WriteLine($"{ConfigPreserveCredentialsKey} = true, canceling erase request.");
-                return;
-            }
+                OperationArguments operationArguments = new OperationArguments(stdin);
 
-            DeleteCredentials(operationArguments);
+                Debug.Assert(operationArguments != null, "The operationArguments is null");
+                Debug.Assert(operationArguments.TargetUri != null, "The operationArgument.TargetUri is null");
+
+                LoadOperationArguments(operationArguments);
+                EnableTraceLogging(operationArguments);
+
+                if (operationArguments.PreserveCredentials)
+                {
+                    Git.Trace.WriteLine($"{ConfigPreserveCredentialsKey} = true, canceling erase request.");
+                    return;
+                }
+
+                DeleteCredentials(operationArguments);
+            }
         }
 
         private static void Get()
@@ -236,21 +241,20 @@ namespace Microsoft.Alm.Cli
             // parse the operations arguments from stdin (this is how git sends commands)
             // see: https://www.kernel.org/pub/software/scm/git/docs/technical/api-credentials.html
             // see: https://www.kernel.org/pub/software/scm/git/docs/git-credential.html
-            var stdin = Console.OpenStandardInput();
-            OperationArguments operationArguments = new OperationArguments(stdin);
+            using (var stdin = Console.OpenStandardInput())
+            {
+                OperationArguments operationArguments = new OperationArguments(stdin);
 
-            if (ReferenceEquals(operationArguments, null))
-                throw new ArgumentNullException("operationArguments");
-            if (ReferenceEquals(operationArguments.TargetUri, null))
-                throw new ArgumentNullException("operationArguments.TargetUri");
+                LoadOperationArguments(operationArguments);
+                EnableTraceLogging(operationArguments);
 
-            LoadOperationArguments(operationArguments);
-            EnableTraceLogging(operationArguments);
+                QueryCredentials(operationArguments);
 
-            QueryCredentials(operationArguments);
-
-            var stdout = Console.OpenStandardOutput();
-            operationArguments.WriteToStream(stdout);
+                using (var stdout = Console.OpenStandardOutput())
+                {
+                    operationArguments.WriteToStream(stdout);
+                }
+            }
         }
 
         [Flags]
@@ -312,7 +316,7 @@ namespace Microsoft.Alm.Cli
                 Exception innerException = exception.InnerExceptions.FirstOrDefault(e => !(e is AggregateException))
                                         ?? exception.InnerException;
 
-                Die(exception);
+                Die(innerException);
             }
             catch (Exception exception)
             {
@@ -366,41 +370,43 @@ namespace Microsoft.Alm.Cli
             // parse the operations arguments from stdin (this is how git sends commands)
             // see: https://www.kernel.org/pub/software/scm/git/docs/technical/api-credentials.html
             // see: https://www.kernel.org/pub/software/scm/git/docs/git-credential.html
-            var stdin = Console.OpenStandardInput();
-            OperationArguments operationArguments = new OperationArguments(stdin);
-
-            Debug.Assert(operationArguments != null, "The operationArguments is null");
-            Debug.Assert(operationArguments.CredUsername != null, "The operaionArgument.Username is null");
-            Debug.Assert(operationArguments.TargetUri != null, "The operationArgument.TargetUri is null");
-
-            LoadOperationArguments(operationArguments);
-            EnableTraceLogging(operationArguments);
-
-            Credential credentials = new Credential(operationArguments.CredUsername, operationArguments.CredPassword);
-            BaseAuthentication authentication = CreateAuthentication(operationArguments);
-
-            switch (operationArguments.Authority)
+            using (var stdin = Console.OpenStandardInput())
             {
-                default:
-                case AuthorityType.Basic:
-                    Git.Trace.WriteLine($"storing basic credentials for '{operationArguments.TargetUri}'.");
-                    break;
+                OperationArguments operationArguments = new OperationArguments(stdin);
 
-                case AuthorityType.AzureDirectory:
-                case AuthorityType.MicrosoftAccount:
-                    Git.Trace.WriteLine($"storing VSTS credentials for '{operationArguments.TargetUri}'.");
-                    break;
+                Debug.Assert(operationArguments != null, "The operationArguments is null");
+                Debug.Assert(operationArguments.CredUsername != null, "The operaionArgument.Username is null");
+                Debug.Assert(operationArguments.TargetUri != null, "The operationArgument.TargetUri is null");
 
-                case AuthorityType.GitHub:
-                    Git.Trace.WriteLine($"storing GitHub credentials for '{operationArguments.TargetUri}'.");
-                    break;
+                LoadOperationArguments(operationArguments);
+                EnableTraceLogging(operationArguments);
 
-                case AuthorityType.Ntlm:
-                    Git.Trace.WriteLine($"storing NTLM credentials for '{operationArguments.TargetUri}'.");
-                    break;
+                Credential credentials = new Credential(operationArguments.CredUsername, operationArguments.CredPassword);
+                BaseAuthentication authentication = CreateAuthentication(operationArguments);
+
+                switch (operationArguments.Authority)
+                {
+                    default:
+                    case AuthorityType.Basic:
+                        Git.Trace.WriteLine($"storing basic credentials for '{operationArguments.TargetUri}'.");
+                        break;
+
+                    case AuthorityType.AzureDirectory:
+                    case AuthorityType.MicrosoftAccount:
+                        Git.Trace.WriteLine($"storing VSTS credentials for '{operationArguments.TargetUri}'.");
+                        break;
+
+                    case AuthorityType.GitHub:
+                        Git.Trace.WriteLine($"storing GitHub credentials for '{operationArguments.TargetUri}'.");
+                        break;
+
+                    case AuthorityType.Ntlm:
+                        Git.Trace.WriteLine($"storing NTLM credentials for '{operationArguments.TargetUri}'.");
+                        break;
+                }
+
+                authentication.SetCredentials(operationArguments.TargetUri, credentials);
             }
-
-            authentication.SetCredentials(operationArguments.TargetUri, credentials);
         }
     }
 }

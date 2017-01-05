@@ -6,7 +6,7 @@ namespace GitHub.UI
 {
     public abstract class AuthenticationDialogWindow : Window
     {
-        public AuthenticationDialogWindow()
+        protected AuthenticationDialogWindow()
         {
             DataContextChanged += (s, e) =>
             {

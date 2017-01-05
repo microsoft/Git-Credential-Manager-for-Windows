@@ -39,7 +39,7 @@ namespace Microsoft.Alm.Cli
             : this()
         {
             if (ReferenceEquals(readableStream, null))
-                throw new ArgumentNullException("stdin");
+                throw new ArgumentNullException(nameof(readableStream));
 
             if (readableStream == Stream.Null || !readableStream.CanRead)
             {
@@ -355,7 +355,7 @@ namespace Microsoft.Alm.Cli
             if (ReferenceEquals(writableStream, null))
                 throw new ArgumentNullException(nameof(writableStream));
             if (!writableStream.CanWrite)
-                throw new ArgumentException(nameof(writableStream));
+                throw new ArgumentException("CanWrite property returned false.", nameof(writableStream));
 
             // Git reads/writes UTF-8, we'll explicitly encode to Utf-8 to
             // avoid NetFx or the operating system making the wrong encoding

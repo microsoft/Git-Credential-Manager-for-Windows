@@ -38,9 +38,8 @@ namespace Microsoft.Alm.Authentication
             : base(message, innerException)
         { }
 
-        [System.Security.SecuritySafeCritical]
         internal VstsLocationServiceException(System.Runtime.Serialization.SerializationInfo info, System.Runtime.Serialization.StreamingContext context)
-            : base(info, context)
+    : base(info, context)
         { }
     }
 }

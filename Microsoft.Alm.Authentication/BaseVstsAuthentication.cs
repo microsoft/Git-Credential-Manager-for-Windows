@@ -45,7 +45,7 @@ namespace Microsoft.Alm.Authentication
         protected BaseVstsAuthentication(VstsTokenScope tokenScope, ICredentialStore personalAccessTokenStore)
         {
             if (ReferenceEquals(tokenScope, null))
-                throw new ArgumentNullException(nameof(TokenScope));
+                throw new ArgumentNullException(nameof(tokenScope));
             if (ReferenceEquals(personalAccessTokenStore, null))
                 throw new ArgumentNullException(nameof(personalAccessTokenStore));
 
@@ -99,9 +99,7 @@ namespace Microsoft.Alm.Authentication
         {
             BaseSecureStore.ValidateTargetUri(targetUri);
 
-            Credential credentials = null;
-
-            if ((credentials = this.PersonalAccessTokenStore.ReadCredentials(targetUri)) != null)
+            if (this.PersonalAccessTokenStore.ReadCredentials(targetUri) != null)
             {
                 this.PersonalAccessTokenStore.DeleteCredentials(targetUri);
             }
@@ -184,6 +182,8 @@ namespace Microsoft.Alm.Authentication
         {
             const string VstsBaseUrlHost = "visualstudio.com";
             const string VstsResourceTenantHeader = "X-VSS-ResourceTenant";
+
+            BaseSecureStore.ValidateTargetUri(targetUri);
 
             tenantId = Guid.Empty;
 

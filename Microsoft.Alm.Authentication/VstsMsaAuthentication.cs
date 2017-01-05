@@ -64,12 +64,12 @@ namespace Microsoft.Alm.Authentication
         /// <param name="targetUri">
         /// The uniform resource indicator of the resource access tokens are being requested for.
         /// </param>
-        /// <param name="requireCompactToken">
+        /// <param name="requestCompactToken">
         /// True if a compact access token is required; false if a standard token is acceptable.
         /// </param>
         /// <returns>A <see cref="Credential"/> for packing into a basic authentication header;
         /// otherwise <see langword="null"/>.</returns>
-        public async Task<Credential> InteractiveLogon(TargetUri targetUri, bool requireCompactToken)
+        public async Task<Credential> InteractiveLogon(TargetUri targetUri, bool requestCompactToken)
         {
             BaseSecureStore.ValidateTargetUri(targetUri);
 
@@ -80,7 +80,7 @@ namespace Microsoft.Alm.Authentication
                 {
                     Git.Trace.WriteLine($"token '{targetUri}' successfully acquired.");
 
-                    return await this.GeneratePersonalAccessToken(targetUri, token, requireCompactToken);
+                    return await this.GeneratePersonalAccessToken(targetUri, token, requestCompactToken);
                 }
             }
             catch (AdalException exception)

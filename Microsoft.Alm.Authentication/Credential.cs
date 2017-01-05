@@ -41,7 +41,10 @@ namespace Microsoft.Alm.Authentication
         /// <param name="password">The password value of the <see cref="Credential"/>.</param>
         public Credential(string username, string password)
         {
-            this.Username = username ?? String.Empty;
+            if (username == null)
+                throw new ArgumentNullException(nameof(username));
+
+            this.Username = username;
             this.Password = password ?? String.Empty;
         }
         /// <summary>

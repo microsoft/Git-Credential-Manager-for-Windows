@@ -53,7 +53,7 @@ namespace Microsoft.Alm.Authentication
             if (String.IsNullOrEmpty(authorityHostUrl))
                 throw new ArgumentNullException(nameof(authorityHostUrl));
             if (!Uri.IsWellFormedUriString(authorityHostUrl, UriKind.Absolute))
-                throw new ArgumentException(nameof(authorityHostUrl));
+                throw new ArgumentException("Uri is not Absolute.", nameof(authorityHostUrl));
 
             AuthorityHostUrl = authorityHostUrl;
             _adalTokenCache = new VstsAdalTokenCache();

@@ -155,14 +155,14 @@ namespace Microsoft.Alm.Authentication
             yield break;
         }
 
-        private bool KeyIsValid(RegistryKey registryKey, out string url, out string type, out string value)
+        private static bool KeyIsValid(RegistryKey registryKey, out string url, out string type, out string value)
         {
             if (ReferenceEquals(registryKey, null))
                 throw new ArgumentNullException(nameof(registryKey));
             if (ReferenceEquals(registryKey.Handle, null))
-                throw new ArgumentNullException(nameof(registryKey.Handle));
+                throw new ArgumentException("Handle property returned null.", nameof(registryKey));
             if (registryKey.Handle.IsInvalid)
-                throw new ArgumentException(nameof(registryKey));
+                throw new ArgumentException("Handle.IsInvalid property returned true.", nameof(registryKey));
 
             url = registryKey.GetValue(RegistryUrlKey, null, RegistryValueOptions.DoNotExpandEnvironmentNames) as String;
             type = registryKey.GetValue(RegistryTypeKey, null, RegistryValueOptions.DoNotExpandEnvironmentNames) as String;
