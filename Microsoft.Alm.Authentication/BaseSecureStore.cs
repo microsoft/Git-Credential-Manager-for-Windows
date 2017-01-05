@@ -35,6 +35,7 @@ namespace Microsoft.Alm.Authentication
     {
         public static readonly char[] IllegalCharacters = new[] { ':', ';', '\\', '?', '@', '=', '&', '%', '$' };
 
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Design", "CA1031:DoNotCatchGeneralExceptionTypes")]
         protected void Delete(string targetName)
         {
             try
@@ -183,6 +184,11 @@ namespace Microsoft.Alm.Authentication
 
         protected void WriteCredential(string targetName, Credential credentials)
         {
+            if (ReferenceEquals(targetName, null))
+                throw new ArgumentNullException(nameof(targetName));
+            if (ReferenceEquals(credentials, null))
+                throw new ArgumentNullException(nameof(credentials));
+
             NativeMethods.Credential credential = new NativeMethods.Credential()
             {
                 Type = NativeMethods.CredentialType.Generic,
@@ -197,8 +203,8 @@ namespace Microsoft.Alm.Authentication
             {
                 if (!NativeMethods.CredWrite(ref credential, 0))
                 {
-                    int errorCode = Marshal.GetLastWin32Error();
-                    throw new Exception("Failed to write credentials", new Win32Exception(errorCode));
+                    int error = Marshal.GetLastWin32Error();
+                    throw new Win32Exception(error, "Failed to write credentials");
                 }
 
                 Git.Trace.WriteLine($"credentials for '{targetName}' written to store.");
@@ -214,6 +220,11 @@ namespace Microsoft.Alm.Authentication
 
         protected void WriteToken(string targetName, Token token)
         {
+            if (ReferenceEquals(targetName, null))
+                throw new ArgumentNullException(nameof(targetName));
+            if (ReferenceEquals(token, null))
+                throw new ArgumentNullException(nameof(token));
+
             byte[] bytes = null;
             if (Token.Serialize(token, out bytes))
             {
@@ -236,8 +247,8 @@ namespace Microsoft.Alm.Authentication
 
                         if (!NativeMethods.CredWrite(ref credential, 0))
                         {
-                            int errorCode = Marshal.GetLastWin32Error();
-                            throw new Exception("Failed to write credentials", new Win32Exception(errorCode));
+                            int error = Marshal.GetLastWin32Error();
+                            throw new Win32Exception(error, "Failed to write credentials");
                         }
 
                         Git.Trace.WriteLine($"token for '{targetName}' written to store.");
@@ -259,9 +270,9 @@ namespace Microsoft.Alm.Authentication
             if (ReferenceEquals(credentials, null))
                 throw new ArgumentNullException(nameof(credentials));
             if (credentials.Password.Length > NativeMethods.Credential.PasswordMaxLength)
-                throw new ArgumentOutOfRangeException(nameof(credentials.Password));
+                throw new ArgumentOutOfRangeException(nameof(credentials), "Password too long.");
             if (credentials.Username.Length > NativeMethods.Credential.UsernameMaxLength)
-                throw new ArgumentOutOfRangeException(nameof(credentials.Username));
+                throw new ArgumentOutOfRangeException(nameof(credentials), "Username too long.");
         }
 
         [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]

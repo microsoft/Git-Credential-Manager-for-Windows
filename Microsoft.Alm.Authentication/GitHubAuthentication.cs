@@ -86,8 +86,7 @@ namespace Microsoft.Alm.Authentication
         {
             BaseSecureStore.ValidateTargetUri(targetUri);
 
-            Credential credentials = null;
-            if ((credentials = this.PersonalAccessTokenStore.ReadCredentials(targetUri)) != null)
+            if (this.PersonalAccessTokenStore.ReadCredentials(targetUri) != null)
             {
                 this.PersonalAccessTokenStore.DeleteCredentials(targetUri);
                 Git.Trace.WriteLine($"credentials for '{targetUri}' deleted");
@@ -229,7 +228,7 @@ namespace Microsoft.Alm.Authentication
         /// <param name="password">The password of the account for which access is to be acquired.</param>
         /// <param name="authenticationCode">The two-factor authentication code for use in access acquisition.</param>
         /// <returns>Acquired <see cref="Credential"/> if successful; otherwise <see langword="null"/>.</returns>
-        public async Task<Credential> NoninteractiveLogonWithCredentials(TargetUri targetUri, string username, string password, string authenticationCode = null)
+        public async Task<Credential> NoninteractiveLogonWithCredentials(TargetUri targetUri, string username, string password, string authenticationCode)
         {
             BaseSecureStore.ValidateTargetUri(targetUri);
             if (String.IsNullOrWhiteSpace(username))
@@ -253,6 +252,9 @@ namespace Microsoft.Alm.Authentication
             Git.Trace.WriteLine($"non-interactive logon for '{targetUri}' failed.");
             return credentials;
         }
+
+        public Task<Credential> NoninteractiveLogonWithCredentials(TargetUri targetUri, string username, string password)
+            => NoninteractiveLogonWithCredentials(targetUri, username, password, null);
 
         /// <summary>
         /// Sets a <see cref="Credential"/> in the storage used by the authentication object.

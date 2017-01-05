@@ -65,6 +65,7 @@
     <Compile Include="GitHubAuthority.cs" />
     <Compile Include="GitHubTokenScope.cs" />
     <Compile Include="Global.cs" />
+    <Compile Include="GlobalSuppressions.cs" />
     <Compile Include="IGitHubAuthentication.cs" />
     <Compile Include="IGitHubAuthority.cs" />
     <Compile Include="NtlmSupport.cs" />

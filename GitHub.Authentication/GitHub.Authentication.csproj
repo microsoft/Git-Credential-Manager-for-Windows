@@ -74,6 +74,7 @@
     <Compile Include="CredentialsWindow.xaml.cs">
       <DependentUpon>CredentialsWindow.xaml</DependentUpon>
     </Compile>
+    <Compile Include="GlobalSuppressions.cs" />
     <Compile Include="Helpers\ActionCommand.cs" />
     <Compile Include="Helpers\BindingProxy.cs" />
     <Compile Include="Helpers\HyperLinkCommand.cs" />

@@ -17,22 +17,16 @@ namespace Microsoft.Alm.Gui
 
             _resource = resource;
 
-            Loaded += (sender, args) =>
-            {
-
-                var style = Resources["FadedLabelStyle"] as Style;
-
-                _textboxAdorner = new PasswordBoxHintAdorner(PassphrasePasswordBox, HintText, style, IsAdornerVisible);
-            };
+            Loaded += OnLoaded;
 
             DataContext = this;
         }
 
-        public bool Cancelled
+        public bool Canceled
         {
-            get { return _cancelled; }
+            get { return _canceled; }
         }
-        private bool _cancelled;
+        private bool _canceled;
 
         public string Passphrase
         {
@@ -48,8 +42,21 @@ namespace Microsoft.Alm.Gui
 
         private PasswordBoxHintAdorner _textboxAdorner;
 
+        protected void OnLoaded(object sender, RoutedEventArgs args)
+        {
+            var style = Resources["FadedLabelStyle"] as Style;
+
+            if (style != null)
+            {
+                _textboxAdorner = new PasswordBoxHintAdorner(PassphrasePasswordBox, HintText, style, IsAdornerVisible);
+            }
+        }
+
         protected override void OnKeyUp(KeyEventArgs e)
         {
+            if (ReferenceEquals(e, null))
+                return;
+
             switch (e.Key)
             {
                 case Key.Enter:
@@ -96,7 +103,7 @@ namespace Microsoft.Alm.Gui
 
         private void Failure()
         {
-            _cancelled = true;
+            _canceled = true;
             _passphrase = null;
         }
 
@@ -113,12 +120,12 @@ namespace Microsoft.Alm.Gui
 
             if (string.IsNullOrWhiteSpace(passphrase))
             {
-                _cancelled = false;
+                _canceled = false;
                 _passphrase = null;
             }
             else
             {
-                _cancelled = false;
+                _canceled = false;
                 _passphrase = passphrase;
             }
         }

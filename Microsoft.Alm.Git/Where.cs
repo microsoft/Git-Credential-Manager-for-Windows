@@ -110,25 +110,13 @@ namespace Microsoft.Alm.Git
             var reg64HkcuPath = String.Empty;
             var shellPathValue = String.Empty;
 
-            RegistryKey reg32HklmKey = null;
-            RegistryKey reg64HklmKey = null;
-            RegistryKey reg32HkcuKey = null;
-            RegistryKey reg64HkcuKey = null;
-
-            if ((reg32HklmKey = RegistryKey.OpenBaseKey(RegistryHive.LocalMachine, RegistryView.Registry32)) != null)
+            using (var reg32HklmKey = RegistryKey.OpenBaseKey(RegistryHive.LocalMachine, RegistryView.Registry32))
+            using (var reg32HkcuKey = RegistryKey.OpenBaseKey(RegistryHive.CurrentUser, RegistryView.Registry32))
+            using (var reg32HklmSubKey = reg32HklmKey?.OpenSubKey(GitSubkeyName))
+            using (var reg32HkcuSubKey = reg32HkcuKey?.OpenSubKey(GitSubkeyName))
             {
-                if ((reg32HklmKey = reg32HklmKey.OpenSubKey(GitSubkeyName)) != null)
-                {
-                    reg32HklmPath = reg32HklmKey.GetValue(GitValueName, reg32HklmPath) as String;
-                }
-            }
-
-            if ((reg32HkcuKey = RegistryKey.OpenBaseKey(RegistryHive.CurrentUser, RegistryView.Registry32)) != null)
-            {
-                if ((reg32HkcuKey = reg32HkcuKey.OpenSubKey(GitSubkeyName)) != null)
-                {
-                    reg32HkcuPath = reg32HkcuKey.GetValue(GitValueName, reg32HkcuPath) as String;
-                }
+                reg32HklmPath = reg32HklmSubKey?.GetValue(GitValueName, reg32HklmPath) as String;
+                reg32HkcuPath = reg32HkcuSubKey?.GetValue(GitValueName, reg32HkcuPath) as String;
             }
 
             if ((programFiles32Path = Environment.GetFolderPath(Environment.SpecialFolder.ProgramFilesX86)) != null)
@@ -138,28 +126,17 @@ namespace Microsoft.Alm.Git
 
             if (Environment.Is64BitOperatingSystem)
             {
-                if ((reg64HklmKey = RegistryKey.OpenBaseKey(RegistryHive.LocalMachine, RegistryView.Registry64)) != null)
+                using (var reg64HklmKey = RegistryKey.OpenBaseKey(RegistryHive.LocalMachine, RegistryView.Registry64))
+                using (var reg64HkcuKey = RegistryKey.OpenBaseKey(RegistryHive.CurrentUser, RegistryView.Registry64))
+                using (var reg64HklmSubKey = reg64HklmKey?.OpenSubKey(GitSubkeyName))
+                using (var reg64HkcuSubKey = reg64HkcuKey?.OpenSubKey(GitSubkeyName))
                 {
-                    if ((reg64HklmKey = reg64HklmKey.OpenSubKey(GitSubkeyName)) != null)
-                    {
-                        reg64HklmPath = reg64HklmKey.GetValue(GitValueName, reg64HklmPath) as String;
-                    }
+                    reg64HklmPath = reg64HklmSubKey?.GetValue(GitValueName, reg64HklmPath) as String;
+                    reg64HkcuPath = reg64HkcuSubKey?.GetValue(GitValueName, reg64HkcuPath) as String;
                 }
 
-                if ((reg64HkcuKey = RegistryKey.OpenBaseKey(RegistryHive.CurrentUser, RegistryView.Registry64)) != null)
+                if ((programFiles64Path = Environment.GetFolderPath(Environment.SpecialFolder.ProgramFiles)) != null)
                 {
-                    if ((reg64HkcuKey = reg64HkcuKey.OpenSubKey(GitSubkeyName)) != null)
-                    {
-                        reg64HkcuPath = reg64HkcuKey.GetValue(GitValueName, reg64HkcuPath) as String;
-                    }
-                }
-
-                // since .NET returns %ProgramFiles% as %ProgramFilesX86% when the app is 32-bit
-                // manual manipulation of the path is required
-
-                if ((programFiles64Path = Environment.GetFolderPath(Environment.SpecialFolder.ProgramFilesX86)) != null)
-                {
-                    programFiles64Path = programFiles64Path.Substring(0, programFiles64Path.Length - 6);
                     programFiles64Path = Path.Combine(programFiles64Path, GitAppName);
                 }
             }
@@ -184,7 +161,7 @@ namespace Microsoft.Alm.Git
             if (Where.FindApp(GitAppName, out shellPathValue))
             {
                 // `Where.App` returns the path to the executable, truncate to the installation root
-                if (shellPathValue.EndsWith(GitInstallation.AllVersionCmdPath, StringComparison.InvariantCultureIgnoreCase))
+                if (shellPathValue.EndsWith(GitInstallation.AllVersionCmdPath, StringComparison.OrdinalIgnoreCase))
                 {
                     shellPathValue = shellPathValue.Substring(0, shellPathValue.Length - GitInstallation.AllVersionCmdPath.Length);
                 }
@@ -289,6 +266,7 @@ namespace Microsoft.Alm.Git
         /// <param name="startingDirectory">A directory of the repository where the configuration file is contained.</param>
         /// <param name="path">Path to the Git local configuration</param>
         /// <returns><see langword="True"/> if succeeds; <see langword="false"/> otherwise.</returns>
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Performance", "CA1800:DoNotCastUnnecessarily")]
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2202:Do not dispose objects multiple times")]
         public static bool GitLocalConfig(string startingDirectory, out string path)
         {

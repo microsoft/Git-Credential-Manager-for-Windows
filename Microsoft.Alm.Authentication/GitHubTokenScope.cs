@@ -30,7 +30,7 @@ using ScopeSet = System.Collections.Generic.HashSet<string>;
 
 namespace Microsoft.Alm.Authentication
 {
-    public sealed class GitHubTokenScope : TokenScope
+    public sealed class GitHubTokenScope : TokenScope, IEquatable<GitHubTokenScope>
     {
         public static readonly GitHubTokenScope None = new GitHubTokenScope(String.Empty);
         /// <summary>
@@ -118,10 +118,6 @@ namespace Microsoft.Alm.Authentication
             : base(value)
         { }
 
-        private GitHubTokenScope(string[] values)
-            : base(values)
-        { }
-
         private GitHubTokenScope(ScopeSet set)
             : base(set)
         { }
@@ -151,49 +147,55 @@ namespace Microsoft.Alm.Authentication
             yield break;
         }
 
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static GitHubTokenScope operator +(GitHubTokenScope scope1, GitHubTokenScope scope2)
-        {
-            ScopeSet set = new ScopeSet();
-            set.UnionWith(scope1._scopes);
-            set.UnionWith(scope2._scopes);
+        public override bool Equals(object obj)
+            => TokenScope.Equals(this as TokenScope, obj);
 
+        public bool Equals(GitHubTokenScope other)
+            => TokenScope.Equals(this as TokenScope, other as TokenScope);
+
+        public override int GetHashCode()
+            => TokenScope.GetHashCode(this as TokenScope);
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static bool operator ==(GitHubTokenScope left, GitHubTokenScope right)
+            => TokenScope.Equals(left as TokenScope, right as TokenScope);
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static bool operator !=(GitHubTokenScope left, GitHubTokenScope right)
+            => !TokenScope.Equals(left as TokenScope, right as TokenScope);
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static GitHubTokenScope operator +(GitHubTokenScope left, GitHubTokenScope right)
+        {
+            var set = TokenScope.UnionWith(left as TokenScope, right as TokenScope);
             return new GitHubTokenScope(set);
         }
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static GitHubTokenScope operator -(GitHubTokenScope scope1, GitHubTokenScope scope2)
-        {
-            ScopeSet set = new ScopeSet();
-            set.UnionWith(scope1._scopes);
-            set.ExceptWith(scope2._scopes);
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static GitHubTokenScope operator -(GitHubTokenScope left, GitHubTokenScope right)
+        {
+            var set = TokenScope.ExceptWith(left as TokenScope, right as TokenScope);
             return new GitHubTokenScope(set);
         }
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static GitHubTokenScope operator |(GitHubTokenScope scope1, GitHubTokenScope scope2)
-        {
-            ScopeSet set = new ScopeSet();
-            set.UnionWith(scope1._scopes);
-            set.UnionWith(scope2._scopes);
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static GitHubTokenScope operator |(GitHubTokenScope left, GitHubTokenScope right)
+        {
+            var set = TokenScope.UnionWith(left as TokenScope, right as TokenScope);
             return new GitHubTokenScope(set);
         }
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static GitHubTokenScope operator &(GitHubTokenScope scope1, GitHubTokenScope scope2)
-        {
-            ScopeSet set = new ScopeSet();
-            set.UnionWith(scope1._scopes);
-            set.IntersectWith(scope2._scopes);
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static GitHubTokenScope operator &(GitHubTokenScope left, GitHubTokenScope right)
+        {
+            var set = TokenScope.IntersectWith(left as TokenScope, right as TokenScope);
             return new GitHubTokenScope(set);
         }
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static GitHubTokenScope operator ^(GitHubTokenScope scope1, GitHubTokenScope scope2)
-        {
-            ScopeSet set = new ScopeSet();
-            set.UnionWith(scope1._scopes);
-            set.SymmetricExceptWith(scope2._scopes);
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static GitHubTokenScope operator ^(GitHubTokenScope left, GitHubTokenScope right)
+        {
+            var set = TokenScope.SymmetricExceptWith(left as TokenScope, right as TokenScope);
             return new GitHubTokenScope(set);
         }
     }

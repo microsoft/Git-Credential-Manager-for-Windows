@@ -62,6 +62,7 @@
     <Reference Include="WindowsFormsIntegration" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="GlobalSuppressions.cs" />
     <Compile Include="PassphraseWindow.xaml.cs">
       <DependentUpon>PassphraseWindow.xaml</DependentUpon>
     </Compile>

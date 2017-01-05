@@ -50,7 +50,19 @@ namespace Microsoft.Alm.Authentication
         /// <param name="password">The password of the account for which access is to be acquired.</param>
         /// <param name="authenticationCode">The two-factor authentication code for use in access acquisition.</param>
         /// <returns>Acquired <see cref="Credential"/> if successful; otherwise <see langword="null"/>.</returns>
-        Task<Credential> NoninteractiveLogonWithCredentials(TargetUri targetUri, string username, string password, string authenticationCode = null);
+        Task<Credential> NoninteractiveLogonWithCredentials(TargetUri targetUri, string username, string password, string authenticationCode);
+
+        /// <summary>
+        /// <para></para>
+        /// <para>Tokens acquired are stored in the secure secret store provided during
+        /// initialization.</para>
+        /// </summary>
+        /// <param name="targetUri">The unique identifier for the resource for which access is to
+        /// be acquired.</param>
+        /// <param name="username">The username of the account for which access is to be acquired.</param>
+        /// <param name="password">The password of the account for which access is to be acquired.</param>
+        /// <returns>Acquired <see cref="Credential"/> if successful; otherwise <see langword="null"/>.</returns>
+        Task<Credential> NoninteractiveLogonWithCredentials(TargetUri targetUri, string username, string password);
 
         Task<bool> ValidateCredentials(TargetUri targetUri, Credential credentials);
     }

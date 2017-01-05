@@ -115,6 +115,7 @@ namespace Microsoft.Alm.Authentication
         /// <summary>
         /// Gets whether the <see cref="QueryUri"/> is absolute.
         /// </summary>
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Performance", "CA1822:MarkMembersAsStatic")]
         public bool IsAbsoluteUri { get { return true; } }
 
         /// <summary>
@@ -174,6 +175,7 @@ namespace Microsoft.Alm.Authentication
         /// <summary>
         /// Gets the client header enabled to work with proxies as necissary.
         /// </summary>
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Reliability", "CA2000:Dispose objects before losing scope")]
         public HttpClientHandler HttpClientHandler
         {
             get

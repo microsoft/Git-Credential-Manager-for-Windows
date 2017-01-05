@@ -27,6 +27,7 @@ namespace Microsoft.Alm.Authentication
 {
     public interface ICredentialStore
     {
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1716:IdentifiersShouldNotMatchKeywords", MessageId = "Namespace")]
         string Namespace { get; }
         Secret.UriNameConversion UriNameConversion { get; }
 

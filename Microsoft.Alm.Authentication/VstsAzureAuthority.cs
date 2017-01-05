@@ -238,6 +238,7 @@ namespace Microsoft.Alm.Authentication
             return false;
         }
 
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Reliability", "CA2000:Dispose objects before losing scope")]
         internal static HttpClient CreateHttpClient(TargetUri targetUri, Token accessToken)
         {
             const string AccessTokenHeader = "Bearer";
@@ -265,6 +266,7 @@ namespace Microsoft.Alm.Authentication
             return httpClient;
         }
 
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Reliability", "CA2000:Dispose objects before losing scope")]
         internal static HttpClient CreateHttpClient(TargetUri targetUri, Credential credentials)
         {
             const string CredentialHeader = "Basic";
@@ -394,6 +396,7 @@ namespace Microsoft.Alm.Authentication
             return content;
         }
 
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Reliability", "CA2000:Dispose objects before losing scope")]
         private static HttpClient CreateHttpClient(TargetUri targetUri)
         {
             Debug.Assert(targetUri != null, $"The `{nameof(targetUri)}` is null.");

@@ -32,6 +32,7 @@ namespace Microsoft.Alm.Git
 {
     public struct GitInstallation : IEquatable<GitInstallation>
     {
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Security", "CA2104:DoNotDeclareReadOnlyMutableReferenceTypes")]
         public static readonly StringComparer PathComparer = StringComparer.InvariantCultureIgnoreCase;
 
         internal const string GitExeName = @"git.exe";
@@ -49,6 +50,7 @@ namespace Microsoft.Alm.Git
         internal const string Version2Libexec32Path = @"mingw32\libexec\git-core";
         internal const string Version2Libexec64Path = @"mingw64\libexec\git-core";
 
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Security", "CA2104:DoNotDeclareReadOnlyMutableReferenceTypes")]
         public static readonly IReadOnlyDictionary<KnownGitDistribution, string> CommonCmdPaths
            = new Dictionary<KnownGitDistribution, string>
            {
@@ -56,6 +58,7 @@ namespace Microsoft.Alm.Git
                 { KnownGitDistribution.GitForWindows32v2, AllVersionCmdPath },
                 { KnownGitDistribution.GitForWindows64v2, AllVersionCmdPath },
            };
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Security", "CA2104:DoNotDeclareReadOnlyMutableReferenceTypes")]
         public static readonly IReadOnlyDictionary<KnownGitDistribution, string> CommonConfigPaths
             = new Dictionary<KnownGitDistribution, string>
             {
@@ -63,6 +66,7 @@ namespace Microsoft.Alm.Git
                 { KnownGitDistribution.GitForWindows32v2, Version2Config32Path },
                 { KnownGitDistribution.GitForWindows64v2, Version2Config64Path },
             };
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Security", "CA2104:DoNotDeclareReadOnlyMutableReferenceTypes")]
         public static readonly IReadOnlyDictionary<KnownGitDistribution, string> CommonGitPaths
             = new Dictionary<KnownGitDistribution, string>
             {
@@ -70,6 +74,7 @@ namespace Microsoft.Alm.Git
                 { KnownGitDistribution.GitForWindows32v2, AllVersionGitPath },
                 { KnownGitDistribution.GitForWindows64v2, AllVersionGitPath },
             };
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Security", "CA2104:DoNotDeclareReadOnlyMutableReferenceTypes")]
         public static readonly IReadOnlyDictionary<KnownGitDistribution, string> CommonLibexecPaths
             = new Dictionary<KnownGitDistribution, string>
             {
@@ -77,6 +82,7 @@ namespace Microsoft.Alm.Git
                 { KnownGitDistribution.GitForWindows32v2, Version2Libexec32Path },
                 { KnownGitDistribution.GitForWindows64v2, Version2Libexec64Path },
             };
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Security", "CA2104:DoNotDeclareReadOnlyMutableReferenceTypes")]
         public static readonly IReadOnlyDictionary<KnownGitDistribution, string> CommonShPaths
             = new Dictionary<KnownGitDistribution, string>
             {
@@ -84,6 +90,7 @@ namespace Microsoft.Alm.Git
                 { KnownGitDistribution.GitForWindows32v2, AllVersionShPath },
                 { KnownGitDistribution.GitForWindows64v2, AllVersionShPath },
             };
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Security", "CA2104:DoNotDeclareReadOnlyMutableReferenceTypes")]
         public static readonly IReadOnlyDictionary<KnownGitDistribution, string> CommonDocPaths
             = new Dictionary<KnownGitDistribution, string>
             {
@@ -105,7 +112,7 @@ namespace Microsoft.Alm.Git
             path = path.TrimEnd('\\');
 
             // Make sure the GitExeName isn't included as a part of the path.
-            if (path.EndsWith(AllVersionGitPath, StringComparison.InvariantCultureIgnoreCase))
+            if (path.EndsWith(AllVersionGitPath, StringComparison.OrdinalIgnoreCase))
             {
                 path = path.Substring(0, path.Length - AllVersionGitPath.Length);
             }
@@ -113,12 +120,12 @@ namespace Microsoft.Alm.Git
             // Versions of git installation could have 2 binaries. One in the `bin` directory
             // and the other in the `cmd` directory. Handle both scenarios.
 
-            if (path.EndsWith(AllVersionBinGitPath, StringComparison.InvariantCultureIgnoreCase))
+            if (path.EndsWith(AllVersionBinGitPath, StringComparison.OrdinalIgnoreCase))
             {
                 path = path.Substring(0, path.Length - AllVersionBinGitPath.Length);
             }
 
-            if (path.EndsWith(GitExeName, StringComparison.InvariantCultureIgnoreCase))
+            if (path.EndsWith(GitExeName, StringComparison.OrdinalIgnoreCase))
             {
                 path = path.Substring(0, path.Length - GitExeName.Length);
             }
@@ -226,8 +233,7 @@ namespace Microsoft.Alm.Git
 
         public override int GetHashCode()
         {
-            return Path.ToLowerInvariant()
-                       .GetHashCode();
+            return StringComparer.OrdinalIgnoreCase.GetHashCode(Path);
         }
 
         public override String ToString()

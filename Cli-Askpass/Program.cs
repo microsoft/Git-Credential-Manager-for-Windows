@@ -56,7 +56,7 @@ namespace Microsoft.Alm.Cli
                 if (match.Groups.Count < 2)
                     throw new ArgumentException("Unable to understand command.");
 
-                string request = match.Groups[0].Value;
+                // string request = match.Groups[0].Value;
                 string resource = match.Groups[1].Value;
 
                 Git.Trace.WriteLine($"open dialog for '{resource}'.");
@@ -65,7 +65,7 @@ namespace Microsoft.Alm.Cli
                 Gui.PassphraseWindow prompt = new Gui.PassphraseWindow(resource);
                 application.Run(prompt);
 
-                if (!prompt.Cancelled && !string.IsNullOrEmpty(prompt.Passphrase))
+                if (!prompt.Canceled && !string.IsNullOrEmpty(prompt.Passphrase))
                 {
                     string passphase = prompt.Passphrase;
 

@@ -19,11 +19,9 @@ namespace Microsoft.Alm.Authentication.Test
 
             basicAuth.CredentialStore.WriteCredentials(targetUri, new Credential("username", "password"));
 
-            Credential credentials;
-
             basicAuth.DeleteCredentials(targetUri);
 
-            Assert.IsNull(credentials = basicAuth.CredentialStore.ReadCredentials(targetUri), "User credentials were not deleted as expected");
+            Assert.IsNull(basicAuth.CredentialStore.ReadCredentials(targetUri), "User credentials were not deleted as expected");
         }
 
         [TestMethod]

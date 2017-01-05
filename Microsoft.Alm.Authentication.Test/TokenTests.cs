@@ -11,63 +11,56 @@ namespace Microsoft.Alm.Authentication.Test
         [TestMethod]
         public void TokenStoreUrl()
         {
-            ITokenStoreTest(new SecretStore("test-token"), "http://dummy.url/for/testing", TokenString, DateTimeOffset.Now);
+            ITokenStoreTest(new SecretStore("test-token"), "http://dummy.url/for/testing", TokenString);
         }
         [TestMethod]
         public void TokenStoreUrlWithParams()
         {
-            ITokenStoreTest(new SecretStore("test-token"), "http://dummy.url/for/testing?with=params", TokenString, DateTimeOffset.Now);
+            ITokenStoreTest(new SecretStore("test-token"), "http://dummy.url/for/testing?with=params", TokenString);
         }
         [TestMethod]
         public void TokenStoreUnc()
         {
-            ITokenStoreTest(new SecretStore("test-token"), @"\\unc\share\test", TokenString, DateTimeOffset.Now);
+            ITokenStoreTest(new SecretStore("test-token"), @"\\unc\share\test", TokenString);
         }
         [TestMethod]
         public void TokenCacheUrl()
         {
-            ITokenStoreTest(new SecretCache("test-token"), "http://dummy.url/for/testing", TokenString, DateTimeOffset.Now);
+            ITokenStoreTest(new SecretCache("test-token"), "http://dummy.url/for/testing", TokenString);
         }
         [TestMethod]
         public void TokenCacheUrlWithParams()
         {
-            ITokenStoreTest(new SecretCache("test-token"), "http://dummy.url/for/testing?with=params", TokenString, DateTimeOffset.Now);
+            ITokenStoreTest(new SecretCache("test-token"), "http://dummy.url/for/testing?with=params", TokenString);
         }
         [TestMethod]
         public void TokenCacheUnc()
         {
-            ITokenStoreTest(new SecretCache("test-token"), @"\\unc\share\test", TokenString, DateTimeOffset.Now);
+            ITokenStoreTest(new SecretCache("test-token"), @"\\unc\share\test", TokenString);
         }
 
-        private void ITokenStoreTest(ITokenStore tokenStore, string url, string token, DateTimeOffset expires)
+        private static void ITokenStoreTest(ITokenStore tokenStore, string url, string token)
         {
-            try
+            TargetUri uri = new TargetUri(url);
+
+            Token writeToken = new Token(token, TokenType.Test);
+            Token readToken = null;
+
+            tokenStore.WriteToken(uri, writeToken);
+
+            if ((readToken = tokenStore.ReadToken(uri)) != null)
             {
-                TargetUri uri = new TargetUri(url);
-
-                Token writeToken = new Token(token, TokenType.Test);
-                Token readToken = null;
-
-                tokenStore.WriteToken(uri, writeToken);
-
-                if ((readToken = tokenStore.ReadToken(uri)) != null)
-                {
-                    Assert.AreEqual(writeToken.Value, readToken.Value, "Token values did not match between written and read");
-                    Assert.AreEqual(writeToken.Type, readToken.Type, "Token types did not mathc between written and read");
-                }
-                else
-                {
-                    Assert.Fail("Failed to read token");
-                }
-
-                tokenStore.DeleteToken(uri);
-
-                Assert.IsNull(readToken = tokenStore.ReadToken(uri), "Deleted token was read back");
+                Assert.AreEqual(writeToken.Value, readToken.Value, "Token values did not match between written and read");
+                Assert.AreEqual(writeToken.Type, readToken.Type, "Token types did not mathc between written and read");
             }
-            catch (Exception exception)
+            else
             {
-                Assert.Fail(exception.Message);
+                Assert.Fail("Failed to read token");
             }
+
+            tokenStore.DeleteToken(uri);
+
+            Assert.IsNull(readToken = tokenStore.ReadToken(uri), "Deleted token was read back");
         }
     }
 }

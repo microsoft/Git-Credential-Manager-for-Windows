@@ -29,7 +29,7 @@ using System.Diagnostics;
 namespace Microsoft.Alm.Authentication
 {
     [DebuggerDisplay("{Type}")]
-    public struct GitHubAuthenticationResult
+    public struct GitHubAuthenticationResult : IEquatable<GitHubAuthenticationResult>
     {
         public GitHubAuthenticationResult(GitHubAuthenticationResultType type)
         {
@@ -46,7 +46,43 @@ namespace Microsoft.Alm.Authentication
         public readonly GitHubAuthenticationResultType Type;
         public Token Token { get; internal set; }
 
-        public static implicit operator Boolean(GitHubAuthenticationResult result)
+        public override Boolean Equals(object obj)
+        {
+            return (obj is GitHubAuthenticationResult
+                    || obj is GitHubAuthenticationResultType)
+                && this.Equals((GitHubAuthenticationResult)obj);
+        }
+
+        public bool Equals(GitHubAuthenticationResult other)
+        {
+            return this.Type == other.Type
+                && this.Token == other.Token;
+        }
+
+        public static GitHubAuthenticationResult FromResultType(GitHubAuthenticationResultType type)
+        {
+            return new GitHubAuthenticationResult(type);
+        }
+
+        public override int GetHashCode()
+        {
+            return Token.GetHashCode();
+        }
+
+        public GitHubAuthenticationResultType ToResultType()
+        {
+            return Type;
+        }
+
+        public static bool operator ==(GitHubAuthenticationResult left, GitHubAuthenticationResult right)
+        {
+            return left.Equals(right);
+        }
+
+        public static bool operator !=(GitHubAuthenticationResult left, GitHubAuthenticationResult right)
+            => !(left == right);
+
+        public static implicit operator bool(GitHubAuthenticationResult result)
         {
             return result.Type == GitHubAuthenticationResultType.Success;
         }

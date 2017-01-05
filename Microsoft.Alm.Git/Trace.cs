@@ -12,10 +12,11 @@ namespace Microsoft.Alm.Git
         void WriteLine(string message, string filePath, int lineNumber, string memberName);
     }
 
-    public sealed class Trace : ITrace
+    public sealed class Trace : ITrace, IDisposable
     {
         public const string EnvironmentVariableKey = "GCM_TRACE";
 
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Design", "CA1031:DoNotCatchGeneralExceptionTypes")]
         private Trace()
         {
             _writers = new List<TextWriter>();
@@ -42,22 +43,12 @@ namespace Microsoft.Alm.Git
                     _writers.Add(writer);
                 }
             }
-            catch { }
+            catch { /* squelch */ }
         }
 
         ~Trace()
         {
-            lock (_syncpoint)
-            {
-                foreach (var writer in _writers)
-                {
-                    try
-                    {
-                        writer?.Dispose();
-                    }
-                    catch { }
-                }
-            }
+            Dispose();
         }
 
         internal static ITrace Instance
@@ -83,9 +74,26 @@ namespace Microsoft.Alm.Git
         public static void AddListener(TextWriter listener)
             => Instance.AddListener(listener);
 
+        public void Dispose()
+        {
+            lock (_syncpoint)
+            {
+                for (int i = 0; i < _writers.Count; i += 1)
+                {
+                    using (var writer = _writers[i])
+                    {
+                        _writers.Remove(writer);
+                    }
+                }
+            }
+
+            GC.SuppressFinalize(this);
+        }
+
         public static void Flush()
             => Instance.Flush();
 
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Design", "CA1026:DefaultParametersShouldNotBeUsed")]
         public static void WriteLine(string message,
             [System.Runtime.CompilerServices.CallerFilePath] string filePath = "",
             [System.Runtime.CompilerServices.CallerLineNumber] int lineNumber = 0,

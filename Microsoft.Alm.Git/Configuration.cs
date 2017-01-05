@@ -46,7 +46,19 @@ namespace Microsoft.Alm.Git
             if (!Directory.Exists(directory))
                 throw new DirectoryNotFoundException(directory);
 
-            LoadGitConfiguration(directory);
+            ConfigurationLevel types = ConfigurationLevel.All;
+
+            if (!loadLocal)
+            {
+                types ^= ConfigurationLevel.Local;
+            }
+
+            if (!loadSystem)
+            {
+                types ^= ConfigurationLevel.System;
+            }
+
+            LoadGitConfiguration(directory, types);
         }
 
         public Configuration()
@@ -58,7 +70,7 @@ namespace Microsoft.Alm.Git
             ParseGitConfig(configReader, _values[level]);
         }
 
-        public IEnumerable<ConfigurationLevel> Levels
+        public static IEnumerable<ConfigurationLevel> Levels
         {
             get
             {
@@ -130,8 +142,8 @@ namespace Microsoft.Alm.Git
                 throw new ArgumentNullException(nameof(suffix));
 
             string match = String.IsNullOrEmpty(key)
-                ? String.Format("{0}.{1}", prefix, suffix)
-                : String.Format("{0}.{1}.{2}", prefix, key, suffix);
+                ? String.Format(System.Globalization.CultureInfo.InvariantCulture, "{0}.{1}", prefix, suffix)
+                : String.Format(System.Globalization.CultureInfo.InvariantCulture, "{0}.{1}.{2}", prefix, key, suffix);
 
             // if there's a match, return it
             if (ContainsKey(match))
@@ -153,7 +165,7 @@ namespace Microsoft.Alm.Git
             if (targetUri != null)
             {
                 // return match seeking from most specific (<prefix>.<scheme>://<host>.<key>) to least specific (credential.<key>)
-                if (TryGetEntry(prefix, String.Format("{0}://{1}", targetUri.Scheme, targetUri.Host), key, out entry)
+                if (TryGetEntry(prefix, String.Format(System.Globalization.CultureInfo.InvariantCulture, "{0}://{1}", targetUri.Scheme, targetUri.Host), key, out entry)
                     || TryGetEntry(prefix, targetUri.Host, key, out entry))
                     return true;
 
@@ -182,7 +194,7 @@ namespace Microsoft.Alm.Git
             return false;
         }
 
-        public void LoadGitConfiguration(string directory)
+        public void LoadGitConfiguration(string directory, ConfigurationLevel types)
         {
             string portableConfig = null;
             string systemConfig = null;
@@ -193,7 +205,8 @@ namespace Microsoft.Alm.Git
             // higher priority configurations are parsed, storing them in a handy lookup table
 
             // find and parse Git's portable config
-            if (Where.GitPortableConfig(out portableConfig))
+            if ((types & ConfigurationLevel.Portable) != 0 
+                && Where.GitPortableConfig(out portableConfig))
             {
                 ParseGitConfig(ConfigurationLevel.Portable, portableConfig);
 
@@ -201,7 +214,8 @@ namespace Microsoft.Alm.Git
             }
 
             // find and parse Git's system config
-            if (Where.GitSystemConfig(null, out systemConfig))
+            if ((types & ConfigurationLevel.System) != 0
+                && Where.GitSystemConfig(null, out systemConfig))
             {
                 ParseGitConfig(ConfigurationLevel.System, systemConfig);
 
@@ -209,7 +223,8 @@ namespace Microsoft.Alm.Git
             }
 
             // find and parse Git's global config
-            if (Where.GitGlobalConfig(out globalConfig))
+            if ((types & ConfigurationLevel.Global) != 0
+                && Where.GitGlobalConfig(out globalConfig))
             {
                 ParseGitConfig(ConfigurationLevel.Global, globalConfig);
 
@@ -217,7 +232,8 @@ namespace Microsoft.Alm.Git
             }
 
             // find and parse Git's local config
-            if (Where.GitLocalConfig(directory, out localConfig))
+            if ((types & ConfigurationLevel.Local) != 0
+                && Where.GitLocalConfig(directory, out localConfig))
             {
                 ParseGitConfig(ConfigurationLevel.Local, localConfig);
 
@@ -236,9 +252,10 @@ namespace Microsoft.Alm.Git
             if (!File.Exists(configPath))
                 return;
 
-            using (var sr = new StreamReader(File.OpenRead(configPath)))
+            using (var stream = File.OpenRead(configPath))
+            using (var reader = new StreamReader(stream))
             {
-                ParseGitConfig(sr, _values[level]);
+                ParseGitConfig(reader, _values[level]);
             }
         }
 
@@ -329,7 +346,9 @@ namespace Microsoft.Alm.Git
 
         public struct Entry : IEquatable<Entry>
         {
+            [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Security", "CA2104:DoNotDeclareReadOnlyMutableReferenceTypes")]
             public static readonly StringComparer KeyComparer = StringComparer.OrdinalIgnoreCase;
+            [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Security", "CA2104:DoNotDeclareReadOnlyMutableReferenceTypes")]
             public static readonly StringComparer ValueComparer = StringComparer.OrdinalIgnoreCase;
 
             public Entry(string key, string value)
@@ -362,17 +381,14 @@ namespace Microsoft.Alm.Git
             {
                 return String.Format(System.Globalization.CultureInfo.InvariantCulture, "{0} = {1}", Key, Value);
             }
-        }
 
-        [Flags]
-        public enum Type
-        {
-            None = 0,
-            Local = 1 << 0,
-            Global = 1 << 1,
-            Xdg = 1 << 2,
-            System = 1 << 3,
-            Portable = 1 << 4,
+            public static bool operator ==(Entry left, Entry right)
+            {
+                return left.Equals(right);
+            }
+
+            public static bool operator !=(Entry left, Entry right)
+                => !(left == right);
         }
     }
 }

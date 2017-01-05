@@ -539,9 +539,12 @@ namespace Microsoft.Alm
         [StructLayout(LayoutKind.Sequential, CharSet = CharSet.Unicode)]
         public unsafe struct CredentialUiInfo
         {
+            [MarshalAs(UnmanagedType.U4)]
             public int Size;
             public IntPtr Parent;
+            [MarshalAs(UnmanagedType.LPWStr)]
             public string MessageText;
+            [MarshalAs(UnmanagedType.LPWStr)]
             public string CaptionText;
             public IntPtr BannerArt;
         }
@@ -581,7 +584,17 @@ namespace Microsoft.Alm
         /// <param name="flags">Specifies special behavior for this function</param>
         /// <returns><see cref="CredentialUiResult"/></returns>
         [DllImport(CredUi32, CharSet = CharSet.Unicode, EntryPoint = "CredUIPromptForCredentialsW", SetLastError = true)]
-        public static extern CredentialUiResult CredUIPromptForCredentials(ref CredentialUiInfo credUiInfo, string targetName, IntPtr reserved, uint authError, StringBuilder username, int usernameMaxLen, StringBuilder password, int passwordMaxLen, ref bool saveCredentials, CredentialUiFlags flags);
+        public static extern CredentialUiResult CredUIPromptForCredentials(
+            [In] ref CredentialUiInfo credUiInfo,
+            [In][MarshalAs(UnmanagedType.LPWStr)] string targetName,
+            [In] IntPtr reserved,
+            [In] uint authError,
+            [In][MarshalAs(UnmanagedType.LPWStr)] StringBuilder username,
+            [In] int usernameMaxLen,
+            [In][MarshalAs(UnmanagedType.LPWStr)] StringBuilder password,
+            [In] int passwordMaxLen,
+            [In][MarshalAs(UnmanagedType.Bool)] ref bool saveCredentials,
+            [In][MarshalAs(UnmanagedType.U4)] CredentialUiFlags flags);
 
         /// <summary>
         /// Creates and displays a configurable dialog box that allows users to supply credential
@@ -640,7 +653,16 @@ namespace Microsoft.Alm
         /// <param name="flags">A value that specifies behavior for this function.</param>
         /// <returns><see cref="Win32Error"/> code value on failure; otherwise <see cref="Win32Error.Success"/>.</returns>
         [DllImport(CredUi32, CharSet = CharSet.Unicode, EntryPoint = "CredUIPromptForWindowsCredentialsW", SetLastError = true)]
-        public static extern int CredUIPromptForWindowsCredentials(ref CredentialUiInfo credInfo, uint authError, ref CredentialPackFlags authPackage, IntPtr inAuthBuffer, uint inAuthBufferSize, out IntPtr outAuthBuffer, out uint outAuthBufferSize, ref bool saveCredentials, CredentialUiWindowsFlags flags);
+        public static extern int CredUIPromptForWindowsCredentials(
+            [In] ref CredentialUiInfo credInfo,
+            [In] uint authError,
+            [In] ref CredentialPackFlags authPackage,
+            [In] IntPtr inAuthBuffer,
+            [In] uint inAuthBufferSize,
+            [Out] out IntPtr outAuthBuffer,
+            [Out] out uint outAuthBufferSize,
+            [In][MarshalAs(UnmanagedType.Bool)] ref bool saveCredentials,
+            [In][MarshalAs(UnmanagedType.U4)] CredentialUiWindowsFlags flags);
 
         /// <summary>
         /// Converts a string user name and password into an authentication buffer.
@@ -660,7 +682,13 @@ namespace Microsoft.Alm
         /// <paramref name="packedCredentials"/> buffer.</param>
         /// <returns>True if success; otherwise false.</returns>
         [DllImport(CredUi32, CharSet = CharSet.Unicode, EntryPoint = "CredPackAuthenticationBufferW", SetLastError = true)]
-        public static extern bool CredPackAuthenticationBuffer(CredentialPackFlags flags, string username, string password, IntPtr packedCredentials, ref int packedCredentialsSize);
+        [return: MarshalAs(UnmanagedType.Bool)]
+        public static extern bool CredPackAuthenticationBuffer(
+            [In][MarshalAs(UnmanagedType.U4)] CredentialPackFlags flags,
+            [In][MarshalAs(UnmanagedType.LPWStr)] string username,
+            [In][MarshalAs(UnmanagedType.LPWStr)] string password,
+            [In] IntPtr packedCredentials,
+            [In] ref int packedCredentialsSize);
 
         /// <summary>
         /// Converts an authentication buffer returned by a call to the
@@ -701,7 +729,17 @@ namespace Microsoft.Alm
         /// <paramref name="password"/> buffer. The size includes the terminating `null` character.</param>
         /// <returns>True if successful; otherwise false.</returns>
         [DllImport(CredUi32, CharSet = CharSet.Unicode, EntryPoint = "CredUnPackAuthenticationBufferW", SetLastError = true)]
-        public static extern bool CredUnPackAuthenticationBuffer(CredentialPackFlags flags, IntPtr authBuffer, uint authBufferSize, StringBuilder username, ref int maxUsernameLen, StringBuilder domainName, ref int maxDomainNameLen, StringBuilder password, ref int maxPasswordLen);
+        [return: MarshalAs(UnmanagedType.Bool)]
+        public static extern bool CredUnPackAuthenticationBuffer(
+            [In][MarshalAs(UnmanagedType.U4)] CredentialPackFlags flags,
+            [In] IntPtr authBuffer,
+            [In] uint authBufferSize,
+            [In][MarshalAs(UnmanagedType.LPWStr)] StringBuilder username,
+            [In] ref int maxUsernameLen,
+            [In][MarshalAs(UnmanagedType.LPWStr)] StringBuilder domainName,
+            [In] ref int maxDomainNameLen,
+            [In][MarshalAs(UnmanagedType.LPWStr)] StringBuilder password,
+            [In] ref int maxPasswordLen);
 
         /// <summary>
         /// Creates or opens a file or I/O device. The most commonly used I/O devices are as
@@ -754,7 +792,14 @@ namespace Microsoft.Alm
         /// <param name="templateFile">This parameter should be <see cref="IntPtr.Zero"/>.</param>
         /// <returns>A handle to the file created.</returns>
         [DllImport(Kernel32, CallingConvention = CallingConvention.StdCall, CharSet = CharSet.Unicode, EntryPoint = "CreateFileW", SetLastError = true)]
-        public static extern SafeFileHandle CreateFile(string fileName, FileAccess desiredAccess, FileShare shareMode, IntPtr securityAttributes, FileCreationDisposition creationDisposition, FileAttributes flagsAndAttributes, IntPtr templateFile);
+        public static extern SafeFileHandle CreateFile(
+            [In][MarshalAs(UnmanagedType.LPWStr)] string fileName,
+            [In] FileAccess desiredAccess,
+            [In] FileShare shareMode,
+            [In] IntPtr securityAttributes,
+            [In] FileCreationDisposition creationDisposition,
+            [In] FileAttributes flagsAndAttributes,
+            [In] IntPtr templateFile);
 
         /// <summary>
         /// Retrieves the current input mode of a console's input buffer or the current output mode
@@ -775,7 +820,10 @@ namespace Microsoft.Alm
         /// </param>
         /// <returns>True if success; otherwise false.</returns>
         [DllImport(Kernel32, CallingConvention = CallingConvention.StdCall, CharSet = CharSet.Unicode, EntryPoint = "GetConsoleMode", SetLastError = true)]
-        public static extern bool GetConsoleMode(SafeFileHandle consoleHandle, out ConsoleMode consoleMode);
+        [return: MarshalAs(UnmanagedType.Bool)]
+        public static extern bool GetConsoleMode(
+            [In] SafeFileHandle consoleHandle,
+            [Out] out ConsoleMode consoleMode);
 
         /// <summary>
         /// Retrieves the file type of the specified file.
@@ -783,7 +831,8 @@ namespace Microsoft.Alm
         /// <param name="fileHandle">A handle to the file.</param>
         /// <returns>A <see cref="FileType"/>.</returns>
         [DllImport(Kernel32, CallingConvention = CallingConvention.StdCall, CharSet = CharSet.Unicode, EntryPoint = "GetFileType", SetLastError = true)]
-        public static extern FileType GetFileType(IntPtr fileHandle);
+        public static extern FileType GetFileType(
+            [In] IntPtr fileHandle);
 
         /// <summary>
         /// Retrieves a handle to the specified standard device (standard input, standard output, or standard error).
@@ -791,7 +840,8 @@ namespace Microsoft.Alm
         /// <param name="std"></param>
         /// <returns>A Handle.</returns>
         [DllImport(Kernel32, CallingConvention = CallingConvention.StdCall, CharSet = CharSet.Unicode, EntryPoint = "GetStdHandle", SetLastError = true)]
-        public static extern IntPtr GetStdHandle(StandardHandleType std);
+        public static extern IntPtr GetStdHandle(
+            [In][MarshalAs(UnmanagedType.I4)] StandardHandleType std);
 
         /// <summary>
         /// Reads character input from the console input buffer and removes it from the buffer.
@@ -811,8 +861,15 @@ namespace Microsoft.Alm
         /// </param>
         /// <param name="reserved">Reserved; must be <see cref="IntPtr.Zero"/>.</param>
         /// <returns>True if success; otherwise false.</returns>
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2205:UseManagedEquivalentsOfWin32Api")]
         [DllImport(Kernel32, CallingConvention = CallingConvention.StdCall, CharSet = CharSet.Unicode, EntryPoint = "ReadConsoleW", SetLastError = true)]
-        public static extern bool ReadConsole(SafeFileHandle consoleInputHandle, [Out]StringBuilder buffer, uint numberOfCharsToRead, out uint numberOfCharsRead, IntPtr reserved);
+        [return: MarshalAs(UnmanagedType.Bool)]
+        public static extern bool ReadConsole(
+            [In] SafeFileHandle consoleInputHandle,
+            [Out][MarshalAs(UnmanagedType.LPWStr)] StringBuilder buffer,
+            [In] uint numberOfCharsToRead,
+            [Out] out uint numberOfCharsRead,
+            [In] IntPtr reserved);
 
         /// <summary>
         /// Sets the input mode of a console's input buffer or the output mode of a console screen
@@ -833,7 +890,10 @@ namespace Microsoft.Alm
         /// </param>
         /// <returns>True if success; otherwise false.</returns>
         [DllImport(Kernel32, CallingConvention = CallingConvention.StdCall, CharSet = CharSet.Unicode, EntryPoint = "SetConsoleMode", SetLastError = true)]
-        public static extern bool SetConsoleMode(SafeFileHandle consoleHandle, ConsoleMode consoleMode);
+        [return: MarshalAs(UnmanagedType.Bool)]
+        public static extern bool SetConsoleMode(
+            [In] SafeFileHandle consoleHandle,
+            [In][MarshalAs(UnmanagedType.U4)] ConsoleMode consoleMode);
 
         /// <summary>
         /// Writes a character string to a console screen buffer beginning at the current cursor
@@ -856,8 +916,15 @@ namespace Microsoft.Alm
         /// </param>
         /// <param name="reserved">Reserved; must be <see cref="IntPtr.Zero"/>.</param>
         /// <returns>True if success; otherwise false.</returns>
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2205:UseManagedEquivalentsOfWin32Api")]
         [DllImport(Kernel32, CallingConvention = CallingConvention.StdCall, CharSet = CharSet.Unicode, EntryPoint = "WriteConsoleW", SetLastError = true)]
-        public static extern bool WriteConsole(SafeHandle consoleOutputHandle, [In]StringBuilder buffer, uint numberOfCharsToWrite, out uint numberOfCharsWritten, IntPtr reserved);
+        [return: MarshalAs(UnmanagedType.Bool)]
+        public static extern bool WriteConsole(
+            [In] SafeHandle consoleOutputHandle,
+            [In][MarshalAs(UnmanagedType.LPWStr)] StringBuilder buffer,
+            [In] uint numberOfCharsToWrite,
+            [Out] out uint numberOfCharsWritten,
+            [In] IntPtr reserved);
 
         /// <summary>
         /// The System Error Codes are very broad. Each one can occur in one of many hundreds of

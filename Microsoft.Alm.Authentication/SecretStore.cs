@@ -39,20 +39,16 @@ namespace Microsoft.Alm.Authentication
         /// secrets vault.
         /// </summary>
         /// <param name="namespace">The namespace of the secrets written and read by this store.</param>
-        /// <param name="credentialCache">
-        /// (optional) Write-through, read-first cache. Default cache is used if a custom cache is
-        /// not provided.
-        /// </param>
-        /// <param name="tokenCache">
-        /// (optional) Write-through, read-first cache. Default cache is used if a custom cache is
-        /// not provided.
-        /// </param>
-        public SecretStore(string @namespace, ICredentialStore credentialCache = null, ITokenStore tokenCache = null, Secret.UriNameConversion getTargetName = null)
+        /// <param name="credentialCache">Write-through, read-first cache. Default cache is used if a custom cache is
+        /// not provided.</param>
+        /// <param name="tokenCache">Write-through, read-first cache. Default cache is used if a custom cache is
+        /// not provided.</param>
+        public SecretStore(string @namespace, ICredentialStore credentialCache, ITokenStore tokenCache, Secret.UriNameConversion getTargetName)
         {
             if (String.IsNullOrWhiteSpace(@namespace))
                 throw new ArgumentNullException(nameof(@namespace));
             if (@namespace.IndexOfAny(IllegalCharacters) != -1)
-                throw new ArgumentException(nameof(@namespace));
+                throw new ArgumentException("Namespace contains illegal characters.", nameof(@namespace));
 
             _getTargetName = getTargetName ?? Secret.UriToName;
 
@@ -60,6 +56,10 @@ namespace Microsoft.Alm.Authentication
             _credentialCache = credentialCache ?? new SecretCache(@namespace, _getTargetName);
             _tokenCache = tokenCache ?? new SecretCache(@namespace, _getTargetName);
         }
+
+        public SecretStore(string @namespace)
+            : this(@namespace, null, null, null)
+        { }
 
         public string Namespace
         {

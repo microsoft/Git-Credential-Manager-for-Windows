@@ -6,7 +6,7 @@ namespace GitHub.UI
 {
     public abstract class DialogUserControl : UserControl
     {
-        public DialogUserControl()
+        protected DialogUserControl()
         {
             IsVisibleChanged += (s, e) =>
             {

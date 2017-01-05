@@ -50,6 +50,7 @@
     <Compile Include="ActionCommandTests.cs" />
     <Compile Include="Controls\MaskedPasswordBoxTests.cs" />
     <Compile Include="CredentialsViewModelTests.cs" />
+    <Compile Include="GlobalSuppressions.cs" />
     <Compile Include="TwoFactorViewModelTests.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Validation\ModelValidatorTests.cs" />
