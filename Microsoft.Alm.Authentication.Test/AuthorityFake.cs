@@ -11,7 +11,7 @@ namespace Microsoft.Alm.Authentication.Test
             this.ExpectedQueryParameters = expectedQueryParameters;
         }
 
-        internal readonly string ExpectedQueryParameters; 
+        internal readonly string ExpectedQueryParameters;
 
         public async Task<Token> GeneratePersonalAccessToken(TargetUri targetUri, Token accessToken, VstsTokenScope tokenScope, bool requireCompactToken)
         {

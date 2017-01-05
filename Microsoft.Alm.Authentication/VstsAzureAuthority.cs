@@ -274,7 +274,7 @@ namespace Microsoft.Alm.Authentication
             Debug.Assert(targetUri != null, $"The `{nameof(targetUri)}` parameter is null.");
 
             HttpClient httpClient = CreateHttpClient(targetUri);
-            
+
             httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue(CredentialHeader, GetBase64EncodedCredentials(credentials));
 
             return httpClient;
@@ -450,7 +450,6 @@ namespace Microsoft.Alm.Authentication
         private static string GetBasicAuthorizationHeader(Credential credentials)
         {
             const string BasicPrefix = "Basic ";
-
 
             // credentials are packed into the 'Authorization' header as a base64 encoded pair
             string base64enc = GetBase64EncodedCredentials(credentials);

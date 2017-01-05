@@ -45,8 +45,8 @@ namespace Microsoft.Alm.Authentication
         /// </param>
         /// <param name="ntlmSupport">
         /// <para>The level of NTLM support to be provided by this instance.</para>
-        /// <para>If `<see cref="NtlmSupport.Always"/>` is used, the 
-        /// `<paramref name="acquireCredentialsCallback"/>` and `<paramref name="acquireResultCallback"/>` 
+        /// <para>If `<see cref="NtlmSupport.Always"/>` is used, the
+        /// `<paramref name="acquireCredentialsCallback"/>` and `<paramref name="acquireResultCallback"/>`
         /// will be ignored by `<see cref="GetCredentials(TargetUri)"/>`.</para>
         /// </param>
         /// <param name="acquireCredentialsCallback">
