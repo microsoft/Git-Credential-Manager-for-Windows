@@ -91,6 +91,7 @@ namespace Microsoft.Alm.Authentication
         {
             get { return QueryUri.AbsolutePath; }
         }
+
         /// <summary>
         /// The actual <see cref="Uri"/> of the target.
         /// </summary>

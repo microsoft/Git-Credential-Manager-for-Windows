@@ -77,7 +77,7 @@ namespace Microsoft.Alm.Authentication
     public delegate Credential AcquireCredentialsDelegate(TargetUri targetUri);
 
     /// <summary>
-    /// Delegate for interactivity related to credential acquisition. 
+    /// Delegate for interactivity related to credential acquisition.
     /// </summary>
     /// <param name="targetUri">
     /// The uniform resource indicator used to uniquely identify the credentials.

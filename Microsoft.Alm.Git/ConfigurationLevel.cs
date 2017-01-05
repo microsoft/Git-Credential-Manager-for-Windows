@@ -39,10 +39,10 @@ namespace Microsoft.Alm.Git
         Global = 1 << 3,
         Local = 1 << 4,
 
-        All = Portable 
-            | System 
-            | Xdg 
-            | Global 
+        All = Portable
+            | System
+            | Xdg
+            | Global
             | Local,
         NoLocal = All & ~Local,
         NoSystem = All & ~(Portable | System),

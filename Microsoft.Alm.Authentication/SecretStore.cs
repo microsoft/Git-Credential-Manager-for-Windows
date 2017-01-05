@@ -24,7 +24,6 @@
 **/
 
 using System;
-using System.Diagnostics;
 
 namespace Microsoft.Alm.Authentication
 {

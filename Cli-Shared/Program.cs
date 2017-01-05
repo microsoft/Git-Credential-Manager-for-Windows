@@ -419,9 +419,9 @@ namespace Microsoft.Alm.Cli
 
                 case AuthorityType.AzureDirectory:
                     Git.Trace.WriteLine($"authority for '{operationArguments.TargetUri}' is Azure Directory.");
-                    
+
                     // return the allocated authority or a generic AAD backed VSTS authentication object
-                    return authority ?? new VstsAadAuthentication(Guid.Empty, VstsCredentialScope, secrets, operationArguments.LoginHint );
+                    return authority ?? new VstsAadAuthentication(Guid.Empty, VstsCredentialScope, secrets, operationArguments.LoginHint);
 
                 case AuthorityType.Basic:
                     // enforce basic authentication only

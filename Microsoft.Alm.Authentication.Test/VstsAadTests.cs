@@ -62,7 +62,6 @@ namespace Microsoft.Alm.Authentication.Test
             Assert.IsNotNull(aadAuthentication.PersonalAccessTokenStore.ReadCredentials(targetUri), "Personal Access Token not found in store as expected.");
         }
 
-
         [TestMethod]
         public void VstsAadSetCredentialsTest()
         {
@@ -94,7 +93,7 @@ namespace Microsoft.Alm.Authentication.Test
         {
             TargetUri targetUri = DefaultTargetUri;
             VstsAadAuthentication aadAuthentication = GetVstsAadAuthentication("aad-loginhint", "username@domain");
-            
+
             Assert.IsNotNull(Task.Run(async () => { return await aadAuthentication.NoninteractiveLogon(targetUri, false); }).Result, "Non-interactive logon unexpectedly failed.");
 
             Assert.IsNotNull(aadAuthentication.PersonalAccessTokenStore.ReadCredentials(targetUri), "Personal Access Token not found in store as expected.");

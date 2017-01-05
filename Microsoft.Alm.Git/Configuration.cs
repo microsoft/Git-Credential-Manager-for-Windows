@@ -205,7 +205,7 @@ namespace Microsoft.Alm.Git
             // higher priority configurations are parsed, storing them in a handy lookup table
 
             // find and parse Git's portable config
-            if ((types & ConfigurationLevel.Portable) != 0 
+            if ((types & ConfigurationLevel.Portable) != 0
                 && Where.GitPortableConfig(out portableConfig))
             {
                 ParseGitConfig(ConfigurationLevel.Portable, portableConfig);

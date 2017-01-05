@@ -48,7 +48,7 @@ namespace Microsoft.Alm.Authentication
         [DllImport(Advapi32, CharSet = CharSet.Unicode, EntryPoint = "CredWriteW", SetLastError = true)]
         [return: MarshalAs(UnmanagedType.Bool)]
         internal static extern bool CredWrite(
-            [In] ref Credential credential, 
+            [In] ref Credential credential,
             [In] uint flags);
 
         /// <summary>
@@ -72,9 +72,9 @@ namespace Microsoft.Alm.Authentication
         [DllImport(Advapi32, CharSet = CharSet.Unicode, EntryPoint = "CredReadW", SetLastError = true)]
         [return: MarshalAs(UnmanagedType.Bool)]
         internal static extern bool CredRead(
-            [In][MarshalAs(UnmanagedType.LPWStr)] string targetName, 
-            [In][MarshalAs(UnmanagedType.U4)] CredentialType type, 
-            [In] uint flags, 
+            [In][MarshalAs(UnmanagedType.LPWStr)] string targetName,
+            [In][MarshalAs(UnmanagedType.U4)] CredentialType type,
+            [In] uint flags,
             [Out] out IntPtr credential);
 
         /// <summary>
@@ -99,8 +99,8 @@ namespace Microsoft.Alm.Authentication
         [DllImport(Advapi32, CharSet = CharSet.Unicode, EntryPoint = "CredDeleteW", SetLastError = true)]
         [return: MarshalAs(UnmanagedType.Bool)]
         internal static extern bool CredDelete(
-            [In][MarshalAs(UnmanagedType.LPWStr)] string targetName, 
-            [In][MarshalAs(UnmanagedType.U4)] CredentialType type, 
+            [In][MarshalAs(UnmanagedType.LPWStr)] string targetName,
+            [In][MarshalAs(UnmanagedType.U4)] CredentialType type,
             [In] uint flags);
 
         /// <summary>
@@ -138,9 +138,9 @@ namespace Microsoft.Alm.Authentication
         [DllImport(Advapi32, CharSet = CharSet.Unicode, EntryPoint = "CredEnumerateW", SetLastError = true)]
         [return: MarshalAs(UnmanagedType.Bool)]
         internal static extern bool CredEnumerate(
-            [In][MarshalAs(UnmanagedType.LPWStr)] string targetNameFilter, 
-            [In][MarshalAs(UnmanagedType.U4)] CredentialEnumerateFlags flags, 
-            [Out] out int count, 
+            [In][MarshalAs(UnmanagedType.LPWStr)] string targetNameFilter,
+            [In][MarshalAs(UnmanagedType.U4)] CredentialEnumerateFlags flags,
+            [Out] out int count,
             [Out] out IntPtr credenitalsArrayPtr);
 
         [Flags]

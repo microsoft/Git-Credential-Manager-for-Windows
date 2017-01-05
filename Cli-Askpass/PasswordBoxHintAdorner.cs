@@ -48,7 +48,7 @@ namespace Microsoft.Alm.Gui
             IsHitTestVisible = true;
             Visibility = Visibility.Visible;
 
-            if (adornedElement!=null)
+            if (adornedElement != null)
             {
                 adornedElement.GotFocus += Invalidate;
                 adornedElement.LostFocus += Invalidate;
