@@ -58,7 +58,7 @@ Only Microsoft can sign binaries with the Microsoft certificate. Therefore, whil
 
 ## Documents
 
-The documentation is formatted using [markdown](https://daringfireball.net/projects/markdown/syntax) and generated using [Pandoc](http://http://pandoc.org/).
+The documentation is formatted using [markdown](https://daringfireball.net/projects/markdown/syntax) and generated using [Pandoc](http://pandoc.org/).
 
 ## Logging
 
@@ -86,7 +86,7 @@ Please submit a Contributor License Agreement (CLA) before submitting a pull req
 
 ### Code of Conduct
 
-This project has adopted the [Microsoft Open Source Code of Conduct](https://opensource.microsoft.com/codeofconduct/). For more information see the [Code of Conduct FAQ](https://opensource.microsoft.com/codeofconduct/faq/) or contact [opencode@microsoft.com](mailto:opencode@microsoft.com) with any additional questions or comments.
+This project has adopted the [Microsoft Open Source Code of Conduct](https://opensource.microsoft.com/codeofconduct/). For more information see the [Code of Conduct FAQ](https://opensource.microsoft.com/codeofconduct/faq/) or contact <opencode@microsoft.com> with any additional questions or comments.
 
 ## License
 

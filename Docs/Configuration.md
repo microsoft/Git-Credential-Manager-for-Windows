@@ -55,7 +55,7 @@ The value should the URL of the proxy server.
 Specifies an Azure Active Directory login hint.
 This is helpful in non-interactive scenarios requiring an authoritative domain apart from visualstudio.com.
 
-Hints are typically of the form: "username@domain" or "domain" without quotes.
+Hints are typically of the form: `username@domain` or `domain` without quotes.
 
     git config --global credential.microsoft.visualstudio.com.loginhint microsoft.com
 
