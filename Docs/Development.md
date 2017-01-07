@@ -42,7 +42,7 @@ In the case of `git credential-manager get`, the `Main` method will call the `Ge
 
 ## Installer (setup.exe)
 
-Changes to the installer (setup.exe) requires [Inno Setup Compiler 5.5.6](http://www.jrsoftware.org/isinfo.php) or later to compile. Additionally, the [IDP plugin for Inno Setup](https://mitrichsoftware.wordpress.com/inno-setup-tools/inno-download-plugin/) is also required.
+Changes to the installer (setup.exe) requires [Inno Setup Compiler 5.5.9](http://www.jrsoftware.org/isinfo.php) or later to compile. Additionally, the [IDP plugin for Inno Setup](https://mitrichsoftware.wordpress.com/inno-setup-tools/inno-download-plugin/) is also required.
 
 The setup compiler pulls content from the "Deploy/" folder, therefore a completed Debug or Release build needs to have been completed prior to running the setup compiler. Content in the "Deploy/" folder will be used in the setup compilation.
 
