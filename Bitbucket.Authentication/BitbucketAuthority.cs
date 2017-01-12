@@ -155,6 +155,7 @@ namespace Bitbucket.Authentication
             BaseSecureStore.ValidateTargetUri(targetUri);
 
             Trace.WriteLine("   BitbucketAuthority::ValidateCredentials");
+            Trace.WriteLine($"        Auth Type = {authHeader.Substring(0,5)}");
 
             // craft the request header for the Bitbucket v2 API w/ credentials
             using (HttpClientHandler handler = targetUri.HttpClientHandler)

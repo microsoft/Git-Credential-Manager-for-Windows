@@ -1224,11 +1224,11 @@ namespace Microsoft.Alm.Cli
                         if (((operationArguments.Interactivity != Interactivity.Always)
                              && ((credentials = bbcAuth.GetCredentials(operationArguments.TargetUri, operationArguments.CredUsername)) != null)
                              && (!operationArguments.ValidateCredentials
-                                 || await bbcAuth.ValidateCredentials(operationArguments.TargetUri, operationArguments.CredUsername, credentials)))
+                                 || ((credentials = await bbcAuth.ValidateCredentials(operationArguments.TargetUri, operationArguments.CredUsername, credentials)) != null)))
                             || ((operationArguments.Interactivity != Interactivity.Never)
                                 && ((credentials = await bbcAuth.InteractiveLogon(operationArguments.TargetUri, operationArguments.CredUsername)) != null)
                                 && (!operationArguments.ValidateCredentials
-                                    || await bbcAuth.ValidateCredentials(operationArguments.TargetUri, operationArguments.CredUsername, credentials))))
+                                    || ((credentials = await bbcAuth.ValidateCredentials(operationArguments.TargetUri, operationArguments.CredUsername, credentials)) != null))))
                         {
                                 Git.Trace.WriteLine($"credentials for '{operationArguments.TargetUri}' found.");
                                 operationArguments.SetCredentials(credentials);

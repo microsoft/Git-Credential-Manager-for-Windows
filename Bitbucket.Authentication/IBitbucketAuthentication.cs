@@ -17,6 +17,6 @@ namespace Bitbucket.Authentication
         Task<Credential> InteractiveLogon(TargetUri targetUri);
 
 
-        Task<bool> ValidateCredentials(TargetUri targetUri, string username, Credential credentials);
+        Task<Credential> ValidateCredentials(TargetUri targetUri, string username, Credential credentials);
     }
 }
