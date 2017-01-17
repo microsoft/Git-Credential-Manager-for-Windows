@@ -1,9 +1,9 @@
-; This script requires Inno Setup Compiler 5.5.6 or later to compile
+; This script requires Inno Setup Compiler 5.5.9 or later to compile
 ; The Inno Setup Compiler (and IDE) can be found at http://www.jrsoftware.org/isinfo.php
 ; The IDP plugin for Inno Setup is also required and can be found at https://mitrichsoftware.wordpress.com/inno-setup-tools/inno-download-plugin/
 
-#if VER < EncodeVer(5,5,6)
-  #error Update your Inno Setup version (5.5.6 or newer)
+#if VER < EncodeVer(5,5,9)
+  #error Update your Inno Setup version (5.5.9 or newer)
 #endif
 
 #define deployDir "Deploy\"
