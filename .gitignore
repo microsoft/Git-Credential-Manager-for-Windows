@@ -19,3 +19,9 @@
 *.suo
 *.user
 *.sln.docstates
+
+# Coverity files
+/cov-int/
+/gcw.tar
+/gcw.tgz
+/gcw.lzma
