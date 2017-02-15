@@ -8,4 +8,4 @@ After installation and configuration, Git will use the Git Askpass and you will 
 
     git askpass
 
-For Git to use Askpass correctly, the `GIT_ASKPASS` environment variable needs contain the full path to the `git-askpass.exe` executable (example: `setx GIT_ASKPASS "C:\Program Files\Git\mingw64\libexec\git-core\askpass.exe"`). SSH can also be configured to use Askpass in the same manner using the `SSH_ASKPASS` environment variable; however, SSH currently will not use Askpass if it detects a TTY console (ala the ability to just ask on the console).
+For Git to use Askpass correctly, the `GIT_ASKPASS` environment variable needs contain the full path to the `git-askpass.exe` executable (example: `setx GIT_ASKPASS "C:\Program Files\Git\mingw64\libexec\git-core\git-askpass.exe"`). SSH can also be configured to use Askpass in the same manner using the `SSH_ASKPASS` environment variable; however, SSH currently will not use Askpass if it detects a TTY console (ala the ability to just ask on the console).
