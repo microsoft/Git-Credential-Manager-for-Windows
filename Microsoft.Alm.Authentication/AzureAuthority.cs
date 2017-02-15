@@ -135,12 +135,8 @@ namespace Microsoft.Alm.Authentication
         /// <param name="redirectUri">
         /// Address to return to upon receiving a response from the authority.
         /// </param>
-        /// <param name="queryParameters">
-        /// Optional: appended as-is to the query string in the HTTP authentication request to the
-        /// authority.
-        /// </param>
         /// <returns>If successful a <see cref="TokenPair"/>; otherwise <see langword="null"/>.</returns>
-        public async Task<Token> NoninteractiveAcquireToken(TargetUri targetUri, string clientId, string resource, Uri redirectUri, string queryParameters = null)
+        public async Task<Token> NoninteractiveAcquireToken(TargetUri targetUri, string clientId, string resource, Uri redirectUri)
         {
             if (ReferenceEquals(targetUri, null))
                 throw new ArgumentNullException(nameof(targetUri));
@@ -154,17 +150,13 @@ namespace Microsoft.Alm.Authentication
                 throw new ArgumentException(nameof(redirectUri));
 
             Token token = null;
-            queryParameters = queryParameters ?? String.Empty;
 
             try
             {
                 AuthenticationContext authCtx = new AuthenticationContext(AuthorityHostUrl, _adalTokenCache);
                 AuthenticationResult authResult = await authCtx.AcquireTokenAsync(resource,
                                                                                   clientId,
-                                                                                  redirectUri,
-                                                                                  new PlatformParameters(PromptBehavior.Never),
-                                                                                  UserIdentifier.AnyUser,
-                                                                                  queryParameters);
+                                                                                  new UserCredential());
 
                 token = new Token(authResult, TokenType.Access);
 

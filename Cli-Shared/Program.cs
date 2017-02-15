@@ -385,8 +385,7 @@ namespace Microsoft.Alm.Cli
                     // detect the authority
                     authority = BaseVstsAuthentication.GetAuthentication(operationArguments.TargetUri,
                                                                          VstsCredentialScope,
-                                                                         secrets,
-                                                                         operationArguments.LoginHint)
+                                                                         secrets)
                              ?? GitHubAuthentication.GetAuthentication(operationArguments.TargetUri,
                                                                        GitHubCredentialScope,
                                                                        secrets,
@@ -421,7 +420,7 @@ namespace Microsoft.Alm.Cli
                     Git.Trace.WriteLine($"authority for '{operationArguments.TargetUri}' is Azure Directory.");
 
                     // return the allocated authority or a generic AAD backed VSTS authentication object
-                    return authority ?? new VstsAadAuthentication(Guid.Empty, VstsCredentialScope, secrets, operationArguments.LoginHint);
+                    return authority ?? new VstsAadAuthentication(Guid.Empty, VstsCredentialScope, secrets);
 
                 case AuthorityType.Basic:
                     // enforce basic authentication only
@@ -630,24 +629,6 @@ namespace Microsoft.Alm.Cli
                 Git.Trace.WriteLine($"{ConfigNamespaceKey} = '{value}'.");
 
                 operationArguments.CustomNamespace = value;
-            }
-
-            // look for an AAD login hint
-            if (TryReadString(operationArguments, ConfigPrefix, EnvironLoginHintKey, out value))
-            {
-                Git.Trace.WriteLine($"{EnvironLoginHintKey} = '{value}'.");
-                operationArguments.LoginHint = value;
-            }
-            else
-            {
-                Configuration.Entry loginHint;
-                if (operationArguments.GitConfiguration.TryGetEntry(ConfigPrefix, operationArguments.QueryUri, ConfigLoginHintKey, out loginHint)
-                    && !String.IsNullOrWhiteSpace(loginHint.Value))
-                {
-                    Git.Trace.WriteLine($"{ConfigLoginHintKey} = '{loginHint}'.");
-
-                    operationArguments.LoginHint = loginHint.Value;
-                }
             }
         }
 

@@ -242,15 +242,13 @@ namespace Microsoft.Alm.Authentication
         /// An implementation of <see cref="BaseAuthentication"/> if one was detected;
         /// <see langword="null"/> otherwise.
         /// </param>
-        /// <param name="authenticationHint">An optional authentication hint for AAD</param>
         /// <returns>
         /// <see langword="true"/> if an authority could be determined; <see langword="false"/> otherwise.
         /// </returns>
         public static BaseAuthentication GetAuthentication(
             TargetUri targetUri,
             VstsTokenScope scope,
-            ICredentialStore personalAccessTokenStore,
-            string authenticationHint)
+            ICredentialStore personalAccessTokenStore)
         {
             BaseSecureStore.ValidateTargetUri(targetUri);
             if (ReferenceEquals(scope, null))
@@ -272,7 +270,7 @@ namespace Microsoft.Alm.Authentication
                 else
                 {
                     Git.Trace.WriteLine($"AAD authority for tenant '{tenantId}' detected.");
-                    authentication = new VstsAadAuthentication(tenantId, scope, personalAccessTokenStore, authenticationHint);
+                    authentication = new VstsAadAuthentication(tenantId, scope, personalAccessTokenStore);
                     (authentication as VstsAadAuthentication).TenantId = tenantId;
                 }
             }

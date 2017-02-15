@@ -64,11 +64,7 @@ namespace Microsoft.Alm.Authentication
         /// <param name="redirectUri">
         /// Address to return to upon receiving a response from the authority.
         /// </param>
-        /// <param name="queryParameters">
-        /// Optional: appended as-is to the query string in the HTTP authentication request to the
-        /// authority.
-        /// </param>
         /// <returns>If successful a <see cref="TokenPair"/>; otherwise <see langword="null"/>.</returns>
-        Task<Token> NoninteractiveAcquireToken(TargetUri targetUri, string clientId, string resource, Uri redirectUri, string queryParameters = null);
+        Task<Token> NoninteractiveAcquireToken(TargetUri targetUri, string clientId, string resource, Uri redirectUri);
     }
 }
