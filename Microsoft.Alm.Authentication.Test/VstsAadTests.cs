@@ -14,7 +14,7 @@ namespace Microsoft.Alm.Authentication.Test
         public void VstsAadDeleteCredentialsTest()
         {
             TargetUri targetUri = DefaultTargetUri;
-            VstsAadAuthentication aadAuthentication = GetVstsAadAuthentication("aad-delete", null);
+            VstsAadAuthentication aadAuthentication = GetVstsAadAuthentication("aad-delete");
 
             aadAuthentication.PersonalAccessTokenStore.WriteCredentials(targetUri, DefaultPersonalAccessToken);
 
@@ -29,7 +29,7 @@ namespace Microsoft.Alm.Authentication.Test
         public void VstsAadGetCredentialsTest()
         {
             TargetUri targetUri = DefaultTargetUri;
-            VstsAadAuthentication aadAuthentication = GetVstsAadAuthentication("aad-get", null);
+            VstsAadAuthentication aadAuthentication = GetVstsAadAuthentication("aad-get");
 
             Assert.IsNull(aadAuthentication.GetCredentials(targetUri), "Credentials were retrieved unexpectedly.");
 
@@ -42,7 +42,7 @@ namespace Microsoft.Alm.Authentication.Test
         public void VstsAadInteractiveLogonTest()
         {
             TargetUri targetUri = DefaultTargetUri;
-            VstsAadAuthentication aadAuthentication = GetVstsAadAuthentication("aad-logon", null);
+            VstsAadAuthentication aadAuthentication = GetVstsAadAuthentication("aad-logon");
 
             Assert.IsNull(aadAuthentication.PersonalAccessTokenStore.ReadCredentials(targetUri), "Personal Access Token found in store unexpectedly.");
 
@@ -55,7 +55,7 @@ namespace Microsoft.Alm.Authentication.Test
         public void VstsAadNoninteractiveLogonTest()
         {
             TargetUri targetUri = DefaultTargetUri;
-            VstsAadAuthentication aadAuthentication = GetVstsAadAuthentication("aad-noninteractive", null);
+            VstsAadAuthentication aadAuthentication = GetVstsAadAuthentication("aad-noninteractive");
 
             Assert.IsNotNull(Task.Run(async () => { return await aadAuthentication.NoninteractiveLogon(targetUri, false); }).Result, "Non-interactive logon unexpectedly failed.");
 
@@ -66,7 +66,7 @@ namespace Microsoft.Alm.Authentication.Test
         public void VstsAadSetCredentialsTest()
         {
             TargetUri targetUri = DefaultTargetUri;
-            VstsAadAuthentication aadAuthentication = GetVstsAadAuthentication("aad-set", null);
+            VstsAadAuthentication aadAuthentication = GetVstsAadAuthentication("aad-set");
             Credential credentials = DefaultCredentials;
 
             aadAuthentication.SetCredentials(targetUri, credentials);
@@ -78,7 +78,7 @@ namespace Microsoft.Alm.Authentication.Test
         [TestMethod]
         public void VstsAadValidateCredentialsTest()
         {
-            VstsAadAuthentication aadAuthentication = GetVstsAadAuthentication("aad-validate", null);
+            VstsAadAuthentication aadAuthentication = GetVstsAadAuthentication("aad-validate");
             Credential credentials = null;
 
             Assert.IsFalse(Task.Run(async () => { return await aadAuthentication.ValidateCredentials(DefaultTargetUri, credentials); }).Result, "Credential validation unexpectedly failed.");
@@ -92,25 +92,21 @@ namespace Microsoft.Alm.Authentication.Test
         public void VstsAadValidateLoginHintTest()
         {
             TargetUri targetUri = DefaultTargetUri;
-            VstsAadAuthentication aadAuthentication = GetVstsAadAuthentication("aad-loginhint", "username@domain");
+            VstsAadAuthentication aadAuthentication = GetVstsAadAuthentication("aad-loginhint");
 
             Assert.IsNotNull(Task.Run(async () => { return await aadAuthentication.NoninteractiveLogon(targetUri, false); }).Result, "Non-interactive logon unexpectedly failed.");
 
             Assert.IsNotNull(aadAuthentication.PersonalAccessTokenStore.ReadCredentials(targetUri), "Personal Access Token not found in store as expected.");
         }
 
-        private static VstsAadAuthentication GetVstsAadAuthentication(string @namespace, string loginHint)
+        private static VstsAadAuthentication GetVstsAadAuthentication(string @namespace)
         {
-            string expectedQueryParamters = null;
-            if (loginHint != null)
-            {
-                expectedQueryParamters = "login_hint=" + loginHint;
-            }
+            string expectedQueryParameters = null;
 
             ICredentialStore tokenStore1 = new SecretCache(@namespace + 1);
             ITokenStore tokenStore2 = new SecretCache(@namespace + 2);
-            IVstsAuthority vstsAuthority = new AuthorityFake(expectedQueryParamters);
-            return new VstsAadAuthentication(tokenStore1, tokenStore2, vstsAuthority, loginHint);
+            IVstsAuthority vstsAuthority = new AuthorityFake(expectedQueryParameters);
+            return new VstsAadAuthentication(tokenStore1, tokenStore2, vstsAuthority);
         }
     }
 }
