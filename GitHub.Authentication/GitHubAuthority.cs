@@ -30,8 +30,10 @@ using System.Net.Http;
 using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
+using Microsoft.Alm.Authentication;
+using Git = Microsoft.Alm.Git;
 
-namespace Microsoft.Alm.Authentication
+namespace GitHub.Authentication
 {
     internal class GitHubAuthority : IGitHubAuthority
     {

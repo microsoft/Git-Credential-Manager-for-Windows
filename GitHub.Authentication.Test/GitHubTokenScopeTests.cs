@@ -1,7 +1,7 @@
 ﻿using System.Collections.Generic;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
-namespace Microsoft.Alm.Authentication.Test
+namespace GitHub.Authentication.Test
 {
     [TestClass]
     public class GitHubTokenScopeTests

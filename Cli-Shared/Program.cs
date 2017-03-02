@@ -8,6 +8,7 @@ using System.Threading.Tasks;
 using Microsoft.Alm.Authentication;
 using Microsoft.Alm.Git;
 using Microsoft.Win32.SafeHandles;
+using Github = GitHub.Authentication;
 
 namespace Microsoft.Alm.Cli
 {
@@ -53,7 +54,7 @@ namespace Microsoft.Alm.Cli
         internal static readonly char[] NewLineChars = Environment.NewLine.ToCharArray();
 
         private static readonly VstsTokenScope VstsCredentialScope = VstsTokenScope.CodeWrite | VstsTokenScope.PackagingRead;
-        private static readonly GitHubTokenScope GitHubCredentialScope = GitHubTokenScope.Gist | GitHubTokenScope.Repo;
+        private static readonly Github.TokenScope GitHubCredentialScope = Github.TokenScope.Gist | Github.TokenScope.Repo;
 
         /// <summary>
         /// Gets the path to the executable.
@@ -368,12 +369,12 @@ namespace Microsoft.Alm.Cli
                     : new AcquireCredentialsDelegate(Program.BasicCredentialPrompt);
 
             var githubCredentialCallback = (operationArguments.UseModalUi)
-                    ? new GitHubAuthentication.AcquireCredentialsDelegate(GitHub.Authentication.AuthenticationPrompts.CredentialModalPrompt)
-                    : new GitHubAuthentication.AcquireCredentialsDelegate(Program.GitHubCredentialPrompt);
+                    ? new Github.Authentication.AcquireCredentialsDelegate(Github.AuthenticationPrompts.CredentialModalPrompt)
+                    : new Github.Authentication.AcquireCredentialsDelegate(Program.GitHubCredentialPrompt);
 
             var githubAuthcodeCallback = (operationArguments.UseModalUi)
-                    ? new GitHubAuthentication.AcquireAuthenticationCodeDelegate(GitHub.Authentication.AuthenticationPrompts.AuthenticationCodeModalPrompt)
-                    : new GitHubAuthentication.AcquireAuthenticationCodeDelegate(Program.GitHubAuthCodePrompt);
+                    ? new Github.Authentication.AcquireAuthenticationCodeDelegate(Github.AuthenticationPrompts.AuthenticationCodeModalPrompt)
+                    : new Github.Authentication.AcquireAuthenticationCodeDelegate(Program.GitHubAuthCodePrompt);
 
             NtlmSupport basicNtlmSupport = NtlmSupport.Auto;
 
@@ -386,7 +387,7 @@ namespace Microsoft.Alm.Cli
                     authority = BaseVstsAuthentication.GetAuthentication(operationArguments.TargetUri,
                                                                          VstsCredentialScope,
                                                                          secrets)
-                             ?? GitHubAuthentication.GetAuthentication(operationArguments.TargetUri,
+                             ?? Github.Authentication.GetAuthentication(operationArguments.TargetUri,
                                                                        GitHubCredentialScope,
                                                                        secrets,
                                                                        githubCredentialCallback,
@@ -406,7 +407,7 @@ namespace Microsoft.Alm.Cli
                             operationArguments.Authority = AuthorityType.AzureDirectory;
                             goto case AuthorityType.AzureDirectory;
                         }
-                        else if (authority is GitHubAuthentication)
+                        else if (authority is Github.Authentication)
                         {
                             operationArguments.Authority = AuthorityType.GitHub;
                             goto case AuthorityType.GitHub;
@@ -431,7 +432,7 @@ namespace Microsoft.Alm.Cli
                     Git.Trace.WriteLine($"authority for '{operationArguments.TargetUri}' is GitHub.");
 
                     // return a GitHub authentication object
-                    return authority ?? new GitHubAuthentication(GitHubCredentialScope,
+                    return authority ?? new Github.Authentication(GitHubCredentialScope,
                                                                  secrets,
                                                                  githubCredentialCallback,
                                                                  githubAuthcodeCallback,
@@ -481,7 +482,7 @@ namespace Microsoft.Alm.Cli
 
                 case AuthorityType.GitHub:
                     Git.Trace.WriteLine($"deleting GitHub credentials for '{operationArguments.TargetUri}'.");
-                    GitHubAuthentication ghAuth = authentication as GitHubAuthentication;
+                    Github.Authentication ghAuth = authentication as Github.Authentication;
                     ghAuth.DeleteCredentials(operationArguments.TargetUri);
                     break;
             }
@@ -734,7 +735,7 @@ namespace Microsoft.Alm.Cli
             }
         }
 
-        private static bool GitHubAuthCodePrompt(TargetUri targetUri, GitHubAuthenticationResultType resultType, string username, out string authenticationCode)
+        private static bool GitHubAuthCodePrompt(TargetUri targetUri, Github.GitHubAuthenticationResultType resultType, string username, out string authenticationCode)
         {
             // ReadConsole 32768 fail, 32767 ok
             // @linquize [https://github.com/Microsoft/Git-Credential-Manager-for-Windows/commit/a62b9a19f430d038dcd85a610d97e5f763980f85]
@@ -756,7 +757,7 @@ namespace Microsoft.Alm.Cli
             using (SafeFileHandle stdout = NativeMethods.CreateFile(NativeMethods.ConsoleOutName, fileAccessFlags, fileShareFlags, IntPtr.Zero, fileCreationDisposition, fileAttributes, IntPtr.Zero))
             using (SafeFileHandle stdin = NativeMethods.CreateFile(NativeMethods.ConsoleInName, fileAccessFlags, fileShareFlags, IntPtr.Zero, fileCreationDisposition, fileAttributes, IntPtr.Zero))
             {
-                string type = resultType == GitHubAuthenticationResultType.TwoFactorApp
+                string type = resultType == Github.GitHubAuthenticationResultType.TwoFactorApp
                     ? "app"
                     : "sms";
 
@@ -1069,7 +1070,7 @@ namespace Microsoft.Alm.Cli
 
                 case AuthorityType.GitHub:
                     {
-                        GitHubAuthentication ghAuth = authentication as GitHubAuthentication;
+                        Github.Authentication ghAuth = authentication as Github.Authentication;
 
                         Task.Run(async () =>
                         {

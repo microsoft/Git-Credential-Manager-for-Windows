@@ -25,8 +25,10 @@
 
 using System;
 using System.Threading.Tasks;
+using Microsoft.Alm.Authentication;
+using Git = Microsoft.Alm.Git;
 
-namespace Microsoft.Alm.Authentication
+namespace GitHub.Authentication
 {
     /// <summary>
     /// Facilitates GitHub simple and two-factor authentication
@@ -57,7 +59,7 @@ namespace Microsoft.Alm.Authentication
             TokenScope = tokenScope;
 
             PersonalAccessTokenStore = personalAccessTokenStore;
-            GitHubAuthority = new GitHubAuthority();
+            Authority = new GitHubAuthority();
 
             AcquireCredentialsCallback = acquireCredentialsCallback;
             AcquireAuthenticationCodeCallback = acquireAuthenticationCodeCallback;
@@ -69,7 +71,7 @@ namespace Microsoft.Alm.Authentication
         /// </summary>
         public readonly GitHubTokenScope TokenScope;
 
-        internal IGitHubAuthority GitHubAuthority { get; set; }
+        internal IGitHubAuthority Authority { get; set; }
         internal ICredentialStore PersonalAccessTokenStore { get; set; }
         internal AcquireCredentialsDelegate AcquireCredentialsCallback { get; set; }
         internal AcquireAuthenticationCodeDelegate AcquireAuthenticationCodeCallback { get; set; }
@@ -172,7 +174,7 @@ namespace Microsoft.Alm.Authentication
             {
                 GitHubAuthenticationResult result;
 
-                if (result = await GitHubAuthority.AcquireToken(targetUri, username, password, null, this.TokenScope))
+                if (result = await Authority.AcquireToken(targetUri, username, password, null, this.TokenScope))
                 {
                     Git.Trace.WriteLine($"token acquisition for '{targetUri}' succeeded");
 
@@ -190,7 +192,7 @@ namespace Microsoft.Alm.Authentication
                     string authenticationCode;
                     if (AcquireAuthenticationCodeCallback(targetUri, result, username, out authenticationCode))
                     {
-                        if (result = await GitHubAuthority.AcquireToken(targetUri, username, password, authenticationCode, this.TokenScope))
+                        if (result = await Authority.AcquireToken(targetUri, username, password, authenticationCode, this.TokenScope))
                         {
                             Git.Trace.WriteLine($"token acquisition for '{targetUri}' succeeded.");
 
@@ -238,7 +240,7 @@ namespace Microsoft.Alm.Authentication
             Credential credentials = null;
 
             GitHubAuthenticationResult result;
-            if (result = await GitHubAuthority.AcquireToken(targetUri, username, password, authenticationCode, this.TokenScope))
+            if (result = await Authority.AcquireToken(targetUri, username, password, authenticationCode, this.TokenScope))
             {
                 Git.Trace.WriteLine($"token acquisition for '{targetUri}' succeeded.");
 
@@ -282,7 +284,7 @@ namespace Microsoft.Alm.Authentication
             BaseSecureStore.ValidateTargetUri(targetUri);
             BaseSecureStore.ValidateCredential(credentials);
 
-            return await GitHubAuthority.ValidateCredentials(targetUri, credentials);
+            return await Authority.ValidateCredentials(targetUri, credentials);
         }
 
         /// <summary>

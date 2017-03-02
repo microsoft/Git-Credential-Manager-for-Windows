@@ -25,8 +25,9 @@
 
 using System;
 using System.Diagnostics;
+using Microsoft.Alm.Authentication;
 
-namespace Microsoft.Alm.Authentication
+namespace GitHub.Authentication
 {
     [DebuggerDisplay("{Type}")]
     public struct GitHubAuthenticationResult : IEquatable<GitHubAuthenticationResult>

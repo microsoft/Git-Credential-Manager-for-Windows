@@ -24,8 +24,9 @@
 **/
 
 using System.Threading.Tasks;
+using Microsoft.Alm.Authentication;
 
-namespace Microsoft.Alm.Authentication
+namespace GitHub.Authentication
 {
     public interface IGitHubAuthentication : IAuthentication
     {

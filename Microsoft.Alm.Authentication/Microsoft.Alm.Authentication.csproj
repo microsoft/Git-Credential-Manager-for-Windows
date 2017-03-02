@@ -49,14 +49,8 @@
     <Reference Include="System.Security" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="GitHubAuthentication.cs" />
-    <Compile Include="GitHubAuthenticationResult.cs" />
-    <Compile Include="GitHubAuthority.cs" />
-    <Compile Include="GitHubTokenScope.cs" />
     <Compile Include="Global.cs" />
     <Compile Include="GlobalSuppressions.cs" />
-    <Compile Include="IGitHubAuthentication.cs" />
-    <Compile Include="IGitHubAuthority.cs" />
     <Compile Include="IVstsAadAuthentication.cs" />
     <Compile Include="IVstsMsaAuthentication.cs" />
     <Compile Include="NtlmSupport.cs" />
@@ -89,7 +83,7 @@
     </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
-    <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
+  <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.
   <Target Name="BeforeBuild">
   </Target>

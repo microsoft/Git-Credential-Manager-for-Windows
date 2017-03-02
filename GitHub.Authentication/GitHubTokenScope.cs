@@ -26,9 +26,10 @@
 using System;
 using System.Collections.Generic;
 using System.Runtime.CompilerServices;
+using Microsoft.Alm.Authentication;
 using ScopeSet = System.Collections.Generic.HashSet<string>;
 
-namespace Microsoft.Alm.Authentication
+namespace GitHub.Authentication
 {
     public sealed class GitHubTokenScope : TokenScope, IEquatable<GitHubTokenScope>
     {
