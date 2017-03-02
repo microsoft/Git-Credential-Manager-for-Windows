@@ -59,7 +59,9 @@
     <Compile Include="AzureAuthority.cs" />
     <Compile Include="BaseVstsAuthentication.cs" />
     <Compile Include="IAzureAuthority.cs" />
+    <Compile Include="IVstsAadAuthentication.cs" />
     <Compile Include="IVstsAuthority.cs" />
+    <Compile Include="IVstsMsaAuthentication.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="TokenRegistry.cs" />
     <Compile Include="VstsAadAuthentication.cs" />

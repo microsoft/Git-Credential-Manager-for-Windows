@@ -74,16 +74,16 @@
     <Compile Include="CredentialsWindow.xaml.cs">
       <DependentUpon>CredentialsWindow.xaml</DependentUpon>
     </Compile>
-    <Compile Include="GitHubAuthentication.cs" />
-    <Compile Include="GitHubAuthenticationResult.cs" />
-    <Compile Include="GitHubAuthority.cs" />
-    <Compile Include="GitHubTokenScope.cs" />
+    <Compile Include="Authentication.cs" />
+    <Compile Include="AuthenticationResult.cs" />
+    <Compile Include="Authority.cs" />
+    <Compile Include="TokenScope.cs" />
     <Compile Include="GlobalSuppressions.cs" />
     <Compile Include="Helpers\ActionCommand.cs" />
     <Compile Include="Helpers\BindingProxy.cs" />
     <Compile Include="Helpers\HyperLinkCommand.cs" />
-    <Compile Include="IGitHubAuthentication.cs" />
-    <Compile Include="IGitHubAuthority.cs" />
+    <Compile Include="IAuthentication.cs" />
+    <Compile Include="IAuthority.cs" />
     <Compile Include="Tester.xaml.cs">
       <DependentUpon>Tester.xaml</DependentUpon>
     </Compile>

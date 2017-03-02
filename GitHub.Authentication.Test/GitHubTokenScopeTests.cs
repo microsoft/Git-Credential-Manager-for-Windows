@@ -9,41 +9,41 @@ namespace GitHub.Authentication.Test
         [TestMethod]
         public void AddOperator()
         {
-            var val = GitHubTokenScope.Gist + GitHubTokenScope.Notifications;
-            Assert.AreEqual(val.Value, GitHubTokenScope.Gist.Value + " " + GitHubTokenScope.Notifications.Value);
+            var val = TokenScope.Gist + TokenScope.Notifications;
+            Assert.AreEqual(val.Value, TokenScope.Gist.Value + " " + TokenScope.Notifications.Value);
 
-            val += GitHubTokenScope.OrgAdmin;
-            Assert.AreEqual(val.Value, GitHubTokenScope.Gist.Value + " " + GitHubTokenScope.Notifications.Value + " " + GitHubTokenScope.OrgAdmin);
+            val += TokenScope.OrgAdmin;
+            Assert.AreEqual(val.Value, TokenScope.Gist.Value + " " + TokenScope.Notifications.Value + " " + TokenScope.OrgAdmin);
         }
 
         [TestMethod]
         public void AndOperator()
         {
-            var val = (GitHubTokenScope.Gist & GitHubTokenScope.Gist);
-            Assert.AreEqual(GitHubTokenScope.Gist, val);
+            var val = (TokenScope.Gist & TokenScope.Gist);
+            Assert.AreEqual(TokenScope.Gist, val);
 
-            val = GitHubTokenScope.OrgAdmin + GitHubTokenScope.OrgHookAdmin + GitHubTokenScope.Gist;
-            Assert.IsTrue((val & GitHubTokenScope.OrgAdmin) == GitHubTokenScope.OrgAdmin);
-            Assert.IsTrue((val & GitHubTokenScope.OrgHookAdmin) == GitHubTokenScope.OrgHookAdmin);
-            Assert.IsTrue((val & GitHubTokenScope.Gist) == GitHubTokenScope.Gist);
-            Assert.IsFalse((val & GitHubTokenScope.OrgRead) == GitHubTokenScope.OrgRead);
-            Assert.IsTrue((val & GitHubTokenScope.OrgRead) == GitHubTokenScope.None);
+            val = TokenScope.OrgAdmin + TokenScope.OrgHookAdmin + TokenScope.Gist;
+            Assert.IsTrue((val & TokenScope.OrgAdmin) == TokenScope.OrgAdmin);
+            Assert.IsTrue((val & TokenScope.OrgHookAdmin) == TokenScope.OrgHookAdmin);
+            Assert.IsTrue((val & TokenScope.Gist) == TokenScope.Gist);
+            Assert.IsFalse((val & TokenScope.OrgRead) == TokenScope.OrgRead);
+            Assert.IsTrue((val & TokenScope.OrgRead) == TokenScope.None);
         }
 
         [TestMethod]
         public void Equality()
         {
-            Assert.AreEqual(GitHubTokenScope.OrgWrite, GitHubTokenScope.OrgWrite);
-            Assert.AreEqual(GitHubTokenScope.None, GitHubTokenScope.None);
+            Assert.AreEqual(TokenScope.OrgWrite, TokenScope.OrgWrite);
+            Assert.AreEqual(TokenScope.None, TokenScope.None);
 
-            Assert.AreNotEqual(GitHubTokenScope.Gist, GitHubTokenScope.PublicKeyAdmin);
-            Assert.AreNotEqual(GitHubTokenScope.Gist, GitHubTokenScope.None);
+            Assert.AreNotEqual(TokenScope.Gist, TokenScope.PublicKeyAdmin);
+            Assert.AreNotEqual(TokenScope.Gist, TokenScope.None);
 
-            Assert.AreEqual(GitHubTokenScope.OrgRead | GitHubTokenScope.PublicKeyRead | GitHubTokenScope.OrgHookAdmin, GitHubTokenScope.OrgRead | GitHubTokenScope.PublicKeyRead | GitHubTokenScope.OrgHookAdmin);
-            Assert.AreEqual(GitHubTokenScope.OrgHookAdmin | GitHubTokenScope.OrgRead | GitHubTokenScope.PublicKeyRead, GitHubTokenScope.OrgRead | GitHubTokenScope.PublicKeyRead | GitHubTokenScope.OrgHookAdmin);
+            Assert.AreEqual(TokenScope.OrgRead | TokenScope.PublicKeyRead | TokenScope.OrgHookAdmin, TokenScope.OrgRead | TokenScope.PublicKeyRead | TokenScope.OrgHookAdmin);
+            Assert.AreEqual(TokenScope.OrgHookAdmin | TokenScope.OrgRead | TokenScope.PublicKeyRead, TokenScope.OrgRead | TokenScope.PublicKeyRead | TokenScope.OrgHookAdmin);
 
-            Assert.AreNotEqual(GitHubTokenScope.OrgRead | GitHubTokenScope.PublicKeyWrite | GitHubTokenScope.OrgHookAdmin, GitHubTokenScope.OrgRead | GitHubTokenScope.PublicKeyRead | GitHubTokenScope.OrgHookAdmin);
-            Assert.AreNotEqual(GitHubTokenScope.OrgRead | GitHubTokenScope.PublicKeyRead | GitHubTokenScope.OrgHookAdmin, GitHubTokenScope.OrgRead | GitHubTokenScope.PublicKeyRead);
+            Assert.AreNotEqual(TokenScope.OrgRead | TokenScope.PublicKeyWrite | TokenScope.OrgHookAdmin, TokenScope.OrgRead | TokenScope.PublicKeyRead | TokenScope.OrgHookAdmin);
+            Assert.AreNotEqual(TokenScope.OrgRead | TokenScope.PublicKeyRead | TokenScope.OrgHookAdmin, TokenScope.OrgRead | TokenScope.PublicKeyRead);
         }
 
         [TestMethod]
@@ -51,17 +51,17 @@ namespace GitHub.Authentication.Test
         {
             HashSet<int> hashCodes = new HashSet<int>();
 
-            foreach (var item in GitHubTokenScope.EnumerateValues())
+            foreach (var item in TokenScope.EnumerateValues())
             {
                 Assert.IsTrue(hashCodes.Add(item.GetHashCode()));
             }
 
             int loop1 = 0;
-            foreach (var item1 in GitHubTokenScope.EnumerateValues())
+            foreach (var item1 in TokenScope.EnumerateValues())
             {
                 int loop2 = 0;
 
-                foreach (var item2 in GitHubTokenScope.EnumerateValues())
+                foreach (var item2 in TokenScope.EnumerateValues())
                 {
                     if (loop1 < loop2)
                     {
@@ -82,45 +82,45 @@ namespace GitHub.Authentication.Test
         [TestMethod]
         public void OrOperator()
         {
-            var val1 = (GitHubTokenScope.Gist | GitHubTokenScope.Gist);
-            Assert.AreEqual(GitHubTokenScope.Gist, val1);
+            var val1 = (TokenScope.Gist | TokenScope.Gist);
+            Assert.AreEqual(TokenScope.Gist, val1);
 
-            val1 = GitHubTokenScope.OrgAdmin + GitHubTokenScope.OrgHookAdmin + GitHubTokenScope.Gist;
-            var val2 = val1 | GitHubTokenScope.OrgAdmin;
+            val1 = TokenScope.OrgAdmin + TokenScope.OrgHookAdmin + TokenScope.Gist;
+            var val2 = val1 | TokenScope.OrgAdmin;
             Assert.AreEqual(val1, val2);
 
-            val2 = GitHubTokenScope.OrgAdmin | GitHubTokenScope.OrgHookAdmin | GitHubTokenScope.Gist;
+            val2 = TokenScope.OrgAdmin | TokenScope.OrgHookAdmin | TokenScope.Gist;
             Assert.AreEqual(val1, val2);
-            Assert.IsTrue((val2 & GitHubTokenScope.OrgAdmin) == GitHubTokenScope.OrgAdmin);
-            Assert.IsTrue((val2 & GitHubTokenScope.OrgHookAdmin) == GitHubTokenScope.OrgHookAdmin);
-            Assert.IsTrue((val2 & GitHubTokenScope.Gist) == GitHubTokenScope.Gist);
-            Assert.IsFalse((val2 & GitHubTokenScope.OrgRead) == GitHubTokenScope.OrgRead);
+            Assert.IsTrue((val2 & TokenScope.OrgAdmin) == TokenScope.OrgAdmin);
+            Assert.IsTrue((val2 & TokenScope.OrgHookAdmin) == TokenScope.OrgHookAdmin);
+            Assert.IsTrue((val2 & TokenScope.Gist) == TokenScope.Gist);
+            Assert.IsFalse((val2 & TokenScope.OrgRead) == TokenScope.OrgRead);
         }
 
         [TestMethod]
         public void MinusOperator()
         {
-            var val1 = GitHubTokenScope.Gist | GitHubTokenScope.Repo | GitHubTokenScope.RepoDelete;
-            var val2 = val1 - GitHubTokenScope.RepoDelete;
-            Assert.AreEqual(val2, GitHubTokenScope.Gist | GitHubTokenScope.Repo);
+            var val1 = TokenScope.Gist | TokenScope.Repo | TokenScope.RepoDelete;
+            var val2 = val1 - TokenScope.RepoDelete;
+            Assert.AreEqual(val2, TokenScope.Gist | TokenScope.Repo);
 
             var val3 = val1 - val2;
-            Assert.AreEqual(val3, GitHubTokenScope.RepoDelete);
+            Assert.AreEqual(val3, TokenScope.RepoDelete);
 
-            var val4 = val3 - GitHubTokenScope.RepoDeployment;
+            var val4 = val3 - TokenScope.RepoDeployment;
             Assert.AreEqual(val3, val4);
 
-            var val5 = (GitHubTokenScope.Gist + GitHubTokenScope.Repo) - (GitHubTokenScope.Repo | GitHubTokenScope.RepoHookAdmin | GitHubTokenScope.OrgWrite);
-            Assert.AreEqual(val5, GitHubTokenScope.Gist);
+            var val5 = (TokenScope.Gist + TokenScope.Repo) - (TokenScope.Repo | TokenScope.RepoHookAdmin | TokenScope.OrgWrite);
+            Assert.AreEqual(val5, TokenScope.Gist);
         }
 
         [TestMethod]
         public void XorOperator()
         {
-            var val1 = GitHubTokenScope.RepoDelete + GitHubTokenScope.PublicKeyAdmin;
-            var val2 = GitHubTokenScope.PublicKeyAdmin + GitHubTokenScope.PublicKeyRead;
+            var val1 = TokenScope.RepoDelete + TokenScope.PublicKeyAdmin;
+            var val2 = TokenScope.PublicKeyAdmin + TokenScope.PublicKeyRead;
             var val3 = val1 ^ val2;
-            Assert.AreEqual(val3, GitHubTokenScope.RepoDelete | GitHubTokenScope.PublicKeyRead);
+            Assert.AreEqual(val3, TokenScope.RepoDelete | TokenScope.PublicKeyRead);
         }
     }
 }

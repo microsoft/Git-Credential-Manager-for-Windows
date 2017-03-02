@@ -33,15 +33,15 @@ namespace GitHub.Authentication
     /// <summary>
     /// Facilitates GitHub simple and two-factor authentication
     /// </summary>
-    public class GitHubAuthentication : BaseAuthentication, IGitHubAuthentication
+    public class Authentication : BaseAuthentication, IAuthentication
     {
         /// <summary>
         ///
         /// </summary>
         /// <param name="tokenScope"></param>
         /// <param name="personalAccessTokenStore"></param>
-        public GitHubAuthentication(
-            GitHubTokenScope tokenScope,
+        public Authentication(
+            TokenScope tokenScope,
             ICredentialStore personalAccessTokenStore,
             AcquireCredentialsDelegate acquireCredentialsCallback,
             AcquireAuthenticationCodeDelegate acquireAuthenticationCodeCallback,
@@ -59,7 +59,7 @@ namespace GitHub.Authentication
             TokenScope = tokenScope;
 
             PersonalAccessTokenStore = personalAccessTokenStore;
-            Authority = new GitHubAuthority();
+            Authority = new Authority();
 
             AcquireCredentialsCallback = acquireCredentialsCallback;
             AcquireAuthenticationCodeCallback = acquireAuthenticationCodeCallback;
@@ -69,9 +69,9 @@ namespace GitHub.Authentication
         /// <summary>
         /// The desired scope of the authentication token to be requested.
         /// </summary>
-        public readonly GitHubTokenScope TokenScope;
+        public readonly TokenScope TokenScope;
 
-        internal IGitHubAuthority Authority { get; set; }
+        internal IAuthority Authority { get; set; }
         internal ICredentialStore PersonalAccessTokenStore { get; set; }
         internal AcquireCredentialsDelegate AcquireCredentialsCallback { get; set; }
         internal AcquireAuthenticationCodeDelegate AcquireAuthenticationCodeCallback { get; set; }
@@ -106,7 +106,7 @@ namespace GitHub.Authentication
         /// <returns>True if success; otherwise false.</returns>
         public static BaseAuthentication GetAuthentication(
             TargetUri targetUri,
-            GitHubTokenScope tokenScope,
+            TokenScope tokenScope,
             ICredentialStore personalAccessTokenStore,
             AcquireCredentialsDelegate acquireCredentialsCallback,
             AcquireAuthenticationCodeDelegate acquireAuthenticationCodeCallback,
@@ -122,7 +122,7 @@ namespace GitHub.Authentication
 
             if (targetUri.DnsSafeHost.EndsWith(GitHubBaseUrlHost, StringComparison.OrdinalIgnoreCase))
             {
-                authentication = new GitHubAuthentication(tokenScope, personalAccessTokenStore, acquireCredentialsCallback, acquireAuthenticationCodeCallback, authenticationResultCallback);
+                authentication = new Authentication(tokenScope, personalAccessTokenStore, acquireCredentialsCallback, acquireAuthenticationCodeCallback, authenticationResultCallback);
                 Git.Trace.WriteLine($"created GitHub authentication for '{targetUri}'.");
             }
             else
@@ -172,7 +172,7 @@ namespace GitHub.Authentication
 
             if (AcquireCredentialsCallback(targetUri, out username, out password))
             {
-                GitHubAuthenticationResult result;
+                AuthenticationResult result;
 
                 if (result = await Authority.AcquireToken(targetUri, username, password, null, this.TokenScope))
                 {
@@ -239,7 +239,7 @@ namespace GitHub.Authentication
 
             Credential credentials = null;
 
-            GitHubAuthenticationResult result;
+            AuthenticationResult result;
             if (result = await Authority.AcquireToken(targetUri, username, password, authenticationCode, this.TokenScope))
             {
                 Git.Trace.WriteLine($"token acquisition for '{targetUri}' succeeded.");

@@ -30,15 +30,15 @@ using Microsoft.Alm.Authentication;
 namespace GitHub.Authentication
 {
     [DebuggerDisplay("{Type}")]
-    public struct GitHubAuthenticationResult : IEquatable<GitHubAuthenticationResult>
+    public struct AuthenticationResult : IEquatable<AuthenticationResult>
     {
-        public GitHubAuthenticationResult(GitHubAuthenticationResultType type)
+        public AuthenticationResult(GitHubAuthenticationResultType type)
         {
             Type = type;
             Token = null;
         }
 
-        public GitHubAuthenticationResult(GitHubAuthenticationResultType type, Token token)
+        public AuthenticationResult(GitHubAuthenticationResultType type, Token token)
         {
             Type = type;
             Token = token;
@@ -49,20 +49,20 @@ namespace GitHub.Authentication
 
         public override Boolean Equals(object obj)
         {
-            return (obj is GitHubAuthenticationResult
+            return (obj is AuthenticationResult
                     || obj is GitHubAuthenticationResultType)
-                && this.Equals((GitHubAuthenticationResult)obj);
+                && this.Equals((AuthenticationResult)obj);
         }
 
-        public bool Equals(GitHubAuthenticationResult other)
+        public bool Equals(AuthenticationResult other)
         {
             return this.Type == other.Type
                 && this.Token == other.Token;
         }
 
-        public static GitHubAuthenticationResult FromResultType(GitHubAuthenticationResultType type)
+        public static AuthenticationResult FromResultType(GitHubAuthenticationResultType type)
         {
-            return new GitHubAuthenticationResult(type);
+            return new AuthenticationResult(type);
         }
 
         public override int GetHashCode()
@@ -75,27 +75,27 @@ namespace GitHub.Authentication
             return Type;
         }
 
-        public static bool operator ==(GitHubAuthenticationResult left, GitHubAuthenticationResult right)
+        public static bool operator ==(AuthenticationResult left, AuthenticationResult right)
         {
             return left.Equals(right);
         }
 
-        public static bool operator !=(GitHubAuthenticationResult left, GitHubAuthenticationResult right)
+        public static bool operator !=(AuthenticationResult left, AuthenticationResult right)
             => !(left == right);
 
-        public static implicit operator bool(GitHubAuthenticationResult result)
+        public static implicit operator bool(AuthenticationResult result)
         {
             return result.Type == GitHubAuthenticationResultType.Success;
         }
 
-        public static implicit operator GitHubAuthenticationResultType(GitHubAuthenticationResult result)
+        public static implicit operator GitHubAuthenticationResultType(AuthenticationResult result)
         {
             return result.Type;
         }
 
-        public static implicit operator GitHubAuthenticationResult(GitHubAuthenticationResultType type)
+        public static implicit operator AuthenticationResult(GitHubAuthenticationResultType type)
         {
-            return new GitHubAuthenticationResult(type);
+            return new AuthenticationResult(type);
         }
     }
 

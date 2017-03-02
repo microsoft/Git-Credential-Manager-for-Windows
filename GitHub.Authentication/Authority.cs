@@ -35,7 +35,7 @@ using Git = Microsoft.Alm.Git;
 
 namespace GitHub.Authentication
 {
-    internal class GitHubAuthority : IGitHubAuthority
+    internal class Authority : IAuthority
     {
         /// <summary>
         /// The GitHub authorizations URL
@@ -50,19 +50,19 @@ namespace GitHub.Authentication
         /// </summary>
         public const int RequestTimeout = 15 * 1000; // 15 second limit
 
-        public GitHubAuthority(string authorityUrl = null)
+        public Authority(string authorityUrl = null)
         {
             _authorityUrl = authorityUrl ?? DefaultAuthorityUrl;
         }
 
         private readonly string _authorityUrl;
 
-        public async Task<GitHubAuthenticationResult> AcquireToken(
+        public async Task<AuthenticationResult> AcquireToken(
             TargetUri targetUri,
             string username,
             string password,
             string authenticationCode,
-            GitHubTokenScope scope)
+            TokenScope scope)
         {
             const string GitHubOptHeader = "X-GitHub-OTP";
 
@@ -135,12 +135,12 @@ namespace GitHub.Authentication
                                 if (token == null)
                                 {
                                     Git.Trace.WriteLine($"authentication for '{targetUri}' failed.");
-                                    return new GitHubAuthenticationResult(GitHubAuthenticationResultType.Failure);
+                                    return new AuthenticationResult(GitHubAuthenticationResultType.Failure);
                                 }
                                 else
                                 {
                                     Git.Trace.WriteLine($"authentication success: new personal acces token for '{targetUri}' created.");
-                                    return new GitHubAuthenticationResult(GitHubAuthenticationResultType.Success, token);
+                                    return new AuthenticationResult(GitHubAuthenticationResultType.Success, token);
                                 }
                             }
 
@@ -154,24 +154,24 @@ namespace GitHub.Authentication
                                     if (mfakvp.Value.First().Contains("app"))
                                     {
                                         Git.Trace.WriteLine($"two-factor app authentication code required for '{targetUri}'.");
-                                        return new GitHubAuthenticationResult(GitHubAuthenticationResultType.TwoFactorApp);
+                                        return new AuthenticationResult(GitHubAuthenticationResultType.TwoFactorApp);
                                     }
                                     else
                                     {
                                         Git.Trace.WriteLine($"two-factor sms authentication code required for '{targetUri}'.");
-                                        return new GitHubAuthenticationResult(GitHubAuthenticationResultType.TwoFactorSms);
+                                        return new AuthenticationResult(GitHubAuthenticationResultType.TwoFactorSms);
                                     }
                                 }
                                 else
                                 {
                                     Git.Trace.WriteLine($"authentication failed for '{targetUri}'.");
-                                    return new GitHubAuthenticationResult(GitHubAuthenticationResultType.Failure);
+                                    return new AuthenticationResult(GitHubAuthenticationResultType.Failure);
                                 }
                             }
 
                         default:
                             Git.Trace.WriteLine($"authentication failed for '{targetUri}'.");
-                            return new GitHubAuthenticationResult(GitHubAuthenticationResultType.Failure);
+                            return new AuthenticationResult(GitHubAuthenticationResultType.Failure);
                     }
                 }
             }

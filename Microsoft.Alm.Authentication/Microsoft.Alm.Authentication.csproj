@@ -51,8 +51,6 @@
   <ItemGroup>
     <Compile Include="Global.cs" />
     <Compile Include="GlobalSuppressions.cs" />
-    <Compile Include="IVstsAadAuthentication.cs" />
-    <Compile Include="IVstsMsaAuthentication.cs" />
     <Compile Include="NtlmSupport.cs" />
     <Compile Include="SecretCache.cs" />
     <Compile Include="TargetUri.cs" />
