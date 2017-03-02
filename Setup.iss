@@ -88,6 +88,7 @@ Source: "{#deployDir}\Microsoft.Alm.Authentication.dll"; DestDir: "{app}"; Flags
 Source: "{#deployDir}\Microsoft.Alm.Git.dll"; DestDir: "{app}"; Flags: ignoreversion
 Source: "{#deployDir}\Microsoft.IdentityModel.Clients.ActiveDirectory.dll"; DestDir: "{app}"; Flags: ignoreversion
 Source: "{#deployDir}\Microsoft.IdentityModel.Clients.ActiveDirectory.Platform.dll"; DestDir: "{app}"; Flags: ignoreversion
+Source: "{#deployDir}\Microsoft.Vsts.Authentication.dll"; DestDir: "{app}"; Flags: ignoreversion
 Source: "{#deployDir}\GitHub.Authentication.exe"; DestDir: "{app}"; Flags: ignoreversion
 Source: "{#deployDir}\README.md"; DestDir: "{app}"; Flags: ignoreversion
 Source: "{#deployDir}\git-credential-manager.html"; DestDir: "{app}"; Flags: ignoreversion

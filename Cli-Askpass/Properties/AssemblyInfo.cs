@@ -8,7 +8,7 @@ using System.Runtime.InteropServices;
 [assembly: AssemblyConfiguration("")]
 [assembly: AssemblyCompany("Microsoft Corporation")]
 [assembly: AssemblyProduct(Microsoft.Alm.Cli.Program.Title + " command line interface")]
-[assembly: AssemblyCopyright("Copyright © Microsoft 2017")]
+[assembly: AssemblyCopyright("Copyright © Microsoft Corporation 2017. All rights reserved.")]
 [assembly: AssemblyTrademark("Microsoft Corporation")]
 [assembly: AssemblyCulture("")]
 [assembly: Guid("62f52119-63d4-40a8-a9df-f1c4b473308a")]

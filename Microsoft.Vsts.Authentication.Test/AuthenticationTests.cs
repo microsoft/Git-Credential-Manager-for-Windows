@@ -16,6 +16,8 @@ namespace Microsoft.Alm.Authentication.Test
         protected static readonly TargetUri DefaultTargetUri = new TargetUri("https://unit-test.uri/git-credential");
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Security", "CA2104:DoNotDeclareReadOnlyMutableReferenceTypes")]
         protected static readonly TargetUri InvalidTargetUri = new TargetUri("https://invlaid-test.uri/git-credential");
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Security", "CA2104:DoNotDeclareReadOnlyMutableReferenceTypes")]
+        protected static readonly VstsTokenScope DefaultTokenScope = VstsTokenScope.CodeWrite;
 
         protected AuthenticationTests()
         {

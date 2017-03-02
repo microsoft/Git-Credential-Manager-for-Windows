@@ -37,6 +37,76 @@ namespace Microsoft.Alm.Authentication
     {
         public static readonly StringComparer TokenComparer = StringComparer.Ordinal;
 
+        public Token(string value, TokenType type)
+        {
+            if (String.IsNullOrWhiteSpace(value))
+                throw new ArgumentNullException(nameof(value));
+
+            Debug.Assert(Enum.IsDefined(typeof(TokenType), type), $"The `{nameof(type)}` parameter is invalid");
+
+            this.Type = type;
+            this.Value = value;
+        }
+
+        public Token(string value, string typeName)
+        {
+            if (String.IsNullOrWhiteSpace(value))
+                throw new ArgumentNullException(nameof(value));
+            if (String.IsNullOrWhiteSpace(typeName))
+                throw new ArgumentNullException(nameof(typeName));
+
+            TokenType type;
+            if (!GetTypeFromFriendlyName(typeName, out type))
+                throw new ArgumentException("Unknown type name.", nameof(typeName));
+        }
+
+        public Token(string value, Guid tenantId, TokenType type)
+        {
+            if (value == null)
+                throw new ArgumentNullException(nameof(value));
+            if ((type & ~(TokenType.Access | TokenType.Federated | TokenType.Personal | TokenType.Test)) != 0)
+                throw new ArgumentOutOfRangeException(nameof(type));
+
+            this.TargetIdentity = tenantId;
+            this.Type = type;
+            this.Value = value;
+        }
+
+        /// <summary>
+        /// The type of the secuity token.
+        /// </summary>
+        public readonly TokenType Type;
+
+        /// <summary>
+        /// The raw contents of the token.
+        /// </summary>
+        public readonly string Value;
+
+        /// <summary>
+        /// The guid form Identity of the target
+        /// </summary>
+        public Guid TargetIdentity { get; set; }
+
+        /// <summary>
+        /// Compares an object to this <see cref="Token"/> for equality.
+        /// </summary>
+        /// <param name="obj">The object to compare.</param>
+        /// <returns>True is equal; false otherwise.</returns>
+        public override bool Equals(Object obj)
+        {
+            return this.Equals(obj as Token);
+        }
+
+        /// <summary>
+        /// Compares a <see cref="Token"/> to this Token for equality.
+        /// </summary>
+        /// <param name="other">The token to compare.</param>
+        /// <returns>True if equal; false otherwise.</returns>
+        public bool Equals(Token other)
+        {
+            return this == other;
+        }
+
         public static bool GetFriendlyNameFromType(TokenType type, out string name)
         {
             Debug.Assert(Enum.IsDefined(typeof(TokenType), type), "The type parameter is invalid");
@@ -76,89 +146,6 @@ namespace Microsoft.Alm.Authentication
             return false;
         }
 
-        internal Token(string value, TokenType type)
-        {
-            if (String.IsNullOrWhiteSpace(value))
-                throw new ArgumentNullException(nameof(value));
-
-            Debug.Assert(Enum.IsDefined(typeof(TokenType), type), $"The `{nameof(type)}` parameter is invalid");
-
-            this.Type = type;
-            this.Value = value;
-        }
-        internal Token(string value, string typeName)
-        {
-            if (String.IsNullOrWhiteSpace(value))
-                throw new ArgumentNullException(nameof(value));
-            if (String.IsNullOrWhiteSpace(typeName))
-                throw new ArgumentNullException(nameof(typeName));
-
-            TokenType type;
-            if (!GetTypeFromFriendlyName(typeName, out type))
-                throw new ArgumentException("Unknown type name.", nameof(typeName));
-        }
-        internal Token(IdentityModel.Clients.ActiveDirectory.AuthenticationResult authResult, TokenType type)
-        {
-            if (ReferenceEquals(authResult, null))
-                throw new ArgumentNullException(nameof(authResult));
-            if (String.IsNullOrWhiteSpace(authResult.AccessToken))
-                throw new ArgumentException("AccessToken property returned null or empty.", nameof(authResult));
-
-            Debug.Assert(Enum.IsDefined(typeof(TokenType), type), "The type parameter is invalid");
-
-            switch (type)
-            {
-                case TokenType.Access:
-                    this.Value = authResult.AccessToken;
-                    break;
-
-                default:
-                    throw new ArgumentException("Unexpected type.", nameof(type));
-            }
-
-            Guid tenantId = Guid.Empty;
-            if (Guid.TryParse(authResult.TenantId, out tenantId))
-            {
-                this.TargetIdentity = tenantId;
-            }
-            this.Type = type;
-        }
-
-        /// <summary>
-        /// The type of the secuity token.
-        /// </summary>
-        public readonly TokenType Type;
-
-        /// <summary>
-        /// The raw contents of the token.
-        /// </summary>
-        public readonly string Value;
-
-        /// <summary>
-        /// The guid form Identity of the target
-        /// </summary>
-        public Guid TargetIdentity { get; internal set; }
-
-        /// <summary>
-        /// Compares an object to this <see cref="Token"/> for equality.
-        /// </summary>
-        /// <param name="obj">The object to compare.</param>
-        /// <returns>True is equal; false otherwise.</returns>
-        public override bool Equals(Object obj)
-        {
-            return this.Equals(obj as Token);
-        }
-
-        /// <summary>
-        /// Compares a <see cref="Token"/> to this Token for equality.
-        /// </summary>
-        /// <param name="other">The token to compare.</param>
-        /// <returns>True if equal; false otherwise.</returns>
-        public bool Equals(Token other)
-        {
-            return this == other;
-        }
-
         /// <summary>
         /// Gets a hash code based on the contents of the token.
         /// </summary>
@@ -182,6 +169,16 @@ namespace Microsoft.Alm.Authentication
                 return value;
             else
                 return base.ToString();
+        }
+
+        public static void Validate(Token token)
+        {
+            if (token == null)
+                throw new ArgumentNullException(nameof(token));
+            if (String.IsNullOrWhiteSpace(token.Value))
+                throw new ArgumentException("Value propertry returned null or empty.", nameof(token));
+            if (token.Value.Length > NativeMethods.Credential.PasswordMaxLength)
+                throw new ArgumentOutOfRangeException(nameof(token));
         }
 
         internal static unsafe bool Deserialize(byte[] bytes, TokenType type, out Token token)
@@ -273,15 +270,6 @@ namespace Microsoft.Alm.Authentication
             return bytes != null;
         }
 
-        internal static void Validate(Token token)
-        {
-            if (token == null)
-                throw new ArgumentNullException(nameof(token));
-            if (String.IsNullOrWhiteSpace(token.Value))
-                throw new ArgumentException("Value propertry returned null or empty.", nameof(token));
-            if (token.Value.Length > NativeMethods.Credential.PasswordMaxLength)
-                throw new ArgumentOutOfRangeException(nameof(token));
-        }
 
         /// <summary>
         /// Explicitly casts a personal access token token into a set of credentials

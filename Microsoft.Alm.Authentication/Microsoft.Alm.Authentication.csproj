@@ -2,7 +2,7 @@
 <Project ToolsVersion="14.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
   <PropertyGroup>
-    <ProjectGuid>{C1DAABC1-B493-459D-BB4F-04FBEFB1BA13}</ProjectGuid>
+    <ProjectGuid>{19770407-B493-459D-BB4F-04FBEFB1BA13}</ProjectGuid>
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
     <RootNamespace>Microsoft.Alm.Authentication</RootNamespace>
@@ -10,8 +10,6 @@
     <TargetFrameworkVersion>v4.5.1</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <TargetFrameworkProfile />
-    <NuGetPackageImportStamp>
-    </NuGetPackageImportStamp>
   </PropertyGroup>
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
@@ -43,19 +41,10 @@
     <CodeAnalysisRuleSet>..\analysisRules.ruleset</CodeAnalysisRuleSet>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="Microsoft.IdentityModel.Clients.ActiveDirectory, Version=3.13.1.846, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
-      <HintPath>..\packages\Microsoft.IdentityModel.Clients.ActiveDirectory.3.13.1\lib\net45\Microsoft.IdentityModel.Clients.ActiveDirectory.dll</HintPath>
-      <Private>True</Private>
-    </Reference>
-    <Reference Include="Microsoft.IdentityModel.Clients.ActiveDirectory.Platform, Version=3.13.1.846, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
-      <HintPath>..\packages\Microsoft.IdentityModel.Clients.ActiveDirectory.3.13.1\lib\net45\Microsoft.IdentityModel.Clients.ActiveDirectory.Platform.dll</HintPath>
-      <Private>True</Private>
-    </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />
     <Reference Include="Microsoft.CSharp" />
     <Reference Include="System.Data" />
-    <Reference Include="System.Drawing" />
     <Reference Include="System.Net.Http" />
     <Reference Include="System.Security" />
   </ItemGroup>
@@ -68,37 +57,26 @@
     <Compile Include="GlobalSuppressions.cs" />
     <Compile Include="IGitHubAuthentication.cs" />
     <Compile Include="IGitHubAuthority.cs" />
-    <Compile Include="NtlmSupport.cs" />
-    <Compile Include="WwwAuthenticateHelper.cs" />
-    <Compile Include="VstsLocationServiceException.cs" />
-    <Compile Include="SecretCache.cs" />
-    <Compile Include="TokenScope.cs" />
-    <Compile Include="TargetUri.cs" />
-    <Compile Include="VstsAzureAuthority.cs" />
-    <Compile Include="VstsTokenScope.cs" />
-    <Compile Include="AzureAuthority.cs" />
-    <Compile Include="IAzureAuthority.cs" />
+    <Compile Include="IVstsAadAuthentication.cs" />
     <Compile Include="IVstsMsaAuthentication.cs" />
+    <Compile Include="NtlmSupport.cs" />
+    <Compile Include="SecretCache.cs" />
+    <Compile Include="TargetUri.cs" />
+    <Compile Include="TokenScope.cs" />
     <Compile Include="TokenType.cs" />
-    <Compile Include="VstsAadAuthentication.cs" />
-    <Compile Include="BaseVstsAuthentication.cs" />
     <Compile Include="BaseAuthentication.cs" />
     <Compile Include="BaseSecureStore.cs" />
     <Compile Include="BasicAuthentication.cs" />
     <Compile Include="Credential.cs" />
     <Compile Include="IAuthentication.cs" />
-    <Compile Include="IVstsAadAuthentication.cs" />
     <Compile Include="ICredentialStore.cs" />
     <Compile Include="ITokenStore.cs" />
-    <Compile Include="VstsAdalTokenCache.cs" />
-    <Compile Include="VstsMsaAuthentication.cs" />
     <Compile Include="Token.cs" />
     <Compile Include="NativeMethods.cs" />
-    <Compile Include="IVstsAuthority.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="TokenRegistry.cs" />
     <Compile Include="SecretStore.cs" />
     <Compile Include="Secret.cs" />
+    <Compile Include="WwwAuthenticateHelper.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="app.config" />
@@ -106,29 +84,16 @@
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\Microsoft.Alm.Git\Microsoft.Alm.Git.csproj">
-      <Project>{4827c16d-5c58-406d-ab3f-3700bb0d06fe}</Project>
+      <Project>{19770407-5c58-406d-ab3f-3700bb0d06fe}</Project>
       <Name>Microsoft.Alm.Git</Name>
     </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
-  <!-- Produce a nuget package of this assembly -->
-  <Import Project="..\packages\MSBuildTasks.*\tools\MSBuild.Community.Tasks.Targets" />
+    <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
+       Other similar extension points exist, see Microsoft.Common.targets.
+  <Target Name="BeforeBuild">
+  </Target>
   <Target Name="AfterBuild">
-    <!-- Only download a new copy of nuget.exe if we don't have a copy available -->
-    <PropertyGroup>
-      <NugetPath>nuget.exe</NugetPath>
-    </PropertyGroup>
-    <PropertyGroup Condition="!Exists($(NugetPath))">
-      <NugetPath>$(IntermediateOutputPath)nuget.exe</NugetPath>
-    </PropertyGroup>
-    <WebDownload Condition="!Exists($(NugetPath))" Filename="$(NugetPath)" FileUri="https://dist.nuget.org/win-x86-commandline/latest/nuget.exe" />
-    <Exec Command="$(NugetPath) pack $(AssemblyName).csproj -BasePath $(TargetDir) -Symbols -IncludeReferencedProjects -Prop Configuration=$(Configuration) -OutputDirectory $(TargetDir)" IgnoreExitCode="true" />
   </Target>
-  <Import Project="..\packages\MSBuildTasks.1.5.0.196\build\MSBuildTasks.targets" Condition="Exists('..\packages\MSBuildTasks.1.5.0.196\build\MSBuildTasks.targets')" />
-  <Target Name="EnsureNuGetPackageBuildImports" BeforeTargets="PrepareForBuild">
-    <PropertyGroup>
-      <ErrorText>This project references NuGet package(s) that are missing on this computer. Use NuGet Package Restore to download them.  For more information, see http://go.microsoft.com/fwlink/?LinkID=322105. The missing file is {0}.</ErrorText>
-    </PropertyGroup>
-    <Error Condition="!Exists('..\packages\MSBuildTasks.1.5.0.196\build\MSBuildTasks.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\MSBuildTasks.1.5.0.196\build\MSBuildTasks.targets'))" />
-  </Target>
+  -->
 </Project>
