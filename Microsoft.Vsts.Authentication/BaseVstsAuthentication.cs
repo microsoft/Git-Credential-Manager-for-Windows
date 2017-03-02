@@ -177,6 +177,7 @@ namespace Microsoft.Alm.Authentication
         /// <param name="targetUri">The resource which the authority protects.</param>
         /// <param name="tenantId">The identity of the authority tenant; <see cref="Guid.Empty"/> otherwise.</param>
         /// <returns><see langword="true"/> if the authority is Visual Studio Online; <see langword="false"/> otherwise</returns>
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Design", "CA1062:Validate arguments of public methods", MessageId = "0")]
         public static bool DetectAuthority(TargetUri targetUri, out Guid tenantId)
         {
             const string VstsBaseUrlHost = "visualstudio.com";

@@ -56,6 +56,9 @@
     <Reference Include="System.Security" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="..\Microsoft.Alm.Authentication\GlobalSuppressions.cs">
+      <Link>GlobalSuppressions.cs</Link>
+    </Compile>
     <Compile Include="AzureAuthority.cs" />
     <Compile Include="BaseVstsAuthentication.cs" />
     <Compile Include="IAzureAuthority.cs" />
