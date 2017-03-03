@@ -43,6 +43,7 @@ namespace Microsoft.Alm.Cli
         //private static readonly Version NetFxMinVersion = new Version(4, 5, 1);
         private static readonly IReadOnlyList<string> FileList = new string[]
         {
+            "Microsoft.Vsts.Authentication.dll",
             "Microsoft.Alm.Authentication.dll",
             "Microsoft.Alm.Git.dll",
             "Microsoft.IdentityModel.Clients.ActiveDirectory.dll",

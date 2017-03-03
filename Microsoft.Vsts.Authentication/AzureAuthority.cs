@@ -109,8 +109,11 @@ namespace Microsoft.Alm.Authentication
                                                                                   new PlatformParameters(PromptBehavior.Always),
                                                                                   UserIdentifier.AnyUser,
                                                                                   queryParameters);
-
-                token = new Token(authResult, TokenType.Access);
+                Guid tenantId;
+                if (Guid.TryParse(authResult.TenantId, out tenantId))
+                {
+                    token = new Token(authResult.AccessToken, tenantId, TokenType.Access);
+                }
 
                 Git.Trace.WriteLine($"authority host URL = '{AuthorityHostUrl}', token acquisition succeeded.");
             }
@@ -158,9 +161,13 @@ namespace Microsoft.Alm.Authentication
                                                                                   clientId,
                                                                                   new UserCredential());
 
-                token = new Token(authResult, TokenType.Access);
+                Guid tentantId;
+                if (Guid.TryParse(authResult.TenantId, out tentantId))
+                {
+                    token = new Token(authResult.AccessToken, tentantId, TokenType.Access);
 
-                Git.Trace.WriteLine($"token acquisition for authority host URL = '{AuthorityHostUrl}' succeeded.");
+                    Git.Trace.WriteLine($"token acquisition for authority host URL = '{AuthorityHostUrl}' succeeded.");
+                }
             }
             catch (AdalException)
             {

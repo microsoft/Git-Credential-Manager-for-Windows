@@ -265,7 +265,7 @@ namespace Microsoft.Alm.Authentication
         }
 
         [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
-        internal static void ValidateCredential(Credential credentials)
+        public static void ValidateCredential(Credential credentials)
         {
             if (ReferenceEquals(credentials, null))
                 throw new ArgumentNullException(nameof(credentials));
@@ -276,7 +276,7 @@ namespace Microsoft.Alm.Authentication
         }
 
         [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
-        internal static void ValidateTargetUri(TargetUri targetUri)
+        public static void ValidateTargetUri(TargetUri targetUri)
         {
             if (ReferenceEquals(targetUri, null))
                 throw new ArgumentNullException(nameof(targetUri));
@@ -285,7 +285,7 @@ namespace Microsoft.Alm.Authentication
         }
 
         [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
-        internal static void ValidateToken(Token token)
+        public static void ValidateToken(Token token)
         {
             if (ReferenceEquals(token, null))
                 throw new ArgumentNullException(nameof(token));

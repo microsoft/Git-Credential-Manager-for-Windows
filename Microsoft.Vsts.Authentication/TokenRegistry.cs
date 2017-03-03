@@ -55,6 +55,7 @@ namespace Microsoft.Alm.Authentication
             // we've decided to not support registry deletes until the rules are established
             throw new NotSupportedException("Deletes from the registry are not supported by this library.");
         }
+
         /// <summary>
         /// Reads a token from the current user's Visual Studio hive in the Windows Registry.
         /// </summary>
@@ -114,6 +115,7 @@ namespace Microsoft.Alm.Authentication
 
             return token;
         }
+
         /// <summary>
         /// Not supported
         /// </summary>

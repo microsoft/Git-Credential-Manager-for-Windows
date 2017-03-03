@@ -26,103 +26,104 @@
 using System;
 using System.Collections.Generic;
 using System.Runtime.CompilerServices;
+using Microsoft.Alm.Authentication;
 using ScopeSet = System.Collections.Generic.HashSet<string>;
 
-namespace Microsoft.Alm.Authentication
+namespace GitHub.Authentication
 {
-    public sealed class GitHubTokenScope : TokenScope, IEquatable<GitHubTokenScope>
+    public sealed class TokenScope : Microsoft.Alm.Authentication.TokenScope, IEquatable<TokenScope>
     {
-        public static readonly GitHubTokenScope None = new GitHubTokenScope(String.Empty);
+        public static readonly TokenScope None = new TokenScope(String.Empty);
         /// <summary>
         /// Create gists
         /// </summary>
-        public static readonly GitHubTokenScope Gist = new GitHubTokenScope("gist");
+        public static readonly TokenScope Gist = new TokenScope("gist");
         /// <summary>
         /// Access notifications
         /// </summary>
-        public static readonly GitHubTokenScope Notifications = new GitHubTokenScope("notifications");
+        public static readonly TokenScope Notifications = new TokenScope("notifications");
         /// <summary>
         /// Full control of orgs and teams
         /// </summary>
-        public static readonly GitHubTokenScope OrgAdmin = new GitHubTokenScope("admin:org");
+        public static readonly TokenScope OrgAdmin = new TokenScope("admin:org");
         /// <summary>
         /// Read org and team membership
         /// </summary>
-        public static readonly GitHubTokenScope OrgRead = new GitHubTokenScope("read:org");
+        public static readonly TokenScope OrgRead = new TokenScope("read:org");
         /// <summary>
         /// Read and write org and team membership
         /// </summary>
-        public static readonly GitHubTokenScope OrgWrite = new GitHubTokenScope("write:org");
+        public static readonly TokenScope OrgWrite = new TokenScope("write:org");
         /// <summary>
         /// Full control of organization hooks
         /// </summary>
-        public static readonly GitHubTokenScope OrgHookAdmin = new GitHubTokenScope("admin:org_hook");
+        public static readonly TokenScope OrgHookAdmin = new TokenScope("admin:org_hook");
         /// <summary>
         /// Full control of user's public keys
         /// </summary>
-        public static readonly GitHubTokenScope PublicKeyAdmin = new GitHubTokenScope("admin:public_key");
+        public static readonly TokenScope PublicKeyAdmin = new TokenScope("admin:public_key");
         /// <summary>
         /// Read user's public keys
         /// </summary>
-        public static readonly GitHubTokenScope PublicKeyRead = new GitHubTokenScope("read:public_key");
+        public static readonly TokenScope PublicKeyRead = new TokenScope("read:public_key");
         /// <summary>
         /// Write user's public keys
         /// </summary>
-        public static readonly GitHubTokenScope PublicKeyWrite = new GitHubTokenScope("write:public_key");
+        public static readonly TokenScope PublicKeyWrite = new TokenScope("write:public_key");
         /// <summary>
         /// Access private repositories
         /// </summary>
-        public static readonly GitHubTokenScope Repo = new GitHubTokenScope("repo");
+        public static readonly TokenScope Repo = new TokenScope("repo");
         /// <summary>
         /// Delete repositories
         /// </summary>
-        public static readonly GitHubTokenScope RepoDelete = new GitHubTokenScope("delete_repo");
+        public static readonly TokenScope RepoDelete = new TokenScope("delete_repo");
         /// <summary>
         /// Access deployment status
         /// </summary>
-        public static readonly GitHubTokenScope RepoDeployment = new GitHubTokenScope("repo_deployment");
+        public static readonly TokenScope RepoDeployment = new TokenScope("repo_deployment");
         /// <summary>
         /// Access public repositories
         /// </summary>
-        public static readonly GitHubTokenScope RepoPublic = new GitHubTokenScope("public_repo");
+        public static readonly TokenScope RepoPublic = new TokenScope("public_repo");
         /// <summary>
         /// Access commit status
         /// </summary>
-        public static readonly GitHubTokenScope RepoStatus = new GitHubTokenScope("repo:status");
+        public static readonly TokenScope RepoStatus = new TokenScope("repo:status");
         /// <summary>
         /// Full control of repository hooks
         /// </summary>
-        public static readonly GitHubTokenScope RepoHookAdmin = new GitHubTokenScope("admin:repo_hook");
+        public static readonly TokenScope RepoHookAdmin = new TokenScope("admin:repo_hook");
         /// <summary>
         /// Read repository hooks
         /// </summary>
-        public static readonly GitHubTokenScope RepoHookRead = new GitHubTokenScope("read:repo_hook");
+        public static readonly TokenScope RepoHookRead = new TokenScope("read:repo_hook");
         /// <summary>
         /// Write repository hooks
         /// </summary>
-        public static readonly GitHubTokenScope RepoHookWrite = new GitHubTokenScope("write:repo_hook");
+        public static readonly TokenScope RepoHookWrite = new TokenScope("write:repo_hook");
         /// <summary>
         /// Update all user information
         /// </summary>
-        public static readonly GitHubTokenScope User = new GitHubTokenScope("user");
+        public static readonly TokenScope User = new TokenScope("user");
         /// <summary>
         /// Access user email address (read-only)
         /// </summary>
-        public static readonly GitHubTokenScope UserEmail = new GitHubTokenScope("user:email");
+        public static readonly TokenScope UserEmail = new TokenScope("user:email");
         /// <summary>
         /// Follow and unfollow users
         /// </summary>
-        public static readonly GitHubTokenScope UserFollow = new GitHubTokenScope("user:follow");
+        public static readonly TokenScope UserFollow = new TokenScope("user:follow");
 
-        private GitHubTokenScope(string value)
+        private TokenScope(string value)
             : base(value)
         { }
 
-        private GitHubTokenScope(ScopeSet set)
+        private TokenScope(ScopeSet set)
             : base(set)
         { }
 
-        public static IEnumerable<GitHubTokenScope> EnumerateValues()
+        public static IEnumerable<TokenScope> EnumerateValues()
         {
             yield return Gist;
             yield return Notifications;
@@ -148,55 +149,55 @@ namespace Microsoft.Alm.Authentication
         }
 
         public override bool Equals(object obj)
-            => TokenScope.Equals(this as TokenScope, obj);
+            => Microsoft.Alm.Authentication.TokenScope.Equals(this as Microsoft.Alm.Authentication.TokenScope, obj);
 
-        public bool Equals(GitHubTokenScope other)
-            => TokenScope.Equals(this as TokenScope, other as TokenScope);
+        public bool Equals(TokenScope other)
+            => Microsoft.Alm.Authentication.TokenScope.Equals(this as Microsoft.Alm.Authentication.TokenScope, other as Microsoft.Alm.Authentication.TokenScope);
 
         public override int GetHashCode()
-            => TokenScope.GetHashCode(this as TokenScope);
+            => Microsoft.Alm.Authentication.TokenScope.GetHashCode(this as Microsoft.Alm.Authentication.TokenScope);
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static bool operator ==(GitHubTokenScope left, GitHubTokenScope right)
-            => TokenScope.Equals(left as TokenScope, right as TokenScope);
+        public static bool operator ==(TokenScope left, TokenScope right)
+            => Microsoft.Alm.Authentication.TokenScope.Equals(left as Microsoft.Alm.Authentication.TokenScope, right as Microsoft.Alm.Authentication.TokenScope);
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static bool operator !=(GitHubTokenScope left, GitHubTokenScope right)
-            => !TokenScope.Equals(left as TokenScope, right as TokenScope);
+        public static bool operator !=(TokenScope left, TokenScope right)
+            => !Microsoft.Alm.Authentication.TokenScope.Equals(left as Microsoft.Alm.Authentication.TokenScope, right as Microsoft.Alm.Authentication.TokenScope);
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static GitHubTokenScope operator +(GitHubTokenScope left, GitHubTokenScope right)
+        public static TokenScope operator +(TokenScope left, TokenScope right)
         {
-            var set = TokenScope.UnionWith(left as TokenScope, right as TokenScope);
-            return new GitHubTokenScope(set);
+            var set = Microsoft.Alm.Authentication.TokenScope.UnionWith(left as Microsoft.Alm.Authentication.TokenScope, right as Microsoft.Alm.Authentication.TokenScope);
+            return new TokenScope(set);
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static GitHubTokenScope operator -(GitHubTokenScope left, GitHubTokenScope right)
+        public static TokenScope operator -(TokenScope left, TokenScope right)
         {
-            var set = TokenScope.ExceptWith(left as TokenScope, right as TokenScope);
-            return new GitHubTokenScope(set);
+            var set = Microsoft.Alm.Authentication.TokenScope.ExceptWith(left as Microsoft.Alm.Authentication.TokenScope, right as Microsoft.Alm.Authentication.TokenScope);
+            return new TokenScope(set);
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static GitHubTokenScope operator |(GitHubTokenScope left, GitHubTokenScope right)
+        public static TokenScope operator |(TokenScope left, TokenScope right)
         {
-            var set = TokenScope.UnionWith(left as TokenScope, right as TokenScope);
-            return new GitHubTokenScope(set);
+            var set = Microsoft.Alm.Authentication.TokenScope.UnionWith(left as Microsoft.Alm.Authentication.TokenScope, right as Microsoft.Alm.Authentication.TokenScope);
+            return new TokenScope(set);
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static GitHubTokenScope operator &(GitHubTokenScope left, GitHubTokenScope right)
+        public static TokenScope operator &(TokenScope left, TokenScope right)
         {
-            var set = TokenScope.IntersectWith(left as TokenScope, right as TokenScope);
-            return new GitHubTokenScope(set);
+            var set = Microsoft.Alm.Authentication.TokenScope.IntersectWith(left as Microsoft.Alm.Authentication.TokenScope, right as Microsoft.Alm.Authentication.TokenScope);
+            return new TokenScope(set);
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static GitHubTokenScope operator ^(GitHubTokenScope left, GitHubTokenScope right)
+        public static TokenScope operator ^(TokenScope left, TokenScope right)
         {
-            var set = TokenScope.SymmetricExceptWith(left as TokenScope, right as TokenScope);
-            return new GitHubTokenScope(set);
+            var set = Microsoft.Alm.Authentication.TokenScope.SymmetricExceptWith(left as Microsoft.Alm.Authentication.TokenScope, right as Microsoft.Alm.Authentication.TokenScope);
+            return new TokenScope(set);
         }
     }
 }

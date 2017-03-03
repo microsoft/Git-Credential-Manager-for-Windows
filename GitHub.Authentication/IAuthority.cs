@@ -24,17 +24,18 @@
 **/
 
 using System.Threading.Tasks;
+using Microsoft.Alm.Authentication;
 
-namespace Microsoft.Alm.Authentication
+namespace GitHub.Authentication
 {
-    internal interface IGitHubAuthority
+    public interface IAuthority
     {
-        Task<GitHubAuthenticationResult> AcquireToken(
+        Task<AuthenticationResult> AcquireToken(
             TargetUri targetUri,
             string username,
             string password,
             string authenticationCode,
-            GitHubTokenScope scope);
+            TokenScope scope);
 
         Task<bool> ValidateCredentials(TargetUri targetUri, Credential credentials);
     }

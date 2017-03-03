@@ -28,13 +28,14 @@ using System.Collections.Generic;
 
 namespace Microsoft.Alm.Authentication
 {
-    internal sealed class SecretCache : ICredentialStore, ITokenStore
+    public sealed class SecretCache : ICredentialStore, ITokenStore
     {
-        public static StringComparer KeyComparer = StringComparer.OrdinalIgnoreCase;
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Security", "CA2104:DoNotDeclareReadOnlyMutableReferenceTypes")]
+        public static readonly StringComparer KeyComparer = StringComparer.OrdinalIgnoreCase;
 
         private static readonly Dictionary<string, Secret> _cache = new Dictionary<string, Secret>(KeyComparer);
 
-        public SecretCache(string @namespace, Secret.UriNameConversion getTargetName = null)
+        public SecretCache(string @namespace, Secret.UriNameConversion getTargetName)
         {
             if (String.IsNullOrWhiteSpace(@namespace))
                 throw new ArgumentNullException(@namespace);
@@ -42,6 +43,10 @@ namespace Microsoft.Alm.Authentication
             _namespace = @namespace;
             _getTargetName = getTargetName ?? Secret.UriToName;
         }
+
+        public SecretCache(string @namespace)
+            : this(@namespace, null)
+        { }
 
         internal SecretCache(ICredentialStore credentialStore)
         {

@@ -1,0 +1,25 @@
+<?xml version="1.0"?>
+<package >
+  <metadata>
+    <id>$id$</id>
+    <version>$version$</version>
+    <title>$title$</title>
+    <authors>$owners$</authors>
+    <owners>$owners$</owners>
+    <licenseUrl>https://raw.githubusercontent.com/Microsoft/Git-Credential-Manager-for-Windows/master/LICENSE.txt</licenseUrl>
+    <projectUrl>https://github.com/Microsoft/Git-Credential-Manager-for-Windows</projectUrl>
+    <requireLicenseAcceptance>true</requireLicenseAcceptance>
+    <description>$description$</description>
+    <copyright>$copyright$</copyright>
+    <language>en-US</language>
+    <dependencies>
+      <dependency id="Microsoft.IdentityModel.Clients.ActiveDirectory" version="3.13.8" />
+    </dependencies>
+    <tags>Git VSTS Visual Studio Team Services TFS GitHub Active Directory NTLM Basic Authentication Library ADAL Directory Azure AD AAD Identity Authentication .NET Windows</tags>
+  </metadata>
+  <files>
+    <file src="Microsoft.Alm.Git.dll" target="lib\net451\Microsoft.Alm.Git.dll" />
+    <file src="Microsoft.Alm.Authentication.dll" target="lib\net451\Microsoft.Alm.Authentication.dll" />
+    <file src="Microsoft.Vsts.Authentication.dll" target="lib\net451\Microsoft.Vsts.Authentication.dll" />
+  </files>
+</package>

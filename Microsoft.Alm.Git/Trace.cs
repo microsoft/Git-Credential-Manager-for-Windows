@@ -78,13 +78,16 @@ namespace Microsoft.Alm.Git
         {
             lock (_syncpoint)
             {
-                for (int i = 0; i < _writers.Count; i += 1)
+                try
                 {
-                    using (var writer = _writers[i])
+                    for (int i = 0; i < _writers.Count; i += 1)
                     {
-                        _writers.Remove(writer);
+                        using (var writer = _writers[i])
+                        {
+                            _writers.Remove(writer);
+                        }
                     }
-                }
+                }catch { /* squelch */ }
             }
 
             GC.SuppressFinalize(this);

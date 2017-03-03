@@ -37,19 +37,16 @@
     <Reference Include="PresentationFramework" />
     <Reference Include="System" />
     <Reference Include="System.Core" />
-    <Reference Include="System.Xaml" />
-    <Reference Include="System.Xml.Linq" />
-    <Reference Include="System.Data.DataSetExtensions" />
     <Reference Include="Microsoft.CSharp" />
-    <Reference Include="System.Data" />
     <Reference Include="System.Net.Http" />
-    <Reference Include="System.Xml" />
+    <Reference Include="System.Xaml" />
     <Reference Include="WindowsBase" />
   </ItemGroup>
   <ItemGroup>
     <Compile Include="ActionCommandTests.cs" />
     <Compile Include="Controls\MaskedPasswordBoxTests.cs" />
     <Compile Include="CredentialsViewModelTests.cs" />
+    <Compile Include="GitHubTokenScopeTests.cs" />
     <Compile Include="GlobalSuppressions.cs" />
     <Compile Include="TwoFactorViewModelTests.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
@@ -63,6 +60,10 @@
     <ProjectReference Include="..\GitHub.Authentication\GitHub.Authentication.csproj">
       <Project>{cf306116-bbf0-4cc7-afce-a506ac4752cb}</Project>
       <Name>GitHub.Authentication</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\Microsoft.Alm.Authentication\Microsoft.Alm.Authentication.csproj">
+      <Project>{19770407-b493-459d-bb4f-04fbefb1ba13}</Project>
+      <Name>Microsoft.Alm.Authentication</Name>
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>

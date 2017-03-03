@@ -28,7 +28,7 @@ using System;
 namespace Microsoft.Alm.Authentication
 {
     [Serializable]
-    public sealed class VstsLocationServiceException : Exception
+    public sealed class VstsLocationServiceException : Exception, System.Runtime.Serialization.ISerializable
     {
         internal VstsLocationServiceException(string message)
             : base(message)
@@ -39,7 +39,7 @@ namespace Microsoft.Alm.Authentication
         { }
 
         internal VstsLocationServiceException(System.Runtime.Serialization.SerializationInfo info, System.Runtime.Serialization.StreamingContext context)
-    : base(info, context)
+            : base(info, context)
         { }
     }
 }
