@@ -41,16 +41,27 @@ namespace Microsoft.Alm.Cli
         private static readonly Regex AskCredentialRegex = new Regex(@"(\S+)\s+for\s+['""]([^'""]+)['""]:\s*", RegexOptions.Compiled | RegexOptions.CultureInvariant | RegexOptions.IgnoreCase);
         private static readonly Regex AskPassphraseRegex = new Regex(@"Enter\s+passphrase\s*for\s*key\s*['""]([^'""]+)['""]\:\s*", RegexOptions.Compiled | RegexOptions.CultureInvariant | RegexOptions.IgnoreCase);
         private static readonly Regex AskPasswordRegex = new Regex(@"(\S+)'s\s+password:\s*", RegexOptions.Compiled | RegexOptions.CultureInvariant | RegexOptions.IgnoreCase);
+        private static readonly Regex AskAuthenticityRegex = new Regex(@"^\s*The authenticity of host '([^']+)' can't be established.\s+RSA key fingerprint is ([^\s:]+:[^\.]+).", RegexOptions.Compiled | RegexOptions.CultureInvariant | RegexOptions.IgnoreCase);
 
         private static void Askpass(string[] args)
         {
             if (args == null || args.Length == 0)
                 throw new ArgumentException("Arguments cannot be empty.");
 
+            Gui.UserPromptKind promptKind = Gui.UserPromptKind.SshPassphrase;
+
             Match match;
-            if ((match = AskPasswordRegex.Match(args[0])).Success
-                || (match = AskPassphraseRegex.Match(args[0])).Success)
+            if ((match = AskPasswordRegex.Match(args[0])).Success)
             {
+                promptKind = Gui.UserPromptKind.CredentialsPassword;
+            }
+            else if ((match = AskPassphraseRegex.Match(args[0])).Success)
+            {
+                promptKind = Gui.UserPromptKind.SshPassphrase;
+            }
+
+            if (match.Success)
+            { 
                 Git.Trace.WriteLine("querying for passphrase key.");
 
                 if (match.Groups.Count < 2)
@@ -62,12 +73,12 @@ namespace Microsoft.Alm.Cli
                 Git.Trace.WriteLine($"open dialog for '{resource}'.");
 
                 System.Windows.Application application = new System.Windows.Application();
-                Gui.PassphraseWindow prompt = new Gui.PassphraseWindow(resource);
+                Gui.UserPromptDialog prompt = new Gui.UserPromptDialog(promptKind, resource);
                 application.Run(prompt);
 
-                if (!prompt.Canceled && !string.IsNullOrEmpty(prompt.Passphrase))
+                if (!prompt.Failed && !string.IsNullOrEmpty(prompt.Response))
                 {
-                    string passphase = prompt.Passphrase;
+                    string passphase = prompt.Response;
 
                     Git.Trace.WriteLine("passphase acquired.");
 
@@ -197,6 +208,31 @@ namespace Microsoft.Alm.Cli
                 Git.Trace.WriteLine($"failed to detect {seeking} in target URL.");
             }
 
+            if ((match = AskAuthenticityRegex.Match(args[0])).Success)
+            {
+                string host = match.Groups[1].Value;
+                string fingerprint = match.Groups[2].Value;
+
+                Git.Trace.WriteLine($"requesting authorization to add {host} ({fingerprint}) to known hosts.");
+
+                System.Windows.Application application = new System.Windows.Application();
+                Gui.UserPromptDialog prompt = new Gui.UserPromptDialog(host, fingerprint);
+                application.Run(prompt);
+
+                if (prompt.Failed)
+                {
+                    Git.Trace.WriteLine("denied authorization of host.");
+                    Console.Out.Write("no\n");
+                }
+                else
+                {
+                    Git.Trace.WriteLine("approved authorization of host.");
+                    Console.Out.Write("yes\n");
+                }
+
+                return;
+            }
+
             Git.Trace.WriteLine("failed to acquire credentials.");
         }
 
@@ -205,10 +241,10 @@ namespace Microsoft.Alm.Cli
         {
             EnableDebugTrace();
 
-            if (args.Length > 0
-                && (String.Equals(args[0], "--help", StringComparison.OrdinalIgnoreCase)
-                    || String.Equals(args[0], "-h", StringComparison.OrdinalIgnoreCase)
-                    || args[0].Contains('?')))
+            if (args.Length == 0
+                || String.Equals(args[0], "--help", StringComparison.OrdinalIgnoreCase)
+                || String.Equals(args[0], "-h", StringComparison.OrdinalIgnoreCase)
+                || String.Equals(args[0], "\\?", StringComparison.Ordinal))
             {
                 PrintHelpMessage();
                 return;

@@ -257,14 +257,6 @@ namespace Microsoft.Alm.Cli
             }
         }
 
-        [Flags]
-        private enum test
-        {
-            A = 1 << 0,
-            B = 1 << 1,
-            C = 1 << 2,
-        }
-
         [STAThread]
         private static void Main(string[] args)
         {
