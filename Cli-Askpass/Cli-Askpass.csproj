@@ -124,6 +124,8 @@ COPY /V /Y "%25src%25GitHub.Authentication.exe" "%25dst%25GitHub.Authentication.
 COPY /V /Y "%25src%25git-askpass.exe" "%25dst%25git-askpass.exe"
 COPY /V /Y "%25src%25README.md" "%25dst%25README.md"
 COPY /V /Y "%25src%25LICENSE.txt" "%25dst%25LICENSE.txt"
+
+"$(SolutionDir)build-docs.cmd"
     </PostBuildEvent>
   </PropertyGroup>
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it.
