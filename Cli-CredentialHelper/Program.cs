@@ -29,7 +29,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
-using System.Threading.Tasks;
+using Bitbucket = Bitbucket.Authentication;
 
 namespace Microsoft.Alm.Cli
 {
@@ -192,9 +192,13 @@ namespace Microsoft.Alm.Cli
                     case AuthorityType.Ntlm:
                         Git.Trace.WriteLine($"deleting NTLM credentials for '{operationArguments.TargetUri}'.");
                         break;
+
+                    case AuthorityType.Bitbucket:
+                        Git.Trace.WriteLine($"deleting Bitbucket credentials for '{operationArguments.CredUsername}@{operationArguments.TargetUri}'.");
+                        break;
                 }
 
-                authentication.DeleteCredentials(operationArguments.TargetUri);
+                authentication.DeleteCredentials(operationArguments.TargetUri, operationArguments.CredUsername);
             }
 
             return;

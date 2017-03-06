@@ -3,7 +3,7 @@
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
-    <ProjectGuid>{5C9EF428-0D26-436A-A8BB-32E58357B36D}</ProjectGuid>
+    <ProjectGuid>{19781214-0D26-436A-A8BB-32E58357B36D}</ProjectGuid>
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
     <RootNamespace>Microsoft.Alm.Git.Test</RootNamespace>
@@ -70,7 +70,7 @@
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\Microsoft.Alm.Git\Microsoft.Alm.Git.csproj">
-      <Project>{4827c16d-5c58-406d-ab3f-3700bb0d06fe}</Project>
+      <Project>{19770407-5c58-406d-ab3f-3700bb0d06fe}</Project>
       <Name>Microsoft.Alm.Git</Name>
     </ProjectReference>
   </ItemGroup>

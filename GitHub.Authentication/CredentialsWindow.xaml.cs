@@ -17,5 +17,10 @@ namespace GitHub.Authentication
         {
             get { return DataContext as CredentialsViewModel; }
         }
+
+        private void credentialsControl_Loaded(object sender, System.Windows.RoutedEventArgs e)
+        {
+
+        }
     }
 }
