@@ -48,7 +48,6 @@ namespace Microsoft.Alm.Cli
             "Microsoft.Alm.Git.dll",
             "Microsoft.IdentityModel.Clients.ActiveDirectory.dll",
             "Microsoft.IdentityModel.Clients.ActiveDirectory.Platform.dll",
-            "Core.Authentication.dll",
             "Bitbucket.Authentication.dll",
             "GitHub.Authentication.exe",
             "git-credential-manager.exe",

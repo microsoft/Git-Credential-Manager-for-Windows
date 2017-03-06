@@ -1,9 +1,9 @@
 ﻿
 
-using Bitbucket.Authentication.ViewModels;
-using Core.Controls;
+using Atlassian.Bitbucket.Authentication.ViewModels;
+using Atlassian.Shared.Controls;
 
-namespace Bitbucket.Authentication.Views
+namespace Atlassian.Bitbucket.Authentication.Views
 {
     public partial class OAuthWindow : AuthenticationDialogWindow
     {

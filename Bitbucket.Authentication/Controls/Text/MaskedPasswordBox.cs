@@ -3,7 +3,7 @@ using System.Globalization;
 using System.Windows;
 using System.Windows.Controls;
 
-namespace Bitbucket.Authentication.Controls.Text
+namespace Atlassian.Bitbucket.Authentication.Controls.Text
 {
     /// <summary>
     /// A masking TextBox control based on http://blogs.ugidotnet.org/leonardo

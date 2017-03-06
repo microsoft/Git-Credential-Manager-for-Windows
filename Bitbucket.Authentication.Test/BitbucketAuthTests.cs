@@ -2,7 +2,7 @@
 using Microsoft.Alm.Authentication;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
-namespace Bitbucket.Authentication.Test
+namespace Atlassian.Bitbucket.Authentication.Test
 {
     [TestClass]
     public class BitbucketAuthTests
@@ -74,11 +74,11 @@ namespace Bitbucket.Authentication.Test
                 "User credentials were unexpectedly not retrieved.");
         }
 
-        private BitbucketAuthentication GetBitbucketAuthentication(string @namespace)
+        private Authentication GetBitbucketAuthentication(string @namespace)
         {
             ICredentialStore credentialStore = new SecretCache(@namespace);
 
-            return new BitbucketAuthentication(credentialStore, null, null);
+            return new Authentication(credentialStore, null, null);
         }
     }
 }

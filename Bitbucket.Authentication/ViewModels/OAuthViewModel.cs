@@ -1,13 +1,8 @@
-﻿using Core.Authentication.Helpers;
-using Core.Authentication.ViewModels;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using System.Windows.Input;
+﻿using System.Windows.Input;
+using Atlassian.Shared.Authentication.Helpers;
+using Atlassian.Shared.Authentication.ViewModels;
 
-namespace Bitbucket.Authentication.ViewModels
+namespace Atlassian.Bitbucket.Authentication.ViewModels
 {
     public class OAuthViewModel : DialogViewModel
     {

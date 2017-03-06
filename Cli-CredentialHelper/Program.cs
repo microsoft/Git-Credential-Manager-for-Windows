@@ -23,13 +23,13 @@
  * WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE."
 **/
 
-using Microsoft.Alm.Authentication;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
-using Bitbucket = Bitbucket.Authentication;
+using System.Threading.Tasks;
+using Microsoft.Alm.Authentication;
 
 namespace Microsoft.Alm.Cli
 {

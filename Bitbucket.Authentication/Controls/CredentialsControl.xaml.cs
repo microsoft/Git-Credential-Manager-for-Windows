@@ -1,8 +1,8 @@
-﻿using Core.Authentication.Helpers;
-using Core.Controls;
-using System;
+﻿using System;
+using Atlassian.Shared.Authentication.Helpers;
+using Atlassian.Shared.Controls;
 
-namespace Bitbucket.Authentication.Controls
+namespace Atlassian.Bitbucket.Authentication.Controls
 {
     /// <summary>
     /// Interaction logic for CredentialsControl.xaml

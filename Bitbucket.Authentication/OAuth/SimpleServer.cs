@@ -1,15 +1,12 @@
-﻿using Core.Authentication.Helpers;
-using System;
-using System.Collections.Generic;
+﻿using System;
 using System.IO;
-using System.Linq;
 using System.Net;
-using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Windows;
+using Atlassian.Shared.Authentication.Helpers;
 
-namespace Bitbucket.Authentication.OAuth
+namespace Atlassian.Bitbucket.Authentication.OAuth
 {
     /// <summary>
     /// 
@@ -76,7 +73,7 @@ namespace Bitbucket.Authentication.OAuth
 
 
                 var html = Application.GetResourceStream(
-            new Uri("pack://application:,,,/Bitbucket.Authentication;component/Assets/auth.html", UriKind.Absolute));
+            new Uri("pack://application:,,,/Bitbucket.Authentication;Component/Assets/auth.html", UriKind.Absolute));
                 if (html != null)
                 {
                     using (StreamReader reader = new StreamReader(html.Stream))

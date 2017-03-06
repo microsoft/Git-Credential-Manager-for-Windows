@@ -1,6 +1,6 @@
 ﻿using System.Windows.Controls;
 
-namespace Bitbucket.Authentication.Controls
+namespace Atlassian.Bitbucket.Authentication.Controls
 {
     public partial class HorizontalShadowDivider : UserControl
     {

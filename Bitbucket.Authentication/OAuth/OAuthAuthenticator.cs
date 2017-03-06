@@ -12,7 +12,7 @@ using System.Threading.Tasks;
 
 using Trace = Microsoft.Alm.Git.Trace;
 
-namespace Bitbucket.Authentication.OAuth
+namespace Atlassian.Bitbucket.Authentication.OAuth
 {
     
 
@@ -41,7 +41,7 @@ namespace Bitbucket.Authentication.OAuth
         /// </summary>
         /// <returns>The access token</returns>
         /// <exception cref="SourceTree.Exceptions.OAuthException">Thrown when OAuth fails for whatever reason</exception>
-        public async Task<BitbucketAuthenticationResult> GetAuthAsync(TargetUri targetUri, BitbucketTokenScope scope, CancellationToken cancellationToken)
+        public async Task<AuthenticationResult> GetAuthAsync(TargetUri targetUri, TokenScope scope, CancellationToken cancellationToken)
         {
 
             var authToken = await Authorize(targetUri, scope, cancellationToken);
@@ -49,12 +49,12 @@ namespace Bitbucket.Authentication.OAuth
             return await GetAccessToken(targetUri, authToken);
         }
 
-        public async Task<BitbucketAuthenticationResult> RefreshAuthAsync(TargetUri targetUri, string refreshToken, CancellationToken cancellationToken)
+        public async Task<AuthenticationResult> RefreshAuthAsync(TargetUri targetUri, string refreshToken, CancellationToken cancellationToken)
         {
             return await RefreshAccessToken(targetUri, refreshToken);
         }
 
-        public async Task<string> Authorize(TargetUri targetUri, BitbucketTokenScope scope, CancellationToken cancellationToken)
+        public async Task<string> Authorize(TargetUri targetUri, TokenScope scope, CancellationToken cancellationToken)
         {
             var authorityUrl = string.Format(
             AuthorizeUri +
@@ -128,7 +128,7 @@ namespace Bitbucket.Authentication.OAuth
         //    return response.Data;
         //}
 
-        private async Task<BitbucketAuthenticationResult> GetAccessToken(TargetUri targetUri, string authCode)
+        private async Task<AuthenticationResult> GetAccessToken(TargetUri targetUri, string authCode)
         {
             Token token = null;
             Token refreshToken = null;
@@ -158,7 +158,7 @@ namespace Bitbucket.Authentication.OAuth
 
                     using (HttpResponseMessage response = await httpClient.PostAsync(url, content))
                     {
-                        Trace.WriteLine("   server responded with " + response.StatusCode);
+                        Trace.WriteLine($"server responded with {response.StatusCode}.");
 
                         switch (response.StatusCode)
                         {
@@ -185,33 +185,33 @@ namespace Bitbucket.Authentication.OAuth
 
                                     if (token == null || refreshToken == null)
                                     {
-                                        Trace.WriteLine("   authentication failure");
-                                        return new BitbucketAuthenticationResult(BitbucketAuthenticationResultType.Failure);
+                                        Trace.WriteLine("authentication failure");
+                                        return new AuthenticationResult(AuthenticationResultType.Failure);
                                     }
                                     else
                                     {
-                                        Trace.WriteLine("   authentication success: new personal acces token created.");
-                                        return new BitbucketAuthenticationResult(BitbucketAuthenticationResultType.Success, token, refreshToken);
+                                        Trace.WriteLine("authentication success: new personal access token created.");
+                                        return new AuthenticationResult(AuthenticationResultType.Success, token, refreshToken);
                                     }
                                 }
 
                             case HttpStatusCode.Unauthorized:
                                 {
                                     // do something
-                                    return new BitbucketAuthenticationResult(BitbucketAuthenticationResultType.Failure);
+                                    return new AuthenticationResult(AuthenticationResultType.Failure);
                                 }
 
                             default:
-                                Trace.WriteLine("   authentication failed");
+                                Trace.WriteLine("authentication failed");
                                 var error = response.Content.ReadAsStringAsync();
-                                return new BitbucketAuthenticationResult(BitbucketAuthenticationResultType.Failure);
+                                return new AuthenticationResult(AuthenticationResultType.Failure);
                         }
                     }
                 }
             }
         }
 
-        public async Task<BitbucketAuthenticationResult> RefreshAccessToken(TargetUri targetUri, string currentRefreshToken)
+        public async Task<AuthenticationResult> RefreshAccessToken(TargetUri targetUri, string currentRefreshToken)
         {
             Token token = null;
             Token refreshToken = null;
@@ -233,7 +233,7 @@ namespace Bitbucket.Authentication.OAuth
 
                     using (HttpResponseMessage response = await httpClient.PostAsync(url, content))
                     {
-                        Trace.WriteLine("   server responded with " + response.StatusCode);
+                        Trace.WriteLine($"server responded with {response.StatusCode}.");
 
                         switch (response.StatusCode)
                         {
@@ -260,26 +260,26 @@ namespace Bitbucket.Authentication.OAuth
 
                                     if (token == null || refreshToken == null)
                                     {
-                                        Trace.WriteLine("   authentication failure");
-                                        return new BitbucketAuthenticationResult(BitbucketAuthenticationResultType.Failure);
+                                        Trace.WriteLine("authentication failure");
+                                        return new AuthenticationResult(AuthenticationResultType.Failure);
                                     }
                                     else
                                     {
-                                        Trace.WriteLine("   authentication success: new personal acces token created.");
-                                        return new BitbucketAuthenticationResult(BitbucketAuthenticationResultType.Success, token, refreshToken);
+                                        Trace.WriteLine("authentication success: new personal access token created.");
+                                        return new AuthenticationResult(AuthenticationResultType.Success, token, refreshToken);
                                     }
                                 }
 
                             case HttpStatusCode.Unauthorized:
                                 {
                                     // do something
-                                    return new BitbucketAuthenticationResult(BitbucketAuthenticationResultType.Failure);
+                                    return new AuthenticationResult(AuthenticationResultType.Failure);
                                 }
 
                             default:
-                                Trace.WriteLine("   authentication failed");
+                                Trace.WriteLine("authentication failed");
                                 var error = response.Content.ReadAsStringAsync();
-                                return new BitbucketAuthenticationResult(BitbucketAuthenticationResultType.Failure);
+                                return new AuthenticationResult(AuthenticationResultType.Failure);
                         }
                     }
                 }

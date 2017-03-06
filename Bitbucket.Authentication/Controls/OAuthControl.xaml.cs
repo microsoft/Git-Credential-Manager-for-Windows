@@ -1,7 +1,6 @@
-﻿using Core.Controls;
-using System;
+﻿using Atlassian.Shared.Controls;
 
-namespace Bitbucket.Authentication.Controls
+namespace Atlassian.Bitbucket.Authentication.Controls
 {
     public partial class OAuthControl : DialogUserControl
     {

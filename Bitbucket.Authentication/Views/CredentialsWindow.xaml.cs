@@ -1,9 +1,7 @@
-﻿
+﻿using Atlassian.Bitbucket.Authentication.ViewModels;
+using Atlassian.Shared.Controls;
 
-using Bitbucket.Authentication.ViewModels;
-using Core.Controls;
-
-namespace Bitbucket.Authentication.Views
+namespace Atlassian.Bitbucket.Authentication.Views
 {
     /// <summary>
     /// Interaction logic for CredentialsWindow.xaml

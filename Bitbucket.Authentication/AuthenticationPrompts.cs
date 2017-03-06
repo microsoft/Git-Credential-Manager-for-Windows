@@ -1,18 +1,18 @@
 ﻿using System;
 using System.Diagnostics;
 using System.Linq;
+using System.Text.RegularExpressions;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Windows;
-using Bitbucket.Authentication.ViewModels;
+using Atlassian.Bitbucket.Authentication.ViewModels;
+using Atlassian.Bitbucket.Authentication.Views;
+using Atlassian.Shared.Authentication.ViewModels;
+using Atlassian.Shared.Controls;
 using Microsoft.Alm.Authentication;
-using Core.Authentication.ViewModels;
-using Core.Controls;
-using Bitbucket.Authentication.Views;
-using System.Text.RegularExpressions;
 using Trace = Microsoft.Alm.Git.Trace;
 
-namespace Bitbucket.Authentication
+namespace Atlassian.Bitbucket.Authentication
 {
     public static class AuthenticationPrompts
     {
@@ -36,11 +36,9 @@ namespace Bitbucket.Authentication
         public static bool CredentialModalPrompt(string title, TargetUri targetUri, out string username,
             out string password)
         {
-            Trace.WriteLine("Program::BitbucketCredentialModalPrompt");
-
             var credentialViewModel = new CredentialsViewModel(GetUserFromTargetUri(targetUri));
 
-            Trace.WriteLine("   prompting user for credentials.");
+            Trace.WriteLine("prompting user for credentials.");
 
             bool credentialValid = ShowViewModel(credentialViewModel, () => new CredentialsWindow());
 
@@ -52,14 +50,12 @@ namespace Bitbucket.Authentication
 
         // TODO add Oauth
         public static bool AuthenticationOAuthModalPrompt(string title, TargetUri targetUri,
-            BitbucketAuthenticationResultType resultType,
+            AuthenticationResultType resultType,
             string username)
         {
-            Trace.WriteLine("Program::BitbucketAuthenticationOAuthModalPrompt");
+            var oauthViewModel = new OAuthViewModel(resultType == AuthenticationResultType.TwoFactor);
 
-            var oauthViewModel = new OAuthViewModel(resultType == BitbucketAuthenticationResultType.TwoFactor);
-
-            Trace.WriteLine("   prompting user for authentication code.");
+            Trace.WriteLine("prompting user for authentication code.");
 
             bool useOAuth = ShowViewModel(oauthViewModel, () => new OAuthWindow());
 

@@ -1,11 +1,11 @@
-﻿using Core.Authentication.ViewModels.Validation;
-using System;
+﻿using System;
 using System.Diagnostics;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Media;
+using Atlassian.Shared.Authentication.ViewModels.Validation;
 
-namespace Bitbucket.Authentication.Controls.Text
+namespace Atlassian.Bitbucket.Authentication.Controls.Text
 {
     public class ValidationMessage : UserControl
     {

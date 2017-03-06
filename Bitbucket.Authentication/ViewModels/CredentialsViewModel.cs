@@ -1,10 +1,10 @@
 ﻿using System.Windows.Input;
-using Core.Authentication.Helpers;
-using Core.Authentication.ViewModels;
-using Core.Authentication.ViewModels.Validation;
-using Bitbucket.Authentication.Properties;
+using Atlassian.Shared.Authentication.Helpers;
+using Atlassian.Shared.Authentication.ViewModels;
+using Atlassian.Shared.Authentication.ViewModels.Validation;
+using Atlassian.Bitbucket.Authentication.Properties;
 
-namespace Bitbucket.Authentication.ViewModels
+namespace Atlassian.Bitbucket.Authentication.ViewModels
 {
     public class CredentialsViewModel : DialogViewModel
     {

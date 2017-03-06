@@ -7,7 +7,7 @@
     <ProjectGuid>{EE663736-5BAD-4CA6-A4F8-99978925AD8A}</ProjectGuid>
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>Bitbucket.Authentication</RootNamespace>
+    <RootNamespace>Atlassian.Bitbucket.Authentication</RootNamespace>
     <AssemblyName>Bitbucket.Authentication</AssemblyName>
     <TargetFrameworkVersion>v4.5.1</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
@@ -31,32 +31,20 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="Microsoft.IdentityModel.Clients.ActiveDirectory, Version=3.13.1.846, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\packages\Microsoft.IdentityModel.Clients.ActiveDirectory.3.13.1\lib\net45\Microsoft.IdentityModel.Clients.ActiveDirectory.dll</HintPath>
-    </Reference>
-    <Reference Include="Microsoft.IdentityModel.Clients.ActiveDirectory.Platform, Version=3.13.1.846, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\packages\Microsoft.IdentityModel.Clients.ActiveDirectory.3.13.1\lib\net45\Microsoft.IdentityModel.Clients.ActiveDirectory.Platform.dll</HintPath>
-    </Reference>
     <Reference Include="PresentationCore" />
     <Reference Include="PresentationFramework" />
     <Reference Include="System" />
     <Reference Include="System.Core" />
     <Reference Include="System.Xaml" />
-    <Reference Include="System.Xml.Linq" />
-    <Reference Include="System.Data.DataSetExtensions" />
     <Reference Include="Microsoft.CSharp" />
-    <Reference Include="System.Data" />
     <Reference Include="System.Net.Http" />
-    <Reference Include="System.Xml" />
     <Reference Include="WindowsBase" />
   </ItemGroup>
   <ItemGroup>
     <Compile Include="AuthenticationPrompts.cs" />
-    <Compile Include="BitbucketAuthentication.cs" />
-    <Compile Include="BitbucketAuthority.cs" />
-    <Compile Include="BitbucketAuthenticationResult.cs" />
+    <Compile Include="Authentication.cs" />
+    <Compile Include="Authority.cs" />
+    <Compile Include="AuthenticationResult.cs" />
     <Compile Include="Controls\CredentialsControl.xaml.cs">
       <DependentUpon>CredentialsControl.xaml</DependentUpon>
     </Compile>
@@ -66,12 +54,12 @@
     <Compile Include="Controls\Text\MaskedPasswordBox.cs" />
     <Compile Include="Controls\Text\PromptTextBox.cs" />
     <Compile Include="Controls\Text\ValidationMessage.cs" />
-    <Compile Include="BitbucketTokenScope.cs" />
+    <Compile Include="TokenScope.cs" />
     <Compile Include="Controls\OAuthControl.xaml.cs">
       <DependentUpon>OAuthControl.xaml</DependentUpon>
     </Compile>
-    <Compile Include="IBitbucketAuthentication.cs" />
-    <Compile Include="IBitbucketAuthority.cs" />
+    <Compile Include="IAuthentication.cs" />
+    <Compile Include="IAuthority.cs" />
     <Compile Include="OAuth\OAuthAuthenticator.cs" />
     <Compile Include="OAuth\SimpleServer.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
@@ -90,10 +78,6 @@
     </Compile>
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\Core.Authentication\Core.Authentication.csproj">
-      <Project>{3cb99b39-dbe5-4a1c-8ae3-775c15e6d54c}</Project>
-      <Name>Core.Authentication</Name>
-    </ProjectReference>
     <ProjectReference Include="..\Microsoft.Alm.Authentication\Microsoft.Alm.Authentication.csproj">
       <Project>{C1DAABC1-B493-459D-BB4F-04FBEFB1BA13}</Project>
       <Name>Microsoft.Alm.Authentication</Name>
@@ -166,6 +150,7 @@
   <ItemGroup>
     <Resource Include="Assets\auth.html" />
   </ItemGroup>
+  <Import Project="..\Wpf-Shared\Wpf-Shared.projitems" Label="Shared" />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.
