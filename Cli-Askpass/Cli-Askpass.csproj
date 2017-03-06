@@ -75,8 +75,16 @@
     <Compile Include="UserPromptKind.cs" />
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\Bitbucket.Authentication\Bitbucket.Authentication.csproj">
+      <Project>{ee663736-5bad-4ca6-a4f8-99978925ad8a}</Project>
+      <Name>Bitbucket.Authentication</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\GitHub.Authentication\GitHub.Authentication.csproj">
+      <Project>{cf306116-bbf0-4cc7-afce-a506ac4752cb}</Project>
+      <Name>GitHub.Authentication</Name>
+    </ProjectReference>
     <ProjectReference Include="..\Microsoft.Alm.Authentication\Microsoft.Alm.Authentication.csproj">
-      <Project>{19770407-b493-459d-bb4f-04fbefb1ba13}</Project>
+      <Project>{c1daabc1-b493-459d-bb4f-04fbefb1ba13}</Project>
       <Name>Microsoft.Alm.Authentication</Name>
     </ProjectReference>
     <ProjectReference Include="..\Microsoft.Alm.Git\Microsoft.Alm.Git.csproj">
@@ -86,10 +94,6 @@
     <ProjectReference Include="..\Microsoft.Vsts.Authentication\Microsoft.Vsts.Authentication.csproj">
       <Project>{19770407-d7d8-4a37-914c-f552ff4b90d4}</Project>
       <Name>Microsoft.Vsts.Authentication</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\GitHub.Authentication\GitHub.Authentication.csproj">
-      <Project>{cf306116-bbf0-4cc7-afce-a506ac4752cb}</Project>
-      <Name>GitHub.Authentication</Name>
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
@@ -124,8 +128,10 @@ COPY /V /Y "%25src%25Microsoft.IdentityModel.Clients.ActiveDirectory.Platform.dl
 COPY /V /Y "%25src%25Microsoft.Alm.Authentication.dll" "%25dst%25Microsoft.Alm.Authentication.dll"
 COPY /V /Y "%25src%25Microsoft.Alm.Git.dll" "%25dst%25Microsoft.Alm.Git.dll"
 COPY /V /Y "%25src%25Microsoft.Vsts.Authentication.dll" "%25dst%25Microsoft.Vsts.Authentication.dll"
+COPY /V /Y "%25src%25Bitbucket.Authentication.exe" "%25dst%25Bitbucket.Authentication.exe"
 COPY /V /Y "%25src%25GitHub.Authentication.exe" "%25dst%25GitHub.Authentication.exe"
 COPY /V /Y "%25src%25git-askpass.exe" "%25dst%25git-askpass.exe"
+COPY /V /Y "%25src%25git-askpass-st.exe" "%25dst%25git-askpass-st.exe"
 COPY /V /Y "%25src%25README.md" "%25dst%25README.md"
 COPY /V /Y "%25src%25LICENSE.txt" "%25dst%25LICENSE.txt"
 

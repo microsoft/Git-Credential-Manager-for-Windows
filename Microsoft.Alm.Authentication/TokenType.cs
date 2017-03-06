@@ -54,5 +54,20 @@ namespace Microsoft.Alm.Authentication
         /// </summary>
         [System.ComponentModel.Description("Test-only Token")]
         Test = 5,
+        /// <summary>
+        /// Bitbucket Password Tokens
+        /// </summary>
+        [System.ComponentModel.Description("Bitbucket Password Token")]
+        BitbucketPassword = 6,
+        /// <summary>
+        /// Bitbucket Access Tokens
+        /// </summary>
+        [System.ComponentModel.Description("Bitbucket Access Token")]
+        BitbucketAccess = 7,
+        /// <summary>
+        /// Used to auto-refresh Bitbucket Access Tokens
+        /// </summary>
+        [System.ComponentModel.Description("Bitbucket Refresh Token")]
+        BitbucketRefresh = 8,
     }
 }

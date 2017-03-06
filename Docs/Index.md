@@ -41,6 +41,7 @@ To build and install the GCM yourself, clone the sources, open the solution file
 * [Build Agent and Automation Support](Automation.md)
 * [Frequently Asked Questions](Faq.md)
 * [Development and Debugging](Development.md)
+* [Bitbucket Support](Bitbucket.md)
 
 ## License
 
