@@ -29,7 +29,7 @@ namespace Microsoft.Alm.Cli
         internal const string ConfigWritelogKey = "writelog";
 
         internal static readonly StringComparer ConfigKeyComparer = StringComparer.OrdinalIgnoreCase;
-        internal static readonly StringComparer ConfigValueComparer = StringComparer.InvariantCultureIgnoreCase;
+        internal static readonly StringComparer ConfigValueComparer = StringComparer.OrdinalIgnoreCase;
 
         internal const string EnvironAuthorityKey = "GCM_AUTHORITY";
         internal const string EnvironConfigNoLocalKey = "GCM_CONFIG_NOLOCAL";
@@ -731,7 +731,7 @@ namespace Microsoft.Alm.Cli
 
                 // write a small header to help with identifying new log entries
                 listener.Write('\n');
-                listener.Write($"{DateTime.Now:YYYY.MM.dd HH:mm:ss} Microsoft {Program.Title} version {Version.ToString(3)}\n");
+                listener.Write($"{DateTime.Now:yyyy.MM.dd HH:mm:ss} Microsoft {Program.Title} version {Version.ToString(3)}\n");
             }
         }
 
@@ -1127,8 +1127,7 @@ namespace Microsoft.Alm.Cli
             // look for an entry in the environment variables
             string localVal = null;
             if (!String.IsNullOrWhiteSpace(environKey)
-                && envars.TryGetValue(environKey, out localVal)
-                && !String.IsNullOrWhiteSpace(localVal))
+                && envars.TryGetValue(environKey, out localVal))
             {
                 goto parse_localval;
             }
@@ -1138,8 +1137,7 @@ namespace Microsoft.Alm.Cli
             // look for an entry in the git config
             Configuration.Entry entry;
             if (!String.IsNullOrWhiteSpace(configKey)
-                && config.TryGetEntry(ConfigPrefix, operationArguments.QueryUri, configKey, out entry)
-                && !String.IsNullOrWhiteSpace(entry.Value))
+                && config.TryGetEntry(ConfigPrefix, operationArguments.QueryUri, configKey, out entry))
             {
                 goto parse_localval;
             }
@@ -1147,24 +1145,25 @@ namespace Microsoft.Alm.Cli
             // parse the value into a bool
             parse_localval:
 
-            bool result;
-            if (bool.TryParse(localVal, out result))
+            // Test `localValue` for a Git 'true' equivalent value
+            if (String.IsNullOrEmpty(localVal)
+                || ConfigValueComparer.Equals(localVal, "yes")
+                || ConfigValueComparer.Equals(localVal, "true")
+                || ConfigValueComparer.Equals(localVal, "1")
+                || ConfigValueComparer.Equals(localVal, "off"))
             {
-                value = result;
+                value = true;
                 return true;
             }
-            else
+
+            // Test `localValue` for a Git 'false' equivalent value
+            if (ConfigValueComparer.Equals(localVal, "no")
+                || ConfigValueComparer.Equals(localVal, "false")
+                || ConfigValueComparer.Equals(localVal, "0")
+                || ConfigValueComparer.Equals(localVal, "off"))
             {
-                if (ConfigValueComparer.Equals(localVal, "no"))
-                {
-                    value = false;
-                    return true;
-                }
-                else if (ConfigValueComparer.Equals(localVal, "yes"))
-                {
-                    value = true;
-                    return true;
-                }
+                value = false;
+                return true;
             }
 
             value = null;
