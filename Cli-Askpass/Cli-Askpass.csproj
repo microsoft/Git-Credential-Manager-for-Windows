@@ -63,12 +63,13 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="GlobalSuppressions.cs" />
-    <Compile Include="PassphraseWindow.xaml.cs">
-      <DependentUpon>PassphraseWindow.xaml</DependentUpon>
+    <Compile Include="UserPromptDialog.xaml.cs">
+      <DependentUpon>UserPromptDialog.xaml</DependentUpon>
     </Compile>
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="PasswordBoxHintAdorner.cs" />
+    <Compile Include="UserPromptKind.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\Microsoft.Alm.Authentication\Microsoft.Alm.Authentication.csproj">
@@ -92,10 +93,16 @@
     <None Include="app.config" />
   </ItemGroup>
   <ItemGroup>
-    <Page Include="PassphraseWindow.xaml">
+    <Page Include="UserPromptDialog.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="Assets\gcm.ico" />
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="Assets\gcm.png" />
   </ItemGroup>
   <Import Project="..\Cli-Shared\Cli-Shared.projitems" Label="Shared" />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
