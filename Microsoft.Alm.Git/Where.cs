@@ -234,6 +234,38 @@ namespace Microsoft.Alm.Git
         }
 
         /// <summary>
+        /// Calculate the path to the user's home directory (~/ or %HOME%) that Git will rely on. 
+        /// </summary>
+        /// <returns>The path to the user's home directory.</returns>
+        public static string Home()
+        {
+            // Git relies on the %HOME% environment variable to represent the users home directory
+            // it can contain embedded environment variables, so we need to expand it
+            string path = Environment.GetEnvironmentVariable("HOME", EnvironmentVariableTarget.Process);
+            path = Environment.ExpandEnvironmentVariables(path);
+
+            // If the path is good, return it.
+            if (path != null && Directory.Exists(path))
+                return path;
+
+            // Absent the %HOME% variable, Git will construct it via %HOMEDRIVE%%HOMEPATH%, so we'll attempt to
+            // that here and if it is valid, return it as %HOME%.
+            string homeDrive = Environment.GetEnvironmentVariable("HOMEDRIVE", EnvironmentVariableTarget.Process);
+            string homePath = Environment.GetEnvironmentVariable("HOMEPATH", EnvironmentVariableTarget.Process);
+
+            if (homeDrive != null && homePath != null)
+            {
+                path = homeDrive + homePath;
+
+                if (Directory.Exists(path))
+                    return path;
+            }
+
+            // When all else fails, Git falls back to %USERPROFILE% as the user's home directory, so should we.
+            return Environment.GetFolderPath(Environment.SpecialFolder.UserProfile);
+        }
+
+        /// <summary>
         /// Gets the path to the Git global configuration file.
         /// </summary>
         /// <param name="path">Path to the Git global configuration</param>
@@ -242,22 +274,20 @@ namespace Microsoft.Alm.Git
         {
             const string GlobalConfigFileName = ".gitconfig";
 
-            path = null;
-
-            string home = Environment.GetEnvironmentVariable("HOME");
-            if (String.IsNullOrWhiteSpace(home) || !Directory.Exists(home))
-            {
-                home = Environment.GetFolderPath(Environment.SpecialFolder.UserProfile);
-            }
+            // Get the user's home directory, then append the global config file name.
+            string home = Home();
 
             var globalPath = Path.Combine(home, GlobalConfigFileName);
 
+            // if the path is valid, return it to the user.
             if (File.Exists(globalPath))
             {
                 path = globalPath;
+                return true;
             }
 
-            return path != null;
+            path = null;
+            return false;
         }
 
         /// <summary>
