@@ -87,7 +87,8 @@ namespace Microsoft.Alm.Git
                             _writers.Remove(writer);
                         }
                     }
-                }catch { /* squelch */ }
+                }
+                catch { /* squelch */ }
             }
 
             GC.SuppressFinalize(this);
@@ -170,9 +171,13 @@ namespace Microsoft.Alm.Git
 
                 foreach (var writer in _writers)
                 {
-                    writer?.Write(text);
-                    writer?.Write('\n');
-                    writer?.Flush();
+                    try
+                    {
+                        writer?.Write(text);
+                        writer?.Write('\n');
+                        writer?.Flush();
+                    }
+                    catch { /* squelch */ }
                 }
             }
         }
