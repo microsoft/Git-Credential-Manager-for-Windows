@@ -324,14 +324,39 @@ namespace Microsoft.Alm.Git
                             }
                         }
 
-                        // add or update the (key, value)
-                        if (destination.ContainsKey(key))
+                        if ("include.path".Equals(key))
                         {
-                            destination[key] = val;
+                            try
+                            {
+                                // This is an include directive, import the configuration values from the included file
+                                string includePath = (val.StartsWith("~/", StringComparison.OrdinalIgnoreCase))
+                                    ? Where.Home() + val.Substring(1, val.Length - 1)
+                                    : val;
+
+                                includePath = Path.GetFullPath(includePath);
+
+                                using (var includeFile = File.Open(includePath, FileMode.Open, FileAccess.Read, FileShare.Read))
+                                using (var includeReader = new StreamReader(includeFile))
+                                {
+                                    ParseGitConfig(includeReader, destination);
+                                }
+                            }
+                            catch (Exception exception)
+                            {
+                                Trace.WriteLine($"failed to parse config file: {val}. {exception.Message}");
+                            }
                         }
                         else
                         {
-                            destination.Add(key, val);
+                            // Add or update the (key, value)
+                            if (destination.ContainsKey(key))
+                            {
+                                destination[key] = val;
+                            }
+                            else
+                            {
+                                destination.Add(key, val);
+                            }
                         }
                     }
                 }
