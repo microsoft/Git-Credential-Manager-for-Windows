@@ -74,6 +74,7 @@ namespace Microsoft.Alm.Git
         public static void AddListener(TextWriter listener)
             => Instance.AddListener(listener);
 
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Design", "CA1031:DoNotCatchGeneralExceptionTypes")]
         public void Dispose()
         {
             lock (_syncpoint)
@@ -88,7 +89,8 @@ namespace Microsoft.Alm.Git
                         }
                     }
                 }
-                catch { /* squelch */ }
+                catch
+                { /* squelch */ }
             }
 
             GC.SuppressFinalize(this);

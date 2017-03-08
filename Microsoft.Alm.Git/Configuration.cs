@@ -253,6 +253,8 @@ namespace Microsoft.Alm.Git
             }
         }
 
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Design", "CA1031:DoNotCatchGeneralExceptionTypes")]
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Maintainability", "CA1502:AvoidExcessiveComplexity")]
         internal static void ParseGitConfig(TextReader reader, IDictionary<string, string> destination)
         {
             Debug.Assert(reader != null, $"The `{nameof(reader)}` parameter is null.");
