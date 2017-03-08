@@ -209,8 +209,6 @@ namespace Microsoft.Alm.Git
                 && Where.GitPortableConfig(out portableConfig))
             {
                 ParseGitConfig(ConfigurationLevel.Portable, portableConfig);
-
-                Git.Trace.WriteLine($"git portable config read, {Count} entries.");
             }
 
             // find and parse Git's system config
@@ -218,8 +216,6 @@ namespace Microsoft.Alm.Git
                 && Where.GitSystemConfig(null, out systemConfig))
             {
                 ParseGitConfig(ConfigurationLevel.System, systemConfig);
-
-                Git.Trace.WriteLine($"git system config read, {Count} entries.");
             }
 
             // find and parse Git's global config
@@ -227,8 +223,6 @@ namespace Microsoft.Alm.Git
                 && Where.GitGlobalConfig(out globalConfig))
             {
                 ParseGitConfig(ConfigurationLevel.Global, globalConfig);
-
-                Git.Trace.WriteLine($"git global config read, {Count} entries.");
             }
 
             // find and parse Git's local config
@@ -236,9 +230,9 @@ namespace Microsoft.Alm.Git
                 && Where.GitLocalConfig(directory, out localConfig))
             {
                 ParseGitConfig(ConfigurationLevel.Local, localConfig);
-
-                Git.Trace.WriteLine($"git local config read, {Count} entries.");
             }
+
+            Git.Trace.WriteLine($"git {types} config read, {Count} entries.");
         }
 
         private void ParseGitConfig(ConfigurationLevel level, string configPath)
