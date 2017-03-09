@@ -75,8 +75,7 @@ namespace Microsoft.Alm.Authentication
             : base(personalAccessTokenStore,
                    vstsIdeTokenCache,
                    vstsAuthority)
-        {
-        }
+        { }
 
         /// <summary>
         /// <para>Creates an interactive logon session, using ADAL secure browser GUI, which

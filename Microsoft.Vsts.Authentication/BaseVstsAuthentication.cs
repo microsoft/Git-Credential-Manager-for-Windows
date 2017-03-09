@@ -24,7 +24,10 @@
 **/
 
 using System;
+using System.Collections.Generic;
+using System.IO;
 using System.Net;
+using System.Text;
 using System.Threading.Tasks;
 using Microsoft.IdentityModel.Clients.ActiveDirectory;
 
@@ -105,6 +108,133 @@ namespace Microsoft.Alm.Authentication
         }
 
         /// <summary>
+        /// Detects the backing authority of the end-point.
+        /// </summary>
+        /// <param name="targetUri">The resource which the authority protects.</param>
+        /// <param name="tenantId">The identity of the authority tenant; <see cref="Guid.Empty"/> otherwise.</param>
+        /// <returns><see langword="true"/> if the authority is Visual Studio Online; <see langword="false"/> otherwise</returns>
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Design", "CA1062:Validate arguments of public methods", MessageId = "0")]
+        public static async Task<Guid> DetectAuthority(TargetUri targetUri)
+        {
+            const string VstsBaseUrlHost = "visualstudio.com";
+            const string VstsResourceTenantHeader = "X-VSS-ResourceTenant";
+
+            BaseSecureStore.ValidateTargetUri(targetUri);
+
+            var tenantId = Guid.Empty;
+
+            if (targetUri.Host.EndsWith(VstsBaseUrlHost, StringComparison.OrdinalIgnoreCase))
+            {
+                Git.Trace.WriteLine($"'{targetUri}' is subdomain of '{VstsBaseUrlHost}', checking AAD vs MSA.");
+
+                string tenant = null;
+                WebResponse response;
+
+                if (StringComparer.OrdinalIgnoreCase.Equals(targetUri.Scheme, "http")
+                    || StringComparer.OrdinalIgnoreCase.Equals(targetUri.Scheme, "https"))
+                {
+                    // Query the cache first
+                    string tenantUrl = targetUri.ToString();
+
+                    // Read the cache from disk
+                    var cache = await DeserializeTenantCache();
+
+                    // Check the cache for an existing value
+                    if (cache.TryGetValue(tenantUrl, out tenantId))
+                        return tenantId;
+
+                    try
+                    {
+                        // build a request that we expect to fail, do not allow redirect to sign in url
+                        var request = WebRequest.CreateHttp(targetUri);
+                        request.UserAgent = Global.UserAgent;
+                        request.Method = "HEAD";
+                        request.AllowAutoRedirect = false;
+                        // get the response from the server
+                        response = await request.GetResponseAsync();
+                    }
+                    catch (WebException exception)
+                    {
+                        response = exception.Response;
+                    }
+
+                    // if the response exists and we have headers, parse them
+                    if (response != null && response.SupportsHeaders)
+                    {
+                        // find the VSTS resource tenant entry
+                        tenant = response.Headers[VstsResourceTenantHeader];
+
+                        if (!String.IsNullOrWhiteSpace(tenant)
+                            && Guid.TryParse(tenant, out tenantId))
+                        {
+                            // Update the cache.
+                            cache[tenantUrl] = tenantId;
+
+                            // Write the cache to disk.
+                            await SerializeTenantCache(cache);
+
+                            // Success, notify the caller
+                            return tenantId;
+                        }
+                    }
+                }
+                else
+                {
+                    Git.Trace.WriteLine($"detected non-https based protocol: {targetUri.Scheme}.");
+                }
+            }
+
+            // if all else fails, fallback to basic authentication
+            return tenantId;
+        }
+
+        /// <summary>
+        /// Creates a new authentication broker based for the specified resource.
+        /// </summary>
+        /// <param name="targetUri">The resource for which authentication is being requested.</param>
+        /// <param name="scope">The scope of the access being requested.</param>
+        /// <param name="personalAccessTokenStore">Storage container for personal access token secrets.</param>
+        /// <param name="adaRefreshTokenStore">Storage container for Azure access token secrets.</param>
+        /// <param name="authentication">
+        /// An implementation of <see cref="BaseAuthentication"/> if one was detected;
+        /// <see langword="null"/> otherwise.
+        /// </param>
+        /// <returns>
+        /// <see langword="true"/> if an authority could be determined; <see langword="false"/> otherwise.
+        /// </returns>
+        public static async Task<BaseAuthentication> GetAuthentication(
+            TargetUri targetUri,
+            VstsTokenScope scope,
+            ICredentialStore personalAccessTokenStore)
+        {
+            BaseSecureStore.ValidateTargetUri(targetUri);
+            if (ReferenceEquals(scope, null))
+                throw new ArgumentNullException(nameof(scope));
+            if (ReferenceEquals(personalAccessTokenStore, null))
+                throw new ArgumentNullException(nameof(personalAccessTokenStore));
+
+            BaseAuthentication authentication = null;
+
+            // Query for the tenant's identity
+            Guid tenantId = await DetectAuthority(targetUri);
+
+            // empty Guid is MSA, anything else is AAD
+            if (tenantId == Guid.Empty)
+            {
+                Git.Trace.WriteLine("MSA authority detected.");
+                authentication = new VstsMsaAuthentication(scope, personalAccessTokenStore);
+            }
+            else
+            {
+                Git.Trace.WriteLine($"AAD authority for tenant '{tenantId}' detected.");
+                authentication = new VstsAadAuthentication(tenantId, scope, personalAccessTokenStore);
+                (authentication as VstsAadAuthentication).TenantId = tenantId;
+            }
+
+            return authentication;
+        }
+
+        /// <summary>
         /// Attempts to get a set of credentials from storage by their target resource.
         /// </summary>
         /// <param name="targetUri">The 'key' by which to identify credentials.</param>
@@ -171,112 +301,101 @@ namespace Microsoft.Alm.Authentication
             return credential;
         }
 
-        /// <summary>
-        /// Detects the backing authority of the end-point.
-        /// </summary>
-        /// <param name="targetUri">The resource which the authority protects.</param>
-        /// <param name="tenantId">The identity of the authority tenant; <see cref="Guid.Empty"/> otherwise.</param>
-        /// <returns><see langword="true"/> if the authority is Visual Studio Online; <see langword="false"/> otherwise</returns>
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Design", "CA1062:Validate arguments of public methods", MessageId = "0")]
-        public static bool DetectAuthority(TargetUri targetUri, out Guid tenantId)
+        private const char CachePairSeperator = '=';
+        private const char CachePairTerminator = '\0';
+
+        private static async Task<Dictionary<string, Guid>> DeserializeTenantCache()
         {
-            const string VstsBaseUrlHost = "visualstudio.com";
-            const string VstsResourceTenantHeader = "X-VSS-ResourceTenant";
+            var encoding = new UTF8Encoding(false);
+            string path = Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData);
+            path = Path.Combine(path, "GCM", "tenants");
 
-            BaseSecureStore.ValidateTargetUri(targetUri);
+            Dictionary<string, Guid> cache = new Dictionary<string, Guid>(StringComparer.OrdinalIgnoreCase);
 
-            tenantId = Guid.Empty;
-
-            if (targetUri.Host.EndsWith(VstsBaseUrlHost, StringComparison.OrdinalIgnoreCase))
+            // Attempt up to five times to read from the cache
+            for (int i = 0; i < 5; i += 1)
             {
-                Git.Trace.WriteLine($"'{targetUri}' is subdomain of '{VstsBaseUrlHost}', checking AAD vs MSA.");
-
-                string tenant = null;
-                WebResponse response;
-
-                if (StringComparer.OrdinalIgnoreCase.Equals(targetUri.Scheme, "http")
-                    || StringComparer.OrdinalIgnoreCase.Equals(targetUri.Scheme, "https"))
+                try
                 {
-                    try
+                    // Just open the file from disk, the tenant identities are not secret and therefore safely
+                    // left as unencrypted plain text.
+                    using (var stream = File.Open(path, FileMode.OpenOrCreate, FileAccess.Read, FileShare.Read))
+                    using (var reader = new StreamReader(stream, encoding))
                     {
-                        // build a request that we expect to fail, do not allow redirect to sign in url
-                        var request = WebRequest.CreateHttp(targetUri);
-                        request.UserAgent = Global.UserAgent;
-                        request.Method = "HEAD";
-                        request.AllowAutoRedirect = false;
-                        // get the response from the server
-                        response = request.GetResponse();
-                    }
-                    catch (WebException exception)
-                    {
-                        response = exception.Response;
-                    }
+                        string data = await reader.ReadToEndAsync();
 
-                    // if the response exists and we have headers, parse them
-                    if (response != null && response.SupportsHeaders)
-                    {
-                        // find the VSTS resource tenant entry
-                        tenant = response.Headers[VstsResourceTenantHeader];
+                        if (data.Length > 0)
+                        {
+                            int last = 0;
+                            int next = -1;
 
-                        return !String.IsNullOrWhiteSpace(tenant)
-                            && Guid.TryParse(tenant, out tenantId);
+                            while ((next = data.IndexOf(CachePairTerminator, last)) > 0)
+                            {
+                                int idx = data.IndexOf(CachePairSeperator, last, next - last);
+                                if (idx > 0)
+                                {
+                                    string key = data.Substring(last, idx - last);
+                                    string val = data.Substring(idx + 1, next - idx - 1);
+
+                                    Guid id;
+                                    if (Guid.TryParse(val, out id))
+                                    {
+                                        cache[key] = id;
+                                    }
+
+                                    last = next + 1;
+                                }
+                            }
+                        }
                     }
                 }
-                else
+                catch when (i < 5)
                 {
-                    Git.Trace.WriteLine($"detected non-https based protocol: {targetUri.Scheme}.");
+                    // Sleep the thread, and wait before trying again using progressive back off
+                    System.Threading.Thread.Sleep(i + 1 * 100);
                 }
             }
 
-            // if all else fails, fallback to basic authentication
-            return false;
+            return cache;
         }
 
-        /// <summary>
-        /// Creates a new authentication broker based for the specified resource.
-        /// </summary>
-        /// <param name="targetUri">The resource for which authentication is being requested.</param>
-        /// <param name="scope">The scope of the access being requested.</param>
-        /// <param name="personalAccessTokenStore">Storage container for personal access token secrets.</param>
-        /// <param name="adaRefreshTokenStore">Storage container for Azure access token secrets.</param>
-        /// <param name="authentication">
-        /// An implementation of <see cref="BaseAuthentication"/> if one was detected;
-        /// <see langword="null"/> otherwise.
-        /// </param>
-        /// <returns>
-        /// <see langword="true"/> if an authority could be determined; <see langword="false"/> otherwise.
-        /// </returns>
-        public static BaseAuthentication GetAuthentication(
-            TargetUri targetUri,
-            VstsTokenScope scope,
-            ICredentialStore personalAccessTokenStore)
+        private static async Task SerializeTenantCache(Dictionary<string, Guid> cache)
         {
-            BaseSecureStore.ValidateTargetUri(targetUri);
-            if (ReferenceEquals(scope, null))
-                throw new ArgumentNullException(nameof(scope));
-            if (ReferenceEquals(personalAccessTokenStore, null))
-                throw new ArgumentNullException(nameof(personalAccessTokenStore));
+            var encoding = new UTF8Encoding(false);
+            string path = Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData);
+            path = Path.Combine(path, "GCM", "tenants");
 
-            BaseAuthentication authentication = null;
-
-            Guid tenantId;
-            if (DetectAuthority(targetUri, out tenantId))
+            // Attempt up to five times to write to the cache
+            for (int i = 0; i < 5; i += 1)
             {
-                // empty Guid is MSA, anything else is AAD
-                if (tenantId == Guid.Empty)
+                try
                 {
-                    Git.Trace.WriteLine("MSA authority detected.");
-                    authentication = new VstsMsaAuthentication(scope, personalAccessTokenStore);
+                    // Just open the file from disk, the tenant identities are not secret and therefore safely
+                    // left as unencrypted plain text.
+                    using (var stream = File.Open(path, FileMode.OpenOrCreate, FileAccess.ReadWrite, FileShare.None))
+                    using (var writer = new StreamWriter(stream, encoding))
+                    {
+                        StringBuilder builder = new StringBuilder();
+
+                        foreach (var pair in cache)
+                        {
+                            builder.Append(pair.Key)
+                                   .Append('=')
+                                   .Append(pair.Value.ToString())
+                                   .Append('\0');
+                        }
+
+                        string data = builder.ToString();
+
+                        await writer.WriteAsync(data);
+                    }
                 }
-                else
+                catch when (i < 5)
                 {
-                    Git.Trace.WriteLine($"AAD authority for tenant '{tenantId}' detected.");
-                    authentication = new VstsAadAuthentication(tenantId, scope, personalAccessTokenStore);
-                    (authentication as VstsAadAuthentication).TenantId = tenantId;
+                    // Sleep the thread, and wait before trying again using progressive back off
+                    System.Threading.Thread.Sleep(i + 1 * 100);
                 }
             }
-
-            return authentication;
         }
     }
 }

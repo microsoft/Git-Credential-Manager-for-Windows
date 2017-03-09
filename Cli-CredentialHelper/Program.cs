@@ -29,6 +29,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
+using System.Threading.Tasks;
 
 namespace Microsoft.Alm.Cli
 {
@@ -169,7 +170,8 @@ namespace Microsoft.Alm.Cli
 
                 LoadOperationArguments(operationArguments);
 
-                BaseAuthentication authentication = CreateAuthentication(operationArguments);
+                var task = Task.Run(async () => { return await CreateAuthentication(operationArguments); });
+                BaseAuthentication authentication = task.Result;
 
                 switch (operationArguments.Authority)
                 {
@@ -374,7 +376,8 @@ namespace Microsoft.Alm.Cli
                 EnableTraceLogging(operationArguments);
 
                 Credential credentials = new Credential(operationArguments.CredUsername, operationArguments.CredPassword);
-                BaseAuthentication authentication = CreateAuthentication(operationArguments);
+                var task = Task.Run(async () => { return await CreateAuthentication(operationArguments); });
+                BaseAuthentication authentication = task.Result;
 
                 switch (operationArguments.Authority)
                 {
