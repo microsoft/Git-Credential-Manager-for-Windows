@@ -198,6 +198,7 @@ namespace Microsoft.Alm.Git
         {
             string portableConfig = null;
             string systemConfig = null;
+            string xdgConfig = null;
             string globalConfig = null;
             string localConfig = null;
 
@@ -216,6 +217,13 @@ namespace Microsoft.Alm.Git
                 && Where.GitSystemConfig(null, out systemConfig))
             {
                 ParseGitConfig(ConfigurationLevel.System, systemConfig);
+            }
+
+            // find and parse Git's Xdg config
+            if ((types & ConfigurationLevel.Xdg) != 0
+                && Where.GitXdgConfig(out xdgConfig))
+            {
+                ParseGitConfig(ConfigurationLevel.Xdg, xdgConfig);
             }
 
             // find and parse Git's global config
@@ -325,7 +333,8 @@ namespace Microsoft.Alm.Git
                                 val = val.Substring(1, val.Length - 1);
                             }
                         }
-
+                        
+                        // Test for and handle include directives
                         if ("include.path".Equals(key))
                         {
                             try
