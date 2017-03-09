@@ -461,5 +461,42 @@ namespace Microsoft.Alm.Git
             path = null;
             return false;
         }
+
+        public static bool GitXdgConfig(out string path)
+        {
+            const string XdgConfigFolder = "Git";
+            const string XdgConfigFileName = "config";
+
+            string xdgConfigHome;
+            string xdgConfigPath;
+
+            // The XDG config home is defined by an environment variable.
+            xdgConfigHome = Environment.GetEnvironmentVariable("XDG_CONFIG_HOME");
+
+            if (Directory.Exists(xdgConfigHome))
+            {
+                xdgConfigPath = Path.Combine(xdgConfigHome, XdgConfigFolder, XdgConfigFileName);
+
+                if (File.Exists(xdgConfigPath))
+                {
+                    path = xdgConfigPath;
+                    return true;
+                }
+            }
+
+            // Fall back to using the %AppData% folder, and try again.
+            xdgConfigHome = Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData);
+
+            xdgConfigPath = Path.Combine(xdgConfigHome, XdgConfigFolder, XdgConfigFileName);
+
+            if (File.Exists(xdgConfigPath))
+            {
+                path = xdgConfigPath;
+                return true;
+            }
+
+            path = null;
+            return false;
+        }
     }
 }
