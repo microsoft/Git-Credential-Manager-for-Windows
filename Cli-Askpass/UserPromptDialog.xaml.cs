@@ -96,7 +96,7 @@ namespace Microsoft.Alm.Gui
             _isLarger = false;
 
             text.Append('\'')
-                .Append(resource)
+                .Append(_resource)
                 .Append('\'');
 
             _promptText = text.ToString(); ;
@@ -138,6 +138,7 @@ namespace Microsoft.Alm.Gui
         private readonly UserPromptKind _kind;
         private string _response;
         private string _resource;
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Performance", "CA1823:AvoidUnusedPrivateFields")]
         private PasswordBoxHintAdorner _textboxAdorner;
         private readonly string _title;
 
@@ -146,6 +147,7 @@ namespace Microsoft.Alm.Gui
             get { return _additionInfoText; }
         }
 
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA1801:ReviewUnusedParameters", MessageId = "value")]
         public double DesiredHeight
         {
             get
@@ -157,6 +159,7 @@ namespace Microsoft.Alm.Gui
             set { /* nope */ }
         }
 
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA1801:ReviewUnusedParameters", MessageId = "value")]
         public double DesiredWidth
         {
             get
@@ -173,6 +176,7 @@ namespace Microsoft.Alm.Gui
             get { return _failed; }
         }
 
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA1801:ReviewUnusedParameters", MessageId = "value")]
         public string Fingerprint
         {
             get { return _fingerprint; }

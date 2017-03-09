@@ -74,6 +74,7 @@ namespace Microsoft.Alm.Git
         public static void AddListener(TextWriter listener)
             => Instance.AddListener(listener);
 
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Design", "CA1031:DoNotCatchGeneralExceptionTypes")]
         public void Dispose()
         {
             lock (_syncpoint)
@@ -87,7 +88,9 @@ namespace Microsoft.Alm.Git
                             _writers.Remove(writer);
                         }
                     }
-                }catch { /* squelch */ }
+                }
+                catch
+                { /* squelch */ }
             }
 
             GC.SuppressFinalize(this);
@@ -170,9 +173,13 @@ namespace Microsoft.Alm.Git
 
                 foreach (var writer in _writers)
                 {
-                    writer?.Write(text);
-                    writer?.Write('\n');
-                    writer?.Flush();
+                    try
+                    {
+                        writer?.Write(text);
+                        writer?.Write('\n');
+                        writer?.Flush();
+                    }
+                    catch { /* squelch */ }
                 }
             }
         }

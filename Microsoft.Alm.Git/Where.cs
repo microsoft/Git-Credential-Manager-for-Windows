@@ -242,11 +242,15 @@ namespace Microsoft.Alm.Git
             // Git relies on the %HOME% environment variable to represent the users home directory
             // it can contain embedded environment variables, so we need to expand it
             string path = Environment.GetEnvironmentVariable("HOME", EnvironmentVariableTarget.Process);
-            path = Environment.ExpandEnvironmentVariables(path);
 
-            // If the path is good, return it.
-            if (path != null && Directory.Exists(path))
-                return path;
+            if (path != null)
+            {
+                path = Environment.ExpandEnvironmentVariables(path);
+
+                // If the path is good, return it.
+                if (Directory.Exists(path))
+                    return path;
+            }
 
             // Absent the %HOME% variable, Git will construct it via %HOMEDRIVE%%HOMEPATH%, so we'll attempt to
             // that here and if it is valid, return it as %HOME%.
@@ -303,8 +307,6 @@ namespace Microsoft.Alm.Git
             const string GitFolderName = ".git";
             const string LocalConfigFileName = "config";
 
-            path = null;
-
             if (!String.IsNullOrWhiteSpace(startingDirectory))
             {
                 var dir = new DirectoryInfo(startingDirectory);
@@ -316,15 +318,16 @@ namespace Microsoft.Alm.Git
                         if (info == null || !info.Exists)
                             return null;
 
-                        return info.EnumerateFileSystemInfos()
-                                   .Where((FileSystemInfo sub) =>
-                                   {
-                                       return sub != null
-                                           && sub.Exists
-                                           && (String.Equals(sub.Name, GitFolderName, StringComparison.OrdinalIgnoreCase)
-                                              || String.Equals(sub.Name, LocalConfigFileName, StringComparison.OrdinalIgnoreCase));
-                                   })
-                                   .FirstOrDefault();
+                        foreach (var item in info.EnumerateFileSystemInfos())
+                        {
+                            if (item != null
+                                && item.Exists
+                                && (GitFolderName.Equals(item.Name, StringComparison.OrdinalIgnoreCase)
+                                    || LocalConfigFileName.Equals(item.Name, StringComparison.OrdinalIgnoreCase)))
+                                return item;
+                        }
+
+                        return null;
                     };
 
                     FileSystemInfo result = null;
@@ -344,11 +347,13 @@ namespace Microsoft.Alm.Git
                             if (File.Exists(localPath))
                             {
                                 path = localPath;
+                                return true;
                             }
                         }
                         else if (result.Name == LocalConfigFileName && result is FileInfo)
                         {
                             path = result.FullName;
+                            return true;
                         }
                         else
                         {
@@ -386,6 +391,7 @@ namespace Microsoft.Alm.Git
                                     if (File.Exists(localPath))
                                     {
                                         path = localPath;
+                                        return true;
                                     }
                                 }
                             }
@@ -394,7 +400,8 @@ namespace Microsoft.Alm.Git
                 }
             }
 
-            return path != null;
+            path = null;
+            return false;
         }
         /// <summary>
         /// Gets the path to the Git local configuration file based on the current working directory.
