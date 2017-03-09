@@ -355,7 +355,7 @@ namespace Microsoft.Alm.Cli
             return null;
         }
 
-        private static BaseAuthentication CreateAuthentication(OperationArguments operationArguments)
+        private static async Task<BaseAuthentication> CreateAuthentication(OperationArguments operationArguments)
         {
             Debug.Assert(operationArguments != null, "The operationArguments is null");
             Debug.Assert(operationArguments.TargetUri != null, "The operationArgument.TargetUri is null");
@@ -384,7 +384,7 @@ namespace Microsoft.Alm.Cli
                     Git.Trace.WriteLine($"detecting authority type for '{operationArguments.TargetUri}'.");
 
                     // detect the authority
-                    authority = BaseVstsAuthentication.GetAuthentication(operationArguments.TargetUri,
+                    authority = await BaseVstsAuthentication.GetAuthentication(operationArguments.TargetUri,
                                                                          VstsCredentialScope,
                                                                          secrets)
                              ?? Github.Authentication.GetAuthentication(operationArguments.TargetUri,
@@ -420,8 +420,11 @@ namespace Microsoft.Alm.Cli
                 case AuthorityType.AzureDirectory:
                     Git.Trace.WriteLine($"authority for '{operationArguments.TargetUri}' is Azure Directory.");
 
+                    // Get the identity of the tenant.
+                    Guid tenantId = await BaseVstsAuthentication.DetectAuthority(operationArguments.TargetUri);
+
                     // return the allocated authority or a generic AAD backed VSTS authentication object
-                    return authority ?? new VstsAadAuthentication(Guid.Empty, VstsCredentialScope, secrets);
+                    return authority ?? new VstsAadAuthentication(tenantId, VstsCredentialScope, secrets);
 
                 case AuthorityType.Basic:
                     // enforce basic authentication only
@@ -463,7 +466,9 @@ namespace Microsoft.Alm.Cli
             if (ReferenceEquals(operationArguments, null))
                 throw new ArgumentNullException("operationArguments");
 
-            BaseAuthentication authentication = CreateAuthentication(operationArguments);
+            var task = Task.Run(async () => { return await CreateAuthentication(operationArguments); });
+
+            BaseAuthentication authentication = task.Result;
 
             switch (operationArguments.Authority)
             {
@@ -819,6 +824,7 @@ namespace Microsoft.Alm.Cli
             _version = asseName.Version;
         }
 
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA1801:ReviewUnusedParameters", MessageId = "targetUri")]
         private static Credential ModalPromptForCredentials(TargetUri targetUri, string message)
         {
             Debug.Assert(targetUri != null);
@@ -865,6 +871,7 @@ namespace Microsoft.Alm.Cli
             return ModalPromptForCredentials(targetUri, message);
         }
 
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA1801:ReviewUnusedParameters", MessageId = "targetUri")]
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Performance", "CA1811:AvoidUncalledPrivateCode")]
         private static Credential ModalPromptForPassword(TargetUri targetUri, string message, string username)
         {
@@ -965,7 +972,8 @@ namespace Microsoft.Alm.Cli
                 throw new ArgumentException("TargetUri property returned null", nameof(operationArguments));
 
             bool credentialsFound = false;
-            BaseAuthentication authentication = CreateAuthentication(operationArguments);
+            var task = Task.Run(async () => { return await CreateAuthentication(operationArguments); });
+            BaseAuthentication authentication = task.Result;
             Credential credentials = null;
 
             switch (operationArguments.Authority)
