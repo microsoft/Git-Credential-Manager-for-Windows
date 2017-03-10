@@ -24,6 +24,7 @@
 **/
 
 using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Security.Cryptography;
 using Microsoft.IdentityModel.Clients.ActiveDirectory;
@@ -32,8 +33,11 @@ namespace Microsoft.Alm.Authentication
 {
     internal class VstsAdalTokenCache : IdentityModel.Clients.ActiveDirectory.TokenCache
     {
-        private const string AdalCachePath = @"Microsoft\VSCommon\VSAccountManagement";
-        private const string AdalCacheFile = @"AdalCache.cache";
+        private readonly IReadOnlyList<IReadOnlyList<string>> AdalCachePaths = new string[][]
+        {
+            new [] { @".IdentityService", @"IdentityServiceAdalCache.cache", }, // VS2017 Adal v3 cache
+            new [] { @"Microsoft\VSCommon\VSAccountManagement", @"AdalCache.cache", }, // VS2015 Adal v2 cache
+        };
 
         /// <summary>
         /// Default constructor.
@@ -41,14 +45,21 @@ namespace Microsoft.Alm.Authentication
         public VstsAdalTokenCache()
         {
             string localAppDataPath = Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData);
-            string directoryPath = Path.Combine(localAppDataPath, AdalCachePath);
 
             AfterAccess = AfterAccessNotification;
             BeforeAccess = BeforeAccessNotification;
 
-            string filePath = Path.Combine(directoryPath, AdalCacheFile);
+            for (int i = 0; i < AdalCachePaths.Count; i += 1)
+            {
+                string directoryPath = Path.Combine(localAppDataPath, AdalCachePaths[i][0]);
+                string filePath = Path.Combine(directoryPath, AdalCachePaths[i][1]);
 
-            _cacheFilePath = filePath;
+                if (File.Exists(filePath))
+                {
+                    _cacheFilePath = filePath;
+                    break;
+                }
+            }
 
             BeforeAccessNotification(null);
         }
