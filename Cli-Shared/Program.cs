@@ -420,8 +420,15 @@ namespace Microsoft.Alm.Cli
                 case AuthorityType.AzureDirectory:
                     Git.Trace.WriteLine($"authority for '{operationArguments.TargetUri}' is Azure Directory.");
 
+                    Guid tenantId = Guid.Empty;
+
                     // Get the identity of the tenant.
-                    Guid tenantId = await BaseVstsAuthentication.DetectAuthority(operationArguments.TargetUri);
+                    var result = await BaseVstsAuthentication.DetectAuthority(operationArguments.TargetUri);
+
+                    if (result.Key)
+                    {
+                        tenantId = result.Value;
+                    }
 
                     // return the allocated authority or a generic AAD backed VSTS authentication object
                     return authority ?? new VstsAadAuthentication(tenantId, VstsCredentialScope, secrets);

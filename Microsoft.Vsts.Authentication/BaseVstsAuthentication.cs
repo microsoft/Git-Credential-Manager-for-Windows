@@ -30,6 +30,7 @@ using System.Net;
 using System.Text;
 using System.Threading.Tasks;
 using Microsoft.IdentityModel.Clients.ActiveDirectory;
+using System.IO.Compression;
 
 namespace Microsoft.Alm.Authentication
 {
@@ -114,7 +115,7 @@ namespace Microsoft.Alm.Authentication
         /// <param name="tenantId">The identity of the authority tenant; <see cref="Guid.Empty"/> otherwise.</param>
         /// <returns><see langword="true"/> if the authority is Visual Studio Online; <see langword="false"/> otherwise</returns>
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Design", "CA1062:Validate arguments of public methods", MessageId = "0")]
-        public static async Task<Guid> DetectAuthority(TargetUri targetUri)
+        public static async Task<KeyValuePair<bool, Guid>> DetectAuthority(TargetUri targetUri)
         {
             const string VstsBaseUrlHost = "visualstudio.com";
             const string VstsResourceTenantHeader = "X-VSS-ResourceTenant";
@@ -141,7 +142,7 @@ namespace Microsoft.Alm.Authentication
 
                     // Check the cache for an existing value
                     if (cache.TryGetValue(tenantUrl, out tenantId))
-                        return tenantId;
+                        return new KeyValuePair<bool, Guid>(true, tenantId);
 
                     try
                     {
@@ -174,7 +175,7 @@ namespace Microsoft.Alm.Authentication
                             await SerializeTenantCache(cache);
 
                             // Success, notify the caller
-                            return tenantId;
+                            return new KeyValuePair<bool, Guid>(true, tenantId);
                         }
                     }
                 }
@@ -185,7 +186,7 @@ namespace Microsoft.Alm.Authentication
             }
 
             // if all else fails, fallback to basic authentication
-            return tenantId;
+            return new KeyValuePair<bool, Guid>(false, tenantId);
         }
 
         /// <summary>
@@ -215,8 +216,13 @@ namespace Microsoft.Alm.Authentication
 
             BaseAuthentication authentication = null;
 
+            var result = await DetectAuthority(targetUri);
+
+            if (!result.Key)
+                return null;
+
             // Query for the tenant's identity
-            Guid tenantId = await DetectAuthority(targetUri);
+            Guid tenantId = result.Value;
 
             // empty Guid is MSA, anything else is AAD
             if (tenantId == Guid.Empty)
@@ -303,13 +309,15 @@ namespace Microsoft.Alm.Authentication
 
         private const char CachePairSeperator = '=';
         private const char CachePairTerminator = '\0';
+        private const string CachePathDirectory = "GitCredentialManager";
+        private const string CachePathFileName = "tenant.cache";
 
         private static async Task<Dictionary<string, Guid>> DeserializeTenantCache()
         {
             var encoding = new UTF8Encoding(false);
-            string path = Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData);
-            path = Path.Combine(path, "GCM", "tenants");
+            var path = GetCachePath();
 
+            string data = null;
             Dictionary<string, Guid> cache = new Dictionary<string, Guid>(StringComparer.OrdinalIgnoreCase);
 
             // Attempt up to five times to read from the cache
@@ -320,33 +328,10 @@ namespace Microsoft.Alm.Authentication
                     // Just open the file from disk, the tenant identities are not secret and therefore safely
                     // left as unencrypted plain text.
                     using (var stream = File.Open(path, FileMode.OpenOrCreate, FileAccess.Read, FileShare.Read))
-                    using (var reader = new StreamReader(stream, encoding))
+                    using (var inflate = new GZipStream(stream, CompressionMode.Decompress))
+                    using (var reader = new StreamReader(inflate, encoding))
                     {
-                        string data = await reader.ReadToEndAsync();
-
-                        if (data.Length > 0)
-                        {
-                            int last = 0;
-                            int next = -1;
-
-                            while ((next = data.IndexOf(CachePairTerminator, last)) > 0)
-                            {
-                                int idx = data.IndexOf(CachePairSeperator, last, next - last);
-                                if (idx > 0)
-                                {
-                                    string key = data.Substring(last, idx - last);
-                                    string val = data.Substring(idx + 1, next - idx - 1);
-
-                                    Guid id;
-                                    if (Guid.TryParse(val, out id))
-                                    {
-                                        cache[key] = id;
-                                    }
-
-                                    last = next + 1;
-                                }
-                            }
-                        }
+                        data = await reader.ReadToEndAsync();
                     }
                 }
                 catch when (i < 5)
@@ -356,14 +341,68 @@ namespace Microsoft.Alm.Authentication
                 }
             }
 
+            // Parse the inflated data
+            if (data.Length > 0)
+            {
+                int last = 0;
+                int next = -1;
+
+                while ((next = data.IndexOf(CachePairTerminator, last)) > 0)
+                {
+                    int idx = data.IndexOf(CachePairSeperator, last, next - last);
+                    if (idx > 0)
+                    {
+                        string key = data.Substring(last, idx - last);
+                        string val = data.Substring(idx + 1, next - idx - 1);
+
+                        Guid id;
+                        if (Guid.TryParse(val, out id))
+                        {
+                            cache[key] = id;
+                        }
+
+                        last = next + 1;
+                    }
+                }
+            }
+
             return cache;
+        }
+
+        private static string GetCachePath()
+        {
+            string path = Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData);
+            path = Path.Combine(path, CachePathDirectory);
+
+            // Create the directory if necissary
+            if (!Directory.Exists(path))
+            {
+                Directory.CreateDirectory(path);
+            }
+
+            // Append the file name to the path
+            path = Path.Combine(path, CachePathFileName);
+
+            return path;
         }
 
         private static async Task SerializeTenantCache(Dictionary<string, Guid> cache)
         {
             var encoding = new UTF8Encoding(false);
-            string path = Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData);
-            path = Path.Combine(path, "GCM", "tenants");
+            string path = GetCachePath();
+
+            StringBuilder builder = new StringBuilder();
+
+            // Write each key/value pair as key=value\0
+            foreach (var pair in cache)
+            {
+                builder.Append(pair.Key)
+                       .Append('=')
+                       .Append(pair.Value.ToString())
+                       .Append('\0');
+            }
+
+            string data = builder.ToString();
 
             // Attempt up to five times to write to the cache
             for (int i = 0; i < 5; i += 1)
@@ -373,20 +412,9 @@ namespace Microsoft.Alm.Authentication
                     // Just open the file from disk, the tenant identities are not secret and therefore safely
                     // left as unencrypted plain text.
                     using (var stream = File.Open(path, FileMode.OpenOrCreate, FileAccess.ReadWrite, FileShare.None))
-                    using (var writer = new StreamWriter(stream, encoding))
+                    using (var deflate = new GZipStream(stream, CompressionMode.Compress))
+                    using (var writer = new StreamWriter(deflate, encoding))
                     {
-                        StringBuilder builder = new StringBuilder();
-
-                        foreach (var pair in cache)
-                        {
-                            builder.Append(pair.Key)
-                                   .Append('=')
-                                   .Append(pair.Value.ToString())
-                                   .Append('\0');
-                        }
-
-                        string data = builder.ToString();
-
                         await writer.WriteAsync(data);
                     }
                 }
