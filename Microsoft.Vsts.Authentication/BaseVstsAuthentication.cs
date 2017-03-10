@@ -30,6 +30,7 @@ using System.Net;
 using System.Text;
 using System.Threading.Tasks;
 using Microsoft.IdentityModel.Clients.ActiveDirectory;
+using System.IO.Compression;
 
 namespace Microsoft.Alm.Authentication
 {
@@ -303,12 +304,21 @@ namespace Microsoft.Alm.Authentication
 
         private const char CachePairSeperator = '=';
         private const char CachePairTerminator = '\0';
+        private const string CachePathDirectory = "GitCredentialManager";
+        private const string CachePathFileName = "tenant.cache";
 
         private static async Task<Dictionary<string, Guid>> DeserializeTenantCache()
         {
             var encoding = new UTF8Encoding(false);
             string path = Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData);
-            path = Path.Combine(path, "GCM", "tenants");
+            path = Path.Combine(path, CachePathDirectory);
+
+            if (!Directory.Exists(path))
+            {
+                Directory.CreateDirectory(path);
+            }
+
+            path = Path.Combine(path, CachePathFileName);
 
             Dictionary<string, Guid> cache = new Dictionary<string, Guid>(StringComparer.OrdinalIgnoreCase);
 
@@ -320,7 +330,8 @@ namespace Microsoft.Alm.Authentication
                     // Just open the file from disk, the tenant identities are not secret and therefore safely
                     // left as unencrypted plain text.
                     using (var stream = File.Open(path, FileMode.OpenOrCreate, FileAccess.Read, FileShare.Read))
-                    using (var reader = new StreamReader(stream, encoding))
+                    using (var inflate = new GZipStream(stream, CompressionMode.Compress))
+                    using (var reader = new StreamReader(inflate, encoding))
                     {
                         string data = await reader.ReadToEndAsync();
 
@@ -363,7 +374,14 @@ namespace Microsoft.Alm.Authentication
         {
             var encoding = new UTF8Encoding(false);
             string path = Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData);
-            path = Path.Combine(path, "GCM", "tenants");
+            path = Path.Combine(path, CachePathDirectory);
+
+            if (!Directory.Exists(path))
+            {
+                Directory.CreateDirectory(path);
+            }
+
+            path = Path.Combine(path, CachePathFileName);
 
             // Attempt up to five times to write to the cache
             for (int i = 0; i < 5; i += 1)
@@ -373,7 +391,8 @@ namespace Microsoft.Alm.Authentication
                     // Just open the file from disk, the tenant identities are not secret and therefore safely
                     // left as unencrypted plain text.
                     using (var stream = File.Open(path, FileMode.OpenOrCreate, FileAccess.ReadWrite, FileShare.None))
-                    using (var writer = new StreamWriter(stream, encoding))
+                    using (var deflate = new GZipStream(stream, CompressionMode.Compress))
+                    using (var writer = new StreamWriter(deflate, encoding))
                     {
                         StringBuilder builder = new StringBuilder();
 
