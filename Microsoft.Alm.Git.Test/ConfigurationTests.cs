@@ -1,18 +1,17 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
+using Xunit;
 
 namespace Microsoft.Alm.Git.Test
 {
     /// <summary>
     /// A class to test <see cref="Configuration"/>.
     /// </summary>
-    [TestClass]
     public class ConfigurationTests
     {
-        [TestMethod]
-        public void ParseGitConfigSimple()
+        [Fact]
+        public void GitConfig_ParseSimple()
         {
             const string input = @"
 [core]
@@ -21,11 +20,11 @@ namespace Microsoft.Alm.Git.Test
 
             var values = TestParseGitConfig(input);
 
-            Assert.AreEqual("false", values["core.autocrlf"]);
+            Assert.Equal("false", values["core.autocrlf"], StringComparer.OrdinalIgnoreCase);
         }
 
-        [TestMethod]
-        public void ParseGitConfigOverwritesValues()
+        [Fact]
+        public void GitConfig_ParseOverwritesValues()
         {
             const string input = @"
 [core]
@@ -36,11 +35,11 @@ namespace Microsoft.Alm.Git.Test
 
             var values = TestParseGitConfig(input);
 
-            Assert.AreEqual("false", values["core.autocrlf"]);
+            Assert.Equal("false", values["core.autocrlf"], StringComparer.OrdinalIgnoreCase);
         }
 
-        [TestMethod]
-        public void ParseGitConfigPartiallyQuoted()
+        [Fact]
+        public void GitConfig_ParsePartiallyQuoted()
         {
             const string input = @"
 [core ""oneQuote]
@@ -49,12 +48,12 @@ namespace Microsoft.Alm.Git.Test
 
             var values = TestParseGitConfig(input);
 
-            Assert.AreEqual("false", values["core.oneQuote.autocrlf"]);
+            Assert.Equal("false", values["core.oneQuote.autocrlf"]);
         }
 
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2202:Do not dispose objects multiple times")]
-        [TestMethod]
-        public void ParseGitConfigSampleFile()
+        [Fact]
+        public void GitConfig_ParseSampleFile()
         {
             var values = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
             var me = this.GetType();
@@ -66,9 +65,9 @@ namespace Microsoft.Alm.Git.Test
                 Configuration.ParseGitConfig(sr, values);
             }
 
-            Assert.AreEqual(36, values.Count);
-            Assert.AreEqual("\\\"C:/Utils/Compare It!/wincmp3.exe\\\" \\\"$(cygpath -w \\\"$LOCAL\\\")\\\" \\\"$(cygpath -w \\\"$REMOTE\\\")\\\"", values["difftool.cygcompareit.cmd"], "The quotes remained.");
-            Assert.AreEqual("!f() { git fetch origin && git checkout -b $1 origin/master --no-track; }; f", values["alias.cob"], "The quotes were stripped.");
+            Assert.Equal(36, values.Count);
+            Assert.Equal("\\\"C:/Utils/Compare It!/wincmp3.exe\\\" \\\"$(cygpath -w \\\"$LOCAL\\\")\\\" \\\"$(cygpath -w \\\"$REMOTE\\\")\\\"", values["difftool.cygcompareit.cmd"], StringComparer.OrdinalIgnoreCase);
+            Assert.Equal("!f() { git fetch origin && git checkout -b $1 origin/master --no-track; }; f", values["alias.cob"], StringComparer.OrdinalIgnoreCase);
         }
 
         private static Dictionary<string, string> TestParseGitConfig(string input)
@@ -82,8 +81,8 @@ namespace Microsoft.Alm.Git.Test
             return values;
         }
 
-        [TestMethod]
-        public void ReadThroughPublicMethods()
+        [Fact]
+        public void GitConfig_ReadThrough()
         {
             const string input = "\n" +
                     "[core]\n" +
@@ -114,21 +113,21 @@ namespace Microsoft.Alm.Git.Test
                 cut = new Configuration.Impl(values);
             }
 
-            Assert.AreEqual(true, cut.ContainsKey("CoRe.AuToCrLf"));
-            Assert.AreEqual("false", cut["CoRe.AuToCrLf"]);
+            Assert.True(cut.ContainsKey("CoRe.AuToCrLf"));
+            Assert.Equal("false", cut["CoRe.AuToCrLf"], StringComparer.OrdinalIgnoreCase);
 
             Configuration.Entry entry;
-            Assert.AreEqual(true, cut.TryGetEntry("core", (string)null, "autocrlf", out entry));
-            Assert.AreEqual("false", entry.Value);
+            Assert.True(cut.TryGetEntry("core", (string)null, "autocrlf", out entry));
+            Assert.Equal("false", entry.Value, StringComparer.OrdinalIgnoreCase);
 
-            Assert.AreEqual(true, cut.TryGetEntry("credential", new Uri("https://microsoft.visualstudio.com"), "authority", out entry));
-            Assert.AreEqual("AAD", entry.Value);
+            Assert.True(cut.TryGetEntry("credential", new Uri("https://microsoft.visualstudio.com"), "authority", out entry));
+            Assert.Equal("AAD", entry.Value, StringComparer.OrdinalIgnoreCase);
 
-            Assert.AreEqual(true, cut.TryGetEntry("credential", new Uri("https://mseng.visualstudio.com"), "authority", out entry));
-            Assert.AreEqual("MSA", entry.Value);
+            Assert.True(cut.TryGetEntry("credential", new Uri("https://mseng.visualstudio.com"), "authority", out entry));
+            Assert.Equal("MSA", entry.Value, StringComparer.OrdinalIgnoreCase);
 
-            Assert.AreEqual(true, cut.TryGetEntry("credential", new Uri("https://ntlm.visualstudio.com"), "authority", out entry));
-            Assert.AreEqual("NTLM", entry.Value);
+            Assert.True(cut.TryGetEntry("credential", new Uri("https://ntlm.visualstudio.com"), "authority", out entry));
+            Assert.Equal("NTLM", entry.Value, StringComparer.OrdinalIgnoreCase);
         }
     }
 }
