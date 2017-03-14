@@ -120,7 +120,7 @@ namespace Microsoft.Alm.Cli
                         return;
                     }
 
-                    Program.WriteLine(" credentials are protected by perserve flag, clear anyways? [Y]es, [N]o.");
+                    Program.WriteLine(" credentials are protected by preserve flag, clear anyways? [Y]es, [N]o.");
 
                     ConsoleKeyInfo key;
                     while ((key = Program.ReadKey(true)).Key != ConsoleKey.Escape)
