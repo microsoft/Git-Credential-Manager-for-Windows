@@ -26,7 +26,6 @@
 using System;
 using System.Collections.Generic;
 using System.Runtime.CompilerServices;
-using Microsoft.Alm.Authentication;
 using ScopeSet = System.Collections.Generic.HashSet<string>;
 
 namespace GitHub.Authentication

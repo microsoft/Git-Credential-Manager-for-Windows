@@ -61,7 +61,7 @@ namespace Microsoft.Alm.Cli
             }
 
             if (match.Success)
-            { 
+            {
                 Git.Trace.WriteLine("querying for passphrase key.");
 
                 if (match.Groups.Count < 2)

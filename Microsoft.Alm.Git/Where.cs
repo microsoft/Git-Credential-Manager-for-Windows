@@ -234,7 +234,7 @@ namespace Microsoft.Alm.Git
         }
 
         /// <summary>
-        /// Calculate the path to the user's home directory (~/ or %HOME%) that Git will rely on. 
+        /// Calculate the path to the user's home directory (~/ or %HOME%) that Git will rely on.
         /// </summary>
         /// <returns>The path to the user's home directory.</returns>
         public static string Home()

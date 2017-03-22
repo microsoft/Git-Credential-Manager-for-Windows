@@ -270,7 +270,6 @@ namespace Microsoft.Alm.Authentication
             return bytes != null;
         }
 
-
         /// <summary>
         /// Explicitly casts a personal access token token into a set of credentials
         /// </summary>

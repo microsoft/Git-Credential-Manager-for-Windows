@@ -333,7 +333,7 @@ namespace Microsoft.Alm.Git
                                 val = val.Substring(1, val.Length - 1);
                             }
                         }
-                        
+
                         // Test for and handle include directives
                         if ("include.path".Equals(key))
                         {
