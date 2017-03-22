@@ -32,7 +32,7 @@ IF EXIST "gcw.tgz"  DEL "gcw.tgz"
 SET MSBUILD_SWITCHES=/nologo /t:Rebuild /p:Configuration=Release /p:Platform="Any CPU"^
  /maxcpucount /consoleloggerparameters:DisableMPLogging;Summary;Verbosity=minimal
 
-"%COVDIR%\bin\cov-build.exe" --dir cov-int MSBuild.exe Microsoft.Alm.sln %MSBUILD_SWITCHES%
+"%COVDIR%\bin\cov-build.exe" --dir cov-int MSBuild.exe GitCredentialManager.sln %MSBUILD_SWITCHES%
 
 
 :tar
