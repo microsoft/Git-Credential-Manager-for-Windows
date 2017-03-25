@@ -1,6 +1,6 @@
 ﻿/**** Git Credential Manager for Windows ****
  *
- * Copyright (c) Microsoft Corporation
+ * Copyright (c) Atlassian
  * All rights reserved.
  *
  * MIT License
@@ -23,7 +23,6 @@
  * WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE."
 **/
 
-using Microsoft.Alm.Authentication;
 using System;
 using System.Collections.Generic;
 using System.Runtime.CompilerServices;
@@ -31,6 +30,9 @@ using ScopeSet = System.Collections.Generic.HashSet<string>;
 
 namespace Atlassian.Bitbucket.Authentication
 {
+    /// <summary>
+    ///     Defines the available scopes associated with OAuth tokens in Bitbucket.
+    /// </summary>
     public sealed class TokenScope : Microsoft.Alm.Authentication.TokenScope
     {
         public static readonly TokenScope None = new TokenScope(String.Empty);

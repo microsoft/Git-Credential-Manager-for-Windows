@@ -1,23 +1,46 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using Microsoft.Alm.Authentication;
-using System.Diagnostics;
-using System.Net.Http;
-using System.Threading;
-using System.Net;
-using System.Text.RegularExpressions;
+﻿/**** Git Credential Manager for Windows ****
+ *
+ * Copyright (c) Atlassian
+ * All rights reserved.
+ *
+ * MIT License
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy
+ * of this software and associated documentation files (the """"Software""""), to deal
+ * in the Software without restriction, including without limitation the rights to
+ * use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of
+ * the Software, and to permit persons to whom the Software is furnished to do so,
+ * subject to the following conditions:
+ *
+ * The above copyright notice and this permission notice shall be included in all
+ * copies or substantial portions of the Software.
+ *
+ * THE SOFTWARE IS PROVIDED *AS IS*, WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS
+ * FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR
+ * COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN
+ * AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
+ * WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE."
+**/
 
+using Microsoft.Alm.Authentication;
+using System;
+using System.Net;
+using System.Net.Http;
+using System.Text;
+using System.Threading;
+using System.Threading.Tasks;
 using Trace = Microsoft.Alm.Git.Trace;
 
 namespace Atlassian.Bitbucket.Authentication
 {
+    /// <summary>
+    ///     Implementation of <see cref="IAuthority"/> representing the Bitbucket APIs as the authority that can provide and validate credentials for Bitbucket.
+    /// </summary>
     internal class Authority : IAuthority
     {
         /// <summary>
-        /// The GitHub authorizations URL
+        /// The root URL for Bitbucket REST API calls.
         /// </summary>
         public const string DefaultRestRoot = "https://api.bitbucket.org/";
 
@@ -26,6 +49,10 @@ namespace Atlassian.Bitbucket.Authentication
         /// </summary>
         public const int RequestTimeout = 15*1000; // 15 second limit
 
+        /// <summary>
+        ///     Default constructor of the <see cref="Authority"/>. Allows the default Bitbucket REST URL to be overridden.
+        /// </summary>
+        /// <param name="restRootUrl">overriding root URL for REST API call.</param>
         public Authority(string restRootUrl = null)
         {
             _restRootUrl = restRootUrl ?? DefaultRestRoot;
@@ -38,11 +65,14 @@ namespace Atlassian.Bitbucket.Authentication
             get { return "/2.0/user"; }
         }
 
+        /// <inheritdoc/>
         public async Task<AuthenticationResult> AcquireToken(TargetUri targetUri, string username,
             string password, AuthenticationResultType resultType, TokenScope scope)
         {
             if (resultType == AuthenticationResultType.TwoFactor)
             {
+                // a previous attempt to aquire a token failed in a way that suggests the user has Bitbucket 2FA turned on.
+                // so attempt to run the OAuth dance...
                 OAuth.OAuthAuthenticator oauth = new OAuth.OAuthAuthenticator();
                 try
                 {
@@ -56,7 +86,7 @@ namespace Atlassian.Bitbucket.Authentication
             }
             else
             {
-                // TOSO refactor into BasicAuthAuthenticator.GetAuthAsync();
+                // use the provided username and password and attempt a Basic Auth request to a known REST API resource.
                 Token token = null;
                 using (HttpClientHandler handler = targetUri.HttpClientHandler)
                 {
@@ -91,16 +121,20 @@ namespace Atlassian.Bitbucket.Authentication
 
                                 case HttpStatusCode.Forbidden:
                                 {
+                                    // A 403/Forbidden response indicates the username/password are recognized and good but 2FA is on
+                                    // in which case we want to indicate that with the TwoFactor result
                                     Trace.WriteLine("two-factor app authentication code required");
                                     return new AuthenticationResult(AuthenticationResultType.TwoFactor);
                                 }
                                 case HttpStatusCode.Unauthorized:
                                 {
+                                    // username or password are wrong.
                                     Trace.WriteLine("authentication failed");
                                     return new AuthenticationResult(AuthenticationResultType.Failure);
                                 }
 
                                 default:
+                                    // any unexpected result can be treated as a failure.
                                     Trace.WriteLine("authentication failed");
                                     return new AuthenticationResult(AuthenticationResultType.Failure);
                             }
@@ -110,8 +144,10 @@ namespace Atlassian.Bitbucket.Authentication
             }
         }
 
+        /// <inheritdoc/>
         public async Task<AuthenticationResult> RefreshToken(TargetUri targetUri, string refreshToken)
         {
+            // Refreshing is only an OAuth concept so use the OAuth tools
             OAuth.OAuthAuthenticator oauth = new OAuth.OAuthAuthenticator();
             try
             {
@@ -124,22 +160,27 @@ namespace Atlassian.Bitbucket.Authentication
             }
         }
 
+        /// <inheritdoc/>
         public async Task<bool> ValidateCredentials(TargetUri targetUri, string username, Credential credentials)
         {
             BaseSecureStore.ValidateTargetUri(targetUri);
             BaseSecureStore.ValidateCredential(credentials);
 
-            // Try the simplest Basic Auth first
+            
             var user = string.IsNullOrWhiteSpace(username) ? credentials.Username : username;
             string authString = String.Format("{0}:{1}", user, credentials.Password);
             byte[] authBytes = Encoding.UTF8.GetBytes(authString);
             string authEncode = Convert.ToBase64String(authBytes);
 
+            // We don't know when the credentials arrive here if they are using OAuth or Basic Auth, so we try both.
+            
+            // Try the simplest Basic Auth first
             if (await ValidateCredentials(targetUri, username, "Basic " + authEncode))
             {
                 return true;
             }
 
+            // if the Basic Auth test failed then try again as OAuth
             if (await ValidateCredentials(targetUri, username, "Bearer " + credentials.Password))
             {
                 return true;
@@ -148,7 +189,15 @@ namespace Atlassian.Bitbucket.Authentication
             return false;
         }
 
-        public async Task<bool> ValidateCredentials(TargetUri targetUri, string username, string authHeader)
+        /// <summary>
+        ///     Validate the provided credentials, made up of the username and the contents if the authHeader, by making a request to a known Bitbucket
+        /// REST API resource. A 200/Success response indicates the credentials are valid. Any other response indicates they are not.
+        /// </summary>
+        /// <param name="targetUri">Contains the <see cref="HttpClientHandler"/> used when making the REST API request</param>
+        /// <param name="username">the username to validate</param>
+        /// <param name="authHeader">the HTTP auth header containing the password/access_token to validate</param>
+        /// <returns>true if the credentials are valid, false otherwise.</returns>
+        private async Task<bool> ValidateCredentials(TargetUri targetUri, string username, string authHeader)
         {
             const string ValidationUrl = "https://api.bitbucket.org/2.0/user";
 

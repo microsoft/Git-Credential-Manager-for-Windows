@@ -1,11 +1,35 @@
-﻿using Microsoft.Alm.Authentication;
+﻿/**** Git Credential Manager for Windows ****
+ *
+ * Copyright (c) Atlassian
+ * All rights reserved.
+ *
+ * MIT License
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy
+ * of this software and associated documentation files (the """"Software""""), to deal
+ * in the Software without restriction, including without limitation the rights to
+ * use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of
+ * the Software, and to permit persons to whom the Software is furnished to do so,
+ * subject to the following conditions:
+ *
+ * The above copyright notice and this permission notice shall be included in all
+ * copies or substantial portions of the Software.
+ *
+ * THE SOFTWARE IS PROVIDED *AS IS*, WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS
+ * FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR
+ * COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN
+ * AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
+ * WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE."
+**/
+
+using Microsoft.Alm.Authentication;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
 using System.Net;
 using System.Net.Http;
-using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading;
 using System.Threading.Tasks;
@@ -14,7 +38,6 @@ using Trace = Microsoft.Alm.Git.Trace;
 
 namespace Atlassian.Bitbucket.Authentication.OAuth
 {
-    
 
     /// <summary>
     /// </summary>
@@ -49,12 +72,26 @@ namespace Atlassian.Bitbucket.Authentication.OAuth
             return await GetAccessToken(targetUri, authToken);
         }
 
+        /// <summary>
+        ///     Uses a refresh_token to get a new access_token
+        /// </summary>
+        /// <param name="targetUri"></param>
+        /// <param name="refreshToken"></param>
+        /// <param name="cancellationToken"></param>
+        /// <returns></returns>
         public async Task<AuthenticationResult> RefreshAuthAsync(TargetUri targetUri, string refreshToken, CancellationToken cancellationToken)
         {
             return await RefreshAccessToken(targetUri, refreshToken);
         }
 
-        public async Task<string> Authorize(TargetUri targetUri, TokenScope scope, CancellationToken cancellationToken)
+        /// <summary>
+        ///     Run the OAuth dance to get a new request_token
+        /// </summary>
+        /// <param name="targetUri"></param>
+        /// <param name="scope"></param>
+        /// <param name="cancellationToken"></param>
+        /// <returns></returns>
+        private async Task<string> Authorize(TargetUri targetUri, TokenScope scope, CancellationToken cancellationToken)
         {
             var authorityUrl = string.Format(
             AuthorizeUri +
@@ -96,19 +133,15 @@ namespace Atlassian.Bitbucket.Authentication.OAuth
 
             //Parse and try to get the key
             Dictionary<string,string> qs =
-          rawUrlData.Split('&')
+                rawUrlData.Split('&')
                .ToDictionary(c => c.Split('=')[0],
                              c => Uri.UnescapeDataString(c.Split('=')[1]));
             var authCode = qs.Keys.Where(k => k.EndsWith("code", StringComparison.InvariantCultureIgnoreCase)).Select(k => qs[k]).FirstOrDefault();
-            //var qs = new Dictionary<string, string>(); // HttpUtility.ParseQueryString(rawUrlData);
-            //var authCode = qs["/?code"];
-            //if (string.IsNullOrEmpty(authCode))
-            //    authCode = qs["code"];
+
 
             if (string.IsNullOrWhiteSpace(authCode))
             {
                 var error_desc = qs["error_description"];
-                //throw new OAuthAuthenticationFlowException("Request for an OAuth request_token was denied", error_desc);
                 throw new Exception("Request for an OAuth request_token was denied" + error_desc);
             }
 
@@ -116,18 +149,11 @@ namespace Atlassian.Bitbucket.Authentication.OAuth
         }
 
         /// <summary>
-        /// 
+        ///     Use a request_token to get an access_token
         /// </summary>
-        /// <param name="refreshToken"></param>
+        /// <param name="targetUri"></param>
+        /// <param name="authCode"></param>
         /// <returns></returns>
-        //public async Task<AccessToken> RefreshAuthAsync(string refreshToken)
-        //{
-        //    var response = await RefreshAccessTokenAsync(refreshToken, GetClient());
-
-        //    //Got it!
-        //    return response.Data;
-        //}
-
         private async Task<AuthenticationResult> GetAccessToken(TargetUri targetUri, string authCode)
         {
             Token token = null;
@@ -211,7 +237,13 @@ namespace Atlassian.Bitbucket.Authentication.OAuth
             }
         }
 
-        public async Task<AuthenticationResult> RefreshAccessToken(TargetUri targetUri, string currentRefreshToken)
+        /// <summary>
+        ///     Use a refresh_token to get a new access_token
+        /// </summary>
+        /// <param name="targetUri"></param>
+        /// <param name="currentRefreshToken"></param>
+        /// <returns></returns>
+        private async Task<AuthenticationResult> RefreshAccessToken(TargetUri targetUri, string currentRefreshToken)
         {
             Token token = null;
             Token refreshToken = null;

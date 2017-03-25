@@ -5,7 +5,5 @@
         <ResourceDictionary Source="Assets/ADG.xaml" />
         <ResourceDictionary Source="Assets/TextBlocks.xaml" />
         <ResourceDictionary Source="Assets/ValidationMessage.xaml" />
-        <!--<ResourceDictionary Source="Controls/Octicons/OcticonImage.xaml" />
-        <ResourceDictionary Source="Controls/Buttons/OcticonCircleButton.xaml" />-->
     </ResourceDictionary.MergedDictionaries>
 </ResourceDictionary>

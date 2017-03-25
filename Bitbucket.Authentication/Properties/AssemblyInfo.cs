@@ -6,11 +6,11 @@ using System.Runtime.InteropServices;
 // set of attributes. Change these attribute values to modify the information
 // associated with an assembly.
 [assembly: AssemblyTitle("Bitbucket.Authentication")]
-[assembly: AssemblyDescription("")]
+[assembly: AssemblyDescription("Bitbucket Authentication Dialogs")]
 [assembly: AssemblyConfiguration("")]
 [assembly: AssemblyCompany("Atlassian")]
 [assembly: AssemblyProduct("Bitbucket.Authentication")]
-[assembly: AssemblyCopyright("Copyright © 2017")]
+[assembly: AssemblyCopyright("Copyright © Atlasssian 2017")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]
 
