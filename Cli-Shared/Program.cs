@@ -24,6 +24,7 @@ namespace Microsoft.Alm.Cli
         internal const string ConfigNamespaceKey = "namespace";
         internal const string ConfigPreserveCredentialsKey = "preserve";
         internal const string ConfigUseHttpPathKey = "useHttpPath";
+        internal const string ConfigUseHttpUsernameKey = "useHttpUsername";
         internal const string ConfigUseModalPromptKey = "modalPrompt";
         internal const string ConfigValidateKey = "validate";
         internal const string ConfigWritelogKey = "writelog";
@@ -614,6 +615,13 @@ namespace Microsoft.Alm.Cli
             if (TryReadBoolean(operationArguments, ConfigUseHttpPathKey, null, out yesno))
             {
                 operationArguments.UseHttpPath = yesno.Value;
+            }
+
+            // look for http username user config settings
+            bool? useHttpUsername;
+            if (TryReadBoolean(operationArguments, ConfigUseHttpUsernameKey, null, operationArguments.UseHttpUsername, out useHttpUsername))
+            {
+                operationArguments.UseHttpUsername = useHttpUsername.Value;
             }
 
             // look for http proxy config settings

@@ -144,6 +144,7 @@ namespace Microsoft.Alm.Cli
             this.ValidateCredentials = true;
             this.WriteLog = false;
             _useHttpPath = false;
+            _useHttpUsername = false;
         }
 
         public AuthorityType Authority { get; set; }
@@ -274,6 +275,15 @@ namespace Microsoft.Alm.Cli
                 CreateTargetUri();
             }
         }
+        public bool UseHttpUsername
+        {
+            get { return _useHttpUsername; }
+            set
+            {
+                _useHttpUsername = value;
+                CreateTargetUri();
+            }
+        }
         public bool UseModalUi { get; set; }
         public bool ValidateCredentials { get; set; }
         public bool WriteLog { get; set; }
@@ -287,6 +297,7 @@ namespace Microsoft.Alm.Cli
         private string _queryProtocol;
         private TargetUri _targetUri;
         private bool _useHttpPath;
+        private bool _useHttpUsername;
         private string _username;
 
         public void LoadConfiguration()
@@ -372,6 +383,15 @@ namespace Microsoft.Alm.Cli
             string queryUrl = null;
             string proxyUrl = _proxyUri?.ToString();
 
+            string userPrefix = "";
+            if (_useHttpUsername)
+            {
+                if (!String.IsNullOrWhiteSpace(_username))
+                {
+                    userPrefix = Uri.EscapeDataString(_username) + "@";
+                }
+            }
+
             // when the target requests a path...
             if (UseHttpPath)
             {
@@ -388,6 +408,7 @@ namespace Microsoft.Alm.Cli
                     {
                         queryUrl = $"{_queryHost}/{_queryPath}";
                     }
+					actualUrl = queryUrl;
                 }
                 // and has a protocol...
                 else
@@ -395,16 +416,16 @@ namespace Microsoft.Alm.Cli
                     // and the target lacks a path, combine protocol + host
                     if (String.IsNullOrWhiteSpace(_queryPath))
                     {
-                        queryUrl = $"{_queryProtocol}://{_queryHost}";
+                        queryUrl = $"{_queryProtocol}://{userPrefix}{_queryHost}";
+                        actualUrl = $"{_queryProtocol}://{_queryHost}";
                     }
                     // combine protocol + host + path
                     else
                     {
-                        queryUrl = $"{_queryProtocol}://{_queryHost}/{_queryPath}";
+                        queryUrl = $"{_queryProtocol}://{userPrefix}{_queryHost}/{_queryPath}";
+                        actualUrl = $"{_queryProtocol}://{_queryHost}/{_queryPath}";
                     }
                 }
-
-                actualUrl = queryUrl;
             }
             // when the target ignores paths...
             else
@@ -453,15 +474,15 @@ namespace Microsoft.Alm.Cli
                 // combine the protocol + host
                 else
                 {
-                    queryUrl = $"{_queryProtocol}://{_queryHost}";
+                    queryUrl = $"{_queryProtocol}://{userPrefix}{_queryHost}";
 
                     if (String.IsNullOrWhiteSpace(_queryPath))
                     {
-                        actualUrl = queryUrl;
+                        actualUrl = $"{_queryProtocol}://{_queryHost}";
                     }
                     else
                     {
-                        actualUrl = $"{queryUrl}/{_queryPath}";
+                        actualUrl = $"{_queryProtocol}://{_queryHost}/{_queryPath}";
                     }
                 }
             }
