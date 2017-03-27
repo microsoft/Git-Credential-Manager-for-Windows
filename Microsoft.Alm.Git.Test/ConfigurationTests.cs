@@ -101,7 +101,17 @@ namespace Microsoft.Alm.Git.Test
 
             using (var reader = new StringReader(input))
             {
-                cut = new Configuration(reader);
+                var dict = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
+                Configuration.ParseGitConfig(reader, dict);
+
+                var values = new Dictionary<ConfigurationLevel, Dictionary<string, string>>();
+
+                foreach( var level in Configuration.Levels)
+                {
+                    values[level] = dict;
+                }
+
+                cut = new Configuration.Impl(values);
             }
 
             Assert.AreEqual(true, cut.ContainsKey("CoRe.AuToCrLf"));

@@ -56,6 +56,48 @@ namespace Microsoft.Alm.Cli
         private static readonly VstsTokenScope VstsCredentialScope = VstsTokenScope.CodeWrite | VstsTokenScope.PackagingRead;
         private static readonly Github.TokenScope GitHubCredentialScope = Github.TokenScope.Gist | Github.TokenScope.Repo;
 
+        internal static Action<Exception> _dieExceptionCallback = (Exception exception) =>
+        {
+            Git.Trace.WriteLine(exception.ToString());
+            LogEvent(exception.ToString(), EventLogEntryType.Error);
+
+            string message;
+            if (!String.IsNullOrWhiteSpace(exception.Message))
+            {
+                message = $"{exception.GetType().Name} encountered.\n   {exception.Message}";
+            }
+            else
+            {
+                message = $"{exception.GetType().Name}  encountered.";
+            }
+
+            Die(message);
+        };
+        internal static Action<string> _dieMessageCallback = (string message) =>
+        {
+            Git.Trace.WriteLine($"fatal: {message}");
+            Program.WriteLine($"fatal: {message}");
+
+            Git.Trace.Flush();
+
+            Environment.Exit(-1);
+        };
+        internal static Action<int, string> _exitCallback = (int exitcode, string message) =>
+        {
+            if (!String.IsNullOrWhiteSpace(message))
+            {
+                Git.Trace.WriteLine(message);
+                Program.WriteLine(message);
+            }
+
+            Environment.Exit(exitcode);
+        };
+
+        private static string _executablePath;
+        private static string _location;
+        private static string _name;
+        private static Version _version;
+
         /// <summary>
         /// Gets the path to the executable.
         /// </summary>
@@ -70,7 +112,6 @@ namespace Microsoft.Alm.Cli
                 return _executablePath;
             }
         }
-        private static string _executablePath;
 
         /// <summary>
         /// Gets the directory where the executable is contained.
@@ -86,7 +127,6 @@ namespace Microsoft.Alm.Cli
                 return _location;
             }
         }
-        private static string _location;
 
         /// <summary>
         /// Gets the name of the application.
@@ -102,7 +142,6 @@ namespace Microsoft.Alm.Cli
                 return _name;
             }
         }
-        private static string _name;
 
         /// <summary>
         /// <para>Gets <see langword="true"/> if stderr is a TTY device; otherwise <see langword="false"/>.</para>
@@ -145,46 +184,15 @@ namespace Microsoft.Alm.Cli
                 return _version;
             }
         }
-        private static Version _version;
 
         internal static void Die(Exception exception)
-        {
-            Git.Trace.WriteLine(exception.ToString());
-            LogEvent(exception.ToString(), EventLogEntryType.Error);
-
-            string message;
-            if (!String.IsNullOrWhiteSpace(exception.Message))
-            {
-                message = $"{exception.GetType().Name} encountered.\n   {exception.Message}";
-            }
-            else
-            {
-                message = $"{exception.GetType().Name}  encountered.";
-            }
-
-            Die(message);
-        }
+            => _dieExceptionCallback(exception);
 
         internal static void Die(string message)
-        {
-            Git.Trace.WriteLine($"fatal: {message}");
-            Program.WriteLine($"fatal: {message}");
-
-            Git.Trace.Flush();
-
-            Environment.Exit(-1);
-        }
+            => _dieMessageCallback(message);
 
         internal static void Exit(int exitcode = 0, string message = null)
-        {
-            if (!String.IsNullOrWhiteSpace(message))
-            {
-                Git.Trace.WriteLine(message);
-                Program.WriteLine(message);
-            }
-
-            Environment.Exit(exitcode);
-        }
+            => _exitCallback(exitcode, message);
 
         internal static void LogEvent(string message, EventLogEntryType eventType)
         {
@@ -500,7 +508,7 @@ namespace Microsoft.Alm.Cli
             }
         }
 
-        private static void LoadOperationArguments(OperationArguments operationArguments)
+        internal static void LoadOperationArguments(OperationArguments operationArguments)
         {
             if (operationArguments.TargetUri == null)
             {
@@ -992,17 +1000,17 @@ namespace Microsoft.Alm.Cli
 
                         Task.Run(async () =>
                         {
-                            // attempt to get cached creds or acquire creds if interactivity is allowed
-                            if ((operationArguments.Interactivity != Interactivity.Always
-                                    && (credentials = authentication.GetCredentials(operationArguments.TargetUri)) != null)
-                                || (operationArguments.Interactivity != Interactivity.Never
-                                    && (credentials = await basicAuth.AcquireCredentials(operationArguments.TargetUri)) != null))
+                    // attempt to get cached creds or acquire creds if interactivity is allowed
+                    if ((operationArguments.Interactivity != Interactivity.Always
+                            && (credentials = authentication.GetCredentials(operationArguments.TargetUri)) != null)
+                        || (operationArguments.Interactivity != Interactivity.Never
+                            && (credentials = await basicAuth.AcquireCredentials(operationArguments.TargetUri)) != null))
                             {
                                 Git.Trace.WriteLine("credentials found.");
-                                // set the credentials object
-                                // no need to save the credentials explicitly, as Git will call back
-                                // with a store command if the credentials are valid.
-                                operationArguments.SetCredentials(credentials);
+                        // set the credentials object
+                        // no need to save the credentials explicitly, as Git will call back
+                        // with a store command if the credentials are valid.
+                        operationArguments.SetCredentials(credentials);
                                 credentialsFound = true;
                             }
                             else
@@ -1021,20 +1029,20 @@ namespace Microsoft.Alm.Cli
 
                         Task.Run(async () =>
                         {
-                            // attempt to get cached creds -> non-interactive logon -> interactive logon
-                            // note that AAD "credentials" are always scoped access tokens
-                            if (((operationArguments.Interactivity != Interactivity.Always
-                                    && ((credentials = aadAuth.GetCredentials(operationArguments.TargetUri)) != null)
-                                    && (!operationArguments.ValidateCredentials
-                                        || await aadAuth.ValidateCredentials(operationArguments.TargetUri, credentials))))
-                                || (operationArguments.Interactivity != Interactivity.Always
-                                        && ((credentials = await aadAuth.NoninteractiveLogon(operationArguments.TargetUri, true)) != null)
-                                    && (!operationArguments.ValidateCredentials
-                                        || await aadAuth.ValidateCredentials(operationArguments.TargetUri, credentials)))
-                                || (operationArguments.Interactivity != Interactivity.Never
-                                    && ((credentials = await aadAuth.InteractiveLogon(operationArguments.TargetUri, true)) != null)
-                                    && (!operationArguments.ValidateCredentials
-                                        || await aadAuth.ValidateCredentials(operationArguments.TargetUri, credentials))))
+                    // attempt to get cached creds -> non-interactive logon -> interactive logon
+                    // note that AAD "credentials" are always scoped access tokens
+                    if (((operationArguments.Interactivity != Interactivity.Always
+                            && ((credentials = aadAuth.GetCredentials(operationArguments.TargetUri)) != null)
+                            && (!operationArguments.ValidateCredentials
+                                || await aadAuth.ValidateCredentials(operationArguments.TargetUri, credentials))))
+                        || (operationArguments.Interactivity != Interactivity.Always
+                                && ((credentials = await aadAuth.NoninteractiveLogon(operationArguments.TargetUri, true)) != null)
+                            && (!operationArguments.ValidateCredentials
+                                || await aadAuth.ValidateCredentials(operationArguments.TargetUri, credentials)))
+                        || (operationArguments.Interactivity != Interactivity.Never
+                            && ((credentials = await aadAuth.InteractiveLogon(operationArguments.TargetUri, true)) != null)
+                            && (!operationArguments.ValidateCredentials
+                                || await aadAuth.ValidateCredentials(operationArguments.TargetUri, credentials))))
                             {
                                 Git.Trace.WriteLine($"credentials for '{operationArguments.TargetUri}' found.");
                                 operationArguments.SetCredentials(credentials);
@@ -1057,16 +1065,16 @@ namespace Microsoft.Alm.Cli
 
                         Task.Run(async () =>
                         {
-                            // attempt to get cached creds -> interactive logon
-                            // note that MSA "credentials" are always scoped access tokens
-                            if (((operationArguments.Interactivity != Interactivity.Always
-                                    && ((credentials = msaAuth.GetCredentials(operationArguments.TargetUri)) != null)
-                                    && (!operationArguments.ValidateCredentials
-                                        || await msaAuth.ValidateCredentials(operationArguments.TargetUri, credentials))))
-                                || (operationArguments.Interactivity != Interactivity.Never
-                                    && ((credentials = await msaAuth.InteractiveLogon(operationArguments.TargetUri, true)) != null)
-                                    && (!operationArguments.ValidateCredentials
-                                        || await msaAuth.ValidateCredentials(operationArguments.TargetUri, credentials))))
+                    // attempt to get cached creds -> interactive logon
+                    // note that MSA "credentials" are always scoped access tokens
+                    if (((operationArguments.Interactivity != Interactivity.Always
+                            && ((credentials = msaAuth.GetCredentials(operationArguments.TargetUri)) != null)
+                            && (!operationArguments.ValidateCredentials
+                                || await msaAuth.ValidateCredentials(operationArguments.TargetUri, credentials))))
+                        || (operationArguments.Interactivity != Interactivity.Never
+                            && ((credentials = await msaAuth.InteractiveLogon(operationArguments.TargetUri, true)) != null)
+                            && (!operationArguments.ValidateCredentials
+                                || await msaAuth.ValidateCredentials(operationArguments.TargetUri, credentials))))
                             {
                                 Git.Trace.WriteLine($"credentials for '{operationArguments.TargetUri}' found.");
                                 operationArguments.SetCredentials(credentials);
@@ -1132,7 +1140,7 @@ namespace Microsoft.Alm.Cli
             return handleFileType == NativeMethods.FileType.Char;
         }
 
-        private static bool TryReadBoolean(OperationArguments operationArguments, string configKey, string environKey, out bool? value)
+        internal static bool TryReadBoolean(OperationArguments operationArguments, string configKey, string environKey, out bool? value)
         {
             if (ReferenceEquals(operationArguments, null))
                 throw new ArgumentNullException(nameof(operationArguments));
