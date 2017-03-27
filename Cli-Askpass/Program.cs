@@ -170,7 +170,7 @@ namespace Microsoft.Alm.Cli
                     {
                         Git.Trace.WriteLine($"success parsing URL, targetUri = '{targetUri}'.");
 
-                        OperationArguments operationArguments = new OperationArguments(targetUri);
+                        OperationArguments operationArguments = new OperationArguments.Impl(targetUri);
 
                         // load up the operation arguments, enable tracing, and query for credentials
                         LoadOperationArguments(operationArguments);
