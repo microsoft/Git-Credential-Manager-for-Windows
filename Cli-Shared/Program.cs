@@ -1160,12 +1160,18 @@ namespace Microsoft.Alm.Cli
             // parse the value into a bool
             parse_localval:
 
+            // An empty value is unset / should not be there, so treat it as if it isn't.
+            if (String.IsNullOrWhiteSpace(localVal))
+            {
+                value = null;
+                return false;
+            }
+
             // Test `localValue` for a Git 'true' equivalent value
-            if (String.IsNullOrEmpty(localVal)
-                || ConfigValueComparer.Equals(localVal, "yes")
+            if (ConfigValueComparer.Equals(localVal, "yes")
                 || ConfigValueComparer.Equals(localVal, "true")
                 || ConfigValueComparer.Equals(localVal, "1")
-                || ConfigValueComparer.Equals(localVal, "off"))
+                || ConfigValueComparer.Equals(localVal, "on"))
             {
                 value = true;
                 return true;
