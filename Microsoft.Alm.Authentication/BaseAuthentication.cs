@@ -39,6 +39,18 @@ namespace Microsoft.Alm.Authentication
         public abstract void DeleteCredentials(TargetUri targetUri);
 
         /// <summary>
+        /// Deletes a <see cref="Credential"/> from the storage used by the authentication object.
+        /// </summary>
+        /// <param name="targetUri">
+        /// The uniform resource indicator used to uniquely identify the credentials.
+        /// </param>
+        /// <param name="username">
+        /// The username of the credentials to be deleted.
+        /// </param>
+        public virtual void DeleteCredentials(TargetUri targetUri, string username)
+            => DeleteCredentials(targetUri, null);
+
+        /// <summary>
         /// Gets a <see cref="Credential"/> from the storage used by the authentication object.
         /// </summary>
         /// <param name="targetUri">
