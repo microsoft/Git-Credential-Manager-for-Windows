@@ -1000,17 +1000,17 @@ namespace Microsoft.Alm.Cli
 
                         Task.Run(async () =>
                         {
-                    // attempt to get cached creds or acquire creds if interactivity is allowed
-                    if ((operationArguments.Interactivity != Interactivity.Always
-                            && (credentials = authentication.GetCredentials(operationArguments.TargetUri)) != null)
-                        || (operationArguments.Interactivity != Interactivity.Never
-                            && (credentials = await basicAuth.AcquireCredentials(operationArguments.TargetUri)) != null))
+                            // attempt to get cached creds or acquire creds if interactivity is allowed
+                            if ((operationArguments.Interactivity != Interactivity.Always
+                                    && (credentials = authentication.GetCredentials(operationArguments.TargetUri)) != null)
+                                || (operationArguments.Interactivity != Interactivity.Never
+                                    && (credentials = await basicAuth.AcquireCredentials(operationArguments.TargetUri)) != null))
                             {
                                 Git.Trace.WriteLine("credentials found.");
-                        // set the credentials object
-                        // no need to save the credentials explicitly, as Git will call back
-                        // with a store command if the credentials are valid.
-                        operationArguments.SetCredentials(credentials);
+                                // set the credentials object
+                                // no need to save the credentials explicitly, as Git will call back
+                                // with a store command if the credentials are valid.
+                                operationArguments.SetCredentials(credentials);
                                 credentialsFound = true;
                             }
                             else
@@ -1029,20 +1029,20 @@ namespace Microsoft.Alm.Cli
 
                         Task.Run(async () =>
                         {
-                    // attempt to get cached creds -> non-interactive logon -> interactive logon
-                    // note that AAD "credentials" are always scoped access tokens
-                    if (((operationArguments.Interactivity != Interactivity.Always
-                            && ((credentials = aadAuth.GetCredentials(operationArguments.TargetUri)) != null)
-                            && (!operationArguments.ValidateCredentials
-                                || await aadAuth.ValidateCredentials(operationArguments.TargetUri, credentials))))
-                        || (operationArguments.Interactivity != Interactivity.Always
-                                && ((credentials = await aadAuth.NoninteractiveLogon(operationArguments.TargetUri, true)) != null)
-                            && (!operationArguments.ValidateCredentials
-                                || await aadAuth.ValidateCredentials(operationArguments.TargetUri, credentials)))
-                        || (operationArguments.Interactivity != Interactivity.Never
-                            && ((credentials = await aadAuth.InteractiveLogon(operationArguments.TargetUri, true)) != null)
-                            && (!operationArguments.ValidateCredentials
-                                || await aadAuth.ValidateCredentials(operationArguments.TargetUri, credentials))))
+                            // attempt to get cached creds -> non-interactive logon -> interactive logon
+                            // note that AAD "credentials" are always scoped access tokens
+                            if (((operationArguments.Interactivity != Interactivity.Always
+                                    && ((credentials = aadAuth.GetCredentials(operationArguments.TargetUri)) != null)
+                                    && (!operationArguments.ValidateCredentials
+                                        || await aadAuth.ValidateCredentials(operationArguments.TargetUri, credentials))))
+                                || (operationArguments.Interactivity != Interactivity.Always
+                                    && ((credentials = await aadAuth.NoninteractiveLogon(operationArguments.TargetUri, true)) != null)
+                                    && (!operationArguments.ValidateCredentials
+                                        || await aadAuth.ValidateCredentials(operationArguments.TargetUri, credentials)))
+                                || (operationArguments.Interactivity != Interactivity.Never
+                                    && ((credentials = await aadAuth.InteractiveLogon(operationArguments.TargetUri, true)) != null)
+                                    && (!operationArguments.ValidateCredentials
+                                        || await aadAuth.ValidateCredentials(operationArguments.TargetUri, credentials))))
                             {
                                 Git.Trace.WriteLine($"credentials for '{operationArguments.TargetUri}' found.");
                                 operationArguments.SetCredentials(credentials);
@@ -1065,16 +1065,16 @@ namespace Microsoft.Alm.Cli
 
                         Task.Run(async () =>
                         {
-                    // attempt to get cached creds -> interactive logon
-                    // note that MSA "credentials" are always scoped access tokens
-                    if (((operationArguments.Interactivity != Interactivity.Always
-                            && ((credentials = msaAuth.GetCredentials(operationArguments.TargetUri)) != null)
-                            && (!operationArguments.ValidateCredentials
-                                || await msaAuth.ValidateCredentials(operationArguments.TargetUri, credentials))))
-                        || (operationArguments.Interactivity != Interactivity.Never
-                            && ((credentials = await msaAuth.InteractiveLogon(operationArguments.TargetUri, true)) != null)
-                            && (!operationArguments.ValidateCredentials
-                                || await msaAuth.ValidateCredentials(operationArguments.TargetUri, credentials))))
+                            // attempt to get cached creds -> interactive logon
+                            // note that MSA "credentials" are always scoped access tokens
+                            if (((operationArguments.Interactivity != Interactivity.Always
+                                    && ((credentials = msaAuth.GetCredentials(operationArguments.TargetUri)) != null)
+                                    && (!operationArguments.ValidateCredentials
+                                        || await msaAuth.ValidateCredentials(operationArguments.TargetUri, credentials))))
+                                || (operationArguments.Interactivity != Interactivity.Never
+                                    && ((credentials = await msaAuth.InteractiveLogon(operationArguments.TargetUri, true)) != null)
+                                    && (!operationArguments.ValidateCredentials
+                                        || await msaAuth.ValidateCredentials(operationArguments.TargetUri, credentials))))
                             {
                                 Git.Trace.WriteLine($"credentials for '{operationArguments.TargetUri}' found.");
                                 operationArguments.SetCredentials(credentials);
