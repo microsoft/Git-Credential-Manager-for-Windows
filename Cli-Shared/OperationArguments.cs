@@ -497,6 +497,11 @@ namespace Microsoft.Alm.Cli
                 }
                 else
                 {
+                    if (!string.IsNullOrWhiteSpace(url))
+                    {
+                        Git.Trace.WriteLine($"failed to parse '{url}'.");
+                    }
+
                     Git.Trace.WriteLine("proxy cleared.");
                 }
                 this.ProxyUri = tmp;
