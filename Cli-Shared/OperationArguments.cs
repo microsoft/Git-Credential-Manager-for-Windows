@@ -285,7 +285,10 @@ namespace Microsoft.Alm.Cli
                 this.UseModalUi = true;
                 this.ValidateCredentials = true;
                 this.WriteLog = false;
+                _preserveCredentials = false;
                 _useHttpPath = false;
+                _useLocalConfig = true;
+                _useSystemConfig = true;
             }
 
             private AuthorityType _authorityType;
