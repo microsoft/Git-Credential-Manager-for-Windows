@@ -174,7 +174,7 @@ namespace Microsoft.Alm.Authentication
         }
 
         /// <summary>
-        /// Gets the client header enabled to work with proxies as necissary.
+        /// Gets the client header enabled to work with proxies as necessary.
         /// </summary>
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Reliability", "CA2000:Dispose objects before losing scope")]
         public HttpClientHandler HttpClientHandler
@@ -211,7 +211,7 @@ namespace Microsoft.Alm.Authentication
         }
 
         /// <summary>
-        /// Gets the web proxy abstraction for working with proxies as necissary.
+        /// Gets the web proxy abstraction for working with proxies as necessary.
         /// </summary>
         public WebProxy WebProxy
         {

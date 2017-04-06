@@ -668,7 +668,7 @@ namespace Microsoft.Alm.Cli
                     }
                 }
 
-                // all necissary content has been deployed to the system
+                // all necessary content has been deployed to the system
                 Result = ResultValue.Success;
 
                 Program.LogEvent($"{Program.Title} successfully removed.", EventLogEntryType.Information);
