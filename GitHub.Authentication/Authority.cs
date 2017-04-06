@@ -38,10 +38,6 @@ namespace GitHub.Authentication
     internal class Authority : IAuthority
     {
         /// <summary>
-        /// The GitHub authorizations URL
-        /// </summary>
-        public const string DefaultAuthorityUrl = "https://api.github.com/authorizations";
-        /// <summary>
         /// The GitHub required HTTP accepts header value
         /// </summary>
         public const string GitHubApiAcceptsHeaderValue = "application/vnd.github.v3+json";
@@ -50,12 +46,24 @@ namespace GitHub.Authentication
         /// </summary>
         public const int RequestTimeout = 15 * 1000; // 15 second limit
 
-        public Authority(string authorityUrl = null)
+        public Authority(TargetUri targetUri)
         {
-            _authorityUrl = authorityUrl ?? DefaultAuthorityUrl;
+            // The GitHub proper API endpoints
+            if (targetUri.Host == "github.com")
+            {
+                _authorityUrl = "https://api.github.com/authorizations";
+                _validationUrl = "https://api.github.com/user/subscriptions";
+            }
+            else
+            {
+                // If we're here otherwise, it's GitHub Enterprise via configured authority
+                var baseUrl = targetUri.ActualUri.GetLeftPart(UriPartial.Authority);
+                _authorityUrl = baseUrl + "/api/v3/authorizations";
+                _validationUrl = baseUrl + "/api/v3/user/subscriptions";
+            }
         }
 
-        private readonly string _authorityUrl;
+        private readonly string _validationUrl, _authorityUrl;
 
         public async Task<AuthenticationResult> AcquireToken(
             TargetUri targetUri,
@@ -179,8 +187,6 @@ namespace GitHub.Authentication
 
         public async Task<bool> ValidateCredentials(TargetUri targetUri, Credential credentials)
         {
-            const string ValidationUrl = "https://api.github.com/user/subscriptions";
-
             BaseSecureStore.ValidateTargetUri(targetUri);
             BaseSecureStore.ValidateCredential(credentials);
 
@@ -199,7 +205,7 @@ namespace GitHub.Authentication
                 httpClient.DefaultRequestHeaders.Add("Accept", GitHubApiAcceptsHeaderValue);
                 httpClient.DefaultRequestHeaders.Add("Authorization", "Basic " + authEncode);
 
-                using (HttpResponseMessage response = await httpClient.GetAsync(ValidationUrl))
+                using (HttpResponseMessage response = await httpClient.GetAsync(_validationUrl))
                 {
                     if (response.IsSuccessStatusCode)
                     {
