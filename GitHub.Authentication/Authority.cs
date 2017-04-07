@@ -56,7 +56,7 @@ namespace GitHub.Authentication
             }
             else
             {
-                // If we're here otherwise, it's GitHub Enterprise via configured authority
+                // If we're here, it's GitHub Enterprise via a configured authority
                 var baseUrl = targetUri.ActualUri.GetLeftPart(UriPartial.Authority);
                 _authorityUrl = baseUrl + "/api/v3/authorizations";
                 _validationUrl = baseUrl + "/api/v3/user/subscriptions";
