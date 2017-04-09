@@ -33,14 +33,14 @@
             TextWrapping="Wrap"
             Style="{StaticResource GitHubDescriptionTextBlock}">
             <Run x:Name="description"
-                 Text="{Binding Description, Mode=OneWay}"/>
+                 Text="{Binding Description, Mode=OneWay}" />
             <Hyperlink
                 Command="{Binding LearnMoreCommand}"
                 CommandParameter="{Binding
                     RelativeSource={RelativeSource Self},
                     Path=ToolTip}"
                 ToolTip="https://help.github.com/articles/about-two-factor-authentication/">
-                <TextBlock Text="{x:Static prop:Resources.LearnMoreLink}"/>
+                <TextBlock Text="{x:Static prop:Resources.LearnMoreLink}" />
             </Hyperlink>
         </TextBlock>
         <ui:TwoFactorInput
