@@ -5,10 +5,10 @@
     xmlns:ui="clr-namespace:GitHub.UI">
 
     <Style x:Key="OcticonCircleButton" TargetType="{x:Type ui:OcticonCircleButton}">
-        <Setter Property="Background" Value="Transparent"/>
-        <Setter Property="Foreground" Value="{DynamicResource GHBlueLinkButtonTextBrush}"/>
-        <Setter Property="FontSize" Value="14"/>
-        <Setter Property="BorderThickness" Value="1"/>
+        <Setter Property="Background" Value="Transparent" />
+        <Setter Property="Foreground" Value="{DynamicResource GHBlueLinkButtonTextBrush}" />
+        <Setter Property="FontSize" Value="14" />
+        <Setter Property="BorderThickness" Value="1" />
         <Setter Property="Padding" Value="6,0,0,0" />
 
         <Setter Property="FocusVisualStyle" Value="{DynamicResource NegativeMarginFocusVisual}" />
@@ -22,10 +22,10 @@
         <Setter Property="Icon" Value="mark_github" />
         <Setter Property="Height" Value="30" />
 
-        <Setter Property="HorizontalContentAlignment" Value="Right"/>
-        <Setter Property="VerticalContentAlignment" Value="Center"/>
+        <Setter Property="HorizontalContentAlignment" Value="Right" />
+        <Setter Property="VerticalContentAlignment" Value="Center" />
 
-        <Setter Property="IconRotationAngle" Value="0"/>
+        <Setter Property="IconRotationAngle" Value="0" />
 
         <Setter Property="Template">
             <Setter.Value>
@@ -153,7 +153,7 @@
                                 </VisualState>
                             </VisualStateGroup>
                             <VisualStateGroup x:Name="FocusStates">
-                                <VisualState x:Name="Unfocused"/>
+                                <VisualState x:Name="Unfocused" />
                                 <VisualState x:Name="Focused" />
                             </VisualStateGroup>
                         </VisualStateManager.VisualStateGroups>
@@ -175,7 +175,7 @@
                                 x:Name="border"
                                 Stroke="{Binding Path=IconForeground, RelativeSource={RelativeSource TemplatedParent}}"
                                 StrokeThickness="{Binding Path=BorderThickness, RelativeSource={RelativeSource TemplatedParent}, Converter={StaticResource ThicknessToDouble}}"
-                                IsHitTestVisible="False"/>
+                                IsHitTestVisible="False" />
 
                             <Grid IsHitTestVisible="True">
 
@@ -241,7 +241,7 @@
                                         Height="{Binding Path=IconSize,
                                             RelativeSource={RelativeSource TemplatedParent}}"
                                         Stretch="Uniform">
-                                            <Path
+                                        <Path
                                                 Height="16"
                                                 Stretch="None"
                                                 Fill="{Binding Path=ActiveForeground,
@@ -249,16 +249,14 @@
                                                 Data="{Binding Path=(Path.Data),
                                                     RelativeSource={RelativeSource TemplatedParent}}"
                                                 RenderTransformOrigin="0.5,0.5">
-                                                <Path.RenderTransform>
-                                                    <RotateTransform Angle="{Binding Path=IconRotationAngle,
+                                            <Path.RenderTransform>
+                                                <RotateTransform Angle="{Binding Path=IconRotationAngle,
                                                     RelativeSource={RelativeSource TemplatedParent}}" />
-                                                </Path.RenderTransform>
-                                            </Path>
+                                            </Path.RenderTransform>
+                                        </Path>
                                     </Viewbox>
-
                                 </Grid>
                             </Grid>
-
                         </ui:FixedAspectRatioPanel>
 
                         <ContentPresenter
@@ -274,14 +272,11 @@
                             RecognizesAccessKey="True"
                             Focusable="False"
                             Grid.Column="2" />
-
                     </Grid>
-
                 </ControlTemplate>
             </Setter.Value>
         </Setter>
     </Style>
 
     <Style BasedOn="{StaticResource OcticonCircleButton}" TargetType="{x:Type ui:OcticonCircleButton}" />
-
 </ResourceDictionary>
