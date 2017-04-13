@@ -448,7 +448,8 @@ namespace Microsoft.Alm.Cli
                     Git.Trace.WriteLine($"authority for '{operationArguments.TargetUri}' is GitHub.");
 
                     // return a GitHub authentication object
-                    return authority ?? new Github.Authentication(GitHubCredentialScope,
+                    return authority ?? new Github.Authentication(operationArguments.TargetUri,
+                                                                 GitHubCredentialScope,
                                                                  secrets,
                                                                  githubCredentialCallback,
                                                                  githubAuthcodeCallback,

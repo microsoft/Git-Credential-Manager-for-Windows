@@ -36,11 +36,13 @@ namespace GitHub.Authentication
     public class Authentication : BaseAuthentication, IAuthentication
     {
         /// <summary>
-        ///
+        /// Creates a new authentication
         /// </summary>
-        /// <param name="tokenScope"></param>
-        /// <param name="personalAccessTokenStore"></param>
+        /// <param name="targetUri">The uniform resource indicator of the resource which requires authentication.</param>
+        /// <param name="tokenScope">The desired scope of any personal access tokens acquired.</param>
+        /// <param name="personalAccessTokenStore">A secure secret store for any personal access tokens acquired.</param>
         public Authentication(
+            TargetUri targetUri,
             TokenScope tokenScope,
             ICredentialStore personalAccessTokenStore,
             AcquireCredentialsDelegate acquireCredentialsCallback,
@@ -59,7 +61,7 @@ namespace GitHub.Authentication
             TokenScope = tokenScope;
 
             PersonalAccessTokenStore = personalAccessTokenStore;
-            Authority = new Authority();
+            Authority = new Authority(targetUri);
 
             AcquireCredentialsCallback = acquireCredentialsCallback;
             AcquireAuthenticationCodeCallback = acquireAuthenticationCodeCallback;
@@ -122,7 +124,7 @@ namespace GitHub.Authentication
 
             if (targetUri.DnsSafeHost.EndsWith(GitHubBaseUrlHost, StringComparison.OrdinalIgnoreCase))
             {
-                authentication = new Authentication(tokenScope, personalAccessTokenStore, acquireCredentialsCallback, acquireAuthenticationCodeCallback, authenticationResultCallback);
+                authentication = new Authentication(targetUri, tokenScope, personalAccessTokenStore, acquireCredentialsCallback, acquireAuthenticationCodeCallback, authenticationResultCallback);
                 Git.Trace.WriteLine($"created GitHub authentication for '{targetUri}'.");
             }
             else
