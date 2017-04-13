@@ -106,7 +106,7 @@ namespace Microsoft.Alm.Git.Test
 
                 var values = new Dictionary<ConfigurationLevel, Dictionary<string, string>>();
 
-                foreach( var level in Configuration.Levels)
+                foreach (var level in Configuration.Levels)
                 {
                     values[level] = dict;
                 }

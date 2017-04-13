@@ -421,9 +421,7 @@ namespace Microsoft.Alm.Cli
                             goto case AuthorityType.GitHub;
                         }
                     }
-
-                    operationArguments.Authority = AuthorityType.Basic;
-                    goto case AuthorityType.Basic;
+                    goto default;
 
                 case AuthorityType.AzureDirectory:
                     Git.Trace.WriteLine($"authority for '{operationArguments.TargetUri}' is Azure Directory.");

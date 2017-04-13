@@ -1,7 +1,7 @@
 ﻿<ResourceDictionary
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-    xmlns:ui="clr-namespace:GitHub.UI" >
+    xmlns:ui="clr-namespace:GitHub.UI">
 
     <Style x:Key="OcticonImage" TargetType="{x:Type ui:OcticonImage}">
         <Setter Property="Focusable" Value="False" />
