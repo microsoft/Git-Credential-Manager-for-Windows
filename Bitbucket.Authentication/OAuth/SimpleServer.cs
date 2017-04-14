@@ -56,26 +56,21 @@ namespace Atlassian.Bitbucket.Authentication.OAuth
                 var context = await listener.GetContextAsync().RunWithCancellation(cancellationToken);
                 rawUrl = context.Request.RawUrl;
 
-                await Task.Delay(100); //Wait 100ms before writing the response out
-
                 //Serve back a simple auth message.
                 var html = GetSuccessString();
                 context.Response.ContentType = "text/html";
                 context.Response.OutputStream.WriteStringUtf8(html);
 
-                await Task.Delay(100); //Wait 100ms before writing the response out
+                await Task.Delay(100); //Wait 100ms without this the server closes before the complete response has been written
 
                 context.Response.Close();
             }
             catch (TimeoutException ex)
             {
-                // throw new ConnectivityException("Timeout awaiting incoming request.", ex);
                 throw new Exception("Timeout awaiting incoming request.", ex);
             }
             catch (Exception ex)
             {
-                //Some other error?
-                //throw new ConnectivityException("Failure awating incoming request.", ex);
                 throw new Exception("Failure awating incoming request.", ex);
             }
             finally
@@ -100,10 +95,8 @@ namespace Atlassian.Bitbucket.Authentication.OAuth
                 if (!UriParser.IsKnownScheme("pack"))
                     new System.Windows.Application();
 
-
-                var html = Application.GetResourceStream(
-            new Uri("pack://application:,,,/Bitbucket.Authentication;Component/Assets/auth.html", UriKind.Absolute));
-                if (html != null)
+                var html = Application.GetResourceStream(new Uri("pack://application:,,,/Bitbucket.Authentication;Component/Assets/auth.html", UriKind.Absolute));
+                if (html != null && html.Stream != null)
                 {
                     using (StreamReader reader = new StreamReader(html.Stream))
                     {
@@ -120,5 +113,4 @@ namespace Atlassian.Bitbucket.Authentication.OAuth
             return result;
         }
     }
-
 }
