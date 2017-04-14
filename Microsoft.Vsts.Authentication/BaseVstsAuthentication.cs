@@ -374,7 +374,7 @@ namespace Microsoft.Alm.Authentication
             string path = Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData);
             path = Path.Combine(path, CachePathDirectory);
 
-            // Create the directory if necissary
+            // Create the directory if necessary
             if (!Directory.Exists(path))
             {
                 Directory.CreateDirectory(path);
