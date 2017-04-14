@@ -66,8 +66,7 @@ namespace Atlassian.Bitbucket.Authentication
         }
 
         /// <inheritdoc/>
-        public async Task<AuthenticationResult> AcquireToken(TargetUri targetUri, string username,
-            string password, AuthenticationResultType resultType, TokenScope scope)
+        public async Task<AuthenticationResult> AcquireToken(TargetUri targetUri, string username, string password, AuthenticationResultType resultType, TokenScope scope)
         {
             if (resultType == AuthenticationResultType.TwoFactor)
             {
@@ -90,10 +89,7 @@ namespace Atlassian.Bitbucket.Authentication
                 Token token = null;
                 using (HttpClientHandler handler = targetUri.HttpClientHandler)
                 {
-                    using (HttpClient httpClient = new HttpClient(handler)
-                    {
-                        Timeout = TimeSpan.FromMilliseconds(RequestTimeout)
-                    })
+                    using (HttpClient httpClient = new HttpClient(handler) { Timeout = TimeSpan.FromMilliseconds(RequestTimeout) })
                     {
                         string basicAuthValue = String.Format("{0}:{1}", username, password);
                         byte[] authBytes = Encoding.UTF8.GetBytes(basicAuthValue);
@@ -115,8 +111,7 @@ namespace Atlassian.Bitbucket.Authentication
                                     token = new Token(password, TokenType.Personal);
 
                                     Trace.WriteLine("authentication success: new password token created.");
-                                    return new AuthenticationResult(AuthenticationResultType.Success,
-                                        token);
+                                    return new AuthenticationResult(AuthenticationResultType.Success, token);
                                 }
 
                                 case HttpStatusCode.Forbidden:

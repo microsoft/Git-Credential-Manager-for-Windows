@@ -18,12 +18,7 @@ namespace Atlassian.Bitbucket.Authentication
         /// <param name="resultType">Optional parameter. Used to pass in the results of a previous token request, e.g. first attempt used Basic Auth now try OAuth</param>
         /// <param name="scope">the access scopes to request</param>
         /// <returns></returns>
-        Task<AuthenticationResult> AcquireToken(
-            TargetUri targetUri,
-            string username,
-            string password,
-            AuthenticationResultType resultType,
-            TokenScope scope);
+        Task<AuthenticationResult> AcquireToken( TargetUri targetUri, string username, string password, AuthenticationResultType resultType, TokenScope scope);
 
         /// <summary>
         ///     Use an existing refresh token to request a new access token from the specified Authority
@@ -31,9 +26,7 @@ namespace Atlassian.Bitbucket.Authentication
         /// <param name="targetUri">defines the Authority to call</param>
         /// <param name="refreshToken">the existing refresh_token to use</param>
         /// <returns></returns>
-        Task<AuthenticationResult> RefreshToken(
-            TargetUri targetUri,
-            string refreshToken);
+        Task<AuthenticationResult> RefreshToken( TargetUri targetUri, string refreshToken);
 
         /// <summary>
         ///     Confirm that an existing set of credentials are still valid for accessing the Authority

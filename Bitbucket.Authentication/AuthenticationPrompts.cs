@@ -74,8 +74,7 @@ namespace Atlassian.Bitbucket.Authentication
         /// <param name="username">the username entered by the user</param>
         /// <param name="password"> the password entered by the user</param>
         /// <returns>returns true if the user provides credentials which are then successfully validated, false otherwise</returns>
-        public static bool CredentialModalPrompt(string title, TargetUri targetUri, out string username,
-            out string password)
+        public static bool CredentialModalPrompt(string title, TargetUri targetUri, out string username, out string password)
         {
             // if there is a user in the remote URL then prepopulate the UI with it.
             var credentialViewModel = new CredentialsViewModel(GetUserFromTargetUri(targetUri));
@@ -98,9 +97,7 @@ namespace Atlassian.Bitbucket.Authentication
         /// <param name="resultType"></param>
         /// <param name="username"></param>
         /// <returns>returns true if the user successfully completes the OAuth dance and the returned access_token is validated, false otherwise</returns>
-        public static bool AuthenticationOAuthModalPrompt(string title, TargetUri targetUri,
-            AuthenticationResultType resultType,
-            string username)
+        public static bool AuthenticationOAuthModalPrompt(string title, TargetUri targetUri, AuthenticationResultType resultType, string username)
         {
             var oauthViewModel = new OAuthViewModel(resultType == AuthenticationResultType.TwoFactor);
 
@@ -153,9 +150,7 @@ namespace Atlassian.Bitbucket.Authentication
                 UriParser.Register(new GenericUriParser(GenericUriParserOptions.GenericAuthority), "pack", -1);
             }
 
-            var appResourcesUri = new Uri(
-                "pack://application:,,,/Bitbucket.Authentication;component/AppResources.xaml",
-                UriKind.RelativeOrAbsolute);
+            var appResourcesUri = new Uri( "pack://application:,,,/Bitbucket.Authentication;component/AppResources.xaml", UriKind.RelativeOrAbsolute);
 
             // If we launch two dialogs in the same process (Credential followed by 2fa), calling new App()
             // throws an exception stating the Application class  can't be created twice. Creating an App
@@ -173,8 +168,7 @@ namespace Atlassian.Bitbucket.Authentication
             {
                 // Application.Current exists, but what if in the future, some other code created
                 // the singleton. Let's make sure our resources are still loaded.
-                var resourcesExist =
-                    Application.Current.Resources.MergedDictionaries.Any(r => r.Source == appResourcesUri);
+                var resourcesExist = Application.Current.Resources.MergedDictionaries.Any(r => r.Source == appResourcesUri);
                 if (!resourcesExist)
                 {
                     Application.Current.Resources.MergedDictionaries.Add(new ResourceDictionary

@@ -127,18 +127,15 @@ namespace Atlassian.Bitbucket.Authentication
         /// </summary>
         public static readonly TokenScope ProjectWrite = new TokenScope("project:write");
 
-        private TokenScope(string value)
-            : base(value)
+        private TokenScope(string value) : base(value)
         {
         }
 
-        private TokenScope(string[] values)
-            : base(values)
+        private TokenScope(string[] values) : base(values)
         {
         }
 
-        private TokenScope(ScopeSet set)
-            : base(set)
+        private TokenScope(ScopeSet set) : base(set)
         {
         }
 

@@ -47,20 +47,18 @@ namespace Atlassian.Bitbucket.Authentication.ViewModels
             LoginCommand = new ActionCommand(_ => Result = AuthenticationDialogResult.Ok);
             CancelCommand = new ActionCommand(_ => Result = AuthenticationDialogResult.Cancel);
 
-            LoginValidator = PropertyValidator.For(this, x => x.Login)
-                .Required(Resources.LoginRequired);
+            LoginValidator = PropertyValidator.For(this, x => x.Login).Required(Resources.LoginRequired);
 
-            PasswordValidator = PropertyValidator.For(this, x => x.Password)
-                .Required(Resources.PasswordRequired);
+            PasswordValidator = PropertyValidator.For(this, x => x.Password).Required(Resources.PasswordRequired);
 
             ModelValidator = new ModelValidator(LoginValidator, PasswordValidator);
             ModelValidator.PropertyChanged += (s, e) =>
-            {
-                if (e.PropertyName == nameof(ModelValidator.IsValid))
-                {
-                    IsValid = ModelValidator.IsValid;
-                }
-            };
+                                              {
+                                                  if (e.PropertyName == nameof(ModelValidator.IsValid))
+                                                  {
+                                                      IsValid = ModelValidator.IsValid;
+                                                  }
+                                              };
 
             // set last to allow validator to run
             if (!string.IsNullOrWhiteSpace(username))

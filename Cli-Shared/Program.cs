@@ -432,7 +432,7 @@ namespace Microsoft.Alm.Cli
                             operationArguments.Authority = AuthorityType.GitHub;
                             goto case AuthorityType.GitHub;
                         }
-						else if (authority is Bitbucket.Authentication)
+                        else if (authority is Bitbucket.Authentication)
                         {
                             operationArguments.Authority = AuthorityType.Bitbucket;
                             goto case AuthorityType.Bitbucket;
@@ -801,8 +801,7 @@ namespace Microsoft.Alm.Cli
             return false;
         }
 
-        private static bool BitbucketOAuthPrompt(string title, TargetUri targetUri, Bitbucket.AuthenticationResultType resultType,
-            string username)
+        private static bool BitbucketOAuthPrompt(string title, TargetUri targetUri, Bitbucket.AuthenticationResultType resultType, string username)
         {
             const int BufferReadSize = 16 * 1024;
 
@@ -1071,7 +1070,7 @@ namespace Microsoft.Alm.Cli
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Performance", "CA1811:AvoidUncalledPrivateCode")]
         private static void PrintVersion()
         {
-            Program.WriteLine($"{Title} version {Version}");
+            Program.WriteLine($"{Title} version {Version.ToString(3)}");
         }
 
         private static bool QueryCredentials(OperationArguments operationArguments)
@@ -1223,42 +1222,43 @@ namespace Microsoft.Alm.Cli
 
                 case AuthorityType.Bitbucket:
 					{
-                    var bbcAuth = authentication as Bitbucket.Authentication;
+                        var bbcAuth = authentication as Bitbucket.Authentication;
 
-                    Task.Run(async () =>
-                    {
-                        if (((operationArguments.Interactivity != Interactivity.Always)
-                             && ((credentials = bbcAuth.GetCredentials(operationArguments.TargetUri, operationArguments.CredUsername)) != null)
-                             && (!operationArguments.ValidateCredentials
-                                 || ((credentials = await bbcAuth.ValidateCredentials(operationArguments.TargetUri, operationArguments.CredUsername, credentials)) != null)))
-                            || ((operationArguments.Interactivity != Interactivity.Never)
-                                && ((credentials = await bbcAuth.InteractiveLogon(operationArguments.TargetUri, operationArguments.CredUsername)) != null)
-                                && (!operationArguments.ValidateCredentials
-                                    || ((credentials = await bbcAuth.ValidateCredentials(operationArguments.TargetUri, operationArguments.CredUsername, credentials)) != null))))
+                        Task.Run(async () =>
                         {
-                                Git.Trace.WriteLine($"credentials for '{operationArguments.TargetUri}' found.");
-                                // Bitbucket relies on a username + secret, so make sure there is a username to return
-                                if (operationArguments.CredUsername != null)
-                                {
-                                    var c2 = new Credential(operationArguments.CredUsername, credentials.Password);
-                                    operationArguments.SetCredentials(c2);
-                                }
-                                else
-                                {
-                                    operationArguments.SetCredentials(credentials);
-                                }
-                                credentialsFound = true;
-                                LogEvent($"Bitbucket credentials for '{operationArguments.TargetUri}' successfully retrieved.", EventLogEntryType.SuccessAudit);
+                            if (((operationArguments.Interactivity != Interactivity.Always)
+                                 && ((credentials = bbcAuth.GetCredentials(operationArguments.TargetUri, operationArguments.CredUsername)) != null)
+                                 && (!operationArguments.ValidateCredentials
+                                     || ((credentials = await bbcAuth.ValidateCredentials(operationArguments.TargetUri, operationArguments.CredUsername, credentials)) != null)))
+                                || ((operationArguments.Interactivity != Interactivity.Never)
+                                    && ((credentials = await bbcAuth.InteractiveLogon(operationArguments.TargetUri, operationArguments.CredUsername)) != null)
+                                    && (!operationArguments.ValidateCredentials
+                                        || ((credentials = await bbcAuth.ValidateCredentials(operationArguments.TargetUri, operationArguments.CredUsername, credentials)) != null))))
+                            {
+                                    Git.Trace.WriteLine($"credentials for '{operationArguments.TargetUri}' found.");
+                                    // Bitbucket relies on a username + secret, so make sure there is a username to return
+                                    if (operationArguments.CredUsername != null)
+                                    {
+                                        var c2 = new Credential(operationArguments.CredUsername, credentials.Password);
+                                        operationArguments.SetCredentials(c2);
+                                    }
+                                    else
+                                    {
+                                        operationArguments.SetCredentials(credentials);
+                                    }
+                                    credentialsFound = true;
+                                    LogEvent($"Bitbucket credentials for '{operationArguments.TargetUri}' successfully retrieved.", EventLogEntryType.SuccessAudit);
 
-                        }
-                        else
-                        {
-                            Program.WriteLine(BitbucketAuthFailureMessage);
-                            LogEvent($"Failed to retrieve Bitbucket credentials for '{operationArguments.TargetUri}'.", EventLogEntryType.FailureAudit);
-                        }
-                    }).Wait();
+                            }
+                            else
+                            {
+                                Program.WriteLine(BitbucketAuthFailureMessage);
+                                LogEvent($"Failed to retrieve Bitbucket credentials for '{operationArguments.TargetUri}'.", EventLogEntryType.FailureAudit);
+                            }
+                        }).Wait();
 					}
                     break;
+
                 case AuthorityType.Ntlm:
                     {
                         Git.Trace.WriteLine($"'{operationArguments.TargetUri}' is NTLM.");
