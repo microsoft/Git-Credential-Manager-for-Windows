@@ -4,7 +4,7 @@
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
-    <ProjectGuid>{5946D367-5254-464A-BC69-FAC502046564}</ProjectGuid>
+    <ProjectGuid>{19781214-5254-464A-BC69-FAC502046564}</ProjectGuid>
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
     <RootNamespace>Microsoft.Alm.Authentication.Test</RootNamespace>
