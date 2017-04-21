@@ -23,21 +23,22 @@
  * WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE."
 **/
 
-using Microsoft.Alm.Authentication;
 using System;
 using System.Net;
 using System.Net.Http;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
+using Microsoft.Alm.Authentication;
 using Trace = Microsoft.Alm.Git.Trace;
 
 namespace Atlassian.Bitbucket.Authentication
 {
     /// <summary>
-    ///     Implementation of <see cref="IAuthority"/> representing the Bitbucket APIs as the authority that can provide and validate credentials for Bitbucket.
+    /// Implementation of <see cref="IAuthority"/> representing the Bitbucket APIs as the authority
+    /// that can provide and validate credentials for Bitbucket.
     /// </summary>
-    internal class Authority : IAuthority
+    internal class Authority: IAuthority
     {
         /// <summary>
         /// The root URL for Bitbucket REST API calls.
@@ -47,10 +48,11 @@ namespace Atlassian.Bitbucket.Authentication
         /// <summary>
         /// The maximum wait time for a network request before timing out
         /// </summary>
-        public const int RequestTimeout = 15*1000; // 15 second limit
+        public const int RequestTimeout = 15 * 1000; // 15 second limit
 
         /// <summary>
-        ///     Default constructor of the <see cref="Authority"/>. Allows the default Bitbucket REST URL to be overridden.
+        /// Default constructor of the <see cref="Authority"/>. Allows the default Bitbucket REST URL
+        /// to be overridden.
         /// </summary>
         /// <param name="restRootUrl">overriding root URL for REST API call.</param>
         public Authority(string restRootUrl = null)
@@ -70,8 +72,8 @@ namespace Atlassian.Bitbucket.Authentication
         {
             if (resultType == AuthenticationResultType.TwoFactor)
             {
-                // a previous attempt to aquire a token failed in a way that suggests the user has Bitbucket 2FA turned on.
-                // so attempt to run the OAuth dance...
+                // a previous attempt to aquire a token failed in a way that suggests the user has
+                // Bitbucket 2FA turned on. so attempt to run the OAuth dance...
                 OAuth.OAuthAuthenticator oauth = new OAuth.OAuthAuthenticator();
                 try
                 {
@@ -85,7 +87,8 @@ namespace Atlassian.Bitbucket.Authentication
             }
             else
             {
-                // use the provided username and password and attempt a Basic Auth request to a known REST API resource.
+                // use the provided username and password and attempt a Basic Auth request to a known
+                // REST API resource.
                 Token token = null;
                 using (HttpClientHandler handler = targetUri.HttpClientHandler)
                 {
@@ -105,28 +108,30 @@ namespace Atlassian.Bitbucket.Authentication
                             {
                                 case HttpStatusCode.OK:
                                 case HttpStatusCode.Created:
-                                {
-                                    // Success with username/passord indicates 2FA is not on so the 'token' is actually the password
-                                    // if we had a successful call then the password is good.
-                                    token = new Token(password, TokenType.Personal);
+                                    {
+                                        // Success with username/passord indicates 2FA is not on so
+                                        // the 'token' is actually the password if we had a
+                                        // successful call then the password is good.
+                                        token = new Token(password, TokenType.Personal);
 
-                                    Trace.WriteLine("authentication success: new password token created.");
-                                    return new AuthenticationResult(AuthenticationResultType.Success, token);
-                                }
+                                        Trace.WriteLine("authentication success: new password token created.");
+                                        return new AuthenticationResult(AuthenticationResultType.Success, token);
+                                    }
 
                                 case HttpStatusCode.Forbidden:
-                                {
-                                    // A 403/Forbidden response indicates the username/password are recognized and good but 2FA is on
-                                    // in which case we want to indicate that with the TwoFactor result
-                                    Trace.WriteLine("two-factor app authentication code required");
-                                    return new AuthenticationResult(AuthenticationResultType.TwoFactor);
-                                }
+                                    {
+                                        // A 403/Forbidden response indicates the username/password
+                                        // are recognized and good but 2FA is on in which case we
+                                        // want to indicate that with the TwoFactor result
+                                        Trace.WriteLine("two-factor app authentication code required");
+                                        return new AuthenticationResult(AuthenticationResultType.TwoFactor);
+                                    }
                                 case HttpStatusCode.Unauthorized:
-                                {
-                                    // username or password are wrong.
-                                    Trace.WriteLine("authentication failed");
-                                    return new AuthenticationResult(AuthenticationResultType.Failure);
-                                }
+                                    {
+                                        // username or password are wrong.
+                                        Trace.WriteLine("authentication failed");
+                                        return new AuthenticationResult(AuthenticationResultType.Failure);
+                                    }
 
                                 default:
                                     // any unexpected result can be treated as a failure.
@@ -161,14 +166,14 @@ namespace Atlassian.Bitbucket.Authentication
             BaseSecureStore.ValidateTargetUri(targetUri);
             BaseSecureStore.ValidateCredential(credentials);
 
-            
             var user = string.IsNullOrWhiteSpace(username) ? credentials.Username : username;
             string authString = String.Format("{0}:{1}", user, credentials.Password);
             byte[] authBytes = Encoding.UTF8.GetBytes(authString);
             string authEncode = Convert.ToBase64String(authBytes);
 
-            // We don't know when the credentials arrive here if they are using OAuth or Basic Auth, so we try both.
-            
+            // We don't know when the credentials arrive here if they are using OAuth or Basic Auth,
+            // so we try both.
+
             // Try the simplest Basic Auth first
             if (await ValidateCredentials(targetUri, username, "Basic " + authEncode))
             {
@@ -185,12 +190,17 @@ namespace Atlassian.Bitbucket.Authentication
         }
 
         /// <summary>
-        ///     Validate the provided credentials, made up of the username and the contents if the authHeader, by making a request to a known Bitbucket
-        /// REST API resource. A 200/Success response indicates the credentials are valid. Any other response indicates they are not.
+        /// Validate the provided credentials, made up of the username and the contents if the
+        /// authHeader, by making a request to a known Bitbucket REST API resource. A 200/Success
+        /// response indicates the credentials are valid. Any other response indicates they are not.
         /// </summary>
-        /// <param name="targetUri">Contains the <see cref="HttpClientHandler"/> used when making the REST API request</param>
+        /// <param name="targetUri">
+        /// Contains the <see cref="HttpClientHandler"/> used when making the REST API request
+        /// </param>
         /// <param name="username">the username to validate</param>
-        /// <param name="authHeader">the HTTP auth header containing the password/access_token to validate</param>
+        /// <param name="authHeader">
+        /// the HTTP auth header containing the password/access_token to validate
+        /// </param>
         /// <returns>true if the credentials are valid, false otherwise.</returns>
         private async Task<bool> ValidateCredentials(TargetUri targetUri, string username, string authHeader)
         {
@@ -198,7 +208,7 @@ namespace Atlassian.Bitbucket.Authentication
 
             BaseSecureStore.ValidateTargetUri(targetUri);
 
-            Trace.WriteLine($"Auth Type = {authHeader.Substring(0,5)}");
+            Trace.WriteLine($"Auth Type = {authHeader.Substring(0, 5)}");
 
             // craft the request header for the Bitbucket v2 API w/ credentials
             using (HttpClientHandler handler = targetUri.HttpClientHandler)
@@ -216,25 +226,25 @@ namespace Atlassian.Bitbucket.Authentication
                     {
                         case HttpStatusCode.OK:
                         case HttpStatusCode.Created:
-                        {
-                            Trace.WriteLine("credential validation succeeded");
-                            return true;
-                        }
+                            {
+                                Trace.WriteLine("credential validation succeeded");
+                                return true;
+                            }
                         case HttpStatusCode.Forbidden:
-                        {
-                            Trace.WriteLine("credential validation failed: Forbidden");
-                            return false;
-                        }
+                            {
+                                Trace.WriteLine("credential validation failed: Forbidden");
+                                return false;
+                            }
                         case HttpStatusCode.Unauthorized:
-                        {
-                            Trace.WriteLine("credential validation failed: Unauthorized");
-                            return false;
-                        }
+                            {
+                                Trace.WriteLine("credential validation failed: Unauthorized");
+                                return false;
+                            }
                         default:
-                        {
-                            Trace.WriteLine("credential validation failed");
-                            return false;
-                        }
+                            {
+                                Trace.WriteLine("credential validation failed");
+                                return false;
+                            }
                     }
                 }
             }

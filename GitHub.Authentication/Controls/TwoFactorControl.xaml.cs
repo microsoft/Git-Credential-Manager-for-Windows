@@ -2,7 +2,7 @@
 
 namespace GitHub.UI
 {
-    public partial class TwoFactorControl : DialogUserControl
+    public partial class TwoFactorControl: DialogUserControl
     {
         public TwoFactorControl()
         {

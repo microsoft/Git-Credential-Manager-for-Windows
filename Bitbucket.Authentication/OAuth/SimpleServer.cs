@@ -23,18 +23,18 @@
  * WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE."
 **/
 
-using Atlassian.Shared.Authentication.Helpers;
 using System;
 using System.IO;
 using System.Net;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Windows;
+using Atlassian.Shared.Authentication.Helpers;
 
 namespace Atlassian.Bitbucket.Authentication.OAuth
 {
     /// <summary>
-    ///     Implements a simple HTTP server capable of handling Bitbucket OAuth callback requests.
+    /// Implements a simple HTTP server capable of handling Bitbucket OAuth callback requests.
     /// </summary>
     public class SimpleServer
     {
@@ -83,7 +83,8 @@ namespace Atlassian.Bitbucket.Authentication.OAuth
         }
 
         /// <summary>
-        ///     Returns a Success HTML page or a simple success message, if the HTML page cannot be loaded, to be served back to the user.
+        /// Returns a Success HTML page or a simple success message, if the HTML page cannot be
+        /// loaded, to be served back to the user.
         /// </summary>
         /// <returns></returns>
         private static string GetSuccessString()

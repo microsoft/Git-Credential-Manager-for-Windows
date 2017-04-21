@@ -105,8 +105,9 @@ namespace Microsoft.Alm.Cli
                 {
                     Git.Trace.WriteLine($"success parsing URL, targetUri = '{targetUri}'.");
 
-                    // config stored credentials come in the format of <username>[:<password>]@<url> with password being optional
-                    // scheme terminator is actually "://" so we need adjust to get the correct index
+                    // config stored credentials come in the format of <username>[:<password>]@<url>
+                    // with password being optional scheme terminator is actually "://" so we need
+                    // adjust to get the correct index
                     int schemeTerminator = targetUrl.IndexOf(':') + 2;
                     int credentialTerminator = targetUrl.IndexOf('@', schemeTerminator + 1);
 
@@ -117,8 +118,8 @@ namespace Microsoft.Alm.Cli
                         string username = null;
                         string password = null;
 
-                        // only check within the credential portion of the url, don't look past the '@' because the port token
-                        // is the same as the username / password seperator.
+                        // only check within the credential portion of the url, don't look past the
+                        // '@' because the port token is the same as the username / password seperator.
                         int credentialLength = credentialTerminator - schemeTerminator;
                         credentialLength = Math.Max(0, credentialLength);
 
@@ -151,7 +152,8 @@ namespace Microsoft.Alm.Cli
                         }
                     }
 
-                    // create a target Url with the credential portion stripped, because Git doesn't report hosts with credentials
+                    // create a target Url with the credential portion stripped, because Git doesn't
+                    // report hosts with credentials
                     targetUrl = String.Format(System.Globalization.CultureInfo.InvariantCulture, "{0}://{1}", targetUri.Scheme, targetUri.Host);
 
                     // retain the port if specified
@@ -261,7 +263,8 @@ namespace Microsoft.Alm.Cli
                 // print out more useful information when an `AggregateException` is encountered
                 exception = exception.Flatten();
 
-                // find the first inner exception which isn't an `AggregateException` with fallback to the canonical `.InnerException`
+                // find the first inner exception which isn't an `AggregateException` with fallback
+                // to the canonical `.InnerException`
                 Exception innerException = exception.InnerExceptions.FirstOrDefault(e => !(e is AggregateException))
                                         ?? exception.InnerException;
 

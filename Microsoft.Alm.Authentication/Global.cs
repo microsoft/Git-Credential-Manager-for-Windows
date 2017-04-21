@@ -61,6 +61,7 @@ namespace Microsoft.Alm.Authentication
                 lock (_syncpoint) _useragent = value;
             }
         }
+
         private static string _useragent = null;
 
         private static readonly object _syncpoint = new object();

@@ -4,7 +4,7 @@ using Microsoft.VisualStudio.TestTools.UnitTesting;
 namespace Microsoft.Alm.Authentication.Test
 {
     [TestClass]
-    public class VstsMsaTests : AuthenticationTests
+    public class VstsMsaTests: AuthenticationTests
     {
         public VstsMsaTests()
             : base()

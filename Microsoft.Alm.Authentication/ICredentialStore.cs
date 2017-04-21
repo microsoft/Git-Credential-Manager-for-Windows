@@ -29,10 +29,13 @@ namespace Microsoft.Alm.Authentication
     {
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1716:IdentifiersShouldNotMatchKeywords", MessageId = "Namespace")]
         string Namespace { get; }
+
         Secret.UriNameConversion UriNameConversion { get; }
 
         void DeleteCredentials(TargetUri targetUri);
+
         Credential ReadCredentials(TargetUri targetUri);
+
         void WriteCredentials(TargetUri targetUri, Credential credentials);
     }
 }

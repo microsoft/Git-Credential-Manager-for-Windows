@@ -32,7 +32,7 @@ namespace Atlassian.Bitbucket.Authentication.Controls
     /// <summary>
     /// Defines the UI used to prompt users for username/password credentials for Bitbucket accounts.
     /// </summary>
-    public partial class CredentialsControl : DialogUserControl
+    public partial class CredentialsControl: DialogUserControl
     {
         public CredentialsControl()
         {

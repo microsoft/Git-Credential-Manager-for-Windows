@@ -30,7 +30,7 @@ using Microsoft.IdentityModel.Clients.ActiveDirectory;
 
 namespace Microsoft.Alm.Authentication
 {
-    public sealed class VstsMsaAuthentication : BaseVstsAuthentication, IVstsMsaAuthentication
+    public sealed class VstsMsaAuthentication: BaseVstsAuthentication, IVstsMsaAuthentication
     {
         public const string DefaultAuthorityHost = AzureAuthority.AuthorityHostUrlBase + "/live.com";
         internal const string QueryParameters = "domain_hint=live.com&display=popup&site_id=501454&nux=1";
@@ -67,8 +67,9 @@ namespace Microsoft.Alm.Authentication
         /// <param name="requestCompactToken">
         /// True if a compact access token is required; false if a standard token is acceptable.
         /// </param>
-        /// <returns>A <see cref="Credential"/> for packing into a basic authentication header;
-        /// otherwise <see langword="null"/>.</returns>
+        /// <returns>
+        /// A <see cref="Credential"/> for packing into a basic authentication header; otherwise <see langword="null"/>.
+        /// </returns>
         public async Task<Credential> InteractiveLogon(TargetUri targetUri, bool requestCompactToken)
         {
             BaseSecureStore.ValidateTargetUri(targetUri);

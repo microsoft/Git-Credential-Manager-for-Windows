@@ -33,25 +33,23 @@ namespace Microsoft.Alm.Authentication
     /// <summary>
     /// Facilitates basic authentication using simple username and password schemes.
     /// </summary>
-    public sealed class BasicAuthentication : BaseAuthentication, IAuthentication
+    public sealed class BasicAuthentication: BaseAuthentication, IAuthentication
     {
         public static readonly Credential NtlmCredentials = WwwAuthenticateHelper.Credentials;
 
         /// <summary>
         /// Creates a new <see cref="BasicAuthentication"/> object with an underlying credential store.
         /// </summary>
-        /// <param name="credentialStore">
-        /// The <see cref="ICredentialStore"/> to delegate to.
-        /// </param>
+        /// <param name="credentialStore">The <see cref="ICredentialStore"/> to delegate to.</param>
         /// <param name="ntlmSupport">
         /// <para>The level of NTLM support to be provided by this instance.</para>
-        /// <para>If `<see cref="NtlmSupport.Always"/>` is used, the
-        /// `<paramref name="acquireCredentialsCallback"/>` and `<paramref name="acquireResultCallback"/>`
-        /// will be ignored by `<see cref="GetCredentials(TargetUri)"/>`.</para>
+        /// <para>
+        /// If ` <see cref="NtlmSupport.Always"/>` is used, the `
+        /// <paramref name="acquireCredentialsCallback"/>` and `
+        /// <paramref name="acquireResultCallback"/>` will be ignored by ` <see cref="GetCredentials(TargetUri)"/>`.
+        /// </para>
         /// </param>
-        /// <param name="acquireCredentialsCallback">
-        /// (optional) delegate for acquiring credentials.
-        /// </param>
+        /// <param name="acquireCredentialsCallback">(optional) delegate for acquiring credentials.</param>
         /// <param name="acquireResultCallback">
         /// (optional) delegate for notification of acquisition results.
         /// </param>
@@ -102,8 +100,10 @@ namespace Microsoft.Alm.Authentication
         /// <param name="targetUri">
         /// The uniform resource indicator used to uniquely identify the credentials.
         /// </param>
-        /// <returns>If successful a <see cref="Credential"/> object from the authentication object,
-        /// authority or storage; otherwise <see langword="null"/>.</returns>
+        /// <returns>
+        /// If successful a <see cref="Credential"/> object from the authentication object, authority
+        /// or storage; otherwise <see langword="null"/>.
+        /// </returns>
         public async Task<Credential> AcquireCredentials(TargetUri targetUri)
         {
             BaseSecureStore.ValidateTargetUri(targetUri);
@@ -165,8 +165,10 @@ namespace Microsoft.Alm.Authentication
         /// <param name="targetUri">
         /// The uniform resource indicator used to uniquely identify the credentials.
         /// </param>
-        /// <returns>If successful a <see cref="Credential"/> object from the authentication object,
-        /// authority or storage; otherwise <see langword="null"/>.</returns>
+        /// <returns>
+        /// If successful a <see cref="Credential"/> object from the authentication object, authority
+        /// or storage; otherwise <see langword="null"/>.
+        /// </returns>
         public override Credential GetCredentials(TargetUri targetUri)
         {
             BaseSecureStore.ValidateTargetUri(targetUri);

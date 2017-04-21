@@ -23,28 +23,31 @@
  * WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE."
 **/
 
-using Microsoft.Alm.Authentication;
 using System.Threading.Tasks;
+using Microsoft.Alm.Authentication;
 
 namespace Atlassian.Bitbucket.Authentication
 {
     /// <summary>
-    ///     Defines the main entry points for managing Bitbucket credentials.
+    /// Defines the main entry points for managing Bitbucket credentials.
     /// </summary>
     public interface IAuthentication
     {
         /// <summary>
-        /// <para>Ask the user for credentials to use to acquire tokens for use with the specified resource</para>
-        /// <para>Tokens acquired are stored in the secure secret store provided during
-        /// initialization.</para>
+        /// <para>
+        /// Ask the user for credentials to use to acquire tokens for use with the specified resource
+        /// </para>
+        /// <para>Tokens acquired are stored in the secure secret store provided during initialization.</para>
         /// </summary>
-        /// <param name="targetUri">The unique identifier for the resource for which access is to
-        /// be acquired.</param>
-        /// /// <returns>Acquired <see cref="Credential"/> if successful; otherwise <see langword="null"/>.</returns>
+        /// <param name="targetUri">
+        /// The unique identifier for the resource for which access is to be acquired.
+        /// </param>
+        /// ///
+        /// <returns>Acquired <see cref="Credential"/> if successful; otherwise <see langword="null"/>.</returns>
         Task<Credential> InteractiveLogon(TargetUri targetUri);
 
         /// <summary>
-        ///     Validate the supplied credentials
+        /// Validate the supplied credentials
         /// </summary>
         /// <param name="targetUri"></param>
         /// <param name="username"></param>

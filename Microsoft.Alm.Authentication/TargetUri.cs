@@ -164,7 +164,9 @@ namespace Microsoft.Alm.Authentication
         /// Determines whether the <see cref="QueryUri"/> is a base of the specified <paramref name="targetUri"/>.
         /// </summary>
         /// <param name="targetUri">The <see cref="TargetUri"/> to test.</param>
-        /// <returns><see langword="True"/> if is a base of <param name="targetUri"/>; otherwise, <see langword="false"/>.</returns>
+        /// <returns>
+        /// <see langword="True"/> if is a base of <param name="targetUri"/>; otherwise, <see langword="false"/>.
+        /// </returns>
         public bool IsBaseOf(TargetUri targetUri)
         {
             if (targetUri == null)
@@ -241,7 +243,8 @@ namespace Microsoft.Alm.Authentication
                     }
                     else
                     {
-                        // if no explicit proxy authentication, set to use default (Credentials will be set to DefaultCredentials automatically)
+                        // if no explicit proxy authentication, set to use default (Credentials will
+                        // be set to DefaultCredentials automatically)
                         proxy.UseDefaultCredentials = true;
                     }
 

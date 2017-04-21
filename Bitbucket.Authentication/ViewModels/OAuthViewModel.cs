@@ -23,20 +23,22 @@
  * WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE."
 **/
 
+using System.Windows.Input;
 using Atlassian.Shared.Authentication.Helpers;
 using Atlassian.Shared.Authentication.ViewModels;
-using System.Windows.Input;
 
 namespace Atlassian.Bitbucket.Authentication.ViewModels
 {
     /// <summary>
-    ///     The ViewModel behind the OAuth UI prompt
+    /// The ViewModel behind the OAuth UI prompt
     /// </summary>
-    public class OAuthViewModel : DialogViewModel
+    public class OAuthViewModel: DialogViewModel
     {
         private bool _resultType;
 
-        public OAuthViewModel() : this(false) { }
+        public OAuthViewModel() : this(false)
+        {
+        }
 
         public OAuthViewModel(bool resultType)
         {
@@ -50,17 +52,17 @@ namespace Atlassian.Bitbucket.Authentication.ViewModels
         }
 
         /// <summary>
-        ///     Provides a link to Bitbucket OAuth documentation
+        /// Provides a link to Bitbucket OAuth documentation
         /// </summary>
         public ICommand LearnMoreCommand { get; } = new HyperLinkCommand();
 
         /// <summary>
-        ///     Run the OAuth dance.
+        /// Run the OAuth dance.
         /// </summary>
         public ICommand OkCommand { get; }
 
         /// <summary>
-        ///     Cancel the authentication attempt.
+        /// Cancel the authentication attempt.
         /// </summary>
         public ICommand CancelCommand { get; }
     }

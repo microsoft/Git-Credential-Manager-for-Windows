@@ -1,4 +1,29 @@
-﻿using System;
+﻿/**** Git Credential Manager for Windows ****
+ *
+ * Copyright (c) GitHub Corporation
+ * All rights reserved.
+ *
+ * MIT License
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy
+ * of this software and associated documentation files (the """"Software""""), to deal
+ * in the Software without restriction, including without limitation the rights to
+ * use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of
+ * the Software, and to permit persons to whom the Software is furnished to do so,
+ * subject to the following conditions:
+ *
+ * The above copyright notice and this permission notice shall be included in all
+ * copies or substantial portions of the Software.
+ *
+ * THE SOFTWARE IS PROVIDED *AS IS*, WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS
+ * FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR
+ * COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN
+ * AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
+ * WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE."
+**/
+
+using System;
 using System.ComponentModel;
 using System.Diagnostics;
 using System.Linq.Expressions;
@@ -6,11 +31,11 @@ using System.Reflection;
 
 namespace GitHub.Authentication.ViewModels.Validation
 {
-    public abstract class PropertyValidator : ViewModel
+    public abstract class PropertyValidator: ViewModel
     {
         /// <summary>
-        /// Creates a validator for a property. This validator is the starting point to attach other validations
-        /// to the property. This method itself doesn't apply any validations.
+        /// Creates a validator for a property. This validator is the starting point to attach other
+        /// validations to the property. This method itself doesn't apply any validations.
         /// </summary>
         /// <typeparam name="TObject">Type of the object with the property to validate.</typeparam>
         /// <typeparam name="TProperty">The type of the property to validate.</typeparam>
@@ -24,6 +49,7 @@ namespace GitHub.Authentication.ViewModels.Validation
         }
 
         private PropertyValidationResult _validationResult = PropertyValidationResult.Unvalidated;
+
         /// <summary>
         /// The current validation result for this validator.
         /// </summary>
@@ -41,7 +67,7 @@ namespace GitHub.Authentication.ViewModels.Validation
         }
     }
 
-    public class PropertyValidator<TProperty> : PropertyValidator
+    public class PropertyValidator<TProperty>: PropertyValidator
     {
         // This should only be used by PropertyValidator<TObject, TProperty>
         protected PropertyValidator() { }
@@ -60,8 +86,7 @@ namespace GitHub.Authentication.ViewModels.Validation
 
                 if (previousValidator.ValidationResult.Status == ValidationStatus.Invalid)
                 {
-                    // If any validator is invalid, we don't need to run the rest
-                    // of the chained validators.
+                    // If any validator is invalid, we don't need to run the rest of the chained validators.
                     ValidationResult = previousValidator.ValidationResult;
                 }
                 else
@@ -73,6 +98,7 @@ namespace GitHub.Authentication.ViewModels.Validation
         }
 
         private TProperty _currentValue;
+
         protected TProperty CurrentPropertyValue
         {
             get { return _currentValue; }
@@ -90,12 +116,11 @@ namespace GitHub.Authentication.ViewModels.Validation
     }
 
     /// <summary>
-    /// This validator watches the target property for changes and then
-    /// propagates that change up the chain.
+    /// This validator watches the target property for changes and then propagates that change up the chain.
     /// </summary>
     /// <typeparam name="TObject"></typeparam>
     /// <typeparam name="TProperty"></typeparam>
-    public class PropertyValidator<TObject, TProperty> : PropertyValidator<TProperty> where TObject : INotifyPropertyChanged
+    public class PropertyValidator<TObject, TProperty>: PropertyValidator<TProperty> where TObject : INotifyPropertyChanged
     {
         internal PropertyValidator(TObject source, Expression<Func<TObject, TProperty>> propertyExpression)
         {
@@ -104,8 +129,7 @@ namespace GitHub.Authentication.ViewModels.Validation
 
             var compiledProperty = propertyExpression.Compile();
             var propertyInfo = GetPropertyInfo(propertyExpression);
-            // Start watching for changes to this property and propagate
-            // those changes to the chained validators.
+            // Start watching for changes to this property and propagate those changes to the chained validators.
             source.PropertyChanged += (s, e) =>
             {
                 if (e.PropertyName == propertyInfo.Name)

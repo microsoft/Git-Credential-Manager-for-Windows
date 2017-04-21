@@ -28,20 +28,21 @@ using System;
 namespace Microsoft.Alm.Authentication
 {
     /// <summary>
-    /// Interface to secure secrets storage which indexes values by target and utilizes the
-    /// operating system keychain / secrets vault.
+    /// Interface to secure secrets storage which indexes values by target and utilizes the operating
+    /// system keychain / secrets vault.
     /// </summary>
-    public sealed class SecretStore : BaseSecureStore, ICredentialStore, ITokenStore
+    public sealed class SecretStore: BaseSecureStore, ICredentialStore, ITokenStore
     {
         /// <summary>
-        /// Creates a new <see cref="SecretStore"/> backed by the operating system keychain /
-        /// secrets vault.
+        /// Creates a new <see cref="SecretStore"/> backed by the operating system keychain / secrets vault.
         /// </summary>
         /// <param name="namespace">The namespace of the secrets written and read by this store.</param>
-        /// <param name="credentialCache">Write-through, read-first cache. Default cache is used if a custom cache is
-        /// not provided.</param>
-        /// <param name="tokenCache">Write-through, read-first cache. Default cache is used if a custom cache is
-        /// not provided.</param>
+        /// <param name="credentialCache">
+        /// Write-through, read-first cache. Default cache is used if a custom cache is not provided.
+        /// </param>
+        /// <param name="tokenCache">
+        /// Write-through, read-first cache. Default cache is used if a custom cache is not provided.
+        /// </param>
         public SecretStore(string @namespace, ICredentialStore credentialCache, ITokenStore tokenCache, Secret.UriNameConversion getTargetName)
         {
             if (String.IsNullOrWhiteSpace(@namespace))

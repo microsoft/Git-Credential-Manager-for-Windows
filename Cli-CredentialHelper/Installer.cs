@@ -40,6 +40,7 @@ namespace Microsoft.Alm.Cli
         internal const string ParamForceKey = "--force";
         internal const string FailFace = "U_U";
         internal const string TadaFace = "^_^";
+
         //private static readonly Version NetFxMinVersion = new Version(4, 5, 1);
         private static readonly IReadOnlyList<string> FileList = new string[]
         {
@@ -53,6 +54,7 @@ namespace Microsoft.Alm.Cli
             "git-credential-manager.exe",
             "git-askpass.exe",
         };
+
         private static readonly IReadOnlyList<string> DocsList = new string[]
         {
             "git-askpass.html",
@@ -127,6 +129,7 @@ namespace Microsoft.Alm.Cli
                 return _cygwinPath;
             }
         }
+
         private static string _cygwinPath;
 
         internal static string UserBinPath
@@ -169,6 +172,7 @@ namespace Microsoft.Alm.Cli
                 return _userBinPath;
             }
         }
+
         private static string _userBinPath = null;
 
         public int ExitCode
@@ -176,6 +180,7 @@ namespace Microsoft.Alm.Cli
             get { return (int)Result; }
             set { Result = (ResultValue)value; }
         }
+
         public ResultValue Result { get; private set; }
 
         private bool _isPassive = false;
@@ -1026,7 +1031,7 @@ namespace Microsoft.Alm.Cli
             }
         }
 
-        public enum ResultValue : int
+        public enum ResultValue: int
         {
             UnknownFailure = -1,
             Success = 0,

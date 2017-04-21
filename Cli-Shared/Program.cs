@@ -74,6 +74,7 @@ namespace Microsoft.Alm.Cli
 
             Die(message);
         };
+
         internal static Action<string> _dieMessageCallback = (string message) =>
         {
             Git.Trace.WriteLine($"fatal: {message}");
@@ -83,6 +84,7 @@ namespace Microsoft.Alm.Cli
 
             Environment.Exit(-1);
         };
+
         internal static Action<int, string> _exitCallback = (int exitcode, string message) =>
         {
             if (!String.IsNullOrWhiteSpace(message))
@@ -146,7 +148,10 @@ namespace Microsoft.Alm.Cli
 
         /// <summary>
         /// <para>Gets <see langword="true"/> if stderr is a TTY device; otherwise <see langword="false"/>.</para>
-        /// <para>If TTY, then it is very likely stderr is attached to a console and ineractions with the user are possible.</para>
+        /// <para>
+        /// If TTY, then it is very likely stderr is attached to a console and ineractions with the
+        /// user are possible.
+        /// </para>
         /// </summary>
         public static bool StandardErrorIsTty
         {
@@ -155,7 +160,10 @@ namespace Microsoft.Alm.Cli
 
         /// <summary>
         /// <para>Gets <see langword="true"/> if stdin is a TTY device; otherwise <see langword="false"/>.</para>
-        /// <para>If TTY, then it is very likely stdin is attached to a console and ineractions with the user are possible.</para>
+        /// <para>
+        /// If TTY, then it is very likely stdin is attached to a console and ineractions with the
+        /// user are possible.
+        /// </para>
         /// </summary>
         public static bool StandardInputIsTty
         {
@@ -164,7 +172,10 @@ namespace Microsoft.Alm.Cli
 
         /// <summary>
         /// <para>Gets <see langword="true"/> if stdout is a TTY device; otherwise <see langword="false"/>.</para>
-        /// <para>If TTY, then it is very likely stdout is attached to a console and ineractions with the user are possible.</para>
+        /// <para>
+        /// If TTY, then it is very likely stdout is attached to a console and ineractions with the
+        /// user are possible.
+        /// </para>
         /// </summary>
         public static bool StandardOutputIsTty
         {
@@ -236,8 +247,7 @@ namespace Microsoft.Alm.Cli
 
         private static Credential BasicCredentialPrompt(TargetUri targetUri, string titleMessage)
         {
-            // ReadConsole 32768 fail, 32767 ok
-            // @linquize [https://github.com/Microsoft/Git-Credential-Manager-for-Windows/commit/a62b9a19f430d038dcd85a610d97e5f763980f85]
+            // ReadConsole 32768 fail, 32767 ok @linquize [https://github.com/Microsoft/Git-Credential-Manager-for-Windows/commit/a62b9a19f430d038dcd85a610d97e5f763980f85]
             const int BufferReadSize = 16 * 1024;
 
             Debug.Assert(targetUri != null);
@@ -410,7 +420,7 @@ namespace Microsoft.Alm.Cli
                                                                        githubCredentialCallback,
                                                                        githubAuthcodeCallback,
                                                                        null)
-							?? Bitbucket.Authentication.GetAuthentication(operationArguments.TargetUri, secrets,
+                            ?? Bitbucket.Authentication.GetAuthentication(operationArguments.TargetUri, secrets,
                                                                           bitbucketCredentialCallback,
                                                                           bitbucketOauthCallback);
 
@@ -713,7 +723,8 @@ namespace Microsoft.Alm.Cli
         [Conditional("DEBUG")]
         private static void EnableDebugTrace()
         {
-            // use the stderr stream for the trace as stdout is used in the cross-process communications protocol
+            // use the stderr stream for the trace as stdout is used in the cross-process
+            // communications protocol
             Git.Trace.AddListener(Console.Error);
         }
 
@@ -856,8 +867,7 @@ namespace Microsoft.Alm.Cli
 
         private static bool GitHubAuthCodePrompt(TargetUri targetUri, Github.GitHubAuthenticationResultType resultType, string username, out string authenticationCode)
         {
-            // ReadConsole 32768 fail, 32767 ok
-            // @linquize [https://github.com/Microsoft/Git-Credential-Manager-for-Windows/commit/a62b9a19f430d038dcd85a610d97e5f763980f85]
+            // ReadConsole 32768 fail, 32767 ok @linquize [https://github.com/Microsoft/Git-Credential-Manager-for-Windows/commit/a62b9a19f430d038dcd85a610d97e5f763980f85]
             const int BufferReadSize = 16 * 1024;
 
             Debug.Assert(targetUri != null);
@@ -1014,8 +1024,8 @@ namespace Microsoft.Alm.Cli
             {
                 int error;
 
-                // execute with `null` to determine buffer size
-                // always returns false when determining size, only fail if `inBufferSize` looks bad
+                // execute with `null` to determine buffer size always returns false when determining
+                // size, only fail if `inBufferSize` looks bad
                 NativeMethods.CredPackAuthenticationBuffer(flags: authPackage,
                                                            username: username,
                                                            password: String.Empty,
@@ -1107,9 +1117,9 @@ namespace Microsoft.Alm.Cli
                                     && (credentials = await basicAuth.AcquireCredentials(operationArguments.TargetUri)) != null))
                             {
                                 Git.Trace.WriteLine("credentials found.");
-                                // set the credentials object
-                                // no need to save the credentials explicitly, as Git will call back
-                                // with a store command if the credentials are valid.
+                                // set the credentials object no need to save the credentials
+                                // explicitly, as Git will call back with a store command if the
+                                // credentials are valid.
                                 operationArguments.SetCredentials(credentials);
                                 credentialsFound = true;
                             }
@@ -1129,8 +1139,8 @@ namespace Microsoft.Alm.Cli
 
                         Task.Run(async () =>
                         {
-                            // attempt to get cached creds -> non-interactive logon -> interactive logon
-                            // note that AAD "credentials" are always scoped access tokens
+                            // attempt to get cached creds -> non-interactive logon -> interactive
+                            // logon note that AAD "credentials" are always scoped access tokens
                             if (((operationArguments.Interactivity != Interactivity.Always
                                     && ((credentials = aadAuth.GetCredentials(operationArguments.TargetUri)) != null)
                                     && (!operationArguments.ValidateCredentials
@@ -1165,8 +1175,8 @@ namespace Microsoft.Alm.Cli
 
                         Task.Run(async () =>
                         {
-                            // attempt to get cached creds -> interactive logon
-                            // note that MSA "credentials" are always scoped access tokens
+                            // attempt to get cached creds -> interactive logon note that MSA
+                            // "credentials" are always scoped access tokens
                             if (((operationArguments.Interactivity != Interactivity.Always
                                     && ((credentials = msaAuth.GetCredentials(operationArguments.TargetUri)) != null)
                                     && (!operationArguments.ValidateCredentials
@@ -1222,7 +1232,7 @@ namespace Microsoft.Alm.Cli
                     break;
 
                 case AuthorityType.Bitbucket:
-					{
+                    {
                         var bbcAuth = authentication as Bitbucket.Authentication;
 
                         Task.Run(async () =>
@@ -1236,20 +1246,20 @@ namespace Microsoft.Alm.Cli
                                     && (!operationArguments.ValidateCredentials
                                         || ((credentials = await bbcAuth.ValidateCredentials(operationArguments.TargetUri, operationArguments.CredUsername, credentials)) != null))))
                             {
-                                    Git.Trace.WriteLine($"credentials for '{operationArguments.TargetUri}' found.");
-                                    // Bitbucket relies on a username + secret, so make sure there is a username to return
-                                    if (operationArguments.CredUsername != null)
-                                    {
-                                        var c2 = new Credential(operationArguments.CredUsername, credentials.Password);
-                                        operationArguments.SetCredentials(c2);
-                                    }
-                                    else
-                                    {
-                                        operationArguments.SetCredentials(credentials);
-                                    }
-                                    credentialsFound = true;
-                                    LogEvent($"Bitbucket credentials for '{operationArguments.TargetUri}' successfully retrieved.", EventLogEntryType.SuccessAudit);
-
+                                Git.Trace.WriteLine($"credentials for '{operationArguments.TargetUri}' found.");
+                                // Bitbucket relies on a username + secret, so make sure there is a
+                                // username to return
+                                if (operationArguments.CredUsername != null)
+                                {
+                                    var c2 = new Credential(operationArguments.CredUsername, credentials.Password);
+                                    operationArguments.SetCredentials(c2);
+                                }
+                                else
+                                {
+                                    operationArguments.SetCredentials(credentials);
+                                }
+                                credentialsFound = true;
+                                LogEvent($"Bitbucket credentials for '{operationArguments.TargetUri}' successfully retrieved.", EventLogEntryType.SuccessAudit);
                             }
                             else
                             {
@@ -1257,7 +1267,7 @@ namespace Microsoft.Alm.Cli
                                 LogEvent($"Failed to retrieve Bitbucket credentials for '{operationArguments.TargetUri}'.", EventLogEntryType.FailureAudit);
                             }
                         }).Wait();
-					}
+                    }
                     break;
 
                 case AuthorityType.Ntlm:

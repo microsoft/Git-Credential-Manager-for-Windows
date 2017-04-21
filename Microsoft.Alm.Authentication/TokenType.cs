@@ -28,42 +28,50 @@ namespace Microsoft.Alm.Authentication
     public enum TokenType
     {
         Unknown = 0,
+
         /// <summary>
         /// Azure Directory Access Token
         /// </summary>
         [System.ComponentModel.Description("Azure Directory Access Token")]
         Access = 1,
+
         /// <summary>
         /// Azure Directory Refresh Token
         /// </summary>
         [System.Obsolete("Azure Directory no longer directly supports Refresh tokens.", true)]
         [System.ComponentModel.Description("Azure Directory Refresh Token")]
         Refresh = 2,
+
         /// <summary>
         /// Personal Access Token, can be compact or not.
         /// </summary>
         [System.ComponentModel.Description("Personal Access Token")]
         Personal = 3,
+
         /// <summary>
         /// Federated Authentication (aka FedAuth) Token
         /// </summary>
         [System.ComponentModel.Description("Federated Authentication Token")]
         Federated = 4,
+
         /// <summary>
         /// Used only for testing
         /// </summary>
         [System.ComponentModel.Description("Test-only Token")]
         Test = 5,
+
         /// <summary>
         /// Bitbucket Password Tokens
         /// </summary>
         [System.ComponentModel.Description("Bitbucket Password Token")]
         BitbucketPassword = 6,
+
         /// <summary>
         /// Bitbucket Access Tokens
         /// </summary>
         [System.ComponentModel.Description("Bitbucket Access Token")]
         BitbucketAccess = 7,
+
         /// <summary>
         /// Used to auto-refresh Bitbucket Access Tokens
         /// </summary>

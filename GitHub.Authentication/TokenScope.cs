@@ -1,6 +1,7 @@
 ﻿/**** Git Credential Manager for Windows ****
  *
  * Copyright (c) Microsoft Corporation
+ * Copyright (c) GitHub Corporation
  * All rights reserved.
  *
  * MIT License
@@ -30,85 +31,105 @@ using ScopeSet = System.Collections.Generic.HashSet<string>;
 
 namespace GitHub.Authentication
 {
-    public sealed class TokenScope : Microsoft.Alm.Authentication.TokenScope, IEquatable<TokenScope>
+    public sealed class TokenScope: Microsoft.Alm.Authentication.TokenScope, IEquatable<TokenScope>
     {
         public static readonly TokenScope None = new TokenScope(String.Empty);
+
         /// <summary>
         /// Create gists
         /// </summary>
         public static readonly TokenScope Gist = new TokenScope("gist");
+
         /// <summary>
         /// Access notifications
         /// </summary>
         public static readonly TokenScope Notifications = new TokenScope("notifications");
+
         /// <summary>
         /// Full control of orgs and teams
         /// </summary>
         public static readonly TokenScope OrgAdmin = new TokenScope("admin:org");
+
         /// <summary>
         /// Read org and team membership
         /// </summary>
         public static readonly TokenScope OrgRead = new TokenScope("read:org");
+
         /// <summary>
         /// Read and write org and team membership
         /// </summary>
         public static readonly TokenScope OrgWrite = new TokenScope("write:org");
+
         /// <summary>
         /// Full control of organization hooks
         /// </summary>
         public static readonly TokenScope OrgHookAdmin = new TokenScope("admin:org_hook");
+
         /// <summary>
         /// Full control of user's public keys
         /// </summary>
         public static readonly TokenScope PublicKeyAdmin = new TokenScope("admin:public_key");
+
         /// <summary>
         /// Read user's public keys
         /// </summary>
         public static readonly TokenScope PublicKeyRead = new TokenScope("read:public_key");
+
         /// <summary>
         /// Write user's public keys
         /// </summary>
         public static readonly TokenScope PublicKeyWrite = new TokenScope("write:public_key");
+
         /// <summary>
         /// Access private repositories
         /// </summary>
         public static readonly TokenScope Repo = new TokenScope("repo");
+
         /// <summary>
         /// Delete repositories
         /// </summary>
         public static readonly TokenScope RepoDelete = new TokenScope("delete_repo");
+
         /// <summary>
         /// Access deployment status
         /// </summary>
         public static readonly TokenScope RepoDeployment = new TokenScope("repo_deployment");
+
         /// <summary>
         /// Access public repositories
         /// </summary>
         public static readonly TokenScope RepoPublic = new TokenScope("public_repo");
+
         /// <summary>
         /// Access commit status
         /// </summary>
         public static readonly TokenScope RepoStatus = new TokenScope("repo:status");
+
         /// <summary>
         /// Full control of repository hooks
         /// </summary>
         public static readonly TokenScope RepoHookAdmin = new TokenScope("admin:repo_hook");
+
         /// <summary>
         /// Read repository hooks
         /// </summary>
         public static readonly TokenScope RepoHookRead = new TokenScope("read:repo_hook");
+
         /// <summary>
         /// Write repository hooks
         /// </summary>
         public static readonly TokenScope RepoHookWrite = new TokenScope("write:repo_hook");
+
         /// <summary>
         /// Update all user information
         /// </summary>
         public static readonly TokenScope User = new TokenScope("user");
+
         /// <summary>
         /// Access user email address (read-only)
         /// </summary>
         public static readonly TokenScope UserEmail = new TokenScope("user:email");
+
         /// <summary>
         /// Follow and unfollow users
         /// </summary>

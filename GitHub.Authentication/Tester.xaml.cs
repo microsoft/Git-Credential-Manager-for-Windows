@@ -5,7 +5,7 @@ namespace GitHub.Authentication
     /// <summary>
     /// Interaction logic for Tester.xaml
     /// </summary>
-    public partial class Tester : Window
+    public partial class Tester: Window
     {
         public Tester()
         {

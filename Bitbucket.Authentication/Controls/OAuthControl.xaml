@@ -1,4 +1,30 @@
-﻿<coreControls:DialogUserControl x:Class="Atlassian.Bitbucket.Authentication.Controls.OAuthControl"
+﻿<!--
+/**** Git Credential Manager for Windows ****
+ *
+ * Copyright (c) Atlassian
+ * All rights reserved.
+ *
+ * MIT License
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy
+ * of this software and associated documentation files (the """"Software""""), to deal
+ * in the Software without restriction, including without limitation the rights to
+ * use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of
+ * the Software, and to permit persons to whom the Software is furnished to do so,
+ * subject to the following conditions:
+ *
+ * The above copyright notice and this permission notice shall be included in all
+ * copies or substantial portions of the Software.
+ *
+ * THE SOFTWARE IS PROVIDED *AS IS*, WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS
+ * FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR
+ * COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN
+ * AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
+ * WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE."
+**/
+-->
+<coreControls:DialogUserControl x:Class="Atlassian.Bitbucket.Authentication.Controls.OAuthControl"
                                 xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
                                 xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
                                 xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
@@ -16,10 +42,10 @@
         Style="{DynamicResource DialogContainerStackPanel}"
         helpers:AccessKeysManagerScoping.IsEnabled="True">
         <StackPanel DockPanel.Dock="Top">
-            <Image Style="{StaticResource AtlassianLogo}"/>
+            <Image Style="{StaticResource AtlassianLogo}" />
             <controls:HorizontalShadowDivider />
-            <Image Style="{StaticResource BitbucketLogo}"/>
-            <Image Style="{StaticResource SourceTreeLogo}"/>
+            <Image Style="{StaticResource BitbucketLogo}" />
+            <Image Style="{StaticResource SourceTreeLogo}" />
         </StackPanel>
         <WrapPanel Orientation="Vertical" HorizontalAlignment="Center" Margin="0,0,0,12">
             <TextBlock
@@ -39,14 +65,14 @@
             TextWrapping="Wrap"
             Style="{StaticResource BitbucketDescriptionTextBlock}">
             <Run x:Name="description"
-                 Text="{Binding Description, Mode=OneWay}"/>
+                 Text="{Binding Description, Mode=OneWay}" />
             <Hyperlink
                 Command="{Binding LearnMoreCommand}"
                 CommandParameter="{Binding
                     RelativeSource={RelativeSource Self},
                     Path=ToolTip}"
                 ToolTip="https://confluence.atlassian.com/bitbucket/two-step-verification-777023203.html">
-                <TextBlock Text="{x:Static prop:Resources.LearnMoreLink}"/>
+                <TextBlock Text="{x:Static prop:Resources.LearnMoreLink}" />
             </Hyperlink>
         </TextBlock>
         <!--<ui:TwoFactorInput
@@ -63,15 +89,13 @@
                 Command="{Binding OkCommand}"
                 IsEnabled="{Binding IsValid, Mode=OneWay}"
                 Content="{x:Static prop:Resources.VerifyText}"
-                Style="{StaticResource PrimaryButton}"
-                />
+                Style="{StaticResource PrimaryButton}" />
             <Button
                 TabIndex="3"
                 IsCancel="True"
                 Command="{Binding CancelCommand}"
                 Content="{x:Static prop:Resources.CancelText}"
-                Style="{StaticResource SecondaryButton}"
-                />
+                Style="{StaticResource SecondaryButton}" />
         </StackPanel>
     </StackPanel>
 </coreControls:DialogUserControl>

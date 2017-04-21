@@ -23,11 +23,11 @@
  * WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE."
 **/
 
-using Microsoft.Alm.Authentication;
 using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Text;
+using Microsoft.Alm.Authentication;
 
 namespace Microsoft.Alm.Cli
 {
@@ -64,7 +64,8 @@ namespace Microsoft.Alm.Cli
         }
 
         /// <summary>
-        /// Gets the process's Git configuration based on current working directory, user's folder, and Git's system directory.
+        /// Gets the process's Git configuration based on current working directory, user's folder,
+        /// and Git's system directory.
         /// </summary>
         public virtual Git.Configuration GitConfiguration
         {
@@ -173,7 +174,7 @@ namespace Microsoft.Alm.Cli
         internal virtual void CreateTargetUri()
             => throw new NotImplementedException();
 
-        internal sealed class Impl : OperationArguments
+        internal sealed class Impl: OperationArguments
         {
             private static readonly char[] SeperatorCharacters = { '/', '\\' };
 
@@ -198,10 +199,10 @@ namespace Microsoft.Alm.Cli
                     {
                         read += r;
 
-                        // if we've filled the buffer, make it larger
-                        // this could hit an out of memory condition, but that'd require
-                        // the called to be attempting to do so, since that's not a secyity
-                        // threat we can safely ignore that and allow NetFx to handle it
+                        // if we've filled the buffer, make it larger this could hit an out of memory
+                        // condition, but that'd require the called to be attempting to do so, since
+                        // that's not a secyity threat we can safely ignore that and allow NetFx to
+                        // handle it
                         if (read == buffer.Length)
                         {
                             Array.Resize(ref buffer, buffer.Length * 2);
@@ -212,8 +213,8 @@ namespace Microsoft.Alm.Cli
                             Program.Die("Invalid input, please see 'https://www.kernel.org/pub/software/scm/git/docs/git-credential.html'.");
                         }
 
-                        // the input ends with LFLF, check for that and break the read loop
-                        // unless input is coming from CLRF system, in which case it'll be CLRFCLRF
+                        // the input ends with LFLF, check for that and break the read loop unless
+                        // input is coming from CLRF system, in which case it'll be CLRFCLRF
                         if ((buffer[read - 2] == '\n'
                                 && buffer[read - 1] == '\n')
                             || (buffer[read - 4] == '\r'
@@ -223,8 +224,8 @@ namespace Microsoft.Alm.Cli
                             break;
                     }
 
-                    // Git uses UTF-8 for string, don't let the OS decide how to decode it
-                    // instead we'll actively decode the UTF-8 block ourselves
+                    // Git uses UTF-8 for string, don't let the OS decide how to decode it instead
+                    // we'll actively decode the UTF-8 block ourselves
                     string input = Encoding.UTF8.GetString(buffer, 0, read);
 
                     // the `StringReader` is just useful
@@ -266,6 +267,7 @@ namespace Microsoft.Alm.Cli
                     this.CreateTargetUri();
                 }
             }
+
             internal Impl(Uri targetUri)
                 : this()
             {
@@ -278,6 +280,7 @@ namespace Microsoft.Alm.Cli
 
                 this.CreateTargetUri();
             }
+
             private Impl()
             {
                 this.Authority = AuthorityType.Auto;
@@ -545,9 +548,8 @@ namespace Microsoft.Alm.Cli
                 if (!writableStream.CanWrite)
                     throw new ArgumentException("CanWrite property returned false.", nameof(writableStream));
 
-                // Git reads/writes UTF-8, we'll explicitly encode to Utf-8 to
-                // avoid NetFx or the operating system making the wrong encoding
-                // decisions.
+                // Git reads/writes UTF-8, we'll explicitly encode to Utf-8 to avoid NetFx or the
+                // operating system making the wrong encoding decisions.
                 string output = ToString();
                 byte[] bytes = Encoding.UTF8.GetBytes(output);
 

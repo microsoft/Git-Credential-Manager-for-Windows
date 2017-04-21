@@ -38,8 +38,9 @@ namespace Microsoft.Alm.Git
         /// Finds the "best" path to an app of a given name.
         /// </summary>
         /// <param name="name">The name of the application, without extension, to find.</param>
-        /// <param name="path">Path to the first match file which the operating system considers
-        /// executable.</param>
+        /// <param name="path">
+        /// Path to the first match file which the operating system considers executable.
+        /// </param>
         /// <returns><see langword="True"/> if succeeds; <see langword="false"/> otherwise.</returns>
         static public bool FindApp(string name, out string path)
         {
@@ -239,8 +240,8 @@ namespace Microsoft.Alm.Git
         /// <returns>The path to the user's home directory.</returns>
         public static string Home()
         {
-            // Git relies on the %HOME% environment variable to represent the users home directory
-            // it can contain embedded environment variables, so we need to expand it
+            // Git relies on the %HOME% environment variable to represent the users home directory it
+            // can contain embedded environment variables, so we need to expand it
             string path = Environment.GetEnvironmentVariable("HOME", EnvironmentVariableTarget.Process);
 
             if (path != null)
@@ -252,8 +253,8 @@ namespace Microsoft.Alm.Git
                     return path;
             }
 
-            // Absent the %HOME% variable, Git will construct it via %HOMEDRIVE%%HOMEPATH%, so we'll attempt to
-            // that here and if it is valid, return it as %HOME%.
+            // Absent the %HOME% variable, Git will construct it via %HOMEDRIVE%%HOMEPATH%, so we'll
+            // attempt to that here and if it is valid, return it as %HOME%.
             string homeDrive = Environment.GetEnvironmentVariable("HOMEDRIVE", EnvironmentVariableTarget.Process);
             string homePath = Environment.GetEnvironmentVariable("HOMEPATH", EnvironmentVariableTarget.Process);
 
@@ -265,7 +266,8 @@ namespace Microsoft.Alm.Git
                     return path;
             }
 
-            // When all else fails, Git falls back to %USERPROFILE% as the user's home directory, so should we.
+            // When all else fails, Git falls back to %USERPROFILE% as the user's home directory, so
+            // should we.
             return Environment.GetFolderPath(Environment.SpecialFolder.UserProfile);
         }
 
@@ -297,7 +299,9 @@ namespace Microsoft.Alm.Git
         /// <summary>
         /// Gets the path to the Git local configuration file based on the <paramref name="startingDirectory"/>.
         /// </summary>
-        /// <param name="startingDirectory">A directory of the repository where the configuration file is contained.</param>
+        /// <param name="startingDirectory">
+        /// A directory of the repository where the configuration file is contained.
+        /// </param>
         /// <param name="path">Path to the Git local configuration</param>
         /// <returns><see langword="True"/> if succeeds; <see langword="false"/> otherwise.</returns>
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Performance", "CA1800:DoNotCastUnnecessarily")]
@@ -403,6 +407,7 @@ namespace Microsoft.Alm.Git
             path = null;
             return false;
         }
+
         /// <summary>
         /// Gets the path to the Git local configuration file based on the current working directory.
         /// </summary>
@@ -413,11 +418,9 @@ namespace Microsoft.Alm.Git
             return GitLocalConfig(Environment.CurrentDirectory, out path);
         }
 
-        /// <summary>
-        /// Gets the path to the Git portable system configuration file.
-        /// </summary>
-        /// <param name="path">Path to the Git portable system configuration</param>
-        /// <returns><see langword="True"/> if succeeds; <se
+        /// <summary> Gets the path to the Git portable system configuration file. </summary> <param
+        /// name="path">Path to the Git portable system configuration</param> <returns><see
+        /// langword="True"/> if succeeds; <se
         public static bool GitPortableConfig(out string path)
         {
             const string PortableConfigFolder = "Git";

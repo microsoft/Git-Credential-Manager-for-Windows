@@ -121,8 +121,8 @@ namespace Microsoft.Alm.Git
                 if (CommentRegex.Value.IsMatch(line))
                     continue;
 
-                // sections begin with values like [section] or [section "section name"]. All subsequent lines,
-                // until a new section is encountered, are children of the section
+                // sections begin with values like [section] or [section "section name"]. All
+                // subsequent lines, until a new section is encountered, are children of the section
                 if ((match = SectionRegex.Value.Match(line)).Success)
                 {
                     if (match.Groups.Count >= 2 && !String.IsNullOrWhiteSpace(match.Groups[1].Value))
@@ -179,7 +179,8 @@ namespace Microsoft.Alm.Git
                         {
                             try
                             {
-                                // This is an include directive, import the configuration values from the included file
+                                // This is an include directive, import the configuration values from
+                                // the included file
                                 string includePath = (val.StartsWith("~/", StringComparison.OrdinalIgnoreCase))
                                     ? Where.Home() + val.Substring(1, val.Length - 1)
                                     : val;
@@ -214,7 +215,7 @@ namespace Microsoft.Alm.Git
             }
         }
 
-        internal sealed class Impl : Configuration
+        internal sealed class Impl: Configuration
         {
             internal Impl()
             { }
@@ -322,7 +323,8 @@ namespace Microsoft.Alm.Git
 
                 if (targetUri != null)
                 {
-                    // return match seeking from most specific (<prefix>.<scheme>://<host>.<key>) to least specific (credential.<key>)
+                    // return match seeking from most specific (<prefix>.<scheme>://<host>.<key>) to
+                    // least specific (credential.<key>)
                     if (TryGetEntry(prefix, String.Format(System.Globalization.CultureInfo.InvariantCulture, "{0}://{1}", targetUri.Scheme, targetUri.Host), key, out entry)
                         || TryGetEntry(prefix, targetUri.Host, key, out entry))
                         return true;
@@ -332,8 +334,8 @@ namespace Microsoft.Alm.Git
                         string[] fragments = targetUri.Host.Split(HostSplitCharacter);
                         string host = null;
 
-                        // look for host matches stripping a single sub-domain at a time off
-                        // don't match against a top-level domain (aka ".com")
+                        // look for host matches stripping a single sub-domain at a time off don't
+                        // match against a top-level domain (aka ".com")
                         for (int i = 1; i < fragments.Length - 1; i++)
                         {
                             host = String.Join(".", fragments, i, fragments.Length - i);
@@ -420,10 +422,11 @@ namespace Microsoft.Alm.Git
             }
         }
 
-        public struct Entry : IEquatable<Entry>
+        public struct Entry: IEquatable<Entry>
         {
             [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Security", "CA2104:DoNotDeclareReadOnlyMutableReferenceTypes")]
             public static readonly StringComparer KeyComparer = StringComparer.OrdinalIgnoreCase;
+
             [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Security", "CA2104:DoNotDeclareReadOnlyMutableReferenceTypes")]
             public static readonly StringComparer ValueComparer = StringComparer.OrdinalIgnoreCase;
 

@@ -41,8 +41,10 @@ namespace Microsoft.Alm.Authentication
         /// <param name="targetUri">
         /// The uniform resource indicator used to uniquely identify the credentials.
         /// </param>
-        /// <returns>If successful a <see cref="Credential"/> object from the authentication object,
-        /// authority or storage; otherwise <see langword="null"/>.</returns>
+        /// <returns>
+        /// If successful a <see cref="Credential"/> object from the authentication object, authority
+        /// or storage; otherwise <see langword="null"/>.
+        /// </returns>
         Credential GetCredentials(TargetUri targetUri);
 
         /// <summary>

@@ -32,12 +32,14 @@ namespace Microsoft.Alm.Authentication
         /// </summary>
         /// <param name="targetUri">The key identifying which token is being deleted.</param>
         void DeleteToken(TargetUri targetUri);
+
         /// <summary>
         /// Reads a <see cref="Token"/> from the underlying storage.
         /// </summary>
         /// <param name="targetUri">The key identifying which token to read.</param>
         /// <returns>A <see cref="Token"/> from the store is successful; otherwise <see langword="null"/>.</returns>
         Token ReadToken(TargetUri targetUri);
+
         /// <summary>
         /// Writes a <see cref="Token"/> to the underlying storage.
         /// </summary>

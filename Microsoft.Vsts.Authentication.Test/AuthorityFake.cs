@@ -1,10 +1,10 @@
-﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
-using System;
+﻿using System;
 using System.Threading.Tasks;
+using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 namespace Microsoft.Alm.Authentication.Test
 {
-    internal class AuthorityFake : IVstsAuthority
+    internal class AuthorityFake: IVstsAuthority
     {
         public AuthorityFake(string expectedQueryParameters)
         {

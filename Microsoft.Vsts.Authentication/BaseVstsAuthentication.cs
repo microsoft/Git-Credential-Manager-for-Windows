@@ -37,7 +37,7 @@ namespace Microsoft.Alm.Authentication
     /// <summary>
     /// Base functionality for performing authentication operations against Visual Studio Online.
     /// </summary>
-    public abstract class BaseVstsAuthentication : BaseAuthentication
+    public abstract class BaseVstsAuthentication: BaseAuthentication
     {
         public const string DefaultResource = "499b84ac-1321-427f-aa17-267ca6975798";
         public const string DefaultClientId = "872cd9fa-d31f-45e0-9eab-6e460a02d1f1";
@@ -58,6 +58,7 @@ namespace Microsoft.Alm.Authentication
             this.PersonalAccessTokenStore = personalAccessTokenStore;
             this.VstsAuthority = new VstsAzureAuthority();
         }
+
         internal BaseVstsAuthentication(
             ICredentialStore personalAccessTokenStore,
             ITokenStore vstsIdeTokenCache,
@@ -78,10 +79,12 @@ namespace Microsoft.Alm.Authentication
         /// The application client identity by which access will be requested.
         /// </summary>
         public readonly string ClientId;
+
         /// <summary>
         /// The Azure resource for which access will be requested.
         /// </summary>
         public readonly string Resource;
+
         /// <summary>
         /// The desired scope of the authentication token to be requested.
         /// </summary>
@@ -112,8 +115,12 @@ namespace Microsoft.Alm.Authentication
         /// Detects the backing authority of the end-point.
         /// </summary>
         /// <param name="targetUri">The resource which the authority protects.</param>
-        /// <param name="tenantId">The identity of the authority tenant; <see cref="Guid.Empty"/> otherwise.</param>
-        /// <returns><see langword="true"/> if the authority is Visual Studio Online; <see langword="false"/> otherwise</returns>
+        /// <param name="tenantId">
+        /// The identity of the authority tenant; <see cref="Guid.Empty"/> otherwise.
+        /// </param>
+        /// <returns>
+        /// <see langword="true"/> if the authority is Visual Studio Online; <see langword="false"/> otherwise
+        /// </returns>
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Design", "CA1062:Validate arguments of public methods", MessageId = "0")]
         public static async Task<KeyValuePair<bool, Guid>> DetectAuthority(TargetUri targetUri)
         {
@@ -194,7 +201,9 @@ namespace Microsoft.Alm.Authentication
         /// </summary>
         /// <param name="targetUri">The resource for which authentication is being requested.</param>
         /// <param name="scope">The scope of the access being requested.</param>
-        /// <param name="personalAccessTokenStore">Storage container for personal access token secrets.</param>
+        /// <param name="personalAccessTokenStore">
+        /// Storage container for personal access token secrets.
+        /// </param>
         /// <param name="adaRefreshTokenStore">Storage container for Azure access token secrets.</param>
         /// <param name="authentication">
         /// An implementation of <see cref="BaseAuthentication"/> if one was detected;
@@ -244,9 +253,10 @@ namespace Microsoft.Alm.Authentication
         /// Attempts to get a set of credentials from storage by their target resource.
         /// </summary>
         /// <param name="targetUri">The 'key' by which to identify credentials.</param>
-        /// <param name="credentials">Credentials associated with the URI if successful;
-        /// <see langword="null"/> otherwise.</param>
-        /// <returns><see langword="true"/> if successful; <see langword="false" /> otherwise.</returns>
+        /// <param name="credentials">
+        /// Credentials associated with the URI if successful; <see langword="null"/> otherwise.
+        /// </param>
+        /// <returns><see langword="true"/> if successful; <see langword="false"/> otherwise.</returns>
         public override Credential GetCredentials(TargetUri targetUri)
         {
             BaseSecureStore.ValidateTargetUri(targetUri);
@@ -275,12 +285,15 @@ namespace Microsoft.Alm.Authentication
         /// <summary>
         /// Generates a "personal access token" or service specific, usage resticted access token.
         /// </summary>
-        /// <param name="targetUri">The target resource for which to acquire the personal access
-        /// token for.</param>
-        /// <param name="accessToken">Azure Directory access token with privileges to grant access
-        /// to the target resource.</param>
-        /// <param name="requestCompactToken">Generates a compact token if <see langword="true"/>;
-        /// generates a self describing token if <see langword="false"/>.</param>
+        /// <param name="targetUri">
+        /// The target resource for which to acquire the personal access token for.
+        /// </param>
+        /// <param name="accessToken">
+        /// Azure Directory access token with privileges to grant access to the target resource.
+        /// </param>
+        /// <param name="requestCompactToken">
+        /// Generates a compact token if <see langword="true"/>; generates a self describing token if <see langword="false"/>.
+        /// </param>
         /// <returns><see langword="true"/> if successful; <see langword="false"/> otherwise.</returns>
         protected async Task<Credential> GeneratePersonalAccessToken(
             TargetUri targetUri,
@@ -325,8 +338,8 @@ namespace Microsoft.Alm.Authentication
             {
                 try
                 {
-                    // Just open the file from disk, the tenant identities are not secret and therefore safely
-                    // left as unencrypted plain text.
+                    // Just open the file from disk, the tenant identities are not secret and
+                    // therefore safely left as unencrypted plain text.
                     using (var stream = File.Open(path, FileMode.OpenOrCreate, FileAccess.Read, FileShare.Read))
                     using (var inflate = new GZipStream(stream, CompressionMode.Decompress))
                     using (var reader = new StreamReader(inflate, encoding))
@@ -409,8 +422,8 @@ namespace Microsoft.Alm.Authentication
             {
                 try
                 {
-                    // Just open the file from disk, the tenant identities are not secret and therefore safely
-                    // left as unencrypted plain text.
+                    // Just open the file from disk, the tenant identities are not secret and
+                    // therefore safely left as unencrypted plain text.
                     using (var stream = File.Open(path, FileMode.OpenOrCreate, FileAccess.ReadWrite, FileShare.None))
                     using (var deflate = new GZipStream(stream, CompressionMode.Compress))
                     using (var writer = new StreamWriter(deflate, encoding))

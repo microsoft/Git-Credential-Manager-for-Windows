@@ -12,26 +12,31 @@ namespace Microsoft.Alm.Authentication.Test
         {
             ITokenStoreTest(new SecretStore("test-token"), "http://dummy.url/for/testing", TokenString);
         }
+
         [TestMethod]
         public void TokenStoreUrlWithParams()
         {
             ITokenStoreTest(new SecretStore("test-token"), "http://dummy.url/for/testing?with=params", TokenString);
         }
+
         [TestMethod]
         public void TokenStoreUnc()
         {
             ITokenStoreTest(new SecretStore("test-token"), @"\\unc\share\test", TokenString);
         }
+
         [TestMethod]
         public void TokenCacheUrl()
         {
             ITokenStoreTest(new SecretCache("test-token"), "http://dummy.url/for/testing", TokenString);
         }
+
         [TestMethod]
         public void TokenCacheUrlWithParams()
         {
             ITokenStoreTest(new SecretCache("test-token"), "http://dummy.url/for/testing?with=params", TokenString);
         }
+
         [TestMethod]
         public void TokenCacheUnc()
         {

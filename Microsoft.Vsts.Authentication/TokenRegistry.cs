@@ -32,10 +32,10 @@ using Microsoft.Win32;
 namespace Microsoft.Alm.Authentication
 {
     /// <summary>
-    /// A token storage object which interacts with the current user's Visual Studio 2015 hive in
-    /// the Windows Registry.
+    /// A token storage object which interacts with the current user's Visual Studio 2015 hive in the
+    /// Windows Registry.
     /// </summary>
-    public sealed class TokenRegistry : ITokenStore
+    public sealed class TokenRegistry: ITokenStore
     {
         private const string RegistryTokenKey = "Token";
         private const string RegistryTypeKey = "Type";

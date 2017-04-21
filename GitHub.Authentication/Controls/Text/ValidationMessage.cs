@@ -1,4 +1,29 @@
-﻿using System;
+﻿/**** Git Credential Manager for Windows ****
+ *
+ * Copyright (c) GitHub Corporation
+ * All rights reserved.
+ *
+ * MIT License
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy
+ * of this software and associated documentation files (the """"Software""""), to deal
+ * in the Software without restriction, including without limitation the rights to
+ * use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of
+ * the Software, and to permit persons to whom the Software is furnished to do so,
+ * subject to the following conditions:
+ *
+ * The above copyright notice and this permission notice shall be included in all
+ * copies or substantial portions of the Software.
+ *
+ * THE SOFTWARE IS PROVIDED *AS IS*, WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS
+ * FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR
+ * COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN
+ * AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
+ * WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE."
+**/
+
+using System;
 using System.Diagnostics;
 using System.Windows;
 using System.Windows.Controls;
@@ -7,7 +32,7 @@ using GitHub.Authentication.ViewModels.Validation;
 
 namespace GitHub.UI
 {
-    public class ValidationMessage : UserControl
+    public class ValidationMessage: UserControl
     {
         private const double defaultTextChangeThrottle = 0.2;
 
@@ -19,8 +44,9 @@ namespace GitHub.UI
                 Visibility = ShowError ? Visibility.Visible : Visibility.Hidden;
                 Text = Validator.ValidationResult.Message;
 
-                // This might look like an event handler leak, but we're making sure Validator can only be set once.
-                // If we ever want to allow it to be set more than once, we'll need to make sure to unsubscribe this event.
+                // This might look like an event handler leak, but we're making sure Validator can
+                // only be set once. If we ever want to allow it to be set more than once, we'll need
+                // to make sure to unsubscribe this event.
                 Validator.PropertyChanged += (s, pce) =>
                 {
                     if (pce.PropertyName == nameof(Validator.ValidationResult))
@@ -36,6 +62,7 @@ namespace GitHub.UI
         }
 
         public static readonly DependencyProperty TextProperty = DependencyProperty.Register(nameof(Text), typeof(string), typeof(ValidationMessage));
+
         public string Text
         {
             get { return (string)GetValue(TextProperty); }
@@ -43,6 +70,7 @@ namespace GitHub.UI
         }
 
         public static readonly DependencyProperty ShowErrorProperty = DependencyProperty.Register(nameof(ShowError), typeof(bool), typeof(ValidationMessage));
+
         public bool ShowError
         {
             get { return (bool)GetValue(ShowErrorProperty); }
@@ -50,6 +78,7 @@ namespace GitHub.UI
         }
 
         public static readonly DependencyProperty TextChangeThrottleProperty = DependencyProperty.Register(nameof(TextChangeThrottle), typeof(double), typeof(ValidationMessage), new PropertyMetadata(defaultTextChangeThrottle));
+
         public double TextChangeThrottle
         {
             get { return (double)GetValue(TextChangeThrottleProperty); }
@@ -57,6 +86,7 @@ namespace GitHub.UI
         }
 
         public static readonly DependencyProperty ValidatorProperty = DependencyProperty.Register(nameof(Validator), typeof(PropertyValidator), typeof(ValidationMessage));
+
         public PropertyValidator Validator
         {
             get { return (PropertyValidator)GetValue(ValidatorProperty); }
@@ -69,6 +99,7 @@ namespace GitHub.UI
         }
 
         public static readonly DependencyProperty IconProperty = DependencyProperty.Register(nameof(Icon), typeof(Octicon), typeof(ValidationMessage), new PropertyMetadata(Octicon.stop));
+
         public Octicon Icon
         {
             get { return (Octicon)GetValue(IconProperty); }

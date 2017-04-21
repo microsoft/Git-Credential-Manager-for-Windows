@@ -30,11 +30,12 @@ namespace Atlassian.Bitbucket.Authentication.Views
 {
     /// <summary>
     /// <para>
-    /// The OAuth Window is the only shown to users who submitted valid credentials, username/password, in the Credentials Window <see cref="CredentialsWindow"/> but have 2FA enabled on their account. 
-    /// Prompts the user to run the OAuth authorization process.
+    /// The OAuth Window is the only shown to users who submitted valid credentials,
+    /// username/password, in the Credentials Window <see cref="CredentialsWindow"/> but have 2FA
+    /// enabled on their account. Prompts the user to run the OAuth authorization process.
     /// </para>
     /// </summary>
-    public partial class OAuthWindow : AuthenticationDialogWindow
+    public partial class OAuthWindow: AuthenticationDialogWindow
     {
         public OAuthWindow()
         {

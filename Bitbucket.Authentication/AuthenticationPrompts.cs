@@ -23,11 +23,6 @@
  * WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE."
 **/
 
-using Atlassian.Bitbucket.Authentication.ViewModels;
-using Atlassian.Bitbucket.Authentication.Views;
-using Atlassian.Shared.Authentication.ViewModels;
-using Atlassian.Shared.Controls;
-using Microsoft.Alm.Authentication;
 using System;
 using System.Diagnostics;
 using System.Linq;
@@ -35,17 +30,22 @@ using System.Text.RegularExpressions;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Windows;
+using Atlassian.Bitbucket.Authentication.ViewModels;
+using Atlassian.Bitbucket.Authentication.Views;
+using Atlassian.Shared.Authentication.ViewModels;
+using Atlassian.Shared.Controls;
+using Microsoft.Alm.Authentication;
 using Trace = Microsoft.Alm.Git.Trace;
 
 namespace Atlassian.Bitbucket.Authentication
 {
     /// <summary>
-    ///     Defines how to call the UI elements to request authentication details from the user.
+    /// Defines how to call the UI elements to request authentication details from the user.
     /// </summary>
     public static class AuthenticationPrompts
     {
         /// <summary>
-        ///     Utility method used to extract a username from a URL of the form http(s)://username@domain/
+        /// Utility method used to extract a username from a URL of the form http(s)://username@domain/
         /// </summary>
         /// <param name="targetUri"></param>
         /// <returns></returns>
@@ -67,13 +67,16 @@ namespace Atlassian.Bitbucket.Authentication
         }
 
         /// <summary>
-        ///     Opens a Modal UI prompting the user for Basic Auth credentials.
+        /// Opens a Modal UI prompting the user for Basic Auth credentials.
         /// </summary>
         /// <param name="title"></param>
         /// <param name="targetUri">contains the URL etc of the Authority</param>
         /// <param name="username">the username entered by the user</param>
-        /// <param name="password"> the password entered by the user</param>
-        /// <returns>returns true if the user provides credentials which are then successfully validated, false otherwise</returns>
+        /// <param name="password">the password entered by the user</param>
+        /// <returns>
+        /// returns true if the user provides credentials which are then successfully validated,
+        /// false otherwise
+        /// </returns>
         public static bool CredentialModalPrompt(string title, TargetUri targetUri, out string username, out string password)
         {
             // if there is a user in the remote URL then prepopulate the UI with it.
@@ -90,13 +93,16 @@ namespace Atlassian.Bitbucket.Authentication
         }
 
         /// <summary>
-        ///     Opens a modal UI prompting the user to run the OAuth dance.
+        /// Opens a modal UI prompting the user to run the OAuth dance.
         /// </summary>
         /// <param name="title"></param>
         /// <param name="targetUri">contains the URL etc of the Authority</param>
         /// <param name="resultType"></param>
         /// <param name="username"></param>
-        /// <returns>returns true if the user successfully completes the OAuth dance and the returned access_token is validated, false otherwise</returns>
+        /// <returns>
+        /// returns true if the user successfully completes the OAuth dance and the returned
+        /// access_token is validated, false otherwise
+        /// </returns>
         public static bool AuthenticationOAuthModalPrompt(string title, TargetUri targetUri, AuthenticationResultType resultType, string username)
         {
             var oauthViewModel = new OAuthViewModel(resultType == AuthenticationResultType.TwoFactor);
@@ -150,24 +156,24 @@ namespace Atlassian.Bitbucket.Authentication
                 UriParser.Register(new GenericUriParser(GenericUriParserOptions.GenericAuthority), "pack", -1);
             }
 
-            var appResourcesUri = new Uri( "pack://application:,,,/Bitbucket.Authentication;component/AppResources.xaml", UriKind.RelativeOrAbsolute);
+            var appResourcesUri = new Uri("pack://application:,,,/Bitbucket.Authentication;component/AppResources.xaml", UriKind.RelativeOrAbsolute);
 
-            // If we launch two dialogs in the same process (Credential followed by 2fa), calling new App()
-            // throws an exception stating the Application class  can't be created twice. Creating an App
-            // instance happens to set Application.Current to that instance (it's weird). However, if you
-            // don't set the ShutdownMode to OnExplicitShutdown, the second time you launch a dialog,
-            // Application.Current is null even in the same process.
+            // If we launch two dialogs in the same process (Credential followed by 2fa), calling new
+            // App() throws an exception stating the Application class can't be created twice.
+            // Creating an App instance happens to set Application.Current to that instance (it's
+            // weird). However, if you don't set the ShutdownMode to OnExplicitShutdown, the second
+            // time you launch a dialog, Application.Current is null even in the same process.
             if (Application.Current == null)
             {
                 var app = new Application();
                 Debug.Assert(Application.Current == app, "Current application not set");
                 app.ShutdownMode = ShutdownMode.OnExplicitShutdown;
-                app.Resources.MergedDictionaries.Add(new ResourceDictionary {Source = appResourcesUri});
+                app.Resources.MergedDictionaries.Add(new ResourceDictionary { Source = appResourcesUri });
             }
             else
             {
-                // Application.Current exists, but what if in the future, some other code created
-                // the singleton. Let's make sure our resources are still loaded.
+                // Application.Current exists, but what if in the future, some other code created the
+                // singleton. Let's make sure our resources are still loaded.
                 var resourcesExist = Application.Current.Resources.MergedDictionaries.Any(r => r.Source == appResourcesUri);
                 if (!resourcesExist)
                 {
