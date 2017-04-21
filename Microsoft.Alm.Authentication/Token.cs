@@ -33,7 +33,7 @@ namespace Microsoft.Alm.Authentication
     /// <summary>
     /// A security token, usually acquired by some authentication and identity services.
     /// </summary>
-    public class Token : Secret, IEquatable<Token>
+    public class Token: Secret, IEquatable<Token>
     {
         public static readonly StringComparer TokenComparer = StringComparer.Ordinal;
 
@@ -293,7 +293,7 @@ namespace Microsoft.Alm.Authentication
         /// </summary>
         /// <param name="left">Token to compare.</param>
         /// <param name="right">Token to compare.</param>
-        /// <returns><see langword="true"/>  if equal; otherwise <see langword="false"/>.</returns>
+        /// <returns><see langword="true"/> if equal; otherwise <see langword="false"/>.</returns>
         public static bool operator ==(Token left, Token right)
         {
             if (ReferenceEquals(left, right))

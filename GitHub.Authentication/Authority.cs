@@ -1,6 +1,6 @@
 ﻿/**** Git Credential Manager for Windows ****
  *
- * Copyright (c) Microsoft Corporation
+ * Copyright (c) GitHub Corporation
  * All rights reserved.
  *
  * MIT License
@@ -35,12 +35,13 @@ using Git = Microsoft.Alm.Git;
 
 namespace GitHub.Authentication
 {
-    internal class Authority : IAuthority
+    internal class Authority: IAuthority
     {
         /// <summary>
         /// The GitHub required HTTP accepts header value
         /// </summary>
         public const string GitHubApiAcceptsHeaderValue = "application/vnd.github.v3+json";
+
         /// <summary>
         /// The maximum wait time for a network request before timing out
         /// </summary>

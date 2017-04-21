@@ -44,6 +44,7 @@ namespace Microsoft.Alm.Git
             | Xdg
             | Global
             | Local,
+
         NoLocal = All & ~Local,
         NoSystem = All & ~(Portable | System),
         UserOnly = All & ~(Portable | System | Local)

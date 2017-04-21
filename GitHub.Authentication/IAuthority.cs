@@ -1,6 +1,6 @@
 ﻿/**** Git Credential Manager for Windows ****
  *
- * Copyright (c) Microsoft Corporation
+ * Copyright (c) GitHub Corporation
  * All rights reserved.
  *
  * MIT License

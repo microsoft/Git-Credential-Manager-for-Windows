@@ -1,4 +1,29 @@
-﻿using System;
+﻿/**** Git Credential Manager for Windows ****
+ *
+ * Copyright (c) GitHub Corporation
+ * All rights reserved.
+ *
+ * MIT License
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy
+ * of this software and associated documentation files (the """"Software""""), to deal
+ * in the Software without restriction, including without limitation the rights to
+ * use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of
+ * the Software, and to permit persons to whom the Software is furnished to do so,
+ * subject to the following conditions:
+ *
+ * The above copyright notice and this permission notice shall be included in all
+ * copies or substantial portions of the Software.
+ *
+ * THE SOFTWARE IS PROVIDED *AS IS*, WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS
+ * FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR
+ * COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN
+ * AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
+ * WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE."
+**/
+
+using System;
 using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
@@ -11,13 +36,13 @@ using GitHub.Authentication.Controls.Octicons;
 namespace GitHub.UI
 {
     /// <summary>
-    /// Represent a raw path with no transformation. Uses the coordinate system from the octicon/svg files which
-    /// are all drawn on a 1024px high canvas with variable width. If you're just after the shape this control
-    /// can be used with Stretch=Uniform. If you're looking for an accurately scaled octicon correctly position
-    /// you'll have to explicitly set the height of the path to 1024 and wrap it in a viewbox to scale it down
-    /// to the size you want.
+    /// Represent a raw path with no transformation. Uses the coordinate system from the octicon/svg
+    /// files which are all drawn on a 1024px high canvas with variable width. If you're just after
+    /// the shape this control can be used with Stretch=Uniform. If you're looking for an accurately
+    /// scaled octicon correctly position you'll have to explicitly set the height of the path to
+    /// 1024 and wrap it in a viewbox to scale it down to the size you want.
     /// </summary>
-    public class OcticonPath : Shape
+    public class OcticonPath: Shape
     {
         private static readonly Lazy<Dictionary<Octicon, Lazy<Geometry>>> cache =
             new Lazy<Dictionary<Octicon, Lazy<Geometry>>>(PrepareCache);

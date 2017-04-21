@@ -100,7 +100,7 @@
 
     <!-- Red color used for errors -->
     <SolidColorBrush x:Key="BitbucketWarningBrush" Color="#ea2828"
-                     PresentationOptions:Freeze="true"/>
+                     PresentationOptions:Freeze="true" />
 
     <!-- black color used for assorted UI elements -->
     <SolidColorBrush x:Key="BitbucketForegroundBrush"
@@ -132,8 +132,8 @@
                      PresentationOptions:Freeze="true" />
     <RadialGradientBrush x:Key="HorizontalDividerShadowBrush"
                          PresentationOptions:Freeze="true">
-        <GradientStop Color="Black"/>
-        <GradientStop Offset="1" Color="#00000000"/>
+        <GradientStop Color="Black" />
+        <GradientStop Offset="1" Color="#00000000" />
     </RadialGradientBrush>
 
     <!-- Primary fonts -->
@@ -143,13 +143,12 @@
     <!-- Modal dialogs all leave this much of the underlying view showing -->
     <GridLength x:Key="ModalViewLeftOffsetColumnWidth">160</GridLength>
 
-
     <!-- Use this focus visual when the control is stretched vertically-->
     <Style x:Key="VerticalMarginFocusVisual" TargetType="Control">
         <Setter Property="Template">
             <Setter.Value>
                 <ControlTemplate>
-                    <Rectangle Margin="-2,2" SnapsToDevicePixels="true" Stroke="{DynamicResource {x:Static SystemColors.ControlTextBrushKey}}" StrokeThickness="1" StrokeDashArray="1 2"/>
+                    <Rectangle Margin="-2,2" SnapsToDevicePixels="true" Stroke="{DynamicResource {x:Static SystemColors.ControlTextBrushKey}}" StrokeThickness="1" StrokeDashArray="1 2" />
                 </ControlTemplate>
             </Setter.Value>
         </Setter>
@@ -159,7 +158,7 @@
         <Setter Property="Template">
             <Setter.Value>
                 <ControlTemplate>
-                    <Rectangle Margin="0" SnapsToDevicePixels="true" Stroke="{DynamicResource {x:Static SystemColors.ControlTextBrushKey}}" StrokeThickness="1" StrokeDashArray="1 2"/>
+                    <Rectangle Margin="0" SnapsToDevicePixels="true" Stroke="{DynamicResource {x:Static SystemColors.ControlTextBrushKey}}" StrokeThickness="1" StrokeDashArray="1 2" />
                 </ControlTemplate>
             </Setter.Value>
         </Setter>
@@ -180,7 +179,7 @@
         <Setter Property="Template">
             <Setter.Value>
                 <ControlTemplate>
-                    <Rectangle Margin="-5" SnapsToDevicePixels="true" Stroke="{DynamicResource {x:Static SystemColors.ControlTextBrushKey}}" StrokeThickness="1" StrokeDashArray="1 2"/>
+                    <Rectangle Margin="-5" SnapsToDevicePixels="true" Stroke="{DynamicResource {x:Static SystemColors.ControlTextBrushKey}}" StrokeThickness="1" StrokeDashArray="1 2" />
                 </ControlTemplate>
             </Setter.Value>
         </Setter>

@@ -30,17 +30,19 @@ namespace Atlassian.Bitbucket.Authentication.Views
 {
     /// <summary>
     /// <para>
-    /// The Credentials Window is the first UI a users will see when prompted to provide authentication for a Bitbucket remote URL. 
-    /// Prompts for a valid username and password.
+    /// The Credentials Window is the first UI a users will see when prompted to provide
+    /// authentication for a Bitbucket remote URL. Prompts for a valid username and password.
     /// </para>
     /// <para>
-    /// If the user's account does NOT have 2FA configured and they submit valid this is also the last UI they will see.
+    /// If the user's account does NOT have 2FA configured and they submit valid this is also the
+    /// last UI they will see.
     /// </para>
     /// <para>
-    /// If the user's account DOES have 2FA configured and they submit valid credentials they will be prompted with a second UI to ask for OAuth authorisation <see cref="OAuthWindow"/>.
+    /// If the user's account DOES have 2FA configured and they submit valid credentials they will be
+    /// prompted with a second UI to ask for OAuth authorisation <see cref="OAuthWindow"/>.
     /// </para>
     /// </summary>
-    public partial class CredentialsWindow : AuthenticationDialogWindow
+    public partial class CredentialsWindow: AuthenticationDialogWindow
     {
         public CredentialsWindow()
         {

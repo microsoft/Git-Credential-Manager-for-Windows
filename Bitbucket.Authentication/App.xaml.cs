@@ -28,10 +28,10 @@ using System.Windows;
 namespace Atlassian.Bitbucket.Authentication
 {
     /// <summary>
-    /// Dummy Application used to load the AppResources.xaml and keep the WPF designer happy
-    /// while keeping this project as a Library rather than an Windows.Application.
+    /// Dummy Application used to load the AppResources.xaml and keep the WPF designer happy while
+    /// keeping this project as a Library rather than an Windows.Application.
     /// </summary>
-    public partial class App : Application
+    public partial class App: Application
     {
     }
 }

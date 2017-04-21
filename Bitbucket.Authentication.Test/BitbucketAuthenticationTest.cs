@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Security.Cryptography.X509Certificates;
 using Microsoft.Alm.Authentication;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
@@ -41,8 +40,8 @@ namespace Atlassian.Bitbucket.Authentication.Test
             var writeCalls = credentialStore.MethodCalls
                 .Where(mc => mc.Key.Equals("WriteCredentials"))
                     .SelectMany(mc => mc.Value)
-                        .Where(wc => wc.Key.Contains(targetUri.ToString()) 
-                            && wc.Key.Contains(credentials.Username) 
+                        .Where(wc => wc.Key.Contains(targetUri.ToString())
+                            && wc.Key.Contains(credentials.Username)
                             && wc.Key.Contains(credentials.Password));
 
             Assert.AreEqual(writeCalls.Count(), 1);
@@ -52,7 +51,6 @@ namespace Atlassian.Bitbucket.Authentication.Test
         [ExpectedException(typeof(ArgumentNullException))]
         public void VerifySetCredentialDoesNotStoreForNullTargetUri()
         {
-            
             var credentialStore = new MockCredentialStore();
             var credentials = new Credential("a", "b");
             var bbAuth = new Authentication(credentialStore, null, null);
@@ -104,10 +102,9 @@ namespace Atlassian.Bitbucket.Authentication.Test
 
             bbAuth.DeleteCredentials(null);
         }
-
     }
 
-    public class MockCredentialStore : ICredentialStore
+    public class MockCredentialStore: ICredentialStore
     {
         public Dictionary<string, Dictionary<List<string>, int>> MethodCalls =
             new Dictionary<string, Dictionary<List<string>, int>>();
@@ -130,7 +127,7 @@ namespace Atlassian.Bitbucket.Authentication.Test
 
         public Credential ReadCredentials(TargetUri targetUri)
         {
-            // do nothing 
+            // do nothing
             RecordMethodCall("ReadCredentials", new List<string>() { targetUri.ToString() });
             return null;
         }

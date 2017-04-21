@@ -30,7 +30,7 @@ using System.IO;
 
 namespace Microsoft.Alm.Git
 {
-    public struct GitInstallation : IEquatable<GitInstallation>
+    public struct GitInstallation: IEquatable<GitInstallation>
     {
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Security", "CA2104:DoNotDeclareReadOnlyMutableReferenceTypes")]
         public static readonly StringComparer PathComparer = StringComparer.InvariantCultureIgnoreCase;
@@ -58,6 +58,7 @@ namespace Microsoft.Alm.Git
                 { KnownGitDistribution.GitForWindows32v2, AllVersionCmdPath },
                 { KnownGitDistribution.GitForWindows64v2, AllVersionCmdPath },
            };
+
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Security", "CA2104:DoNotDeclareReadOnlyMutableReferenceTypes")]
         public static readonly IReadOnlyDictionary<KnownGitDistribution, string> CommonConfigPaths
             = new Dictionary<KnownGitDistribution, string>
@@ -66,6 +67,7 @@ namespace Microsoft.Alm.Git
                 { KnownGitDistribution.GitForWindows32v2, Version2Config32Path },
                 { KnownGitDistribution.GitForWindows64v2, Version2Config64Path },
             };
+
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Security", "CA2104:DoNotDeclareReadOnlyMutableReferenceTypes")]
         public static readonly IReadOnlyDictionary<KnownGitDistribution, string> CommonGitPaths
             = new Dictionary<KnownGitDistribution, string>
@@ -74,6 +76,7 @@ namespace Microsoft.Alm.Git
                 { KnownGitDistribution.GitForWindows32v2, AllVersionGitPath },
                 { KnownGitDistribution.GitForWindows64v2, AllVersionGitPath },
             };
+
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Security", "CA2104:DoNotDeclareReadOnlyMutableReferenceTypes")]
         public static readonly IReadOnlyDictionary<KnownGitDistribution, string> CommonLibexecPaths
             = new Dictionary<KnownGitDistribution, string>
@@ -82,6 +85,7 @@ namespace Microsoft.Alm.Git
                 { KnownGitDistribution.GitForWindows32v2, Version2Libexec32Path },
                 { KnownGitDistribution.GitForWindows64v2, Version2Libexec64Path },
             };
+
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Security", "CA2104:DoNotDeclareReadOnlyMutableReferenceTypes")]
         public static readonly IReadOnlyDictionary<KnownGitDistribution, string> CommonShPaths
             = new Dictionary<KnownGitDistribution, string>
@@ -90,6 +94,7 @@ namespace Microsoft.Alm.Git
                 { KnownGitDistribution.GitForWindows32v2, AllVersionShPath },
                 { KnownGitDistribution.GitForWindows64v2, AllVersionShPath },
             };
+
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Security", "CA2104:DoNotDeclareReadOnlyMutableReferenceTypes")]
         public static readonly IReadOnlyDictionary<KnownGitDistribution, string> CommonDocPaths
             = new Dictionary<KnownGitDistribution, string>
@@ -117,8 +122,8 @@ namespace Microsoft.Alm.Git
                 path = path.Substring(0, path.Length - AllVersionGitPath.Length);
             }
 
-            // Versions of git installation could have 2 binaries. One in the `bin` directory
-            // and the other in the `cmd` directory. Handle both scenarios.
+            // Versions of git installation could have 2 binaries. One in the `bin` directory and the
+            // other in the `cmd` directory. Handle both scenarios.
 
             if (path.EndsWith(AllVersionBinGitPath, StringComparison.OrdinalIgnoreCase))
             {
@@ -154,7 +159,9 @@ namespace Microsoft.Alm.Git
                 return _config;
             }
         }
+
         private string _config;
+
         public string Cmd
         {
             get
@@ -166,7 +173,9 @@ namespace Microsoft.Alm.Git
                 return _cmd;
             }
         }
+
         private string _cmd;
+
         public string Doc
         {
             get
@@ -178,7 +187,9 @@ namespace Microsoft.Alm.Git
                 return _doc;
             }
         }
+
         private string _doc;
+
         public string Git
         {
             get
@@ -190,7 +201,9 @@ namespace Microsoft.Alm.Git
                 return _git;
             }
         }
+
         private string _git;
+
         public string Libexec
         {
             get
@@ -202,7 +215,9 @@ namespace Microsoft.Alm.Git
                 return _libexec;
             }
         }
+
         private string _libexec;
+
         public string Sh
         {
             get
@@ -214,6 +229,7 @@ namespace Microsoft.Alm.Git
                 return _sh;
             }
         }
+
         private string _sh;
         public readonly string Path;
         public readonly KnownGitDistribution Version;

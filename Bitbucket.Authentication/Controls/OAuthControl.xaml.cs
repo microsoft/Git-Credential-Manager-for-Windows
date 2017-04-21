@@ -30,7 +30,7 @@ namespace Atlassian.Bitbucket.Authentication.Controls
     /// <summary>
     /// Defines the UI used to prompt a user to run the OAuth authorization process.
     /// </summary>
-    public partial class OAuthControl : DialogUserControl
+    public partial class OAuthControl: DialogUserControl
     {
         public OAuthControl()
         {
@@ -39,7 +39,6 @@ namespace Atlassian.Bitbucket.Authentication.Controls
 
         protected override void SetFocus()
         {
-
         }
     }
 }

@@ -23,7 +23,6 @@
  * WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE."
 **/
 
-using Microsoft.Alm.Authentication;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -33,7 +32,7 @@ using System.Net.Http;
 using System.Text.RegularExpressions;
 using System.Threading;
 using System.Threading.Tasks;
-
+using Microsoft.Alm.Authentication;
 using Trace = Microsoft.Alm.Git.Trace;
 
 namespace Atlassian.Bitbucket.Authentication.OAuth
@@ -46,6 +45,7 @@ namespace Atlassian.Bitbucket.Authentication.OAuth
         /// The maximum wait time for a network request before timing out
         /// </summary>
         public const int RequestTimeout = 15 * 1000; // 15 second limit
+
         private static Regex RefreshTokenRegex = new Regex(@"\s*""refresh_token""\s*:\s*""([^""]+)""\s*", RegexOptions.Compiled | RegexOptions.CultureInvariant | RegexOptions.IgnoreCase);
         private static Regex AccessTokenTokenRegex = new Regex(@"\s*""access_token""\s*:\s*""([^""]+)""\s*", RegexOptions.Compiled | RegexOptions.CultureInvariant | RegexOptions.IgnoreCase);
 
@@ -60,10 +60,12 @@ namespace Atlassian.Bitbucket.Authentication.OAuth
         public string TokenUri { get { return "/site/oauth2/access_token"; } }
 
         /// <summary>
-        ///     Gets the OAuth access token
+        /// Gets the OAuth access token
         /// </summary>
         /// <returns>The access token</returns>
-        /// <exception cref="SourceTree.Exceptions.OAuthException">Thrown when OAuth fails for whatever reason</exception>
+        /// <exception cref="SourceTree.Exceptions.OAuthException">
+        /// Thrown when OAuth fails for whatever reason
+        /// </exception>
         public async Task<AuthenticationResult> GetAuthAsync(TargetUri targetUri, TokenScope scope, CancellationToken cancellationToken)
         {
             var authToken = await Authorize(targetUri, scope, cancellationToken);
@@ -72,7 +74,7 @@ namespace Atlassian.Bitbucket.Authentication.OAuth
         }
 
         /// <summary>
-        ///     Uses a refresh_token to get a new access_token
+        /// Uses a refresh_token to get a new access_token
         /// </summary>
         /// <param name="targetUri"></param>
         /// <param name="refreshToken"></param>
@@ -84,7 +86,7 @@ namespace Atlassian.Bitbucket.Authentication.OAuth
         }
 
         /// <summary>
-        ///     Run the OAuth dance to get a new request_token
+        /// Run the OAuth dance to get a new request_token
         /// </summary>
         /// <param name="targetUri"></param>
         /// <param name="scope"></param>
@@ -154,7 +156,7 @@ namespace Atlassian.Bitbucket.Authentication.OAuth
         }
 
         /// <summary>
-        ///     Use a request_token to get an access_token
+        /// Use a request_token to get an access_token
         /// </summary>
         /// <param name="targetUri"></param>
         /// <param name="authCode"></param>
@@ -175,7 +177,7 @@ namespace Atlassian.Bitbucket.Authentication.OAuth
         }
 
         /// <summary>
-        ///     Use a refresh_token to get a new access_token
+        /// Use a refresh_token to get a new access_token
         /// </summary>
         /// <param name="targetUri"></param>
         /// <param name="currentRefreshToken"></param>

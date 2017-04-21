@@ -28,19 +28,20 @@ namespace Microsoft.Alm.Authentication
     public enum NtlmSupport
     {
         /// <summary>
-        /// <para>The authentication class should attempt to detect and prefer
-        /// NTML credentials over basic credentials.</para>
+        /// <para>
+        /// The authentication class should attempt to detect and prefer NTML credentials over basic credentials.
+        /// </para>
         /// <para>This is the default.</para>
         /// </summary>
         Auto,
+
         /// <summary>
-        /// The authentication class should only detect and return NTML
-        /// credentials.
+        /// The authentication class should only detect and return NTML credentials.
         /// </summary>
         Never,
+
         /// <summary>
-        /// The authentication class should never detect nor return
-        /// NTML credentials.
+        /// The authentication class should never detect nor return NTML credentials.
         /// </summary>
         Always,
     }

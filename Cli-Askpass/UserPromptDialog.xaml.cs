@@ -33,7 +33,7 @@ namespace Microsoft.Alm.Gui
     /// Interaction logic for PassphraseWindow.xaml
     /// </summary>
     [System.Runtime.InteropServices.ComVisible(false)]
-    public partial class UserPromptDialog : Window
+    public partial class UserPromptDialog: Window
     {
         public const string HintTextPassphrase = "SSH Passphrase";
         public const string HintTextPassword = "Password";
@@ -137,8 +137,10 @@ namespace Microsoft.Alm.Gui
         private readonly UserPromptKind _kind;
         private string _response;
         private string _resource;
+
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Performance", "CA1823:AvoidUnusedPrivateFields")]
         private PasswordBoxHintAdorner _textboxAdorner;
+
         private readonly string _title;
 
         public string AdditionalInfoText

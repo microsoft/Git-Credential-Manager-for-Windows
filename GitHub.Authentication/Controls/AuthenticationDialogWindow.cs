@@ -4,7 +4,7 @@ using GitHub.Authentication.ViewModels;
 
 namespace GitHub.UI
 {
-    public abstract class AuthenticationDialogWindow : Window
+    public abstract class AuthenticationDialogWindow: Window
     {
         protected AuthenticationDialogWindow()
         {

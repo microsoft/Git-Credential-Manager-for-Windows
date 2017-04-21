@@ -3,7 +3,7 @@ using GitHub.UI;
 
 namespace GitHub.Authentication
 {
-    public partial class TwoFactorWindow : AuthenticationDialogWindow
+    public partial class TwoFactorWindow: AuthenticationDialogWindow
     {
         public TwoFactorWindow()
         {

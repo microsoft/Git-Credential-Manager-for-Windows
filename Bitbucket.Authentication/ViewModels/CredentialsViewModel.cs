@@ -23,23 +23,24 @@
  * WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE."
 **/
 
+using System.Windows.Input;
 using Atlassian.Bitbucket.Authentication.Properties;
 using Atlassian.Shared.Authentication.Helpers;
 using Atlassian.Shared.Authentication.ViewModels;
 using Atlassian.Shared.Authentication.ViewModels.Validation;
-using System.Windows.Input;
 
 namespace Atlassian.Bitbucket.Authentication.ViewModels
 {
     /// <summary>
-    ///     The ViewModel behind the Basic Auth username/password UI prompt.
+    /// The ViewModel behind the Basic Auth username/password UI prompt.
     /// </summary>
-    public class CredentialsViewModel : DialogViewModel
+    public class CredentialsViewModel: DialogViewModel
     {
         public CredentialsViewModel() : this(string.Empty)
         {
-            // without this default constructor get nullreferenceexceptions during binding
-            // i guess 'cos the view is built before the 'official' viewmodel and hence generates it own viewmodel while building?
+            // without this default constructor get nullreferenceexceptions during binding i guess
+            // 'cos the view is built before the 'official' viewmodel and hence generates it own
+            // viewmodel while building?
         }
 
         public CredentialsViewModel(string username)
@@ -94,9 +95,8 @@ namespace Atlassian.Bitbucket.Authentication.ViewModels
             get { return _password; }
             set
             {
-                // Hack: Because we're binding one way to source, we need to
-                // skip the initial value that's sent when the binding is setup
-                // by the XAML
+                // Hack: Because we're binding one way to source, we need to skip the initial value
+                // that's sent when the binding is setup by the XAML
                 if (_password == null && value == null)
                 {
                     return;
@@ -112,22 +112,22 @@ namespace Atlassian.Bitbucket.Authentication.ViewModels
         public ModelValidator ModelValidator { get; }
 
         /// <summary>
-        ///     Start the process to validate the username/password
+        /// Start the process to validate the username/password
         /// </summary>
         public ICommand LoginCommand { get; }
 
         /// <summary>
-        ///     Cancel the authentication attempt.
+        /// Cancel the authentication attempt.
         /// </summary>
         public ICommand CancelCommand { get; }
 
         /// <summary>
-        ///     Hyperlink to Bitbucket documentation.
+        /// Hyperlink to Bitbucket documentation.
         /// </summary>
         public ICommand HyperLinkCommand { get; } = new HyperLinkCommand();
 
         /// <summary>
-        ///     Hyperlink to the Bitbucket forgotten password process.
+        /// Hyperlink to the Bitbucket forgotten password process.
         /// </summary>
         public ICommand ForgotPasswordCommand { get; } = new HyperLinkCommand();
     }

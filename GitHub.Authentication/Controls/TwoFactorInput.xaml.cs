@@ -9,7 +9,7 @@ using GitHub.Extensions;
 
 namespace GitHub.UI
 {
-    public class TwoFactorInputToTextBox : ValueConverterMarkupExtension<TwoFactorInputToTextBox>
+    public class TwoFactorInputToTextBox: ValueConverterMarkupExtension<TwoFactorInputToTextBox>
     {
         public override object Convert(object value, Type targetType, object parameter, CultureInfo culture)
         {
@@ -20,7 +20,7 @@ namespace GitHub.UI
     /// <summary>
     /// Interaction logic for TwoFactorInput.xaml
     /// </summary>
-    public partial class TwoFactorInput : UserControl
+    public partial class TwoFactorInput: UserControl
     {
         public static readonly DependencyProperty TextProperty =
             DependencyProperty.Register(nameof(Text), typeof(string), typeof(TwoFactorInput), new PropertyMetadata(""));
@@ -139,8 +139,8 @@ namespace GitHub.UI
 
             textBox.SelectionChanged += (sender, args) =>
             {
-                // Make sure we can't insert additional text into a textbox.
-                // Each textbox should only allow one character.
+                // Make sure we can't insert additional text into a textbox. Each textbox should only
+                // allow one character.
                 if (textBox.SelectionLength == 0 && textBox.Text.Any())
                 {
                     textBox.SelectAll();

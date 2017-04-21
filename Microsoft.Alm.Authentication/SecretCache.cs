@@ -28,7 +28,7 @@ using System.Collections.Generic;
 
 namespace Microsoft.Alm.Authentication
 {
-    public sealed class SecretCache : ICredentialStore, ITokenStore
+    public sealed class SecretCache: ICredentialStore, ITokenStore
     {
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Security", "CA2104:DoNotDeclareReadOnlyMutableReferenceTypes")]
         public static readonly StringComparer KeyComparer = StringComparer.OrdinalIgnoreCase;
@@ -139,7 +139,7 @@ namespace Microsoft.Alm.Authentication
         /// Gets a token from the cache.
         /// </summary>
         /// <param name="targetUri">The key which to find the token.</param>
-        /// <returns>A <see cref="Token"/> if successful;  otherwise <see langword="null"/>.</returns>
+        /// <returns>A <see cref="Token"/> if successful; otherwise <see langword="null"/>.</returns>
         public Token ReadToken(TargetUri targetUri)
         {
             BaseSecureStore.ValidateTargetUri(targetUri);

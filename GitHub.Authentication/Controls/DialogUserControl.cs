@@ -4,7 +4,7 @@ using System.Windows.Threading;
 
 namespace GitHub.UI
 {
-    public abstract class DialogUserControl : UserControl
+    public abstract class DialogUserControl: UserControl
     {
         protected DialogUserControl()
         {

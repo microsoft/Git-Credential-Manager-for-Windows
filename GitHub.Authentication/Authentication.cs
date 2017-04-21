@@ -1,6 +1,6 @@
 ﻿/**** Git Credential Manager for Windows ****
  *
- * Copyright (c) Microsoft Corporation
+ * Copyright (c) GitHub Corporation
  * All rights reserved.
  *
  * MIT License
@@ -33,14 +33,18 @@ namespace GitHub.Authentication
     /// <summary>
     /// Facilitates GitHub simple and two-factor authentication
     /// </summary>
-    public class Authentication : BaseAuthentication, IAuthentication
+    public class Authentication: BaseAuthentication, IAuthentication
     {
         /// <summary>
         /// Creates a new authentication
         /// </summary>
-        /// <param name="targetUri">The uniform resource indicator of the resource which requires authentication.</param>
+        /// <param name="targetUri">
+        /// The uniform resource indicator of the resource which requires authentication.
+        /// </param>
         /// <param name="tokenScope">The desired scope of any personal access tokens acquired.</param>
-        /// <param name="personalAccessTokenStore">A secure secret store for any personal access tokens acquired.</param>
+        /// <param name="personalAccessTokenStore">
+        /// A secure secret store for any personal access tokens acquired.
+        /// </param>
         public Authentication(
             TargetUri targetUri,
             TokenScope tokenScope,
@@ -99,11 +103,13 @@ namespace GitHub.Authentication
         /// <summary>
         /// Gets a configured authentication object for 'github.com'.
         /// </summary>
-        /// <param name="targetUri">The uniform resource indicator of the resource which requires
-        /// authentication.</param>
+        /// <param name="targetUri">
+        /// The uniform resource indicator of the resource which requires authentication.
+        /// </param>
         /// <param name="tokenScope">The desired scope of any personal access tokens acquired.</param>
-        /// <param name="personalAccessTokenStore">A secure secret store for any personal access
-        /// tokens acquired.</param>
+        /// <param name="personalAccessTokenStore">
+        /// A secure secret store for any personal access tokens acquired.
+        /// </param>
         /// <param name="authentication">(out) The authentication object if successful.</param>
         /// <returns>True if success; otherwise false.</returns>
         public static BaseAuthentication GetAuthentication(
@@ -142,8 +148,10 @@ namespace GitHub.Authentication
         /// <param name="targetUri">
         /// The uniform resource indicator used to uniquely identity the credentials.
         /// </param>
-        /// <returns> <see cref="Credential"/> object from the authentication object,
-        /// authority or storage; otherwise `null`, if successful.</returns>
+        /// <returns>
+        /// <see cref="Credential"/> object from the authentication object, authority or storage;
+        /// otherwise `null`, if successful.
+        /// </returns>
         public override Credential GetCredentials(TargetUri targetUri)
         {
             BaseSecureStore.ValidateTargetUri(targetUri);
@@ -160,12 +168,13 @@ namespace GitHub.Authentication
 
         /// <summary>
         /// <para></para>
-        /// <para>Tokens acquired are stored in the secure secret store provided during
-        /// initialization.</para>
+        /// <para>Tokens acquired are stored in the secure secret store provided during initialization.</para>
         /// </summary>
-        /// <param name="targetUri">The unique identifier for the resource for which access is to
-        /// be acquired.</param>
-        /// /// <returns>Acquired <see cref="Credential"/> if successful; otherwise <see langword="null"/>.</returns>
+        /// <param name="targetUri">
+        /// The unique identifier for the resource for which access is to be acquired.
+        /// </param>
+        /// ///
+        /// <returns>Acquired <see cref="Credential"/> if successful; otherwise <see langword="null"/>.</returns>
         public async Task<Credential> InteractiveLogon(TargetUri targetUri)
         {
             Credential credentials = null;
@@ -222,14 +231,16 @@ namespace GitHub.Authentication
 
         /// <summary>
         /// <para></para>
-        /// <para>Tokens acquired are stored in the secure secret store provided during
-        /// initialization.</para>
+        /// <para>Tokens acquired are stored in the secure secret store provided during initialization.</para>
         /// </summary>
-        /// <param name="targetUri">The unique identifier for the resource for which access is to
-        /// be acquired.</param>
+        /// <param name="targetUri">
+        /// The unique identifier for the resource for which access is to be acquired.
+        /// </param>
         /// <param name="username">The username of the account for which access is to be acquired.</param>
         /// <param name="password">The password of the account for which access is to be acquired.</param>
-        /// <param name="authenticationCode">The two-factor authentication code for use in access acquisition.</param>
+        /// <param name="authenticationCode">
+        /// The two-factor authentication code for use in access acquisition.
+        /// </param>
         /// <returns>Acquired <see cref="Credential"/> if successful; otherwise <see langword="null"/>.</returns>
         public async Task<Credential> NoninteractiveLogonWithCredentials(TargetUri targetUri, string username, string password, string authenticationCode)
         {
@@ -277,8 +288,9 @@ namespace GitHub.Authentication
         /// <summary>
         /// Validates that a set of credentials grants access to the target resource.
         /// </summary>
-        /// <param name="targetUri">The unique identifier for the resource for which credentials
-        /// are being validated against.</param>
+        /// <param name="targetUri">
+        /// The unique identifier for the resource for which credentials are being validated against.
+        /// </param>
         /// <param name="credentials">The credentials to validate.</param>
         /// <returns>True is successful; otherwise false.</returns>
         public async Task<bool> ValidateCredentials(TargetUri targetUri, Credential credentials)
@@ -308,7 +320,9 @@ namespace GitHub.Authentication
         /// </param>
         /// <param name="resultType">
         /// <para>The result of initial logon attempt, using the results of <see cref="AcquireCredentialsDelegate"/>.</para>
-        /// <para>Should be either <see cref="GitHubAuthenticationResultType.TwoFactorApp"/> or <see cref="GitHubAuthenticationResultType.TwoFactorSms"/>.</para>
+        /// <para>
+        /// Should be either <see cref="GitHubAuthenticationResultType.TwoFactorApp"/> or <see cref="GitHubAuthenticationResultType.TwoFactorSms"/>.
+        /// </para>
         /// </param>
         /// <param name="authenticationCode">The authentication code provided by the user.</param>
         /// <returns>True if successful; otherwise false.</returns>

@@ -30,7 +30,7 @@ namespace Microsoft.Alm.Authentication
     /// <summary>
     /// Credentials for user authentication.
     /// </summary>
-    public sealed class Credential : Secret, IEquatable<Credential>
+    public sealed class Credential: Secret, IEquatable<Credential>
     {
         public static readonly Credential Empty = new Credential(String.Empty, String.Empty);
 
@@ -47,6 +47,7 @@ namespace Microsoft.Alm.Authentication
             this.Username = username;
             this.Password = password ?? String.Empty;
         }
+
         /// <summary>
         /// Creates a credential object with only a username.
         /// </summary>

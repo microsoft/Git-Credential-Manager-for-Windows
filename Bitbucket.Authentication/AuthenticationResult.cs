@@ -23,14 +23,14 @@
  * WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE."
 **/
 
-using Microsoft.Alm.Authentication;
 using System;
 using System.Diagnostics;
+using Microsoft.Alm.Authentication;
 
 namespace Atlassian.Bitbucket.Authentication
 {
     /// <summary>
-    ///     Defines the properties of interest of the results of an Authentication attempt.
+    /// Defines the properties of interest of the results of an Authentication attempt.
     /// </summary>
     [DebuggerDisplay("{Type}")]
     public struct AuthenticationResult
@@ -78,7 +78,7 @@ namespace Atlassian.Bitbucket.Authentication
     }
 
     /// <summary>
-    ///     Defines the types of Authentication results we care about.
+    /// Defines the types of Authentication results we care about.
     /// </summary>
     public enum AuthenticationResultType
     {

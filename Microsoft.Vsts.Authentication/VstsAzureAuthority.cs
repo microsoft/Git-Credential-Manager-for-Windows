@@ -35,7 +35,7 @@ using System.Threading.Tasks;
 
 namespace Microsoft.Alm.Authentication
 {
-    internal class VstsAzureAuthority : AzureAuthority, IVstsAuthority
+    internal class VstsAzureAuthority: AzureAuthority, IVstsAuthority
     {
         public VstsAzureAuthority(string authorityHostUrl = null)
             : base()
@@ -193,13 +193,13 @@ namespace Microsoft.Alm.Authentication
         }
 
         /// <summary>
-        /// <para>Validates that <see cref="Token"/> are valid to grant access to the Visual Studio
-        /// Online service represented by the <paramref name="targetUri"/> parameter.</para>
+        /// <para>
+        /// Validates that <see cref="Token"/> are valid to grant access to the Visual Studio Online
+        /// service represented by the <paramref name="targetUri"/> parameter.
+        /// </para>
         /// </summary>
         /// <param name="targetUri">Uniform resource identifier for a VSTS service.</param>
-        /// <param name="token">
-        /// <see cref="Token"/> expected to grant access to the VSTS service.
-        /// </param>
+        /// <param name="token"><see cref="Token"/> expected to grant access to the VSTS service.</param>
         /// <returns>True if successful; otherwise false.</returns>
         public async Task<bool> ValidateToken(TargetUri targetUri, Token token)
         {
