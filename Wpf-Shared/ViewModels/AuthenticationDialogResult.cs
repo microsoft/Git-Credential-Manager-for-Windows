@@ -1,7 +1,6 @@
 ﻿/**** Git Credential Manager for Windows ****
  *
  * Copyright (c) GitHub Corporation
- * Copyright (c) Atlassian
  * All rights reserved.
  *
  * MIT License
@@ -24,7 +23,7 @@
  * WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE."
 **/
 
-namespace Atlassian.Shared.Authentication.ViewModels
+namespace GitHub.Shared.Authentication.ViewModels
 {
     public enum AuthenticationDialogResult
     {

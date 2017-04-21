@@ -28,7 +28,7 @@
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     xmlns:controlsText="clr-namespace:Atlassian.Bitbucket.Authentication.Controls.Text"
-    xmlns:converters="clr-namespace:Atlassian.Shared.Converters">
+    xmlns:converters="clr-namespace:GitHub.Shared.Converters">
 
     <Style TargetType="{x:Type controlsText:ValidationMessage}">
         <Setter Property="Padding" Value="2,6" />

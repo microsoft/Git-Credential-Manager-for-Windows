@@ -24,8 +24,8 @@
 **/
 
 using System;
-using Atlassian.Shared.Authentication.Helpers;
-using Atlassian.Shared.Controls;
+using GitHub.Shared.Authentication.Helpers;
+using GitHub.Shared.Controls;
 
 namespace Atlassian.Bitbucket.Authentication.Controls
 {

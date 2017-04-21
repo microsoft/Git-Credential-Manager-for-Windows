@@ -1,7 +1,6 @@
 ﻿/**** Git Credential Manager for Windows ****
  *
  * Copyright (c) GitHub Corporation
- * Copyright (c) Atlassian
  * All rights reserved.
  *
  * MIT License
@@ -28,7 +27,7 @@ using System.Windows;
 using System.Windows.Input;
 using System.Windows.Media;
 
-namespace Atlassian.Shared.Authentication.Helpers
+namespace GitHub.Shared.Authentication.Helpers
 {
     /// <summary>
     /// Contains attached dependency properties to correct the scoping of access keys within the WPF framework.

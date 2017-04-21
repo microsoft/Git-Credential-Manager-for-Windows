@@ -1,7 +1,6 @@
 ﻿/**** Git Credential Manager for Windows ****
  *
  * Copyright (c) GitHub Corporation
- * Copyright (c) Atlassian
  * All rights reserved.
  *
  * MIT License
@@ -28,11 +27,11 @@ using System;
 using System.Windows.Controls;
 using System.Windows.Threading;
 
-namespace Atlassian.Shared.Controls
+namespace GitHub.Shared.Controls
 {
     public abstract class DialogUserControl: UserControl
     {
-        public DialogUserControl()
+        protected DialogUserControl()
         {
             IsVisibleChanged += (s, e) =>
             {

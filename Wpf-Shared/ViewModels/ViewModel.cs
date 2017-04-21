@@ -1,7 +1,6 @@
 ﻿/**** Git Credential Manager for Windows ****
  *
  * Copyright (c) GitHub Corporation
- * Copyright (c) Atlassian
  * All rights reserved.
  *
  * MIT License
@@ -26,7 +25,7 @@
 
 using System.ComponentModel;
 
-namespace Atlassian.Shared.Authentication.ViewModels
+namespace GitHub.Shared.Authentication.ViewModels
 {
     /// <summary>
     /// Rather than bring in all the overhead of an MVVM framework, we'll just do the simplest

@@ -1,7 +1,6 @@
 ﻿/**** Git Credential Manager for Windows ****
  *
  * Copyright (c) GitHub Corporation
- * Copyright (c) Atlassian
  * All rights reserved.
  *
  * MIT License
@@ -31,7 +30,7 @@ using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Input;
 
-namespace Atlassian.Shared.Authentication.Helpers
+namespace GitHub.Shared.Authentication.Helpers
 {
     public static class FocusHelper
     {

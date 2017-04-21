@@ -1,7 +1,6 @@
 ﻿/**** Git Credential Manager for Windows ****
  *
  * Copyright (c) GitHub Corporation
- * Copyright (c) Atlassian
  * All rights reserved.
  *
  * MIT License
@@ -27,7 +26,7 @@
 using System;
 using System.Diagnostics;
 
-namespace Atlassian.Shared.Authentication.Helpers
+namespace GitHub.Shared.Authentication.Helpers
 {
     /// <summary>
     /// Command that opens a browser to the URL specified by the command parameter.

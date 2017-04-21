@@ -1,7 +1,6 @@
 ﻿/**** Git Credential Manager for Windows ****
  *
  * Copyright (c) GitHub Corporation
- * Copyright (c) Atlassian
  * All rights reserved.
  *
  * MIT License
@@ -28,7 +27,7 @@ using System;
 using System.Windows;
 using System.Windows.Data;
 
-namespace Atlassian.Shared.Converters
+namespace GitHub.Shared.Converters
 {
     public class ThicknessConverter: IValueConverter
     {

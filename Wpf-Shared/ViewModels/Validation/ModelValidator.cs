@@ -1,7 +1,6 @@
 ﻿/**** Git Credential Manager for Windows ****
  *
  * Copyright (c) GitHub Corporation
- * Copyright (c) Atlassian
  * All rights reserved.
  *
  * MIT License
@@ -27,7 +26,7 @@
 using System;
 using System.Linq;
 
-namespace Atlassian.Shared.Authentication.ViewModels.Validation
+namespace GitHub.Shared.Authentication.ViewModels.Validation
 {
     /// <summary>
     /// A validator that represents the validation state of a model. It's true if all the supplied

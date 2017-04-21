@@ -24,7 +24,7 @@
 **/
 
 using Atlassian.Bitbucket.Authentication.ViewModels;
-using Atlassian.Shared.Controls;
+using GitHub.Shared.Controls;
 
 namespace Atlassian.Bitbucket.Authentication.Views
 {

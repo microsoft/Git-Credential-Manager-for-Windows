@@ -1,8 +1,7 @@
 ﻿/**** Git Credential Manager for Windows ****
  *
  * Copyright (c) GitHub Corporation
- * Copyright (c) Atlassian
- * All rights reserved.
+  * All rights reserved.
  *
  * MIT License
  *
@@ -26,7 +25,7 @@
 
 using System;
 
-namespace Atlassian.Shared.Authentication.ViewModels.Validation
+namespace GitHub.Shared.Authentication.ViewModels.Validation
 {
     public static class PropertyValidatorExtensions
     {

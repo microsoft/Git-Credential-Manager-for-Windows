@@ -1,7 +1,6 @@
 ﻿/**** Git Credential Manager for Windows ****
  *
  * Copyright (c) GitHub Corporation
- * Copyright (c) Atlassian
  * All rights reserved.
  *
  * MIT License
@@ -28,7 +27,7 @@ using System;
 using System.Globalization;
 using System.Windows;
 
-namespace Atlassian.Shared.Converters
+namespace GitHub.Shared.Converters
 {
     [Localizability(LocalizationCategory.NeverLocalize)]
     public sealed class BooleanToVisibilityConverter: ValueConverterMarkupExtension<BooleanToVisibilityConverter>

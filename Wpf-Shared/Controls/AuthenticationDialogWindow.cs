@@ -1,7 +1,6 @@
 ﻿/**** Git Credential Manager for Windows ****
  *
  * Copyright (c) GitHub Corporation
- * Copyright (c) Atlassian
  * All rights reserved.
  *
  * MIT License
@@ -26,13 +25,13 @@
 
 using System.ComponentModel;
 using System.Windows;
-using Atlassian.Shared.Authentication.ViewModels;
+using GitHub.Shared.Authentication.ViewModels;
 
-namespace Atlassian.Shared.Controls
+namespace GitHub.Shared.Controls
 {
     public abstract class AuthenticationDialogWindow: Window
     {
-        public AuthenticationDialogWindow()
+        protected AuthenticationDialogWindow()
         {
             DataContextChanged += (s, e) =>
             {

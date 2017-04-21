@@ -1,6 +1,5 @@
 ﻿/**** Git Credential Manager for Windows ****
  *
- * Copyright (c) GitHub Corporation
  * Copyright (c) Atlassian
  * All rights reserved.
  *

@@ -32,7 +32,7 @@
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     xmlns:controls="clr-namespace:Atlassian.Bitbucket.Authentication.Controls"
     xmlns:vm="clr-namespace:Atlassian.Bitbucket.Authentication.ViewModels"
-    xmlns:coreControls="clr-namespace:Atlassian.Shared.Controls"
+    xmlns:coreControls="clr-namespace:GitHub.Shared.Controls"
     mc:Ignorable="d"
     Background="White"
     ResizeMode="NoResize"
