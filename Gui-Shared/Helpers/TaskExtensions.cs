@@ -26,7 +26,7 @@
 using System.Threading;
 using System.Threading.Tasks;
 
-namespace Atlassian.Shared.Authentication.Helpers
+namespace Atlassian.Shared.Helpers
 {
     public static class TaskExtensions
     {

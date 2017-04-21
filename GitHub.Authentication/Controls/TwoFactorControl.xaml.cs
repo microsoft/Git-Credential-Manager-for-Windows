@@ -1,4 +1,5 @@
 ﻿using System;
+using GitHub.Shared.Controls;
 
 namespace GitHub.UI
 {

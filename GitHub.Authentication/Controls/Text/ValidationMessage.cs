@@ -28,7 +28,7 @@ using System.Diagnostics;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Media;
-using GitHub.Authentication.ViewModels.Validation;
+using GitHub.Shared.ViewModels.Validation;
 
 namespace GitHub.UI
 {

@@ -23,12 +23,31 @@
  * WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE."
 **/
 
-namespace GitHub.Authentication.ViewModels
+using System;
+using System.Diagnostics;
+
+namespace GitHub.Shared.Helpers
 {
-    public enum AuthenticationDialogResult
+    /// <summary>
+    /// Command that opens a browser to the URL specified by the command parameter.
+    /// </summary>
+    public class HyperLinkCommand: ActionCommand
     {
-        None,
-        Ok,
-        Cancel
+        public HyperLinkCommand() : base(ExecuteNavigateUrl)
+        {
+        }
+
+        private static void ExecuteNavigateUrl(object parameter)
+        {
+            var commandParameter = parameter as string;
+            if (string.IsNullOrWhiteSpace(commandParameter)) return;
+
+            Uri navigateUrl;
+
+            if (Uri.TryCreate(commandParameter, UriKind.Absolute, out navigateUrl))
+            {
+                Process.Start(new ProcessStartInfo(navigateUrl.AbsoluteUri));
+            }
+        }
     }
 }

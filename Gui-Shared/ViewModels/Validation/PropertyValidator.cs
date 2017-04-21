@@ -29,7 +29,7 @@ using System.Diagnostics;
 using System.Linq.Expressions;
 using System.Reflection;
 
-namespace GitHub.Shared.Authentication.ViewModels.Validation
+namespace GitHub.Shared.ViewModels.Validation
 {
     public abstract class PropertyValidator: ViewModel
     {
@@ -49,6 +49,7 @@ namespace GitHub.Shared.Authentication.ViewModels.Validation
         }
 
         private PropertyValidationResult _validationResult = PropertyValidationResult.Unvalidated;
+
         /// <summary>
         /// The current validation result for this validator.
         /// </summary>
@@ -97,6 +98,7 @@ namespace GitHub.Shared.Authentication.ViewModels.Validation
         }
 
         private TProperty _currentValue;
+
         protected TProperty CurrentPropertyValue
         {
             get { return _currentValue; }

@@ -30,7 +30,7 @@ using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Input;
 
-namespace GitHub.Shared.Authentication.Helpers
+namespace GitHub.Shared.Helpers
 {
     public static class FocusHelper
     {

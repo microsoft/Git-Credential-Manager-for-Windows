@@ -27,7 +27,7 @@ using System.Windows;
 using System.Windows.Input;
 using System.Windows.Media;
 
-namespace GitHub.Helpers
+namespace GitHub.Shared.Helpers
 {
     /// <summary>
     /// Contains attached dependency properties to correct the scoping of access keys within the WPF framework.

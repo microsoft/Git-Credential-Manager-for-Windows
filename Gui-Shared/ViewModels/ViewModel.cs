@@ -23,33 +23,21 @@
  * WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE."
 **/
 
-using System;
-using System.Globalization;
-using System.Windows;
+using System.ComponentModel;
 
-namespace GitHub.UI
+namespace GitHub.Shared.ViewModels
 {
-    [Localizability(LocalizationCategory.NeverLocalize)]
-    public sealed class BooleanToVisibilityConverter: ValueConverterMarkupExtension<BooleanToVisibilityConverter>
+    /// <summary>
+    /// Rather than bring in all the overhead of an MVVM framework, we'll just do the simplest
+    /// possible thing.
+    /// </summary>
+    public class ViewModel: INotifyPropertyChanged
     {
-        private readonly System.Windows.Controls.BooleanToVisibilityConverter converter = new System.Windows.Controls.BooleanToVisibilityConverter();
+        public event PropertyChangedEventHandler PropertyChanged;
 
-        public override object Convert(
-            object value,
-            Type targetType,
-            object parameter,
-            CultureInfo culture)
+        protected void RaisePropertyChangedEvent(string propertyName)
         {
-            return converter.Convert(value, targetType, parameter, culture);
-        }
-
-        public override object ConvertBack(
-            object value,
-            Type targetType,
-            object parameter,
-            CultureInfo culture)
-        {
-            return converter.ConvertBack(value, targetType, parameter, culture);
+            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
         }
     }
 }

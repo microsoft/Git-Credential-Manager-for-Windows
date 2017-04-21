@@ -22,29 +22,13 @@
  * AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
  * WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE."
 **/
-using System;
-using System.Windows.Controls;
-using System.Windows.Threading;
 
-namespace GitHub.UI
+namespace GitHub.Shared.ViewModels.Validation
 {
-    public abstract class DialogUserControl: UserControl
+    public enum ValidationStatus
     {
-        protected DialogUserControl()
-        {
-            IsVisibleChanged += (s, e) =>
-            {
-                if (IsVisible)
-                {
-                    Dispatcher.BeginInvoke(DispatcherPriority.ContextIdle,
-                        new Action(delegate ()
-                        {
-                            SetFocus();
-                        }));
-                }
-            };
-        }
-
-        protected abstract void SetFocus();
+        Unvalidated = 0,
+        Invalid = 1,
+        Valid = 2,
     }
 }

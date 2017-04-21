@@ -4,7 +4,7 @@
                     xmlns:PresentationOptions="http://schemas.microsoft.com/winfx/2006/xaml/presentation/options"
                     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
                     xmlns:ui="clr-namespace:GitHub.UI"
-                    xmlns:helpers="clr-namespace:GitHub.Helpers"
+                    xmlns:helpers="clr-namespace:GitHub.Shared.Helpers"
                     mc:Ignorable="PresentationOptions">
 
     <!-- The blue accent color used through-out the app -->

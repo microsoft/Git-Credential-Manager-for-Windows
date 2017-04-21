@@ -29,7 +29,7 @@
                                 xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
                                 xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
                                 xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-                                xmlns:helpers="clr-namespace:GitHub.Shared.Authentication.Helpers"
+                                xmlns:helpers="clr-namespace:GitHub.Shared.Helpers"
                                 xmlns:controls="clr-namespace:Atlassian.Bitbucket.Authentication.Controls"
                                 xmlns:prop="clr-namespace:Atlassian.Bitbucket.Authentication.Properties"
                                 xmlns:coreControls="clr-namespace:GitHub.Shared.Controls"

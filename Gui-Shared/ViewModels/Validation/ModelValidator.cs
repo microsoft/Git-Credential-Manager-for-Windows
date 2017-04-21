@@ -23,24 +23,37 @@
  * WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE."
 **/
 
-namespace GitHub.Authentication.ViewModels
-{
-    public class DialogViewModel: ViewModel
-    {
-        private AuthenticationDialogResult _result = AuthenticationDialogResult.None;
+using System;
+using System.Linq;
 
-        public AuthenticationDialogResult Result
+namespace GitHub.Shared.ViewModels.Validation
+{
+    /// <summary>
+    /// A validator that represents the validation state of a model. It's true if all the supplied
+    /// property validators are true.
+    /// </summary>
+    public class ModelValidator: ViewModel
+    {
+        public ModelValidator(params PropertyValidator[] propertyValidators)
         {
-            get { return _result; }
-            protected set
+            if (propertyValidators == null) throw new ArgumentNullException(nameof(propertyValidators));
+
+            // Protect against mutations of the supplied array.
+            var validators = propertyValidators.ToList();
+
+            // This would be a lot cleaner with ReactiveUI but here we are.
+            foreach (var validator in validators)
             {
-                _result = value;
-                RaisePropertyChangedEvent(nameof(Result));
+                validator.PropertyChanged += (s, e) =>
+                {
+                    if (e.PropertyName != nameof(validator.ValidationResult)) return;
+
+                    IsValid = validators.All(v => v.ValidationResult.IsValid);
+                };
             }
         }
 
         private bool _isValid;
-
         public bool IsValid
         {
             get { return _isValid; }

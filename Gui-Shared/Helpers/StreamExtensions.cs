@@ -1,6 +1,6 @@
 ﻿/**** Git Credential Manager for Windows ****
  *
- * Copyright (c) GitHub Corporation
+ * Copyright (c) Atlassian
  * All rights reserved.
  *
  * MIT License
@@ -23,42 +23,17 @@
  * WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE."
 **/
 
-using System.ComponentModel;
-using System.Windows;
-using GitHub.Shared.Authentication.ViewModels;
+using System.IO;
+using System.Text;
 
-namespace GitHub.Shared.Controls
+namespace Atlassian.Shared.Helpers
 {
-    public abstract class AuthenticationDialogWindow: Window
+    public static class StreamExtensions
     {
-        protected AuthenticationDialogWindow()
+        public static void WriteStringUtf8(this Stream target, string value)
         {
-            DataContextChanged += (s, e) =>
-            {
-                var oldViewModel = e.OldValue as ViewModel;
-                if (oldViewModel != null)
-                {
-                    oldViewModel.PropertyChanged -= HandleDialogResult;
-                }
-                DataContext = e.NewValue;
-                if (DataContext != null)
-                {
-                    ((ViewModel)DataContext).PropertyChanged += HandleDialogResult;
-                }
-            };
-        }
-
-        private void HandleDialogResult(object sender, PropertyChangedEventArgs e)
-        {
-            var viewModel = sender as DialogViewModel;
-            if (viewModel == null) return;
-            if (e.PropertyName == nameof(DialogViewModel.Result))
-            {
-                if (viewModel.Result != AuthenticationDialogResult.None)
-                {
-                    Close();
-                }
-            }
+            var encoded = Encoding.UTF8.GetBytes(value);
+            target.Write(encoded, 0, encoded.Length);
         }
     }
 }

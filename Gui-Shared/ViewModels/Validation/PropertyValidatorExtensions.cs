@@ -1,7 +1,7 @@
 ﻿/**** Git Credential Manager for Windows ****
  *
  * Copyright (c) GitHub Corporation
- * All rights reserved.
+  * All rights reserved.
  *
  * MIT License
  *
@@ -24,28 +24,24 @@
 **/
 
 using System;
-using System.Globalization;
-using System.Windows;
 
-namespace GitHub.UI
+namespace GitHub.Shared.ViewModels.Validation
 {
-    [Localizability(LocalizationCategory.NeverLocalize)]
-    public sealed class BooleanToInverseHiddenVisibilityConverter: ValueConverterMarkupExtension<BooleanToInverseHiddenVisibilityConverter>
+    public static class PropertyValidatorExtensions
     {
-        public override object Convert(object value,
-            Type targetType,
-            object parameter,
-            CultureInfo culture)
+        public static PropertyValidator<string> Required(this PropertyValidator<string> validator, string errorMessage)
         {
-            return value is bool && (bool)value ? Visibility.Hidden : Visibility.Visible;
+            return validator.ValidIfTrue(value => !string.IsNullOrEmpty(value), errorMessage);
         }
 
-        public override object ConvertBack(object value,
-            Type targetType,
-            object parameter,
-            CultureInfo culture)
+        public static PropertyValidator<TProperty> ValidIfTrue<TProperty>(
+            this PropertyValidator<TProperty> validator,
+            Func<TProperty, bool> predicate,
+            string errorMessage)
         {
-            return value is Visibility && (Visibility)value != Visibility.Visible;
+            return new PropertyValidator<TProperty>(validator, value => predicate(value)
+                ? PropertyValidationResult.Success
+                : new PropertyValidationResult(ValidationStatus.Invalid, errorMessage));
         }
     }
 }

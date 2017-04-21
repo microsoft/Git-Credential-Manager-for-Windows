@@ -32,8 +32,8 @@ using System.Threading.Tasks;
 using System.Windows;
 using Atlassian.Bitbucket.Authentication.ViewModels;
 using Atlassian.Bitbucket.Authentication.Views;
-using GitHub.Shared.Authentication.ViewModels;
 using GitHub.Shared.Controls;
+using GitHub.Shared.ViewModels;
 using Microsoft.Alm.Authentication;
 using Trace = Microsoft.Alm.Git.Trace;
 

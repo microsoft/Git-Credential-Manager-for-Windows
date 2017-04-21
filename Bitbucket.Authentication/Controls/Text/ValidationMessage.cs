@@ -28,7 +28,7 @@ using System.Diagnostics;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Media;
-using GitHub.Shared.Authentication.ViewModels.Validation;
+using GitHub.Shared.ViewModels.Validation;
 
 namespace Atlassian.Bitbucket.Authentication.Controls.Text
 {

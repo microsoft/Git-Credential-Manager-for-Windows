@@ -25,9 +25,9 @@
 
 using System.Windows.Input;
 using Atlassian.Bitbucket.Authentication.Properties;
-using GitHub.Shared.Authentication.Helpers;
-using GitHub.Shared.Authentication.ViewModels;
-using GitHub.Shared.Authentication.ViewModels.Validation;
+using GitHub.Shared.Helpers;
+using GitHub.Shared.ViewModels;
+using GitHub.Shared.ViewModels.Validation;
 
 namespace Atlassian.Bitbucket.Authentication.ViewModels
 {

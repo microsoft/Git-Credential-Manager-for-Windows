@@ -23,30 +23,42 @@
  * WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE."
 **/
 
-using System;
-using System.Globalization;
+using System.ComponentModel;
 using System.Windows;
+using GitHub.Shared.ViewModels;
 
-namespace GitHub.UI
+namespace GitHub.Shared.Controls
 {
-    [Localizability(LocalizationCategory.NeverLocalize)]
-    public sealed class BooleanToHiddenVisibilityConverter: ValueConverterMarkupExtension<BooleanToHiddenVisibilityConverter>
+    public abstract class AuthenticationDialogWindow: Window
     {
-        public override object Convert(
-            object value,
-            Type targetType,
-            object parameter,
-            CultureInfo culture)
+        protected AuthenticationDialogWindow()
         {
-            return value is bool && (bool)value ? Visibility.Visible : Visibility.Hidden;
+            DataContextChanged += (s, e) =>
+            {
+                var oldViewModel = e.OldValue as ViewModel;
+                if (oldViewModel != null)
+                {
+                    oldViewModel.PropertyChanged -= HandleDialogResult;
+                }
+                DataContext = e.NewValue;
+                if (DataContext != null)
+                {
+                    ((ViewModel)DataContext).PropertyChanged += HandleDialogResult;
+                }
+            };
         }
 
-        public override object ConvertBack(object value,
-            Type targetType,
-            object parameter,
-            CultureInfo culture)
+        private void HandleDialogResult(object sender, PropertyChangedEventArgs e)
         {
-            return value is Visibility && (Visibility)value == Visibility.Visible;
+            var viewModel = sender as DialogViewModel;
+            if (viewModel == null) return;
+            if (e.PropertyName == nameof(DialogViewModel.Result))
+            {
+                if (viewModel.Result != AuthenticationDialogResult.None)
+                {
+                    Close();
+                }
+            }
         }
     }
 }

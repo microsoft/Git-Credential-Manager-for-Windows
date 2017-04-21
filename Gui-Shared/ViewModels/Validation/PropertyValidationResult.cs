@@ -23,7 +23,7 @@
  * WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE."
 **/
 
-namespace GitHub.Shared.Authentication.ViewModels.Validation
+namespace GitHub.Shared.ViewModels.Validation
 {
     public class PropertyValidationResult
     {
