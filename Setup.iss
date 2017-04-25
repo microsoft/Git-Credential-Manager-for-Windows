@@ -33,11 +33,11 @@
 #define Git4WinFile "Git-" + str(Git4WinVer) + "-64-bit.exe"
 #define Git4WinUrl "https://github.com/git-for-windows/git/releases/download/" + str(Git4WinVerLong) + "/" + str(Git4WinFile)
 #define Git4WinSpace 394309632
-#define NetFxName "The Microsoft .NET Framework 4.6.1"
+#define NetFxName "The Microsoft .NET Framework 4.6.2"
 #define NetFxBaseFile "NetFx40Installer.exe"
 #define NetFxBaseUrl "https://download.microsoft.com/download/1/B/E/1BE39E79-7E39-46A3-96FF-047F95396215/dotNetFx40_Full_setup.exe"
 #define NetFxCoreFile "NetFx46Installer.exe"
-#define NetFxCoreUrl "https://download.microsoft.com/download/3/5/9/35980F81-60F4-4DE3-88FC-8F962B97253B/NDP461-KB3102438-Web.exe"
+#define NetFxCoreUrl "https://download.microsoft.com/download/D/5/C/D5C98AB0-35CC-45D9-9BA5-B18256BA2AE6/NDP462-KB3151802-Web.exe"
 #define NetFxSpace 381005824
 
 [Setup]
@@ -90,7 +90,7 @@ Source: "{#deployDir}\Microsoft.IdentityModel.Clients.ActiveDirectory.dll"; Dest
 Source: "{#deployDir}\Microsoft.IdentityModel.Clients.ActiveDirectory.Platform.dll"; DestDir: "{app}"; Flags: ignoreversion
 Source: "{#deployDir}\Microsoft.Vsts.Authentication.dll"; DestDir: "{app}"; Flags: ignoreversion
 Source: "{#deployDir}\GitHub.Authentication.exe"; DestDir: "{app}"; Flags: ignoreversion
-Source: "{#deployDir}\Bitbucket.Authentication.exe"; DestDir: "{app}"; Flags: ignoreversion
+Source: "{#deployDir}\Bitbucket.Authentication.dll"; DestDir: "{app}"; Flags: ignoreversion
 Source: "{#deployDir}\README.md"; DestDir: "{app}"; Flags: ignoreversion
 Source: "{#deployDir}\git-credential-manager.html"; DestDir: "{app}"; Flags: ignoreversion
 Source: "{#deployDir}\git-askpass.html"; DestDir: "{app}"; Flags: ignoreversion
@@ -104,7 +104,9 @@ type NetFx_Version = (
    NetFx_v451, // .NET Framework 4.5.1
    NetFx_v452, // .NET Framework 4.5.2
    NetFx_v46,  // .NET Framework 4.6
-   NetFx_v461  // .NET Framework 4.6.1
+   NetFx_v461, // .NET Framework 4.6.1
+   NetFx_v462, // .NET Framework 4.6.2
+   NetFx_v47   // .NET Framework 4.7
 );
 
 function DetectGit(): Boolean;
@@ -185,6 +187,16 @@ begin
         end;
 
       if (NetFx_v461 = version) and (regVersion >= 394254) then
+        begin
+          Result := True;
+        end;
+
+      if (NetFx_v462 = version) and (regVersion >= 394802) then
+        begin
+          Result := True;
+        end;
+
+      if (NetFx_V47 = version) and (regVersion >= 460798) then
         begin
           Result := True;
         end;
