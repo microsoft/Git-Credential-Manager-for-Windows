@@ -1,4 +1,4 @@
-# Bitbucket Auth, 2FA and OAuth
+# Bitbucket Authentication, 2FA and OAuth
 
 By default for authenticating against private Git repositories Bitbucket supports SSH and username/password Basic Auth over HTTPS. Username/password Basic Auth over HTTPS is also available for REST api access. Additionally Bitbucket supports App-specific passwords which can be used via Basic Auth as username/app-pecific-password.
 
@@ -23,7 +23,7 @@ This means that the Bitbucket implementation in the GCM can support multiple acc
 # Authentication User Experience.
 When the GCM is triggered by Git, the GCM will check the 'host' parameter passed to it. If it contains 'bitbucket.org' it will trigger the Bitbucket related processes.
 
-## Basic Auth
+## Basic Authentication
 If the GCM needs to prompt the user for credentials they will always be shown an initial dialog where they can enter a username and password. If the 'username' parameter was passed into the GCM it is used to pre-populate the username field, although it can be overriden.
 
 When username and password credentials are submitted the GCM will use them to attempto retrieve a token, for Basic Auth this token is in effect the password the user just entered. The GCM retrieves this 'token' by checking the password can be used to successfully retrieve the User profile via the Bitbucket REST API. 
