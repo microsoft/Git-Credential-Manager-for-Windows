@@ -23,7 +23,7 @@
  * WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE."
 **/
 
-using Atlassian.Shared.Controls;
+using GitHub.Shared.Controls;
 
 namespace Atlassian.Bitbucket.Authentication.Controls
 {

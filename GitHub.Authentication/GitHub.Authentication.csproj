@@ -65,15 +65,10 @@
       <SubType>Designer</SubType>
     </ApplicationDefinition>
     <Compile Include="AuthenticationPrompts.cs" />
-    <Compile Include="Controls\AuthenticationDialogWindow.cs" />
     <Compile Include="Controls\CredentialsControl.xaml.cs">
       <DependentUpon>CredentialsControl.xaml</DependentUpon>
     </Compile>
-    <Compile Include="Controls\DialogUserControl.cs" />
-    <Compile Include="Controls\Text\PromptTextBox.cs" />
-    <Compile Include="Controls\Text\MaskedPasswordBox.cs" />
     <Compile Include="Controls\Text\ValidationMessage.cs" />
-    <Compile Include="Converters\BooleanToVisibilityConverter.cs" />
     <Compile Include="CredentialsWindow.xaml.cs">
       <DependentUpon>CredentialsWindow.xaml</DependentUpon>
     </Compile>
@@ -82,24 +77,14 @@
     <Compile Include="Authority.cs" />
     <Compile Include="TokenScope.cs" />
     <Compile Include="GlobalSuppressions.cs" />
-    <Compile Include="Helpers\ActionCommand.cs" />
     <Compile Include="Helpers\BindingProxy.cs" />
-    <Compile Include="Helpers\HyperLinkCommand.cs" />
     <Compile Include="IAuthentication.cs" />
     <Compile Include="IAuthority.cs" />
     <Compile Include="Tester.xaml.cs">
       <DependentUpon>Tester.xaml</DependentUpon>
     </Compile>
-    <Compile Include="ViewModels\AuthenticationDialogResult.cs" />
     <Compile Include="ViewModels\CredentialsViewModel.cs" />
-    <Compile Include="ViewModels\DialogViewModel.cs" />
     <Compile Include="ViewModels\TwoFactorViewModel.cs" />
-    <Compile Include="ViewModels\Validation\ModelValidator.cs" />
-    <Compile Include="ViewModels\Validation\PropertyValidationResult.cs" />
-    <Compile Include="ViewModels\Validation\PropertyValidator.cs" />
-    <Compile Include="ViewModels\Validation\PropertyValidatorExtensions.cs" />
-    <Compile Include="ViewModels\Validation\ValidationStatus.cs" />
-    <Compile Include="ViewModels\ViewModel.cs" />
     <Page Include="AppResources.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
@@ -175,13 +160,6 @@
     <Compile Include="Controls\TwoFactorInput.xaml.cs">
       <DependentUpon>TwoFactorInput.xaml</DependentUpon>
     </Compile>
-    <Compile Include="Converters\AspectRatioConverter.cs" />
-    <Compile Include="Converters\BooleanToHiddenVisibilityConverter.cs" />
-    <Compile Include="Converters\BooleanToInverseHiddenVisibilityConverter.cs" />
-    <Compile Include="Converters\ThicknessConverter.cs" />
-    <Compile Include="Converters\ValueConverterMarkupExtension.cs" />
-    <Compile Include="Helpers\AccessKeysManagerScoping.cs" />
-    <Compile Include="Helpers\FocusHelper.cs" />
     <Compile Include="Octicon.cs" />
     <Compile Include="Properties\Resources.Designer.cs">
       <AutoGen>True</AutoGen>
@@ -235,6 +213,8 @@
   <ItemGroup>
     <Resource Include="Assets\octocat-mark.ico" />
   </ItemGroup>
+  <ItemGroup />
+  <Import Project="..\Gui-Shared\Gui-Shared.projitems" Label="Shared" />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>
     <PostBuildEvent>

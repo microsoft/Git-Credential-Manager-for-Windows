@@ -24,8 +24,9 @@
 **/
 
 using System.Windows.Input;
-using GitHub.Authentication.Helpers;
 using GitHub.Authentication.Properties;
+using GitHub.Shared.Helpers;
+using GitHub.Shared.ViewModels;
 
 namespace GitHub.Authentication.ViewModels
 {

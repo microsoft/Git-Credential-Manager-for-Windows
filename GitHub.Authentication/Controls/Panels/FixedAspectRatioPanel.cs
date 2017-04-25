@@ -27,6 +27,7 @@ using System;
 using System.ComponentModel;
 using System.Windows;
 using System.Windows.Controls;
+using GitHub.Shared.Converters;
 
 namespace GitHub.UI
 {

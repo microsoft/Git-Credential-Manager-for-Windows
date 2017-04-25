@@ -1,0 +1,37 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <PropertyGroup>
+    <MSBuildAllProjects>$(MSBuildAllProjects);$(MSBuildThisFileFullPath)</MSBuildAllProjects>
+    <HasSharedItems>true</HasSharedItems>
+    <SharedGUID>4a4f5ada-7166-4799-bc7c-d5882637cf7a</SharedGUID>
+  </PropertyGroup>
+  <PropertyGroup Label="Configuration">
+    <Import_RootNamespace>Wpf_Shared</Import_RootNamespace>
+  </PropertyGroup>
+  <ItemGroup>
+    <Compile Include="$(MSBuildThisFileDirectory)Controls\AuthenticationDialogWindow.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Controls\DialogUserControl.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Controls\MaskedPasswordBox.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Controls\PromptTextBox.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Converters\AspectRatioConverter.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Converters\BooleanToHiddenVisibilityConverter.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Converters\BooleanToInverseHiddenVisibilityConverter.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Converters\BooleanToVisibilityConverter.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Converters\ThicknessConverter.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Converters\ValueConverterMarkupExtension.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Helpers\AccessKeysManagerScoping.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Helpers\ActionCommand.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Helpers\FocusHelper.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Helpers\HyperLinkCommand.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Helpers\StreamExtensions.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Helpers\TaskExtensions.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)ViewModels\AuthenticationDialogResult.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)ViewModels\DialogViewModel.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)ViewModels\Validation\ModelValidator.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)ViewModels\Validation\PropertyValidationResult.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)ViewModels\Validation\PropertyValidator.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)ViewModels\Validation\PropertyValidatorExtensions.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)ViewModels\Validation\ValidationStatus.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)ViewModels\ViewModel.cs" />
+  </ItemGroup>
+</Project>

@@ -30,7 +30,8 @@ using System.Threading;
 using System.Threading.Tasks;
 using System.Windows;
 using GitHub.Authentication.ViewModels;
-using GitHub.UI;
+using GitHub.Shared.Controls;
+using GitHub.Shared.ViewModels;
 using Microsoft.Alm.Authentication;
 using Git = Microsoft.Alm.Git;
 

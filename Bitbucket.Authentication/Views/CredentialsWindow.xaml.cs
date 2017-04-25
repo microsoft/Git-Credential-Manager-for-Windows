@@ -24,7 +24,7 @@
 **/
 
 using Atlassian.Bitbucket.Authentication.ViewModels;
-using Atlassian.Shared.Controls;
+using GitHub.Shared.Controls;
 
 namespace Atlassian.Bitbucket.Authentication.Views
 {
@@ -42,14 +42,14 @@ namespace Atlassian.Bitbucket.Authentication.Views
     /// prompted with a second UI to ask for OAuth authorisation <see cref="OAuthWindow"/>.
     /// </para>
     /// </summary>
-    public partial class CredentialsWindow: AuthenticationDialogWindow
+    partial class CredentialsWindow: AuthenticationDialogWindow
     {
         public CredentialsWindow()
         {
             InitializeComponent();
         }
 
-        public CredentialsViewModel ViewModel
+        internal CredentialsViewModel ViewModel
         {
             get { return DataContext as CredentialsViewModel; }
         }

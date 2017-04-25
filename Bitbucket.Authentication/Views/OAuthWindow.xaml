@@ -24,15 +24,15 @@
  * WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE."
 **/
 -->
-<coreControls:AuthenticationDialogWindow
+<sharedControls:AuthenticationDialogWindow
     x:Class="Atlassian.Bitbucket.Authentication.Views.OAuthWindow"
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     xmlns:controls="clr-namespace:Atlassian.Bitbucket.Authentication.Controls"
-    xmlns:vm="clr-namespace:Atlassian.Bitbucket.Authentication.ViewModels"
-    xmlns:coreControls="clr-namespace:Atlassian.Shared.Controls"
+    xmlns:viewmodels="clr-namespace:Atlassian.Bitbucket.Authentication.ViewModels"
+    xmlns:sharedControls="clr-namespace:GitHub.Shared.Controls"
     mc:Ignorable="d"
     Background="White"
     ResizeMode="NoResize"
@@ -43,9 +43,9 @@
     Width="420"
     Icon="pack://application:,,,/Bitbucket.Authentication;component/Assets/SourceTree.ico">
     <Window.DataContext>
-        <vm:OAuthViewModel />
+        <viewmodels:OAuthViewModel />
     </Window.DataContext>
     <Grid>
         <controls:OAuthControl x:Name="oauthControl" />
     </Grid>
-</coreControls:AuthenticationDialogWindow>
+</sharedControls:AuthenticationDialogWindow>

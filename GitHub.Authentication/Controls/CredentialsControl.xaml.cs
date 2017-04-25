@@ -1,5 +1,6 @@
 ﻿using System;
-using GitHub.Extensions;
+using GitHub.Shared.Controls;
+using GitHub.Shared.Helpers;
 
 namespace GitHub.UI
 {

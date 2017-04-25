@@ -29,7 +29,7 @@ using System.Net;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Windows;
-using Atlassian.Shared.Authentication.Helpers;
+using Atlassian.Shared.Helpers;
 
 namespace Atlassian.Bitbucket.Authentication.OAuth
 {
