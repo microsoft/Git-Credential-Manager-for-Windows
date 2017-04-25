@@ -1,16 +1,17 @@
 # Git Credential Manager for Windows [![Build status](https://ci.appveyor.com/api/projects/status/jl6oe1thiwv5s52o/branch/master?svg=true)](https://ci.appveyor.com/project/whoisj/git-credential-manager-for-windows/branch/master) [![Coverity Scan Build Status](https://scan.coverity.com/projects/11371/badge.svg)](https://scan.coverity.com/projects/git-credential-manager-for-windows)
 
-The [Git Credential Manager for Windows](https://github.com/Microsoft/Git-Credential-Manager-for-Windows) (GCM) provides secure Git credential storage for Windows. It's the successor to the [Windows Credential Store for Git](https://gitcredentialstore.codeplex.com/) (git-credential-winstore), which is no longer maintained. Compared to Git's built-in credential storage for Windows ([wincred](https://git-scm.com/book/en/v2/Git-Tools-Credential-Storage)), which provides single-factor authentication support working on any HTTP enabled Git repository, GCM provides multi-factor authentication support for [Visual Studio Team Services](https://www.visualstudio.com/), [Team Foundation Server](Docs/Faq.md#q-i-thought-microsoft-was-maintaining-this-why-does-the-gcm-not-work-as-expected-with-tfs), and GitHub.
+The [Git Credential Manager for Windows](https://github.com/Microsoft/Git-Credential-Manager-for-Windows) (GCM) provides secure Git credential storage for Windows. It's the successor to the [Windows Credential Store for Git](https://gitcredentialstore.codeplex.com/) (git-credential-winstore), which is no longer maintained. Compared to Git's built-in credential storage for Windows ([wincred](https://git-scm.com/book/en/v2/Git-Tools-Credential-Storage)), which provides single-factor authentication support working on any HTTP enabled Git repository, GCM provides multi-factor authentication support for [Visual Studio Team Services](https://www.visualstudio.com/), [Team Foundation Server](Docs/Faq.md#q-i-thought-microsoft-was-maintaining-this-why-does-the-gcm-not-work-as-expected-with-tfs), GitHub, and Bitbucket.
 
 This project includes:
 
-* Secure password storage in the Windows Credential Store
-* Multi-factor authentication support for Visual Studio Team Services
-* Two-factor authentication support for GitHub
-* Personal Access Token generation and usage support for Visual Studio Team Services and GitHub
-* Non-interactive mode support for Visual Studio Team Services backed by Azure Directory
-* Kerberos authentication for Team Foundation Server ([see notes](Docs/Faq.md#q-i-thought-microsoft-was-maintaining-this-why-does-the-gcm-not-work-as-expected-with-tfs))
-* Optional settings for [build agent optimization](Docs/Automation.md)
+* Secure password storage in the Windows Credential Store.
+* Multi-factor authentication support for Visual Studio Team Services.
+* Two-factor authentication support for GitHub.
+* Two-factor authentication support for Bitbucket.
+* Personal Access Token generation and usage support for Visual Studio Team Services and GitHub.
+* Non-interactive mode support for Visual Studio Team Services backed by Azure Directory..
+* NTLM/Kerberos authentication for Team Foundation Server ([see notes](Docs/Faq.md#q-i-thought-microsoft-was-maintaining-this-why-does-the-gcm-not-work-as-expected-with-tfs)).
+* Optional settings for [build agent optimization](Docs/Automation.md).
 
 ## Community
 
@@ -42,6 +43,7 @@ To build and install the GCM yourself, clone the sources, open the solution file
 * [Askpass Usage](Docs/Askpass.md)
 * [Configuration Options](Docs/Configuration.md)
 * [Build Agent and Automation Support](Docs/Automation.md)
+* [Bitbucket Specific Details][Docs/Bitbucket.md]
 * [Frequently Asked Questions](Docs/Faq.md)
 * [Development and Debugging](Docs/Development.md)
 
