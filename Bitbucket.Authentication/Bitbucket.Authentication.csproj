@@ -54,8 +54,6 @@
     <Compile Include="Controls\HorizontalShadowDivider.xaml.cs">
       <DependentUpon>HorizontalShadowDivider.xaml</DependentUpon>
     </Compile>
-    <Compile Include="Controls\Text\MaskedPasswordBox.cs" />
-    <Compile Include="Controls\Text\PromptTextBox.cs" />
     <Compile Include="Controls\Text\ValidationMessage.cs" />
     <Compile Include="TokenScope.cs" />
     <Compile Include="Controls\OAuthControl.xaml.cs">

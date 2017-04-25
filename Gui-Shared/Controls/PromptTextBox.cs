@@ -1,6 +1,6 @@
 ﻿/**** Git Credential Manager for Windows ****
  *
- * Copyright (c) Atlassian
+ * Copyright (c) GitHub Corporation
  * All rights reserved.
  *
  * MIT License
@@ -27,7 +27,7 @@ using System.ComponentModel;
 using System.Windows;
 using System.Windows.Controls;
 
-namespace Atlassian.Bitbucket.Authentication.Controls.Text
+namespace GitHub.Shared.Controls
 {
     public class PromptTextBox: TextBox
     {

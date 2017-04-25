@@ -11,6 +11,8 @@
   <ItemGroup>
     <Compile Include="$(MSBuildThisFileDirectory)Controls\AuthenticationDialogWindow.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Controls\DialogUserControl.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Controls\MaskedPasswordBox.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Controls\PromptTextBox.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Converters\AspectRatioConverter.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Converters\BooleanToHiddenVisibilityConverter.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Converters\BooleanToInverseHiddenVisibilityConverter.cs" />

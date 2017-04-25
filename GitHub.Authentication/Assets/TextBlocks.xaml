@@ -4,6 +4,7 @@
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
     xmlns:controls="clr-namespace:GitHub.UI"
+    xmlns:sharedControls="clr-namespace:GitHub.Shared.Controls"
     mc:Ignorable="d">
 
     <!-- TextBox -->
@@ -54,7 +55,7 @@
     <Style TargetType="{x:Type TextBox}" BasedOn="{StaticResource GitHubTextBox}" />
 
     <!-- RoundedPromptTextBox -->
-    <Style x:Key="RoundedPromptTextBox" TargetType="{x:Type controls:PromptTextBox}" BasedOn="{StaticResource GitHubTextBox}">
+    <Style x:Key="RoundedPromptTextBox" TargetType="{x:Type sharedControls:PromptTextBox}" BasedOn="{StaticResource GitHubTextBox}">
         <Setter Property="Background" Value="White" />
         <Setter Property="BorderBrush" Value="#D1D1D1" />
         <Setter Property="Foreground" Value="{DynamicResource GitHubTextBrush}" />
@@ -67,7 +68,7 @@
         <Setter Property="Height" Value="24" />
         <Setter Property="Template">
             <Setter.Value>
-                <ControlTemplate TargetType="{x:Type controls:PromptTextBox}">
+                <ControlTemplate TargetType="{x:Type sharedControls:PromptTextBox}">
                     <Grid>
                         <Border x:Name="Bd" CornerRadius="2" ClipToBounds="True" BorderBrush="{TemplateBinding BorderBrush}" BorderThickness="{TemplateBinding BorderThickness}" Background="{TemplateBinding Background}" SnapsToDevicePixels="True">
                             <Border CornerRadius="0" BorderBrush="Black" BorderThickness="0,1,0,0" Margin="2,-2,2,0" Opacity="0.4">

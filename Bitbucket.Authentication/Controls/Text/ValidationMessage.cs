@@ -30,7 +30,7 @@ using System.Windows.Controls;
 using System.Windows.Media;
 using GitHub.Shared.ViewModels.Validation;
 
-namespace Atlassian.Bitbucket.Authentication.Controls.Text
+namespace Atlassian.Bitbucket.Authentication.Controls
 {
     public class ValidationMessage: UserControl
     {

@@ -68,8 +68,6 @@
     <Compile Include="Controls\CredentialsControl.xaml.cs">
       <DependentUpon>CredentialsControl.xaml</DependentUpon>
     </Compile>
-    <Compile Include="Controls\Text\PromptTextBox.cs" />
-    <Compile Include="Controls\Text\MaskedPasswordBox.cs" />
     <Compile Include="Controls\Text\ValidationMessage.cs" />
     <Compile Include="CredentialsWindow.xaml.cs">
       <DependentUpon>CredentialsWindow.xaml</DependentUpon>
@@ -215,6 +213,7 @@
   <ItemGroup>
     <Resource Include="Assets\octocat-mark.ico" />
   </ItemGroup>
+  <ItemGroup />
   <Import Project="..\Gui-Shared\Gui-Shared.projitems" Label="Shared" />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>
