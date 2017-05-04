@@ -54,26 +54,23 @@ namespace Microsoft.Alm.Authentication
                     // Try the actual uri
                     string actualUrl = targetUri.ActualUri.ToString();
 
-                    using (var httpClientHandler = targetUri.HttpClientHandler)
+                    // Send off the HTTP requests and wait for them to complete
+                    var results = await Task.WhenAll(RequestAuthenticate(targetUri, queryUrl),
+                                                     RequestAuthenticate(targetUri, actualUrl));
+
+                    // If any of then returned true, then we're looking at a TFS server
+                    HashSet<AuthenticationHeaderValue> set = new HashSet<AuthenticationHeaderValue>();
+
+                    // combine the results into a unique set
+                    foreach (var result in results)
                     {
-                        // Send off the HTTP requests and wait for them to complete
-                        var results = await Task.WhenAll(RequestAuthenticate(queryUrl, httpClientHandler),
-                                                         RequestAuthenticate(actualUrl, httpClientHandler));
-
-                        // If any of then returned true, then we're looking at a TFS server
-                        HashSet<AuthenticationHeaderValue> set = new HashSet<AuthenticationHeaderValue>();
-
-                        // combine the results into a unique set
-                        foreach (var result in results)
+                        foreach (var item in result)
                         {
-                            foreach (var item in result)
-                            {
-                                set.Add(item);
-                            }
+                            set.Add(item);
                         }
-
-                        return set.ToArray();
                     }
+
+                    return set.ToArray();
                 }
                 catch (Exception exception)
                 {
@@ -90,25 +87,28 @@ namespace Microsoft.Alm.Authentication
                 && value.Scheme.Equals(NtlmHeader.Scheme, StringComparison.OrdinalIgnoreCase);
         }
 
-        private static async Task<AuthenticationHeaderValue[]> RequestAuthenticate(string targetUrl, HttpClientHandler httpClientHandler)
+        private static async Task<AuthenticationHeaderValue[]> RequestAuthenticate(TargetUri targetUri, string targetUrl)
         {
-            // configure the http client handler to not choose an authentication strategy for us
-            // because we want to deliver the complete payload to the caller
-            httpClientHandler.AllowAutoRedirect = false;
-            httpClientHandler.PreAuthenticate = false;
-            httpClientHandler.UseDefaultCredentials = false;
-
-            using (HttpClient client = new HttpClient(httpClientHandler))
+            using (var httpClientHandler = targetUri.HttpClientHandler)
             {
-                client.DefaultRequestHeaders.Add("User-Agent", Global.UserAgent);
-                client.Timeout = TimeSpan.FromMilliseconds(Global.RequestTimeout);
+                // configure the http client handler to not choose an authentication strategy for us
+                // because we want to deliver the complete payload to the caller
+                httpClientHandler.AllowAutoRedirect = false;
+                httpClientHandler.PreAuthenticate = false;
+                httpClientHandler.UseDefaultCredentials = false;
 
-                using (HttpResponseMessage response = await client.GetAsync(targetUrl, HttpCompletionOption.ResponseHeadersRead))
+                using (HttpClient client = new HttpClient(httpClientHandler))
                 {
-                    // Check for a WWW-Authenticate header with NTLM protocol specified
-                    return response.Headers.Contains("WWW-Authenticate")
-                        ? response.Headers.WwwAuthenticate.ToArray()
-                        : NullResult;
+                    client.DefaultRequestHeaders.Add("User-Agent", Global.UserAgent);
+                    client.Timeout = TimeSpan.FromMilliseconds(Global.RequestTimeout);
+
+                    using (HttpResponseMessage response = await client.GetAsync(targetUrl, HttpCompletionOption.ResponseHeadersRead))
+                    {
+                        // Check for a WWW-Authenticate header with NTLM protocol specified
+                        return response.Headers.Contains("WWW-Authenticate")
+                            ? response.Headers.WwwAuthenticate.ToArray()
+                            : NullResult;
+                    }
                 }
             }
         }

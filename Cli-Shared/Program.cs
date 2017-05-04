@@ -206,6 +206,151 @@ namespace Microsoft.Alm.Cli
         internal static void Exit(int exitcode = 0, string message = null)
             => _exitCallback(exitcode, message);
 
+        internal static void LoadOperationArguments(OperationArguments operationArguments)
+        {
+            if (operationArguments.TargetUri == null)
+            {
+                Die("No host information, unable to continue.");
+            }
+
+            string value;
+            bool? yesno;
+
+            if (TryReadBoolean(operationArguments, null, EnvironConfigNoLocalKey, out yesno))
+            {
+                operationArguments.UseConfigLocal = yesno.Value;
+            }
+
+            if (TryReadBoolean(operationArguments, null, EnvironConfigNoSystemKey, out yesno))
+            {
+                operationArguments.UseConfigSystem = yesno.Value;
+            }
+
+            // load/re-load the Git configuration after setting the use local/system config values
+            operationArguments.LoadConfiguration();
+
+            // if a user-agent has been specified in the environment, set it globally
+            if (TryReadString(operationArguments, null, EnvironHttpUserAgent, out value))
+            {
+                Global.UserAgent = value;
+            }
+
+            // look for authority settings
+            if (TryReadString(operationArguments, ConfigAuthorityKey, EnvironAuthorityKey, out value))
+            {
+                Git.Trace.WriteLine($"{ConfigAuthorityKey} = '{value}'.");
+
+                if (ConfigKeyComparer.Equals(value, "MSA")
+                        || ConfigKeyComparer.Equals(value, "Microsoft")
+                        || ConfigKeyComparer.Equals(value, "MicrosoftAccount")
+                        || ConfigKeyComparer.Equals(value, "Live")
+                        || ConfigKeyComparer.Equals(value, "LiveConnect")
+                        || ConfigKeyComparer.Equals(value, "LiveID"))
+                {
+                    operationArguments.Authority = AuthorityType.MicrosoftAccount;
+                }
+                else if (ConfigKeyComparer.Equals(value, "AAD")
+                         || ConfigKeyComparer.Equals(value, "Azure")
+                         || ConfigKeyComparer.Equals(value, "AzureDirectory"))
+                {
+                    operationArguments.Authority = AuthorityType.AzureDirectory;
+                }
+                else if (ConfigKeyComparer.Equals(value, "Integrated")
+                         || ConfigKeyComparer.Equals(value, "Windows")
+                         || ConfigKeyComparer.Equals(value, "TFS")
+                         || ConfigKeyComparer.Equals(value, "Kerberos")
+                         || ConfigKeyComparer.Equals(value, "NTLM")
+                         || ConfigKeyComparer.Equals(value, "SSO"))
+                {
+                    operationArguments.Authority = AuthorityType.Ntlm;
+                }
+                else if (ConfigKeyComparer.Equals(value, "GitHub"))
+                {
+                    operationArguments.Authority = AuthorityType.GitHub;
+                }
+                else
+                {
+                    operationArguments.Authority = AuthorityType.Basic;
+                }
+            }
+
+            // look for interactivity config settings
+            if (TryReadString(operationArguments, ConfigInteractiveKey, EnvironInteractiveKey, out value))
+            {
+                Git.Trace.WriteLine($"{EnvironInteractiveKey} = '{value}'.");
+
+                if (ConfigKeyComparer.Equals(value, "always")
+                    || ConfigKeyComparer.Equals(value, "true")
+                    || ConfigKeyComparer.Equals(value, "force"))
+                {
+                    operationArguments.Interactivity = Interactivity.Always;
+                }
+                else if (ConfigKeyComparer.Equals(value, "never")
+                         || ConfigKeyComparer.Equals(value, "false"))
+                {
+                    operationArguments.Interactivity = Interactivity.Never;
+                }
+            }
+
+            // look for credential validation config settings
+            if (TryReadBoolean(operationArguments, ConfigValidateKey, EnvironValidateKey, out yesno))
+            {
+                operationArguments.ValidateCredentials = yesno.Value;
+            }
+
+            // look for write log config settings
+            if (TryReadBoolean(operationArguments, ConfigWritelogKey, EnvironWritelogKey, out yesno))
+            {
+                operationArguments.WriteLog = yesno.Value;
+            }
+
+            // look for modal prompt config settings
+            if (TryReadBoolean(operationArguments, ConfigUseModalPromptKey, EnvironModalPromptKey, out yesno))
+            {
+                operationArguments.UseModalUi = yesno.Value;
+            }
+
+            // look for credential preservation config settings
+            if (TryReadBoolean(operationArguments, ConfigPreserveCredentialsKey, EnvironPreserveCredentialsKey, out yesno))
+            {
+                operationArguments.PreserveCredentials = yesno.Value;
+            }
+
+            // look for http path usage config settings
+            if (TryReadBoolean(operationArguments, ConfigUseHttpPathKey, null, out yesno))
+            {
+                operationArguments.UseHttpPath = yesno.Value;
+            }
+
+            // look for http proxy config settings
+            if (TryReadString(operationArguments, ConfigHttpProxyKey, EnvironHttpProxyKey, out value))
+            {
+                Git.Trace.WriteLine($"{ConfigHttpProxyKey} = '{value}'.");
+
+                operationArguments.SetProxy(value);
+            }
+            else
+            {
+                // check the git-config http.proxy setting just-in-case
+                Configuration.Entry entry;
+                if (operationArguments.GitConfiguration.TryGetEntry("http", operationArguments.QueryUri, "proxy", out entry)
+                    && !String.IsNullOrWhiteSpace(entry.Value))
+                {
+                    Git.Trace.WriteLine($"http.proxy = '{entry.Value}'.");
+
+                    operationArguments.SetProxy(entry.Value);
+                }
+            }
+
+            // look for custom namespace config settings
+            if (TryReadString(operationArguments, ConfigNamespaceKey, EnvironNamespaceKey, out value))
+            {
+                Git.Trace.WriteLine($"{ConfigNamespaceKey} = '{value}'.");
+
+                operationArguments.CustomNamespace = value;
+            }
+        }
+
         internal static void LogEvent(string message, EventLogEntryType eventType)
         {
             /*** try-squelch due to UAC issues which require a proper installer to work around ***/
@@ -217,6 +362,182 @@ namespace Microsoft.Alm.Cli
                 EventLog.WriteEntry(EventSource, message, eventType);
             }
             catch { /* squelch */ }
+        }
+
+        internal static Credential QueryCredentials(OperationArguments operationArguments)
+        {
+            if (ReferenceEquals(operationArguments, null))
+                throw new ArgumentNullException(nameof(operationArguments));
+            if (ReferenceEquals(operationArguments.TargetUri, null))
+                throw new ArgumentException("TargetUri property returned null", nameof(operationArguments));
+
+            var task = Task.Run(async () => { return await CreateAuthentication(operationArguments); });
+            BaseAuthentication authentication = task.Result;
+            Credential credentials = null;
+
+            switch (operationArguments.Authority)
+            {
+                default:
+                case AuthorityType.Basic:
+                    {
+                        BasicAuthentication basicAuth = authentication as BasicAuthentication;
+
+                        Task.Run(async () =>
+                        {
+                            // attempt to get cached creds or acquire creds if interactivity is allowed
+                            if ((operationArguments.Interactivity != Interactivity.Always
+                                    && (credentials = authentication.GetCredentials(operationArguments.TargetUri)) != null)
+                                || (operationArguments.Interactivity != Interactivity.Never
+                                    && (credentials = await basicAuth.AcquireCredentials(operationArguments.TargetUri)) != null))
+                            {
+                                Git.Trace.WriteLine("credentials found.");
+                                // no need to save the credentials explicitly, as Git will call back with
+                                // a store command if the credentials are valid.
+                            }
+                            else
+                            {
+                                Git.Trace.WriteLine($"credentials for '{operationArguments.TargetUri}' not found.");
+                                LogEvent($"Failed to retrieve credentials for '{operationArguments.TargetUri}'.", EventLogEntryType.FailureAudit);
+                            }
+                        }).Wait();
+                    }
+                    break;
+
+                case AuthorityType.AzureDirectory:
+                    {
+                        VstsAadAuthentication aadAuth = authentication as VstsAadAuthentication;
+
+                        Task.Run(async () =>
+                        {
+                            // attempt to get cached creds -> non-interactive logon -> interactive
+                            // logon note that AAD "credentials" are always scoped access tokens
+                            if (((operationArguments.Interactivity != Interactivity.Always
+                                    && ((credentials = aadAuth.GetCredentials(operationArguments.TargetUri)) != null)
+                                    && (!operationArguments.ValidateCredentials
+                                        || await aadAuth.ValidateCredentials(operationArguments.TargetUri, credentials))))
+                                || (operationArguments.Interactivity != Interactivity.Always
+                                    && ((credentials = await aadAuth.NoninteractiveLogon(operationArguments.TargetUri, true)) != null)
+                                    && (!operationArguments.ValidateCredentials
+                                        || await aadAuth.ValidateCredentials(operationArguments.TargetUri, credentials)))
+                                || (operationArguments.Interactivity != Interactivity.Never
+                                    && ((credentials = await aadAuth.InteractiveLogon(operationArguments.TargetUri, true)) != null)
+                                    && (!operationArguments.ValidateCredentials
+                                        || await aadAuth.ValidateCredentials(operationArguments.TargetUri, credentials))))
+                            {
+                                Git.Trace.WriteLine($"credentials for '{operationArguments.TargetUri}' found.");
+                                LogEvent($"Azure Directory credentials  for '{operationArguments.TargetUri}' successfully retrieved.", EventLogEntryType.SuccessAudit);
+                            }
+                            else
+                            {
+                                Git.Trace.WriteLine($"credentials for '{operationArguments.TargetUri}' not found.");
+                                LogEvent($"Failed to retrieve Azure Directory credentials for '{operationArguments.TargetUri}'.", EventLogEntryType.FailureAudit);
+                            }
+                        }).Wait();
+                    }
+                    break;
+
+                case AuthorityType.MicrosoftAccount:
+                    {
+                        VstsMsaAuthentication msaAuth = authentication as VstsMsaAuthentication;
+
+                        Task.Run(async () =>
+                        {
+                            // attempt to get cached creds -> interactive logon note that MSA
+                            // "credentials" are always scoped access tokens
+                            if (((operationArguments.Interactivity != Interactivity.Always
+                                    && ((credentials = msaAuth.GetCredentials(operationArguments.TargetUri)) != null)
+                                    && (!operationArguments.ValidateCredentials
+                                        || await msaAuth.ValidateCredentials(operationArguments.TargetUri, credentials))))
+                                || (operationArguments.Interactivity != Interactivity.Never
+                                    && ((credentials = await msaAuth.InteractiveLogon(operationArguments.TargetUri, true)) != null)
+                                    && (!operationArguments.ValidateCredentials
+                                        || await msaAuth.ValidateCredentials(operationArguments.TargetUri, credentials))))
+                            {
+                                Git.Trace.WriteLine($"credentials for '{operationArguments.TargetUri}' found.");
+                                LogEvent($"Microsoft Live credentials for '{operationArguments.TargetUri}' successfully retrieved.", EventLogEntryType.SuccessAudit);
+                            }
+                            else
+                            {
+                                Git.Trace.WriteLine($"credentials for '{operationArguments.TargetUri}' not found.");
+                                LogEvent($"Failed to retrieve Microsoft Live credentials for '{operationArguments.TargetUri}'.", EventLogEntryType.FailureAudit);
+                            }
+                        }).Wait();
+                    }
+                    break;
+
+                case AuthorityType.GitHub:
+                    {
+                        Github.Authentication ghAuth = authentication as Github.Authentication;
+
+                        Task.Run(async () =>
+                        {
+                            if ((operationArguments.Interactivity != Interactivity.Always
+                                    && ((credentials = ghAuth.GetCredentials(operationArguments.TargetUri)) != null)
+                                    && (!operationArguments.ValidateCredentials
+                                        || await ghAuth.ValidateCredentials(operationArguments.TargetUri, credentials)))
+                                || (operationArguments.Interactivity != Interactivity.Never
+                                    && ((credentials = await ghAuth.InteractiveLogon(operationArguments.TargetUri)) != null)
+                                    && (!operationArguments.ValidateCredentials
+                                        || await ghAuth.ValidateCredentials(operationArguments.TargetUri, credentials))))
+                            {
+                                Git.Trace.WriteLine($"credentials for '{operationArguments.TargetUri}' found.");
+                                LogEvent($"GitHub credentials for '{operationArguments.TargetUri}' successfully retrieved.", EventLogEntryType.SuccessAudit);
+                            }
+                            else
+                            {
+                                Git.Trace.WriteLine($"credentials for '{operationArguments.TargetUri}' not found.");
+                                LogEvent($"Failed to retrieve GitHub credentials for '{operationArguments.TargetUri}'.", EventLogEntryType.FailureAudit);
+                            }
+                        }).Wait();
+                    }
+                    break;
+
+                case AuthorityType.Bitbucket:
+                    {
+                        var bbcAuth = authentication as Bitbucket.Authentication;
+
+                        Task.Run(async () =>
+                        {
+                            if (((operationArguments.Interactivity != Interactivity.Always)
+                                 && ((credentials = bbcAuth.GetCredentials(operationArguments.TargetUri, operationArguments.CredUsername)) != null)
+                                 && (!operationArguments.ValidateCredentials
+                                     || ((credentials = await bbcAuth.ValidateCredentials(operationArguments.TargetUri, operationArguments.CredUsername, credentials)) != null)))
+                                     || ((operationArguments.Interactivity != Interactivity.Never)
+                                        && ((credentials = await bbcAuth.InteractiveLogon(operationArguments.TargetUri, operationArguments.CredUsername)) != null)
+                                        && (!operationArguments.ValidateCredentials
+                                            || ((credentials = await bbcAuth.ValidateCredentials(operationArguments.TargetUri, operationArguments.CredUsername, credentials)) != null))))
+                            {
+                                Git.Trace.WriteLine($"credentials for '{operationArguments.TargetUri}' found.");
+                                // Bitbucket relies on a username + secret, so make sure there is a
+                                // username to return
+                                if (operationArguments.CredUsername != null)
+                                {
+                                    credentials = new Credential(operationArguments.CredUsername, credentials.Password);
+                                }
+                                LogEvent($"Bitbucket credentials for '{operationArguments.TargetUri}' successfully retrieved.", EventLogEntryType.SuccessAudit);
+                            }
+                            else
+                            {
+                                LogEvent($"Failed to retrieve Bitbucket credentials for '{operationArguments.TargetUri}'.", EventLogEntryType.FailureAudit);
+                            }
+                        }).Wait();
+                    }
+                    break;
+
+                case AuthorityType.Ntlm:
+                    {
+                        Git.Trace.WriteLine($"'{operationArguments.TargetUri}' is NTLM.");
+                        credentials = BasicAuthentication.NtlmCredentials;
+                    }
+                    break;
+            }
+
+            if (credentials != null)
+            {
+                operationArguments.SetCredentials(credentials);
+            }
+
+            return credentials;
         }
 
         internal static ConsoleKeyInfo ReadKey(bool intercept = true)
@@ -545,151 +866,6 @@ namespace Microsoft.Alm.Cli
                     var bbAuth = authentication as Bitbucket.Authentication;
                     bbAuth.DeleteCredentials(operationArguments.TargetUri, operationArguments.CredUsername);
                     break;
-            }
-        }
-
-        internal static void LoadOperationArguments(OperationArguments operationArguments)
-        {
-            if (operationArguments.TargetUri == null)
-            {
-                Die("No host information, unable to continue.");
-            }
-
-            string value;
-            bool? yesno;
-
-            if (TryReadBoolean(operationArguments, null, EnvironConfigNoLocalKey, out yesno))
-            {
-                operationArguments.UseConfigLocal = yesno.Value;
-            }
-
-            if (TryReadBoolean(operationArguments, null, EnvironConfigNoSystemKey, out yesno))
-            {
-                operationArguments.UseConfigSystem = yesno.Value;
-            }
-
-            // load/re-load the Git configuration after setting the use local/system config values
-            operationArguments.LoadConfiguration();
-
-            // if a user-agent has been specified in the environment, set it globally
-            if (TryReadString(operationArguments, null, EnvironHttpUserAgent, out value))
-            {
-                Global.UserAgent = value;
-            }
-
-            // look for authority settings
-            if (TryReadString(operationArguments, ConfigAuthorityKey, EnvironAuthorityKey, out value))
-            {
-                Git.Trace.WriteLine($"{ConfigAuthorityKey} = '{value}'.");
-
-                if (ConfigKeyComparer.Equals(value, "MSA")
-                        || ConfigKeyComparer.Equals(value, "Microsoft")
-                        || ConfigKeyComparer.Equals(value, "MicrosoftAccount")
-                        || ConfigKeyComparer.Equals(value, "Live")
-                        || ConfigKeyComparer.Equals(value, "LiveConnect")
-                        || ConfigKeyComparer.Equals(value, "LiveID"))
-                {
-                    operationArguments.Authority = AuthorityType.MicrosoftAccount;
-                }
-                else if (ConfigKeyComparer.Equals(value, "AAD")
-                         || ConfigKeyComparer.Equals(value, "Azure")
-                         || ConfigKeyComparer.Equals(value, "AzureDirectory"))
-                {
-                    operationArguments.Authority = AuthorityType.AzureDirectory;
-                }
-                else if (ConfigKeyComparer.Equals(value, "Integrated")
-                         || ConfigKeyComparer.Equals(value, "Windows")
-                         || ConfigKeyComparer.Equals(value, "TFS")
-                         || ConfigKeyComparer.Equals(value, "Kerberos")
-                         || ConfigKeyComparer.Equals(value, "NTLM")
-                         || ConfigKeyComparer.Equals(value, "SSO"))
-                {
-                    operationArguments.Authority = AuthorityType.Ntlm;
-                }
-                else if (ConfigKeyComparer.Equals(value, "GitHub"))
-                {
-                    operationArguments.Authority = AuthorityType.GitHub;
-                }
-                else
-                {
-                    operationArguments.Authority = AuthorityType.Basic;
-                }
-            }
-
-            // look for interactivity config settings
-            if (TryReadString(operationArguments, ConfigInteractiveKey, EnvironInteractiveKey, out value))
-            {
-                Git.Trace.WriteLine($"{EnvironInteractiveKey} = '{value}'.");
-
-                if (ConfigKeyComparer.Equals(value, "always")
-                    || ConfigKeyComparer.Equals(value, "true")
-                    || ConfigKeyComparer.Equals(value, "force"))
-                {
-                    operationArguments.Interactivity = Interactivity.Always;
-                }
-                else if (ConfigKeyComparer.Equals(value, "never")
-                         || ConfigKeyComparer.Equals(value, "false"))
-                {
-                    operationArguments.Interactivity = Interactivity.Never;
-                }
-            }
-
-            // look for credential validation config settings
-            if (TryReadBoolean(operationArguments, ConfigValidateKey, EnvironValidateKey, out yesno))
-            {
-                operationArguments.ValidateCredentials = yesno.Value;
-            }
-
-            // look for write log config settings
-            if (TryReadBoolean(operationArguments, ConfigWritelogKey, EnvironWritelogKey, out yesno))
-            {
-                operationArguments.WriteLog = yesno.Value;
-            }
-
-            // look for modal prompt config settings
-            if (TryReadBoolean(operationArguments, ConfigUseModalPromptKey, EnvironModalPromptKey, out yesno))
-            {
-                operationArguments.UseModalUi = yesno.Value;
-            }
-
-            // look for credential preservation config settings
-            if (TryReadBoolean(operationArguments, ConfigPreserveCredentialsKey, EnvironPreserveCredentialsKey, out yesno))
-            {
-                operationArguments.PreserveCredentials = yesno.Value;
-            }
-
-            // look for http path usage config settings
-            if (TryReadBoolean(operationArguments, ConfigUseHttpPathKey, null, out yesno))
-            {
-                operationArguments.UseHttpPath = yesno.Value;
-            }
-
-            // look for http proxy config settings
-            if (TryReadString(operationArguments, ConfigHttpProxyKey, EnvironHttpProxyKey, out value))
-            {
-                Git.Trace.WriteLine($"{ConfigHttpProxyKey} = '{value}'.");
-
-                operationArguments.SetProxy(value);
-            }
-            else
-            {
-                // check the git-config http.proxy setting just-in-case
-                Configuration.Entry entry;
-                if (operationArguments.GitConfiguration.TryGetEntry("http", operationArguments.QueryUri, "proxy", out entry)
-                    && !String.IsNullOrWhiteSpace(entry.Value))
-                {
-                    Git.Trace.WriteLine($"http.proxy = '{entry.Value}'.");
-
-                    operationArguments.SetProxy(entry.Value);
-                }
-            }
-
-            // look for custom namespace config settings
-            if (TryReadString(operationArguments, ConfigNamespaceKey, EnvironNamespaceKey, out value))
-            {
-                Git.Trace.WriteLine($"{ConfigNamespaceKey} = '{value}'.");
-
-                operationArguments.CustomNamespace = value;
             }
         }
 
@@ -1095,204 +1271,6 @@ namespace Microsoft.Alm.Cli
         private static void PrintVersion()
         {
             Program.WriteLine($"{Title} version {Version.ToString(3)}");
-        }
-
-        private static bool QueryCredentials(OperationArguments operationArguments)
-        {
-            const string AadMsaAuthFailureMessage = "Logon failed, use ctrl+c to cancel basic credential prompt.";
-            const string BasicAuthFaulureMessage = "Logon failed, use ctrl+c to cancel basic credential prompt.";
-            const string GitHubAuthFailureMessage = "Logon failed, use ctrl+c to cancel basic credential prompt.";
-            const string BitbucketAuthFailureMessage = "Logon failed, use ctrl+c to cancel basic credential prompt.";
-
-            if (ReferenceEquals(operationArguments, null))
-                throw new ArgumentNullException(nameof(operationArguments));
-            if (ReferenceEquals(operationArguments.TargetUri, null))
-                throw new ArgumentException("TargetUri property returned null", nameof(operationArguments));
-
-            bool credentialsFound = false;
-            var task = Task.Run(async () => { return await CreateAuthentication(operationArguments); });
-            BaseAuthentication authentication = task.Result;
-            Credential credentials = null;
-
-            switch (operationArguments.Authority)
-            {
-                default:
-                case AuthorityType.Basic:
-                    {
-                        BasicAuthentication basicAuth = authentication as BasicAuthentication;
-
-                        Task.Run(async () =>
-                        {
-                            // attempt to get cached creds or acquire creds if interactivity is allowed
-                            if ((operationArguments.Interactivity != Interactivity.Always
-                                    && (credentials = authentication.GetCredentials(operationArguments.TargetUri)) != null)
-                                || (operationArguments.Interactivity != Interactivity.Never
-                                    && (credentials = await basicAuth.AcquireCredentials(operationArguments.TargetUri)) != null))
-                            {
-                                Git.Trace.WriteLine("credentials found.");
-                                // set the credentials object no need to save the credentials
-                                // explicitly, as Git will call back with a store command if the
-                                // credentials are valid.
-                                operationArguments.SetCredentials(credentials);
-                                credentialsFound = true;
-                            }
-                            else
-                            {
-                                Git.Trace.WriteLine($"credentials for '{operationArguments.TargetUri}' not found.");
-                                Program.WriteLine(BasicAuthFaulureMessage);
-                                LogEvent($"Failed to retrieve credentials for '{operationArguments.TargetUri}'.", EventLogEntryType.FailureAudit);
-                            }
-                        }).Wait();
-                    }
-                    break;
-
-                case AuthorityType.AzureDirectory:
-                    {
-                        VstsAadAuthentication aadAuth = authentication as VstsAadAuthentication;
-
-                        Task.Run(async () =>
-                        {
-                            // attempt to get cached creds -> non-interactive logon -> interactive
-                            // logon note that AAD "credentials" are always scoped access tokens
-                            if (((operationArguments.Interactivity != Interactivity.Always
-                                    && ((credentials = aadAuth.GetCredentials(operationArguments.TargetUri)) != null)
-                                    && (!operationArguments.ValidateCredentials
-                                        || await aadAuth.ValidateCredentials(operationArguments.TargetUri, credentials))))
-                                || (operationArguments.Interactivity != Interactivity.Always
-                                    && ((credentials = await aadAuth.NoninteractiveLogon(operationArguments.TargetUri, true)) != null)
-                                    && (!operationArguments.ValidateCredentials
-                                        || await aadAuth.ValidateCredentials(operationArguments.TargetUri, credentials)))
-                                || (operationArguments.Interactivity != Interactivity.Never
-                                    && ((credentials = await aadAuth.InteractiveLogon(operationArguments.TargetUri, true)) != null)
-                                    && (!operationArguments.ValidateCredentials
-                                        || await aadAuth.ValidateCredentials(operationArguments.TargetUri, credentials))))
-                            {
-                                Git.Trace.WriteLine($"credentials for '{operationArguments.TargetUri}' found.");
-                                operationArguments.SetCredentials(credentials);
-                                credentialsFound = true;
-                                LogEvent($"Azure Directory credentials  for '{operationArguments.TargetUri}' successfully retrieved.", EventLogEntryType.SuccessAudit);
-                            }
-                            else
-                            {
-                                Git.Trace.WriteLine($"credentials for '{operationArguments.TargetUri}' not found.");
-                                Program.WriteLine(AadMsaAuthFailureMessage);
-                                LogEvent($"Failed to retrieve Azure Directory credentials for '{operationArguments.TargetUri}'.", EventLogEntryType.FailureAudit);
-                            }
-                        }).Wait();
-                    }
-                    break;
-
-                case AuthorityType.MicrosoftAccount:
-                    {
-                        VstsMsaAuthentication msaAuth = authentication as VstsMsaAuthentication;
-
-                        Task.Run(async () =>
-                        {
-                            // attempt to get cached creds -> interactive logon note that MSA
-                            // "credentials" are always scoped access tokens
-                            if (((operationArguments.Interactivity != Interactivity.Always
-                                    && ((credentials = msaAuth.GetCredentials(operationArguments.TargetUri)) != null)
-                                    && (!operationArguments.ValidateCredentials
-                                        || await msaAuth.ValidateCredentials(operationArguments.TargetUri, credentials))))
-                                || (operationArguments.Interactivity != Interactivity.Never
-                                    && ((credentials = await msaAuth.InteractiveLogon(operationArguments.TargetUri, true)) != null)
-                                    && (!operationArguments.ValidateCredentials
-                                        || await msaAuth.ValidateCredentials(operationArguments.TargetUri, credentials))))
-                            {
-                                Git.Trace.WriteLine($"credentials for '{operationArguments.TargetUri}' found.");
-                                operationArguments.SetCredentials(credentials);
-                                credentialsFound = true;
-                                LogEvent($"Microsoft Live credentials for '{operationArguments.TargetUri}' successfully retrieved.", EventLogEntryType.SuccessAudit);
-                            }
-                            else
-                            {
-                                Git.Trace.WriteLine($"credentials for '{operationArguments.TargetUri}' not found.");
-                                Program.WriteLine(AadMsaAuthFailureMessage);
-                                LogEvent($"Failed to retrieve Microsoft Live credentials for '{operationArguments.TargetUri}'.", EventLogEntryType.FailureAudit);
-                            }
-                        }).Wait();
-                    }
-                    break;
-
-                case AuthorityType.GitHub:
-                    {
-                        Github.Authentication ghAuth = authentication as Github.Authentication;
-
-                        Task.Run(async () =>
-                        {
-                            if ((operationArguments.Interactivity != Interactivity.Always
-                                    && ((credentials = ghAuth.GetCredentials(operationArguments.TargetUri)) != null)
-                                    && (!operationArguments.ValidateCredentials
-                                        || await ghAuth.ValidateCredentials(operationArguments.TargetUri, credentials)))
-                                || (operationArguments.Interactivity != Interactivity.Never
-                                    && ((credentials = await ghAuth.InteractiveLogon(operationArguments.TargetUri)) != null)
-                                    && (!operationArguments.ValidateCredentials
-                                        || await ghAuth.ValidateCredentials(operationArguments.TargetUri, credentials))))
-                            {
-                                Git.Trace.WriteLine($"credentials for '{operationArguments.TargetUri}' found.");
-                                operationArguments.SetCredentials(credentials);
-                                credentialsFound = true;
-                                LogEvent($"GitHub credentials for '{operationArguments.TargetUri}' successfully retrieved.", EventLogEntryType.SuccessAudit);
-                            }
-                            else
-                            {
-                                Git.Trace.WriteLine($"credentials for '{operationArguments.TargetUri}' not found.");
-                                Program.WriteLine(GitHubAuthFailureMessage);
-                                LogEvent($"Failed to retrieve GitHub credentials for '{operationArguments.TargetUri}'.", EventLogEntryType.FailureAudit);
-                            }
-                        }).Wait();
-                    }
-                    break;
-
-                case AuthorityType.Bitbucket:
-                    {
-                        var bbcAuth = authentication as Bitbucket.Authentication;
-
-                        Task.Run(async () =>
-                        {
-                            if (((operationArguments.Interactivity != Interactivity.Always)
-                                 && ((credentials = bbcAuth.GetCredentials(operationArguments.TargetUri, operationArguments.CredUsername)) != null)
-                                 && (!operationArguments.ValidateCredentials
-                                     || ((credentials = await bbcAuth.ValidateCredentials(operationArguments.TargetUri, operationArguments.CredUsername, credentials)) != null)))
-                                || ((operationArguments.Interactivity != Interactivity.Never)
-                                    && ((credentials = await bbcAuth.InteractiveLogon(operationArguments.TargetUri, operationArguments.CredUsername)) != null)
-                                    && (!operationArguments.ValidateCredentials
-                                        || ((credentials = await bbcAuth.ValidateCredentials(operationArguments.TargetUri, operationArguments.CredUsername, credentials)) != null))))
-                            {
-                                Git.Trace.WriteLine($"credentials for '{operationArguments.TargetUri}' found.");
-                                // Bitbucket relies on a username + secret, so make sure there is a
-                                // username to return
-                                if (operationArguments.CredUsername != null)
-                                {
-                                    var c2 = new Credential(operationArguments.CredUsername, credentials.Password);
-                                    operationArguments.SetCredentials(c2);
-                                }
-                                else
-                                {
-                                    operationArguments.SetCredentials(credentials);
-                                }
-                                credentialsFound = true;
-                                LogEvent($"Bitbucket credentials for '{operationArguments.TargetUri}' successfully retrieved.", EventLogEntryType.SuccessAudit);
-                            }
-                            else
-                            {
-                                Program.WriteLine(BitbucketAuthFailureMessage);
-                                LogEvent($"Failed to retrieve Bitbucket credentials for '{operationArguments.TargetUri}'.", EventLogEntryType.FailureAudit);
-                            }
-                        }).Wait();
-                    }
-                    break;
-
-                case AuthorityType.Ntlm:
-                    {
-                        Git.Trace.WriteLine($"'{operationArguments.TargetUri}' is NTLM.");
-                        operationArguments.SetCredentials(BasicAuthentication.NtlmCredentials);
-                        credentialsFound = true;
-                    }
-                    break;
-            }
-
-            return credentialsFound;
         }
 
         private static bool StandardHandleIsTty(NativeMethods.StandardHandleType handleType)
