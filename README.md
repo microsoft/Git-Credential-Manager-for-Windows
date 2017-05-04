@@ -43,7 +43,7 @@ To build and install the GCM yourself, clone the sources, open the solution file
 * [Askpass Usage](Docs/Askpass.md)
 * [Configuration Options](Docs/Configuration.md)
 * [Build Agent and Automation Support](Docs/Automation.md)
-* [Bitbucket Specific Details][Docs/Bitbucket.md]
+* [Bitbucket Specific Details](Docs/Bitbucket.md)
 * [Frequently Asked Questions](Docs/Faq.md)
 * [Development and Debugging](Docs/Development.md)
 
