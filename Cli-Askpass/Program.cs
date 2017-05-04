@@ -34,14 +34,60 @@ namespace Microsoft.Alm.Cli
 {
     internal partial class Program
     {
-        public const string Title = "SSH Key Manager for Windows";
-        public const string Description = "Secure SSH key helper for Windows, by Microsoft";
+        public const string Title = "Askpass Utility for Windows";
+        public const string Description = "Secure askpass utility for Windows, by Microsoft";
         public const string DefinitionUrlPassphrase = "https://www.visualstudio.com/docs/git/gcm-ssh-passphrase";
 
         private static readonly Regex AskCredentialRegex = new Regex(@"(\S+)\s+for\s+['""]([^'""]+)['""]:\s*", RegexOptions.Compiled | RegexOptions.CultureInvariant | RegexOptions.IgnoreCase);
         private static readonly Regex AskPassphraseRegex = new Regex(@"Enter\s+passphrase\s*for\s*key\s*['""]([^'""]+)['""]\:\s*", RegexOptions.Compiled | RegexOptions.CultureInvariant | RegexOptions.IgnoreCase);
         private static readonly Regex AskPasswordRegex = new Regex(@"(\S+)'s\s+password:\s*", RegexOptions.Compiled | RegexOptions.CultureInvariant | RegexOptions.IgnoreCase);
         private static readonly Regex AskAuthenticityRegex = new Regex(@"^\s*The authenticity of host '([^']+)' can't be established.\s+RSA key fingerprint is ([^\s:]+:[^\.]+).", RegexOptions.Compiled | RegexOptions.CultureInvariant | RegexOptions.IgnoreCase);
+
+        internal static bool TryParseUrlCredentials(string targetUrl, out string username, out string password)
+        {
+            // config stored credentials come in the format of <username>[:<password>]@<url>
+            // with password being optional scheme terminator is actually "://" so we need
+            // adjust to get the correct index
+            int schemeTerminator = targetUrl.IndexOf(':') + 2;
+            int credentialTerminator = targetUrl.IndexOf('@', schemeTerminator + 1);
+
+            if (credentialTerminator > 0)
+            {
+                // only check within the credential portion of the url, don't look past the
+                // '@' because the port token is the same as the username / password seperator.
+                int credentialLength = credentialTerminator - schemeTerminator;
+                credentialLength = Math.Max(0, credentialLength);
+
+                // Now that we have a proper set of bounds for the credentials portion of the url,
+                // check for a username:password pair.
+                int passwordTerminator = targetUrl.IndexOf(':', schemeTerminator + 1, credentialLength);
+
+                if (passwordTerminator > 0)
+                {
+                    username = targetUrl.Substring(schemeTerminator + 1, passwordTerminator - schemeTerminator - 1);
+                    password = targetUrl.Substring(passwordTerminator + 1, credentialTerminator - passwordTerminator + 1);
+
+                    // Unescape credentials
+                    username = Uri.UnescapeDataString(username);
+                    password = Uri.UnescapeDataString(password);
+                }
+                else
+                {
+                    username = targetUrl.Substring(schemeTerminator + 1, credentialTerminator - schemeTerminator - 1);
+                    password = null;
+
+                    // Unescape credentials
+                    username = Uri.UnescapeDataString(username);
+                }
+
+                return true;
+            }
+
+            username = null;
+            password = null;
+
+            return false;
+        }
 
         private static void Askpass(string[] args)
         {
@@ -86,12 +132,12 @@ namespace Microsoft.Alm.Cli
                     return;
                 }
 
-                Git.Trace.WriteLine("failed to interactively acquire credentials.");
+                Die("failed to interactively acquire credentials.");
             }
 
             if ((match = AskCredentialRegex.Match(args[0])).Success)
             {
-                Git.Trace.WriteLine("querying for HTTPS credentials.");
+                Git.Trace.WriteLine("querying for basic credentials.");
 
                 if (match.Groups.Count < 3)
                     throw new ArgumentException("Unable to understand command.");
@@ -99,49 +145,18 @@ namespace Microsoft.Alm.Cli
                 string seeking = match.Groups[1].Value;
                 string targetUrl = match.Groups[2].Value;
 
-                Uri targetUri;
-
-                if (Uri.TryCreate(targetUrl, UriKind.Absolute, out targetUri))
+                // Since we're looking for HTTP(s) credentials, we can use NetFx `Uri` class.
+                if (Uri.TryCreate(targetUrl, UriKind.Absolute, out Uri targetUri))
                 {
                     Git.Trace.WriteLine($"success parsing URL, targetUri = '{targetUri}'.");
 
-                    // config stored credentials come in the format of <username>[:<password>]@<url>
-                    // with password being optional scheme terminator is actually "://" so we need
-                    // adjust to get the correct index
-                    int schemeTerminator = targetUrl.IndexOf(':') + 2;
-                    int credentialTerminator = targetUrl.IndexOf('@', schemeTerminator + 1);
-
-                    if (credentialTerminator > 0)
+                    if (TryParseUrlCredentials(targetUrl, out string username, out string password))
                     {
-                        Git.Trace.WriteLine("'@' symbol found in URL, assuming credential prefix.");
-
-                        string username = null;
-                        string password = null;
-
-                        // only check within the credential portion of the url, don't look past the
-                        // '@' because the port token is the same as the username / password seperator.
-                        int credentialLength = credentialTerminator - schemeTerminator;
-                        credentialLength = Math.Max(0, credentialLength);
-
-                        int passwordTerminator = targetUrl.IndexOf(':', schemeTerminator + 1, credentialLength);
-
-                        if (passwordTerminator > 0)
+                        if (password != null
+                            && seeking.Equals("Password", StringComparison.OrdinalIgnoreCase))
                         {
-                            Git.Trace.WriteLine("':' symbol found in URL, assuming credential prefix contains password.");
-
-                            username = targetUrl.Substring(schemeTerminator + 1, passwordTerminator - schemeTerminator - 1);
-                            password = targetUrl.Substring(passwordTerminator + 1, credentialTerminator - passwordTerminator + 1);
-
-                            // print the password if it sought
-                            if (seeking.Equals("Password", StringComparison.OrdinalIgnoreCase))
-                            {
-                                Console.Out.Write(password + '\n');
-                                return;
-                            }
-                        }
-                        else
-                        {
-                            username = targetUrl.Substring(schemeTerminator + 1, credentialTerminator - schemeTerminator - 1);
+                            Console.Out.Write(password + '\n');
+                            return;
                         }
 
                         // print the username if it sought
@@ -154,7 +169,17 @@ namespace Microsoft.Alm.Cli
 
                     // create a target Url with the credential portion stripped, because Git doesn't
                     // report hosts with credentials
-                    targetUrl = String.Format(System.Globalization.CultureInfo.InvariantCulture, "{0}://{1}", targetUri.Scheme, targetUri.Host);
+                    targetUrl = targetUri.Scheme + "://";
+
+                    // Add the username@ portion of the url if it exists
+                    if (username != null)
+                    {
+                        targetUrl += Uri.EscapeDataString(username);
+
+                        targetUrl += '@';
+                    }
+
+                    targetUrl += targetUri.Host;
 
                     // retain the port if specified
                     if (!targetUri.IsDefaultPort)
@@ -173,6 +198,7 @@ namespace Microsoft.Alm.Cli
                         Git.Trace.WriteLine($"success parsing URL, targetUri = '{targetUri}'.");
 
                         OperationArguments operationArguments = new OperationArguments.Impl(targetUri);
+                        operationArguments.SetCredentials(username, password);
 
                         // load up the operation arguments, enable tracing, and query for credentials
                         LoadOperationArguments(operationArguments);
@@ -196,6 +222,11 @@ namespace Microsoft.Alm.Cli
                                 return;
                             }
                         }
+                        else
+                        {
+                            Git.Trace.WriteLine($"user cancelled credential dialog.");
+                            return;
+                        }
                     }
                     else
                     {
@@ -207,7 +238,7 @@ namespace Microsoft.Alm.Cli
                     Git.Trace.WriteLine("error: unable to parse supplied URL.");
                 }
 
-                Git.Trace.WriteLine($"failed to detect {seeking} in target URL.");
+                Die($"failed to detect {seeking} in target URL.");
             }
 
             if ((match = AskAuthenticityRegex.Match(args[0])).Success)
@@ -235,7 +266,7 @@ namespace Microsoft.Alm.Cli
                 return;
             }
 
-            Git.Trace.WriteLine("failed to acquire credentials.");
+            Die("failed to acquire credentials.");
         }
 
         [STAThread]

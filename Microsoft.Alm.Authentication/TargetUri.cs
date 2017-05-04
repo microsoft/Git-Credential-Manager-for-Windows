@@ -209,7 +209,44 @@ namespace Microsoft.Alm.Authentication
         /// <returns></returns>
         public override string ToString()
         {
-            return QueryUri.ToString();
+            return ToString(false, true, true);
+        }
+
+        public string ToString(bool username = false, bool port = false, bool path = false)
+        {
+            // Start building up a url with the scheme
+            var url = QueryUri.Scheme + "://";
+
+            // Append the username if asked for an it exiusts.
+            if (username && QueryUri.UserInfo != null)
+            {
+                url += (QueryUri.UserEscaped)
+                        ? QueryUri.UserInfo
+                        : Uri.EscapeDataString(QueryUri.UserInfo);
+                url += '@';
+            }
+
+            // Append the host name
+            url += QueryUri.Host;
+
+            // Append the port information if asked for and relevant
+            if ((port && !QueryUri.IsDefaultPort))
+            {
+                url += ':';
+                url += QueryUri.Port;
+            }
+
+            // Append some amount of path to the url
+            if (path)
+            {
+                url += QueryUri.AbsolutePath;
+            }
+            else
+            {
+                url += '/';
+            }
+
+            return url;
         }
 
         /// <summary>

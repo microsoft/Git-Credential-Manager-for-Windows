@@ -143,6 +143,12 @@ namespace Microsoft.Alm.Authentication
                 }
             }
 
+            // If credentials have been acquired, write them to the secret store.
+            if (credentials != null)
+            {
+                _credentialStore.WriteCredentials(targetUri, credentials);
+            }
+
             return credentials;
         }
 
