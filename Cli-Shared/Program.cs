@@ -991,7 +991,20 @@ namespace Microsoft.Alm.Cli
 
         private static Credential ModalPromptForCredentials(TargetUri targetUri)
         {
-            string message = String.Format("Enter your credentials for {0}.", targetUri);
+            string message = String.Format("Enter your credentials for {0}.", targetUri.ToString(port: true, path: true));
+
+            if (!string.IsNullOrEmpty(targetUri.ActualUri.UserInfo))
+            {
+                string username = targetUri.ActualUri.UserInfo;
+
+                if (!targetUri.ActualUri.UserEscaped)
+                {
+                    username = Uri.UnescapeDataString(username);
+                }
+
+                return ModalPromptForPassword(targetUri, message, username);
+            }
+
             return ModalPromptForCredentials(targetUri, message);
         }
 
@@ -1029,7 +1042,7 @@ namespace Microsoft.Alm.Cli
                 NativeMethods.CredPackAuthenticationBuffer(flags: authPackage,
                                                            username: username,
                                                            password: String.Empty,
-                                                           packedCredentials: inBufferPtr,
+                                                           packedCredentials: IntPtr.Zero,
                                                            packedCredentialsSize: ref inBufferSize);
                 if (inBufferSize <= 0)
                 {

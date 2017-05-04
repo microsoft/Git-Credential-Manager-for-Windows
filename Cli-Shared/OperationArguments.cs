@@ -161,6 +161,13 @@ namespace Microsoft.Alm.Cli
         public virtual void SetCredentials(Credential credentials)
             => throw new NotImplementedException();
 
+        public virtual void SetCredentials(string username, string password)
+        {
+            var credentials = new Credential(username, password);
+
+            SetCredentials(credentials);
+        }
+
         public virtual void SetProxy(string url)
             => throw new NotImplementedException();
 
@@ -275,23 +282,25 @@ namespace Microsoft.Alm.Cli
                     throw new ArgumentNullException("targetUri");
 
                 _queryProtocol = targetUri.Scheme;
-                _queryHost = targetUri.Host;
+                _queryHost = (targetUri.IsDefaultPort)
+                    ? targetUri.Host
+                    : String.Format(System.Globalization.CultureInfo.InvariantCulture, "{0}:{1}", targetUri.Host, targetUri.Port);
                 _queryPath = targetUri.AbsolutePath;
 
-                this.CreateTargetUri();
+                CreateTargetUri();
             }
 
             private Impl()
             {
-                this.Authority = AuthorityType.Auto;
-                this.Interactivity = Interactivity.Auto;
-                this.UseModalUi = true;
-                this.ValidateCredentials = true;
-                this.WriteLog = false;
                 _preserveCredentials = false;
                 _useHttpPath = false;
                 _useLocalConfig = true;
                 _useSystemConfig = true;
+                Authority = AuthorityType.Auto;
+                Interactivity = Interactivity.Auto;
+                UseModalUi = true;
+                ValidateCredentials = true;
+                WriteLog = false;
             }
 
             private AuthorityType _authorityType;
@@ -489,6 +498,8 @@ namespace Microsoft.Alm.Cli
             {
                 _username = credentials.Username;
                 _password = credentials.Password;
+
+                CreateTargetUri();
             }
 
             public sealed override void SetProxy(string url)
@@ -561,47 +572,73 @@ namespace Microsoft.Alm.Cli
             {
                 string actualUrl = null;
                 string queryUrl = null;
-                string proxyUrl = _proxyUri?.ToString();
+                string proxyUrl = _proxyUri?.OriginalString;
 
                 // when the target requests a path...
                 if (UseHttpPath)
                 {
                     // and lacks a protocol...
-                    if (String.IsNullOrWhiteSpace(_queryProtocol))
+                    if (string.IsNullOrWhiteSpace(_queryProtocol))
                     {
                         // and the target lacks a path: use just the host
-                        if ((String.IsNullOrWhiteSpace(_queryPath)))
+                        if ((string.IsNullOrWhiteSpace(_queryPath)))
                         {
-                            queryUrl = _queryHost;
+                            queryUrl = $"{_queryHost}/";
+
+                            // if the username is known, include it in the actual url
+                            if (!string.IsNullOrEmpty(_username))
+                            {
+                                var escapedUsername = Uri.EscapeDataString(_username);
+                                actualUrl = $"{escapedUsername}@{_queryHost}/";
+                            }
                         }
                         // combine the host + path
                         else
                         {
                             queryUrl = $"{_queryHost}/{_queryPath}";
+
+                            // if the username is known, include it in the actual url
+                            if (!string.IsNullOrEmpty(_username))
+                            {
+                                var escapedUsername = Uri.EscapeDataString(_username);
+                                actualUrl = $"{escapedUsername}@{_queryHost}/{_queryPath}";
+                            }
                         }
                     }
                     // and has a protocol...
                     else
                     {
                         // and the target lacks a path, combine protocol + host
-                        if (String.IsNullOrWhiteSpace(_queryPath))
+                        if (string.IsNullOrWhiteSpace(_queryPath))
                         {
-                            queryUrl = $"{_queryProtocol}://{_queryHost}";
+                            queryUrl = $"{_queryProtocol}://{_queryHost}/";
+
+                            // if the username is known, include it in the actual url
+                            if (!string.IsNullOrEmpty(_username))
+                            {
+                                var escapedUsername = Uri.EscapeDataString(_username);
+                                actualUrl = $"{_queryProtocol}://{escapedUsername}@{_queryHost}/";
+                            }
                         }
                         // combine protocol + host + path
                         else
                         {
                             queryUrl = $"{_queryProtocol}://{_queryHost}/{_queryPath}";
+
+                            // if the username is known, include it in the actual url
+                            if (!string.IsNullOrEmpty(_username))
+                            {
+                                var escapedUsername = Uri.EscapeDataString(_username);
+                                actualUrl = $"{_queryProtocol}://{escapedUsername}@{_queryHost}/{_queryPath}";
+                            }
                         }
                     }
-
-                    actualUrl = queryUrl;
                 }
                 // when the target ignores paths...
                 else
                 {
                     // and lacks a protocol...
-                    if (String.IsNullOrWhiteSpace(_queryProtocol))
+                    if (string.IsNullOrWhiteSpace(_queryProtocol))
                     {
                         // and the host starts with "\\", strip the path...
                         if (_queryHost.StartsWith(@"\\", StringComparison.Ordinal))
@@ -610,20 +647,41 @@ namespace Microsoft.Alm.Cli
                             queryUrl = (idx > 0)
                                 ? _queryHost.Substring(0, idx)
                                 : _queryHost;
+
+                            queryUrl += '/';
+
+                            // if the username is known, include it in the actual url
+                            if (string.IsNullOrEmpty(_username))
+                            {
+                                actualUrl = queryUrl;
+                            }
+                            else
+                            {
+                                var escapedUsername = Uri.EscapeDataString(_username);
+                                actualUrl = $"{_queryProtocol}://{escapedUsername}@{_queryHost}/";
+                            }
                         }
                         // use just the host
                         else
                         {
-                            queryUrl = _queryHost;
+                            queryUrl = $"{_queryHost}/";
+
+                            // if the username is known, include it in the actual url
+                            if (string.IsNullOrEmpty(_username))
+                            {
+                                actualUrl = queryUrl;
+                            }
+                            else
+                            {
+                                var escapedUsername = Uri.EscapeDataString(_username);
+                                actualUrl = $"{_queryProtocol}://{escapedUsername}@{_queryHost}/";
+                            }
                         }
 
-                        if (String.IsNullOrWhiteSpace(_queryPath))
+                        // append path information in the actual url, but avoid empty paths
+                        if (!string.IsNullOrWhiteSpace(_queryPath) && _queryPath.Length > 1)
                         {
-                            actualUrl = queryUrl;
-                        }
-                        else
-                        {
-                            actualUrl = $"{queryUrl}/{_queryPath}";
+                            actualUrl += _queryPath;
                         }
                     }
                     // and the protocol is "file://" strip any path
@@ -637,26 +695,53 @@ namespace Microsoft.Alm.Cli
                             : _queryHost;
 
                         // combine with protocol
-                        queryUrl = $"{_queryProtocol}://{queryUrl}";
+                        queryUrl = $"{_queryProtocol}://{queryUrl}/";
 
-                        actualUrl = queryUrl;
-                    }
-                    // combine the protocol + host
-                    else
-                    {
-                        queryUrl = $"{_queryProtocol}://{_queryHost}";
-
-                        if (String.IsNullOrWhiteSpace(_queryPath))
+                        // if the username is known, include it in the actual url
+                        if (string.IsNullOrEmpty(_username))
                         {
                             actualUrl = queryUrl;
                         }
                         else
                         {
-                            actualUrl = $"{queryUrl}/{_queryPath}";
+                            var escapedUsername = Uri.EscapeDataString(_username);
+                            actualUrl = $"{_queryProtocol}://{escapedUsername}@{_queryHost}/";
+                        }
+
+                        // append path information in the actual url, but avoid empty paths
+                        if (!string.IsNullOrWhiteSpace(_queryPath) && _queryPath.Length > 1)
+                        {
+                            actualUrl += _queryPath;
+                        }
+                    }
+                    // combine the protocol + host
+                    else
+                    {
+                        queryUrl = $"{_queryProtocol}://{_queryHost}/";
+
+                        // if the username is known, include it in the actual url
+                        if (string.IsNullOrEmpty(_username))
+                        {
+                            actualUrl = queryUrl;
+                        }
+                        else
+                        {
+                            var escapedUsername = Uri.EscapeDataString(_username);
+                            actualUrl = $"{_queryProtocol}://{escapedUsername}@{_queryHost}/";
+                        }
+
+                        // append path information in the actual url, but avoid empty paths
+                        if (!string.IsNullOrWhiteSpace(_queryPath) && _queryPath.Length > 1)
+                        {
+                            actualUrl += _queryPath;
                         }
                     }
                 }
 
+                // take the query url if the actual url is still unset
+                actualUrl = actualUrl ?? queryUrl;
+
+                // Create the target uri object
                 _targetUri = new TargetUri(actualUrl, queryUrl, proxyUrl);
             }
         }
