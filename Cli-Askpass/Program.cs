@@ -29,6 +29,7 @@ using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Text.RegularExpressions;
+using Microsoft.Alm.Authentication;
 
 namespace Microsoft.Alm.Cli
 {
@@ -178,13 +179,14 @@ namespace Microsoft.Alm.Cli
                         LoadOperationArguments(operationArguments);
                         EnableTraceLogging(operationArguments);
 
-                        if (QueryCredentials(operationArguments))
+                        Credential credentials;
+                        if ((credentials = QueryCredentials(operationArguments)) != null)
                         {
                             if (seeking.Equals("Username", StringComparison.OrdinalIgnoreCase))
                             {
                                 Git.Trace.WriteLine($"username for '{targetUrl}' asked for and found.");
 
-                                Console.Out.Write(operationArguments.CredUsername + '\n');
+                                Console.Out.Write(credentials.Username + '\n');
                                 return;
                             }
 
@@ -192,7 +194,7 @@ namespace Microsoft.Alm.Cli
                             {
                                 Git.Trace.WriteLine($"password for '{targetUrl}' asked for and found.");
 
-                                Console.Out.Write(operationArguments.CredPassword + '\n');
+                                Console.Out.Write(credentials.Password + '\n');
                                 return;
                             }
                         }

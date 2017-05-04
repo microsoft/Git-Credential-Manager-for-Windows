@@ -33,6 +33,7 @@ using Microsoft.Alm.Authentication;
 
 namespace Microsoft.Alm.Cli
 {
+    [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA1806:DoNotIgnoreMethodResults")]
     internal partial class Program
     {
         public const string Title = "Git Credential Manager for Windows";
@@ -69,7 +70,6 @@ namespace Microsoft.Alm.Cli
             CommandVersion
         };
 
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA1806:DoNotIgnoreMethodResults", MessageId = "System.Boolean.TryParse(System.String,System.Boolean@)")]
         private static void Clear()
         {
             var args = Environment.GetCommandLineArgs();
@@ -254,11 +254,17 @@ namespace Microsoft.Alm.Cli
                 LoadOperationArguments(operationArguments);
                 EnableTraceLogging(operationArguments);
 
-                QueryCredentials(operationArguments);
-
-                using (var stdout = Console.OpenStandardOutput())
+                Credential credentials;
+                if ((credentials = QueryCredentials(operationArguments)) == null)
                 {
-                    operationArguments.WriteToStream(stdout);
+                    Exit(-1, "Logon failed, use ctrl+c to cancel basic credential prompt.");
+                }
+                else
+                {
+                    using (var stdout = Console.OpenStandardOutput())
+                    {
+                        operationArguments.WriteToStream(stdout);
+                    }
                 }
             }
         }
