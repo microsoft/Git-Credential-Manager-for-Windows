@@ -81,11 +81,11 @@ namespace Microsoft.Alm.Authentication
 
                         File.WriteAllBytes(_cacheFilePath, data);
 
-                        this.HasStateChanged = false;
+                        HasStateChanged = false;
                     }
                     catch (Exception exception)
                     {
-                        Git.Trace.WriteLine($"! {exception.Message}");
+                        Git.Trace.WriteLine($"error: {nameof(VstsAdalTokenCache)} \"{_cacheFilePath}\": {exception.Message}");
                     }
                 }
             }
@@ -103,11 +103,11 @@ namespace Microsoft.Alm.Authentication
 
                         byte[] state = ProtectedData.Unprotect(data, null, DataProtectionScope.CurrentUser);
 
-                        this.Deserialize(state);
+                        Deserialize(state);
                     }
                     catch (Exception exception)
                     {
-                        Git.Trace.WriteLine($"! {exception.Message}");
+                        Git.Trace.WriteLine($"error: {nameof(VstsAdalTokenCache)} \"{_cacheFilePath}\": {exception.Message}");
                     }
                 }
             }
