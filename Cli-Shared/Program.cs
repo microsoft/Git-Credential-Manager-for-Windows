@@ -733,15 +733,16 @@ namespace Microsoft.Alm.Cli
 
                     // detect the authority
                     authority = await BaseVstsAuthentication.GetAuthentication(operationArguments.TargetUri,
-                                                                         VstsCredentialScope,
-                                                                         secrets)
+                                                                               VstsCredentialScope,
+                                                                               secrets)
                              ?? Github.Authentication.GetAuthentication(operationArguments.TargetUri,
                                                                        GitHubCredentialScope,
                                                                        secrets,
                                                                        githubCredentialCallback,
                                                                        githubAuthcodeCallback,
                                                                        null)
-                            ?? Bitbucket.Authentication.GetAuthentication(operationArguments.TargetUri, secrets,
+                            ?? Bitbucket.Authentication.GetAuthentication(operationArguments.TargetUri,
+                                                                          new SecretStore(secretsNamespace, Secret.UriToUrl),
                                                                           bitbucketCredentialCallback,
                                                                           bitbucketOauthCallback);
 
