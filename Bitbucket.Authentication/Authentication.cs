@@ -137,9 +137,10 @@ namespace Atlassian.Bitbucket.Authentication
         /// <param name="targetUri"></param>
         /// <param name="username"></param>
         /// <returns></returns>
-        private TargetUri GetPerUserTargetUri(TargetUri targetUri, string username)
+        public TargetUri GetPerUserTargetUri(TargetUri targetUri, string username)
         {
-            if (string.IsNullOrWhiteSpace(username))
+            // belt and braces, don't add a username if the URI already contains one.
+            if (string.IsNullOrWhiteSpace(username) || TargetUriContainsUsername(targetUri))
             {
                 return targetUri;
             }
@@ -281,7 +282,7 @@ namespace Atlassian.Bitbucket.Authentication
         /// <returns>a valid instance of <see cref="Credential"/> or null</returns>
         public async Task<Credential> InteractiveLogon(TargetUri targetUri, string username)
         {
-            if (string.IsNullOrWhiteSpace(username))
+            if (string.IsNullOrWhiteSpace(username) || TargetUriContainsUsername(targetUri))
             {
                 return await InteractiveLogon(targetUri);
             }
@@ -409,7 +410,16 @@ namespace Atlassian.Bitbucket.Authentication
             BaseSecureStore.ValidateTargetUri(targetUri);
             BaseSecureStore.ValidateCredential(credentials);
 
-            var userSpecificTargetUri = GetPerUserTargetUri(targetUri, username);
+            TargetUri userSpecificTargetUri;
+            if (TargetUriContainsUsername(targetUri))
+            {
+                userSpecificTargetUri = targetUri;
+            }
+            else
+            {
+                userSpecificTargetUri = GetPerUserTargetUri(targetUri, username);
+            }
+
 
             if (await BitbucketAuthority.ValidateCredentials(userSpecificTargetUri, username, credentials))
             {

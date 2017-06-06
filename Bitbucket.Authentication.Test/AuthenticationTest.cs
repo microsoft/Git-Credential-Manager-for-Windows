@@ -3,11 +3,12 @@ using System.Collections.Generic;
 using System.Linq;
 using Microsoft.Alm.Authentication;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
+using System.Net;
 
 namespace Atlassian.Bitbucket.Authentication.Test
 {
     [TestClass]
-    public class BitbucketAuthenticationTest
+    public class AuthenticationTest
     {
         [TestMethod]
         public void VerifyBitbucketOrgIsIdentified()
@@ -101,6 +102,56 @@ namespace Atlassian.Bitbucket.Authentication.Test
             var bbAuth = new Authentication(credentialStore, null, null);
 
             bbAuth.DeleteCredentials(null);
+        }
+
+        [TestMethod]
+        public void VerifyGetPerUserTargetUriInsertsMissingUsernameToActualUri()
+        {
+            var credentialStore = new MockCredentialStore();
+            var bbAuth = new Authentication(credentialStore, null, null);
+
+            var targetUri = new TargetUri("https://example.com");
+            var username = "johnsquire";
+
+            var resultUri = bbAuth.GetPerUserTargetUri(targetUri, username);
+
+            Assert.AreEqual("/", resultUri.AbsolutePath);
+            Assert.AreEqual("https://johnsquire@example.com/", resultUri.ActualUri.AbsoluteUri);
+            Assert.AreEqual("example.com", resultUri.DnsSafeHost);
+            Assert.AreEqual("example.com", resultUri.Host);
+            Assert.AreEqual(true, resultUri.IsAbsoluteUri);
+            Assert.AreEqual(true, resultUri.IsDefaultPort);
+            Assert.AreEqual(443, resultUri.Port);
+            Assert.AreEqual(null, resultUri.ProxyUri);
+            Assert.AreEqual("https://johnsquire@example.com/", resultUri.QueryUri.AbsoluteUri);
+            Assert.AreEqual("https", resultUri.Scheme);
+            Assert.AreEqual(new WebProxy().Address, resultUri.WebProxy.Address);
+            Assert.AreEqual("https://example.com/", resultUri.ToString());
+        }
+
+        [TestMethod]
+        public void VerifyGetPerUserTargetUriDoesNotDuplicateUsernameOnActualUri()
+        {
+            var credentialStore = new MockCredentialStore();
+            var bbAuth = new Authentication(credentialStore, null, null);
+
+            var targetUri = new TargetUri("https://johnsquire@example.com");
+            var username = "johnsquire";
+
+            var resultUri = bbAuth.GetPerUserTargetUri(targetUri, username);
+
+            Assert.AreEqual("/", resultUri.AbsolutePath);
+            Assert.AreEqual("https://johnsquire@example.com/", resultUri.ActualUri.AbsoluteUri);
+            Assert.AreEqual("example.com", resultUri.DnsSafeHost);
+            Assert.AreEqual("example.com", resultUri.Host);
+            Assert.AreEqual(true, resultUri.IsAbsoluteUri);
+            Assert.AreEqual(true, resultUri.IsDefaultPort);
+            Assert.AreEqual(443, resultUri.Port);
+            Assert.AreEqual(null, resultUri.ProxyUri);
+            Assert.AreEqual("https://johnsquire@example.com/", resultUri.QueryUri.AbsoluteUri);
+            Assert.AreEqual("https", resultUri.Scheme);
+            Assert.AreEqual(new WebProxy().Address, resultUri.WebProxy.Address);
+            Assert.AreEqual("https://example.com/", resultUri.ToString());
         }
     }
 
