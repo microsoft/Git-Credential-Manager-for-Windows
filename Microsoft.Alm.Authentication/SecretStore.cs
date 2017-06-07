@@ -57,6 +57,10 @@ namespace Microsoft.Alm.Authentication
             _tokenCache = tokenCache ?? new SecretCache(@namespace, _getTargetName);
         }
 
+        public SecretStore(string @namespace, Secret.UriNameConversion getTargetName)
+            : this(@namespace, null, null, getTargetName)
+        { }
+
         public SecretStore(string @namespace)
             : this(@namespace, null, null, null)
         { }
