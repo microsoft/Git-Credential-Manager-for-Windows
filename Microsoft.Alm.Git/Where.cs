@@ -448,6 +448,7 @@ namespace Microsoft.Alm.Git
             if (installation.HasValue && File.Exists(installation.Value.Config))
             {
                 path = installation.Value.Path;
+                return true;
             }
             // find Git on the local disk - the system config is stored relative to it
             else
@@ -458,6 +459,7 @@ namespace Microsoft.Alm.Git
                     && File.Exists(installations[0].Config))
                 {
                     path = installations[0].Config;
+                    return true;
                 }
             }
 
