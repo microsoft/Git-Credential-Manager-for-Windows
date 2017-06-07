@@ -94,9 +94,9 @@ namespace Microsoft.Alm.Authentication
                     }
                 }
             }
-            catch
+            catch (Exception e)
             {
-                Git.Trace.WriteLine("! an error occurred.");
+                Git.Trace.WriteLine($"! an error occurred: {e.Message}");
             }
 
             Git.Trace.WriteLine($"personal access token acquisition for '{targetUri}' failed.");
