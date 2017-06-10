@@ -935,8 +935,9 @@ namespace Microsoft.Alm.Cli
                     }
                 }
             }
-
+#if DEBUG
             Git.Trace.WriteLine($"GCM arguments:{Environment.NewLine}{operationArguments}");
+#endif
         }
 
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA1801:ReviewUnusedParameters", MessageId = "operationArguments")]
