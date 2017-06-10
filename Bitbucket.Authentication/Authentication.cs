@@ -87,10 +87,9 @@ namespace Atlassian.Bitbucket.Authentication
         {
             BaseSecureStore.ValidateTargetUri(targetUri);
 
-            Trace.WriteLine("BitbucketAuthentication::DeleteCredentials");
+            Trace.WriteLine($"BitbucketAuthentication::DeleteCredentials for {targetUri.ActualUri}");
 
             Credential credentials = null;
-
             if ((credentials = PersonalAccessTokenStore.ReadCredentials(targetUri)) != null)
             {
                 // try to delete the credentials for the explicit target uri first
@@ -98,13 +97,29 @@ namespace Atlassian.Bitbucket.Authentication
                 Trace.WriteLine($"host credentials deleted for {targetUri.ActualUri}");
             }
 
-            // tidy up and refresh tokens
+            // tidy up and delete any related refresh tokens
             var refreshTargetUri = GetRefreshTokenTargetUri(targetUri);
             if ((credentials = PersonalAccessTokenStore.ReadCredentials(refreshTargetUri)) != null)
             {
                 // try to delete the credentials for the explicit target uri first
                 PersonalAccessTokenStore.DeleteCredentials(refreshTargetUri);
                 Trace.WriteLine($"host refresh credentials deleted for {refreshTargetUri.ActualUri}");
+            }
+
+            // if we deleted per user then we shoudl try and delete the host level credentials too if they match the username
+            if (TargetUriContainsUsername(targetUri))
+            {
+                var hostTargetUri = GetHostTargetUri(targetUri);
+                var hostCredentials = GetCredentials(hostTargetUri);
+                if (GetTargetUriUsername(targetUri) != username)
+                {
+                    Trace.WriteLine($"username {username} != targetUri userInfo {targetUri.ActualUri.UserInfo}");
+                }
+
+                if (hostCredentials != null && hostCredentials.Username.Equals(GetTargetUriUsername(targetUri)))
+                {
+                    DeleteCredentials(GetHostTargetUri(targetUri), username);
+                }
             }
         }
 
@@ -148,9 +163,25 @@ namespace Atlassian.Bitbucket.Authentication
             return new TargetUri(targetUri.ActualUri.AbsoluteUri.Replace(targetUri.Host, username + "@" + targetUri.Host));
         }
 
+        public TargetUri GetHostTargetUri(TargetUri targetUri)
+        {
+            // belt and braces, don't add a username if the URI already contains one.
+            if (!TargetUriContainsUsername(targetUri))
+            {
+                return targetUri;
+            }
+
+            return new TargetUri(targetUri.ToString());
+        }
+
         private bool TargetUriContainsUsername(TargetUri targetUri)
         {
             return targetUri.ActualUri.AbsoluteUri.Contains("@");
+        }
+
+        private string GetTargetUriUsername(TargetUri targetUri)
+        {
+            return targetUri.ActualUri.UserInfo;
         }
 
         /// <inheritdoc/>

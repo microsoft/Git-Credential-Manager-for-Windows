@@ -102,8 +102,161 @@ namespace Atlassian.Bitbucket.Authentication.Test
             var bbAuth = new Authentication(credentialStore, null, null);
 
             bbAuth.DeleteCredentials(null);
+
+            var deleteCalls = credentialStore.MethodCalls
+                .Where(mc => mc.Key.Equals("DeleteCredentials"))
+                    .SelectMany(mc => mc.Value);
+
+            Assert.AreEqual(deleteCalls.Count(), 0);
         }
 
+        [TestMethod]
+        public void VerifyDeleteCredentialForBasicAuthReadsTwiceDeletesOnce()
+        {
+            var credentialStore = new MockCredentialStore();
+            // add a stored basic auth credential to delete.
+            credentialStore.Credentials.Add("https://example.com/", new Credential("john", "squire"));
+
+            var bbAuth = new Authentication(credentialStore, null, null);
+
+            var targetUri = new TargetUri("https://example.com/");
+            bbAuth.DeleteCredentials(targetUri);
+
+            var readCalls = credentialStore.MethodCalls
+                .Where(mc => mc.Key.Equals("ReadCredentials"))
+                    .SelectMany(mc => mc.Value);
+
+            // 2 read calls, 1 for the basic uri and 1 for /refresh_token
+            Assert.AreEqual(2, readCalls.Count());
+            Assert.IsTrue(readCalls.Any(rc => rc.Key[0].Equals("https://example.com/")));
+            Assert.IsTrue(readCalls.Any(rc => rc.Key[0].Equals("https://example.com/refresh_token")));
+
+            var deleteCalls = credentialStore.MethodCalls
+                .Where(mc => mc.Key.Equals("DeleteCredentials"))
+                    .SelectMany(mc => mc.Value);
+
+            // 1 delete call, 1 for the basic uri 0 for /refresh_token as there isn't one
+            Assert.AreEqual(1, deleteCalls.Count());
+            Assert.IsTrue(deleteCalls.Any(rc => rc.Key[0].Equals("https://example.com/")));
+            Assert.IsFalse(deleteCalls.Any(rc => rc.Key[0].Equals("https://example.com/refresh_token")));
+        }
+
+        [TestMethod]
+        public void VerifyDeleteCredentialForOAuthReadsTwiceDeletesTwice()
+        {
+            var credentialStore = new MockCredentialStore();
+            // add a stored basic auth credential to delete.
+            credentialStore.Credentials.Add("https://example.com/", new Credential("john", "a1b2c3"));
+            credentialStore.Credentials.Add("https://example.com/refresh_token", new Credential("john", "d4e5f6"));
+
+            var bbAuth = new Authentication(credentialStore, null, null);
+
+            var targetUri = new TargetUri("https://example.com/");
+            bbAuth.DeleteCredentials(targetUri);
+
+            var readCalls = credentialStore.MethodCalls
+                .Where(mc => mc.Key.Equals("ReadCredentials"))
+                    .SelectMany(mc => mc.Value);
+
+            // 2 read calls, 1 for the basic uri and 1 for /refresh_token
+            Assert.AreEqual(2, readCalls.Count());
+            Assert.IsTrue(readCalls.Any(rc => rc.Key[0].Equals("https://example.com/")));
+            Assert.IsTrue(readCalls.Any(rc => rc.Key[0].Equals("https://example.com/refresh_token")));
+
+            var deleteCalls = credentialStore.MethodCalls
+                .Where(mc => mc.Key.Equals("DeleteCredentials"))
+                    .SelectMany(mc => mc.Value);
+
+            // 2 delete call, 1 for the basic uri, 1 for /refresh_token as there is one
+            Assert.AreEqual(2, deleteCalls.Count());
+            Assert.IsTrue(deleteCalls.Any(rc => rc.Key[0].Equals("https://example.com/")));
+            Assert.IsTrue(deleteCalls.Any(rc => rc.Key[0].Equals("https://example.com/refresh_token")));
+        }
+
+        [TestMethod]
+        public void VerifyDeleteCredentialForBasicAuthReadsQuinceDeletesTwiceIfHostCredentialsExistAndShareUsername()
+        {
+            var credentialStore = new MockCredentialStore();
+            // add a stored basic auth credential to delete.
+            // per host credentials
+            credentialStore.Credentials.Add("https://example.com/", new Credential("john", "squire"));
+            // per user credentials
+            credentialStore.Credentials.Add("https://john@example.com/", new Credential("john", "squire"));
+
+            var bbAuth = new Authentication(credentialStore, null, null);
+
+            var targetUri = new TargetUri("https://john@example.com/");
+            bbAuth.DeleteCredentials(targetUri);
+
+            var readCalls = credentialStore.MethodCalls
+                .Where(mc => mc.Key.Equals("ReadCredentials"))
+                    .SelectMany(mc => mc.Value);
+
+            // 5 read calls
+            // 1 for the basic uri with username
+            // 1 for /refresh_token with username
+            // 1 for the basic uri to compare username
+            // 1 for the basic uri without username
+            // 1 for /refresh_token without username
+            Assert.AreEqual(5, readCalls.Count());
+            Assert.AreEqual(1, readCalls.Count(rc => rc.Key[0].Equals("https://john@example.com/")));
+            Assert.AreEqual(1, readCalls.Count(rc => rc.Key[0].Equals("https://john@example.com/refresh_token")));
+            Assert.AreEqual(2, readCalls.Count(rc => rc.Key[0].Equals("https://example.com/")));
+            Assert.AreEqual(1, readCalls.Count(rc => rc.Key[0].Equals("https://example.com/refresh_token")));
+
+            var deleteCalls = credentialStore.MethodCalls
+                .Where(mc => mc.Key.Equals("DeleteCredentials"))
+                    .SelectMany(mc => mc.Value);
+
+            // 2 delete calls
+            // 1 for the basic uri with username
+            // 1 for the basic uri without username
+            Assert.AreEqual(2, deleteCalls.Count());
+            Assert.AreEqual(1, deleteCalls.Count(rc => rc.Key[0].Equals("https://john@example.com/")));
+            Assert.IsFalse(deleteCalls.Any(rc => rc.Key[0].Equals("https://example.com/refresh_token")));
+            Assert.AreEqual(1, deleteCalls.Count(rc => rc.Key[0].Equals("https://example.com/")));
+        }
+
+        [TestMethod]
+        public void VerifyDeleteCredentialForBasicAuthReadsThriceDeletesOnceIfHostCredentialsExistAndDoNotShareUsername()
+        {
+            var credentialStore = new MockCredentialStore();
+            // add a stored basic auth credential to delete.
+            // per host credentials
+            credentialStore.Credentials.Add("https://example.com/", new Credential("ian", "brown"));
+            // per user credentials
+            credentialStore.Credentials.Add("https://john@example.com/", new Credential("john", "squire"));
+
+            var bbAuth = new Authentication(credentialStore, null, null);
+
+            var targetUri = new TargetUri("https://john@example.com/");
+            bbAuth.DeleteCredentials(targetUri);
+
+            var readCalls = credentialStore.MethodCalls
+                .Where(mc => mc.Key.Equals("ReadCredentials"))
+                    .SelectMany(mc => mc.Value);
+
+            // 5 read calls
+            // 1 for the basic uri with username
+            // 1 for /refresh_token with username
+            // 1 for the basic uri to compare username
+            Assert.AreEqual(3, readCalls.Count());
+            Assert.AreEqual(1, readCalls.Count(rc => rc.Key[0].Equals("https://john@example.com/")));
+            Assert.AreEqual(1, readCalls.Count(rc => rc.Key[0].Equals("https://john@example.com/refresh_token")));
+            Assert.AreEqual(1, readCalls.Count(rc => rc.Key[0].Equals("https://example.com/")));
+            
+            var deleteCalls = credentialStore.MethodCalls
+                .Where(mc => mc.Key.Equals("DeleteCredentials"))
+                    .SelectMany(mc => mc.Value);
+
+            // 1 delete calls
+            // 1 for the basic uri with username
+            // DOES NOT delete the Host credentials because they are for a different username.
+            Assert.AreEqual(1, deleteCalls.Count());
+            Assert.AreEqual(1, deleteCalls.Count(rc => rc.Key[0].Equals("https://john@example.com/")));
+            Assert.IsFalse(deleteCalls.Any(rc => rc.Key[0].Equals("https://example.com/refresh_token")));
+            Assert.IsFalse(deleteCalls.Any(rc => rc.Key[0].Equals("https://example.com/")));
+        }
         [TestMethod]
         public void VerifyGetPerUserTargetUriInsertsMissingUsernameToActualUri()
         {
@@ -160,6 +313,8 @@ namespace Atlassian.Bitbucket.Authentication.Test
         public Dictionary<string, Dictionary<List<string>, int>> MethodCalls =
             new Dictionary<string, Dictionary<List<string>, int>>();
 
+        public Dictionary<string, Credential> Credentials = new Dictionary<string, Credential>();
+
         public string Namespace
         {
             get { throw new NotImplementedException(); }
@@ -173,20 +328,20 @@ namespace Atlassian.Bitbucket.Authentication.Test
         public void DeleteCredentials(TargetUri targetUri)
         {
             // do nothing
-            RecordMethodCall("DeleteCredentials", new List<string>() { targetUri.ToString() });
+            RecordMethodCall("DeleteCredentials", new List<string>() {targetUri.ActualUri.AbsoluteUri });
         }
 
         public Credential ReadCredentials(TargetUri targetUri)
         {
             // do nothing
-            RecordMethodCall("ReadCredentials", new List<string>() { targetUri.ToString() });
-            return null;
+            RecordMethodCall("ReadCredentials", new List<string>() {targetUri.ActualUri.AbsoluteUri });
+            return Credentials != null && Credentials.Keys.Contains(targetUri.ActualUri.AbsoluteUri) ? Credentials[targetUri.ActualUri.AbsoluteUri] : null;
         }
 
         public void WriteCredentials(TargetUri targetUri, Credential credentials)
         {
             // do nothing
-            RecordMethodCall("WriteCredentials", new List<string>() { targetUri.ToString(), credentials.Username, credentials.Password });
+            RecordMethodCall("WriteCredentials", new List<string>() {targetUri.ActualUri.AbsoluteUri, credentials.Username, credentials.Password });
         }
 
         private void RecordMethodCall(string methodName, List<string> args)
