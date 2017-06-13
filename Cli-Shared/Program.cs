@@ -742,7 +742,7 @@ namespace Microsoft.Alm.Cli
                                                                        githubAuthcodeCallback,
                                                                        null)
                             ?? Bitbucket.Authentication.GetAuthentication(operationArguments.TargetUri,
-                                                                          new SecretStore(secretsNamespace, Secret.UriToActualUri),
+                                                                          new SecretStore(secretsNamespace, Secret.UriToActualUrl),
                                                                           bitbucketCredentialCallback,
                                                                           bitbucketOauthCallback);
 

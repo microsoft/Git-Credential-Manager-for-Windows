@@ -307,5 +307,47 @@ namespace Microsoft.Alm.Authentication
                 ? null
                 : new TargetUri(uri);
         }
+
+        /// <summary>
+        ///     Get a version of this <see cref="TargetUri"/> that contains the specified username.
+        /// </summary>
+        /// <remarks>
+        ///     If the <see cref="TargetUri"/> already contains a username, that one is kept NOT overwritten.
+        /// </remarks>
+        public TargetUri GetPerUserTargetUri(string username)
+        {
+            // belt and braces, don't add a username if the URI already contains one.
+            if (string.IsNullOrWhiteSpace(username) || TargetUriContainsUsername)
+            {
+                return this;
+            }
+
+            return new TargetUri(ActualUri.AbsoluteUri.Replace(Host, username + "@" + Host));
+        }
+
+        /// <summary>
+        ///     Get a version of this <see cref="TargetUri"/> that does NOT contain any username.
+        /// </summary>
+        public TargetUri GetHostTargetUri()
+        {
+            // belt and braces, don't add a username if the URI already contains one.
+            if (!TargetUriContainsUsername)
+            {
+                return this;
+            }
+
+            // default ToString() does not include any UserInfo
+            return new TargetUri(this.ToString());
+        }
+
+        /// <summary>
+        ///     Determine if the ActualUri of this <see cref="TargetUri"/> contains UserInfo
+        /// </summary>
+        public bool TargetUriContainsUsername{ get { return this.ActualUri.AbsoluteUri.Contains("@"); }}
+
+        /// <summary>
+        ///     Get username contained in the ActualUri of this <see cref="TargetUri"/>
+        /// </summary>
+        public string TargetUriUsername { get { return this.ActualUri.UserInfo; }  }
     }
 }

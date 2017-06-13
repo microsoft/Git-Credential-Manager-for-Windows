@@ -257,6 +257,7 @@ namespace Atlassian.Bitbucket.Authentication.Test
             Assert.IsFalse(deleteCalls.Any(rc => rc.Key[0].Equals("https://example.com/refresh_token")));
             Assert.IsFalse(deleteCalls.Any(rc => rc.Key[0].Equals("https://example.com/")));
         }
+
         [TestMethod]
         public void VerifyGetPerUserTargetUriInsertsMissingUsernameToActualUri()
         {
@@ -266,7 +267,7 @@ namespace Atlassian.Bitbucket.Authentication.Test
             var targetUri = new TargetUri("https://example.com");
             var username = "johnsquire";
 
-            var resultUri = bbAuth.GetPerUserTargetUri(targetUri, username);
+            var resultUri = targetUri.GetPerUserTargetUri(username);
 
             Assert.AreEqual("/", resultUri.AbsolutePath);
             Assert.AreEqual("https://johnsquire@example.com/", resultUri.ActualUri.AbsoluteUri);
@@ -291,7 +292,7 @@ namespace Atlassian.Bitbucket.Authentication.Test
             var targetUri = new TargetUri("https://johnsquire@example.com");
             var username = "johnsquire";
 
-            var resultUri = bbAuth.GetPerUserTargetUri(targetUri, username);
+            var resultUri = targetUri.GetPerUserTargetUri(username);
 
             Assert.AreEqual("/", resultUri.AbsolutePath);
             Assert.AreEqual("https://johnsquire@example.com/", resultUri.ActualUri.AbsoluteUri);
