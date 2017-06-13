@@ -87,10 +87,9 @@ namespace Atlassian.Bitbucket.Authentication
         {
             BaseSecureStore.ValidateTargetUri(targetUri);
 
-            Trace.WriteLine("BitbucketAuthentication::DeleteCredentials");
+            Trace.WriteLine($"Deleting Bitbucket Credentials for {targetUri.ActualUri}");
 
             Credential credentials = null;
-
             if ((credentials = PersonalAccessTokenStore.ReadCredentials(targetUri)) != null)
             {
                 // try to delete the credentials for the explicit target uri first
@@ -98,13 +97,29 @@ namespace Atlassian.Bitbucket.Authentication
                 Trace.WriteLine($"host credentials deleted for {targetUri.ActualUri}");
             }
 
-            // tidy up and refresh tokens
+            // tidy up and delete any related refresh tokens
             var refreshTargetUri = GetRefreshTokenTargetUri(targetUri);
             if ((credentials = PersonalAccessTokenStore.ReadCredentials(refreshTargetUri)) != null)
             {
                 // try to delete the credentials for the explicit target uri first
                 PersonalAccessTokenStore.DeleteCredentials(refreshTargetUri);
                 Trace.WriteLine($"host refresh credentials deleted for {refreshTargetUri.ActualUri}");
+            }
+
+            // if we deleted per user then we shoudl try and delete the host level credentials too if they match the username
+            if (targetUri.TargetUriContainsUsername)
+            {
+                var hostTargetUri = targetUri.GetHostTargetUri();
+                var hostCredentials = GetCredentials(hostTargetUri);
+                if (targetUri.TargetUriUsername != username)
+                {
+                    Trace.WriteLine($"username {username} != targetUri userInfo {targetUri.ActualUri.UserInfo}");
+                }
+
+                if (hostCredentials != null && hostCredentials.Username.Equals(targetUri.TargetUriUsername))
+                {
+                    DeleteCredentials(targetUri.GetHostTargetUri(), username);
+                }
             }
         }
 
@@ -123,33 +138,12 @@ namespace Atlassian.Bitbucket.Authentication
         /// <inheritdoc/>
         public Credential GetCredentials(TargetUri targetUri, string username)
         {
-            if (string.IsNullOrWhiteSpace(username) || TargetUriContainsUsername(targetUri))
+            if (string.IsNullOrWhiteSpace(username) || targetUri.TargetUriContainsUsername)
             {
                 return GetCredentials(targetUri);
             }
 
-            return GetCredentials(GetPerUserTargetUri(targetUri, username));
-        }
-
-        /// <summary>
-        /// Since Bitbucket requires a username in a Git remote URL even if using OAuth tokens
-        /// </summary>
-        /// <param name="targetUri"></param>
-        /// <param name="username"></param>
-        /// <returns></returns>
-        private TargetUri GetPerUserTargetUri(TargetUri targetUri, string username)
-        {
-            if (string.IsNullOrWhiteSpace(username))
-            {
-                return targetUri;
-            }
-
-            return new TargetUri(targetUri.ActualUri.AbsoluteUri.Replace(targetUri.Host, username + "@" + targetUri.Host));
-        }
-
-        private bool TargetUriContainsUsername(TargetUri targetUri)
-        {
-            return targetUri.ActualUri.AbsoluteUri.Contains("@");
+            return GetCredentials(targetUri.GetPerUserTargetUri(username));
         }
 
         /// <inheritdoc/>
@@ -206,12 +200,12 @@ namespace Atlassian.Bitbucket.Authentication
             SetCredentials(targetUri, credentials, null);
 
             // Store() will not call with a username url
-            if (TargetUriContainsUsername(targetUri))
+            if (targetUri.TargetUriContainsUsername)
                 return;
 
             // see if there is a matching personal refresh token
             var username = credentials.Username;
-            var userSpecificTargetUri = GetPerUserTargetUri(targetUri, username);
+            var userSpecificTargetUri = targetUri.GetPerUserTargetUri(username);
             var userCredentials = GetCredentials(userSpecificTargetUri, username);
 
             if (userCredentials != null && userCredentials.Password.Equals(credentials.Password))
@@ -235,10 +229,10 @@ namespace Atlassian.Bitbucket.Authentication
             Trace.WriteLine($"{credentials.Username} at {targetUri.ActualUri.AbsoluteUri}");
 
             // if the url doesn't contain a username then save with an explicit username.
-            if (!TargetUriContainsUsername(targetUri) && !string.IsNullOrWhiteSpace(username))
+            if (!targetUri.TargetUriContainsUsername && !string.IsNullOrWhiteSpace(username))
             {
                 Credential tempCredentials = new Credential(username, credentials.Password);
-                SetCredentials(GetPerUserTargetUri(targetUri, username), tempCredentials, null);
+                SetCredentials(targetUri.GetPerUserTargetUri(username), tempCredentials, null);
             }
 
             PersonalAccessTokenStore.WriteCredentials(targetUri, credentials);
@@ -281,12 +275,12 @@ namespace Atlassian.Bitbucket.Authentication
         /// <returns>a valid instance of <see cref="Credential"/> or null</returns>
         public async Task<Credential> InteractiveLogon(TargetUri targetUri, string username)
         {
-            if (string.IsNullOrWhiteSpace(username))
+            if (string.IsNullOrWhiteSpace(username) || targetUri.TargetUriContainsUsername)
             {
                 return await InteractiveLogon(targetUri);
             }
 
-            return await InteractiveLogon(GetPerUserTargetUri(targetUri, username));
+            return await InteractiveLogon(targetUri.GetPerUserTargetUri(username));
         }
 
         /// <inheritdoc/>
@@ -362,7 +356,7 @@ namespace Atlassian.Bitbucket.Authentication
             ref AuthenticationResult result)
         {
             Credential credentials = (Credential)result.Token;
-            if (!TargetUriContainsUsername(targetUri))
+            if (!targetUri.TargetUriContainsUsername)
             {
                 // no user info in uri so personalize the credentials
                 credentials = new Credential(username, credentials.Password);
@@ -390,7 +384,7 @@ namespace Atlassian.Bitbucket.Authentication
         {
             Credential credentials = (Credential)result.Token;
 
-            if (!TargetUriContainsUsername(targetUri))
+            if (!targetUri.TargetUriContainsUsername)
             {
                 // no user info in uri so personalize the credentials
                 credentials = new Credential(username, result.RefreshToken.Value);
@@ -409,7 +403,16 @@ namespace Atlassian.Bitbucket.Authentication
             BaseSecureStore.ValidateTargetUri(targetUri);
             BaseSecureStore.ValidateCredential(credentials);
 
-            var userSpecificTargetUri = GetPerUserTargetUri(targetUri, username);
+            TargetUri userSpecificTargetUri;
+            if (targetUri.TargetUriContainsUsername)
+            {
+                userSpecificTargetUri = targetUri;
+            }
+            else
+            {
+                userSpecificTargetUri = targetUri.GetPerUserTargetUri(username);
+            }
+
 
             if (await BitbucketAuthority.ValidateCredentials(userSpecificTargetUri, username, credentials))
             {

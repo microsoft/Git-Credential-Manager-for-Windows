@@ -54,6 +54,22 @@ namespace Microsoft.Alm.Authentication
             return targetName;
         }
 
+        /// <summary>
+        ///     Generate a key based on the ActualUri.
+        ///     This may include username, port, etc
+        /// </summary>
+        public static string UriToActualUrl(TargetUri targetUri, string @namespace)
+        {
+            BaseSecureStore.ValidateTargetUri(targetUri);
+            if (String.IsNullOrWhiteSpace(@namespace))
+                throw new ArgumentNullException(@namespace);
+
+            string targetName = $"{@namespace}:{targetUri.ActualUri.AbsoluteUri}";
+            targetName = targetName.TrimEnd('/', '\\');
+
+            return targetName;
+        }
+
         public delegate string UriNameConversion(TargetUri targetUri, string @namespace);
     }
 }

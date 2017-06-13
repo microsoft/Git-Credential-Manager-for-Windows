@@ -742,7 +742,7 @@ namespace Microsoft.Alm.Cli
                                                                        githubAuthcodeCallback,
                                                                        null)
                             ?? Bitbucket.Authentication.GetAuthentication(operationArguments.TargetUri,
-                                                                          new SecretStore(secretsNamespace, Secret.UriToUrl),
+                                                                          new SecretStore(secretsNamespace, Secret.UriToActualUrl),
                                                                           bitbucketCredentialCallback,
                                                                           bitbucketOauthCallback);
 
@@ -935,6 +935,9 @@ namespace Microsoft.Alm.Cli
                     }
                 }
             }
+#if DEBUG
+            Git.Trace.WriteLine($"GCM arguments:{Environment.NewLine}{operationArguments}");
+#endif
         }
 
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA1801:ReviewUnusedParameters", MessageId = "operationArguments")]
