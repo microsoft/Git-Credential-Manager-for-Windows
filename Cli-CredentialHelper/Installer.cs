@@ -68,7 +68,7 @@ namespace Microsoft.Alm.Cli
             // parse arguments
             for (int i = 2; i < args.Length; i++)
             {
-                if (String.Equals(args[i], ParamPathKey, StringComparison.OrdinalIgnoreCase))
+                if (string.Equals(args[i], ParamPathKey, StringComparison.OrdinalIgnoreCase))
                 {
                     if (args.Length > i + 1)
                     {
@@ -78,13 +78,13 @@ namespace Microsoft.Alm.Cli
                         Git.Trace.WriteLine($"{ParamPathKey} = '{_customPath}'.");
                     }
                 }
-                else if (String.Equals(args[i], ParamPassiveKey, StringComparison.OrdinalIgnoreCase))
+                else if (string.Equals(args[i], ParamPassiveKey, StringComparison.OrdinalIgnoreCase))
                 {
                     _isPassive = true;
 
                     Git.Trace.WriteLine($"{ParamPassiveKey} = true.");
                 }
-                else if (String.Equals(args[i], ParamForceKey, StringComparison.OrdinalIgnoreCase))
+                else if (string.Equals(args[i], ParamForceKey, StringComparison.OrdinalIgnoreCase))
                 {
                     _isForced = true;
 
@@ -205,7 +205,7 @@ namespace Microsoft.Alm.Cli
                 List<GitInstallation> installations = null;
 
                 // use the custom installation path if supplied
-                if (!String.IsNullOrEmpty(_customPath))
+                if (!string.IsNullOrEmpty(_customPath))
                 {
                     if (!Directory.Exists(_customPath))
                     {
@@ -471,7 +471,7 @@ namespace Microsoft.Alm.Cli
                 List<GitInstallation> installations = null;
 
                 // use the custom installation path if supplied
-                if (!String.IsNullOrEmpty(_customPath))
+                if (!string.IsNullOrEmpty(_customPath))
                 {
                     if (!Directory.Exists(_customPath))
                     {
@@ -859,7 +859,7 @@ namespace Microsoft.Alm.Cli
                     arguments.Append(" ")
                              .Append(ParamForceKey);
                 }
-                if (!String.IsNullOrEmpty(_customPath))
+                if (!string.IsNullOrEmpty(_customPath))
                 {
                     arguments.Append(" ")
                              .Append(ParamForceKey)
@@ -903,7 +903,7 @@ namespace Microsoft.Alm.Cli
 
         private static bool ExecuteGit(string gitCmdPath, string command, params int[] allowedExitCodes)
         {
-            if (String.IsNullOrEmpty(gitCmdPath) || String.IsNullOrEmpty(command))
+            if (string.IsNullOrEmpty(gitCmdPath) || string.IsNullOrEmpty(command))
                 return false;
 
             if (!File.Exists(gitCmdPath))
@@ -964,7 +964,7 @@ namespace Microsoft.Alm.Cli
                     arguments.Append(" ")
                              .Append(ParamForceKey);
                 }
-                if (!String.IsNullOrEmpty(_customPath))
+                if (!string.IsNullOrEmpty(_customPath))
                 {
                     arguments.Append(" ")
                              .Append(ParamForceKey)

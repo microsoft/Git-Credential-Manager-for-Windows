@@ -239,7 +239,7 @@ namespace Microsoft.Alm.Cli
                     using (StringReader reader = new StringReader(input))
                     {
                         string line;
-                        while (!String.IsNullOrWhiteSpace((line = reader.ReadLine())))
+                        while (!string.IsNullOrWhiteSpace((line = reader.ReadLine())))
                         {
                             string[] pair = line.Split(new[] { '=' }, 2);
 
@@ -284,7 +284,7 @@ namespace Microsoft.Alm.Cli
                 _queryProtocol = targetUri.Scheme;
                 _queryHost = (targetUri.IsDefaultPort)
                     ? targetUri.Host
-                    : String.Format(System.Globalization.CultureInfo.InvariantCulture, "{0}:{1}", targetUri.Host, targetUri.Port);
+                    : string.Format(System.Globalization.CultureInfo.InvariantCulture, "{0}:{1}", targetUri.Host, targetUri.Port);
                 _queryPath = targetUri.AbsolutePath;
 
                 CreateTargetUri();
@@ -526,13 +526,13 @@ namespace Microsoft.Alm.Cli
                 StringBuilder builder = new StringBuilder();
 
                 builder.Append("protocol=")
-                       .Append(_queryProtocol ?? String.Empty)
+                       .Append(_queryProtocol ?? string.Empty)
                        .Append("\n");
                 builder.Append("host=")
-                       .Append(_queryHost ?? String.Empty)
+                       .Append(_queryHost ?? string.Empty)
                        .Append("\n");
                 builder.Append("path=")
-                       .Append(_queryPath ?? String.Empty)
+                       .Append(_queryPath ?? string.Empty)
                        .Append("\n");
                 // only write out username if we know it
                 if (_username != null)

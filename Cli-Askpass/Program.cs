@@ -189,7 +189,7 @@ namespace Microsoft.Alm.Cli
                     }
 
                     // retain the path if specified
-                    if (!String.IsNullOrWhiteSpace(targetUri.LocalPath))
+                    if (!string.IsNullOrWhiteSpace(targetUri.LocalPath))
                     {
                         targetUrl += targetUri.LocalPath;
                     }
@@ -277,9 +277,9 @@ namespace Microsoft.Alm.Cli
             EnableDebugTrace();
 
             if (args.Length == 0
-                || String.Equals(args[0], "--help", StringComparison.OrdinalIgnoreCase)
-                || String.Equals(args[0], "-h", StringComparison.OrdinalIgnoreCase)
-                || String.Equals(args[0], "\\?", StringComparison.Ordinal))
+                || string.Equals(args[0], "--help", StringComparison.OrdinalIgnoreCase)
+                || string.Equals(args[0], "-h", StringComparison.OrdinalIgnoreCase)
+                || string.Equals(args[0], "\\?", StringComparison.Ordinal))
             {
                 PrintHelpMessage();
                 return;

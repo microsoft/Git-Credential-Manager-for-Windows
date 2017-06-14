@@ -1,4 +1,4 @@
-﻿using GitHub.Authentication.Helpers;
+﻿using GitHub.Shared.Helpers;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 namespace GitHub.Authentication.Test

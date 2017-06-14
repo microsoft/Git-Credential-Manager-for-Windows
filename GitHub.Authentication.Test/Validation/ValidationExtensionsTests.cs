@@ -1,4 +1,4 @@
-﻿using GitHub.Authentication.ViewModels.Validation;
+﻿using GitHub.Shared.ViewModels.Validation;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 namespace GitHub.Authentication.Test.Validation

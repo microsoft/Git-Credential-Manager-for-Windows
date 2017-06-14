@@ -1,8 +1,8 @@
 ﻿using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Data;
-using GitHub.Authentication.ViewModels;
-using GitHub.Authentication.ViewModels.Validation;
+using GitHub.Shared.ViewModels;
+using GitHub.Shared.ViewModels.Validation;
 using GitHub.UI;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 

@@ -158,7 +158,7 @@ namespace Microsoft.Alm.Cli
             }
             else
             {
-                url = String.Format("{0}://{1}", Uri.UriSchemeHttps, url);
+                url = string.Format("{0}://{1}", Uri.UriSchemeHttps, url);
                 if (!Uri.TryCreate(url, UriKind.Absolute, out uri))
                     goto error_parse;
             }
@@ -277,8 +277,8 @@ namespace Microsoft.Alm.Cli
                 EnableDebugTrace();
 
                 if (args.Length == 0
-                    || String.Equals(args[0], "--help", StringComparison.OrdinalIgnoreCase)
-                    || String.Equals(args[0], "-h", StringComparison.OrdinalIgnoreCase)
+                    || string.Equals(args[0], "--help", StringComparison.OrdinalIgnoreCase)
+                    || string.Equals(args[0], "-h", StringComparison.OrdinalIgnoreCase)
                     || args[0].Contains('?'))
                 {
                     PrintHelpMessage();
@@ -333,7 +333,7 @@ namespace Microsoft.Alm.Cli
         {
             const string HelpFileName = "git-credential-manager.html";
 
-            Program.WriteLine("usage: git credential-manager [" + String.Join("|", CommandList) + "] [<args>]");
+            Program.WriteLine("usage: git credential-manager [" + string.Join("|", CommandList) + "] [<args>]");
 
             List<Git.GitInstallation> installations;
             if (Git.Where.FindGitInstallations(out installations))

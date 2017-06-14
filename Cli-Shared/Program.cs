@@ -13,6 +13,8 @@ using Github = GitHub.Authentication;
 
 namespace Microsoft.Alm.Cli
 {
+    [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Performance", "CA1811:AvoidUncalledPrivateCode")]
+    [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA1801:ReviewUnusedParameters")]
     partial class Program
     {
         public const string SourceUrl = "https://github.com/Microsoft/Git-Credential-Manager-for-Windows";
@@ -49,13 +51,13 @@ namespace Microsoft.Alm.Cli
 
         internal static readonly StringComparer EnvironKeyComparer = StringComparer.OrdinalIgnoreCase;
 
-        private const string ConfigPrefix = "credential";
-        private const string SecretsNamespace = "git";
+        internal const string ConfigPrefix = "credential";
+        internal const string SecretsNamespace = "git";
 
         internal static readonly char[] NewLineChars = Environment.NewLine.ToCharArray();
 
-        private static readonly VstsTokenScope VstsCredentialScope = VstsTokenScope.CodeWrite | VstsTokenScope.PackagingRead;
-        private static readonly Github.TokenScope GitHubCredentialScope = Github.TokenScope.Gist | Github.TokenScope.Repo;
+        internal static readonly VstsTokenScope VstsCredentialScope = VstsTokenScope.CodeWrite | VstsTokenScope.PackagingRead;
+        internal static readonly Github.TokenScope GitHubCredentialScope = Github.TokenScope.Gist | Github.TokenScope.Repo;
 
         internal static Action<Exception> _dieExceptionCallback = (Exception exception) =>
         {
@@ -149,7 +151,7 @@ namespace Microsoft.Alm.Cli
         /// <summary>
         /// <para>Gets <see langword="true"/> if stderr is a TTY device; otherwise <see langword="false"/>.</para>
         /// <para>
-        /// If TTY, then it is very likely stderr is attached to a console and ineractions with the
+        /// If TTY, then it is very likely stderr is attached to a console and interactions with the
         /// user are possible.
         /// </para>
         /// </summary>
@@ -161,7 +163,7 @@ namespace Microsoft.Alm.Cli
         /// <summary>
         /// <para>Gets <see langword="true"/> if stdin is a TTY device; otherwise <see langword="false"/>.</para>
         /// <para>
-        /// If TTY, then it is very likely stdin is attached to a console and ineractions with the
+        /// If TTY, then it is very likely stdin is attached to a console and interactions with the
         /// user are possible.
         /// </para>
         /// </summary>
@@ -173,7 +175,7 @@ namespace Microsoft.Alm.Cli
         /// <summary>
         /// <para>Gets <see langword="true"/> if stdout is a TTY device; otherwise <see langword="false"/>.</para>
         /// <para>
-        /// If TTY, then it is very likely stdout is attached to a console and ineractions with the
+        /// If TTY, then it is very likely stdout is attached to a console and interaction with the
         /// user are possible.
         /// </para>
         /// </summary>
@@ -831,8 +833,7 @@ namespace Microsoft.Alm.Cli
             }
         }
 
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Performance", "CA1811:AvoidUncalledPrivateCode")]
-        private static void DeleteCredentials(OperationArguments operationArguments)
+        internal static void DeleteCredentials(OperationArguments operationArguments)
         {
             if (ReferenceEquals(operationArguments, null))
                 throw new ArgumentNullException("operationArguments");
@@ -1221,7 +1222,7 @@ namespace Microsoft.Alm.Cli
                 // size, only fail if `inBufferSize` looks bad
                 NativeMethods.CredPackAuthenticationBuffer(flags: authPackage,
                                                            username: username,
-                                                           password: String.Empty,
+                                                           password: string.Empty,
                                                            packedCredentials: IntPtr.Zero,
                                                            packedCredentialsSize: ref inBufferSize);
                 if (inBufferSize <= 0)
@@ -1236,7 +1237,7 @@ namespace Microsoft.Alm.Cli
 
                 if (!NativeMethods.CredPackAuthenticationBuffer(flags: authPackage,
                                                                 username: username,
-                                                                password: String.Empty,
+                                                                password: string.Empty,
                                                                 packedCredentials: inBufferPtr,
                                                                 packedCredentialsSize: ref inBufferSize))
                 {
