@@ -111,7 +111,7 @@ namespace Microsoft.Alm.Cli.Test
             envvars = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
             {
                 { "HOME", Environment.GetFolderPath(Environment.SpecialFolder.UserProfile) },
-                { Program.EnvironPreserveCredentialsKey, String.Empty },
+                { Program.EnvironPreserveCredentialsKey, string.Empty },
             };
             opargsMock.Setup(r => r.EnvironmentVariables)
                       .Returns(envvars);

@@ -1,4 +1,4 @@
-﻿using GitHub.Authentication.ViewModels;
+﻿using GitHub.Shared.ViewModels;
 
 namespace GitHub.Authentication.Test.Validation
 {

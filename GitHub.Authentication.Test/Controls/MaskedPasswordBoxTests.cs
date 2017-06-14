@@ -1,4 +1,4 @@
-﻿using GitHub.UI;
+﻿using GitHub.Shared.Controls;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 namespace GitHub.Authentication.Test.Controls

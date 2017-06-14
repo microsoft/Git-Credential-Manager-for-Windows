@@ -45,7 +45,7 @@ namespace Microsoft.Alm.Authentication
         /// </param>
         public SecretStore(string @namespace, ICredentialStore credentialCache, ITokenStore tokenCache, Secret.UriNameConversion getTargetName)
         {
-            if (String.IsNullOrWhiteSpace(@namespace))
+            if (string.IsNullOrWhiteSpace(@namespace))
                 throw new ArgumentNullException(nameof(@namespace));
             if (@namespace.IndexOfAny(IllegalCharacters) != -1)
                 throw new ArgumentException("Namespace contains illegal characters.", nameof(@namespace));

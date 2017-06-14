@@ -33,7 +33,7 @@ namespace Microsoft.Alm.Authentication
         public static string UriToName(TargetUri targetUri, string @namespace)
         {
             BaseSecureStore.ValidateTargetUri(targetUri);
-            if (String.IsNullOrWhiteSpace(@namespace))
+            if (string.IsNullOrWhiteSpace(@namespace))
                 throw new ArgumentNullException(@namespace);
 
             string targetName = $"{@namespace}:{targetUri}";
@@ -45,7 +45,7 @@ namespace Microsoft.Alm.Authentication
         public static string UriToUrl(TargetUri targetUri, string @namespace)
         {
             BaseSecureStore.ValidateTargetUri(targetUri);
-            if (String.IsNullOrWhiteSpace(@namespace))
+            if (string.IsNullOrWhiteSpace(@namespace))
                 throw new ArgumentNullException(@namespace);
 
             string targetName = $"{@namespace}:{targetUri.ToString(false, true, true)}";
