@@ -37,7 +37,7 @@ namespace Microsoft.Alm.Cli
     internal partial class Program
     {
         public const string AssemblyTitle = "Git Credential Manager for Windows";
-        public const string Description = "Secure Git credential helper for Windows, by Microsoft";
+        public const string AssemblyDescription = "Secure Git credential helper for Windows, by Microsoft";
 
         internal const string CommandApprove = "approve";
         internal const string CommandClear = "clear";

@@ -36,7 +36,7 @@ namespace Microsoft.Alm.Cli
     internal partial class Program
     {
         public const string AssemblyTitle = "Askpass Utility for Windows";
-        public const string Description = "Secure askpass utility for Windows, by Microsoft";
+        public const string AssemblyDesciption = "Secure askpass utility for Windows, by Microsoft";
         public const string DefinitionUrlPassphrase = "https://www.visualstudio.com/docs/git/gcm-ssh-passphrase";
 
         private static readonly Regex AskCredentialRegex = new Regex(@"(\S+)\s+for\s+['""]([^'""]+)['""]:\s*", RegexOptions.Compiled | RegexOptions.CultureInvariant | RegexOptions.IgnoreCase);
