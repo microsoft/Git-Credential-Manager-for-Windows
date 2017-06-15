@@ -224,16 +224,16 @@ namespace Microsoft.Alm.Cli
         internal void WriteLine(string message = null)
             => _writeLine(this, message);
 
-        private Credential BasicCredentialPrompt(TargetUri targetUri)
+        internal Credential BasicCredentialPrompt(TargetUri targetUri)
         {
             string message = "Please enter your credentials for ";
             return BasicCredentialPrompt(targetUri, message);
         }
 
-        private Credential BasicCredentialPrompt(TargetUri targetUri, string titleMessage)
+        internal Credential BasicCredentialPrompt(TargetUri targetUri, string titleMessage)
             => _basicCredentialPrompt(this, targetUri, titleMessage);
 
-        private Task<BaseAuthentication> CreateAuthentication(OperationArguments operationArguments)
+        internal Task<BaseAuthentication> CreateAuthentication(OperationArguments operationArguments)
             => _createAuthentication(this, operationArguments);
 
         private void DeleteCredentials(OperationArguments operationArguments)
@@ -250,22 +250,22 @@ namespace Microsoft.Alm.Cli
             Git.Trace.AddListener(Console.Error);
         }
 
-        private void EnableTraceLogging(OperationArguments operationArguments)
+        internal void EnableTraceLogging(OperationArguments operationArguments)
             => _enableTraceLogging(this, operationArguments);
 
-        private void EnableTraceLogging(OperationArguments operationArguments, string logFilePath)
+        internal void EnableTraceLogging(OperationArguments operationArguments, string logFilePath)
             => _enableTraceLoggingFile(this, operationArguments, logFilePath);
 
-        private bool BitbucketCredentialPrompt(string titleMessage, TargetUri targetUri, out string username, out string password)
+        internal bool BitbucketCredentialPrompt(string titleMessage, TargetUri targetUri, out string username, out string password)
             => _bitbucketCredentialPrompt(this, titleMessage, targetUri, out username, out password);
 
-        private bool BitbucketOAuthPrompt(string title, TargetUri targetUri, Bitbucket.AuthenticationResultType resultType, string username)
+        internal bool BitbucketOAuthPrompt(string title, TargetUri targetUri, Bitbucket.AuthenticationResultType resultType, string username)
             => _bitbucketOauthPrompt(this, title, targetUri, resultType, username);
 
-        private bool GitHubAuthCodePrompt(TargetUri targetUri, Github.GitHubAuthenticationResultType resultType, string username, out string authenticationCode)
+        internal bool GitHubAuthCodePrompt(TargetUri targetUri, Github.GitHubAuthenticationResultType resultType, string username, out string authenticationCode)
             => _gitHubAuthCodePrompt(this, targetUri, resultType, username, out authenticationCode);
 
-        private bool GitHubCredentialPrompt(TargetUri targetUri, out string username, out string password)
+        internal bool GitHubCredentialPrompt(TargetUri targetUri, out string username, out string password)
             => _gitHubCredentialPrompt(this, targetUri, out username, out password);
 
         private void LoadAssemblyInformation()
@@ -279,16 +279,16 @@ namespace Microsoft.Alm.Cli
             _version = asseName.Version;
         }
 
-        private bool ModalPromptDisplayDialog(ref NativeMethods.CredentialUiInfo credUiInfo,
-                                                     ref NativeMethods.CredentialPackFlags authPackage,
-                                                     IntPtr packedAuthBufferPtr,
-                                                     uint packedAuthBufferSize,
-                                                     IntPtr inBufferPtr,
-                                                     int inBufferSize,
-                                                     bool saveCredentials,
-                                                     NativeMethods.CredentialUiWindowsFlags flags,
-                                                     out string username,
-                                                     out string password)
+        internal bool ModalPromptDisplayDialog(ref NativeMethods.CredentialUiInfo credUiInfo,
+                                               ref NativeMethods.CredentialPackFlags authPackage,
+                                               IntPtr packedAuthBufferPtr,
+                                               uint packedAuthBufferSize,
+                                               IntPtr inBufferPtr,
+                                               int inBufferSize,
+                                               bool saveCredentials,
+                                               NativeMethods.CredentialUiWindowsFlags flags,
+                                               out string username,
+                                               out string password)
             => _modalPromptDisplayDialog(this,
                                          ref credUiInfo,
                                          ref authPackage,
@@ -301,10 +301,10 @@ namespace Microsoft.Alm.Cli
                                          out username,
                                          out password);
 
-        private Credential ModalPromptForCredentials(TargetUri targetUri, string message)
+        internal Credential ModalPromptForCredentials(TargetUri targetUri, string message)
             => _modalPromptForCredentials(this, targetUri, message);
 
-        private Credential ModalPromptForCredentials(TargetUri targetUri)
+        internal Credential ModalPromptForCredentials(TargetUri targetUri)
         {
             string message = string.Format("Enter your credentials for {0}.", targetUri.ToString(port: true, path: true));
 
@@ -334,10 +334,10 @@ namespace Microsoft.Alm.Cli
         private bool StandardHandleIsTty(NativeMethods.StandardHandleType handleType)
             => _standardHandleIsTty(this, handleType);
 
-        private bool TryReadBoolean(OperationArguments operationArguments, string configKey, string environKey, out bool? value)
+        internal bool TryReadBoolean(OperationArguments operationArguments, string configKey, string environKey, out bool? value)
             => _tryReadBoolean(this, operationArguments, configKey, environKey, out value);
 
-        private bool TryReadString(OperationArguments operationArguments, string configKey, string environKey, out string value)
+        internal bool TryReadString(OperationArguments operationArguments, string configKey, string environKey, out string value)
             => _tryReadString(this, operationArguments, configKey, environKey, out value);
     }
 }

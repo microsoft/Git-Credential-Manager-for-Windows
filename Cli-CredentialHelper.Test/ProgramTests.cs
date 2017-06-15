@@ -93,10 +93,10 @@ namespace Microsoft.Alm.Cli.Test
 
             Program program = new Program();
 
-            Assert.IsFalse(Program.CommonFunctions.TryReadBoolean(program, opargsMock.Object, "notFound", "notFound", out yesno));
+            Assert.IsFalse(CommonFunctions.TryReadBoolean(program, opargsMock.Object, "notFound", "notFound", out yesno));
             Assert.IsFalse(yesno.HasValue);
 
-            Assert.IsTrue(Program.CommonFunctions.TryReadBoolean(program, opargsMock.Object, Program.ConfigPreserveCredentialsKey, Program.EnvironPreserveCredentialsKey, out yesno));
+            Assert.IsTrue(CommonFunctions.TryReadBoolean(program, opargsMock.Object, Program.ConfigPreserveCredentialsKey, Program.EnvironPreserveCredentialsKey, out yesno));
             Assert.IsTrue(yesno.HasValue);
             Assert.IsFalse(yesno.Value);
 
@@ -108,7 +108,7 @@ namespace Microsoft.Alm.Cli.Test
             opargsMock.Setup(r => r.EnvironmentVariables)
                       .Returns(envvars);
 
-            Assert.IsTrue(Program.CommonFunctions.TryReadBoolean(program, opargsMock.Object, Program.ConfigPreserveCredentialsKey, Program.EnvironPreserveCredentialsKey, out yesno));
+            Assert.IsTrue(CommonFunctions.TryReadBoolean(program, opargsMock.Object, Program.ConfigPreserveCredentialsKey, Program.EnvironPreserveCredentialsKey, out yesno));
             Assert.IsTrue(yesno.HasValue);
             Assert.IsTrue(yesno.Value);
 
@@ -120,7 +120,7 @@ namespace Microsoft.Alm.Cli.Test
             opargsMock.Setup(r => r.EnvironmentVariables)
                       .Returns(envvars);
 
-            Assert.IsFalse(Program.CommonFunctions.TryReadBoolean(program, opargsMock.Object, Program.ConfigPreserveCredentialsKey, Program.EnvironPreserveCredentialsKey, out yesno));
+            Assert.IsFalse(CommonFunctions.TryReadBoolean(program, opargsMock.Object, Program.ConfigPreserveCredentialsKey, Program.EnvironPreserveCredentialsKey, out yesno));
             Assert.IsFalse(yesno.HasValue);
         }
     }
