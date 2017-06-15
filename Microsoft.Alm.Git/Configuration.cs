@@ -51,11 +51,13 @@ namespace Microsoft.Alm.Git
             }
         }
 
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Design", "CA1065:DoNotRaiseExceptionsInUnexpectedLocations")]
         public virtual string this[string key]
         {
             get => throw new NotImplementedException();
         }
 
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Design", "CA1065:DoNotRaiseExceptionsInUnexpectedLocations")]
         public virtual int Count
         {
             get => throw new NotImplementedException();
@@ -72,7 +74,7 @@ namespace Microsoft.Alm.Git
 
         public static Configuration ReadConfiuration(string directory, bool loadLocal, bool loadSystem)
         {
-            if (String.IsNullOrWhiteSpace(directory))
+            if (string.IsNullOrWhiteSpace(directory))
                 throw new ArgumentNullException("directory");
             if (!Directory.Exists(directory))
                 throw new DirectoryNotFoundException(directory);
@@ -116,7 +118,7 @@ namespace Microsoft.Alm.Git
             while ((line = reader.ReadLine()) != null)
             {
                 // skip empty and commented lines
-                if (String.IsNullOrWhiteSpace(line))
+                if (string.IsNullOrWhiteSpace(line))
                     continue;
                 if (CommentRegex.Value.IsMatch(line))
                     continue;
@@ -125,12 +127,12 @@ namespace Microsoft.Alm.Git
                 // subsequent lines, until a new section is encountered, are children of the section
                 if ((match = SectionRegex.Value.Match(line)).Success)
                 {
-                    if (match.Groups.Count >= 2 && !String.IsNullOrWhiteSpace(match.Groups[1].Value))
+                    if (match.Groups.Count >= 2 && !string.IsNullOrWhiteSpace(match.Groups[1].Value))
                     {
                         section = match.Groups[1].Value.Trim();
 
                         // check if the section is named, if so: process the name
-                        if (match.Groups.Count >= 3 && !String.IsNullOrWhiteSpace(match.Groups[2].Value))
+                        if (match.Groups.Count >= 3 && !string.IsNullOrWhiteSpace(match.Groups[2].Value))
                         {
                             string val = match.Groups[2].Value.Trim();
 
@@ -155,8 +157,8 @@ namespace Microsoft.Alm.Git
                 else if ((match = KeyValueRegex.Value.Match(line)).Success)
                 {
                     if (match.Groups.Count >= 3
-                        && !String.IsNullOrEmpty(match.Groups[1].Value)
-                        && !String.IsNullOrEmpty(match.Groups[2].Value))
+                        && !string.IsNullOrEmpty(match.Groups[1].Value)
+                        && !string.IsNullOrEmpty(match.Groups[2].Value))
                     {
                         string key = section + HostSplitCharacter + match.Groups[1].Value.Trim();
                         string val = match.Groups[2].Value.Trim();
@@ -300,9 +302,9 @@ namespace Microsoft.Alm.Git
                 if (ReferenceEquals(suffix, null))
                     throw new ArgumentNullException(nameof(suffix));
 
-                string match = String.IsNullOrEmpty(key)
-                    ? String.Format(System.Globalization.CultureInfo.InvariantCulture, "{0}.{1}", prefix, suffix)
-                    : String.Format(System.Globalization.CultureInfo.InvariantCulture, "{0}.{1}.{2}", prefix, key, suffix);
+                string match = string.IsNullOrEmpty(key)
+                    ? string.Format(System.Globalization.CultureInfo.InvariantCulture, "{0}.{1}", prefix, suffix)
+                    : string.Format(System.Globalization.CultureInfo.InvariantCulture, "{0}.{1}.{2}", prefix, key, suffix);
 
                 // if there's a match, return it
                 if (ContainsKey(match))
@@ -325,11 +327,11 @@ namespace Microsoft.Alm.Git
                 {
                     // return match seeking from most specific (<prefix>.<scheme>://<host>.<key>) to
                     // least specific (credential.<key>)
-                    if (TryGetEntry(prefix, String.Format(System.Globalization.CultureInfo.InvariantCulture, "{0}://{1}", targetUri.Scheme, targetUri.Host), key, out entry)
+                    if (TryGetEntry(prefix, string.Format(System.Globalization.CultureInfo.InvariantCulture, "{0}://{1}", targetUri.Scheme, targetUri.Host), key, out entry)
                         || TryGetEntry(prefix, targetUri.Host, key, out entry))
                         return true;
 
-                    if (!String.IsNullOrWhiteSpace(targetUri.Host))
+                    if (!string.IsNullOrWhiteSpace(targetUri.Host))
                     {
                         string[] fragments = targetUri.Host.Split(HostSplitCharacter);
                         string host = null;
@@ -338,7 +340,7 @@ namespace Microsoft.Alm.Git
                         // match against a top-level domain (aka ".com")
                         for (int i = 1; i < fragments.Length - 1; i++)
                         {
-                            host = String.Join(".", fragments, i, fragments.Length - i);
+                            host = string.Join(".", fragments, i, fragments.Length - i);
                             if (TryGetEntry(prefix, host, key, out entry))
                                 return true;
                         }
@@ -346,7 +348,7 @@ namespace Microsoft.Alm.Git
                 }
 
                 // try to find an unadorned match as a complete fallback
-                if (TryGetEntry(prefix, String.Empty, key, out entry))
+                if (TryGetEntry(prefix, string.Empty, key, out entry))
                     return true;
 
                 // nothing found
@@ -406,7 +408,7 @@ namespace Microsoft.Alm.Git
             private void ParseGitConfig(ConfigurationLevel level, string configPath)
             {
                 Debug.Assert(Enum.IsDefined(typeof(ConfigurationLevel), level), $"The `{nameof(level)}` parameter is not defined.");
-                Debug.Assert(!String.IsNullOrWhiteSpace(configPath), $"The `{nameof(configPath)}` parameter is null or invalid.");
+                Debug.Assert(!string.IsNullOrWhiteSpace(configPath), $"The `{nameof(configPath)}` parameter is null or invalid.");
                 Debug.Assert(File.Exists(configPath), $"The `{nameof(configPath)}` parameter references a non-existent file.");
 
                 if (!_values.ContainsKey(level))
@@ -458,7 +460,7 @@ namespace Microsoft.Alm.Git
 
             public override string ToString()
             {
-                return String.Format(System.Globalization.CultureInfo.InvariantCulture, "{0} = {1}", Key, Value);
+                return string.Format(System.Globalization.CultureInfo.InvariantCulture, "{0} = {1}", Key, Value);
             }
 
             public static bool operator ==(Entry left, Entry right)

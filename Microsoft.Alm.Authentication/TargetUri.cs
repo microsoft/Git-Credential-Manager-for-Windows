@@ -212,6 +212,7 @@ namespace Microsoft.Alm.Authentication
             return ToString(false, true, true);
         }
 
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Design", "CA1026:DefaultParametersShouldNotBeUsed")]
         public string ToString(bool username = false, bool port = false, bool path = false)
         {
             // Start building up a url with the scheme
@@ -314,6 +315,7 @@ namespace Microsoft.Alm.Authentication
         /// <remarks>
         ///     If the <see cref="TargetUri"/> already contains a username, that one is kept NOT overwritten.
         /// </remarks>
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2234:PassSystemUriObjectsInsteadOfStrings")]
         public TargetUri GetPerUserTargetUri(string username)
         {
             // belt and braces, don't add a username if the URI already contains one.
@@ -328,6 +330,8 @@ namespace Microsoft.Alm.Authentication
         /// <summary>
         ///     Get a version of this <see cref="TargetUri"/> that does NOT contain any username.
         /// </summary>
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Design", "CA1024:UsePropertiesWhereAppropriate")]
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2234:PassSystemUriObjectsInsteadOfStrings")]
         public TargetUri GetHostTargetUri()
         {
             // belt and braces, don't add a username if the URI already contains one.
@@ -348,6 +352,7 @@ namespace Microsoft.Alm.Authentication
         /// <summary>
         ///     Get username contained in the ActualUri of this <see cref="TargetUri"/>
         /// </summary>
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Design", "CA1056:UriPropertiesShouldNotBeStrings")]
         public string TargetUriUsername { get { return this.ActualUri.UserInfo; }  }
     }
 }

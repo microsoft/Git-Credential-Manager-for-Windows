@@ -176,7 +176,7 @@ namespace Microsoft.Alm.Authentication
             if (token == null)
                 throw new ArgumentNullException(nameof(token));
             if (String.IsNullOrWhiteSpace(token.Value))
-                throw new ArgumentException("Value propertry returned null or empty.", nameof(token));
+                throw new ArgumentException("Value property returned null or empty.", nameof(token));
             if (token.Value.Length > NativeMethods.Credential.PasswordMaxLength)
                 throw new ArgumentOutOfRangeException(nameof(token));
         }
