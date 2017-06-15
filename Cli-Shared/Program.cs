@@ -1,20 +1,14 @@
 using System;
-using System.ComponentModel;
 using System.Diagnostics;
 using System.IO;
-using System.Runtime.InteropServices;
-using System.Text;
+using System.Runtime.CompilerServices;
 using System.Threading.Tasks;
 using Microsoft.Alm.Authentication;
-using Microsoft.Alm.Git;
-using Microsoft.Win32.SafeHandles;
 using Bitbucket = Atlassian.Bitbucket.Authentication;
 using Github = GitHub.Authentication;
 
 namespace Microsoft.Alm.Cli
 {
-    [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Performance", "CA1811:AvoidUncalledPrivateCode")]
-    [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA1801:ReviewUnusedParameters")]
     partial class Program
     {
         public const string SourceUrl = "https://github.com/Microsoft/Git-Credential-Manager-for-Windows";
@@ -59,54 +53,42 @@ namespace Microsoft.Alm.Cli
         internal static readonly VstsTokenScope VstsCredentialScope = VstsTokenScope.CodeWrite | VstsTokenScope.PackagingRead;
         internal static readonly Github.TokenScope GitHubCredentialScope = Github.TokenScope.Gist | Github.TokenScope.Repo;
 
-        internal static Action<Exception> _dieExceptionCallback = (Exception exception) =>
-        {
-            Git.Trace.WriteLine(exception.ToString());
-            LogEvent(exception.ToString(), EventLogEntryType.Error);
+        internal BasicCredentialPromptDelegate _basicCredentialPrompt = ConsoleFunctions.CredentialPrompt;
+        internal BitbucketCredentialPromptDelegate _bitbucketCredentialPrompt = BitbucketFunctions.CredentialPrompt;
+        internal BitbucketOAuthPromptDelegate _bitbucketOauthPrompt = BitbucketFunctions.OAuthPrompt;
+        internal CreateAuthenticationDelegate _createAuthentication = CommonFunctions.CreateAuthentication;
+        internal DeleteCredentialsDelegate _deleteCredentials = CommonFunctions.DeleteCredentials;
+        internal DieExceptionDelegate _dieException = CommonFunctions.DieException;
+        internal DieMessageDelegate _dieMessage = CommonFunctions.DieMessage;
+        internal EnableTraceLoggingDelegate _enableTraceLogging = CommonFunctions.EnableTraceLogging;
+        internal EnableTraceLoggingFileDelegate _enableTraceLoggingFile = CommonFunctions.EnableTraceLoggingFile;
+        internal ExitDelegate _exit = ConsoleFunctions.Exit;
+        internal GitHubAuthCodePromptDelegate _gitHubAuthCodePrompt = GitHubFunctions.AuthCodePrompt;
+        internal GitHubCredentialPromptDelegate _gitHubCredentialPrompt = GitHubFunctions.CredentialPrompt;
+        internal LoadOperationArgumentsDelegate _loadOperationArguments = CommonFunctions.LoadOperationArguments;
+        internal LogEventDelegate _logEvent = CommonFunctions.LogEvent;
+        internal ModalPromptDisplayDialogDelegate _modalPromptDisplayDialog = DialogFunctions.DisplayModal;
+        internal ModalPromptForCredentialsDelegate _modalPromptForCredentials = DialogFunctions.CredentialPrompt;
+        internal ModalPromptForPasswordDelegate _modalPromptForPassword = DialogFunctions.PasswordPrompt;
+        internal PrintArgsDelegate _printArgs = CommonFunctions.PrintArgs;
+        internal QueryCredentialsDelegate _queryCredentials = CommonFunctions.QueryCredentials;
+        internal ReadKeyDelegate _readKey = ConsoleFunctions.ReadKey;
+        internal StandardHandleIsTtyDelegate _standardHandleIsTty = ConsoleFunctions.StandardHandleIsTty;
+        internal TryReadBooleanDelegate _tryReadBoolean = CommonFunctions.TryReadBoolean;
+        internal TryReadStringDelegate _tryReadString = CommonFunctions.TryReadString;
+        internal WriteDelegate _write = ConsoleFunctions.Write;
+        internal WriteLineDelegate _writeLine = ConsoleFunctions.WriteLine;
 
-            string message;
-            if (!String.IsNullOrWhiteSpace(exception.Message))
-            {
-                message = $"{exception.GetType().Name} encountered.\n   {exception.Message}";
-            }
-            else
-            {
-                message = $"{exception.GetType().Name}  encountered.";
-            }
-
-            Die(message);
-        };
-
-        internal static Action<string> _dieMessageCallback = (string message) =>
-        {
-            Git.Trace.WriteLine($"fatal: {message}");
-            Program.WriteLine($"fatal: {message}");
-
-            Git.Trace.Flush();
-
-            Environment.Exit(-1);
-        };
-
-        internal static Action<int, string> _exitCallback = (int exitcode, string message) =>
-        {
-            if (!String.IsNullOrWhiteSpace(message))
-            {
-                Git.Trace.WriteLine(message);
-                Program.WriteLine(message);
-            }
-
-            Environment.Exit(exitcode);
-        };
-
-        private static string _executablePath;
-        private static string _location;
-        private static string _name;
-        private static Version _version;
+        private string _executablePath;
+        private string _location;
+        private string _name;
+        private string _title;
+        private Version _version;
 
         /// <summary>
         /// Gets the path to the executable.
         /// </summary>
-        public static string ExecutablePath
+        public string ExecutablePath
         {
             get
             {
@@ -121,7 +103,7 @@ namespace Microsoft.Alm.Cli
         /// <summary>
         /// Gets the directory where the executable is contained.
         /// </summary>
-        public static string Location
+        public string Location
         {
             get
             {
@@ -136,7 +118,7 @@ namespace Microsoft.Alm.Cli
         /// <summary>
         /// Gets the name of the application.
         /// </summary>
-        public static string Name
+        public string Name
         {
             get
             {
@@ -155,7 +137,7 @@ namespace Microsoft.Alm.Cli
         /// user are possible.
         /// </para>
         /// </summary>
-        public static bool StandardErrorIsTty
+        public bool StandardErrorIsTty
         {
             get { return StandardHandleIsTty(NativeMethods.StandardHandleType.Error); }
         }
@@ -167,7 +149,7 @@ namespace Microsoft.Alm.Cli
         /// user are possible.
         /// </para>
         /// </summary>
-        public static bool StandardInputIsTty
+        public bool StandardInputIsTty
         {
             get { return StandardHandleIsTty(NativeMethods.StandardHandleType.Input); }
         }
@@ -179,15 +161,21 @@ namespace Microsoft.Alm.Cli
         /// user are possible.
         /// </para>
         /// </summary>
-        public static bool StandardOutputIsTty
+        public bool StandardOutputIsTty
         {
             get { return StandardHandleIsTty(NativeMethods.StandardHandleType.Output); }
+        }
+
+        public string Title
+        {
+            get { return _title; }
+            private set { _title = value; }
         }
 
         /// <summary>
         /// Gets the version of the application.
         /// </summary>
-        internal static Version Version
+        public Version Version
         {
             get
             {
@@ -199,926 +187,88 @@ namespace Microsoft.Alm.Cli
             }
         }
 
-        internal static void Die(Exception exception)
-            => _dieExceptionCallback(exception);
+        internal void Die(Exception exception,
+                                [CallerFilePath] string path = "",
+                                [CallerLineNumber] int line = 0,
+                                [CallerMemberName] string name = "")
+            => _dieException(this, exception, path, line, name);
 
-        internal static void Die(string message)
-            => _dieMessageCallback(message);
+        internal void Die(string message,
+                                [CallerFilePath] string path = "",
+                                [CallerLineNumber] int line = 0,
+                                [CallerMemberName] string name = "")
+            => _dieMessage(this, message, path, line, name);
 
-        internal static void Exit(int exitcode = 0, string message = null)
-            => _exitCallback(exitcode, message);
+        internal void Exit(int exitcode = 0,
+                                  string message = null,
+                                 [CallerFilePath] string path = "",
+                                 [CallerLineNumber] int line = 0,
+                                 [CallerMemberName] string name = "")
+            => _exit(this, exitcode, message, path, line, name);
 
-        internal static void LoadOperationArguments(OperationArguments operationArguments)
-        {
-            if (operationArguments.TargetUri == null)
-            {
-                Die("No host information, unable to continue.");
-            }
+        internal void LoadOperationArguments(OperationArguments operationArguments)
+            => _loadOperationArguments(this, operationArguments);
 
-            string value;
-            bool? yesno;
+        internal void LogEvent(string message, EventLogEntryType eventType)
+            => _logEvent(this, message, eventType);
 
-            if (TryReadBoolean(operationArguments, null, EnvironConfigNoLocalKey, out yesno))
-            {
-                operationArguments.UseConfigLocal = yesno.Value;
-            }
+        internal Credential QueryCredentials(OperationArguments operationArguments)
+            => _queryCredentials(this, operationArguments);
 
-            if (TryReadBoolean(operationArguments, null, EnvironConfigNoSystemKey, out yesno))
-            {
-                operationArguments.UseConfigSystem = yesno.Value;
-            }
+        internal ConsoleKeyInfo ReadKey(bool intercept = true)
+            => _readKey(this, intercept);
 
-            // load/re-load the Git configuration after setting the use local/system config values
-            operationArguments.LoadConfiguration();
+        internal void Write(string message)
+            => _write(this, message);
 
-            // if a user-agent has been specified in the environment, set it globally
-            if (TryReadString(operationArguments, null, EnvironHttpUserAgent, out value))
-            {
-                Global.UserAgent = value;
-            }
+        internal void WriteLine(string message = null)
+            => _writeLine(this, message);
 
-            // look for authority settings
-            if (TryReadString(operationArguments, ConfigAuthorityKey, EnvironAuthorityKey, out value))
-            {
-                Git.Trace.WriteLine($"{ConfigAuthorityKey} = '{value}'.");
-
-                if (ConfigKeyComparer.Equals(value, "MSA")
-                        || ConfigKeyComparer.Equals(value, "Microsoft")
-                        || ConfigKeyComparer.Equals(value, "MicrosoftAccount")
-                        || ConfigKeyComparer.Equals(value, "Live")
-                        || ConfigKeyComparer.Equals(value, "LiveConnect")
-                        || ConfigKeyComparer.Equals(value, "LiveID"))
-                {
-                    operationArguments.Authority = AuthorityType.MicrosoftAccount;
-                }
-                else if (ConfigKeyComparer.Equals(value, "AAD")
-                         || ConfigKeyComparer.Equals(value, "Azure")
-                         || ConfigKeyComparer.Equals(value, "AzureDirectory"))
-                {
-                    operationArguments.Authority = AuthorityType.AzureDirectory;
-                }
-                else if (ConfigKeyComparer.Equals(value, "Integrated")
-                         || ConfigKeyComparer.Equals(value, "Windows")
-                         || ConfigKeyComparer.Equals(value, "TFS")
-                         || ConfigKeyComparer.Equals(value, "Kerberos")
-                         || ConfigKeyComparer.Equals(value, "NTLM")
-                         || ConfigKeyComparer.Equals(value, "SSO"))
-                {
-                    operationArguments.Authority = AuthorityType.Ntlm;
-                }
-                else if (ConfigKeyComparer.Equals(value, "GitHub"))
-                {
-                    operationArguments.Authority = AuthorityType.GitHub;
-                }
-                else
-                {
-                    operationArguments.Authority = AuthorityType.Basic;
-                }
-            }
-
-            // look for interactivity config settings
-            if (TryReadString(operationArguments, ConfigInteractiveKey, EnvironInteractiveKey, out value))
-            {
-                Git.Trace.WriteLine($"{EnvironInteractiveKey} = '{value}'.");
-
-                if (ConfigKeyComparer.Equals(value, "always")
-                    || ConfigKeyComparer.Equals(value, "true")
-                    || ConfigKeyComparer.Equals(value, "force"))
-                {
-                    operationArguments.Interactivity = Interactivity.Always;
-                }
-                else if (ConfigKeyComparer.Equals(value, "never")
-                         || ConfigKeyComparer.Equals(value, "false"))
-                {
-                    operationArguments.Interactivity = Interactivity.Never;
-                }
-            }
-
-            // look for credential validation config settings
-            if (TryReadBoolean(operationArguments, ConfigValidateKey, EnvironValidateKey, out yesno))
-            {
-                operationArguments.ValidateCredentials = yesno.Value;
-            }
-
-            // look for write log config settings
-            if (TryReadBoolean(operationArguments, ConfigWritelogKey, EnvironWritelogKey, out yesno))
-            {
-                operationArguments.WriteLog = yesno.Value;
-            }
-
-            // look for modal prompt config settings
-            if (TryReadBoolean(operationArguments, ConfigUseModalPromptKey, EnvironModalPromptKey, out yesno))
-            {
-                operationArguments.UseModalUi = yesno.Value;
-            }
-
-            // look for credential preservation config settings
-            if (TryReadBoolean(operationArguments, ConfigPreserveCredentialsKey, EnvironPreserveCredentialsKey, out yesno))
-            {
-                operationArguments.PreserveCredentials = yesno.Value;
-            }
-
-            // look for http path usage config settings
-            if (TryReadBoolean(operationArguments, ConfigUseHttpPathKey, null, out yesno))
-            {
-                operationArguments.UseHttpPath = yesno.Value;
-            }
-
-            // look for http proxy config settings
-            if (TryReadString(operationArguments, ConfigHttpProxyKey, EnvironHttpProxyKey, out value))
-            {
-                Git.Trace.WriteLine($"{ConfigHttpProxyKey} = '{value}'.");
-
-                operationArguments.SetProxy(value);
-            }
-            else
-            {
-                // check the git-config http.proxy setting just-in-case
-                Configuration.Entry entry;
-                if (operationArguments.GitConfiguration.TryGetEntry("http", operationArguments.QueryUri, "proxy", out entry)
-                    && !String.IsNullOrWhiteSpace(entry.Value))
-                {
-                    Git.Trace.WriteLine($"http.proxy = '{entry.Value}'.");
-
-                    operationArguments.SetProxy(entry.Value);
-                }
-            }
-
-            // look for custom namespace config settings
-            if (TryReadString(operationArguments, ConfigNamespaceKey, EnvironNamespaceKey, out value))
-            {
-                Git.Trace.WriteLine($"{ConfigNamespaceKey} = '{value}'.");
-
-                operationArguments.CustomNamespace = value;
-            }
-        }
-
-        internal static void LogEvent(string message, EventLogEntryType eventType)
-        {
-            /*** try-squelch due to UAC issues which require a proper installer to work around ***/
-
-            Git.Trace.WriteLine(message);
-
-            try
-            {
-                EventLog.WriteEntry(EventSource, message, eventType);
-            }
-            catch { /* squelch */ }
-        }
-
-        internal static Credential QueryCredentials(OperationArguments operationArguments)
-        {
-            if (ReferenceEquals(operationArguments, null))
-                throw new ArgumentNullException(nameof(operationArguments));
-            if (ReferenceEquals(operationArguments.TargetUri, null))
-                throw new ArgumentException("TargetUri property returned null", nameof(operationArguments));
-
-            var task = Task.Run(async () => { return await CreateAuthentication(operationArguments); });
-            BaseAuthentication authentication = task.Result;
-            Credential credentials = null;
-
-            switch (operationArguments.Authority)
-            {
-                default:
-                case AuthorityType.Basic:
-                    {
-                        BasicAuthentication basicAuth = authentication as BasicAuthentication;
-
-                        Task.Run(async () =>
-                        {
-                            // attempt to get cached creds or acquire creds if interactivity is allowed
-                            if ((operationArguments.Interactivity != Interactivity.Always
-                                    && (credentials = authentication.GetCredentials(operationArguments.TargetUri)) != null)
-                                || (operationArguments.Interactivity != Interactivity.Never
-                                    && (credentials = await basicAuth.AcquireCredentials(operationArguments.TargetUri)) != null))
-                            {
-                                Git.Trace.WriteLine("credentials found.");
-                                // no need to save the credentials explicitly, as Git will call back with
-                                // a store command if the credentials are valid.
-                            }
-                            else
-                            {
-                                Git.Trace.WriteLine($"credentials for '{operationArguments.TargetUri}' not found.");
-                                LogEvent($"Failed to retrieve credentials for '{operationArguments.TargetUri}'.", EventLogEntryType.FailureAudit);
-                            }
-                        }).Wait();
-                    }
-                    break;
-
-                case AuthorityType.AzureDirectory:
-                    {
-                        VstsAadAuthentication aadAuth = authentication as VstsAadAuthentication;
-
-                        Task.Run(async () =>
-                        {
-                            // attempt to get cached creds -> non-interactive logon -> interactive
-                            // logon note that AAD "credentials" are always scoped access tokens
-                            if (((operationArguments.Interactivity != Interactivity.Always
-                                    && ((credentials = aadAuth.GetCredentials(operationArguments.TargetUri)) != null)
-                                    && (!operationArguments.ValidateCredentials
-                                        || await aadAuth.ValidateCredentials(operationArguments.TargetUri, credentials))))
-                                || (operationArguments.Interactivity != Interactivity.Always
-                                    && ((credentials = await aadAuth.NoninteractiveLogon(operationArguments.TargetUri, true)) != null)
-                                    && (!operationArguments.ValidateCredentials
-                                        || await aadAuth.ValidateCredentials(operationArguments.TargetUri, credentials)))
-                                || (operationArguments.Interactivity != Interactivity.Never
-                                    && ((credentials = await aadAuth.InteractiveLogon(operationArguments.TargetUri, true)) != null)
-                                    && (!operationArguments.ValidateCredentials
-                                        || await aadAuth.ValidateCredentials(operationArguments.TargetUri, credentials))))
-                            {
-                                Git.Trace.WriteLine($"credentials for '{operationArguments.TargetUri}' found.");
-                                LogEvent($"Azure Directory credentials  for '{operationArguments.TargetUri}' successfully retrieved.", EventLogEntryType.SuccessAudit);
-                            }
-                            else
-                            {
-                                Git.Trace.WriteLine($"credentials for '{operationArguments.TargetUri}' not found.");
-                                LogEvent($"Failed to retrieve Azure Directory credentials for '{operationArguments.TargetUri}'.", EventLogEntryType.FailureAudit);
-                            }
-                        }).Wait();
-                    }
-                    break;
-
-                case AuthorityType.MicrosoftAccount:
-                    {
-                        VstsMsaAuthentication msaAuth = authentication as VstsMsaAuthentication;
-
-                        Task.Run(async () =>
-                        {
-                            // attempt to get cached creds -> interactive logon note that MSA
-                            // "credentials" are always scoped access tokens
-                            if (((operationArguments.Interactivity != Interactivity.Always
-                                    && ((credentials = msaAuth.GetCredentials(operationArguments.TargetUri)) != null)
-                                    && (!operationArguments.ValidateCredentials
-                                        || await msaAuth.ValidateCredentials(operationArguments.TargetUri, credentials))))
-                                || (operationArguments.Interactivity != Interactivity.Never
-                                    && ((credentials = await msaAuth.InteractiveLogon(operationArguments.TargetUri, true)) != null)
-                                    && (!operationArguments.ValidateCredentials
-                                        || await msaAuth.ValidateCredentials(operationArguments.TargetUri, credentials))))
-                            {
-                                Git.Trace.WriteLine($"credentials for '{operationArguments.TargetUri}' found.");
-                                LogEvent($"Microsoft Live credentials for '{operationArguments.TargetUri}' successfully retrieved.", EventLogEntryType.SuccessAudit);
-                            }
-                            else
-                            {
-                                Git.Trace.WriteLine($"credentials for '{operationArguments.TargetUri}' not found.");
-                                LogEvent($"Failed to retrieve Microsoft Live credentials for '{operationArguments.TargetUri}'.", EventLogEntryType.FailureAudit);
-                            }
-                        }).Wait();
-                    }
-                    break;
-
-                case AuthorityType.GitHub:
-                    {
-                        Github.Authentication ghAuth = authentication as Github.Authentication;
-
-                        Task.Run(async () =>
-                        {
-                            if ((operationArguments.Interactivity != Interactivity.Always
-                                    && ((credentials = ghAuth.GetCredentials(operationArguments.TargetUri)) != null)
-                                    && (!operationArguments.ValidateCredentials
-                                        || await ghAuth.ValidateCredentials(operationArguments.TargetUri, credentials)))
-                                || (operationArguments.Interactivity != Interactivity.Never
-                                    && ((credentials = await ghAuth.InteractiveLogon(operationArguments.TargetUri)) != null)
-                                    && (!operationArguments.ValidateCredentials
-                                        || await ghAuth.ValidateCredentials(operationArguments.TargetUri, credentials))))
-                            {
-                                Git.Trace.WriteLine($"credentials for '{operationArguments.TargetUri}' found.");
-                                LogEvent($"GitHub credentials for '{operationArguments.TargetUri}' successfully retrieved.", EventLogEntryType.SuccessAudit);
-                            }
-                            else
-                            {
-                                Git.Trace.WriteLine($"credentials for '{operationArguments.TargetUri}' not found.");
-                                LogEvent($"Failed to retrieve GitHub credentials for '{operationArguments.TargetUri}'.", EventLogEntryType.FailureAudit);
-                            }
-                        }).Wait();
-                    }
-                    break;
-
-                case AuthorityType.Bitbucket:
-                    {
-                        var bbcAuth = authentication as Bitbucket.Authentication;
-
-                        Task.Run(async () =>
-                        {
-                            if (((operationArguments.Interactivity != Interactivity.Always)
-                                 && ((credentials = bbcAuth.GetCredentials(operationArguments.TargetUri, operationArguments.CredUsername)) != null)
-                                 && (!operationArguments.ValidateCredentials
-                                     || ((credentials = await bbcAuth.ValidateCredentials(operationArguments.TargetUri, operationArguments.CredUsername, credentials)) != null)))
-                                     || ((operationArguments.Interactivity != Interactivity.Never)
-                                        && ((credentials = await bbcAuth.InteractiveLogon(operationArguments.TargetUri, operationArguments.CredUsername)) != null)
-                                        && (!operationArguments.ValidateCredentials
-                                            || ((credentials = await bbcAuth.ValidateCredentials(operationArguments.TargetUri, operationArguments.CredUsername, credentials)) != null))))
-                            {
-                                Git.Trace.WriteLine($"credentials for '{operationArguments.TargetUri}' found.");
-                                // Bitbucket relies on a username + secret, so make sure there is a
-                                // username to return
-                                if (operationArguments.CredUsername != null)
-                                {
-                                    credentials = new Credential(operationArguments.CredUsername, credentials.Password);
-                                }
-                                LogEvent($"Bitbucket credentials for '{operationArguments.TargetUri}' successfully retrieved.", EventLogEntryType.SuccessAudit);
-                            }
-                            else
-                            {
-                                LogEvent($"Failed to retrieve Bitbucket credentials for '{operationArguments.TargetUri}'.", EventLogEntryType.FailureAudit);
-                            }
-                        }).Wait();
-                    }
-                    break;
-
-                case AuthorityType.Ntlm:
-                    {
-                        Git.Trace.WriteLine($"'{operationArguments.TargetUri}' is NTLM.");
-                        credentials = BasicAuthentication.NtlmCredentials;
-                    }
-                    break;
-            }
-
-            if (credentials != null)
-            {
-                operationArguments.SetCredentials(credentials);
-            }
-
-            return credentials;
-        }
-
-        internal static ConsoleKeyInfo ReadKey(bool intercept = true)
-        {
-            return (StandardInputIsTty)
-                ? Console.ReadKey(intercept)
-                : new ConsoleKeyInfo(' ', ConsoleKey.Escape, false, false, false);
-        }
-
-        internal static void Write(string message)
-        {
-            if (message == null)
-                return;
-
-            Console.Error.WriteLine(message);
-        }
-
-        internal static void WriteLine(string message = null)
-        {
-            Console.Error.WriteLine(message);
-        }
-
-        private static Credential BasicCredentialPrompt(TargetUri targetUri)
+        internal Credential BasicCredentialPrompt(TargetUri targetUri)
         {
             string message = "Please enter your credentials for ";
             return BasicCredentialPrompt(targetUri, message);
         }
 
-        private static Credential BasicCredentialPrompt(TargetUri targetUri, string titleMessage)
-        {
-            // ReadConsole 32768 fail, 32767 ok @linquize [https://github.com/Microsoft/Git-Credential-Manager-for-Windows/commit/a62b9a19f430d038dcd85a610d97e5f763980f85]
-            const int BufferReadSize = 16 * 1024;
+        internal Credential BasicCredentialPrompt(TargetUri targetUri, string titleMessage)
+            => _basicCredentialPrompt(this, targetUri, titleMessage);
 
-            Debug.Assert(targetUri != null);
+        internal Task<BaseAuthentication> CreateAuthentication(OperationArguments operationArguments)
+            => _createAuthentication(this, operationArguments);
 
-            if (!StandardErrorIsTty || !StandardInputIsTty)
-            {
-                Git.Trace.WriteLine("not a tty detected, abandoning prompt.");
-                return null;
-            }
+        private void DeleteCredentials(OperationArguments operationArguments)
+            => _deleteCredentials(this, operationArguments);
 
-            titleMessage = titleMessage ?? "Please enter your credentials for ";
-
-            StringBuilder buffer = new StringBuilder(BufferReadSize);
-            uint read = 0;
-            uint written = 0;
-
-            NativeMethods.FileAccess fileAccessFlags = NativeMethods.FileAccess.GenericRead | NativeMethods.FileAccess.GenericWrite;
-            NativeMethods.FileAttributes fileAttributes = NativeMethods.FileAttributes.Normal;
-            NativeMethods.FileCreationDisposition fileCreationDisposition = NativeMethods.FileCreationDisposition.OpenExisting;
-            NativeMethods.FileShare fileShareFlags = NativeMethods.FileShare.Read | NativeMethods.FileShare.Write;
-
-            using (SafeFileHandle stdout = NativeMethods.CreateFile(NativeMethods.ConsoleOutName, fileAccessFlags, fileShareFlags, IntPtr.Zero, fileCreationDisposition, fileAttributes, IntPtr.Zero))
-            using (SafeFileHandle stdin = NativeMethods.CreateFile(NativeMethods.ConsoleInName, fileAccessFlags, fileShareFlags, IntPtr.Zero, fileCreationDisposition, fileAttributes, IntPtr.Zero))
-            {
-                string username = null;
-                string password = null;
-
-                // read the current console mode
-                NativeMethods.ConsoleMode consoleMode;
-                if (!NativeMethods.GetConsoleMode(stdin, out consoleMode))
-                {
-                    int error = Marshal.GetLastWin32Error();
-                    throw new Win32Exception(error, "Unable to determine console mode (" + NativeMethods.Win32Error.GetText(error) + ").");
-                }
-
-                Git.Trace.WriteLine($"console mode = '{consoleMode}'.");
-
-                // instruct the user as to what they are expected to do
-                buffer.Append(titleMessage)
-                      .Append(targetUri)
-                      .AppendLine();
-                if (!NativeMethods.WriteConsole(stdout, buffer, (uint)buffer.Length, out written, IntPtr.Zero))
-                {
-                    int error = Marshal.GetLastWin32Error();
-                    throw new Win32Exception(error, "Unable to write to standard output (" + NativeMethods.Win32Error.GetText(error) + ").");
-                }
-
-                // clear the buffer for the next operation
-                buffer.Clear();
-
-                // prompt the user for the username wanted
-                buffer.Append("username: ");
-                if (!NativeMethods.WriteConsole(stdout, buffer, (uint)buffer.Length, out written, IntPtr.Zero))
-                {
-                    int error = Marshal.GetLastWin32Error();
-                    throw new Win32Exception(error, "Unable to write to standard output (" + NativeMethods.Win32Error.GetText(error) + ").");
-                }
-
-                // clear the buffer for the next operation
-                buffer.Clear();
-
-                // read input from the user
-                if (!NativeMethods.ReadConsole(stdin, buffer, BufferReadSize, out read, IntPtr.Zero))
-                {
-                    int error = Marshal.GetLastWin32Error();
-                    throw new Win32Exception(error, "Unable to read from standard input (" + NativeMethods.Win32Error.GetText(error) + ").");
-                }
-
-                // record input from the user into local storage, stripping any eol chars
-                username = buffer.ToString(0, (int)read);
-                username = username.Trim(Environment.NewLine.ToCharArray());
-
-                // clear the buffer for the next operation
-                buffer.Clear();
-
-                // set the console mode to current without echo input
-                NativeMethods.ConsoleMode consoleMode2 = consoleMode ^ NativeMethods.ConsoleMode.EchoInput;
-
-                try
-                {
-                    if (!NativeMethods.SetConsoleMode(stdin, consoleMode2))
-                    {
-                        int error = Marshal.GetLastWin32Error();
-                        throw new Win32Exception(error, "Unable to set console mode (" + NativeMethods.Win32Error.GetText(error) + ").");
-                    }
-
-                    Git.Trace.WriteLine($"console mode = '{consoleMode2}'.");
-
-                    // prompt the user for password
-                    buffer.Append("password: ");
-                    if (!NativeMethods.WriteConsole(stdout, buffer, (uint)buffer.Length, out written, IntPtr.Zero))
-                    {
-                        int error = Marshal.GetLastWin32Error();
-                        throw new Win32Exception(error, "Unable to write to standard output (" + NativeMethods.Win32Error.GetText(error) + ").");
-                    }
-
-                    // clear the buffer for the next operation
-                    buffer.Clear();
-
-                    // read input from the user
-                    if (!NativeMethods.ReadConsole(stdin, buffer, BufferReadSize, out read, IntPtr.Zero))
-                    {
-                        int error = Marshal.GetLastWin32Error();
-                        throw new Win32Exception(error, "Unable to read from standard input (" + NativeMethods.Win32Error.GetText(error) + ").");
-                    }
-
-                    // record input from the user into local storage, stripping any eol chars
-                    password = buffer.ToString(0, (int)read);
-                    password = password.Trim(Environment.NewLine.ToCharArray());
-                }
-                catch { throw; }
-                finally
-                {
-                    // restore the console mode to its original value
-                    NativeMethods.SetConsoleMode(stdin, consoleMode);
-
-                    Git.Trace.WriteLine($"console mode = '{consoleMode}'.");
-                }
-
-                if (username != null && password != null)
-                    return new Credential(username, password);
-            }
-
-            return null;
-        }
-
-        private static async Task<BaseAuthentication> CreateAuthentication(OperationArguments operationArguments)
-        {
-            Debug.Assert(operationArguments != null, "The operationArguments is null");
-            Debug.Assert(operationArguments.TargetUri != null, "The operationArgument.TargetUri is null");
-
-            var secretsNamespace = operationArguments.CustomNamespace ?? SecretsNamespace;
-            var secrets = new SecretStore(secretsNamespace, null, null, Secret.UriToName);
-            BaseAuthentication authority = null;
-
-            var basicCredentialCallback = (operationArguments.UseModalUi)
-                    ? new AcquireCredentialsDelegate(Program.ModalPromptForCredentials)
-                    : new AcquireCredentialsDelegate(Program.BasicCredentialPrompt);
-
-            var bitbucketCredentialCallback = (operationArguments.UseModalUi)
-                    ? Bitbucket.AuthenticationPrompts.CredentialModalPrompt
-                    : new Bitbucket.Authentication.AcquireCredentialsDelegate(BitbucketCredentialPrompt);
-
-            var bitbucketOauthCallback = (operationArguments.UseModalUi)
-                    ? Bitbucket.AuthenticationPrompts.AuthenticationOAuthModalPrompt
-                    : new Bitbucket.Authentication.AcquireAuthenticationOAuthDelegate(BitbucketOAuthPrompt);
-
-            var githubCredentialCallback = (operationArguments.UseModalUi)
-                    ? new Github.Authentication.AcquireCredentialsDelegate(Github.AuthenticationPrompts.CredentialModalPrompt)
-                    : new Github.Authentication.AcquireCredentialsDelegate(Program.GitHubCredentialPrompt);
-
-            var githubAuthcodeCallback = (operationArguments.UseModalUi)
-                    ? new Github.Authentication.AcquireAuthenticationCodeDelegate(Github.AuthenticationPrompts.AuthenticationCodeModalPrompt)
-                    : new Github.Authentication.AcquireAuthenticationCodeDelegate(Program.GitHubAuthCodePrompt);
-
-            NtlmSupport basicNtlmSupport = NtlmSupport.Auto;
-
-            switch (operationArguments.Authority)
-            {
-                case AuthorityType.Auto:
-                    Git.Trace.WriteLine($"detecting authority type for '{operationArguments.TargetUri}'.");
-
-                    // detect the authority
-                    authority = await BaseVstsAuthentication.GetAuthentication(operationArguments.TargetUri,
-                                                                               VstsCredentialScope,
-                                                                               secrets)
-                             ?? Github.Authentication.GetAuthentication(operationArguments.TargetUri,
-                                                                       GitHubCredentialScope,
-                                                                       secrets,
-                                                                       githubCredentialCallback,
-                                                                       githubAuthcodeCallback,
-                                                                       null)
-                            ?? Bitbucket.Authentication.GetAuthentication(operationArguments.TargetUri,
-                                                                          new SecretStore(secretsNamespace, Secret.UriToActualUrl),
-                                                                          bitbucketCredentialCallback,
-                                                                          bitbucketOauthCallback);
-
-                    if (authority != null)
-                    {
-                        // set the authority type based on the returned value
-                        if (authority is VstsMsaAuthentication)
-                        {
-                            operationArguments.Authority = AuthorityType.MicrosoftAccount;
-                            goto case AuthorityType.MicrosoftAccount;
-                        }
-                        else if (authority is VstsAadAuthentication)
-                        {
-                            operationArguments.Authority = AuthorityType.AzureDirectory;
-                            goto case AuthorityType.AzureDirectory;
-                        }
-                        else if (authority is Github.Authentication)
-                        {
-                            operationArguments.Authority = AuthorityType.GitHub;
-                            goto case AuthorityType.GitHub;
-                        }
-                        else if (authority is Bitbucket.Authentication)
-                        {
-                            operationArguments.Authority = AuthorityType.Bitbucket;
-                            goto case AuthorityType.Bitbucket;
-                        }
-                    }
-                    goto default;
-
-                case AuthorityType.AzureDirectory:
-                    Git.Trace.WriteLine($"authority for '{operationArguments.TargetUri}' is Azure Directory.");
-
-                    Guid tenantId = Guid.Empty;
-
-                    // Get the identity of the tenant.
-                    var result = await BaseVstsAuthentication.DetectAuthority(operationArguments.TargetUri);
-
-                    if (result.Key)
-                    {
-                        tenantId = result.Value;
-                    }
-
-                    // return the allocated authority or a generic AAD backed VSTS authentication object
-                    return authority ?? new VstsAadAuthentication(tenantId, VstsCredentialScope, secrets);
-
-                case AuthorityType.Basic:
-                    // enforce basic authentication only
-                    basicNtlmSupport = NtlmSupport.Never;
-                    goto default;
-
-                case AuthorityType.GitHub:
-                    Git.Trace.WriteLine($"authority for '{operationArguments.TargetUri}' is GitHub.");
-
-                    // return a GitHub authentication object
-                    return authority ?? new Github.Authentication(operationArguments.TargetUri,
-                                                                 GitHubCredentialScope,
-                                                                 secrets,
-                                                                 githubCredentialCallback,
-                                                                 githubAuthcodeCallback,
-                                                                 null);
-
-                case AuthorityType.Bitbucket:
-                    Git.Trace.WriteLine($"authority for '{operationArguments.TargetUri}'  is Bitbucket");
-
-                    // return a Bitbucket authentication object
-                    return authority ?? new Bitbucket.Authentication(secrets,
-                                                                     bitbucketCredentialCallback,
-                                                                     bitbucketOauthCallback);
-
-                case AuthorityType.MicrosoftAccount:
-                    Git.Trace.WriteLine($"authority for '{operationArguments.TargetUri}' is Microsoft Live.");
-
-                    // return the allocated authority or a generic MSA backed VSTS authentication object
-                    return authority ?? new VstsMsaAuthentication(VstsCredentialScope, secrets);
-
-                case AuthorityType.Ntlm:
-                    // enforce NTLM authentication only
-                    basicNtlmSupport = NtlmSupport.Always;
-                    goto default;
-
-                default:
-                    Git.Trace.WriteLine($"authority for '{operationArguments.TargetUri}' is basic with NTLM={basicNtlmSupport}.");
-
-                    // return a generic username + password authentication object
-                    return authority ?? new BasicAuthentication(secrets, basicNtlmSupport, basicCredentialCallback, null);
-            }
-        }
-
-        internal static void DeleteCredentials(OperationArguments operationArguments)
-        {
-            if (ReferenceEquals(operationArguments, null))
-                throw new ArgumentNullException("operationArguments");
-
-            var task = Task.Run(async () => { return await CreateAuthentication(operationArguments); });
-
-            BaseAuthentication authentication = task.Result;
-
-            switch (operationArguments.Authority)
-            {
-                default:
-                case AuthorityType.Basic:
-                    Git.Trace.WriteLine($"deleting basic credentials for '{operationArguments.TargetUri}'.");
-                    authentication.DeleteCredentials(operationArguments.TargetUri);
-                    break;
-
-                case AuthorityType.AzureDirectory:
-                case AuthorityType.MicrosoftAccount:
-                    Git.Trace.WriteLine($"deleting VSTS credentials for '{operationArguments.TargetUri}'.");
-                    BaseVstsAuthentication vstsAuth = authentication as BaseVstsAuthentication;
-                    vstsAuth.DeleteCredentials(operationArguments.TargetUri);
-                    break;
-
-                case AuthorityType.GitHub:
-                    Git.Trace.WriteLine($"deleting GitHub credentials for '{operationArguments.TargetUri}'.");
-                    Github.Authentication ghAuth = authentication as Github.Authentication;
-                    ghAuth.DeleteCredentials(operationArguments.TargetUri);
-                    break;
-
-                case AuthorityType.Bitbucket:
-                    Git.Trace.WriteLine($"deleting Bitbucket credentials for '{operationArguments.TargetUri}'.");
-                    var bbAuth = authentication as Bitbucket.Authentication;
-                    bbAuth.DeleteCredentials(operationArguments.TargetUri, operationArguments.CredUsername);
-                    break;
-            }
-        }
-
-        private static void PrintArgs(string[] args)
-        {
-            Debug.Assert(args != null, $"The `{nameof(args)}` parameter is null.");
-
-            StringBuilder builder = new StringBuilder();
-            builder.Append(Program.Name)
-                   .Append(" (v")
-                   .Append(Program.Version.ToString(3))
-                   .Append(")");
-
-            for (int i = 0; i < args.Length; i += 1)
-            {
-                builder.Append(" '")
-                       .Append(args[i])
-                       .Append("'");
-
-                if (i + 1 < args.Length)
-                {
-                    builder.Append(",");
-                }
-            }
-
-            // fake being part of the Main method for clarity
-            Git.Trace.WriteLine(builder.ToString(), memberName: nameof(Main));
-            builder = null;
-        }
+        private void PrintArgs(string[] args)
+            => _printArgs(this, args);
 
         [Conditional("DEBUG")]
-        private static void EnableDebugTrace()
+        private void EnableDebugTrace()
         {
             // use the stderr stream for the trace as stdout is used in the cross-process
             // communications protocol
             Git.Trace.AddListener(Console.Error);
         }
 
-        private static void EnableTraceLogging(OperationArguments operationArguments)
-        {
-            if (operationArguments.WriteLog)
-            {
-                Git.Trace.WriteLine("trace logging enabled.");
+        internal void EnableTraceLogging(OperationArguments operationArguments)
+            => _enableTraceLogging(this, operationArguments);
 
-                string gitConfigPath;
-                if (Where.GitLocalConfig(out gitConfigPath))
-                {
-                    Git.Trace.WriteLine($"git local config found at '{gitConfigPath}'.");
+        internal void EnableTraceLogging(OperationArguments operationArguments, string logFilePath)
+            => _enableTraceLoggingFile(this, operationArguments, logFilePath);
 
-                    string gitDirPath = Path.GetDirectoryName(gitConfigPath);
+        internal bool BitbucketCredentialPrompt(string titleMessage, TargetUri targetUri, out string username, out string password)
+            => _bitbucketCredentialPrompt(this, titleMessage, targetUri, out username, out password);
 
-                    if (Directory.Exists(gitDirPath))
-                    {
-                        EnableTraceLogging(operationArguments, gitDirPath);
-                    }
-                }
-                else if (Where.GitGlobalConfig(out gitConfigPath))
-                {
-                    Git.Trace.WriteLine($"git global config found at '{gitConfigPath}'.");
+        internal bool BitbucketOAuthPrompt(string title, TargetUri targetUri, Bitbucket.AuthenticationResultType resultType, string username)
+            => _bitbucketOauthPrompt(this, title, targetUri, resultType, username);
 
-                    string homeDirPath = Path.GetDirectoryName(gitConfigPath);
+        internal bool GitHubAuthCodePrompt(TargetUri targetUri, Github.GitHubAuthenticationResultType resultType, string username, out string authenticationCode)
+            => _gitHubAuthCodePrompt(this, targetUri, resultType, username, out authenticationCode);
 
-                    if (Directory.Exists(homeDirPath))
-                    {
-                        EnableTraceLogging(operationArguments, homeDirPath);
-                    }
-                }
-            }
-#if DEBUG
-            Git.Trace.WriteLine($"GCM arguments:{Environment.NewLine}{operationArguments}");
-#endif
-        }
+        internal bool GitHubCredentialPrompt(TargetUri targetUri, out string username, out string password)
+            => _gitHubCredentialPrompt(this, targetUri, out username, out password);
 
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA1801:ReviewUnusedParameters", MessageId = "operationArguments")]
-        private static void EnableTraceLogging(OperationArguments operationArguments, string logFilePath)
-        {
-            const int LogFileMaxLength = 8 * 1024 * 1024; // 8 MB
-
-            string logFileName = Path.Combine(logFilePath, Path.ChangeExtension(ConfigPrefix, ".log"));
-
-            FileInfo logFileInfo = new FileInfo(logFileName);
-            if (logFileInfo.Exists && logFileInfo.Length > LogFileMaxLength)
-            {
-                for (int i = 1; i < Int32.MaxValue; i++)
-                {
-                    string moveName = String.Format("{0}{1:000}.log", ConfigPrefix, i);
-                    string movePath = Path.Combine(logFilePath, moveName);
-
-                    if (!File.Exists(movePath))
-                    {
-                        logFileInfo.MoveTo(movePath);
-                        break;
-                    }
-                }
-            }
-
-            Git.Trace.WriteLine($"trace log destination is '{logFilePath}'.");
-
-            using (var fileStream = File.Open(logFileName, FileMode.Append, FileAccess.Write, FileShare.ReadWrite))
-            {
-                var listener = new StreamWriter(fileStream, Encoding.UTF8);
-                Git.Trace.AddListener(listener);
-
-                // write a small header to help with identifying new log entries
-                listener.Write('\n');
-                listener.Write($"{DateTime.Now:yyyy.MM.dd HH:mm:ss} Microsoft {Program.Title} version {Version.ToString(3)}\n");
-            }
-        }
-
-        private static bool BitbucketCredentialPrompt(string titleMessage, TargetUri targetUri, out string username, out string password)
-        {
-            Credential credential;
-            if ((credential = BasicCredentialPrompt(targetUri, titleMessage)) != null)
-            {
-                username = credential.Username;
-                password = credential.Password;
-
-                return true;
-            }
-
-            username = null;
-            password = null;
-
-            return false;
-        }
-
-        private static bool BitbucketOAuthPrompt(string title, TargetUri targetUri, Bitbucket.AuthenticationResultType resultType, string username)
-        {
-            const int BufferReadSize = 16 * 1024;
-
-            Debug.Assert(targetUri != null);
-
-            var buffer = new StringBuilder(BufferReadSize);
-            uint read = 0;
-            uint written = 0;
-
-            string accessToken = null;
-
-            var fileAccessFlags = NativeMethods.FileAccess.GenericRead | NativeMethods.FileAccess.GenericWrite;
-            var fileAttributes = NativeMethods.FileAttributes.Normal;
-            var fileCreationDisposition = NativeMethods.FileCreationDisposition.OpenExisting;
-            var fileShareFlags = NativeMethods.FileShare.Read | NativeMethods.FileShare.Write;
-
-            using (
-                var stdout = NativeMethods.CreateFile(NativeMethods.ConsoleOutName, fileAccessFlags, fileShareFlags,
-                    IntPtr.Zero, fileCreationDisposition, fileAttributes, IntPtr.Zero))
-            {
-                using (
-                    var stdin = NativeMethods.CreateFile(NativeMethods.ConsoleInName, fileAccessFlags, fileShareFlags,
-                        IntPtr.Zero, fileCreationDisposition, fileAttributes, IntPtr.Zero))
-                {
-                    buffer.AppendLine()
-                        .Append(title)
-                        .Append(" OAuth Access Token: ");
-
-                    if (!NativeMethods.WriteConsole(stdout, buffer, (uint)buffer.Length, out written, IntPtr.Zero))
-                    {
-                        var error = Marshal.GetLastWin32Error();
-                        throw new Win32Exception(error,
-                            "Unable to write to standard output (" + NativeMethods.Win32Error.GetText(error) + ").");
-                    }
-                    buffer.Clear();
-
-                    // read input from the user
-                    if (!NativeMethods.ReadConsole(stdin, buffer, BufferReadSize, out read, IntPtr.Zero))
-                    {
-                        var error = Marshal.GetLastWin32Error();
-                        throw new Win32Exception(error,
-                            "Unable to read from standard input (" + NativeMethods.Win32Error.GetText(error) + ").");
-                    }
-
-                    accessToken = buffer.ToString(0, (int)read);
-                    accessToken = accessToken.Trim(NewLineChars);
-                }
-            }
-            return accessToken != null;
-        }
-
-        private static bool GitHubAuthCodePrompt(TargetUri targetUri, Github.GitHubAuthenticationResultType resultType, string username, out string authenticationCode)
-        {
-            // ReadConsole 32768 fail, 32767 ok @linquize [https://github.com/Microsoft/Git-Credential-Manager-for-Windows/commit/a62b9a19f430d038dcd85a610d97e5f763980f85]
-            const int BufferReadSize = 16 * 1024;
-
-            Debug.Assert(targetUri != null);
-
-            StringBuilder buffer = new StringBuilder(BufferReadSize);
-            uint read = 0;
-            uint written = 0;
-
-            authenticationCode = null;
-
-            NativeMethods.FileAccess fileAccessFlags = NativeMethods.FileAccess.GenericRead | NativeMethods.FileAccess.GenericWrite;
-            NativeMethods.FileAttributes fileAttributes = NativeMethods.FileAttributes.Normal;
-            NativeMethods.FileCreationDisposition fileCreationDisposition = NativeMethods.FileCreationDisposition.OpenExisting;
-            NativeMethods.FileShare fileShareFlags = NativeMethods.FileShare.Read | NativeMethods.FileShare.Write;
-
-            using (SafeFileHandle stdout = NativeMethods.CreateFile(NativeMethods.ConsoleOutName, fileAccessFlags, fileShareFlags, IntPtr.Zero, fileCreationDisposition, fileAttributes, IntPtr.Zero))
-            using (SafeFileHandle stdin = NativeMethods.CreateFile(NativeMethods.ConsoleInName, fileAccessFlags, fileShareFlags, IntPtr.Zero, fileCreationDisposition, fileAttributes, IntPtr.Zero))
-            {
-                string type = resultType == Github.GitHubAuthenticationResultType.TwoFactorApp
-                    ? "app"
-                    : "sms";
-
-                Git.Trace.WriteLine($"2fa type = '{type}'.");
-
-                buffer.AppendLine()
-                      .Append("authcode (")
-                      .Append(type)
-                      .Append("): ");
-
-                if (!NativeMethods.WriteConsole(stdout, buffer, (uint)buffer.Length, out written, IntPtr.Zero))
-                {
-                    int error = Marshal.GetLastWin32Error();
-                    throw new Win32Exception(error, "Unable to write to standard output (" + NativeMethods.Win32Error.GetText(error) + ").");
-                }
-                buffer.Clear();
-
-                // read input from the user
-                if (!NativeMethods.ReadConsole(stdin, buffer, BufferReadSize, out read, IntPtr.Zero))
-                {
-                    int error = Marshal.GetLastWin32Error();
-                    throw new Win32Exception(error, "Unable to read from standard input (" + NativeMethods.Win32Error.GetText(error) + ").");
-                }
-
-                authenticationCode = buffer.ToString(0, (int)read);
-                authenticationCode = authenticationCode.Trim(NewLineChars);
-            }
-
-            return authenticationCode != null;
-        }
-
-        private static bool GitHubCredentialPrompt(TargetUri targetUri, out string username, out string password)
-        {
-            const string TitleMessage = "Please enter your GitHub credentials for ";
-
-            Credential credential;
-            if ((credential = BasicCredentialPrompt(targetUri, TitleMessage)) != null)
-            {
-                username = credential.Username;
-                password = credential.Password;
-
-                return true;
-            }
-
-            username = null;
-            password = null;
-
-            return false;
-        }
-
-        private static void LoadAssemblyInformation()
+        private void LoadAssemblyInformation()
         {
             var assembly = System.Reflection.Assembly.GetEntryAssembly();
             var asseName = assembly.GetName();
@@ -1129,31 +279,18 @@ namespace Microsoft.Alm.Cli
             _version = asseName.Version;
         }
 
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA1801:ReviewUnusedParameters", MessageId = "targetUri")]
-        private static Credential ModalPromptForCredentials(TargetUri targetUri, string message)
-        {
-            Debug.Assert(targetUri != null);
-            Debug.Assert(message != null);
-
-            NativeMethods.CredentialUiInfo credUiInfo = new NativeMethods.CredentialUiInfo
-            {
-                BannerArt = IntPtr.Zero,
-                CaptionText = Title,
-                MessageText = message,
-                Parent = IntPtr.Zero,
-                Size = Marshal.SizeOf(typeof(NativeMethods.CredentialUiInfo))
-            };
-            NativeMethods.CredentialUiWindowsFlags flags = NativeMethods.CredentialUiWindowsFlags.Generic;
-            NativeMethods.CredentialPackFlags authPackage = NativeMethods.CredentialPackFlags.None;
-            IntPtr packedAuthBufferPtr = IntPtr.Zero;
-            IntPtr inBufferPtr = IntPtr.Zero;
-            uint packedAuthBufferSize = 0;
-            bool saveCredentials = false;
-            int inBufferSize = 0;
-            string username;
-            string password;
-
-            if (ModalPromptDisplayDialog(ref credUiInfo,
+        internal bool ModalPromptDisplayDialog(ref NativeMethods.CredentialUiInfo credUiInfo,
+                                               ref NativeMethods.CredentialPackFlags authPackage,
+                                               IntPtr packedAuthBufferPtr,
+                                               uint packedAuthBufferSize,
+                                               IntPtr inBufferPtr,
+                                               int inBufferSize,
+                                               bool saveCredentials,
+                                               NativeMethods.CredentialUiWindowsFlags flags,
+                                               out string username,
+                                               out string password)
+            => _modalPromptDisplayDialog(this,
+                                         ref credUiInfo,
                                          ref authPackage,
                                          packedAuthBufferPtr,
                                          packedAuthBufferSize,
@@ -1162,17 +299,14 @@ namespace Microsoft.Alm.Cli
                                          saveCredentials,
                                          flags,
                                          out username,
-                                         out password))
-            {
-                return new Credential(username, password);
-            }
+                                         out password);
 
-            return null;
-        }
+        internal Credential ModalPromptForCredentials(TargetUri targetUri, string message)
+            => _modalPromptForCredentials(this, targetUri, message);
 
-        private static Credential ModalPromptForCredentials(TargetUri targetUri)
+        internal Credential ModalPromptForCredentials(TargetUri targetUri)
         {
-            string message = String.Format("Enter your credentials for {0}.", targetUri.ToString(port: true, path: true));
+            string message = string.Format("Enter your credentials for {0}.", targetUri.ToString(port: true, path: true));
 
             if (!string.IsNullOrEmpty(targetUri.ActualUri.UserInfo))
             {
@@ -1189,271 +323,21 @@ namespace Microsoft.Alm.Cli
             return ModalPromptForCredentials(targetUri, message);
         }
 
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA1801:ReviewUnusedParameters", MessageId = "targetUri")]
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Performance", "CA1811:AvoidUncalledPrivateCode")]
-        private static Credential ModalPromptForPassword(TargetUri targetUri, string message, string username)
+        private Credential ModalPromptForPassword(TargetUri targetUri, string message, string username)
+            => _modalPromptForPassword(this, targetUri, message, username);
+
+        private void PrintVersion()
         {
-            Debug.Assert(targetUri != null);
-            Debug.Assert(message != null);
-            Debug.Assert(username != null);
-
-            NativeMethods.CredentialUiInfo credUiInfo = new NativeMethods.CredentialUiInfo
-            {
-                BannerArt = IntPtr.Zero,
-                CaptionText = Title,
-                MessageText = message,
-                Parent = IntPtr.Zero,
-                Size = Marshal.SizeOf(typeof(NativeMethods.CredentialUiInfo))
-            };
-            NativeMethods.CredentialUiWindowsFlags flags = NativeMethods.CredentialUiWindowsFlags.Generic;
-            NativeMethods.CredentialPackFlags authPackage = NativeMethods.CredentialPackFlags.None;
-            IntPtr packedAuthBufferPtr = IntPtr.Zero;
-            IntPtr inBufferPtr = IntPtr.Zero;
-            uint packedAuthBufferSize = 0;
-            bool saveCredentials = false;
-            int inBufferSize = 0;
-            string password;
-
-            try
-            {
-                int error;
-
-                // execute with `null` to determine buffer size always returns false when determining
-                // size, only fail if `inBufferSize` looks bad
-                NativeMethods.CredPackAuthenticationBuffer(flags: authPackage,
-                                                           username: username,
-                                                           password: string.Empty,
-                                                           packedCredentials: IntPtr.Zero,
-                                                           packedCredentialsSize: ref inBufferSize);
-                if (inBufferSize <= 0)
-                {
-                    error = Marshal.GetLastWin32Error();
-                    Git.Trace.WriteLine($"unable to determine credential buffer size ('{NativeMethods.Win32Error.GetText(error)}').");
-
-                    return null;
-                }
-
-                inBufferPtr = Marshal.AllocHGlobal(inBufferSize);
-
-                if (!NativeMethods.CredPackAuthenticationBuffer(flags: authPackage,
-                                                                username: username,
-                                                                password: string.Empty,
-                                                                packedCredentials: inBufferPtr,
-                                                                packedCredentialsSize: ref inBufferSize))
-                {
-                    error = Marshal.GetLastWin32Error();
-                    Git.Trace.WriteLine($"unable to write to credential buffer ('{NativeMethods.Win32Error.GetText(error)}').");
-
-                    return null;
-                }
-
-                if (ModalPromptDisplayDialog(ref credUiInfo,
-                                             ref authPackage,
-                                             packedAuthBufferPtr,
-                                             packedAuthBufferSize,
-                                             inBufferPtr,
-                                             inBufferSize,
-                                             saveCredentials,
-                                             flags,
-                                             out username,
-                                             out password))
-                {
-                    return new Credential(username, password);
-                }
-            }
-            finally
-            {
-                if (inBufferPtr != IntPtr.Zero)
-                {
-                    Marshal.FreeCoTaskMem(inBufferPtr);
-                }
-            }
-
-            return null;
+            WriteLine($"{Title} version {Version.ToString(3)}");
         }
 
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Performance", "CA1811:AvoidUncalledPrivateCode")]
-        private static void PrintVersion()
-        {
-            Program.WriteLine($"{Title} version {Version.ToString(3)}");
-        }
+        private bool StandardHandleIsTty(NativeMethods.StandardHandleType handleType)
+            => _standardHandleIsTty(this, handleType);
 
-        private static bool StandardHandleIsTty(NativeMethods.StandardHandleType handleType)
-        {
-            var standardHandle = NativeMethods.GetStdHandle(handleType);
-            var handleFileType = NativeMethods.GetFileType(standardHandle);
-            return handleFileType == NativeMethods.FileType.Char;
-        }
+        internal bool TryReadBoolean(OperationArguments operationArguments, string configKey, string environKey, out bool? value)
+            => _tryReadBoolean(this, operationArguments, configKey, environKey, out value);
 
-        internal static bool TryReadBoolean(OperationArguments operationArguments, string configKey, string environKey, out bool? value)
-        {
-            if (ReferenceEquals(operationArguments, null))
-                throw new ArgumentNullException(nameof(operationArguments));
-
-            var envars = operationArguments.EnvironmentVariables;
-
-            // look for an entry in the environment variables
-            string localVal = null;
-            if (!String.IsNullOrWhiteSpace(environKey)
-                && envars.TryGetValue(environKey, out localVal))
-            {
-                goto parse_localval;
-            }
-
-            var config = operationArguments.GitConfiguration;
-
-            // look for an entry in the git config
-            Configuration.Entry entry;
-            if (!String.IsNullOrWhiteSpace(configKey)
-                && config.TryGetEntry(ConfigPrefix, operationArguments.QueryUri, configKey, out entry))
-            {
-                goto parse_localval;
-            }
-
-            // parse the value into a bool
-            parse_localval:
-
-            // An empty value is unset / should not be there, so treat it as if it isn't.
-            if (String.IsNullOrWhiteSpace(localVal))
-            {
-                value = null;
-                return false;
-            }
-
-            // Test `localValue` for a Git 'true' equivalent value
-            if (ConfigValueComparer.Equals(localVal, "yes")
-                || ConfigValueComparer.Equals(localVal, "true")
-                || ConfigValueComparer.Equals(localVal, "1")
-                || ConfigValueComparer.Equals(localVal, "on"))
-            {
-                value = true;
-                return true;
-            }
-
-            // Test `localValue` for a Git 'false' equivalent value
-            if (ConfigValueComparer.Equals(localVal, "no")
-                || ConfigValueComparer.Equals(localVal, "false")
-                || ConfigValueComparer.Equals(localVal, "0")
-                || ConfigValueComparer.Equals(localVal, "off"))
-            {
-                value = false;
-                return true;
-            }
-
-            value = null;
-            return false;
-        }
-
-        private static bool TryReadString(OperationArguments operationArguments, string configKey, string environKey, out string value)
-        {
-            if (ReferenceEquals(operationArguments, null))
-                throw new ArgumentNullException(nameof(operationArguments));
-
-            var envars = operationArguments.EnvironmentVariables;
-
-            // look for an entry in the environment variables
-            string localVal;
-            if (!String.IsNullOrWhiteSpace(environKey)
-                && envars.TryGetValue(environKey, out localVal)
-                && !String.IsNullOrWhiteSpace(localVal))
-            {
-                value = localVal;
-                return true;
-            }
-
-            var config = operationArguments.GitConfiguration;
-
-            // look for an entry in the git config
-            Configuration.Entry entry;
-            if (!String.IsNullOrWhiteSpace(configKey)
-                && config.TryGetEntry(ConfigPrefix, operationArguments.QueryUri, configKey, out entry)
-                && !String.IsNullOrWhiteSpace(entry.Value))
-            {
-                value = entry.Value;
-                return true;
-            }
-
-            value = null;
-            return false;
-        }
-
-        private static bool ModalPromptDisplayDialog(
-            ref NativeMethods.CredentialUiInfo credUiInfo,
-            ref NativeMethods.CredentialPackFlags authPackage,
-            IntPtr packedAuthBufferPtr,
-            uint packedAuthBufferSize,
-            IntPtr inBufferPtr,
-            int inBufferSize,
-            bool saveCredentials,
-            NativeMethods.CredentialUiWindowsFlags flags,
-            out string username,
-            out string password)
-        {
-            int error;
-
-            try
-            {
-                // open a standard Windows authentication dialog to acquire username + password credentials
-                if ((error = NativeMethods.CredUIPromptForWindowsCredentials(credInfo: ref credUiInfo,
-                                                                             authError: 0,
-                                                                             authPackage: ref authPackage,
-                                                                             inAuthBuffer: inBufferPtr,
-                                                                             inAuthBufferSize: (uint)inBufferSize,
-                                                                             outAuthBuffer: out packedAuthBufferPtr,
-                                                                             outAuthBufferSize: out packedAuthBufferSize,
-                                                                             saveCredentials: ref saveCredentials,
-                                                                             flags: flags)) != NativeMethods.Win32Error.Success)
-                {
-                    Git.Trace.WriteLine($"credential prompt failed ('{NativeMethods.Win32Error.GetText(error)}').");
-
-                    username = null;
-                    password = null;
-
-                    return false;
-                }
-
-                // use `StringBuilder` references instead of string so that they can be written to
-                StringBuilder usernameBuffer = new StringBuilder(512);
-                StringBuilder domainBuffer = new StringBuilder(256);
-                StringBuilder passwordBuffer = new StringBuilder(512);
-                int usernameLen = usernameBuffer.Capacity;
-                int passwordLen = passwordBuffer.Capacity;
-                int domainLen = domainBuffer.Capacity;
-
-                // unpack the result into locally useful data
-                if (!NativeMethods.CredUnPackAuthenticationBuffer(flags: authPackage,
-                                                                  authBuffer: packedAuthBufferPtr,
-                                                                  authBufferSize: packedAuthBufferSize,
-                                                                  username: usernameBuffer,
-                                                                  maxUsernameLen: ref usernameLen,
-                                                                  domainName: domainBuffer,
-                                                                  maxDomainNameLen: ref domainLen,
-                                                                  password: passwordBuffer,
-                                                                  maxPasswordLen: ref passwordLen))
-                {
-                    username = null;
-                    password = null;
-
-                    error = Marshal.GetLastWin32Error();
-                    Git.Trace.WriteLine($"failed to unpack buffer ('{NativeMethods.Win32Error.GetText(error)}').");
-
-                    return false;
-                }
-
-                Git.Trace.WriteLine("successfully acquired credentials from user.");
-
-                username = usernameBuffer.ToString();
-                password = passwordBuffer.ToString();
-
-                return true;
-            }
-            finally
-            {
-                if (packedAuthBufferPtr != IntPtr.Zero)
-                {
-                    Marshal.FreeHGlobal(packedAuthBufferPtr);
-                }
-            }
-        }
+        internal bool TryReadString(OperationArguments operationArguments, string configKey, string environKey, out string value)
+            => _tryReadString(this, operationArguments, configKey, environKey, out value);
     }
 }

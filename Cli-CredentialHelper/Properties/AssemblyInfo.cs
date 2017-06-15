@@ -3,11 +3,11 @@ using System.Resources;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 
-[assembly: AssemblyTitle(Microsoft.Alm.Cli.Program.Title)]
-[assembly: AssemblyDescription(Microsoft.Alm.Cli.Program.Title + ". " + Microsoft.Alm.Cli.Program.SourceUrl)]
+[assembly: AssemblyTitle(Microsoft.Alm.Cli.Program.AssemblyTitle)]
+[assembly: AssemblyDescription(Microsoft.Alm.Cli.Program.AssemblyDescription + ". " + Microsoft.Alm.Cli.Program.SourceUrl)]
 [assembly: AssemblyConfiguration("")]
 [assembly: AssemblyCompany("Microsoft Corporation")]
-[assembly: AssemblyProduct(Microsoft.Alm.Cli.Program.Title + " command line interface")]
+[assembly: AssemblyProduct(Microsoft.Alm.Cli.Program.AssemblyTitle + " command line interface.")]
 [assembly: AssemblyCopyright("Copyright © Microsoft Corporation 2017. All rights reserved.")]
 [assembly: AssemblyTrademark("Microsoft Corporation")]
 [assembly: AssemblyCulture("")]

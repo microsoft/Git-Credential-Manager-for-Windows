@@ -26,10 +26,10 @@
 using System;
 
 namespace Microsoft.Alm.Authentication
-{ 
-    [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Design", "CA1055:UriReturnValuesShouldNotBeStrings")]
+{
     public abstract class Secret
     {
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Design", "CA1055:UriReturnValuesShouldNotBeStrings")]
         public static string UriToName(TargetUri targetUri, string @namespace)
         {
             BaseSecureStore.ValidateTargetUri(targetUri);
@@ -42,6 +42,7 @@ namespace Microsoft.Alm.Authentication
             return targetName;
         }
 
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Design", "CA1055:UriReturnValuesShouldNotBeStrings")]
         public static string UriToUrl(TargetUri targetUri, string @namespace)
         {
             BaseSecureStore.ValidateTargetUri(targetUri);
@@ -58,10 +59,11 @@ namespace Microsoft.Alm.Authentication
         ///     Generate a key based on the ActualUri.
         ///     This may include username, port, etc
         /// </summary>
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Design", "CA1055:UriReturnValuesShouldNotBeStrings")]
         public static string UriToActualUrl(TargetUri targetUri, string @namespace)
         {
             BaseSecureStore.ValidateTargetUri(targetUri);
-            if (String.IsNullOrWhiteSpace(@namespace))
+            if (string.IsNullOrWhiteSpace(@namespace))
                 throw new ArgumentNullException(@namespace);
 
             string targetName = $"{@namespace}:{targetUri.ActualUri.AbsoluteUri}";

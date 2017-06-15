@@ -121,6 +121,7 @@ namespace Microsoft.Alm.Authentication
         /// <returns>
         /// <see langword="true"/> if the authority is Visual Studio Online; <see langword="false"/> otherwise
         /// </returns>
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Design", "CA1006:DoNotNestGenericTypesInMemberSignatures")]
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Design", "CA1062:Validate arguments of public methods", MessageId = "0")]
         public static async Task<KeyValuePair<bool, Guid>> DetectAuthority(TargetUri targetUri)
         {
