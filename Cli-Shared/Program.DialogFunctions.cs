@@ -1,15 +1,33 @@
-﻿using System;
-using System.ComponentModel;
+﻿/**** Git Credential Manager for Windows ****
+ *
+ * Copyright (c) Microsoft Corporation
+ * All rights reserved.
+ *
+ * MIT License
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy
+ * of this software and associated documentation files (the """"Software""""), to deal
+ * in the Software without restriction, including without limitation the rights to
+ * use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of
+ * the Software, and to permit persons to whom the Software is furnished to do so,
+ * subject to the following conditions:
+ *
+ * The above copyright notice and this permission notice shall be included in all
+ * copies or substantial portions of the Software.
+ *
+ * THE SOFTWARE IS PROVIDED *AS IS*, WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS
+ * FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR
+ * COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN
+ * AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
+ * WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE."
+**/
+
+using System;
 using System.Diagnostics;
-using System.IO;
 using System.Runtime.InteropServices;
 using System.Text;
-using System.Threading.Tasks;
 using Microsoft.Alm.Authentication;
-using Microsoft.Alm.Git;
-using Microsoft.Win32.SafeHandles;
-using Bitbucket = Atlassian.Bitbucket.Authentication;
-using Github = GitHub.Authentication;
 
 namespace Microsoft.Alm.Cli
 {
@@ -17,7 +35,8 @@ namespace Microsoft.Alm.Cli
     {
         internal static class DialogFunctions
         {
-            public static bool DisplayModal(ref NativeMethods.CredentialUiInfo credUiInfo,
+            public static bool DisplayModal(Program program,
+                                            ref NativeMethods.CredentialUiInfo credUiInfo,
                                             ref NativeMethods.CredentialPackFlags authPackage,
                                             IntPtr packedAuthBufferPtr,
                                             uint packedAuthBufferSize,
@@ -95,7 +114,7 @@ namespace Microsoft.Alm.Cli
                 }
             }
 
-            public static Credential CredentialPrompt(TargetUri targetUri, string message)
+            public static Credential CredentialPrompt(Program program, TargetUri targetUri, string message)
             {
                 Debug.Assert(targetUri != null);
                 Debug.Assert(message != null);
@@ -103,7 +122,7 @@ namespace Microsoft.Alm.Cli
                 NativeMethods.CredentialUiInfo credUiInfo = new NativeMethods.CredentialUiInfo
                 {
                     BannerArt = IntPtr.Zero,
-                    CaptionText = Title,
+                    CaptionText = program.Title,
                     MessageText = message,
                     Parent = IntPtr.Zero,
                     Size = Marshal.SizeOf(typeof(NativeMethods.CredentialUiInfo))
@@ -118,7 +137,7 @@ namespace Microsoft.Alm.Cli
                 string username;
                 string password;
 
-                if (Program.ModalPromptDisplayDialog(ref credUiInfo,
+                if (program.ModalPromptDisplayDialog(ref credUiInfo,
                                                      ref authPackage,
                                                      packedAuthBufferPtr,
                                                      packedAuthBufferSize,
@@ -135,7 +154,7 @@ namespace Microsoft.Alm.Cli
                 return null;
             }
 
-            public static Credential PasswordPrompt(TargetUri targetUri, string message, string username)
+            public static Credential PasswordPrompt(Program program, TargetUri targetUri, string message, string username)
             {
                 Debug.Assert(targetUri != null);
                 Debug.Assert(message != null);
@@ -144,7 +163,7 @@ namespace Microsoft.Alm.Cli
                 NativeMethods.CredentialUiInfo credUiInfo = new NativeMethods.CredentialUiInfo
                 {
                     BannerArt = IntPtr.Zero,
-                    CaptionText = Title,
+                    CaptionText = program.Title,
                     MessageText = message,
                     Parent = IntPtr.Zero,
                     Size = Marshal.SizeOf(typeof(NativeMethods.CredentialUiInfo))
@@ -191,7 +210,7 @@ namespace Microsoft.Alm.Cli
                         return null;
                     }
 
-                    if (Program.ModalPromptDisplayDialog(ref credUiInfo,
+                    if (program.ModalPromptDisplayDialog(ref credUiInfo,
                                                          ref authPackage,
                                                          packedAuthBufferPtr,
                                                          packedAuthBufferSize,

@@ -53,41 +53,42 @@ namespace Microsoft.Alm.Cli
         internal static readonly VstsTokenScope VstsCredentialScope = VstsTokenScope.CodeWrite | VstsTokenScope.PackagingRead;
         internal static readonly Github.TokenScope GitHubCredentialScope = Github.TokenScope.Gist | Github.TokenScope.Repo;
 
-        internal static BasicCredentialPromptDelegate _basicCredentialPrompt = ConsoleFunctions.CredentialPrompt;
-        internal static BitbucketCredentialPromptDelegate _bitbucketCredentialPrompt = BitbucketFunctions.CredentialPrompt;
-        internal static BitbucketOAuthPromptDelegate _bitbucketOauthPrompt = BitbucketFunctions.OAuthPrompt;
-        internal static CreateAuthenticationDelegate _createAuthentication = CommonFunctions.CreateAuthentication;
-        internal static DeleteCredentialsDelegate _deleteCredentials = CommonFunctions.DeleteCredentials;
-        internal static DieExceptionDelegate _dieException = CommonFunctions.DieException;
-        internal static DieMessageDelegate _dieMessage = CommonFunctions.DieMessage;
-        internal static EnableTraceLoggingDelegate _enableTraceLogging = CommonFunctions.EnableTraceLogging;
-        internal static EnableTraceLoggingFileDelegate _enableTraceLoggingFile = CommonFunctions.EnableTraceLoggingFile;
-        internal static ExitDelegate _exit = ConsoleFunctions.Exit;
-        internal static GitHubAuthCodePromptDelegate _gitHubAuthCodePrompt = GitHubFunctions.AuthCodePrompt;
-        internal static GitHubCredentialPromptDelegate _gitHubCredentialPrompt = GitHubFunctions.CredentialPrompt;
-        internal static LoadOperationArgumentsDelegate _loadOperationArguments = CommonFunctions.LoadOperationArguments;
-        internal static LogEventDelegate _logEvent = CommonFunctions.LogEvent;
-        internal static ModalPromptDisplayDialogDelegate _modalPromptDisplayDialog = DialogFunctions.DisplayModal;
-        internal static ModalPromptForCredentialsDelegate _modalPromptForCredentials = DialogFunctions.CredentialPrompt;
-        internal static ModalPromptForPasswordDelegate _modalPromptForPassword = DialogFunctions.PasswordPrompt;
-        internal static PrintArgsDelegate _printArgs = CommonFunctions.PrintArgs;
-        internal static QueryCredentialsDelegate _queryCredentials = CommonFunctions.QueryCredentials;
-        internal static ReadKeyDelegate _readKey = ConsoleFunctions.ReadKey;
-        internal static StandardHandleIsTtyDelegate _standardHandleIsTty = ConsoleFunctions.StandardHandleIsTty;
-        internal static TryReadBooleanDelegate _tryReadBoolean = CommonFunctions.TryReadBoolean;
-        internal static TryReadStringDelegate _tryReadString = CommonFunctions.TryReadString;
-        internal static WriteDelegate _write = ConsoleFunctions.Write;
-        internal static WriteLineDelegate _writeLine = ConsoleFunctions.WriteLine;
+        internal BasicCredentialPromptDelegate _basicCredentialPrompt = ConsoleFunctions.CredentialPrompt;
+        internal BitbucketCredentialPromptDelegate _bitbucketCredentialPrompt = BitbucketFunctions.CredentialPrompt;
+        internal BitbucketOAuthPromptDelegate _bitbucketOauthPrompt = BitbucketFunctions.OAuthPrompt;
+        internal CreateAuthenticationDelegate _createAuthentication = CommonFunctions.CreateAuthentication;
+        internal DeleteCredentialsDelegate _deleteCredentials = CommonFunctions.DeleteCredentials;
+        internal DieExceptionDelegate _dieException = CommonFunctions.DieException;
+        internal DieMessageDelegate _dieMessage = CommonFunctions.DieMessage;
+        internal EnableTraceLoggingDelegate _enableTraceLogging = CommonFunctions.EnableTraceLogging;
+        internal EnableTraceLoggingFileDelegate _enableTraceLoggingFile = CommonFunctions.EnableTraceLoggingFile;
+        internal ExitDelegate _exit = ConsoleFunctions.Exit;
+        internal GitHubAuthCodePromptDelegate _gitHubAuthCodePrompt = GitHubFunctions.AuthCodePrompt;
+        internal GitHubCredentialPromptDelegate _gitHubCredentialPrompt = GitHubFunctions.CredentialPrompt;
+        internal LoadOperationArgumentsDelegate _loadOperationArguments = CommonFunctions.LoadOperationArguments;
+        internal LogEventDelegate _logEvent = CommonFunctions.LogEvent;
+        internal ModalPromptDisplayDialogDelegate _modalPromptDisplayDialog = DialogFunctions.DisplayModal;
+        internal ModalPromptForCredentialsDelegate _modalPromptForCredentials = DialogFunctions.CredentialPrompt;
+        internal ModalPromptForPasswordDelegate _modalPromptForPassword = DialogFunctions.PasswordPrompt;
+        internal PrintArgsDelegate _printArgs = CommonFunctions.PrintArgs;
+        internal QueryCredentialsDelegate _queryCredentials = CommonFunctions.QueryCredentials;
+        internal ReadKeyDelegate _readKey = ConsoleFunctions.ReadKey;
+        internal StandardHandleIsTtyDelegate _standardHandleIsTty = ConsoleFunctions.StandardHandleIsTty;
+        internal TryReadBooleanDelegate _tryReadBoolean = CommonFunctions.TryReadBoolean;
+        internal TryReadStringDelegate _tryReadString = CommonFunctions.TryReadString;
+        internal WriteDelegate _write = ConsoleFunctions.Write;
+        internal WriteLineDelegate _writeLine = ConsoleFunctions.WriteLine;
 
-        private static string _executablePath;
-        private static string _location;
-        private static string _name;
-        private static Version _version;
+        private string _executablePath;
+        private string _location;
+        private string _name;
+        private string _title;
+        private Version _version;
 
         /// <summary>
         /// Gets the path to the executable.
         /// </summary>
-        public static string ExecutablePath
+        public string ExecutablePath
         {
             get
             {
@@ -102,7 +103,7 @@ namespace Microsoft.Alm.Cli
         /// <summary>
         /// Gets the directory where the executable is contained.
         /// </summary>
-        public static string Location
+        public string Location
         {
             get
             {
@@ -117,7 +118,7 @@ namespace Microsoft.Alm.Cli
         /// <summary>
         /// Gets the name of the application.
         /// </summary>
-        public static string Name
+        public string Name
         {
             get
             {
@@ -136,7 +137,7 @@ namespace Microsoft.Alm.Cli
         /// user are possible.
         /// </para>
         /// </summary>
-        public static bool StandardErrorIsTty
+        public bool StandardErrorIsTty
         {
             get { return StandardHandleIsTty(NativeMethods.StandardHandleType.Error); }
         }
@@ -148,7 +149,7 @@ namespace Microsoft.Alm.Cli
         /// user are possible.
         /// </para>
         /// </summary>
-        public static bool StandardInputIsTty
+        public bool StandardInputIsTty
         {
             get { return StandardHandleIsTty(NativeMethods.StandardHandleType.Input); }
         }
@@ -160,15 +161,21 @@ namespace Microsoft.Alm.Cli
         /// user are possible.
         /// </para>
         /// </summary>
-        public static bool StandardOutputIsTty
+        public bool StandardOutputIsTty
         {
             get { return StandardHandleIsTty(NativeMethods.StandardHandleType.Output); }
+        }
+
+        public string Title
+        {
+            get { return _title; }
+            private set { _title = value; }
         }
 
         /// <summary>
         /// Gets the version of the application.
         /// </summary>
-        public static Version Version
+        public Version Version
         {
             get
             {
@@ -180,88 +187,88 @@ namespace Microsoft.Alm.Cli
             }
         }
 
-        internal static void Die(Exception exception,
+        internal void Die(Exception exception,
                                 [CallerFilePath] string path = "",
                                 [CallerLineNumber] int line = 0,
                                 [CallerMemberName] string name = "")
-            => _dieException(exception, path, line, name);
+            => _dieException(this, exception, path, line, name);
 
-        internal static void Die(string message,
+        internal void Die(string message,
                                 [CallerFilePath] string path = "",
                                 [CallerLineNumber] int line = 0,
                                 [CallerMemberName] string name = "")
-            => _dieMessage(message, path, line, name);
+            => _dieMessage(this, message, path, line, name);
 
-        internal static void Exit(int exitcode = 0,
+        internal void Exit(int exitcode = 0,
                                   string message = null,
                                  [CallerFilePath] string path = "",
                                  [CallerLineNumber] int line = 0,
                                  [CallerMemberName] string name = "")
-            => _exit(exitcode, message, path, line, name);
+            => _exit(this, exitcode, message, path, line, name);
 
-        internal static void LoadOperationArguments(OperationArguments operationArguments)
-            => _loadOperationArguments(operationArguments);
+        internal void LoadOperationArguments(OperationArguments operationArguments)
+            => _loadOperationArguments(this, operationArguments);
 
-        internal static void LogEvent(string message, EventLogEntryType eventType)
-            => _logEvent(message, eventType);
+        internal void LogEvent(string message, EventLogEntryType eventType)
+            => _logEvent(this, message, eventType);
 
-        internal static Credential QueryCredentials(OperationArguments operationArguments)
-            => _queryCredentials(operationArguments);
+        internal Credential QueryCredentials(OperationArguments operationArguments)
+            => _queryCredentials(this, operationArguments);
 
-        internal static ConsoleKeyInfo ReadKey(bool intercept = true)
-            => _readKey(intercept);
+        internal ConsoleKeyInfo ReadKey(bool intercept = true)
+            => _readKey(this, intercept);
 
-        internal static void Write(string message)
-            => _write(message);
+        internal void Write(string message)
+            => _write(this, message);
 
-        internal static void WriteLine(string message = null)
-            => _writeLine(message);
+        internal void WriteLine(string message = null)
+            => _writeLine(this, message);
 
-        private static Credential BasicCredentialPrompt(TargetUri targetUri)
+        private Credential BasicCredentialPrompt(TargetUri targetUri)
         {
             string message = "Please enter your credentials for ";
             return BasicCredentialPrompt(targetUri, message);
         }
 
-        private static Credential BasicCredentialPrompt(TargetUri targetUri, string titleMessage)
-            => _basicCredentialPrompt(targetUri, titleMessage);
+        private Credential BasicCredentialPrompt(TargetUri targetUri, string titleMessage)
+            => _basicCredentialPrompt(this, targetUri, titleMessage);
 
-        private static Task<BaseAuthentication> CreateAuthentication(OperationArguments operationArguments)
-            => _createAuthentication(operationArguments);
+        private Task<BaseAuthentication> CreateAuthentication(OperationArguments operationArguments)
+            => _createAuthentication(this, operationArguments);
 
-        private static void DeleteCredentials(OperationArguments operationArguments)
-            => _deleteCredentials(operationArguments);
+        private void DeleteCredentials(OperationArguments operationArguments)
+            => _deleteCredentials(this, operationArguments);
 
-        private static void PrintArgs(string[] args)
-            => _printArgs(args);
+        private void PrintArgs(string[] args)
+            => _printArgs(this, args);
 
         [Conditional("DEBUG")]
-        private static void EnableDebugTrace()
+        private void EnableDebugTrace()
         {
             // use the stderr stream for the trace as stdout is used in the cross-process
             // communications protocol
             Git.Trace.AddListener(Console.Error);
         }
 
-        private static void EnableTraceLogging(OperationArguments operationArguments)
-            => _enableTraceLogging(operationArguments);
+        private void EnableTraceLogging(OperationArguments operationArguments)
+            => _enableTraceLogging(this, operationArguments);
 
-        private static void EnableTraceLogging(OperationArguments operationArguments, string logFilePath)
-            => _enableTraceLoggingFile(operationArguments, logFilePath);
+        private void EnableTraceLogging(OperationArguments operationArguments, string logFilePath)
+            => _enableTraceLoggingFile(this, operationArguments, logFilePath);
 
-        private static bool BitbucketCredentialPrompt(string titleMessage, TargetUri targetUri, out string username, out string password)
-            => _bitbucketCredentialPrompt(titleMessage, targetUri, out username, out password);
+        private bool BitbucketCredentialPrompt(string titleMessage, TargetUri targetUri, out string username, out string password)
+            => _bitbucketCredentialPrompt(this, titleMessage, targetUri, out username, out password);
 
-        private static bool BitbucketOAuthPrompt(string title, TargetUri targetUri, Bitbucket.AuthenticationResultType resultType, string username)
-            => _bitbucketOauthPrompt(title, targetUri, resultType, username);
+        private bool BitbucketOAuthPrompt(string title, TargetUri targetUri, Bitbucket.AuthenticationResultType resultType, string username)
+            => _bitbucketOauthPrompt(this, title, targetUri, resultType, username);
 
-        private static bool GitHubAuthCodePrompt(TargetUri targetUri, Github.GitHubAuthenticationResultType resultType, string username, out string authenticationCode)
-            => _gitHubAuthCodePrompt(targetUri, resultType, username, out authenticationCode);
+        private bool GitHubAuthCodePrompt(TargetUri targetUri, Github.GitHubAuthenticationResultType resultType, string username, out string authenticationCode)
+            => _gitHubAuthCodePrompt(this, targetUri, resultType, username, out authenticationCode);
 
-        private static bool GitHubCredentialPrompt(TargetUri targetUri, out string username, out string password)
-            => _gitHubCredentialPrompt(targetUri, out username, out password);
+        private bool GitHubCredentialPrompt(TargetUri targetUri, out string username, out string password)
+            => _gitHubCredentialPrompt(this, targetUri, out username, out password);
 
-        private static void LoadAssemblyInformation()
+        private void LoadAssemblyInformation()
         {
             var assembly = System.Reflection.Assembly.GetEntryAssembly();
             var asseName = assembly.GetName();
@@ -272,7 +279,7 @@ namespace Microsoft.Alm.Cli
             _version = asseName.Version;
         }
 
-        private static bool ModalPromptDisplayDialog(ref NativeMethods.CredentialUiInfo credUiInfo,
+        private bool ModalPromptDisplayDialog(ref NativeMethods.CredentialUiInfo credUiInfo,
                                                      ref NativeMethods.CredentialPackFlags authPackage,
                                                      IntPtr packedAuthBufferPtr,
                                                      uint packedAuthBufferSize,
@@ -282,7 +289,8 @@ namespace Microsoft.Alm.Cli
                                                      NativeMethods.CredentialUiWindowsFlags flags,
                                                      out string username,
                                                      out string password)
-            => _modalPromptDisplayDialog(ref credUiInfo,
+            => _modalPromptDisplayDialog(this,
+                                         ref credUiInfo,
                                          ref authPackage,
                                          packedAuthBufferPtr,
                                          packedAuthBufferSize,
@@ -293,10 +301,10 @@ namespace Microsoft.Alm.Cli
                                          out username,
                                          out password);
 
-        private static Credential ModalPromptForCredentials(TargetUri targetUri, string message)
-            => _modalPromptForCredentials(targetUri, message);
+        private Credential ModalPromptForCredentials(TargetUri targetUri, string message)
+            => _modalPromptForCredentials(this, targetUri, message);
 
-        private static Credential ModalPromptForCredentials(TargetUri targetUri)
+        private Credential ModalPromptForCredentials(TargetUri targetUri)
         {
             string message = string.Format("Enter your credentials for {0}.", targetUri.ToString(port: true, path: true));
 
@@ -315,21 +323,21 @@ namespace Microsoft.Alm.Cli
             return ModalPromptForCredentials(targetUri, message);
         }
 
-        private static Credential ModalPromptForPassword(TargetUri targetUri, string message, string username)
-            => _modalPromptForPassword(targetUri, message, username);
+        private Credential ModalPromptForPassword(TargetUri targetUri, string message, string username)
+            => _modalPromptForPassword(this, targetUri, message, username);
 
-        private static void PrintVersion()
+        private void PrintVersion()
         {
             WriteLine($"{Title} version {Version.ToString(3)}");
         }
 
-        private static bool StandardHandleIsTty(NativeMethods.StandardHandleType handleType)
-            => _standardHandleIsTty(handleType);
+        private bool StandardHandleIsTty(NativeMethods.StandardHandleType handleType)
+            => _standardHandleIsTty(this, handleType);
 
-        private static bool TryReadBoolean(OperationArguments operationArguments, string configKey, string environKey, out bool? value)
-            => _tryReadBoolean(operationArguments, configKey, environKey, out value);
+        private bool TryReadBoolean(OperationArguments operationArguments, string configKey, string environKey, out bool? value)
+            => _tryReadBoolean(this, operationArguments, configKey, environKey, out value);
 
-        private static bool TryReadString(OperationArguments operationArguments, string configKey, string environKey, out string value)
-            => _tryReadString(operationArguments, configKey, environKey, out value);
+        private bool TryReadString(OperationArguments operationArguments, string configKey, string environKey, out string value)
+            => _tryReadString(this, operationArguments, configKey, environKey, out value);
     }
 }

@@ -61,8 +61,10 @@ namespace Microsoft.Alm.Cli
             "git-credential-manager.html",
         };
 
-        public Installer()
+        public Installer(Program program)
         {
+            _program = program;
+
             var args = Environment.GetCommandLineArgs();
 
             // parse arguments
@@ -93,7 +95,24 @@ namespace Microsoft.Alm.Cli
             }
         }
 
-        internal static string CygwinPath
+        private string _customPath = null;
+        private string _cygwinPath;
+        private bool _isPassive = false;
+        private bool _isForced = false;
+        private Program _program;
+        private TextWriter _stdout = null;
+        private TextWriter _stderr = null;
+        private string _userBinPath = null;
+
+        public int ExitCode
+        {
+            get { return (int)Result; }
+            set { Result = (ResultValue)value; }
+        }
+
+        public ResultValue Result { get; private set; }
+
+        internal string CygwinPath
         {
             get
             {
@@ -130,9 +149,12 @@ namespace Microsoft.Alm.Cli
             }
         }
 
-        private static string _cygwinPath;
+        internal Program Program
+        {
+            get { return _program; }
+        }
 
-        internal static string UserBinPath
+        internal string UserBinPath
         {
             get
             {
@@ -172,22 +194,6 @@ namespace Microsoft.Alm.Cli
                 return _userBinPath;
             }
         }
-
-        private static string _userBinPath = null;
-
-        public int ExitCode
-        {
-            get { return (int)Result; }
-            set { Result = (ResultValue)value; }
-        }
-
-        public ResultValue Result { get; private set; }
-
-        private bool _isPassive = false;
-        private bool _isForced = false;
-        private string _customPath = null;
-        private TextWriter _stdout = null;
-        private TextWriter _stderr = null;
 
         public void DeployConsole()
         {
@@ -426,7 +432,7 @@ namespace Microsoft.Alm.Cli
             }
         }
 
-        public static bool DetectNetFx(out Version version)
+        public bool DetectNetFx(out Version version)
         {
             const string NetFxKeyBase = @"HKEY_LOCAL_MACHINE\Software\Microsoft\Net Framework Setup\NDP\v4\";
             const string NetFxKeyClient = NetFxKeyBase + @"\Client";
@@ -441,9 +447,9 @@ namespace Microsoft.Alm.Cli
             Version netfxVerson = null;
 
             // query for existing installations of .NET
-            if ((netfxString = Registry.GetValue(NetFxKeyClient, ValueName, DefaultValue) as String) != null
+            if ((netfxString = Registry.GetValue(NetFxKeyClient, ValueName, DefaultValue) as string) != null
                     && Version.TryParse(netfxString, out netfxVerson)
-                || (netfxString = Registry.GetValue(NetFxKeyFull, ValueName, DefaultValue) as String) != null
+                || (netfxString = Registry.GetValue(NetFxKeyFull, ValueName, DefaultValue) as string) != null
                     && Version.TryParse(netfxString, out netfxVerson))
             {
                 Program.LogEvent($"NetFx version {netfxVerson.ToString(3)} detected.", EventLogEntryType.Information);

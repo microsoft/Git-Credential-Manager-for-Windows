@@ -35,7 +35,7 @@ namespace Microsoft.Alm.Cli
 {
     internal partial class Program
     {
-        public const string Title = "Askpass Utility for Windows";
+        public const string AssemblyTitle = "Askpass Utility for Windows";
         public const string Description = "Secure askpass utility for Windows, by Microsoft";
         public const string DefinitionUrlPassphrase = "https://www.visualstudio.com/docs/git/gcm-ssh-passphrase";
 
@@ -44,7 +44,12 @@ namespace Microsoft.Alm.Cli
         private static readonly Regex AskPasswordRegex = new Regex(@"(\S+)'s\s+password:\s*", RegexOptions.Compiled | RegexOptions.CultureInvariant | RegexOptions.IgnoreCase);
         private static readonly Regex AskAuthenticityRegex = new Regex(@"^\s*The authenticity of host '([^']+)' can't be established.\s+RSA key fingerprint is ([^\s:]+:[^\.]+).", RegexOptions.Compiled | RegexOptions.CultureInvariant | RegexOptions.IgnoreCase);
 
-        internal static bool TryParseUrlCredentials(string targetUrl, out string username, out string password)
+        internal Program()
+        {
+            Title = AssemblyTitle;
+        }
+
+        internal bool TryParseUrlCredentials(string targetUrl, out string username, out string password)
         {
             // config stored credentials come in the format of <username>[:<password>]@<url>
             // with password being optional scheme terminator is actually "://" so we need
@@ -90,7 +95,7 @@ namespace Microsoft.Alm.Cli
             return false;
         }
 
-        internal static void Askpass(string[] args)
+        internal void Askpass(string[] args)
         {
             if (args == null || args.Length == 0)
                 throw new ArgumentException("Arguments cannot be empty.");
@@ -271,7 +276,7 @@ namespace Microsoft.Alm.Cli
             Die("failed to acquire credentials.");
         }
 
-        internal static void PrintHelpMessage()
+        internal void PrintHelpMessage()
         {
             const string HelpFileName = "git-askpass.html";
 
@@ -304,6 +309,13 @@ namespace Microsoft.Alm.Cli
 
         [STAThread]
         private static void Main(string[] args)
+        {
+            Program program = new Program();
+
+            program.Run(args);
+        }
+
+        private void Run(string[] args)
         {
             EnableDebugTrace();
 

@@ -36,7 +36,7 @@ namespace Microsoft.Alm.Cli
     [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA1806:DoNotIgnoreMethodResults")]
     internal partial class Program
     {
-        public const string Title = "Git Credential Manager for Windows";
+        public const string AssemblyTitle = "Git Credential Manager for Windows";
         public const string Description = "Secure Git credential helper for Windows, by Microsoft";
 
         internal const string CommandApprove = "approve";
@@ -70,7 +70,12 @@ namespace Microsoft.Alm.Cli
             CommandVersion
         };
 
-        internal static void Clear()
+        internal Program()
+        {
+            Title = AssemblyTitle;
+        }
+
+        internal void Clear()
         {
             var args = Environment.GetCommandLineArgs();
             string url = null;
@@ -87,7 +92,7 @@ namespace Microsoft.Alm.Cli
 
                 Git.Trace.WriteLine("prompting user for url.");
 
-                Program.WriteLine(" Target Url:");
+                WriteLine(" Target Url:");
                 url = Console.In.ReadLine();
             }
             else
@@ -120,10 +125,10 @@ namespace Microsoft.Alm.Cli
                         return;
                     }
 
-                    Program.WriteLine(" credentials are protected by preserve flag, clear anyways? [Y]es, [N]o.");
+                    WriteLine(" credentials are protected by preserve flag, clear anyways? [Y]es, [N]o.");
 
                     ConsoleKeyInfo key;
-                    while ((key = Program.ReadKey(true)).Key != ConsoleKey.Escape)
+                    while ((key = ReadKey(true)).Key != ConsoleKey.Escape)
                     {
                         if (key.KeyChar == 'N' || key.KeyChar == 'n')
                             return;
@@ -141,7 +146,7 @@ namespace Microsoft.Alm.Cli
             }
         }
 
-        internal static void Delete()
+        internal void Delete()
         {
             string[] args = Environment.GetCommandLineArgs();
 
@@ -207,17 +212,17 @@ namespace Microsoft.Alm.Cli
             Die("Unable to parse target URI.");
         }
 
-        internal static void Deploy()
+        internal void Deploy()
         {
-            var installer = new Installer();
+            var installer = new Installer(this);
             installer.DeployConsole();
 
             Git.Trace.WriteLine($"Installer result = '{installer.Result}', exit code = {installer.ExitCode}.");
 
-            Program.Exit(installer.ExitCode);
+            Exit(installer.ExitCode);
         }
 
-        internal static void Erase()
+        internal void Erase()
         {
             // parse the operations arguments from stdin (this is how git sends commands)
             // see: https://www.kernel.org/pub/software/scm/git/docs/technical/api-credentials.html
@@ -242,7 +247,7 @@ namespace Microsoft.Alm.Cli
             }
         }
 
-        internal static void Get()
+        internal void Get()
         {
             // parse the operations arguments from stdin (this is how git sends commands)
             // see: https://www.kernel.org/pub/software/scm/git/docs/technical/api-credentials.html
@@ -269,11 +274,11 @@ namespace Microsoft.Alm.Cli
             }
         }
 
-        internal static void PrintHelpMessage()
+        internal void PrintHelpMessage()
         {
             const string HelpFileName = "git-credential-manager.html";
 
-            Program.WriteLine("usage: git credential-manager [" + string.Join("|", CommandList) + "] [<args>]");
+            WriteLine("usage: git credential-manager [" + string.Join("|", CommandList) + "] [<args>]");
 
             List<Git.GitInstallation> installations;
             if (Git.Where.FindGitInstallations(out installations))
@@ -300,9 +305,9 @@ namespace Microsoft.Alm.Cli
             Die("Unable to open help documentation.");
         }
 
-        internal static void Remove()
+        internal void Remove()
         {
-            var installer = new Installer();
+            var installer = new Installer(this);
             installer.RemoveConsole();
 
             Git.Trace.WriteLine($"Installer result = {installer.Result}, exit code = {installer.ExitCode}.");
@@ -310,7 +315,7 @@ namespace Microsoft.Alm.Cli
             Exit(installer.ExitCode);
         }
 
-        internal static void Store()
+        internal void Store()
         {
             // parse the operations arguments from stdin (this is how git sends commands)
             // see: https://www.kernel.org/pub/software/scm/git/docs/technical/api-credentials.html
@@ -357,6 +362,13 @@ namespace Microsoft.Alm.Cli
 
         [STAThread]
         private static void Main(string[] args)
+        {
+            var program = new Program();
+
+            program.Run(args);
+        }
+
+        private void Run(string[] args)
         {
             try
             {
