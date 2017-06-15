@@ -36,9 +36,9 @@ namespace Microsoft.Alm.Cli.Test
         [TestMethod]
         public void LoadOperationArgumentsTest()
         {
-            Program._dieExceptionCallback = (Exception e) => Assert.Fail($"Error: {e.ToString()}");
-            Program._dieMessageCallback = (string m) => Assert.Fail($"Error: {m}");
-            Program._exitCallback = (int e, string m) => Assert.Fail($"Error: {e} {m}");
+            Program._dieException = (Exception e, string path, int line, string name) => Assert.Fail($"Error: {e.ToString()}");
+            Program._dieMessage = (string m, string path, int line, string name) => Assert.Fail($"Error: {m}");
+            Program._exit = (int e, string m, string path, int line, string name) => Assert.Fail($"Error: {e} {m}");
 
             var envvars = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
             {
@@ -89,10 +89,10 @@ namespace Microsoft.Alm.Cli.Test
             opargsMock.Setup(r => r.QueryUri)
                       .Returns(targetUri);
 
-            Assert.IsFalse(Program.TryReadBoolean(opargsMock.Object, "notFound", "notFound", out yesno));
+            Assert.IsFalse(Program.Functions.TryReadBoolean(opargsMock.Object, "notFound", "notFound", out yesno));
             Assert.IsFalse(yesno.HasValue);
 
-            Assert.IsTrue(Program.TryReadBoolean(opargsMock.Object, Program.ConfigPreserveCredentialsKey, Program.EnvironPreserveCredentialsKey, out yesno));
+            Assert.IsTrue(Program.Functions.TryReadBoolean(opargsMock.Object, Program.ConfigPreserveCredentialsKey, Program.EnvironPreserveCredentialsKey, out yesno));
             Assert.IsTrue(yesno.HasValue);
             Assert.IsFalse(yesno.Value);
 
@@ -104,7 +104,7 @@ namespace Microsoft.Alm.Cli.Test
             opargsMock.Setup(r => r.EnvironmentVariables)
                       .Returns(envvars);
 
-            Assert.IsTrue(Program.TryReadBoolean(opargsMock.Object, Program.ConfigPreserveCredentialsKey, Program.EnvironPreserveCredentialsKey, out yesno));
+            Assert.IsTrue(Program.Functions.TryReadBoolean(opargsMock.Object, Program.ConfigPreserveCredentialsKey, Program.EnvironPreserveCredentialsKey, out yesno));
             Assert.IsTrue(yesno.HasValue);
             Assert.IsTrue(yesno.Value);
 
@@ -116,7 +116,7 @@ namespace Microsoft.Alm.Cli.Test
             opargsMock.Setup(r => r.EnvironmentVariables)
                       .Returns(envvars);
 
-            Assert.IsFalse(Program.TryReadBoolean(opargsMock.Object, Program.ConfigPreserveCredentialsKey, Program.EnvironPreserveCredentialsKey, out yesno));
+            Assert.IsFalse(Program.Functions.TryReadBoolean(opargsMock.Object, Program.ConfigPreserveCredentialsKey, Program.EnvironPreserveCredentialsKey, out yesno));
             Assert.IsFalse(yesno.HasValue);
         }
     }

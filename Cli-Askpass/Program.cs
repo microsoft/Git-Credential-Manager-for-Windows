@@ -90,7 +90,7 @@ namespace Microsoft.Alm.Cli
             return false;
         }
 
-        private static void Askpass(string[] args)
+        internal static void Askpass(string[] args)
         {
             if (args == null || args.Length == 0)
                 throw new ArgumentException("Arguments cannot be empty.");
@@ -271,6 +271,37 @@ namespace Microsoft.Alm.Cli
             Die("failed to acquire credentials.");
         }
 
+        internal static void PrintHelpMessage()
+        {
+            const string HelpFileName = "git-askpass.html";
+
+            Console.Out.WriteLine("usage: git askpass '<user_prompt_text>'");
+
+            List<Git.GitInstallation> installations;
+            if (Git.Where.FindGitInstallations(out installations))
+            {
+                foreach (var installation in installations)
+                {
+                    if (Directory.Exists(installation.Doc))
+                    {
+                        string doc = Path.Combine(installation.Doc, HelpFileName);
+
+                        // if the help file exists, send it to the operating system to display to the user
+                        if (File.Exists(doc))
+                        {
+                            Git.Trace.WriteLine($"opening help documentation '{doc}'.");
+
+                            Process.Start(doc);
+
+                            return;
+                        }
+                    }
+                }
+            }
+
+            Die("Unable to open help documentation.");
+        }
+
         [STAThread]
         private static void Main(string[] args)
         {
@@ -309,37 +340,6 @@ namespace Microsoft.Alm.Cli
             }
 
             Trace.Flush();
-        }
-
-        private static void PrintHelpMessage()
-        {
-            const string HelpFileName = "git-askpass.html";
-
-            Console.Out.WriteLine("usage: git askpass '<user_prompt_text>'");
-
-            List<Git.GitInstallation> installations;
-            if (Git.Where.FindGitInstallations(out installations))
-            {
-                foreach (var installation in installations)
-                {
-                    if (Directory.Exists(installation.Doc))
-                    {
-                        string doc = Path.Combine(installation.Doc, HelpFileName);
-
-                        // if the help file exists, send it to the operating system to display to the user
-                        if (File.Exists(doc))
-                        {
-                            Git.Trace.WriteLine($"opening help documentation '{doc}'.");
-
-                            Process.Start(doc);
-
-                            return;
-                        }
-                    }
-                }
-            }
-
-            Die("Unable to open help documentation.");
         }
     }
 }

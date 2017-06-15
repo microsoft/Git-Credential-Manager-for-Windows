@@ -14,5 +14,11 @@
     <Compile Include="$(MSBuildThisFileDirectory)NativeMethods.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)OperationArguments.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Program.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Program.BitbucketFunctions.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Program.CommonFunctions.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Program.ConsoleFunctions.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Program.Delegates.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Program.DialogFunctions.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Program.GitHubFunctions.cs" />
   </ItemGroup>
 </Project>

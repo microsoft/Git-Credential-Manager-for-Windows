@@ -70,7 +70,7 @@ namespace Microsoft.Alm.Cli
             CommandVersion
         };
 
-        private static void Clear()
+        internal static void Clear()
         {
             var args = Environment.GetCommandLineArgs();
             string url = null;
@@ -141,7 +141,7 @@ namespace Microsoft.Alm.Cli
             }
         }
 
-        private static void Delete()
+        internal static void Delete()
         {
             string[] args = Environment.GetCommandLineArgs();
 
@@ -207,7 +207,7 @@ namespace Microsoft.Alm.Cli
             Die("Unable to parse target URI.");
         }
 
-        private static void Deploy()
+        internal static void Deploy()
         {
             var installer = new Installer();
             installer.DeployConsole();
@@ -217,7 +217,7 @@ namespace Microsoft.Alm.Cli
             Program.Exit(installer.ExitCode);
         }
 
-        private static void Erase()
+        internal static void Erase()
         {
             // parse the operations arguments from stdin (this is how git sends commands)
             // see: https://www.kernel.org/pub/software/scm/git/docs/technical/api-credentials.html
@@ -242,7 +242,7 @@ namespace Microsoft.Alm.Cli
             }
         }
 
-        private static void Get()
+        internal static void Get()
         {
             // parse the operations arguments from stdin (this is how git sends commands)
             // see: https://www.kernel.org/pub/software/scm/git/docs/technical/api-credentials.html
@@ -266,6 +266,92 @@ namespace Microsoft.Alm.Cli
                         operationArguments.WriteToStream(stdout);
                     }
                 }
+            }
+        }
+
+        internal static void PrintHelpMessage()
+        {
+            const string HelpFileName = "git-credential-manager.html";
+
+            Program.WriteLine("usage: git credential-manager [" + string.Join("|", CommandList) + "] [<args>]");
+
+            List<Git.GitInstallation> installations;
+            if (Git.Where.FindGitInstallations(out installations))
+            {
+                foreach (var installation in installations)
+                {
+                    if (Directory.Exists(installation.Doc))
+                    {
+                        string doc = Path.Combine(installation.Doc, HelpFileName);
+
+                        // if the help file exists, send it to the operating system to display to the user
+                        if (File.Exists(doc))
+                        {
+                            Git.Trace.WriteLine($"opening help documentation '{doc}'.");
+
+                            Process.Start(doc);
+
+                            return;
+                        }
+                    }
+                }
+            }
+
+            Die("Unable to open help documentation.");
+        }
+
+        internal static void Remove()
+        {
+            var installer = new Installer();
+            installer.RemoveConsole();
+
+            Git.Trace.WriteLine($"Installer result = {installer.Result}, exit code = {installer.ExitCode}.");
+
+            Exit(installer.ExitCode);
+        }
+
+        internal static void Store()
+        {
+            // parse the operations arguments from stdin (this is how git sends commands)
+            // see: https://www.kernel.org/pub/software/scm/git/docs/technical/api-credentials.html
+            // see: https://www.kernel.org/pub/software/scm/git/docs/git-credential.html
+            using (var stdin = Console.OpenStandardInput())
+            {
+                OperationArguments operationArguments = new OperationArguments.Impl(stdin);
+
+                Debug.Assert(operationArguments != null, "The operationArguments is null");
+                Debug.Assert(operationArguments.CredUsername != null, "The operaionArgument.Username is null");
+                Debug.Assert(operationArguments.TargetUri != null, "The operationArgument.TargetUri is null");
+
+                LoadOperationArguments(operationArguments);
+                EnableTraceLogging(operationArguments);
+
+                Credential credentials = new Credential(operationArguments.CredUsername, operationArguments.CredPassword);
+                var task = Task.Run(async () => { return await CreateAuthentication(operationArguments); });
+                BaseAuthentication authentication = task.Result;
+
+                switch (operationArguments.Authority)
+                {
+                    default:
+                    case AuthorityType.Basic:
+                        Git.Trace.WriteLine($"storing basic credentials for '{operationArguments.TargetUri}'.");
+                        break;
+
+                    case AuthorityType.AzureDirectory:
+                    case AuthorityType.MicrosoftAccount:
+                        Git.Trace.WriteLine($"storing VSTS credentials for '{operationArguments.TargetUri}'.");
+                        break;
+
+                    case AuthorityType.GitHub:
+                        Git.Trace.WriteLine($"storing GitHub credentials for '{operationArguments.TargetUri}'.");
+                        break;
+
+                    case AuthorityType.Ntlm:
+                        Git.Trace.WriteLine($"storing NTLM credentials for '{operationArguments.TargetUri}'.");
+                        break;
+                }
+
+                authentication.SetCredentials(operationArguments.TargetUri, credentials);
             }
         }
 
@@ -326,92 +412,6 @@ namespace Microsoft.Alm.Cli
             catch (Exception exception)
             {
                 Die(exception);
-            }
-        }
-
-        private static void PrintHelpMessage()
-        {
-            const string HelpFileName = "git-credential-manager.html";
-
-            Program.WriteLine("usage: git credential-manager [" + string.Join("|", CommandList) + "] [<args>]");
-
-            List<Git.GitInstallation> installations;
-            if (Git.Where.FindGitInstallations(out installations))
-            {
-                foreach (var installation in installations)
-                {
-                    if (Directory.Exists(installation.Doc))
-                    {
-                        string doc = Path.Combine(installation.Doc, HelpFileName);
-
-                        // if the help file exists, send it to the operating system to display to the user
-                        if (File.Exists(doc))
-                        {
-                            Git.Trace.WriteLine($"opening help documentation '{doc}'.");
-
-                            Process.Start(doc);
-
-                            return;
-                        }
-                    }
-                }
-            }
-
-            Die("Unable to open help documentation.");
-        }
-
-        private static void Remove()
-        {
-            var installer = new Installer();
-            installer.RemoveConsole();
-
-            Git.Trace.WriteLine($"Installer result = {installer.Result}, exit code = {installer.ExitCode}.");
-
-            Program.Exit(installer.ExitCode);
-        }
-
-        private static void Store()
-        {
-            // parse the operations arguments from stdin (this is how git sends commands)
-            // see: https://www.kernel.org/pub/software/scm/git/docs/technical/api-credentials.html
-            // see: https://www.kernel.org/pub/software/scm/git/docs/git-credential.html
-            using (var stdin = Console.OpenStandardInput())
-            {
-                OperationArguments operationArguments = new OperationArguments.Impl(stdin);
-
-                Debug.Assert(operationArguments != null, "The operationArguments is null");
-                Debug.Assert(operationArguments.CredUsername != null, "The operaionArgument.Username is null");
-                Debug.Assert(operationArguments.TargetUri != null, "The operationArgument.TargetUri is null");
-
-                LoadOperationArguments(operationArguments);
-                EnableTraceLogging(operationArguments);
-
-                Credential credentials = new Credential(operationArguments.CredUsername, operationArguments.CredPassword);
-                var task = Task.Run(async () => { return await CreateAuthentication(operationArguments); });
-                BaseAuthentication authentication = task.Result;
-
-                switch (operationArguments.Authority)
-                {
-                    default:
-                    case AuthorityType.Basic:
-                        Git.Trace.WriteLine($"storing basic credentials for '{operationArguments.TargetUri}'.");
-                        break;
-
-                    case AuthorityType.AzureDirectory:
-                    case AuthorityType.MicrosoftAccount:
-                        Git.Trace.WriteLine($"storing VSTS credentials for '{operationArguments.TargetUri}'.");
-                        break;
-
-                    case AuthorityType.GitHub:
-                        Git.Trace.WriteLine($"storing GitHub credentials for '{operationArguments.TargetUri}'.");
-                        break;
-
-                    case AuthorityType.Ntlm:
-                        Git.Trace.WriteLine($"storing NTLM credentials for '{operationArguments.TargetUri}'.");
-                        break;
-                }
-
-                authentication.SetCredentials(operationArguments.TargetUri, credentials);
             }
         }
     }
