@@ -25,22 +25,21 @@
 
 using System;
 using System.Collections.Generic;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Moq;
+using Xunit;
 
 namespace Microsoft.Alm.Cli.Test
 {
-    [TestClass]
     public class ProgramTests
     {
-        [TestMethod]
+        [Fact]
         public void LoadOperationArgumentsTest()
         {
             Program program = new Program();
 
-            program._dieException = (Program caller, Exception e, string path, int line, string name) => Assert.Fail($"Error: {e.ToString()}");
-            program._dieMessage = (Program caller, string m, string path, int line, string name) => Assert.Fail($"Error: {m}");
-            program._exit = (Program caller, int e, string m, string path, int line, string name) => Assert.Fail($"Error: {e} {m}");
+            program._dieException = (Program caller, Exception e, string path, int line, string name) => Assert.False(true, $"Error: {e.ToString()}");
+            program._dieMessage = (Program caller, string m, string path, int line, string name) => Assert.False(true, $"Error: {m}");
+            program._exit = (Program caller, int e, string m, string path, int line, string name) => Assert.False(true, $"Error: {e} {m}");
 
             var envvars = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
             {
@@ -64,10 +63,10 @@ namespace Microsoft.Alm.Cli.Test
 
             program.LoadOperationArguments(opargs);
 
-            Assert.IsNotNull(opargs);
+            Assert.NotNull(opargs);
         }
 
-        [TestMethod]
+        [Fact]
         public void TryReadBooleanTest()
         {
             bool? yesno;
@@ -93,12 +92,12 @@ namespace Microsoft.Alm.Cli.Test
 
             Program program = new Program();
 
-            Assert.IsFalse(CommonFunctions.TryReadBoolean(program, opargsMock.Object, "notFound", "notFound", out yesno));
-            Assert.IsFalse(yesno.HasValue);
+            Assert.False(CommonFunctions.TryReadBoolean(program, opargsMock.Object, "notFound", "notFound", out yesno));
+            Assert.False(yesno.HasValue);
 
-            Assert.IsTrue(CommonFunctions.TryReadBoolean(program, opargsMock.Object, Program.ConfigPreserveCredentialsKey, Program.EnvironPreserveCredentialsKey, out yesno));
-            Assert.IsTrue(yesno.HasValue);
-            Assert.IsFalse(yesno.Value);
+            Assert.True(CommonFunctions.TryReadBoolean(program, opargsMock.Object, Program.ConfigPreserveCredentialsKey, Program.EnvironPreserveCredentialsKey, out yesno));
+            Assert.True(yesno.HasValue);
+            Assert.False(yesno.Value);
 
             envvars = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
             {
@@ -108,9 +107,9 @@ namespace Microsoft.Alm.Cli.Test
             opargsMock.Setup(r => r.EnvironmentVariables)
                       .Returns(envvars);
 
-            Assert.IsTrue(CommonFunctions.TryReadBoolean(program, opargsMock.Object, Program.ConfigPreserveCredentialsKey, Program.EnvironPreserveCredentialsKey, out yesno));
-            Assert.IsTrue(yesno.HasValue);
-            Assert.IsTrue(yesno.Value);
+            Assert.True(CommonFunctions.TryReadBoolean(program, opargsMock.Object, Program.ConfigPreserveCredentialsKey, Program.EnvironPreserveCredentialsKey, out yesno));
+            Assert.True(yesno.HasValue);
+            Assert.True(yesno.Value);
 
             envvars = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
             {
@@ -120,8 +119,8 @@ namespace Microsoft.Alm.Cli.Test
             opargsMock.Setup(r => r.EnvironmentVariables)
                       .Returns(envvars);
 
-            Assert.IsFalse(CommonFunctions.TryReadBoolean(program, opargsMock.Object, Program.ConfigPreserveCredentialsKey, Program.EnvironPreserveCredentialsKey, out yesno));
-            Assert.IsFalse(yesno.HasValue);
+            Assert.False(CommonFunctions.TryReadBoolean(program, opargsMock.Object, Program.ConfigPreserveCredentialsKey, Program.EnvironPreserveCredentialsKey, out yesno));
+            Assert.False(yesno.HasValue);
         }
     }
 }

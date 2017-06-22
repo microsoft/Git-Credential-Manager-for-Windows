@@ -9,12 +9,25 @@ namespace Microsoft.Alm.Git.Test
     {
         private static StringComparer PathComparer = StringComparer.InvariantCultureIgnoreCase;
 
+        public static object[] FindAppData
+        {
+            get
+            {
+                var data = new List<object[]>()
+                {
+                    new object[] { "cmd" },
+                    new object[] { "notepad" },
+                    new object[] { "calc" },
+                    new object[] { "powershell" },
+                    new object[] { "git" },
+                };
+
+                return data.ToArray();
+            }
+        }
+
         [Theory]
-        [InlineData("cmd")]
-        [InlineData("notepad")]
-        [InlineData("calc")]
-        [InlineData("powershell")]
-        [InlineData("git")]
+        [MemberData(nameof(FindAppData))]
         public void Where_FindApp(string app)
         {
             string path1;

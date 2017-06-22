@@ -10,46 +10,32 @@ namespace Microsoft.Alm.Git.Test
     /// </summary>
     public class ConfigurationTests
     {
-        [Fact]
-        public void GitConfig_ParseSimple()
+
+        public static object[] ParseData
         {
-            const string input = @"
-[core]
-    autocrlf = false
-";
+            get
+            {
+                var data = new List<object[]>()
+                {
+                    new object[] { "\n[core]\n    autocrlf = false\n", "core.autocrlf", "false", StringComparer.OrdinalIgnoreCase },
+                    new object[] { "\n[core]\n    autocrlf = true\n    autocrlf = ThisShouldBeInvalidButIgnored\n    autocrlf = false\n", "core.autocrlf", "false", StringComparer.OrdinalIgnoreCase },
+                    new object[] { "\n[core \"oneQuote]\n    autocrlf = \"false\n", "core.oneQuote.autocrlf", "false", StringComparer.OrdinalIgnoreCase },
+                };
 
-            var values = TestParseGitConfig(input);
-
-            Assert.Equal("false", values["core.autocrlf"], StringComparer.OrdinalIgnoreCase);
+                return data.ToArray();
+            }
         }
 
-        [Fact]
-        public void GitConfig_ParseOverwritesValues()
+        [Theory]
+        [MemberData(nameof(ParseData))]
+        public void GitConfif_Parse(string input, string expectedName, string expected, StringComparer comparer)
         {
-            const string input = @"
-[core]
-    autocrlf = true
-    autocrlf = ThisShouldBeInvalidButIgnored
-    autocrlf = false
-";
-
             var values = TestParseGitConfig(input);
+            Assert.NotNull(values);
 
-            Assert.Equal("false", values["core.autocrlf"], StringComparer.OrdinalIgnoreCase);
+            Assert.Equal(expected, values[expectedName], comparer);
         }
 
-        [Fact]
-        public void GitConfig_ParsePartiallyQuoted()
-        {
-            const string input = @"
-[core ""oneQuote]
-    autocrlf = ""false
-";
-
-            var values = TestParseGitConfig(input);
-
-            Assert.Equal("false", values["core.oneQuote.autocrlf"]);
-        }
 
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2202:Do not dispose objects multiple times")]
         [Fact]
@@ -68,17 +54,6 @@ namespace Microsoft.Alm.Git.Test
             Assert.Equal(36, values.Count);
             Assert.Equal("\\\"C:/Utils/Compare It!/wincmp3.exe\\\" \\\"$(cygpath -w \\\"$LOCAL\\\")\\\" \\\"$(cygpath -w \\\"$REMOTE\\\")\\\"", values["difftool.cygcompareit.cmd"], StringComparer.OrdinalIgnoreCase);
             Assert.Equal("!f() { git fetch origin && git checkout -b $1 origin/master --no-track; }; f", values["alias.cob"], StringComparer.OrdinalIgnoreCase);
-        }
-
-        private static Dictionary<string, string> TestParseGitConfig(string input)
-        {
-            var values = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
-
-            using (var sr = new StringReader(input))
-            {
-                Configuration.ParseGitConfig(sr, values);
-            }
-            return values;
         }
 
         [Fact]
@@ -128,6 +103,17 @@ namespace Microsoft.Alm.Git.Test
 
             Assert.True(cut.TryGetEntry("credential", new Uri("https://ntlm.visualstudio.com"), "authority", out entry));
             Assert.Equal("NTLM", entry.Value, StringComparer.OrdinalIgnoreCase);
+        }
+
+        private static Dictionary<string, string> TestParseGitConfig(string input)
+        {
+            var values = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
+
+            using (var sr = new StringReader(input))
+            {
+                Configuration.ParseGitConfig(sr, values);
+            }
+            return values;
         }
     }
 }

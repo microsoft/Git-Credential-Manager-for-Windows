@@ -2,14 +2,13 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Text;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
+using Xunit;
 
 namespace Microsoft.Alm.Cli.Test
 {
-    [TestClass]
     public class OperationArgumentsTests
     {
-        [TestMethod]
+        [Fact]
         public void Typical()
         {
             const string input = "protocol=https\n"
@@ -30,19 +29,20 @@ namespace Microsoft.Alm.Cli.Test
                 cut = new OperationArguments.Impl(memory);
             }
 
-            Assert.AreEqual("https", cut.QueryProtocol);
-            Assert.AreEqual("example.visualstudio.com", cut.QueryHost);
-            Assert.AreEqual("https://example.visualstudio.com/", cut.TargetUri.ToString());
-            Assert.AreEqual("path", cut.QueryPath);
-            Assert.AreEqual("userName", cut.CredUsername);
-            Assert.AreEqual("incorrect", cut.CredPassword);
+            Assert.Equal("https", cut.QueryProtocol);
+            Assert.Equal("example.visualstudio.com", cut.QueryHost);
+            Assert.Equal("https://example.visualstudio.com/", cut.TargetUri.ToString());
+            Assert.Equal("path", cut.QueryPath);
+            Assert.Equal("userName", cut.CredUsername);
+            Assert.Equal("incorrect", cut.CredPassword);
 
             var expected = ReadLines(input);
             var actual = ReadLines(cut.ToString());
-            CollectionAssert.AreEqual(expected, actual);
+
+            Assert.Equal(expected, actual);
         }
 
-        [TestMethod]
+        [Fact]
         public void SpecialCharacters()
         {
             const string input = "protocol=https\n"
@@ -63,19 +63,19 @@ namespace Microsoft.Alm.Cli.Test
                 cut = new OperationArguments.Impl(memory);
             }
 
-            Assert.AreEqual("https", cut.QueryProtocol);
-            Assert.AreEqual("example.visualstudio.com", cut.QueryHost);
-            Assert.AreEqual("https://example.visualstudio.com/", cut.TargetUri.ToString());
-            Assert.AreEqual("path", cut.QueryPath);
-            Assert.AreEqual("userNamể", cut.CredUsername);
-            Assert.AreEqual("ḭncorrect", cut.CredPassword);
+            Assert.Equal("https", cut.QueryProtocol);
+            Assert.Equal("example.visualstudio.com", cut.QueryHost);
+            Assert.Equal("https://example.visualstudio.com/", cut.TargetUri.ToString());
+            Assert.Equal("path", cut.QueryPath);
+            Assert.Equal("userNamể", cut.CredUsername);
+            Assert.Equal("ḭncorrect", cut.CredPassword);
 
             var expected = ReadLines(input);
             var actual = ReadLines(cut.ToString());
-            CollectionAssert.AreEqual(expected, actual);
+            Assert.Equal(expected, actual);
         }
 
-        [TestMethod]
+        [Fact]
         public void CreateTargetUriGitHubSimple()
         {
             var input = new InputArg()
@@ -89,7 +89,7 @@ namespace Microsoft.Alm.Cli.Test
             CreateTargetUriTestWithPath(input);
         }
 
-        [TestMethod]
+        [Fact]
         public void CreateTargetUri_VstsSimple()
         {
             var input = new InputArg()
@@ -103,7 +103,7 @@ namespace Microsoft.Alm.Cli.Test
             CreateTargetUriTestWithPath(input);
         }
 
-        [TestMethod]
+        [Fact]
         public void CreateTargetUriGitHubComplex()
         {
             var input = new InputArg()
@@ -118,7 +118,7 @@ namespace Microsoft.Alm.Cli.Test
             CreateTargetUriTestWithPath(input);
         }
 
-        [TestMethod]
+        [Fact]
         public void CreateTargetUriWithPortNumber()
         {
             var input = new InputArg()
@@ -132,7 +132,7 @@ namespace Microsoft.Alm.Cli.Test
             CreateTargetUriTestWithPath(input);
         }
 
-        [TestMethod]
+        [Fact]
         public void CreateTargetUriComplexAndMessy()
         {
             var input = new InputArg()
@@ -147,7 +147,7 @@ namespace Microsoft.Alm.Cli.Test
             CreateTargetUriTestWithPath(input);
         }
 
-        [TestMethod]
+        [Fact]
         public void CreateTargetUriWithCredentials()
         {
             var input = new InputArg()
@@ -163,7 +163,7 @@ namespace Microsoft.Alm.Cli.Test
             CreateTargetUriTestWithPath(input);
         }
 
-        [TestMethod]
+        [Fact]
         public void CreateTargetUriUnc()
         {
             var input = new InputArg()
@@ -178,7 +178,7 @@ namespace Microsoft.Alm.Cli.Test
             CreateTargetUriTestWithPath(input);
         }
 
-        [TestMethod]
+        [Fact]
         public void CreateTargetUriUncColloquial()
         {
             var input = new InputArg()
@@ -203,17 +203,17 @@ namespace Microsoft.Alm.Cli.Test
 
                 var oparg = new OperationArguments.Impl(memory);
 
-                Assert.IsNotNull(oparg);
-                Assert.AreEqual(input.Protocol ?? string.Empty, oparg.QueryProtocol);
-                Assert.AreEqual(input.Host ?? string.Empty, oparg.QueryHost);
-                Assert.AreEqual(input.Path, oparg.QueryPath);
-                Assert.AreEqual(input.Username, oparg.CredUsername);
-                Assert.AreEqual(input.Password, oparg.CredPassword);
+                Assert.NotNull(oparg);
+                Assert.Equal(input.Protocol ?? string.Empty, oparg.QueryProtocol);
+                Assert.Equal(input.Host ?? string.Empty, oparg.QueryHost);
+                Assert.Equal(input.Path, oparg.QueryPath);
+                Assert.Equal(input.Username, oparg.CredUsername);
+                Assert.Equal(input.Password, oparg.CredPassword);
 
                 // file or unc paths are treated specially
-                if (oparg.QueryUri.Scheme != "file")
+                if (oparg.QueryUri.Scheme != System.Uri.UriSchemeFile)
                 {
-                    Assert.AreEqual("/", oparg.QueryUri.AbsolutePath);
+                    Assert.Equal("/", oparg.QueryUri.AbsolutePath);
                 }
             }
         }
@@ -231,17 +231,17 @@ namespace Microsoft.Alm.Cli.Test
                 var oparg = new OperationArguments.Impl(memory);
                 oparg.UseHttpPath = false;
 
-                Assert.IsNotNull(oparg);
-                Assert.AreEqual(input.Protocol ?? string.Empty, oparg.QueryProtocol);
-                Assert.AreEqual(input.Host ?? string.Empty, oparg.QueryHost);
-                Assert.AreEqual(input.Path, oparg.QueryPath);
-                Assert.AreEqual(input.Username, oparg.CredUsername);
-                Assert.AreEqual(input.Password, oparg.CredPassword);
+                Assert.NotNull(oparg);
+                Assert.Equal(input.Protocol ?? string.Empty, oparg.QueryProtocol);
+                Assert.Equal(input.Host ?? string.Empty, oparg.QueryHost);
+                Assert.Equal(input.Path, oparg.QueryPath);
+                Assert.Equal(input.Username, oparg.CredUsername);
+                Assert.Equal(input.Password, oparg.CredPassword);
 
                 // file or unc paths are treated specially
-                if (oparg.QueryUri.Scheme != "file")
+                if (oparg.QueryUri.Scheme != System.Uri.UriSchemeFile)
                 {
-                    Assert.AreEqual("/", oparg.QueryUri.AbsolutePath);
+                    Assert.Equal("/", oparg.QueryUri.AbsolutePath);
                 }
             }
         }
@@ -259,17 +259,17 @@ namespace Microsoft.Alm.Cli.Test
                 var oparg = new OperationArguments.Impl(memory);
                 oparg.UseHttpPath = true;
 
-                Assert.IsNotNull(oparg);
-                Assert.AreEqual(input.Protocol ?? string.Empty, oparg.QueryProtocol);
-                Assert.AreEqual(input.Host ?? string.Empty, oparg.QueryHost);
-                Assert.AreEqual(input.Path, oparg.QueryPath);
-                Assert.AreEqual(input.Username, oparg.CredUsername);
-                Assert.AreEqual(input.Password, oparg.CredPassword);
+                Assert.NotNull(oparg);
+                Assert.Equal(input.Protocol ?? string.Empty, oparg.QueryProtocol);
+                Assert.Equal(input.Host ?? string.Empty, oparg.QueryHost);
+                Assert.Equal(input.Path, oparg.QueryPath);
+                Assert.Equal(input.Username, oparg.CredUsername);
+                Assert.Equal(input.Password, oparg.CredPassword);
 
                 // file or unc paths are treated specially
-                if (oparg.QueryUri.Scheme != "file")
+                if (oparg.QueryUri.Scheme != System.Uri.UriSchemeFile)
                 {
-                    Assert.AreEqual("/" + input.Path, oparg.QueryUri.AbsolutePath);
+                    Assert.Equal("/" + input.Path, oparg.QueryUri.AbsolutePath);
                 }
             }
         }

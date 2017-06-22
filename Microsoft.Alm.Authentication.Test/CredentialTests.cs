@@ -1,14 +1,13 @@
 ﻿using System;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
+using Xunit;
 
 namespace Microsoft.Alm.Authentication.Test
 {
-    [TestClass]
     public class CredentialTests
     {
         private const string Namespace = "test";
 
-        [TestMethod]
+        [Fact]
         public void UriToName_GitHubSimple()
         {
             const string Expected = Namespace + ":https://www.github.com";
@@ -17,7 +16,7 @@ namespace Microsoft.Alm.Authentication.Test
             UriToNameTest(Namespace, Original, Expected);
         }
 
-        [TestMethod]
+        [Fact]
         public void UriToName_VstsSimple()
         {
             const string Expected = Namespace + ":https://account.visualstudio.com";
@@ -26,7 +25,7 @@ namespace Microsoft.Alm.Authentication.Test
             UriToNameTest(Namespace, Original, Expected);
         }
 
-        [TestMethod]
+        [Fact]
         public void UriToName_HttpsWithPath()
         {
             const string Expected = Namespace + ":https://github.com/Microsoft/Git-Credential-Manager-for-Windows.git";
@@ -35,7 +34,7 @@ namespace Microsoft.Alm.Authentication.Test
             UriToNameTest(Namespace, Original, Expected);
         }
 
-        [TestMethod]
+        [Fact]
         public void UriToName_HttpsWithTrailingSlash()
         {
             const string Expected = Namespace + ":https://www.github.com";
@@ -44,7 +43,7 @@ namespace Microsoft.Alm.Authentication.Test
             UriToNameTest(Namespace, Original, Expected);
         }
 
-        [TestMethod]
+        [Fact]
         public void UriToName_ComplexVsts()
         {
             const string Expected = Namespace + ":https://mytenant.visualstudio.com/MYTENANT/_git/App.MyApp";
@@ -53,10 +52,10 @@ namespace Microsoft.Alm.Authentication.Test
             var uri = new Uri(Original);
             var actual = Secret.UriToName(uri, Namespace);
 
-            Assert.AreEqual(Expected, actual);
+            Assert.Equal(Expected, actual);
         }
 
-        [TestMethod]
+        [Fact]
         public void UriToName_Unc()
         {
             const string Expected = Namespace + ":file://unc/path";
@@ -65,7 +64,7 @@ namespace Microsoft.Alm.Authentication.Test
             UriToNameTest(Namespace, Original, Expected);
         }
 
-        [TestMethod]
+        [Fact]
         public void UriToName_UncWithPrefix()
         {
             const string Expected = Namespace + ":file://unc/path";
@@ -74,7 +73,7 @@ namespace Microsoft.Alm.Authentication.Test
             UriToNameTest(Namespace, Original, Expected);
         }
 
-        [TestMethod]
+        [Fact]
         public void UriToName_UncWithTrailingSlash()
         {
             const string Expected = Namespace + ":file://unc/path";
@@ -83,85 +82,89 @@ namespace Microsoft.Alm.Authentication.Test
             var uri = new Uri(Original);
             var actual = Secret.UriToName(uri, Namespace);
 
-            Assert.AreEqual(Expected, actual);
+            Assert.Equal(Expected, actual);
         }
 
-        [TestMethod]
+        [Fact]
         public void CredentialStoreUrl()
         {
             ICredentialStoreTest(new SecretStore("test", null, null, Secret.UriToName), "http://dummy.url/for/testing", "username", "password");
         }
 
-        [TestMethod]
+        [Fact]
         public void CredentialStoreUrlWithParams()
         {
             ICredentialStoreTest(new SecretStore("test", null, null, Secret.UriToName), "http://dummy.url/for/testing?with=params", "username", "password");
         }
 
-        [TestMethod]
+        [Fact]
         public void CredentialStoreUnc()
         {
             ICredentialStoreTest(new SecretStore("test", null, null, Secret.UriToName), @"\\unc\share\test", "username", "password");
         }
 
-        [TestMethod]
-        [ExpectedException(typeof(ArgumentNullException))]
+        [Fact]
         public void CredentialStoreUsernameNullReject()
         {
-            ICredentialStoreTest(new SecretStore("test", null, null, Secret.UriToName), "http://dummy.url/for/testing", null, "null_usernames_are_illegal");
+            Assert.Throws<ArgumentNullException>(() =>
+            {
+                ICredentialStoreTest(new SecretStore("test", null, null, Secret.UriToName), "http://dummy.url/for/testing", null, "null_usernames_are_illegal");
+            });
         }
 
-        [TestMethod]
+        [Fact]
         public void CredentialStoreUsernameBlank()
         {
             ICredentialStoreTest(new SecretStore("test", null, null, Secret.UriToName), "http://dummy.url/for/testing", "", "blank_usernames_are_legal");
         }
 
-        [TestMethod]
+        [Fact]
         public void CredentialStorePasswordNull()
         {
             ICredentialStoreTest(new SecretStore("test", null, null, Secret.UriToName), "http://dummy.url/for/testing", "null_passwords_are_illegal", null);
         }
 
-        [TestMethod]
+        [Fact]
         public void CredentialStorePassswordBlank()
         {
             ICredentialStoreTest(new SecretStore("test", null, null, Secret.UriToName), "http://dummy.url/for/testing", "blank_passwords_are_legal", "");
         }
 
-        [TestMethod]
+        [Fact]
         public void SecretCacheUrl()
         {
             ICredentialStoreTest(new SecretCache("test-cache"), "http://dummy.url/for/testing", "username", "password");
             ICredentialStoreTest(new SecretCache("test-cache"), "http://dummy.url/for/testing", "username", "password");
         }
 
-        [TestMethod]
+        [Fact]
         public void SecretCacheUrlWithParams()
         {
             ICredentialStoreTest(new SecretCache("test-cache", Secret.UriToName), "http://dummy.url/for/testing?with=params", "username", "password");
         }
 
-        [TestMethod]
+        [Fact]
         public void SecretCacheUnc()
         {
             ICredentialStoreTest(new SecretCache("test-cache", Secret.UriToName), @"\\unc\share\test", "username", "password");
         }
 
-        [TestMethod]
-        [ExpectedException(typeof(ArgumentNullException))]
+        [Fact]
         public void SecretCacheUsernameNull()
         {
-            ICredentialStoreTest(new SecretCache("test-cache", Secret.UriToName), "http://dummy.url/for/testing", null, "null_usernames_are_illegal");
+            Assert.Throws<ArgumentNullException>(() =>
+            {
+                ICredentialStoreTest(new SecretCache("test-cache", Secret.UriToName), "http://dummy.url/for/testing", null, "null_usernames_are_illegal");
+            });
         }
 
-        [TestMethod]
+        [Fact]
         public void SecretCacheUsernameBlankReject()
         {
             ICredentialStoreTest(new SecretCache("test-cache", Secret.UriToName), "http://dummy.url/for/testing", "", "blank_usernames_are_illegal");
         }
 
-        [TestMethod]
+        [Fact]
         public void SecretCachePasswordNull()
         {
             ICredentialStoreTest(new SecretCache("test-cache", Secret.UriToName), "http://dummy.url/for/testing", "null_passwords_are_illegal", null);
@@ -175,19 +178,14 @@ namespace Microsoft.Alm.Authentication.Test
 
             credentialStore.WriteCredentials(uri, writeCreds);
 
-            if ((readCreds = credentialStore.ReadCredentials(uri)) != null)
-            {
-                Assert.AreEqual(writeCreds.Password, readCreds.Password, "Passwords did not match between written and read credentials");
-                Assert.AreEqual(writeCreds.Username, readCreds.Username, "Usernames did not match between written and read credentials");
-            }
-            else
-            {
-                Assert.Fail("Failed to read credentials");
-            }
+            readCreds = credentialStore.ReadCredentials(uri);
+            Assert.NotNull(readCreds);
+            Assert.Equal(writeCreds.Password, readCreds.Password);
+            Assert.Equal(writeCreds.Username, readCreds.Username);
 
             credentialStore.DeleteCredentials(uri);
 
-            Assert.IsNull(readCreds = credentialStore.ReadCredentials(uri), "Deleted credentials were read back");
+            Assert.Null(readCreds = credentialStore.ReadCredentials(uri));
         }
 
         private static void UriToNameTest(string @namespace, string original, string expected)
@@ -195,7 +193,7 @@ namespace Microsoft.Alm.Authentication.Test
             var uri = new Uri(original);
             var actual = Secret.UriToName(uri, @namespace);
 
-            Assert.AreEqual(expected, actual);
+            Assert.Equal(expected, actual);
         }
     }
 }
