@@ -10,8 +10,8 @@
 
 namespace GitHub.Authentication.Properties {
     using System;
-
-
+    
+    
     /// <summary>
     ///   A strongly-typed resource class, for looking up localized strings, etc.
     /// </summary>
@@ -23,15 +23,15 @@ namespace GitHub.Authentication.Properties {
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
     [global::System.Runtime.CompilerServices.CompilerGeneratedAttribute()]
     public class Resources {
-
+        
         private static global::System.Resources.ResourceManager resourceMan;
-
+        
         private static global::System.Globalization.CultureInfo resourceCulture;
-
+        
         [global::System.Diagnostics.CodeAnalysis.SuppressMessageAttribute("Microsoft.Performance", "CA1811:AvoidUncalledPrivateCode")]
         internal Resources() {
         }
-
+        
         /// <summary>
         ///   Returns the cached ResourceManager instance used by this class.
         /// </summary>
@@ -45,7 +45,7 @@ namespace GitHub.Authentication.Properties {
                 return resourceMan;
             }
         }
-
+        
         /// <summary>
         ///   Overrides the current thread's CurrentUICulture property for all
         ///   resource lookups using this strongly typed resource class.
@@ -59,7 +59,7 @@ namespace GitHub.Authentication.Properties {
                 resourceCulture = value;
             }
         }
-
+        
         /// <summary>
         ///   Looks up a localized string similar to Cancel.
         /// </summary>
@@ -68,7 +68,7 @@ namespace GitHub.Authentication.Properties {
                 return ResourceManager.GetString("CancelText", resourceCulture);
             }
         }
-
+        
         /// <summary>
         ///   Looks up a localized string similar to Don’t have an account? .
         /// </summary>
@@ -77,7 +77,7 @@ namespace GitHub.Authentication.Properties {
                 return ResourceManager.GetString("DoNotHaveAccountText", resourceCulture);
             }
         }
-
+        
         /// <summary>
         ///   Looks up a localized string similar to Forgot your password?.
         /// </summary>
@@ -86,7 +86,7 @@ namespace GitHub.Authentication.Properties {
                 return ResourceManager.GetString("ForgotPasswordText", resourceCulture);
             }
         }
-
+        
         /// <summary>
         ///   Looks up a localized string similar to Learn More.
         /// </summary>
@@ -95,7 +95,7 @@ namespace GitHub.Authentication.Properties {
                 return ResourceManager.GetString("LearnMoreLink", resourceCulture);
             }
         }
-
+        
         /// <summary>
         ///   Looks up a localized string similar to Login.
         /// </summary>
@@ -104,7 +104,7 @@ namespace GitHub.Authentication.Properties {
                 return ResourceManager.GetString("LoginLabel", resourceCulture);
             }
         }
-
+        
         /// <summary>
         ///   Looks up a localized string similar to Login.
         /// </summary>
@@ -113,7 +113,7 @@ namespace GitHub.Authentication.Properties {
                 return ResourceManager.GetString("LoginLinkText", resourceCulture);
             }
         }
-
+        
         /// <summary>
         ///   Looks up a localized string similar to Username or email.
         /// </summary>
@@ -122,7 +122,7 @@ namespace GitHub.Authentication.Properties {
                 return ResourceManager.GetString("LoginPromptText", resourceCulture);
             }
         }
-
+        
         /// <summary>
         ///   Looks up a localized string similar to Please enter your username or email address.
         /// </summary>
@@ -131,7 +131,7 @@ namespace GitHub.Authentication.Properties {
                 return ResourceManager.GetString("LoginRequired", resourceCulture);
             }
         }
-
+        
         /// <summary>
         ///   Looks up a localized string similar to Open the two-factor authentication app on your device to view your authentication code..
         /// </summary>
@@ -140,7 +140,7 @@ namespace GitHub.Authentication.Properties {
                 return ResourceManager.GetString("OpenTwoFactorAuthAppText", resourceCulture);
             }
         }
-
+        
         /// <summary>
         ///   Looks up a localized string similar to Password.
         /// </summary>
@@ -149,7 +149,7 @@ namespace GitHub.Authentication.Properties {
                 return ResourceManager.GetString("PasswordPromptText", resourceCulture);
             }
         }
-
+        
         /// <summary>
         ///   Looks up a localized string similar to Please enter your password.
         /// </summary>
@@ -158,7 +158,7 @@ namespace GitHub.Authentication.Properties {
                 return ResourceManager.GetString("PasswordRequired", resourceCulture);
             }
         }
-
+        
         /// <summary>
         ///   Looks up a localized string similar to Sign up.
         /// </summary>
@@ -167,7 +167,7 @@ namespace GitHub.Authentication.Properties {
                 return ResourceManager.GetString("SignUpLinkText", resourceCulture);
             }
         }
-
+        
         /// <summary>
         ///   Looks up a localized string similar to Two-factor authentication.
         /// </summary>
@@ -176,7 +176,7 @@ namespace GitHub.Authentication.Properties {
                 return ResourceManager.GetString("TwoFactorAuthText", resourceCulture);
             }
         }
-
+        
         /// <summary>
         ///   Looks up a localized string similar to We sent you a message via SMS with your authentication code..
         /// </summary>
@@ -185,7 +185,7 @@ namespace GitHub.Authentication.Properties {
                 return ResourceManager.GetString("TwoFactorSms", resourceCulture);
             }
         }
-
+        
         /// <summary>
         ///   Looks up a localized string similar to Ok.
         /// </summary>

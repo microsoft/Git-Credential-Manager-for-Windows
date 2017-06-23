@@ -1,16 +1,15 @@
 ﻿using System.Threading.Tasks;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
+using Xunit;
 
 namespace Microsoft.Alm.Authentication.Test
 {
-    [TestClass]
     public class VstsMsaTests: AuthenticationTests
     {
         public VstsMsaTests()
             : base()
         { }
 
-        [TestMethod]
+        [Fact]
         public void VstsMsaDeleteCredentialsTest()
         {
             TargetUri targetUri = DefaultTargetUri;
@@ -19,65 +18,60 @@ namespace Microsoft.Alm.Authentication.Test
             msaAuthority.PersonalAccessTokenStore.WriteCredentials(targetUri, DefaultPersonalAccessToken);
 
             msaAuthority.DeleteCredentials(targetUri);
-            Assert.IsNull(msaAuthority.PersonalAccessTokenStore.ReadCredentials(targetUri), "Personal Access Tokens were not deleted as expected"); ;
+            Assert.Null(msaAuthority.PersonalAccessTokenStore.ReadCredentials(targetUri));
 
             msaAuthority.DeleteCredentials(targetUri);
-            Assert.IsNull(msaAuthority.PersonalAccessTokenStore.ReadCredentials(targetUri), "Personal Access Tokens were not deleted as expected"); ;
+            Assert.Null(msaAuthority.PersonalAccessTokenStore.ReadCredentials(targetUri));
         }
 
-        [TestMethod]
+        [Fact]
         public void VstsMsaGetCredentialsTest()
         {
             TargetUri targetUri = DefaultTargetUri;
             VstsMsaAuthentication msaAuthority = GetVstsMsaAuthentication("msa-get");
 
-            Assert.IsNull(msaAuthority.GetCredentials(targetUri), "Credentials were retrieved unexpectedly.");
+            Assert.Null(msaAuthority.GetCredentials(targetUri));
 
             msaAuthority.PersonalAccessTokenStore.WriteCredentials(targetUri, DefaultPersonalAccessToken);
 
-            Assert.IsNotNull(msaAuthority.GetCredentials(targetUri), "Credentials were not retrieved as expected.");
+            Assert.NotNull(msaAuthority.GetCredentials(targetUri));
         }
 
-        [TestMethod]
+        [Fact]
         public void VstsMsaInteractiveLogonTest()
         {
             TargetUri targetUri = DefaultTargetUri;
             VstsMsaAuthentication msaAuthority = GetVstsMsaAuthentication("msa-logon");
 
-            Assert.IsNull(msaAuthority.PersonalAccessTokenStore.ReadCredentials(targetUri), "Personal Access Token found in store unexpectedly.");
+            Assert.Null(msaAuthority.PersonalAccessTokenStore.ReadCredentials(targetUri));
 
-            Assert.IsNotNull(msaAuthority.InteractiveLogon(targetUri, false).Result, "Interactive logon failed unexpectedly.");
+            Assert.NotNull(msaAuthority.InteractiveLogon(targetUri, false).Result);
 
-            Assert.IsNotNull(msaAuthority.PersonalAccessTokenStore.ReadCredentials(targetUri), "Personal Access Token not found in store as expected.");
+            Assert.NotNull(msaAuthority.PersonalAccessTokenStore.ReadCredentials(targetUri));
         }
 
-        [TestMethod]
+        [Fact]
         public void VstsMsaSetCredentialsTest()
         {
             TargetUri targetUri = DefaultTargetUri;
             VstsMsaAuthentication msaAuthority = GetVstsMsaAuthentication("msa-set");
 
-            try
-            {
-                msaAuthority.SetCredentials(targetUri, DefaultCredentials);
-                Assert.Fail("Credentials were unexpectedly set.");
-            }
-            catch { }
+            msaAuthority.SetCredentials(targetUri, DefaultCredentials);
 
-            Assert.IsNull(msaAuthority.PersonalAccessTokenStore.ReadCredentials(targetUri), "Personal Access Token unexpectedly found in store.");
+            Assert.Null(msaAuthority.PersonalAccessTokenStore.ReadCredentials(targetUri));
         }
 
-        [TestMethod]
+        [Fact]
         public void VstsMsaValidateCredentialsTest()
         {
             VstsMsaAuthentication msaAuthority = GetVstsMsaAuthentication("msa-validate");
             Credential credentials = null;
 
-            Assert.IsFalse(Task.Run(async () => { return await msaAuthority.ValidateCredentials(DefaultTargetUri, credentials); }).Result, "Credential validation unexpectedly failed.");
+            Assert.False(Task.Run(async () => { return await msaAuthority.ValidateCredentials(DefaultTargetUri, credentials); }).Result, "Credential validation unexpectedly failed.");
 
             credentials = DefaultCredentials;
 
-            Assert.IsTrue(Task.Run(async () => { return await msaAuthority.ValidateCredentials(DefaultTargetUri, credentials); }).Result, "Credential validation unexpectedly failed.");
+            Assert.True(Task.Run(async () => { return await msaAuthority.ValidateCredentials(DefaultTargetUri, credentials); }).Result, "Credential validation unexpectedly failed.");
         }
 
         private static VstsMsaAuthentication GetVstsMsaAuthentication(string @namespace)

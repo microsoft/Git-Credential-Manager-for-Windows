@@ -1,16 +1,15 @@
 ﻿using System.Threading.Tasks;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
+using Xunit;
 
 namespace Microsoft.Alm.Authentication.Test
 {
-    [TestClass]
     public class VstsAadTests: AuthenticationTests
     {
         public VstsAadTests()
             : base()
         { }
 
-        [TestMethod]
+        [Fact]
         public void VstsAadDeleteCredentialsTest()
         {
             TargetUri targetUri = DefaultTargetUri;
@@ -19,50 +18,50 @@ namespace Microsoft.Alm.Authentication.Test
             aadAuthentication.PersonalAccessTokenStore.WriteCredentials(targetUri, DefaultPersonalAccessToken);
 
             aadAuthentication.DeleteCredentials(targetUri);
-            Assert.IsNull(aadAuthentication.PersonalAccessTokenStore.ReadCredentials(targetUri), "Personal Access Tokens were not deleted as expected");
+            Assert.Null(aadAuthentication.PersonalAccessTokenStore.ReadCredentials(targetUri));
 
             aadAuthentication.DeleteCredentials(targetUri);
-            Assert.IsNull(aadAuthentication.PersonalAccessTokenStore.ReadCredentials(targetUri), "Personal Access Tokens were not deleted as expected");
+            Assert.Null(aadAuthentication.PersonalAccessTokenStore.ReadCredentials(targetUri));
         }
 
-        [TestMethod]
+        [Fact]
         public void VstsAadGetCredentialsTest()
         {
             TargetUri targetUri = DefaultTargetUri;
             VstsAadAuthentication aadAuthentication = GetVstsAadAuthentication("aad-get");
 
-            Assert.IsNull(aadAuthentication.GetCredentials(targetUri), "Credentials were retrieved unexpectedly.");
+            Assert.Null(aadAuthentication.GetCredentials(targetUri));
 
             aadAuthentication.PersonalAccessTokenStore.WriteCredentials(targetUri, DefaultPersonalAccessToken);
 
-            Assert.IsNotNull(aadAuthentication.GetCredentials(targetUri), "Credentials were not retrieved as expected.");
+            Assert.NotNull(aadAuthentication.GetCredentials(targetUri));
         }
 
-        [TestMethod]
+        [Fact]
         public void VstsAadInteractiveLogonTest()
         {
             TargetUri targetUri = DefaultTargetUri;
             VstsAadAuthentication aadAuthentication = GetVstsAadAuthentication("aad-logon");
 
-            Assert.IsNull(aadAuthentication.PersonalAccessTokenStore.ReadCredentials(targetUri), "Personal Access Token found in store unexpectedly.");
+            Assert.Null(aadAuthentication.PersonalAccessTokenStore.ReadCredentials(targetUri));
 
-            Assert.IsNotNull(aadAuthentication.InteractiveLogon(targetUri, false).Result, "Interactive logon failed unexpectedly.");
+            Assert.NotNull(aadAuthentication.InteractiveLogon(targetUri, false).Result);
 
-            Assert.IsNotNull(aadAuthentication.PersonalAccessTokenStore.ReadCredentials(targetUri), "Personal Access Token not found in store as expected.");
+            Assert.NotNull(aadAuthentication.PersonalAccessTokenStore.ReadCredentials(targetUri));
         }
 
-        [TestMethod]
+        [Fact]
         public void VstsAadNoninteractiveLogonTest()
         {
             TargetUri targetUri = DefaultTargetUri;
             VstsAadAuthentication aadAuthentication = GetVstsAadAuthentication("aad-noninteractive");
 
-            Assert.IsNotNull(Task.Run(async () => { return await aadAuthentication.NoninteractiveLogon(targetUri, false); }).Result, "Non-interactive logon unexpectedly failed.");
+            Assert.NotNull(Task.Run(async () => { return await aadAuthentication.NoninteractiveLogon(targetUri, false); }).Result);
 
-            Assert.IsNotNull(aadAuthentication.PersonalAccessTokenStore.ReadCredentials(targetUri), "Personal Access Token not found in store as expected.");
+            Assert.NotNull(aadAuthentication.PersonalAccessTokenStore.ReadCredentials(targetUri));
         }
 
-        [TestMethod]
+        [Fact]
         public void VstsAadSetCredentialsTest()
         {
             TargetUri targetUri = DefaultTargetUri;
@@ -71,32 +70,32 @@ namespace Microsoft.Alm.Authentication.Test
 
             aadAuthentication.SetCredentials(targetUri, credentials);
 
-            Assert.IsNull(aadAuthentication.PersonalAccessTokenStore.ReadCredentials(targetUri), "Personal Access Token unexpectedly found in store.");
-            Assert.IsNull(credentials = aadAuthentication.GetCredentials(targetUri), "Credentials were retrieved unexpectedly.");
+            Assert.Null(aadAuthentication.PersonalAccessTokenStore.ReadCredentials(targetUri));
+            Assert.Null(credentials = aadAuthentication.GetCredentials(targetUri));
         }
 
-        [TestMethod]
+        [Fact]
         public void VstsAadValidateCredentialsTest()
         {
             VstsAadAuthentication aadAuthentication = GetVstsAadAuthentication("aad-validate");
             Credential credentials = null;
 
-            Assert.IsFalse(Task.Run(async () => { return await aadAuthentication.ValidateCredentials(DefaultTargetUri, credentials); }).Result, "Credential validation unexpectedly failed.");
+            Assert.False(Task.Run(async () => { return await aadAuthentication.ValidateCredentials(DefaultTargetUri, credentials); }).Result, "Credential validation unexpectedly failed.");
 
             credentials = DefaultCredentials;
 
-            Assert.IsTrue(Task.Run(async () => { return await aadAuthentication.ValidateCredentials(DefaultTargetUri, credentials); }).Result, "Credential validation unexpectedly failed.");
+            Assert.True(Task.Run(async () => { return await aadAuthentication.ValidateCredentials(DefaultTargetUri, credentials); }).Result, "Credential validation unexpectedly failed.");
         }
 
-        [TestMethod]
+        [Fact]
         public void VstsAadValidateLoginHintTest()
         {
             TargetUri targetUri = DefaultTargetUri;
             VstsAadAuthentication aadAuthentication = GetVstsAadAuthentication("aad-loginhint");
 
-            Assert.IsNotNull(Task.Run(async () => { return await aadAuthentication.NoninteractiveLogon(targetUri, false); }).Result, "Non-interactive logon unexpectedly failed.");
+            Assert.NotNull(Task.Run(async () => { return await aadAuthentication.NoninteractiveLogon(targetUri, false); }).Result);
 
-            Assert.IsNotNull(aadAuthentication.PersonalAccessTokenStore.ReadCredentials(targetUri), "Personal Access Token not found in store as expected.");
+            Assert.NotNull(aadAuthentication.PersonalAccessTokenStore.ReadCredentials(targetUri));
         }
 
         private static VstsAadAuthentication GetVstsAadAuthentication(string @namespace)

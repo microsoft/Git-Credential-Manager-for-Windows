@@ -1,45 +1,59 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Diagnostics;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
+using Xunit;
 
 namespace Microsoft.Alm.Git.Test
 {
-    [TestClass]
     public class WhereTests
     {
         private static StringComparer PathComparer = StringComparer.InvariantCultureIgnoreCase;
 
-        [TestMethod]
-        public void FindApp()
+        public static object[] FindAppData
         {
-            string[] apps = new[] { "cmd", "notepad", "calc", "powershell", "git" };
-            foreach (string app in apps)
+            get
             {
-                string path1;
-                Assert.IsTrue(CmdWhere(app, out path1));
-                string path2;
-                Assert.IsTrue(Where.FindApp(app, out path2));
+                var data = new List<object[]>()
+                {
+                    new object[] { "cmd" },
+                    new object[] { "notepad" },
+                    new object[] { "calc" },
+                    new object[] { "powershell" },
+                    new object[] { "git" },
+                };
 
-                Assert.IsTrue(PathComparer.Equals(path1, path2));
+                return data.ToArray();
             }
         }
 
-        [TestMethod]
-        public void FindGit()
+        [Theory]
+        [MemberData(nameof(FindAppData))]
+        public void Where_FindApp(string app)
+        {
+            string path1;
+            Assert.True(CmdWhere(app, out path1));
+
+            string path2;
+            Assert.True(Where.FindApp(app, out path2));
+
+            Assert.True(PathComparer.Equals(path1, path2));
+        }
+
+        [Fact]
+        public void Where_FindGit()
         {
             string gitPath;
             if (!Where.FindApp("git", out gitPath))
-                Assert.Inconclusive();
+                throw new Exception("Git not found on system");
 
             List<GitInstallation> installations;
-            Assert.IsTrue(Where.FindGitInstallations(out installations));
-            Assert.IsTrue(installations.Count > 0);
-            Assert.IsTrue(PathComparer.Equals(installations[0].Git, gitPath));
+            Assert.True(Where.FindGitInstallations(out installations));
+            Assert.True(installations.Count > 0);
+            Assert.True(PathComparer.Equals(installations[0].Git, gitPath));
 
             GitInstallation installation;
-            Assert.IsTrue(Where.FindGitInstallation(installations[0].Path, installations[0].Version, out installation));
-            Assert.IsTrue(installations[0] == installation);
+            Assert.True(Where.FindGitInstallation(installations[0].Path, installations[0].Version, out installation));
+            Assert.True(installations[0] == installation);
         }
 
         private static bool CmdWhere(string app, out string path)

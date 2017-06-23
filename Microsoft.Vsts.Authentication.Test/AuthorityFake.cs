@@ -1,6 +1,6 @@
 ﻿using System;
 using System.Threading.Tasks;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
+using Xunit;
 
 namespace Microsoft.Alm.Authentication.Test
 {
@@ -20,7 +20,7 @@ namespace Microsoft.Alm.Authentication.Test
 
         public async Task<Token> InteractiveAcquireToken(TargetUri targetUri, string clientId, string resource, Uri redirectUri, string queryParameters = null)
         {
-            Assert.AreEqual(this.ExpectedQueryParameters, queryParameters);
+            Assert.Equal(this.ExpectedQueryParameters, queryParameters);
 
             return await Task.Run(() => { return new Token("token-access", TokenType.Access); });
         }

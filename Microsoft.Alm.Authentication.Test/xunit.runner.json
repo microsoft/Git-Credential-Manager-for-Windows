@@ -1,0 +1,6 @@
+{
+  "appDomain": "denied",
+  "diagnosticMessages": true,
+  "methodDisplay": "method",
+  "parallelizeAssembly":  true
+}
