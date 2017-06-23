@@ -49,7 +49,7 @@ namespace Microsoft.Alm.Cli
             Title = AssemblyTitle;
         }
 
-        internal bool TryParseUrlCredentials(string targetUrl, out string username, out string password)
+        internal static bool TryParseUrlCredentials(string targetUrl, out string username, out string password)
         {
             // config stored credentials come in the format of <username>[:<password>]@<url>
             // with password being optional scheme terminator is actually "://" so we need
