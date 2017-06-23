@@ -1,25 +1,24 @@
 ﻿using GitHub.Authentication.ViewModels;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
+using Xunit;
 
 namespace GitHub.Authentication.Test
 {
-    [TestClass]
     public class TwoFactorViewModelTests
     {
-        [TestMethod]
+        [Fact]
         public void IsValidIsTrueWhenAuthenticationCodeIsSixCharacters()
         {
             var vm = new TwoFactorViewModel();
             vm.AuthenticationCode = "012345";
-            Assert.IsTrue(vm.IsValid);
+            Assert.True(vm.IsValid);
         }
 
-        [TestMethod]
+        [Fact]
         public void IsValidIsFalseWhenAuthenticationCodeIsLessThanSixCharacters()
         {
             var vm = new TwoFactorViewModel();
             vm.AuthenticationCode = "01234";
-            Assert.IsFalse(vm.IsValid);
+            Assert.False(vm.IsValid);
         }
     }
 }

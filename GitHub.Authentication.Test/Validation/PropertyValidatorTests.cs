@@ -1,13 +1,12 @@
 ﻿using System.Collections.Generic;
 using GitHub.Shared.ViewModels.Validation;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
+using Xunit;
 
 namespace GitHub.Authentication.Test.Validation
 {
-    [TestClass]
     public class PropertyValidatorTests
     {
-        [TestMethod]
+        [Fact]
         public void ValidationResultReturnsUnvalidatedIfNoValidators()
         {
             var validatableObject = new ValidatableTestObject();
@@ -15,10 +14,10 @@ namespace GitHub.Authentication.Test.Validation
 
             var result = validator.ValidationResult;
 
-            Assert.AreEqual(PropertyValidationResult.Unvalidated, result);
+            Assert.Equal(PropertyValidationResult.Unvalidated, result);
         }
 
-        [TestMethod]
+        [Fact]
         public void ValidationResultReturnsSuccessIfValidatorsPass()
         {
             var validatableObject = new ValidatableTestObject();
@@ -30,10 +29,10 @@ namespace GitHub.Authentication.Test.Validation
 
             var result = validator.ValidationResult;
 
-            Assert.IsTrue(result.IsValid);
+            Assert.True(result.IsValid);
         }
 
-        [TestMethod]
+        [Fact]
         public void ValidationResultReturnsFailureIfAnyValidatorsFail()
         {
             var validatableObject = new ValidatableTestObject();
@@ -46,11 +45,11 @@ namespace GitHub.Authentication.Test.Validation
 
             var result = validator.ValidationResult;
 
-            Assert.IsFalse(result.IsValid);
-            Assert.AreEqual("Error occurred!", result.Message);
+            Assert.False(result.IsValid);
+            Assert.Equal("Error occurred!", result.Message);
         }
 
-        [TestMethod]
+        [Fact]
         public void ValidatorsRunInOrderAndStopWhenInvalid()
         {
             List<int> results = new List<int>();
@@ -66,13 +65,13 @@ namespace GitHub.Authentication.Test.Validation
 
             var result = validator.ValidationResult;
 
-            Assert.IsFalse(result.IsValid);
-            Assert.AreEqual("Error occurred!", result.Message);
-            Assert.AreEqual(4, results.Count);
-            for (int i = 0; i < 4; i++) Assert.AreEqual(i, results[i]);
+            Assert.False(result.IsValid);
+            Assert.Equal("Error occurred!", result.Message);
+            Assert.Equal(4, results.Count);
+            for (int i = 0; i < 4; i++) Assert.Equal(i, results[i]);
         }
 
-        [TestMethod]
+        [Fact]
         public void ValidationResultNotifiesWhenValidationStateChanges()
         {
             var validatableObject = new ValidatableTestObject();
@@ -86,12 +85,12 @@ namespace GitHub.Authentication.Test.Validation
                 if (e.PropertyName == nameof(validator.ValidationResult))
                     validationResult = validator.ValidationResult;
             };
-            Assert.IsNull(validationResult); // Precondition
+            Assert.Null(validationResult); // Precondition
 
             validatableObject.SomeStringProperty = "not empty";
 
-            Assert.AreEqual(validationResult, validator.ValidationResult);
-            Assert.IsFalse(validationResult.IsValid);
+            Assert.Equal(validationResult, validator.ValidationResult);
+            Assert.False(validationResult.IsValid);
         }
     }
 }

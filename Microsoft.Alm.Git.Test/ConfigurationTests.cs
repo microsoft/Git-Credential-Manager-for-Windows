@@ -5,21 +5,17 @@ using Xunit;
 
 namespace Microsoft.Alm.Git.Test
 {
-    /// <summary>
-    /// A class to test <see cref="Configuration"/>.
-    /// </summary>
     public class ConfigurationTests
     {
-
         public static object[] ParseData
         {
             get
             {
                 var data = new List<object[]>()
                 {
-                    new object[] { "\n[core]\n    autocrlf = false\n", "core.autocrlf", "false", StringComparer.OrdinalIgnoreCase },
-                    new object[] { "\n[core]\n    autocrlf = true\n    autocrlf = ThisShouldBeInvalidButIgnored\n    autocrlf = false\n", "core.autocrlf", "false", StringComparer.OrdinalIgnoreCase },
-                    new object[] { "\n[core \"oneQuote]\n    autocrlf = \"false\n", "core.oneQuote.autocrlf", "false", StringComparer.OrdinalIgnoreCase },
+                    new object[] { "\n[core]\n    autocrlf = false\n", "core.autocrlf", "false", true },
+                    new object[] { "\n[core]\n    autocrlf = true\n    autocrlf = ThisShouldBeInvalidButIgnored\n    autocrlf = false\n", "core.autocrlf", "false", true },
+                    new object[] { "\n[core \"oneQuote]\n    autocrlf = \"false\n", "core.oneQuote.autocrlf", "false", true },
                 };
 
                 return data.ToArray();
@@ -28,12 +24,12 @@ namespace Microsoft.Alm.Git.Test
 
         [Theory]
         [MemberData(nameof(ParseData))]
-        public void GitConfif_Parse(string input, string expectedName, string expected, StringComparer comparer)
+        public void GitConfif_Parse(string input, string expectedName, string expected, bool ignoreCase)
         {
             var values = TestParseGitConfig(input);
             Assert.NotNull(values);
 
-            Assert.Equal(expected, values[expectedName], comparer);
+            Assert.Equal(expected, values[expectedName], ignoreCase ? StringComparer.OrdinalIgnoreCase : StringComparer.Ordinal);
         }
 
 

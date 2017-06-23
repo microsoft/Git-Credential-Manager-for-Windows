@@ -1,12 +1,11 @@
 ﻿using GitHub.Shared.ViewModels.Validation;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
+using Xunit;
 
 namespace GitHub.Authentication.Test.Validation
 {
-    [TestClass]
     public class ModelValidatorTests
     {
-        [TestMethod]
+        [Fact]
         public void IsValidWhenAllValidatorsAreValid()
         {
             var validatableObject = new ValidatableTestObject();
@@ -18,19 +17,19 @@ namespace GitHub.Authentication.Test.Validation
                 .Required("Error occurred!");
             var modelValidator = new ModelValidator(validator, anotherValidator);
 
-            Assert.IsFalse(modelValidator.IsValid);
+            Assert.False(modelValidator.IsValid);
 
             validatableObject.SomeStringProperty = "valid";
 
-            Assert.IsFalse(modelValidator.IsValid);
+            Assert.False(modelValidator.IsValid);
 
             validatableObject.AnotherStringProperty = "valid";
 
-            Assert.IsTrue(modelValidator.IsValid);
+            Assert.True(modelValidator.IsValid);
 
             validatableObject.AnotherStringProperty = "";
 
-            Assert.IsFalse(modelValidator.IsValid);
+            Assert.False(modelValidator.IsValid);
         }
     }
 }
