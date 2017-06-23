@@ -1,5 +1,5 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
-<RuleSet Name="GCW Analysis Rules" Description="This rule set contains all Microsoft rules except the annoying ones." ToolsVersion="14.0">
+<RuleSet Name="GCM Analysis Rules" Description="This rule set contains all Microsoft rules except the annoying ones." ToolsVersion="14.0">
   <IncludeAll Action="Warning" />
   <Rules AnalyzerId="Microsoft.Analyzers.ManagedCodeAnalysis" RuleNamespace="Microsoft.Rules.Managed">
     <Rule Id="CA1014" Action="None" />

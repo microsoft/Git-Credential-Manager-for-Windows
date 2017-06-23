@@ -165,16 +165,16 @@ namespace Microsoft.Alm.Authentication
             if (registryKey.Handle.IsInvalid)
                 throw new ArgumentException("Handle.IsInvalid property returned true.", nameof(registryKey));
 
-            url = registryKey.GetValue(RegistryUrlKey, null, RegistryValueOptions.DoNotExpandEnvironmentNames) as String;
-            type = registryKey.GetValue(RegistryTypeKey, null, RegistryValueOptions.DoNotExpandEnvironmentNames) as String;
-            value = registryKey.GetValue(RegistryTokenKey, null, RegistryValueOptions.DoNotExpandEnvironmentNames) as String;
+            url = registryKey.GetValue(RegistryUrlKey, null, RegistryValueOptions.DoNotExpandEnvironmentNames) as string;
+            type = registryKey.GetValue(RegistryTypeKey, null, RegistryValueOptions.DoNotExpandEnvironmentNames) as string;
+            value = registryKey.GetValue(RegistryTokenKey, null, RegistryValueOptions.DoNotExpandEnvironmentNames) as string;
 
-            return !String.IsNullOrEmpty(url)
-                && !String.IsNullOrEmpty(value)
+            return !string.IsNullOrEmpty(url)
+                && !string.IsNullOrEmpty(value)
                 && Uri.IsWellFormedUriString(url, UriKind.Absolute);
         }
 
-        private IEnumerable<RegistryKey> EnumerateRootKeys()
+        private static IEnumerable<RegistryKey> EnumerateRootKeys()
         {
             foreach (string version in Versions)
             {
@@ -182,7 +182,7 @@ namespace Microsoft.Alm.Authentication
 
                 try
                 {
-                    string registryPath = String.Format(RegistryPathFormat, version);
+                    string registryPath = string.Format(RegistryPathFormat, version);
 
                     result = Registry.CurrentUser.OpenSubKey(registryPath, false);
                 }

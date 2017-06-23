@@ -104,7 +104,7 @@ namespace Microsoft.Alm.Authentication
             return null;
         }
 
-        public async Task<bool> PopulateTokenTargetId(TargetUri targetUri, Token accessToken)
+        public static async Task<bool> PopulateTokenTargetId(TargetUri targetUri, Token accessToken)
         {
             BaseSecureStore.ValidateTargetUri(targetUri);
             BaseSecureStore.ValidateToken(accessToken);
@@ -411,7 +411,7 @@ namespace Microsoft.Alm.Authentication
             return httpClient;
         }
 
-        private async Task<Uri> CreatePersonalAccessTokenRequestUri(HttpClient client, TargetUri targetUri, bool requireCompactToken)
+        private static async Task<Uri> CreatePersonalAccessTokenRequestUri(HttpClient client, TargetUri targetUri, bool requireCompactToken)
         {
             const string SessionTokenUrl = "_apis/token/sessiontokens?api-version=1.0";
             const string CompactTokenUrl = SessionTokenUrl + "&tokentype=compact";

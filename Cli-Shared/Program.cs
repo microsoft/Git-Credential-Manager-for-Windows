@@ -243,7 +243,7 @@ namespace Microsoft.Alm.Cli
             => _printArgs(this, args);
 
         [Conditional("DEBUG")]
-        private void EnableDebugTrace()
+        private static void EnableDebugTrace()
         {
             // use the stderr stream for the trace as stdout is used in the cross-process
             // communications protocol
