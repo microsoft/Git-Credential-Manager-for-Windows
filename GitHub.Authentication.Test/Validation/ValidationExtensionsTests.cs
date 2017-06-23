@@ -1,12 +1,11 @@
 ﻿using GitHub.Shared.ViewModels.Validation;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
+using Xunit;
 
 namespace GitHub.Authentication.Test.Validation
 {
-    [TestClass]
     public class ValidationExtensionsTests
     {
-        [TestMethod]
+        [Fact]
         public void RequiredIsUnvalidatedAndNotValidIfPropertyNeverChanges()
         {
             var validatableObject = new ValidatableTestObject();
@@ -16,11 +15,11 @@ namespace GitHub.Authentication.Test.Validation
 
             var result = validator.ValidationResult;
 
-            Assert.IsFalse(result.IsValid);
-            Assert.AreEqual(PropertyValidationResult.Unvalidated, result);
+            Assert.False(result.IsValid);
+            Assert.Equal(PropertyValidationResult.Unvalidated, result);
         }
 
-        [TestMethod]
+        [Fact]
         public void RequiredValidatesPropertyNotNull()
         {
             var validatableObject = new ValidatableTestObject();
@@ -32,11 +31,11 @@ namespace GitHub.Authentication.Test.Validation
 
             var result = validator.ValidationResult;
 
-            Assert.IsFalse(result.IsValid);
-            Assert.AreEqual("Please provide a value for SomeStringProperty!", result.Message);
+            Assert.False(result.IsValid);
+            Assert.Equal("Please provide a value for SomeStringProperty!", result.Message);
         }
 
-        [TestMethod]
+        [Fact]
         public void RequiredValidatesPropertyNotEmpty()
         {
             var validatableObject = new ValidatableTestObject();
@@ -47,8 +46,8 @@ namespace GitHub.Authentication.Test.Validation
 
             var result = validator.ValidationResult;
 
-            Assert.IsFalse(result.IsValid);
-            Assert.AreEqual("Please provide a value for SomeStringProperty!", result.Message);
+            Assert.False(result.IsValid);
+            Assert.Equal("Please provide a value for SomeStringProperty!", result.Message);
         }
     }
 }

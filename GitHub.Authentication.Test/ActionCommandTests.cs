@@ -1,26 +1,25 @@
 ﻿using GitHub.Shared.Helpers;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
+using Xunit;
 
 namespace GitHub.Authentication.Test
 {
-    [TestClass]
     public class ActionCommandTests
     {
-        [TestMethod]
+        [Fact]
         public void CanExecuteIsTrueByDefault()
         {
             var command = new ActionCommand(_ => { });
-            Assert.IsTrue(command.CanExecute(null));
+            Assert.True(command.CanExecute(null));
         }
 
-        [TestMethod]
+        [Fact]
         public void CanExecuteReturnsFalseWhenIsEnabledIsFalse()
         {
             var command = new ActionCommand(_ => { }) { IsEnabled = false };
-            Assert.IsFalse(command.CanExecute(null));
+            Assert.False(command.CanExecute(null));
         }
 
-        [TestMethod]
+        [Fact]
         public void ExecuteCallsActionWhenExecuted()
         {
             var parameter = new object();
@@ -28,7 +27,7 @@ namespace GitHub.Authentication.Test
             var command = new ActionCommand(_ => { suppliedParameter = parameter; }) { IsEnabled = true };
             command.Execute(parameter);
 
-            Assert.AreSame(parameter, suppliedParameter);
+            Assert.Same(parameter, suppliedParameter);
         }
     }
 }

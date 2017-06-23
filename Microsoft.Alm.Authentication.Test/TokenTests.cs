@@ -1,4 +1,5 @@
-﻿using Xunit;
+﻿using System.Collections.Generic;
+using Xunit;
 
 namespace Microsoft.Alm.Authentication.Test
 {
@@ -6,47 +7,38 @@ namespace Microsoft.Alm.Authentication.Test
     {
         private const string TokenString = "The Azure AD Authentication Library (ADAL) for .NET enables client application developers to easily authenticate users to cloud or on-premises Active Directory (AD), and then obtain access tokens for securing API calls. ADAL for .NET has many features that make authentication easier for developers, such as asynchronous support, a configurable token cache that stores access tokens and refresh tokens, automatic token refresh when an access token expires and a refresh token is available, and more. By handling most of the complexity, ADAL can help a developer focus on business logic in their application and easily secure resources without being an expert on security.";
 
-        [Fact]
-        public void TokenStoreUrl()
+        public static object[] TokenStoreData
         {
-            ITokenStoreTest(new SecretStore("test-token"), "http://dummy.url/for/testing", TokenString);
+            get
+            {
+                var data = new List<object[]>()
+                {
+                    new object[] { true, "test-token", "http://dummy.url/for/testing", TokenString },
+                    new object[] { true, "test-token", "http://dummy.url/for/testing?with=params", TokenString },
+                    new object[] { true, "test-token", @"\\unc\share\test", TokenString },
+                    new object[] { true, "test-token", "file://dummy.url/for/testing", TokenString },
+                    new object[] { true, "test-token", "http://dummy.url:9090/for/testing", TokenString },
+                    new object[] { false, "test-token", "http://dummy.url/for/testing", TokenString },
+                    new object[] { false, "test-token", "http://dummy.url/for/testing?with=params", TokenString },
+                    new object[] { false, "test-token", @"\\unc\share\test", TokenString },
+                    new object[] { false, "test-token", "file://dummy.url/for/testing", TokenString },
+                    new object[] { false, "test-token", "http://dummy.url:9090/for/testing", TokenString },
+                };
+
+                return data.ToArray();
+            }
         }
 
-        [Fact]
-        public void TokenStoreUrlWithParams()
+        [Theory]
+        [MemberData(nameof(TokenStoreData))]
+        public void Token_WriteDelete(bool useCache, string secretName, string url, string token)
         {
-            ITokenStoreTest(new SecretStore("test-token"), "http://dummy.url/for/testing?with=params", TokenString);
-        }
+            var tokenStore = useCache
+                ? new SecretCache(secretName) as ITokenStore
+                : new SecretStore(secretName) as ITokenStore;
+            var uri = new TargetUri(url);
 
-        [Fact]
-        public void TokenStoreUnc()
-        {
-            ITokenStoreTest(new SecretStore("test-token"), @"\\unc\share\test", TokenString);
-        }
-
-        [Fact]
-        public void TokenCacheUrl()
-        {
-            ITokenStoreTest(new SecretCache("test-token"), "http://dummy.url/for/testing", TokenString);
-        }
-
-        [Fact]
-        public void TokenCacheUrlWithParams()
-        {
-            ITokenStoreTest(new SecretCache("test-token"), "http://dummy.url/for/testing?with=params", TokenString);
-        }
-
-        [Fact]
-        public void TokenCacheUnc()
-        {
-            ITokenStoreTest(new SecretCache("test-token"), @"\\unc\share\test", TokenString);
-        }
-
-        private static void ITokenStoreTest(ITokenStore tokenStore, string url, string token)
-        {
-            TargetUri uri = new TargetUri(url);
-
-            Token writeToken = new Token(token, TokenType.Test);
+            var writeToken = new Token(token, TokenType.Test);
             Token readToken = null;
 
             tokenStore.WriteToken(uri, writeToken);

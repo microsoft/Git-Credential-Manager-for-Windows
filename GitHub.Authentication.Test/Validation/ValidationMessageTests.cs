@@ -4,14 +4,13 @@ using System.Windows.Data;
 using GitHub.Shared.ViewModels;
 using GitHub.Shared.ViewModels.Validation;
 using GitHub.UI;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
+using Xunit;
 
 namespace GitHub.Authentication.Test.Validation
 {
-    [TestClass]
     public class ValidationMessageTests
     {
-        [TestMethod]
+        [WpfFact]
         public void DoesNotShowErrorWhenUnvalidated()
         {
             var viewModel = new ValidatableTestObject();
@@ -21,10 +20,10 @@ namespace GitHub.Authentication.Test.Validation
 
             validationMessage.Validator = testValidator;
 
-            Assert.IsFalse(validationMessage.ShowError);
+            Assert.False(validationMessage.ShowError);
         }
 
-        [TestMethod]
+        [WpfFact]
         public void ShowsErrorWhenValidationResultIsInvalid()
         {
             var viewModel = new ValidatableTestObject();
@@ -36,11 +35,11 @@ namespace GitHub.Authentication.Test.Validation
             viewModel.SomeStringProperty = "valid";
             viewModel.SomeStringProperty = "";
 
-            Assert.AreEqual(ValidationStatus.Invalid, testValidator.ValidationResult.Status);
-            Assert.IsTrue(validationMessage.ShowError);
+            Assert.Equal(ValidationStatus.Invalid, testValidator.ValidationResult.Status);
+            Assert.True(validationMessage.ShowError);
         }
 
-        [TestMethod]
+        [WpfFact]
         public void EndToEndTestShowsErrorMessageWhenReactiveValidatorIsNotValid()
         {
             var textBox = new TextBox();
@@ -52,15 +51,15 @@ namespace GitHub.Authentication.Test.Validation
 
             validationMessage.Validator = testValidator;
 
-            Assert.IsFalse(validationMessage.ShowError);
+            Assert.False(validationMessage.ShowError);
 
             textBox.Text = "x";
-            Assert.AreEqual("x", viewModel.SomeStringProperty);
+            Assert.Equal("x", viewModel.SomeStringProperty);
             textBox.Text = "";
-            Assert.AreEqual("", viewModel.SomeStringProperty);
+            Assert.Equal("", viewModel.SomeStringProperty);
 
-            Assert.IsFalse(testValidator.ValidationResult.IsValid);
-            Assert.IsTrue(validationMessage.ShowError);
+            Assert.False(testValidator.ValidationResult.IsValid);
+            Assert.True(validationMessage.ShowError);
         }
 
         private void BindControlToViewModel(ViewModel viewModel, string viewModelProperty, FrameworkElement control, DependencyProperty controlProperty)

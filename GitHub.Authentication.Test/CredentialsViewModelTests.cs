@@ -1,40 +1,39 @@
 ﻿using GitHub.Authentication.ViewModels;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
+using Xunit;
 
 namespace GitHub.Authentication.Test
 {
-    [TestClass]
     public class CredentialsViewModelTests
     {
-        [TestMethod]
+        [Fact]
         public void ValidatesLoginAndPassword()
         {
             var viewModel = new CredentialsViewModel();
-            Assert.IsFalse(viewModel.LoginValidator.ValidationResult.IsValid);
-            Assert.IsFalse(viewModel.PasswordValidator.ValidationResult.IsValid);
+            Assert.False(viewModel.LoginValidator.ValidationResult.IsValid);
+            Assert.False(viewModel.PasswordValidator.ValidationResult.IsValid);
 
             viewModel.Login = "Tyrion";
             viewModel.Password = "staying alive";
 
-            Assert.IsTrue(viewModel.LoginValidator.ValidationResult.IsValid);
-            Assert.IsTrue(viewModel.PasswordValidator.ValidationResult.IsValid);
+            Assert.True(viewModel.LoginValidator.ValidationResult.IsValid);
+            Assert.True(viewModel.PasswordValidator.ValidationResult.IsValid);
         }
 
-        [TestMethod]
+        [Fact]
         public void IsValidWhenBothLoginAndPasswordIsValid()
         {
             var viewModel = new CredentialsViewModel();
-            Assert.IsFalse(viewModel.ModelValidator.IsValid);
+            Assert.False(viewModel.ModelValidator.IsValid);
             viewModel.Login = "Tyrion";
-            Assert.IsFalse(viewModel.ModelValidator.IsValid);
+            Assert.False(viewModel.ModelValidator.IsValid);
 
             viewModel.Password = "staying alive";
 
-            Assert.IsTrue(viewModel.ModelValidator.IsValid);
+            Assert.True(viewModel.ModelValidator.IsValid);
 
             viewModel.Login = "";
 
-            Assert.IsFalse(viewModel.ModelValidator.IsValid);
+            Assert.False(viewModel.ModelValidator.IsValid);
         }
     }
 }
