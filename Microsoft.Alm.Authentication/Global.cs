@@ -74,7 +74,8 @@ namespace Microsoft.Alm.Authentication
         {
             get
             {
-                var assemblyName = System.Reflection.Assembly.GetEntryAssembly().GetName();
+                var assembly = System.Reflection.Assembly.GetEntryAssembly() ?? System.Reflection.Assembly.GetCallingAssembly();
+                var assemblyName = assembly.GetName();
                 var name = assemblyName.Name;
                 var version = assemblyName.Version;
                 var useragent = string.Format("{0} ({1}; {2}; {3}) CLR/{4} git-tools/{5}",
