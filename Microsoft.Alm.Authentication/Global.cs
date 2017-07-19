@@ -74,7 +74,7 @@ namespace Microsoft.Alm.Authentication
         {
             get
             {
-                var assembly = System.Reflection.Assembly.GetEntryAssembly() ?? System.Reflection.Assembly.GetCallingAssembly();
+                var assembly = System.Reflection.Assembly.GetEntryAssembly() ?? typeof(Global).Assembly;
                 var assemblyName = assembly.GetName();
                 var name = assemblyName.Name;
                 var version = assemblyName.Version;
