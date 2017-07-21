@@ -293,6 +293,30 @@ namespace Atlassian.Bitbucket.Authentication.Test
         }
 
         [Fact]
+        public void VerifyGetPerUserTargetUriFormatsEmailUsernames()
+        {
+            var credentialStore = new MockCredentialStore();
+            var bbAuth = new Authentication(credentialStore, null, null);
+
+            var targetUri = new TargetUri("https://example.com");
+            var username = "johnsquire@stoneroses.com";
+
+            var resultUri = targetUri.GetPerUserTargetUri(username);
+
+            Assert.Equal("/", resultUri.AbsolutePath);
+            Assert.Equal("https://johnsquire%40stoneroses.com@example.com/", resultUri.ActualUri.AbsoluteUri);
+            Assert.Equal("example.com", resultUri.DnsSafeHost);
+            Assert.Equal("example.com", resultUri.Host);
+            Assert.Equal(true, resultUri.IsAbsoluteUri);
+            Assert.Equal(true, resultUri.IsDefaultPort);
+            Assert.Equal(443, resultUri.Port);
+            Assert.Equal(null, resultUri.ProxyUri);
+            Assert.Equal("https://johnsquire%40stoneroses.com@example.com/", resultUri.QueryUri.AbsoluteUri);
+            Assert.Equal("https", resultUri.Scheme);
+            Assert.Equal(new WebProxy().Address, resultUri.WebProxy.Address);
+            Assert.Equal("https://example.com/", resultUri.ToString());
+        }
+        [Fact]
         public void VerifyGetPerUserTargetUriDoesNotDuplicateUsernameOnActualUri()
         {
             var credentialStore = new MockCredentialStore();

@@ -328,7 +328,11 @@ namespace Microsoft.Alm.Cli
 
         private void PrintVersion()
         {
+#if DEBUG
+            WriteLine($"{Title} version {Version.ToString(4)}");
+#else
             WriteLine($"{Title} version {Version.ToString(3)}");
+#endif
         }
 
         private bool StandardHandleIsTty(NativeMethods.StandardHandleType handleType)

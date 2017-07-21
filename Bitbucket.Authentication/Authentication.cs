@@ -111,12 +111,13 @@ namespace Atlassian.Bitbucket.Authentication
             {
                 var hostTargetUri = targetUri.GetHostTargetUri();
                 var hostCredentials = GetCredentials(hostTargetUri);
-                if (targetUri.TargetUriUsername != username)
+                var encodedUsername = Uri.EscapeDataString(targetUri.TargetUriUsername);
+                if (encodedUsername != username)
                 {
-                    Trace.WriteLine($"username {username} != targetUri userInfo {targetUri.ActualUri.UserInfo}");
+                    Trace.WriteLine($"username {username} != targetUri userInfo {encodedUsername}");
                 }
 
-                if (hostCredentials != null && hostCredentials.Username.Equals(targetUri.TargetUriUsername))
+                if (hostCredentials != null && hostCredentials.Username.Equals(encodedUsername))
                 {
                     DeleteCredentials(targetUri.GetHostTargetUri(), username);
                 }
@@ -229,13 +230,32 @@ namespace Atlassian.Bitbucket.Authentication
             Trace.WriteLine($"{credentials.Username} at {targetUri.ActualUri.AbsoluteUri}");
 
             // if the url doesn't contain a username then save with an explicit username.
-            if (!targetUri.TargetUriContainsUsername && !string.IsNullOrWhiteSpace(username))
+            if (!targetUri.TargetUriContainsUsername && (!string.IsNullOrWhiteSpace(username)
+                || !string.IsNullOrWhiteSpace(credentials.Username)))
             {
-                Credential tempCredentials = new Credential(username, credentials.Password);
+                var realUsername = GetRealUsername(credentials, username);
+                Credential tempCredentials = new Credential(realUsername, credentials.Password);
                 SetCredentials(targetUri.GetPerUserTargetUri(username), tempCredentials, null);
             }
 
             PersonalAccessTokenStore.WriteCredentials(targetUri, credentials);
+        }
+
+        private static string GetRealUsername(Credential credentials, string username)
+        {
+            return GetRealUsername(credentials.Username, username);
+        }
+
+        private static string GetRealUsername(string remoteUsername, string username)
+        {
+            // if there is no credentials username, use the provided one
+            if (string.IsNullOrWhiteSpace(remoteUsername))
+            {
+                return username;
+            }
+
+            // otherwise 
+            return remoteUsername;
         }
 
         /// <summary>
@@ -356,10 +376,13 @@ namespace Atlassian.Bitbucket.Authentication
             ref AuthenticationResult result)
         {
             Credential credentials = (Credential)result.Token;
+
+            var realUsername = GetRealUsername(result.RemoteUsername, username);
+
             if (!targetUri.TargetUriContainsUsername)
             {
                 // no user info in uri so personalize the credentials
-                credentials = new Credential(username, credentials.Password);
+                credentials = new Credential(realUsername, credentials.Password);
             }
 
             return credentials;

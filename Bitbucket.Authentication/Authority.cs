@@ -29,6 +29,8 @@ using System.Net.Http;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
+using Atlassian.Bitbucket.Authentication.BasicAuth;
+using Atlassian.Bitbucket.Authentication.Rest;
 using Microsoft.Alm.Authentication;
 using Trace = Microsoft.Alm.Git.Trace;
 
@@ -62,11 +64,6 @@ namespace Atlassian.Bitbucket.Authentication
 
         private readonly string _restRootUrl;
 
-        public string UserUrl
-        {
-            get { return "/2.0/user"; }
-        }
-
         /// <inheritdoc/>
         public async Task<AuthenticationResult> AcquireToken(TargetUri targetUri, string username, string password, AuthenticationResultType resultType, TokenScope scope)
         {
@@ -77,7 +74,35 @@ namespace Atlassian.Bitbucket.Authentication
                 OAuth.OAuthAuthenticator oauth = new OAuth.OAuthAuthenticator();
                 try
                 {
-                    return await oauth.GetAuthAsync(targetUri, scope, CancellationToken.None);
+                    var result = await oauth.GetAuthAsync(targetUri, scope, CancellationToken.None);
+
+                    if (!result.IsSuccess)
+                    {
+                        Trace.WriteLine($"oauth authentication failed");
+                        return new AuthenticationResult(AuthenticationResultType.Failure);
+                    }
+
+                    // we got a toke but lets check to see the usernames match
+                    var restRootUri = new Uri(_restRootUrl);
+                    var authHeader = GetBearerHeaderAuthHeader(result.Token.Value);
+                    var userResult = await RestClient.TryGetUser(targetUri, RequestTimeout, restRootUri, authHeader);
+
+                    if(!userResult.IsSuccess)
+                    {
+                        Trace.WriteLine($"oauth user check failed");
+                        return new AuthenticationResult(AuthenticationResultType.Failure);
+                    }
+
+                    if (!string.IsNullOrWhiteSpace(userResult.RemoteUsername) && !username.Equals(userResult.RemoteUsername))
+                    {
+                        Trace.WriteLine($"Remote username [{userResult.RemoteUsername}] != [{username}] supplied username");
+                        // make sure the 'real' username is returned
+                        return new AuthenticationResult(AuthenticationResultType.Success, result.Token, result.RefreshToken, userResult.RemoteUsername);
+                    }
+
+                    // everything is hunky dory
+                    return result;
+
                 }
                 catch (Exception ex)
                 {
@@ -87,59 +112,16 @@ namespace Atlassian.Bitbucket.Authentication
             }
             else
             {
-                // use the provided username and password and attempt a Basic Auth request to a known
-                // REST API resource.
-                Token token = null;
-                using (HttpClientHandler handler = targetUri.HttpClientHandler)
+                BasicAuthAuthenticator basicauth = new BasicAuthAuthenticator();
+                try
                 {
-                    using (HttpClient httpClient = new HttpClient(handler) { Timeout = TimeSpan.FromMilliseconds(RequestTimeout) })
-                    {
-                        string basicAuthValue = String.Format("{0}:{1}", username, password);
-                        byte[] authBytes = Encoding.UTF8.GetBytes(basicAuthValue);
-                        basicAuthValue = Convert.ToBase64String(authBytes);
-                        httpClient.DefaultRequestHeaders.Add("Authorization", "Basic " + basicAuthValue);
-
-                        var url = new Uri(new Uri(_restRootUrl), UserUrl).AbsoluteUri;
-                        using (HttpResponseMessage response = await httpClient.GetAsync(url))
-                        {
-                            Trace.WriteLine($"server responded with {response.StatusCode}.");
-
-                            switch (response.StatusCode)
-                            {
-                                case HttpStatusCode.OK:
-                                case HttpStatusCode.Created:
-                                    {
-                                        // Success with username/passord indicates 2FA is not on so
-                                        // the 'token' is actually the password if we had a
-                                        // successful call then the password is good.
-                                        token = new Token(password, TokenType.Personal);
-
-                                        Trace.WriteLine("authentication success: new password token created.");
-                                        return new AuthenticationResult(AuthenticationResultType.Success, token);
-                                    }
-
-                                case HttpStatusCode.Forbidden:
-                                    {
-                                        // A 403/Forbidden response indicates the username/password
-                                        // are recognized and good but 2FA is on in which case we
-                                        // want to indicate that with the TwoFactor result
-                                        Trace.WriteLine("two-factor app authentication code required");
-                                        return new AuthenticationResult(AuthenticationResultType.TwoFactor);
-                                    }
-                                case HttpStatusCode.Unauthorized:
-                                    {
-                                        // username or password are wrong.
-                                        Trace.WriteLine("authentication failed");
-                                        return new AuthenticationResult(AuthenticationResultType.Failure);
-                                    }
-
-                                default:
-                                    // any unexpected result can be treated as a failure.
-                                    Trace.WriteLine("authentication failed");
-                                    return new AuthenticationResult(AuthenticationResultType.Failure);
-                            }
-                        }
-                    }
+                    var restRootUri = new Uri(_restRootUrl);
+                    return await basicauth.GetAuthAsync(targetUri, scope, RequestTimeout, restRootUri, username, password);
+                }
+                catch (Exception ex)
+                {
+                    Trace.WriteLine($"basic auth authentication failed [{ex.Message}]");
+                    return new AuthenticationResult(AuthenticationResultType.Failure);
                 }
             }
         }
@@ -166,27 +148,54 @@ namespace Atlassian.Bitbucket.Authentication
             BaseSecureStore.ValidateTargetUri(targetUri);
             BaseSecureStore.ValidateCredential(credentials);
 
-            var user = string.IsNullOrWhiteSpace(username) ? credentials.Username : username;
-            string authString = String.Format("{0}:{1}", user, credentials.Password);
-            byte[] authBytes = Encoding.UTF8.GetBytes(authString);
-            string authEncode = Convert.ToBase64String(authBytes);
-
             // We don't know when the credentials arrive here if they are using OAuth or Basic Auth,
             // so we try both.
 
             // Try the simplest Basic Auth first
-            if (await ValidateCredentials(targetUri, username, "Basic " + authEncode))
+            var authEncode = GetEncodedCredentials(username, credentials);
+            if (await ValidateCredentials(targetUri, GetBasicAuthHeader(authEncode)))
             {
                 return true;
             }
 
             // if the Basic Auth test failed then try again as OAuth
-            if (await ValidateCredentials(targetUri, username, "Bearer " + credentials.Password))
+            if (await ValidateCredentials(targetUri, GetBearerHeaderAuthHeader(credentials.Password)))
             {
                 return true;
             }
 
             return false;
+        }
+
+        private static string GetBasicAuthHeader(string secret)
+        {
+            return "Basic " + secret;
+        }
+
+        private static string GetBearerHeaderAuthHeader(string secret)
+        {
+            return "Bearer " + secret;
+        }
+
+        /// <summary>
+        ///     Get the HTTP encoded version of the Credentials secret
+        /// </summary>
+        private static string GetEncodedCredentials(string username, Credential credentials)
+        {
+            var user = string.IsNullOrWhiteSpace(username) ? credentials.Username : username;
+            var password = credentials.Password;
+            return GetEncodedCredentials(user, password);
+        }
+
+        /// <summary>
+        ///     Get the HTTP encoded version of the Credentials secret
+        /// </summary>
+        private static string GetEncodedCredentials(string user, string password)
+        {
+            string authString = String.Format("{0}:{1}", user, password);
+            byte[] authBytes = Encoding.UTF8.GetBytes(authString);
+            string authEncode = Convert.ToBase64String(authBytes);
+            return authEncode;
         }
 
         /// <summary>
@@ -197,57 +206,27 @@ namespace Atlassian.Bitbucket.Authentication
         /// <param name="targetUri">
         /// Contains the <see cref="HttpClientHandler"/> used when making the REST API request
         /// </param>
-        /// <param name="username">the username to validate</param>
         /// <param name="authHeader">
         /// the HTTP auth header containing the password/access_token to validate
         /// </param>
         /// <returns>true if the credentials are valid, false otherwise.</returns>
-        private async Task<bool> ValidateCredentials(TargetUri targetUri, string username, string authHeader)
+        private async Task<bool> ValidateCredentials(TargetUri targetUri, string authHeader)
         {
-            const string ValidationUrl = "https://api.bitbucket.org/2.0/user";
-
             BaseSecureStore.ValidateTargetUri(targetUri);
 
             Trace.WriteLine($"Auth Type = {authHeader.Substring(0, 5)}");
 
-            // craft the request header for the Bitbucket v2 API w/ credentials
-            using (HttpClientHandler handler = targetUri.HttpClientHandler)
-            using (HttpClient httpClient = new HttpClient(handler)
-            {
-                Timeout = TimeSpan.FromMilliseconds(RequestTimeout)
-            })
-            {
-                httpClient.DefaultRequestHeaders.Add("User-Agent", Global.UserAgent);
-                httpClient.DefaultRequestHeaders.Add("Authorization", authHeader);
+            var restRootUrl = new Uri(_restRootUrl);
+            var result = await RestClient.TryGetUser(targetUri, RequestTimeout, restRootUrl, authHeader);
 
-                using (HttpResponseMessage response = await httpClient.GetAsync(ValidationUrl))
-                {
-                    switch (response.StatusCode)
-                    {
-                        case HttpStatusCode.OK:
-                        case HttpStatusCode.Created:
-                            {
-                                Trace.WriteLine("credential validation succeeded");
-                                return true;
-                            }
-                        case HttpStatusCode.Forbidden:
-                            {
-                                Trace.WriteLine("credential validation failed: Forbidden");
-                                return false;
-                            }
-                        case HttpStatusCode.Unauthorized:
-                            {
-                                Trace.WriteLine("credential validation failed: Unauthorized");
-                                return false;
-                            }
-                        default:
-                            {
-                                Trace.WriteLine("credential validation failed");
-                                return false;
-                            }
-                    }
-                }
+            if (result.Type.Equals(AuthenticationResultType.Success))
+            {
+                Trace.WriteLine("credential validation succeeded");
+                return true;
             }
+
+            Trace.WriteLine("credential validation failed");
+            return false;
         }
     }
 }
