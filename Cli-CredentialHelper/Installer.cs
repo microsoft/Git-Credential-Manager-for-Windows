@@ -202,11 +202,11 @@ namespace Microsoft.Alm.Cli
             {
                 System.Security.Principal.WindowsIdentity identity = System.Security.Principal.WindowsIdentity.GetCurrent();
                 System.Security.Principal.WindowsPrincipal principal = new System.Security.Principal.WindowsPrincipal(identity);
-                if (!principal.IsInRole(System.Security.Principal.WindowsBuiltInRole.Administrator))
-                {
-                    DeployElevated();
-                    return;
-                }
+                //if (!principal.IsInRole(System.Security.Principal.WindowsBuiltInRole.Administrator))
+                //{
+                //    DeployElevated();
+                //    return;
+                //}
 
                 List<GitInstallation> installations = null;
 
