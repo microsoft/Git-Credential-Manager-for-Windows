@@ -111,12 +111,13 @@ namespace Atlassian.Bitbucket.Authentication
             {
                 var hostTargetUri = targetUri.GetHostTargetUri();
                 var hostCredentials = GetCredentials(hostTargetUri);
-                if (targetUri.TargetUriUsername != username)
+                var encodedUsername = Uri.EscapeDataString(targetUri.TargetUriUsername);
+                if (encodedUsername != username)
                 {
-                    Trace.WriteLine($"username {username} != targetUri userInfo {targetUri.ActualUri.UserInfo}");
+                    Trace.WriteLine($"username {username} != targetUri userInfo {encodedUsername}");
                 }
 
-                if (hostCredentials != null && hostCredentials.Username.Equals(targetUri.TargetUriUsername))
+                if (hostCredentials != null && hostCredentials.Username.Equals(encodedUsername))
                 {
                     DeleteCredentials(targetUri.GetHostTargetUri(), username);
                 }
