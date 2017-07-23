@@ -324,7 +324,8 @@ namespace Microsoft.Alm.Authentication
                 return this;
             }
 
-            return new TargetUri(ActualUri.AbsoluteUri.Replace(Host, username + "@" + Host));
+            var encodedUsername = Uri.EscapeDataString(username);
+            return new TargetUri(ActualUri.AbsoluteUri.Replace(Host, encodedUsername + "@" + Host));
         }
 
         /// <summary>
