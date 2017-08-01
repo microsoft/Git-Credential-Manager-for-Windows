@@ -49,6 +49,13 @@ namespace Microsoft.Alm.Git
                 string pathext = Environment.GetEnvironmentVariable("PATHEXT");
                 string envpath = Environment.GetEnvironmentVariable("PATH");
 
+                if (string.IsNullOrEmpty(pathext) || string.IsNullOrEmpty(envpath))
+                {
+                    // The user is likely hosed, or a poorly crafted test case - eitherway avoid NRE from the .Split call.
+                    path = null;
+                    return false;
+                }
+
                 string[] exts = pathext.Split(';');
                 string[] paths = envpath.Split(';');
 
