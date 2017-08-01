@@ -20,6 +20,7 @@ namespace Microsoft.Alm.Cli
         internal const string ConfigLoginHintKey = "loginhint";
         internal const string ConfigNamespaceKey = "namespace";
         internal const string ConfigPreserveCredentialsKey = "preserve";
+        internal const string ConfigTokenDuration = "tokenDuration";
         internal const string ConfigUseHttpPathKey = "useHttpPath";
         internal const string ConfigUseModalPromptKey = "modalPrompt";
         internal const string ConfigValidateKey = "validate";
@@ -37,6 +38,7 @@ namespace Microsoft.Alm.Cli
         internal const string EnvironLoginHintKey = "GCM_LOGINHINT";
         internal const string EnvironModalPromptKey = "GCM_MODAL_PROMPT";
         internal const string EnvironNamespaceKey = "GCM_NAMESPACE";
+        internal const string EnvironTokenDuration = "GCM_TOKEN_DURATION";
         internal const string EnvironPreserveCredentialsKey = "GCM_PRESERVE_CREDS";
         internal const string EnvironValidateKey = "GCM_VALIDATE";
         internal const string EnvironWritelogKey = "GCM_WRITELOG";
