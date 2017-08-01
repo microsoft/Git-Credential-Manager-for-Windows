@@ -32,7 +32,7 @@ namespace Microsoft.Alm.Authentication
 {
     public class VstsTokenScope: TokenScope
     {
-        public static readonly VstsTokenScope None = new VstsTokenScope(String.Empty);
+        public static readonly VstsTokenScope None = new VstsTokenScope(string.Empty);
 
         /// <summary>
         /// Grants the ability to access build artifacts, including build results, definitions, and

@@ -37,7 +37,7 @@ namespace Microsoft.Alm.Authentication
 
         public SecretCache(string @namespace, Secret.UriNameConversion getTargetName)
         {
-            if (String.IsNullOrWhiteSpace(@namespace))
+            if (string.IsNullOrWhiteSpace(@namespace))
                 throw new ArgumentNullException(@namespace);
 
             _namespace = @namespace;

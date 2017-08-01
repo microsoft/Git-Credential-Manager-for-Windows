@@ -32,7 +32,7 @@ namespace Microsoft.Alm.Authentication
     /// </summary>
     public sealed class Credential: Secret, IEquatable<Credential>
     {
-        public static readonly Credential Empty = new Credential(String.Empty, String.Empty);
+        public static readonly Credential Empty = new Credential(string.Empty, string.Empty);
 
         /// <summary>
         /// Creates a credential object with a username and password pair.
@@ -45,7 +45,7 @@ namespace Microsoft.Alm.Authentication
                 throw new ArgumentNullException(nameof(username));
 
             this.Username = username;
-            this.Password = password ?? String.Empty;
+            this.Password = password ?? string.Empty;
         }
 
         /// <summary>
@@ -53,7 +53,7 @@ namespace Microsoft.Alm.Authentication
         /// </summary>
         /// <param name="username">The username value of the <see cref="Credential"/>.</param>
         public Credential(string username)
-            : this(username, String.Empty)
+            : this(username, string.Empty)
         { }
 
         /// <summary>
@@ -111,8 +111,8 @@ namespace Microsoft.Alm.Authentication
             if (ReferenceEquals(credential1, null) || ReferenceEquals(null, credential2))
                 return false;
 
-            return String.Equals(credential1.Username, credential2.Username, StringComparison.Ordinal)
-                && String.Equals(credential1.Password, credential2.Password, StringComparison.Ordinal);
+            return string.Equals(credential1.Username, credential2.Username, StringComparison.Ordinal)
+                && string.Equals(credential1.Password, credential2.Password, StringComparison.Ordinal);
         }
 
         /// <summary>

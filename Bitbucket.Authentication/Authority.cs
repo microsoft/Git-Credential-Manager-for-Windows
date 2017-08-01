@@ -192,7 +192,7 @@ namespace Atlassian.Bitbucket.Authentication
         /// </summary>
         private static string GetEncodedCredentials(string user, string password)
         {
-            string authString = String.Format("{0}:{1}", user, password);
+            string authString = string.Format("{0}:{1}", user, password);
             byte[] authBytes = Encoding.UTF8.GetBytes(authString);
             string authEncode = Convert.ToBase64String(authBytes);
             return authEncode;

@@ -90,7 +90,7 @@ namespace Microsoft.Alm.Authentication
                             value = Encoding.UTF8.GetString(data);
 
                             TokenType tokenType;
-                            if (String.Equals(type, "Federated", StringComparison.OrdinalIgnoreCase))
+                            if (string.Equals(type, "Federated", StringComparison.OrdinalIgnoreCase))
                             {
                                 tokenType = TokenType.Federated;
                             }

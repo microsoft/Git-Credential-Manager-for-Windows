@@ -106,7 +106,7 @@ namespace Microsoft.Alm.Git
 
         internal GitInstallation(string path, KnownGitDistribution version)
         {
-            Debug.Assert(!String.IsNullOrWhiteSpace(path), $"The `{nameof(path)}` parameter is null or invalid.");
+            Debug.Assert(!string.IsNullOrWhiteSpace(path), $"The `{nameof(path)}` parameter is null or invalid.");
             Debug.Assert(CommonConfigPaths.ContainsKey(version), $"The `{nameof(version)}` parameter not found in `{nameof(CommonConfigPaths)}`.");
             Debug.Assert(CommonCmdPaths.ContainsKey(version), $"The `{nameof(version)}` parameter not found in `{nameof(CommonCmdPaths)}`.");
             Debug.Assert(CommonGitPaths.ContainsKey(version), $"The `{nameof(version)}` parameter not found in `{nameof(CommonGitPaths)}`.");
@@ -252,7 +252,7 @@ namespace Microsoft.Alm.Git
             return StringComparer.OrdinalIgnoreCase.GetHashCode(Path);
         }
 
-        public override String ToString()
+        public override string ToString()
         {
             return Path;
         }

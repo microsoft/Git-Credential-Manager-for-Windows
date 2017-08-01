@@ -126,8 +126,8 @@ namespace Microsoft.Alm.Authentication
 
                     string password = passwordLength > 0
                                     ? Marshal.PtrToStringUni(credStruct.CredentialBlob, passwordLength / sizeof(char))
-                                    : String.Empty;
-                    string username = credStruct.UserName ?? String.Empty;
+                                    : string.Empty;
+                    string username = credStruct.UserName ?? string.Empty;
 
                     credentials = new Credential(username, password);
 
@@ -289,7 +289,7 @@ namespace Microsoft.Alm.Authentication
         {
             if (ReferenceEquals(token, null))
                 throw new ArgumentNullException(nameof(token));
-            if (String.IsNullOrEmpty(token.Value))
+            if (string.IsNullOrEmpty(token.Value))
                 throw new ArgumentException(nameof(token.Value));
         }
     }

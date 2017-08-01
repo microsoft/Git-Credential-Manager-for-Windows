@@ -92,7 +92,7 @@ namespace GitHub.UI
 
         private void SetText(string text)
         {
-            if (String.IsNullOrEmpty(text))
+            if (string.IsNullOrEmpty(text))
             {
                 foreach (var textBox in TextBoxes)
                 {
@@ -106,7 +106,7 @@ namespace GitHub.UI
             {
                 TextBoxes[i].Text = digits[i].ToString();
             }
-            SetValue(TextProperty, String.Join("", digits));
+            SetValue(TextProperty, string.Join("", digits));
         }
 
         public string Text
@@ -175,7 +175,7 @@ namespace GitHub.UI
 
             textBox.TextChanged += (sender, args) =>
             {
-                SetValue(TextProperty, String.Join("", GetTwoFactorCode()));
+                SetValue(TextProperty, string.Join("", GetTwoFactorCode()));
                 var change = args.Changes.FirstOrDefault();
                 args.Handled = (change != null && change.AddedLength > 0) && MoveNext();
             };
@@ -205,12 +205,12 @@ namespace GitHub.UI
 
         private static string GetTextBoxValue(TextBox textBox)
         {
-            return String.IsNullOrEmpty(textBox.Text) ? " " : textBox.Text;
+            return string.IsNullOrEmpty(textBox.Text) ? " " : textBox.Text;
         }
 
         private string GetTwoFactorCode()
         {
-            return String.Join("", TextBoxes.Select(textBox => textBox.Text));
+            return string.Join("", TextBoxes.Select(textBox => textBox.Text));
         }
     }
 }

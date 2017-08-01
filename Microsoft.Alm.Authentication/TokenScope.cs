@@ -34,7 +34,7 @@ namespace Microsoft.Alm.Authentication
     {
         protected TokenScope(string value)
         {
-            if (String.IsNullOrWhiteSpace(value))
+            if (string.IsNullOrWhiteSpace(value))
             {
                 _scopes = new string[0];
             }
@@ -63,7 +63,7 @@ namespace Microsoft.Alm.Authentication
             _scopes = result;
         }
 
-        public string Value { get { return String.Join(" ", _scopes); } }
+        public string Value { get { return string.Join(" ", _scopes); } }
 
         protected readonly IReadOnlyList<string> _scopes;
 

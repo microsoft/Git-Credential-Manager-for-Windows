@@ -245,9 +245,9 @@ namespace GitHub.Authentication
         public async Task<Credential> NoninteractiveLogonWithCredentials(TargetUri targetUri, string username, string password, string authenticationCode)
         {
             BaseSecureStore.ValidateTargetUri(targetUri);
-            if (String.IsNullOrWhiteSpace(username))
+            if (string.IsNullOrWhiteSpace(username))
                 throw new ArgumentNullException("username", "The `username` parameter is null or invalid.");
-            if (String.IsNullOrWhiteSpace(password))
+            if (string.IsNullOrWhiteSpace(password))
                 throw new ArgumentNullException("username", "The `password` parameter is null or invalid.");
 
             Credential credentials = null;
