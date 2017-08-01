@@ -44,8 +44,8 @@ namespace Microsoft.Alm.Authentication
             if (username == null)
                 throw new ArgumentNullException(nameof(username));
 
-            this.Username = username;
-            this.Password = password ?? string.Empty;
+            Username = username;
+            Password = password ?? string.Empty;
         }
 
         /// <summary>

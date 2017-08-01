@@ -8,7 +8,7 @@ namespace Microsoft.Alm.Authentication.Test
     {
         public AuthorityFake(string expectedQueryParameters)
         {
-            this.ExpectedQueryParameters = expectedQueryParameters;
+            ExpectedQueryParameters = expectedQueryParameters;
         }
 
         internal readonly string ExpectedQueryParameters;
@@ -20,7 +20,7 @@ namespace Microsoft.Alm.Authentication.Test
 
         public async Task<Token> InteractiveAcquireToken(TargetUri targetUri, string clientId, string resource, Uri redirectUri, string queryParameters = null)
         {
-            Assert.Equal(this.ExpectedQueryParameters, queryParameters);
+            Assert.Equal(ExpectedQueryParameters, queryParameters);
 
             return await Task.FromResult(new Token("token-access", TokenType.Access));
         }

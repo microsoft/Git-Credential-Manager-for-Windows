@@ -52,7 +52,7 @@ namespace Xunit
                     SynchronizationContext.SetSynchronizationContext(new DispatcherSynchronizationContext());
 
                     // Start off the test method.
-                    var testCaseTask = this.testCase.RunAsync(diagnosticMessageSink, messageBus, constructorArguments, aggregator, cancellationTokenSource);
+                    var testCaseTask = testCase.RunAsync(diagnosticMessageSink, messageBus, constructorArguments, aggregator, cancellationTokenSource);
 
                     // Arrange to pump messages to execute any async work associated with the test.
                     var frame = new DispatcherFrame();

@@ -64,7 +64,7 @@ namespace GitHub.UI
 
         protected override Geometry DefiningGeometry
         {
-            get { return GetGeometryForIcon(this.Icon); }
+            get { return GetGeometryForIcon(Icon); }
         }
 
         public static Geometry GetGeometryForIcon(Octicon icon)

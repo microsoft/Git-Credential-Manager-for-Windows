@@ -342,18 +342,18 @@ namespace Microsoft.Alm.Authentication
             }
 
             // default ToString() does not include any UserInfo
-            return new TargetUri(this.ToString());
+            return new TargetUri(ToString());
         }
 
         /// <summary>
         ///     Determine if the ActualUri of this <see cref="TargetUri"/> contains UserInfo
         /// </summary>
-        public bool TargetUriContainsUsername{ get { return this.ActualUri.AbsoluteUri.Contains("@"); }}
+        public bool TargetUriContainsUsername{ get { return ActualUri.AbsoluteUri.Contains("@"); }}
 
         /// <summary>
         ///     Get username contained in the ActualUri of this <see cref="TargetUri"/>
         /// </summary>
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Design", "CA1056:UriPropertiesShouldNotBeStrings")]
-        public string TargetUriUsername { get { return this.ActualUri.UserInfo; }  }
+        public string TargetUriUsername { get { return ActualUri.UserInfo; }  }
     }
 }

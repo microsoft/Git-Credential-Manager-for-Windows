@@ -38,7 +38,7 @@ namespace Microsoft.Alm.Git.Test
         public void GitConfig_ParseSampleFile()
         {
             var values = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
-            var me = this.GetType();
+            var me = GetType();
             var us = me.Assembly;
 
             using (var rs = us.GetManifestResourceStream(me, "sample.gitconfig"))

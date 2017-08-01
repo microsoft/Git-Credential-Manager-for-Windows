@@ -93,9 +93,9 @@ namespace GitHub.Authentication
         {
             BaseSecureStore.ValidateTargetUri(targetUri);
 
-            if (this.PersonalAccessTokenStore.ReadCredentials(targetUri) != null)
+            if (PersonalAccessTokenStore.ReadCredentials(targetUri) != null)
             {
-                this.PersonalAccessTokenStore.DeleteCredentials(targetUri);
+                PersonalAccessTokenStore.DeleteCredentials(targetUri);
                 Git.Trace.WriteLine($"credentials for '{targetUri}' deleted");
             }
         }
@@ -158,7 +158,7 @@ namespace GitHub.Authentication
 
             Credential credentials = null;
 
-            if ((credentials = this.PersonalAccessTokenStore.ReadCredentials(targetUri)) != null)
+            if ((credentials = PersonalAccessTokenStore.ReadCredentials(targetUri)) != null)
             {
                 Git.Trace.WriteLine($"credentials for '{targetUri}' found.");
             }
@@ -185,12 +185,12 @@ namespace GitHub.Authentication
             {
                 AuthenticationResult result;
 
-                if (result = await Authority.AcquireToken(targetUri, username, password, null, this.TokenScope))
+                if (result = await Authority.AcquireToken(targetUri, username, password, null, TokenScope))
                 {
                     Git.Trace.WriteLine($"token acquisition for '{targetUri}' succeeded");
 
                     credentials = (Credential)result.Token;
-                    this.PersonalAccessTokenStore.WriteCredentials(targetUri, credentials);
+                    PersonalAccessTokenStore.WriteCredentials(targetUri, credentials);
 
                     // if a result callback was registered, call it
                     AuthenticationResultCallback?.Invoke(targetUri, result);
@@ -203,12 +203,12 @@ namespace GitHub.Authentication
                     string authenticationCode;
                     if (AcquireAuthenticationCodeCallback(targetUri, result, username, out authenticationCode))
                     {
-                        if (result = await Authority.AcquireToken(targetUri, username, password, authenticationCode, this.TokenScope))
+                        if (result = await Authority.AcquireToken(targetUri, username, password, authenticationCode, TokenScope))
                         {
                             Git.Trace.WriteLine($"token acquisition for '{targetUri}' succeeded.");
 
                             credentials = (Credential)result.Token;
-                            this.PersonalAccessTokenStore.WriteCredentials(targetUri, credentials);
+                            PersonalAccessTokenStore.WriteCredentials(targetUri, credentials);
 
                             // if a result callback was registered, call it
                             AuthenticationResultCallback?.Invoke(targetUri, result);
@@ -253,7 +253,7 @@ namespace GitHub.Authentication
             Credential credentials = null;
 
             AuthenticationResult result;
-            if (result = await Authority.AcquireToken(targetUri, username, password, authenticationCode, this.TokenScope))
+            if (result = await Authority.AcquireToken(targetUri, username, password, authenticationCode, TokenScope))
             {
                 Git.Trace.WriteLine($"token acquisition for '{targetUri}' succeeded.");
 

@@ -71,11 +71,11 @@ namespace Microsoft.Alm.Authentication
         {
             lock (_syncpoint)
             {
-                if (File.Exists(_cacheFilePath) && this.HasStateChanged)
+                if (File.Exists(_cacheFilePath) && HasStateChanged)
                 {
                     try
                     {
-                        byte[] state = this.Serialize();
+                        byte[] state = Serialize();
 
                         byte[] data = ProtectedData.Protect(state, null, DataProtectionScope.CurrentUser);
 

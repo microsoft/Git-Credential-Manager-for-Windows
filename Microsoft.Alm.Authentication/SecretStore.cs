@@ -89,9 +89,9 @@ namespace Microsoft.Alm.Authentication
         {
             ValidateTargetUri(targetUri);
 
-            string targetName = this.GetTargetName(targetUri);
+            string targetName = GetTargetName(targetUri);
 
-            this.Delete(targetName);
+            Delete(targetName);
 
             _credentialCache.DeleteCredentials(targetUri);
         }
@@ -104,9 +104,9 @@ namespace Microsoft.Alm.Authentication
         {
             ValidateTargetUri(targetUri);
 
-            string targetName = this.GetTargetName(targetUri);
+            string targetName = GetTargetName(targetUri);
 
-            this.Delete(targetName);
+            Delete(targetName);
             _tokenCache.DeleteToken(targetUri);
         }
 
@@ -128,10 +128,10 @@ namespace Microsoft.Alm.Authentication
         {
             ValidateTargetUri(targetUri);
 
-            string targetName = this.GetTargetName(targetUri);
+            string targetName = GetTargetName(targetUri);
 
             return _credentialCache.ReadCredentials(targetUri)
-                ?? this.ReadCredentials(targetName);
+                ?? ReadCredentials(targetName);
         }
 
         /// <summary>
@@ -143,7 +143,7 @@ namespace Microsoft.Alm.Authentication
         {
             ValidateTargetUri(targetUri);
 
-            string targetName = this.GetTargetName(targetUri);
+            string targetName = GetTargetName(targetUri);
 
             return _tokenCache.ReadToken(targetUri)
                 ?? ReadToken(targetName);
@@ -159,9 +159,9 @@ namespace Microsoft.Alm.Authentication
             ValidateTargetUri(targetUri);
             BaseSecureStore.ValidateCredential(credentials);
 
-            string targetName = this.GetTargetName(targetUri);
+            string targetName = GetTargetName(targetUri);
 
-            this.WriteCredential(targetName, credentials);
+            WriteCredential(targetName, credentials);
 
             _credentialCache.WriteCredentials(targetUri, credentials);
         }
@@ -176,9 +176,9 @@ namespace Microsoft.Alm.Authentication
             ValidateTargetUri(targetUri);
             Token.Validate(token);
 
-            string targetName = this.GetTargetName(targetUri);
+            string targetName = GetTargetName(targetUri);
 
-            this.WriteToken(targetName, token);
+            WriteToken(targetName, token);
 
             _tokenCache.WriteToken(targetUri, token);
         }

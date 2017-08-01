@@ -44,8 +44,8 @@ namespace Microsoft.Alm.Authentication
 
             Debug.Assert(Enum.IsDefined(typeof(TokenType), type), $"The `{nameof(type)}` parameter is invalid");
 
-            this.Type = type;
-            this.Value = value;
+            Type = type;
+            Value = value;
         }
 
         public Token(string value, string typeName)
@@ -67,9 +67,9 @@ namespace Microsoft.Alm.Authentication
             if ((type & ~(TokenType.Access | TokenType.Federated | TokenType.Personal | TokenType.Test)) != 0)
                 throw new ArgumentOutOfRangeException(nameof(type));
 
-            this.TargetIdentity = tenantId;
-            this.Type = type;
-            this.Value = value;
+            TargetIdentity = tenantId;
+            Type = type;
+            Value = value;
         }
 
         /// <summary>
@@ -94,7 +94,7 @@ namespace Microsoft.Alm.Authentication
         /// <returns>True is equal; false otherwise.</returns>
         public override bool Equals(Object obj)
         {
-            return this.Equals(obj as Token);
+            return Equals(obj as Token);
         }
 
         /// <summary>

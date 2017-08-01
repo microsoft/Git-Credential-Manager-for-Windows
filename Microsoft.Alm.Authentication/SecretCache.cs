@@ -78,7 +78,7 @@ namespace Microsoft.Alm.Authentication
         {
             BaseSecureStore.ValidateTargetUri(targetUri);
 
-            string targetName = this.GetTargetName(targetUri);
+            string targetName = GetTargetName(targetUri);
 
             lock (_cache)
             {
@@ -97,7 +97,7 @@ namespace Microsoft.Alm.Authentication
         {
             BaseSecureStore.ValidateTargetUri(targetUri);
 
-            string targetName = this.GetTargetName(targetUri);
+            string targetName = GetTargetName(targetUri);
 
             lock (_cache)
             {
@@ -118,7 +118,7 @@ namespace Microsoft.Alm.Authentication
             BaseSecureStore.ValidateTargetUri(targetUri);
 
             Credential credentials = null;
-            string targetName = this.GetTargetName(targetUri);
+            string targetName = GetTargetName(targetUri);
 
             lock (_cache)
             {
@@ -145,7 +145,7 @@ namespace Microsoft.Alm.Authentication
             BaseSecureStore.ValidateTargetUri(targetUri);
 
             Token token = null;
-            string targetName = this.GetTargetName(targetUri);
+            string targetName = GetTargetName(targetUri);
 
             lock (_cache)
             {
@@ -172,7 +172,7 @@ namespace Microsoft.Alm.Authentication
             BaseSecureStore.ValidateTargetUri(targetUri);
             BaseSecureStore.ValidateCredential(credentials);
 
-            string targetName = this.GetTargetName(targetUri);
+            string targetName = GetTargetName(targetUri);
 
             lock (_cache)
             {
@@ -197,7 +197,7 @@ namespace Microsoft.Alm.Authentication
             BaseSecureStore.ValidateTargetUri(targetUri);
             Token.Validate(token);
 
-            string targetName = this.GetTargetName(targetUri);
+            string targetName = GetTargetName(targetUri);
 
             lock (_cache)
             {
