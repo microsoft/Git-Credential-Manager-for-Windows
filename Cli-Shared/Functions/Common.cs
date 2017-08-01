@@ -375,6 +375,11 @@ namespace Microsoft.Alm.Cli
                 {
                     operationArguments.Authority = AuthorityType.GitHub;
                 }
+                else if (Program.ConfigKeyComparer.Equals(value, "Atlassian")
+                    || Program.ConfigKeyComparer.Equals(value, "Bitbucket"))
+                {
+                    operationArguments.Authority = AuthorityType.Bitbucket;
+                }
                 else
                 {
                     operationArguments.Authority = AuthorityType.Basic;
