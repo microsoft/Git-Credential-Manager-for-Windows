@@ -37,7 +37,7 @@ namespace Microsoft.Alm.Authentication
     /// <summary>
     /// Base functionality for performing authentication operations against Visual Studio Online.
     /// </summary>
-    public abstract class BaseVstsAuthentication: BaseAuthentication
+    public abstract class BaseVstsAuthentication : BaseAuthentication
     {
         public const string DefaultResource = "499b84ac-1321-427f-aa17-267ca6975798";
         public const string DefaultClientId = "872cd9fa-d31f-45e0-9eab-6e460a02d1f1";
@@ -52,11 +52,11 @@ namespace Microsoft.Alm.Authentication
             if (ReferenceEquals(personalAccessTokenStore, null))
                 throw new ArgumentNullException(nameof(personalAccessTokenStore));
 
-            this.ClientId = DefaultClientId;
-            this.Resource = DefaultResource;
-            this.TokenScope = tokenScope;
-            this.PersonalAccessTokenStore = personalAccessTokenStore;
-            this.VstsAuthority = new VstsAzureAuthority();
+            ClientId = DefaultClientId;
+            Resource = DefaultResource;
+            TokenScope = tokenScope;
+            PersonalAccessTokenStore = personalAccessTokenStore;
+            VstsAuthority = new VstsAzureAuthority();
         }
 
         internal BaseVstsAuthentication(
@@ -70,9 +70,9 @@ namespace Microsoft.Alm.Authentication
             if (ReferenceEquals(vstsAuthority, null))
                 throw new ArgumentNullException(nameof(vstsAuthority));
 
-            this.VstsIdeTokenCache = vstsIdeTokenCache;
-            this.VstsAuthority = vstsAuthority;
-            this.VstsAdalTokenCache = TokenCache.DefaultShared;
+            VstsIdeTokenCache = vstsIdeTokenCache;
+            VstsAuthority = vstsAuthority;
+            VstsAdalTokenCache = TokenCache.DefaultShared;
         }
 
         /// <summary>
@@ -105,9 +105,9 @@ namespace Microsoft.Alm.Authentication
         {
             BaseSecureStore.ValidateTargetUri(targetUri);
 
-            if (this.PersonalAccessTokenStore.ReadCredentials(targetUri) != null)
+            if (PersonalAccessTokenStore.ReadCredentials(targetUri) != null)
             {
-                this.PersonalAccessTokenStore.DeleteCredentials(targetUri);
+                PersonalAccessTokenStore.DeleteCredentials(targetUri);
             }
         }
 
@@ -173,7 +173,7 @@ namespace Microsoft.Alm.Authentication
                         // find the VSTS resource tenant entry
                         tenant = response.Headers[VstsResourceTenantHeader];
 
-                        if (!String.IsNullOrWhiteSpace(tenant)
+                        if (!string.IsNullOrWhiteSpace(tenant)
                             && Guid.TryParse(tenant, out tenantId))
                         {
                             // Update the cache.
@@ -264,7 +264,7 @@ namespace Microsoft.Alm.Authentication
 
             Credential credentials = null;
 
-            if ((credentials = this.PersonalAccessTokenStore.ReadCredentials(targetUri)) != null)
+            if ((credentials = PersonalAccessTokenStore.ReadCredentials(targetUri)) != null)
             {
                 Git.Trace.WriteLine($"credentials for '{targetUri}' found.");
             }
@@ -280,7 +280,57 @@ namespace Microsoft.Alm.Authentication
         /// <returns><see langword="true"/> if successful; <see langword="false"/> otherwise.</returns>
         public async Task<bool> ValidateCredentials(TargetUri targetUri, Credential credentials)
         {
-            return await this.VstsAuthority.ValidateCredentials(targetUri, credentials);
+            return await VstsAuthority.ValidateCredentials(targetUri, credentials);
+        }
+
+        /// <summary>
+        /// Generates a "personal access token" or service specific, usage resticted access token.
+        /// </summary>
+        /// <param name="targetUri">
+        /// The target resource for which to acquire the personal access token for.
+        /// </param>
+        /// <param name="accessToken">
+        /// Azure Directory access token with privileges to grant access to the target resource.
+        /// </param>
+        /// <param name="options">
+        /// Set of options related to generation of personal access tokens.
+        /// </param>
+        /// <returns><see langword="true"/> if successful; <see langword="false"/> otherwise.</returns>
+        protected async Task<Credential> GeneratePersonalAccessToken(
+            TargetUri targetUri,
+            Token accessToken,
+            PersonalAccessTokenOptions options)
+        {
+            BaseSecureStore.ValidateTargetUri(targetUri);
+
+            if (ReferenceEquals(accessToken, null))
+                throw new ArgumentNullException(nameof(accessToken));
+
+            VstsTokenScope requestedScope = TokenScope;
+
+            if (options.TokenScope != null)
+            {
+                // Take the intersection of the auhority scope and the requested scope
+                requestedScope &= options.TokenScope;
+
+                // If the result of the intersection is none, then fail
+                if (string.IsNullOrWhiteSpace(requestedScope.Value))
+                    throw new InvalidOperationException("Invalid scope requested. Reqeuested scope would result in no access privileges.");
+            }
+
+            Credential credential = null;
+
+            Token personalAccessToken;
+            if ((personalAccessToken = await VstsAuthority.GeneratePersonalAccessToken(targetUri, accessToken, requestedScope, options.RequireCompactToken, options.TokenDuration)) != null)
+            {
+                credential = (Credential)personalAccessToken;
+
+                Git.Trace.WriteLine($"personal access token created for '{targetUri}'.");
+
+                PersonalAccessTokenStore.WriteCredentials(targetUri, credential);
+            }
+
+            return credential;
         }
 
         /// <summary>
@@ -309,13 +359,13 @@ namespace Microsoft.Alm.Authentication
             Credential credential = null;
 
             Token personalAccessToken;
-            if ((personalAccessToken = await this.VstsAuthority.GeneratePersonalAccessToken(targetUri, accessToken, TokenScope, requestCompactToken)) != null)
+            if ((personalAccessToken = await VstsAuthority.GeneratePersonalAccessToken(targetUri, accessToken, TokenScope, requestCompactToken)) != null)
             {
                 credential = (Credential)personalAccessToken;
 
                 Git.Trace.WriteLine($"personal access token created for '{targetUri}'.");
 
-                this.PersonalAccessTokenStore.WriteCredentials(targetUri, credential);
+                PersonalAccessTokenStore.WriteCredentials(targetUri, credential);
             }
 
             return credential;

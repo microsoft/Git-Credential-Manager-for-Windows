@@ -38,7 +38,7 @@ namespace Microsoft.Alm.Authentication
         public VstsMsaAuthentication(VstsTokenScope tokenScope, ICredentialStore personalAccessTokenStore)
             : base(tokenScope, personalAccessTokenStore)
         {
-            this.VstsAuthority = new VstsAzureAuthority(DefaultAuthorityHost);
+            VstsAuthority = new VstsAzureAuthority(DefaultAuthorityHost);
         }
 
         /// <summary>
@@ -64,6 +64,41 @@ namespace Microsoft.Alm.Authentication
         /// <param name="targetUri">
         /// The uniform resource indicator of the resource access tokens are being requested for.
         /// </param>
+        /// <param name="options">
+        /// </param>
+        /// <returns>
+        /// A <see cref="Credential"/> for packing into a basic authentication header; otherwise <see langword="null"/>.
+        /// </returns>
+        public async Task<Credential> InteractiveLogon(TargetUri targetUri, PersonalAccessTokenOptions options)
+        {
+            BaseSecureStore.ValidateTargetUri(targetUri);
+
+            try
+            {
+                Token token;
+                if ((token = await VstsAuthority.InteractiveAcquireToken(targetUri, ClientId, Resource, new Uri(RedirectUrl), QueryParameters)) != null)
+                {
+                    Git.Trace.WriteLine($"token '{targetUri}' successfully acquired.");
+
+                    return await GeneratePersonalAccessToken(targetUri, token, options);
+                }
+            }
+            catch (AdalException exception)
+            {
+                Debug.Write(exception);
+            }
+
+            Git.Trace.WriteLine($"failed to acquire token for '{targetUri}'.");
+            return null;
+        }
+
+        /// <summary>
+        /// Opens an interactive logon prompt to acquire acquire an authentication token from the
+        /// Microsoft Live authentication and identity service.
+        /// </summary>
+        /// <param name="targetUri">
+        /// The uniform resource indicator of the resource access tokens are being requested for.
+        /// </param>
         /// <param name="requestCompactToken">
         /// True if a compact access token is required; false if a standard token is acceptable.
         /// </param>
@@ -77,11 +112,11 @@ namespace Microsoft.Alm.Authentication
             try
             {
                 Token token;
-                if ((token = await this.VstsAuthority.InteractiveAcquireToken(targetUri, this.ClientId, this.Resource, new Uri(RedirectUrl), QueryParameters)) != null)
+                if ((token = await VstsAuthority.InteractiveAcquireToken(targetUri, ClientId, Resource, new Uri(RedirectUrl), QueryParameters)) != null)
                 {
                     Git.Trace.WriteLine($"token '{targetUri}' successfully acquired.");
 
-                    return await this.GeneratePersonalAccessToken(targetUri, token, requestCompactToken);
+                    return await GeneratePersonalAccessToken(targetUri, token, requestCompactToken);
                 }
             }
             catch (AdalException exception)

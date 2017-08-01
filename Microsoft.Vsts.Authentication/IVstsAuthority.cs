@@ -23,13 +23,14 @@
  * WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE."
 **/
 
+using System;
 using System.Threading.Tasks;
 
 namespace Microsoft.Alm.Authentication
 {
     internal interface IVstsAuthority: IAzureAuthority
     {
-        Task<Token> GeneratePersonalAccessToken(TargetUri targetUri, Token accessToken, VstsTokenScope tokenScope, bool requireCompactToken);
+        Task<Token> GeneratePersonalAccessToken(TargetUri targetUri, Token accessToken, VstsTokenScope tokenScope, bool requireCompactToken, TimeSpan? tokenDuration = null);
 
         Task<bool> ValidateCredentials(TargetUri targetUri, Credential credentials);
 

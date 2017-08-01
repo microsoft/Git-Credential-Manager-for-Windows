@@ -60,6 +60,7 @@
     <Compile Include="..\Microsoft.Alm.Authentication\GlobalSuppressions.cs">
       <Link>GlobalSuppressions.cs</Link>
     </Compile>
+    <Compile Include="PersonalAccessTokenOptions.cs" />
     <Compile Include="AzureAuthority.cs" />
     <Compile Include="BaseVstsAuthentication.cs" />
     <Compile Include="IAzureAuthority.cs" />
