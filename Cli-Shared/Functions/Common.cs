@@ -319,11 +319,15 @@ namespace Microsoft.Alm.Cli
 
             if (program.TryReadBoolean(operationArguments, null, Program.EnvironConfigNoLocalKey, out yesno))
             {
+                Git.Trace.WriteLine($"{Program.EnvironConfigNoLocalKey} = '{yesno}'.");
+
                 operationArguments.UseConfigLocal = yesno.Value;
             }
 
             if (program.TryReadBoolean(operationArguments, null, Program.EnvironConfigNoSystemKey, out yesno))
             {
+                Git.Trace.WriteLine($"{Program.EnvironConfigNoSystemKey} = '{yesno}'.");
+
                 operationArguments.UseConfigSystem = yesno.Value;
             }
 
@@ -333,6 +337,8 @@ namespace Microsoft.Alm.Cli
             // if a user-agent has been specified in the environment, set it globally
             if (program.TryReadString(operationArguments, null, Program.EnvironHttpUserAgent, out value))
             {
+                Git.Trace.WriteLine($"{Program.EnvironHttpUserAgent} = '{value}'.");
+
                 Global.UserAgent = value;
             }
 
@@ -369,6 +375,11 @@ namespace Microsoft.Alm.Cli
                 {
                     operationArguments.Authority = AuthorityType.GitHub;
                 }
+                else if (Program.ConfigKeyComparer.Equals(value, "Atlassian")
+                    || Program.ConfigKeyComparer.Equals(value, "Bitbucket"))
+                {
+                    operationArguments.Authority = AuthorityType.Bitbucket;
+                }
                 else
                 {
                     operationArguments.Authority = AuthorityType.Basic;
@@ -396,30 +407,40 @@ namespace Microsoft.Alm.Cli
             // look for credential validation config settings
             if (program.TryReadBoolean(operationArguments, Program.ConfigValidateKey, Program.EnvironValidateKey, out yesno))
             {
+                Git.Trace.WriteLine($"{Program.ConfigValidateKey} = '{yesno}'.");
+
                 operationArguments.ValidateCredentials = yesno.Value;
             }
 
             // look for write log config settings
             if (program.TryReadBoolean(operationArguments, Program.ConfigWritelogKey, Program.EnvironWritelogKey, out yesno))
             {
+                Git.Trace.WriteLine($"{Program.ConfigWritelogKey} = '{yesno}'.");
+
                 operationArguments.WriteLog = yesno.Value;
             }
 
             // look for modal prompt config settings
             if (program.TryReadBoolean(operationArguments, Program.ConfigUseModalPromptKey, Program.EnvironModalPromptKey, out yesno))
             {
+                Git.Trace.WriteLine($"{Program.ConfigUseModalPromptKey} = '{yesno}'.");
+
                 operationArguments.UseModalUi = yesno.Value;
             }
 
             // look for credential preservation config settings
             if (program.TryReadBoolean(operationArguments, Program.ConfigPreserveCredentialsKey, Program.EnvironPreserveCredentialsKey, out yesno))
             {
+                Git.Trace.WriteLine($"{Program.ConfigPreserveCredentialsKey} = '{yesno}'.");
+
                 operationArguments.PreserveCredentials = yesno.Value;
             }
 
             // look for http path usage config settings
             if (program.TryReadBoolean(operationArguments, Program.ConfigUseHttpPathKey, null, out yesno))
             {
+                Git.Trace.WriteLine($"{Program.ConfigUseHttpPathKey} = '{value}'.");
+
                 operationArguments.UseHttpPath = yesno.Value;
             }
 
@@ -449,6 +470,18 @@ namespace Microsoft.Alm.Cli
                 Git.Trace.WriteLine($"{Program.ConfigNamespaceKey} = '{value}'.");
 
                 operationArguments.CustomNamespace = value;
+            }
+
+            // look for custom token duration settings
+            if (program.TryReadString(operationArguments, Program.ConfigTokenDuration, Program.EnvironTokenDuration, out value))
+            {
+                Git.Trace.WriteLine($"{Program.ConfigTokenDuration} = '{value}'.");
+
+                int hours;
+                if (int.TryParse(value, out hours))
+                {
+                    operationArguments.TokenDuration = TimeSpan.FromHours(hours);
+                }
             }
         }
 
@@ -536,6 +569,12 @@ namespace Microsoft.Alm.Cli
                 case AuthorityType.AzureDirectory:
                     {
                         VstsAadAuthentication aadAuth = authentication as VstsAadAuthentication;
+                        PersonalAccessTokenOptions patOptions = new PersonalAccessTokenOptions()
+                        {
+                            RequireCompactToken = true,
+                            TokenDuration = operationArguments.TokenDuration,
+                            TokenScope = null,
+                        };
 
                         Task.Run(async () =>
                         {
@@ -546,11 +585,11 @@ namespace Microsoft.Alm.Cli
                                     && (!operationArguments.ValidateCredentials
                                         || await aadAuth.ValidateCredentials(operationArguments.TargetUri, credentials))))
                                 || (operationArguments.Interactivity != Interactivity.Always
-                                    && ((credentials = await aadAuth.NoninteractiveLogon(operationArguments.TargetUri, true)) != null)
+                                    && ((credentials = await aadAuth.NoninteractiveLogon(operationArguments.TargetUri, patOptions)) != null)
                                     && (!operationArguments.ValidateCredentials
                                         || await aadAuth.ValidateCredentials(operationArguments.TargetUri, credentials)))
                                 || (operationArguments.Interactivity != Interactivity.Never
-                                    && ((credentials = await aadAuth.InteractiveLogon(operationArguments.TargetUri, true)) != null)
+                                    && ((credentials = await aadAuth.InteractiveLogon(operationArguments.TargetUri, patOptions)) != null)
                                     && (!operationArguments.ValidateCredentials
                                         || await aadAuth.ValidateCredentials(operationArguments.TargetUri, credentials))))
                             {
@@ -569,6 +608,12 @@ namespace Microsoft.Alm.Cli
                 case AuthorityType.MicrosoftAccount:
                     {
                         VstsMsaAuthentication msaAuth = authentication as VstsMsaAuthentication;
+                        PersonalAccessTokenOptions patOptions = new PersonalAccessTokenOptions()
+                        {
+                            RequireCompactToken = true,
+                            TokenDuration = operationArguments.TokenDuration,
+                            TokenScope = null,
+                        };
 
                         Task.Run(async () =>
                         {
@@ -579,7 +624,7 @@ namespace Microsoft.Alm.Cli
                                     && (!operationArguments.ValidateCredentials
                                         || await msaAuth.ValidateCredentials(operationArguments.TargetUri, credentials))))
                                 || (operationArguments.Interactivity != Interactivity.Never
-                                    && ((credentials = await msaAuth.InteractiveLogon(operationArguments.TargetUri, true)) != null)
+                                    && ((credentials = await msaAuth.InteractiveLogon(operationArguments.TargetUri, patOptions)) != null)
                                     && (!operationArguments.ValidateCredentials
                                         || await msaAuth.ValidateCredentials(operationArguments.TargetUri, credentials))))
                             {

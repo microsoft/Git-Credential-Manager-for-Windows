@@ -50,7 +50,7 @@ namespace Microsoft.Alm.Authentication
         /// <param name="authorityHostUrl">Optional: sets a non-default authority host url.</param>
         public AzureAuthority(string authorityHostUrl = DefaultAuthorityHostUrl)
         {
-            if (String.IsNullOrEmpty(authorityHostUrl))
+            if (string.IsNullOrEmpty(authorityHostUrl))
                 throw new ArgumentNullException(nameof(authorityHostUrl));
             if (!Uri.IsWellFormedUriString(authorityHostUrl, UriKind.Absolute))
                 throw new ArgumentException("Uri is not Absolute.", nameof(authorityHostUrl));
@@ -85,9 +85,9 @@ namespace Microsoft.Alm.Authentication
         {
             if (ReferenceEquals(targetUri, null))
                 throw new ArgumentNullException(nameof(targetUri));
-            if (String.IsNullOrWhiteSpace(clientId))
+            if (string.IsNullOrWhiteSpace(clientId))
                 throw new ArgumentNullException(nameof(clientId));
-            if (String.IsNullOrWhiteSpace(resource))
+            if (string.IsNullOrWhiteSpace(resource))
                 throw new ArgumentNullException(nameof(resource));
             if (ReferenceEquals(redirectUri, null))
                 throw new ArgumentNullException(nameof(redirectUri));
@@ -95,7 +95,7 @@ namespace Microsoft.Alm.Authentication
                 throw new ArgumentException(nameof(redirectUri));
 
             Token token = null;
-            queryParameters = queryParameters ?? String.Empty;
+            queryParameters = queryParameters ?? string.Empty;
 
             try
             {
@@ -138,9 +138,9 @@ namespace Microsoft.Alm.Authentication
         {
             if (ReferenceEquals(targetUri, null))
                 throw new ArgumentNullException(nameof(targetUri));
-            if (String.IsNullOrWhiteSpace(clientId))
+            if (string.IsNullOrWhiteSpace(clientId))
                 throw new ArgumentNullException(nameof(clientId));
-            if (String.IsNullOrWhiteSpace(resource))
+            if (string.IsNullOrWhiteSpace(resource))
                 throw new ArgumentNullException(nameof(resource));
             if (ReferenceEquals(redirectUri, null))
                 throw new ArgumentNullException(nameof(redirectUri));
@@ -174,7 +174,7 @@ namespace Microsoft.Alm.Authentication
 
         public static string GetAuthorityUrl(Guid tenantId)
         {
-            return String.Format("{0}/{1:D}", AzureAuthority.AuthorityHostUrlBase, tenantId);
+            return string.Format("{0}/{1:D}", AzureAuthority.AuthorityHostUrlBase, tenantId);
         }
     }
 }

@@ -22,13 +22,15 @@ For the complete list of settings the GCM knows how to check for an apply, see t
 
 Defines the type of authentication to be used.
 
-Supports Auto, Basic, AAD, MSA, GitHub, and Integrated.
+Supports **Auto**, **Basic**, **AAD**, **MSA**, **GitHub**, **Integrated**, and **NTLM**.
 
-Use AAD or MSA if the host is visualstudio.com Azure Domain or Live Account authentication, relatively.
+Use **AAD** or **MSA** if the host is visualstudio.com Azure Domain or Live Account authentication, relatively.
 
-Use GitHub if the host is github.com.
+Use **GitHub** if the host is github.com.
 
-Use Integrated if the host is a Team Foundation, or other NTLM authentication based, server.
+Use **BitBucket** or **Atlassian** if the host is bitbucket.org.
+
+Use **Integrated** or **NTLM** if the host is a Team Foundation, or other NTLM authentication based, server.
 
 Defaults to _Auto_.
 
@@ -48,7 +50,7 @@ The value should the URL of the proxy server.
 
  Supports Auto, Always, or Never. Defaults to Auto.
 
-  `git config --global credential.microsoft.visualstudio.com.interactive never`
+    git config --global credential.microsoft.visualstudio.com.interactive never
 
 ### modalPrompt
 
@@ -74,6 +76,16 @@ Defaults to _false_.
 
     git config --global credential.visualstudio.com.preserve true
 
+### tokenDuration
+
+Sets a duration, in hours, limit for the validity of Personal Access Tokens requested from Visual Studio Team Services [VSTS].
+
+If the value is greater than the maximum duration set for the account, the account value supercedes. The value cannot be less than a one hour (1).
+
+Defaults to the account token duration. Honored by _AAD_ and _MSA_ authorities.
+
+    git config --global credential.visualstudio.com.tokenDuration 24
+
 ### useHttpPath
 
 Causes the path portion of the target URI to considered meaningful.
@@ -96,6 +108,8 @@ Defaults to _true_. Ignored by _Basic_ authority.
 
 Enables trace logging of all activities. Logs are written to the local .git/ folder at the root of the repository.
 
+__Note:__ This setting will not override the **GCM_TRACE** environment variable.
+
 Defaults to _false_.
 
     git config --global credential.writelog true
@@ -107,6 +121,7 @@ Defaults to _false_.
     authority = AAD
     interactive = never
     preserve = true
+    tokenDuration = 12
     validate = false
 [credential "visualstudio.com"]
     authority = MSA

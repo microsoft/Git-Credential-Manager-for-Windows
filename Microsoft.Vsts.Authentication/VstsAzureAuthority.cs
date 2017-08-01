@@ -53,7 +53,7 @@ namespace Microsoft.Alm.Authentication
         /// <param name="tokenScope"></param>
         /// <param name="requireCompactToken"></param>
         /// <returns></returns>
-        public async Task<Token> GeneratePersonalAccessToken(TargetUri targetUri, Token accessToken, VstsTokenScope tokenScope, bool requireCompactToken)
+        public async Task<Token> GeneratePersonalAccessToken(TargetUri targetUri, Token accessToken, VstsTokenScope tokenScope, bool requireCompactToken, TimeSpan? tokenDuration = null)
         {
             BaseSecureStore.ValidateTargetUri(targetUri);
             BaseSecureStore.ValidateToken(accessToken);
@@ -68,14 +68,14 @@ namespace Microsoft.Alm.Authentication
                     {
                         Uri requestUri = await CreatePersonalAccessTokenRequestUri(httpClient, targetUri, requireCompactToken);
 
-                        using (StringContent content = GetAccessTokenRequestBody(targetUri, accessToken, tokenScope))
+                        using (StringContent content = GetAccessTokenRequestBody(targetUri, accessToken, tokenScope, tokenDuration))
                         using (HttpResponseMessage response = await httpClient.PostAsync(requestUri, content))
                         {
                             if (response.IsSuccessStatusCode)
                             {
                                 string responseText = await response.Content.ReadAsStringAsync();
 
-                                if (!String.IsNullOrWhiteSpace(responseText))
+                                if (!string.IsNullOrWhiteSpace(responseText))
                                 {
                                     // find the 'token : <value>' portion of the result content, if any
                                     Match tokenMatch = null;
@@ -245,7 +245,7 @@ namespace Microsoft.Alm.Authentication
             const string FederatedTokenHeader = "Cookie";
 
             Debug.Assert(targetUri != null, $"The `{nameof(targetUri)}` parameter is null.");
-            Debug.Assert(accessToken != null && !String.IsNullOrWhiteSpace(accessToken.Value), $"The `{nameof(accessToken)}' is null or invalid.");
+            Debug.Assert(accessToken != null && !string.IsNullOrWhiteSpace(accessToken.Value), $"The `{nameof(accessToken)}' is null or invalid.");
 
             HttpClient httpClient = CreateHttpClient(targetUri);
 
@@ -338,7 +338,7 @@ namespace Microsoft.Alm.Authentication
             Debug.Assert(targetUri != null && targetUri.IsAbsoluteUri, "The targetUri parameter is null or invalid");
 
             // create a url to the connection data end-point, it's deployment level and "always on".
-            string validationUrl = String.Format(System.Globalization.CultureInfo.InvariantCulture, VstsValidationUrlFormat, targetUri.Scheme, targetUri.DnsSafeHost);
+            string validationUrl = string.Format(System.Globalization.CultureInfo.InvariantCulture, VstsValidationUrlFormat, targetUri.Scheme, targetUri.DnsSafeHost);
 
             // start building the request, only supports GET
             HttpWebRequest request = WebRequest.CreateHttp(validationUrl);
@@ -356,7 +356,7 @@ namespace Microsoft.Alm.Authentication
             Debug.Assert(client != null, $"The `{nameof(client)}` parameter is null.");
             Debug.Assert(targetUri != null && targetUri.IsAbsoluteUri, $"The `{nameof(targetUri)}` parameter is null or invalid");
 
-            string locationServiceUrl = String.Format(System.Globalization.CultureInfo.InvariantCulture, LocationServiceUrlFormat, targetUri.Host);
+            string locationServiceUrl = string.Format(System.Globalization.CultureInfo.InvariantCulture, LocationServiceUrlFormat, targetUri.Host);
             Uri idenitityServiceUri = null;
 
             using (HttpResponseMessage response = await client.GetAsync(locationServiceUrl))
@@ -380,9 +380,10 @@ namespace Microsoft.Alm.Authentication
             return idenitityServiceUri;
         }
 
-        private static StringContent GetAccessTokenRequestBody(TargetUri targetUri, Token accessToken, VstsTokenScope tokenScope)
+        private static StringContent GetAccessTokenRequestBody(TargetUri targetUri, Token accessToken, VstsTokenScope tokenScope, TimeSpan? duration = null)
         {
-            const string ContentJsonFormat = "{{ \"scope\" : \"{0}\", \"targetAccounts\" : [\"{1}\"], \"displayName\" : \"Git: {2} on {3}\" }}";
+            const string ContentBasicJsonFormat = "{{ \"scope\" : \"{0}\", \"targetAccounts\" : [\"{1}\"], \"displayName\" : \"Git: {2} on {3}\" }}";
+            const string ContentTimedJsonFormat = "{{ \"scope\" : \"{0}\", \"targetAccounts\" : [\"{1}\"], \"displayName\" : \"Git: {2} on {3}\", \"validTo\": \"{4:u}\" }}";
             const string HttpJsonContentType = "application/json";
 
             Debug.Assert(accessToken != null && (accessToken.Type == TokenType.Access || accessToken.Type == TokenType.Federated), "The accessToken parameter is null or invalid");
@@ -390,7 +391,9 @@ namespace Microsoft.Alm.Authentication
 
             Git.Trace.WriteLine($"creating access token scoped to '{tokenScope}' for '{accessToken.TargetIdentity}'");
 
-            string jsonContent = String.Format(ContentJsonFormat, tokenScope, accessToken.TargetIdentity, targetUri, Environment.MachineName);
+            string jsonContent = (duration.HasValue && duration.Value > TimeSpan.FromHours(1))
+                ? string.Format(ContentTimedJsonFormat, tokenScope, accessToken.TargetIdentity, targetUri, Environment.MachineName, DateTime.UtcNow + duration.Value)
+                : string.Format(ContentBasicJsonFormat, tokenScope, accessToken.TargetIdentity, targetUri, Environment.MachineName);
             StringContent content = new StringContent(jsonContent, Encoding.UTF8, HttpJsonContentType);
 
             return content;
@@ -440,7 +443,7 @@ namespace Microsoft.Alm.Authentication
 
             Debug.Assert(credentials != null, "The credentials parameter is null or invalid");
 
-            string credPair = String.Format(UsernamePasswordFormat, credentials.Username, credentials.Password);
+            string credPair = string.Format(UsernamePasswordFormat, credentials.Username, credentials.Password);
             byte[] credBytes = Encoding.ASCII.GetBytes(credPair);
             string base64enc = Convert.ToBase64String(credBytes);
 

@@ -131,6 +131,12 @@ namespace Microsoft.Alm.Cli
             get => throw new NotImplementedException();
         }
 
+        public virtual TimeSpan? TokenDuration
+        {
+            get => throw new NotImplementedException();
+            set => throw new NotImplementedException();
+        }
+
         public virtual bool UseHttpPath
         {
             get => throw new NotImplementedException();
@@ -181,7 +187,7 @@ namespace Microsoft.Alm.Cli
         internal virtual void CreateTargetUri()
             => throw new NotImplementedException();
 
-        internal sealed class Impl: OperationArguments
+        internal sealed class Impl : OperationArguments
         {
             private static readonly char[] SeperatorCharacters = { '/', '\\' };
 
@@ -314,6 +320,7 @@ namespace Microsoft.Alm.Cli
             private string _queryPath;
             private string _queryProtocol;
             private TargetUri _targetUri;
+            private TimeSpan? _tokenDuration;
             private bool _useHttpPath;
             private bool _useLocalConfig;
             private string _username;
@@ -455,6 +462,17 @@ namespace Microsoft.Alm.Cli
                 }
             }
 
+            public sealed override TargetUri TargetUri
+            {
+                get { return _targetUri; }
+            }
+
+            public sealed override TimeSpan? TokenDuration
+            {
+                get { return _tokenDuration; }
+                set { _tokenDuration = value; }
+            }
+
             public sealed override bool UseConfigLocal
             {
                 get { return _useLocalConfig; }
@@ -465,11 +483,6 @@ namespace Microsoft.Alm.Cli
             {
                 get { return _useSystemConfig; }
                 set { _useSystemConfig = value; }
-            }
-
-            public sealed override TargetUri TargetUri
-            {
-                get { return _targetUri; }
             }
 
             public sealed override bool UseHttpPath

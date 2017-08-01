@@ -40,6 +40,24 @@ namespace Microsoft.Alm.Authentication
         /// <param name="targetUri">
         /// The unique identifier for the resource for which access is to be acquired.
         /// </param>
+        /// <param name="options">
+        /// </param>
+        /// <returns>
+        /// A <see cref="Credential"/> for packing into a basic authentication header; otherwise <see langword="null"/>.
+        /// </returns>
+        Task<Credential> InteractiveLogon(TargetUri targetUri, PersonalAccessTokenOptions options);
+
+        /// <summary>
+        /// <para>
+        /// Creates an interactive logon session, using ADAL secure browser GUI, which enables users
+        /// to authenticate with the Azure tenant and acquire the necessary access tokens to exchange
+        /// for a VSTS personal access token.
+        /// </para>
+        /// <para>Tokens acquired are stored in the secure secret stores provided during initialization.</para>
+        /// </summary>
+        /// <param name="targetUri">
+        /// The unique identifier for the resource for which access is to be acquired.
+        /// </param>
         /// <param name="requestCompactToken">
         /// <para>
         /// Requests a compact format personal access token; otherwise requests a standard personal
@@ -54,6 +72,24 @@ namespace Microsoft.Alm.Authentication
         /// A <see cref="Credential"/> for packing into a basic authentication header; otherwise <see langword="null"/>.
         /// </returns>
         Task<Credential> InteractiveLogon(TargetUri targetUri, bool requestCompactToken);
+
+        /// <summary>
+        /// <para>
+        /// Uses Active Directory Federation Services to authenticate with the Azure tenant
+        /// non-interactively and acquire the necessary access tokens to exchange for a VSTS personal
+        /// access token.
+        /// </para>
+        /// <para>Tokens acquired are stored in the secure secret stores provided during initialization.</para>
+        /// </summary>
+        /// <param name="targetUri">
+        /// The unique identifier for the resource for which access is to be acquired.
+        /// </param>
+        /// <param name="options">
+        /// </param>
+        /// <returns>
+        /// A <see cref="Credential"/> for packing into a basic authentication header; otherwise <see langword="null"/>.
+        /// </returns>
+        Task<Credential> NoninteractiveLogon(TargetUri targetUri, PersonalAccessTokenOptions options);
 
         /// <summary>
         /// <para>

@@ -58,13 +58,13 @@ namespace Microsoft.Alm.Authentication
         {
             if (tenantId == Guid.Empty)
             {
-                this.VstsAuthority = new VstsAzureAuthority(AzureAuthority.DefaultAuthorityHostUrl);
+                VstsAuthority = new VstsAzureAuthority(AzureAuthority.DefaultAuthorityHostUrl);
             }
             else
             {
                 // create an authority host URL in the format of https://login.microsoft.com/12345678-9ABC-DEF0-1234-56789ABCDEF0
                 string authorityHost = AzureAuthority.GetAuthorityUrl(tenantId);
-                this.VstsAuthority = new VstsAzureAuthority(authorityHost);
+                VstsAuthority = new VstsAzureAuthority(authorityHost);
             }
         }
 
@@ -104,18 +104,18 @@ namespace Microsoft.Alm.Authentication
         /// <returns>
         /// A <see cref="Credential"/> for packing into a basic authentication header; otherwise <see langword="null"/>.
         /// </returns>
-        public async Task<Credential> InteractiveLogon(TargetUri targetUri, bool requestCompactToken)
+        public async Task<Credential> InteractiveLogon(TargetUri targetUri, PersonalAccessTokenOptions options)
         {
             BaseSecureStore.ValidateTargetUri(targetUri);
 
             try
             {
                 Token token;
-                if ((token = await this.VstsAuthority.InteractiveAcquireToken(targetUri, this.ClientId, this.Resource, new Uri(RedirectUrl), null)) != null)
+                if ((token = await VstsAuthority.InteractiveAcquireToken(targetUri, ClientId, Resource, new Uri(RedirectUrl), null)) != null)
                 {
                     Git.Trace.WriteLine($"token acquisition for '{targetUri}' succeeded.");
 
-                    return await this.GeneratePersonalAccessToken(targetUri, token, requestCompactToken);
+                    return await GeneratePersonalAccessToken(targetUri, token, options);
                 }
             }
             catch (AdalException)
@@ -124,6 +124,91 @@ namespace Microsoft.Alm.Authentication
             }
 
             Git.Trace.WriteLine($"interactive logon for '{targetUri}' failed");
+            return null;
+        }
+
+        /// <summary>
+        /// <para>
+        /// Creates an interactive logon session, using ADAL secure browser GUI, which enables users
+        /// to authenticate with the Azure tenant and acquire the necessary access tokens to exchange
+        /// for a VSTS personal access token.
+        /// </para>
+        /// <para>Tokens acquired are stored in the secure secret stores provided during initialization.</para>
+        /// </summary>
+        /// <param name="targetUri">
+        /// The unique identifier for the resource for which access is to be acquired.
+        /// </param>
+        /// <param name="requestCompactToken">
+        /// <para>
+        /// Requests a compact format personal access token; otherwise requests a standard personal
+        /// access token.
+        /// </para>
+        /// <para>
+        /// Compact tokens are necessary for clients which have restrictions on the size of the basic
+        /// authentication header which they can create (example: Git).
+        /// </para>
+        /// </param>
+        /// <returns>
+        /// A <see cref="Credential"/> for packing into a basic authentication header; otherwise <see langword="null"/>.
+        /// </returns>
+        public async Task<Credential> InteractiveLogon(TargetUri targetUri, bool requestCompactToken)
+        {
+            BaseSecureStore.ValidateTargetUri(targetUri);
+
+            try
+            {
+                Token token;
+                if ((token = await VstsAuthority.InteractiveAcquireToken(targetUri, ClientId, Resource, new Uri(RedirectUrl), null)) != null)
+                {
+                    Git.Trace.WriteLine($"token acquisition for '{targetUri}' succeeded.");
+
+                    return await GeneratePersonalAccessToken(targetUri, token, requestCompactToken);
+                }
+            }
+            catch (AdalException)
+            {
+                Git.Trace.WriteLine($"token acquisition for '{targetUri}' failed.");
+            }
+
+            Git.Trace.WriteLine($"interactive logon for '{targetUri}' failed");
+            return null;
+        }
+
+        /// <summary>
+        /// <para>
+        /// Uses Active Directory Federation Services to authenticate with the Azure tenant
+        /// non-interactively and acquire the necessary access tokens to exchange for a VSTS personal
+        /// access token.
+        /// </para>
+        /// <para>Tokens acquired are stored in the secure secret stores provided during initialization.</para>
+        /// </summary>
+        /// <param name="targetUri">
+        /// The unique identifier for the resource for which access is to be acquired.
+        /// </param>
+        /// <param name="options"></param>
+        /// <returns>
+        /// A <see cref="Credential"/> for packing into a basic authentication header; otherwise <see langword="null"/>.
+        /// </returns>
+        public async Task<Credential> NoninteractiveLogon(TargetUri targetUri, PersonalAccessTokenOptions options)
+        {
+            BaseSecureStore.ValidateTargetUri(targetUri);
+
+            try
+            {
+                Token token;
+                if ((token = await VstsAuthority.NoninteractiveAcquireToken(targetUri, ClientId, Resource, new Uri(RedirectUrl))) != null)
+                {
+                    Git.Trace.WriteLine($"token acquisition for '{targetUri}' succeeded");
+
+                    return await GeneratePersonalAccessToken(targetUri, token, options);
+                }
+            }
+            catch (AdalException)
+            {
+                Git.Trace.WriteLine($"failed to acquire for '{targetUri}' token from VstsAuthority.");
+            }
+
+            Git.Trace.WriteLine($"non-interactive logon for '{targetUri}' failed");
             return null;
         }
 
@@ -158,11 +243,11 @@ namespace Microsoft.Alm.Authentication
             try
             {
                 Token token;
-                if ((token = await this.VstsAuthority.NoninteractiveAcquireToken(targetUri, this.ClientId, this.Resource, new Uri(RedirectUrl))) != null)
+                if ((token = await VstsAuthority.NoninteractiveAcquireToken(targetUri, ClientId, Resource, new Uri(RedirectUrl))) != null)
                 {
                     Git.Trace.WriteLine($"token acquisition for '{targetUri}' succeeded");
 
-                    return await this.GeneratePersonalAccessToken(targetUri, token, requestCompactToken);
+                    return await GeneratePersonalAccessToken(targetUri, token, requestCompactToken);
                 }
             }
             catch (AdalException)
