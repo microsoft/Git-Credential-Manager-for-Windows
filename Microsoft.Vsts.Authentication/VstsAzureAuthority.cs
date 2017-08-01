@@ -208,7 +208,7 @@ namespace Microsoft.Alm.Authentication
 
             // personal access tokens are effectively credentials, treat them as such
             if (token.Type == TokenType.Personal)
-                return await this.ValidateCredentials(targetUri, (Credential)token);
+                return await ValidateCredentials(targetUri, (Credential)token);
 
             try
             {

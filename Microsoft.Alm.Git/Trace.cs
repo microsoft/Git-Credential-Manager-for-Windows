@@ -139,7 +139,7 @@ namespace Microsoft.Alm.Git
             const int SourceColumnMaxWidth = 23;
 
             // source column format is file:line
-            string source = String.Format(System.Globalization.CultureInfo.InvariantCulture, "{0}:{1}", filePath, lineNumber);
+            string source = string.Format(System.Globalization.CultureInfo.InvariantCulture, "{0}:{1}", filePath, lineNumber);
 
             if (source.Length > SourceColumnMaxWidth)
             {
@@ -163,7 +163,7 @@ namespace Microsoft.Alm.Git
             }
 
             // Git's trace format is "{timestamp,-15} {source,-23} trace: {details}"
-            string text = String.Format(System.Globalization.CultureInfo.InvariantCulture, "{0:HH:mm:ss.ffffff} {1,-23} trace: [{2}] {3}", DateTime.Now, source, memberName, message);
+            string text = string.Format(System.Globalization.CultureInfo.InvariantCulture, "{0:HH:mm:ss.ffffff} {1,-23} trace: [{2}] {3}", DateTime.Now, source, memberName, message);
 
             return text;
         }

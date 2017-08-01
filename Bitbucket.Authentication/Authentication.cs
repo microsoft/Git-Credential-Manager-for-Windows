@@ -235,7 +235,7 @@ namespace Atlassian.Bitbucket.Authentication
             {
                 var realUsername = GetRealUsername(credentials, username);
                 Credential tempCredentials = new Credential(realUsername, credentials.Password);
-                SetCredentials(targetUri.GetPerUserTargetUri(username), tempCredentials, null);
+                SetCredentials(targetUri.GetPerUserTargetUri(realUsername), tempCredentials, null);
             }
 
             PersonalAccessTokenStore.WriteCredentials(targetUri, credentials);
@@ -254,7 +254,7 @@ namespace Atlassian.Bitbucket.Authentication
                 return username;
             }
 
-            // otherwise 
+            // otherwise
             return remoteUsername;
         }
 
@@ -315,7 +315,7 @@ namespace Atlassian.Bitbucket.Authentication
             {
                 AuthenticationResult result;
 
-                if (result = await BitbucketAuthority.AcquireToken(targetUri, username, password, AuthenticationResultType.None, this.TokenScope))
+                if (result = await BitbucketAuthority.AcquireToken(targetUri, username, password, AuthenticationResultType.None, TokenScope))
                 {
                     Trace.WriteLine("token acquisition succeeded");
 
@@ -336,7 +336,7 @@ namespace Atlassian.Bitbucket.Authentication
                     // the user to run the OAuth dance.
                     if (AcquireAuthenticationOAuthCallback("", targetUri, result, username))
                     {
-                        if (result = await BitbucketAuthority.AcquireToken(targetUri, username, password, AuthenticationResultType.TwoFactor, this.TokenScope))
+                        if (result = await BitbucketAuthority.AcquireToken(targetUri, username, password, AuthenticationResultType.TwoFactor, TokenScope))
                         {
                             Trace.WriteLine("token acquisition succeeded");
 

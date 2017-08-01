@@ -51,13 +51,13 @@ namespace GitHub.Authentication
         {
             return (obj is AuthenticationResult
                     || obj is GitHubAuthenticationResultType)
-                && this.Equals((AuthenticationResult)obj);
+                && Equals((AuthenticationResult)obj);
         }
 
         public bool Equals(AuthenticationResult other)
         {
-            return this.Type == other.Type
-                && this.Token == other.Token;
+            return Type == other.Type
+                && Token == other.Token;
         }
 
         public static AuthenticationResult FromResultType(GitHubAuthenticationResultType type)

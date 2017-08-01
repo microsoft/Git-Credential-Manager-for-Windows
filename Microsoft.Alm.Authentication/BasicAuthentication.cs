@@ -162,7 +162,7 @@ namespace Microsoft.Alm.Authentication
         {
             BaseSecureStore.ValidateTargetUri(targetUri);
 
-            this.CredentialStore.DeleteCredentials(targetUri);
+            CredentialStore.DeleteCredentials(targetUri);
         }
 
         /// <summary>
@@ -179,7 +179,7 @@ namespace Microsoft.Alm.Authentication
         {
             BaseSecureStore.ValidateTargetUri(targetUri);
 
-            return this.CredentialStore.ReadCredentials(targetUri);
+            return CredentialStore.ReadCredentials(targetUri);
         }
 
         /// <summary>
@@ -195,7 +195,7 @@ namespace Microsoft.Alm.Authentication
             BaseSecureStore.ValidateTargetUri(targetUri);
             BaseSecureStore.ValidateCredential(credentials);
 
-            this.CredentialStore.WriteCredentials(targetUri, credentials);
+            CredentialStore.WriteCredentials(targetUri, credentials);
         }
     }
 }

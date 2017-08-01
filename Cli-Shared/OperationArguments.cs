@@ -276,7 +276,7 @@ namespace Microsoft.Alm.Cli
                         }
                     }
 
-                    this.CreateTargetUri();
+                    CreateTargetUri();
                 }
             }
 
@@ -530,7 +530,7 @@ namespace Microsoft.Alm.Cli
 
                     Git.Trace.WriteLine("proxy cleared.");
                 }
-                this.ProxyUri = tmp;
+                ProxyUri = tmp;
             }
 
             public sealed override string ToString()

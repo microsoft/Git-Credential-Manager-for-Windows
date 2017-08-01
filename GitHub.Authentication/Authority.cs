@@ -86,13 +86,13 @@ namespace GitHub.Authentication
                 httpClient.DefaultRequestHeaders.Add("User-Agent", Global.UserAgent);
                 httpClient.DefaultRequestHeaders.Add("Accept", GitHubApiAcceptsHeaderValue);
 
-                string basicAuthValue = String.Format("{0}:{1}", username, password);
+                string basicAuthValue = string.Format("{0}:{1}", username, password);
                 byte[] authBytes = Encoding.UTF8.GetBytes(basicAuthValue);
                 basicAuthValue = Convert.ToBase64String(authBytes);
 
                 httpClient.DefaultRequestHeaders.Add("Authorization", "Basic " + basicAuthValue);
 
-                if (!String.IsNullOrWhiteSpace(authenticationCode))
+                if (!string.IsNullOrWhiteSpace(authenticationCode))
                 {
                     httpClient.DefaultRequestHeaders.Add(GitHubOptHeader, authenticationCode);
                 }
@@ -119,7 +119,7 @@ namespace GitHub.Authentication
 
                 scopesBuilder.Append(']');
 
-                string jsonContent = String.Format(JsonContentFormat, scopesBuilder, targetUri, Environment.MachineName, DateTime.Now);
+                string jsonContent = string.Format(JsonContentFormat, scopesBuilder, targetUri, Environment.MachineName, DateTime.Now);
 
                 using (StringContent content = new StringContent(jsonContent, Encoding.UTF8, HttpJsonContentType))
                 using (HttpResponseMessage response = await httpClient.PostAsync(_authorityUrl, content))
@@ -155,10 +155,10 @@ namespace GitHub.Authentication
 
                         case HttpStatusCode.Unauthorized:
                             {
-                                if (String.IsNullOrWhiteSpace(authenticationCode)
-                                    && response.Headers.Any(x => String.Equals(GitHubOptHeader, x.Key, StringComparison.OrdinalIgnoreCase)))
+                                if (string.IsNullOrWhiteSpace(authenticationCode)
+                                    && response.Headers.Any(x => string.Equals(GitHubOptHeader, x.Key, StringComparison.OrdinalIgnoreCase)))
                                 {
-                                    var mfakvp = response.Headers.First(x => String.Equals(GitHubOptHeader, x.Key, StringComparison.OrdinalIgnoreCase) && x.Value != null && x.Value.Count() > 0);
+                                    var mfakvp = response.Headers.First(x => string.Equals(GitHubOptHeader, x.Key, StringComparison.OrdinalIgnoreCase) && x.Value != null && x.Value.Count() > 0);
 
                                     if (mfakvp.Value.First().Contains("app"))
                                     {
@@ -191,7 +191,7 @@ namespace GitHub.Authentication
             BaseSecureStore.ValidateTargetUri(targetUri);
             BaseSecureStore.ValidateCredential(credentials);
 
-            string authString = String.Format("{0}:{1}", credentials.Username, credentials.Password);
+            string authString = string.Format("{0}:{1}", credentials.Username, credentials.Password);
             byte[] authBytes = Encoding.UTF8.GetBytes(authString);
             string authEncode = Convert.ToBase64String(authBytes);
 

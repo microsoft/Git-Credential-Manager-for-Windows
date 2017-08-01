@@ -44,7 +44,7 @@ namespace Microsoft.Alm.Git
         /// <returns><see langword="True"/> if succeeds; <see langword="false"/> otherwise.</returns>
         static public bool FindApp(string name, out string path)
         {
-            if (!String.IsNullOrWhiteSpace(name))
+            if (!string.IsNullOrWhiteSpace(name))
             {
                 string pathext = Environment.GetEnvironmentVariable("PATHEXT");
                 string envpath = Environment.GetEnvironmentVariable("PATH");
@@ -54,15 +54,15 @@ namespace Microsoft.Alm.Git
 
                 for (int i = 0; i < paths.Length; i++)
                 {
-                    if (String.IsNullOrWhiteSpace(paths[i]))
+                    if (string.IsNullOrWhiteSpace(paths[i]))
                         continue;
 
                     for (int j = 0; j < exts.Length; j++)
                     {
-                        if (String.IsNullOrWhiteSpace(exts[j]))
+                        if (string.IsNullOrWhiteSpace(exts[j]))
                             continue;
 
-                        string value = String.Format("{0}\\{1}{2}", paths[i], name, exts[j]);
+                        string value = string.Format("{0}\\{1}{2}", paths[i], name, exts[j]);
                         if (File.Exists(value))
                         {
                             value = value.Replace("\\\\", "\\");
@@ -100,24 +100,24 @@ namespace Microsoft.Alm.Git
 
             installations = null;
 
-            var programFiles32Path = String.Empty;
-            var programFiles64Path = String.Empty;
-            var appDataRoamingPath = String.Empty;
-            var appDataLocalPath = String.Empty;
-            var programDataPath = String.Empty;
-            var reg32HklmPath = String.Empty;
-            var reg64HklmPath = String.Empty;
-            var reg32HkcuPath = String.Empty;
-            var reg64HkcuPath = String.Empty;
-            var shellPathValue = String.Empty;
+            var programFiles32Path = string.Empty;
+            var programFiles64Path = string.Empty;
+            var appDataRoamingPath = string.Empty;
+            var appDataLocalPath = string.Empty;
+            var programDataPath = string.Empty;
+            var reg32HklmPath = string.Empty;
+            var reg64HklmPath = string.Empty;
+            var reg32HkcuPath = string.Empty;
+            var reg64HkcuPath = string.Empty;
+            var shellPathValue = string.Empty;
 
             using (var reg32HklmKey = RegistryKey.OpenBaseKey(RegistryHive.LocalMachine, RegistryView.Registry32))
             using (var reg32HkcuKey = RegistryKey.OpenBaseKey(RegistryHive.CurrentUser, RegistryView.Registry32))
             using (var reg32HklmSubKey = reg32HklmKey?.OpenSubKey(GitSubkeyName))
             using (var reg32HkcuSubKey = reg32HkcuKey?.OpenSubKey(GitSubkeyName))
             {
-                reg32HklmPath = reg32HklmSubKey?.GetValue(GitValueName, reg32HklmPath) as String;
-                reg32HkcuPath = reg32HkcuSubKey?.GetValue(GitValueName, reg32HkcuPath) as String;
+                reg32HklmPath = reg32HklmSubKey?.GetValue(GitValueName, reg32HklmPath) as string;
+                reg32HkcuPath = reg32HkcuSubKey?.GetValue(GitValueName, reg32HkcuPath) as string;
             }
 
             if ((programFiles32Path = Environment.GetFolderPath(Environment.SpecialFolder.ProgramFilesX86)) != null)
@@ -132,8 +132,8 @@ namespace Microsoft.Alm.Git
                 using (var reg64HklmSubKey = reg64HklmKey?.OpenSubKey(GitSubkeyName))
                 using (var reg64HkcuSubKey = reg64HkcuKey?.OpenSubKey(GitSubkeyName))
                 {
-                    reg64HklmPath = reg64HklmSubKey?.GetValue(GitValueName, reg64HklmPath) as String;
-                    reg64HkcuPath = reg64HkcuSubKey?.GetValue(GitValueName, reg64HkcuPath) as String;
+                    reg64HklmPath = reg64HklmSubKey?.GetValue(GitValueName, reg64HklmPath) as string;
+                    reg64HkcuPath = reg64HkcuSubKey?.GetValue(GitValueName, reg64HkcuPath) as string;
                 }
 
                 if ((programFiles64Path = Environment.GetFolderPath(Environment.SpecialFolder.ProgramFiles)) != null)
@@ -172,46 +172,46 @@ namespace Microsoft.Alm.Git
                 candidates.Add(new GitInstallation(shellPathValue, KnownGitDistribution.GitForWindows32v1));
             }
 
-            if (!String.IsNullOrEmpty(reg64HklmPath))
+            if (!string.IsNullOrEmpty(reg64HklmPath))
             {
                 candidates.Add(new GitInstallation(reg64HklmPath, KnownGitDistribution.GitForWindows64v2));
             }
-            if (!String.IsNullOrEmpty(programFiles32Path))
+            if (!string.IsNullOrEmpty(programFiles32Path))
             {
                 candidates.Add(new GitInstallation(programFiles64Path, KnownGitDistribution.GitForWindows64v2));
             }
-            if (!String.IsNullOrEmpty(reg64HkcuPath))
+            if (!string.IsNullOrEmpty(reg64HkcuPath))
             {
                 candidates.Add(new GitInstallation(reg64HkcuPath, KnownGitDistribution.GitForWindows64v2));
             }
-            if (!String.IsNullOrEmpty(reg32HklmPath))
+            if (!string.IsNullOrEmpty(reg32HklmPath))
             {
                 candidates.Add(new GitInstallation(reg32HklmPath, KnownGitDistribution.GitForWindows32v2));
                 candidates.Add(new GitInstallation(reg32HklmPath, KnownGitDistribution.GitForWindows32v1));
             }
-            if (!String.IsNullOrEmpty(programFiles32Path))
+            if (!string.IsNullOrEmpty(programFiles32Path))
             {
                 candidates.Add(new GitInstallation(programFiles32Path, KnownGitDistribution.GitForWindows32v2));
                 candidates.Add(new GitInstallation(programFiles32Path, KnownGitDistribution.GitForWindows32v1));
             }
-            if (!String.IsNullOrEmpty(reg32HkcuPath))
+            if (!string.IsNullOrEmpty(reg32HkcuPath))
             {
                 candidates.Add(new GitInstallation(reg32HkcuPath, KnownGitDistribution.GitForWindows32v2));
                 candidates.Add(new GitInstallation(reg32HkcuPath, KnownGitDistribution.GitForWindows32v1));
             }
-            if (!String.IsNullOrEmpty(programDataPath))
+            if (!string.IsNullOrEmpty(programDataPath))
             {
                 candidates.Add(new GitInstallation(programDataPath, KnownGitDistribution.GitForWindows64v2));
                 candidates.Add(new GitInstallation(programDataPath, KnownGitDistribution.GitForWindows32v2));
                 candidates.Add(new GitInstallation(programDataPath, KnownGitDistribution.GitForWindows32v1));
             }
-            if (!String.IsNullOrEmpty(appDataLocalPath))
+            if (!string.IsNullOrEmpty(appDataLocalPath))
             {
                 candidates.Add(new GitInstallation(appDataLocalPath, KnownGitDistribution.GitForWindows64v2));
                 candidates.Add(new GitInstallation(appDataLocalPath, KnownGitDistribution.GitForWindows32v2));
                 candidates.Add(new GitInstallation(appDataLocalPath, KnownGitDistribution.GitForWindows32v1));
             }
-            if (!String.IsNullOrEmpty(appDataRoamingPath))
+            if (!string.IsNullOrEmpty(appDataRoamingPath))
             {
                 candidates.Add(new GitInstallation(appDataRoamingPath, KnownGitDistribution.GitForWindows64v2));
                 candidates.Add(new GitInstallation(appDataRoamingPath, KnownGitDistribution.GitForWindows32v2));
@@ -311,7 +311,7 @@ namespace Microsoft.Alm.Git
             const string GitFolderName = ".git";
             const string LocalConfigFileName = "config";
 
-            if (!String.IsNullOrWhiteSpace(startingDirectory))
+            if (!string.IsNullOrWhiteSpace(startingDirectory))
             {
                 var dir = new DirectoryInfo(startingDirectory);
 

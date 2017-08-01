@@ -36,7 +36,7 @@ namespace Atlassian.Bitbucket.Authentication
     /// </summary>
     public sealed class TokenScope: Microsoft.Alm.Authentication.TokenScope
     {
-        public static readonly TokenScope None = new TokenScope(String.Empty);
+        public static readonly TokenScope None = new TokenScope(string.Empty);
 
         /// <summary>
         /// Access accounts

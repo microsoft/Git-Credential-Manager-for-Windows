@@ -203,7 +203,7 @@ namespace Microsoft.Alm.Gui
         {
             string hintText = null;
 
-            this.Title = _title;
+            Title = _title;
 
             switch (_kind)
             {
@@ -230,9 +230,9 @@ namespace Microsoft.Alm.Gui
                 ? Visibility.Visible
                 : Visibility.Collapsed;
 
-            this.Topmost = true;
-            this.BringIntoView();
-            this.Activate();
+            Topmost = true;
+            BringIntoView();
+            Activate();
 
             if (hintText != null)
             {
@@ -244,7 +244,7 @@ namespace Microsoft.Alm.Gui
                     _textboxAdorner = new PasswordBoxHintAdorner(PassphrasePasswordBox, hintText, style, IsAdornerVisible);
                 }
 
-                this.PassphrasePasswordBox.Focus();
+                PassphrasePasswordBox.Focus();
             }
             else
             {

@@ -846,7 +846,7 @@ namespace Microsoft.Alm.Cli
         {
             if (_isPassive)
             {
-                this.Result = ResultValue.Unprivileged;
+                Result = ResultValue.Unprivileged;
             }
             else
             {
@@ -897,12 +897,12 @@ namespace Microsoft.Alm.Cli
                     Git.Trace.WriteLine($"process exited with {elevated.ExitCode}.");
 
                     // exit with the elevated process' exit code
-                    this.ExitCode = elevated.ExitCode;
+                    ExitCode = elevated.ExitCode;
                 }
                 catch (Exception exception)
                 {
                     Git.Trace.WriteLine($"process failed with '{exception.Message}'");
-                    this.Result = ResultValue.Unprivileged;
+                    Result = ResultValue.Unprivileged;
                 }
             }
         }
@@ -951,7 +951,7 @@ namespace Microsoft.Alm.Cli
         {
             if (_isPassive)
             {
-                this.Result = ResultValue.Unprivileged;
+                Result = ResultValue.Unprivileged;
             }
             else
             {
@@ -1002,12 +1002,12 @@ namespace Microsoft.Alm.Cli
                     Git.Trace.WriteLine($"process exited with {elevated.ExitCode}.");
 
                     // exit with the elevated process' exit code
-                    this.ExitCode = elevated.ExitCode;
+                    ExitCode = elevated.ExitCode;
                 }
                 catch (Exception exception)
                 {
                     Git.Trace.WriteLine($"! process failed with '{exception.Message}'.");
-                    this.Result = ResultValue.Unprivileged;
+                    Result = ResultValue.Unprivileged;
                 }
             }
         }

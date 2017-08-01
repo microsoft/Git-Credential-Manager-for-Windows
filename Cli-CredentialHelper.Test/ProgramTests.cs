@@ -35,20 +35,51 @@ namespace Microsoft.Alm.Cli.Test
         [Fact]
         public void LoadOperationArgumentsTest()
         {
-            Program program = new Program();
+            var program = new Program();
 
             program._dieException = (Program caller, Exception e, string path, int line, string name) => Assert.False(true, $"Error: {e.ToString()}");
             program._dieMessage = (Program caller, string m, string path, int line, string name) => Assert.False(true, $"Error: {m}");
             program._exit = (Program caller, int e, string m, string path, int line, string name) => Assert.False(true, $"Error: {e} {m}");
 
+            var configs = new Dictionary<Git.ConfigurationLevel, Dictionary<string, string>>
+            {
+                {
+                    Git.ConfigurationLevel.Local,
+                    new Dictionary<string, string>(StringComparer.Ordinal)
+                    {
+                        { "credential.validate", "true" },
+                        { "credential.useHttpPath", "true" },
+                        { "credential.not-match.com.useHttpPath", "false" },
+                    }
+                },
+                {
+                    Git.ConfigurationLevel.Global,
+                    new Dictionary<string, string>(StringComparer.Ordinal)
+                    {
+                        { "credential.validate", "false" },
+                    }
+                },
+                {
+                    Git.ConfigurationLevel.Xdg,
+                    new Dictionary<string, string>(StringComparer.Ordinal) { }
+                },
+                {
+                    Git.ConfigurationLevel.System,
+                    new Dictionary<string, string>(StringComparer.Ordinal) { }
+                },
+                {
+                    Git.ConfigurationLevel.Portable,
+                    new Dictionary<string, string>(StringComparer.Ordinal) { }
+                },
+            };
             var envvars = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
             {
-                { "HOME", Environment.GetFolderPath(Environment.SpecialFolder.UserProfile) }
+                { "HOME", Environment.GetFolderPath(Environment.SpecialFolder.UserProfile) },
             };
-            var gitconfig = new Git.Configuration.Impl();
+            var gitconfig = new Git.Configuration.Impl(configs);
             var targetUri = new Authentication.TargetUri("https://example.visualstudio.com/");
 
-            Mock<OperationArguments> opargsMock = new Mock<OperationArguments>();
+            var opargsMock = new Mock<OperationArguments>(MockBehavior.Strict);
             opargsMock.Setup(r => r.EnvironmentVariables)
                       .Returns(envvars);
             opargsMock.Setup(r => r.GitConfiguration)
@@ -58,12 +89,16 @@ namespace Microsoft.Alm.Cli.Test
                       .Returns(targetUri);
             opargsMock.Setup(r => r.QueryUri)
                       .Returns(targetUri);
+            opargsMock.SetupProperty(r => r.UseHttpPath);
+            opargsMock.SetupProperty(r => r.ValidateCredentials);
 
             var opargs = opargsMock.Object;
 
             program.LoadOperationArguments(opargs);
 
             Assert.NotNull(opargs);
+            Assert.True(opargs.ValidateCredentials, "credential.validate");
+            Assert.True(opargs.UseHttpPath, "credential.useHttpPath");
         }
 
         [Fact]
@@ -79,7 +114,7 @@ namespace Microsoft.Alm.Cli.Test
             var gitconfig = new Git.Configuration.Impl();
             var targetUri = new Authentication.TargetUri("https://example.visualstudio.com/");
 
-            Mock<OperationArguments> opargsMock = new Mock<OperationArguments>();
+            var opargsMock = new Mock<OperationArguments>();
             opargsMock.Setup(r => r.EnvironmentVariables)
                       .Returns(envvars);
             opargsMock.Setup(r => r.GitConfiguration)
@@ -90,7 +125,7 @@ namespace Microsoft.Alm.Cli.Test
             opargsMock.Setup(r => r.QueryUri)
                       .Returns(targetUri);
 
-            Program program = new Program();
+            var program = new Program();
 
             Assert.False(CommonFunctions.TryReadBoolean(program, opargsMock.Object, "notFound", "notFound", out yesno));
             Assert.False(yesno.HasValue);

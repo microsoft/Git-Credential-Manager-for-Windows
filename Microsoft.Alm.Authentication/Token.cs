@@ -39,20 +39,20 @@ namespace Microsoft.Alm.Authentication
 
         public Token(string value, TokenType type)
         {
-            if (String.IsNullOrWhiteSpace(value))
+            if (string.IsNullOrWhiteSpace(value))
                 throw new ArgumentNullException(nameof(value));
 
             Debug.Assert(Enum.IsDefined(typeof(TokenType), type), $"The `{nameof(type)}` parameter is invalid");
 
-            this.Type = type;
-            this.Value = value;
+            Type = type;
+            Value = value;
         }
 
         public Token(string value, string typeName)
         {
-            if (String.IsNullOrWhiteSpace(value))
+            if (string.IsNullOrWhiteSpace(value))
                 throw new ArgumentNullException(nameof(value));
-            if (String.IsNullOrWhiteSpace(typeName))
+            if (string.IsNullOrWhiteSpace(typeName))
                 throw new ArgumentNullException(nameof(typeName));
 
             TokenType type;
@@ -67,9 +67,9 @@ namespace Microsoft.Alm.Authentication
             if ((type & ~(TokenType.Access | TokenType.Federated | TokenType.Personal | TokenType.Test)) != 0)
                 throw new ArgumentOutOfRangeException(nameof(type));
 
-            this.TargetIdentity = tenantId;
-            this.Type = type;
-            this.Value = value;
+            TargetIdentity = tenantId;
+            Type = type;
+            Value = value;
         }
 
         /// <summary>
@@ -94,7 +94,7 @@ namespace Microsoft.Alm.Authentication
         /// <returns>True is equal; false otherwise.</returns>
         public override bool Equals(Object obj)
         {
-            return this.Equals(obj as Token);
+            return Equals(obj as Token);
         }
 
         /// <summary>
@@ -126,7 +126,7 @@ namespace Microsoft.Alm.Authentication
 
         public static bool GetTypeFromFriendlyName(string name, out TokenType type)
         {
-            if (String.IsNullOrWhiteSpace(name))
+            if (string.IsNullOrWhiteSpace(name))
                 throw new ArgumentNullException(nameof(name));
 
             type = TokenType.Unknown;
@@ -138,7 +138,7 @@ namespace Microsoft.Alm.Authentication
                 string typename;
                 if (GetFriendlyNameFromType(type, out typename))
                 {
-                    if (String.Equals(name, typename, StringComparison.OrdinalIgnoreCase))
+                    if (string.Equals(name, typename, StringComparison.OrdinalIgnoreCase))
                         return true;
                 }
             }
@@ -175,7 +175,7 @@ namespace Microsoft.Alm.Authentication
         {
             if (token == null)
                 throw new ArgumentNullException(nameof(token));
-            if (String.IsNullOrWhiteSpace(token.Value))
+            if (string.IsNullOrWhiteSpace(token.Value))
                 throw new ArgumentException("Value property returned null or empty.", nameof(token));
             if (token.Value.Length > NativeMethods.Credential.PasswordMaxLength)
                 throw new ArgumentOutOfRangeException(nameof(token));
@@ -212,7 +212,7 @@ namespace Microsoft.Alm.Authentication
                     {
                         string value = Encoding.UTF8.GetString(bytes, preamble, bytes.Length - preamble);
 
-                        if (!String.IsNullOrWhiteSpace(value))
+                        if (!string.IsNullOrWhiteSpace(value))
                         {
                             token = new Token(value, type);
                             token.TargetIdentity = targetIdentity;
@@ -225,7 +225,7 @@ namespace Microsoft.Alm.Authentication
                 {
                     string value = Encoding.UTF8.GetString(bytes);
 
-                    if (!String.IsNullOrWhiteSpace(value))
+                    if (!string.IsNullOrWhiteSpace(value))
                     {
                         token = new Token(value, type);
                     }
@@ -243,7 +243,7 @@ namespace Microsoft.Alm.Authentication
         {
             if (ReferenceEquals(token, null))
                 throw new ArgumentNullException(nameof(token));
-            if (String.IsNullOrWhiteSpace(token.Value))
+            if (string.IsNullOrWhiteSpace(token.Value))
                 throw new ArgumentException("Value property returned null or empty.", nameof(token));
 
             bytes = null;

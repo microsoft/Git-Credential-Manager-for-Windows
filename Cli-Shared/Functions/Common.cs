@@ -737,6 +737,7 @@ namespace Microsoft.Alm.Cli
             if (!string.IsNullOrWhiteSpace(configKey)
                 && config.TryGetEntry(Program.ConfigPrefix, operationArguments.QueryUri, configKey, out entry))
             {
+                localVal = entry.Value;
                 goto parse_localval;
             }
 

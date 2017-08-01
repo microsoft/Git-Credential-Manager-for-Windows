@@ -42,7 +42,7 @@ namespace Atlassian.Bitbucket.Authentication.ViewModels
 
         public OAuthViewModel(bool resultType)
         {
-            this._resultType = resultType;
+            _resultType = resultType;
 
             OkCommand = new ActionCommand(_ => Result = AuthenticationDialogResult.Ok);
             CancelCommand = new ActionCommand(_ => Result = AuthenticationDialogResult.Cancel);

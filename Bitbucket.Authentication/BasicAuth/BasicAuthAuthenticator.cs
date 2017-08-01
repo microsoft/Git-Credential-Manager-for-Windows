@@ -19,7 +19,7 @@ namespace Atlassian.Bitbucket.Authentication.BasicAuth
             // use the provided username and password and attempt a Basic Auth request to a known
             // REST API resource.
             
-            string basicAuthValue = String.Format("{0}:{1}", username, password);
+            string basicAuthValue = string.Format("{0}:{1}", username, password);
             byte[] authBytes = Encoding.UTF8.GetBytes(basicAuthValue);
             basicAuthValue = Convert.ToBase64String(authBytes);
             var authHeader = "Basic " + basicAuthValue;
