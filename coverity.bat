@@ -14,11 +14,8 @@ IF DEFINED COVDIR IF NOT EXIST "%COVDIR%" (
 )
 
 
-CALL "%VS140COMNTOOLS%\vsvars32.bat"
-IF %ERRORLEVEL% NEQ 0 (
-    ECHO vsvars32.bat call failed.
-    GOTO End
-)
+CALL :SubVSPath
+IF NOT EXIST "%VS_PATH%" CALL :SUBMSG "ERROR" "Visual Studio 2017 NOT FOUND!"
 
 
 :Cleanup
@@ -29,6 +26,9 @@ IF EXIST "gcw.tgz"  DEL "gcw.tgz"
 
 
 :Main
+SET "TOOLSET=%VS_PATH%\Common7\Tools\vsdevcmd"
+CALL "%TOOLSET%"
+
 SET MSBUILD_SWITCHES=/nologo /t:Rebuild /p:Configuration=Release /p:Platform="Any CPU"^
  /maxcpucount /consoleloggerparameters:DisableMPLogging;Summary;Verbosity=minimal
 
@@ -64,6 +64,11 @@ IF EXIST "%SEVENZIP_PATH%" (SET "SEVENZIP=%SEVENZIP_PATH%" & EXIT /B)
 FOR /F "tokens=2*" %%A IN (
     'REG QUERY "HKLM\SOFTWARE\7-Zip" /v "Path" 2^>NUL ^| FIND "REG_SZ" ^|^|
      REG QUERY "HKLM\SOFTWARE\Wow6432Node\7-Zip" /v "Path" 2^>NUL ^| FIND "REG_SZ"') DO SET "SEVENZIP=%%B\7z.exe"
+EXIT /B
+
+
+:SubVSPath
+FOR /f "delims=" %%A IN ('"%ProgramFiles(x86)%\Microsoft Visual Studio\Installer\vswhere.exe" -property installationPath -latest -requires Microsoft.Component.MSBuild Microsoft.VisualStudio.Component.VC.ATLMFC Microsoft.VisualStudio.Component.VC.Tools.x86.x64') DO SET "VS_PATH=%%A"
 EXIT /B
 
 

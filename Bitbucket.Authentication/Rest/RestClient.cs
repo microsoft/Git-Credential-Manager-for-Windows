@@ -19,7 +19,6 @@ namespace Atlassian.Bitbucket.Authentication.Rest
 
         public static async Task<AuthenticationResult> TryGetUser(TargetUri targetUri, int requestTimeout, Uri restRootUrl, string authHeader)
         {
-            Token token;
             using (HttpClientHandler handler = targetUri.HttpClientHandler)
             {
                 using (HttpClient httpClient = new HttpClient(handler) { Timeout = TimeSpan.FromMilliseconds(requestTimeout) })
