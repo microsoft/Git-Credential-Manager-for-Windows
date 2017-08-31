@@ -31,7 +31,7 @@ namespace Microsoft.Alm.Authentication
     /// Interface to secure secrets storage which indexes values by target and utilizes the operating
     /// system keychain / secrets vault.
     /// </summary>
-    public sealed class SecretStore: BaseSecureStore, ICredentialStore, ITokenStore
+    public sealed class SecretStore : BaseSecureStore, ICredentialStore, ITokenStore
     {
         /// <summary>
         /// Creates a new <see cref="SecretStore"/> backed by the operating system keychain / secrets vault.
@@ -85,29 +85,28 @@ namespace Microsoft.Alm.Authentication
         /// Deletes credentials for target URI from the credential store
         /// </summary>
         /// <param name="targetUri">The URI of the target for which credentials are being deleted</param>
-        public void DeleteCredentials(TargetUri targetUri)
+        public bool DeleteCredentials(TargetUri targetUri)
         {
             ValidateTargetUri(targetUri);
 
             string targetName = GetTargetName(targetUri);
 
-            Delete(targetName);
-
-            _credentialCache.DeleteCredentials(targetUri);
+            return Delete(targetName)
+                && _credentialCache.DeleteCredentials(targetUri);
         }
 
         /// <summary>
         /// Deletes the token for target URI from the token store
         /// </summary>
         /// <param name="targetUri">The URI of the target for which the token is being deleted</param>
-        public void DeleteToken(TargetUri targetUri)
+        public bool DeleteToken(TargetUri targetUri)
         {
             ValidateTargetUri(targetUri);
 
             string targetName = GetTargetName(targetUri);
 
-            Delete(targetName);
-            _tokenCache.DeleteToken(targetUri);
+            return Delete(targetName)
+                && _tokenCache.DeleteToken(targetUri);
         }
 
         /// <summary>
@@ -154,16 +153,15 @@ namespace Microsoft.Alm.Authentication
         /// </summary>
         /// <param name="targetUri">The URI of the target for which credentials are being stored</param>
         /// <param name="credentials">The credentials to be stored</param>
-        public void WriteCredentials(TargetUri targetUri, Credential credentials)
+        public bool WriteCredentials(TargetUri targetUri, Credential credentials)
         {
             ValidateTargetUri(targetUri);
             BaseSecureStore.ValidateCredential(credentials);
 
             string targetName = GetTargetName(targetUri);
 
-            WriteCredential(targetName, credentials);
-
-            _credentialCache.WriteCredentials(targetUri, credentials);
+            return WriteCredential(targetName, credentials)
+                && _credentialCache.WriteCredentials(targetUri, credentials);
         }
 
         /// <summary>
@@ -171,16 +169,15 @@ namespace Microsoft.Alm.Authentication
         /// </summary>
         /// <param name="targetUri">The URI of the target for which a token is being stored</param>
         /// <param name="token">The token to be stored</param>
-        public void WriteToken(TargetUri targetUri, Token token)
+        public bool WriteToken(TargetUri targetUri, Token token)
         {
             ValidateTargetUri(targetUri);
             Token.Validate(token);
 
             string targetName = GetTargetName(targetUri);
 
-            WriteToken(targetName, token);
-
-            _tokenCache.WriteToken(targetUri, token);
+            return WriteToken(targetName, token)
+                && _tokenCache.WriteToken(targetUri, token);
         }
 
         /// <summary>

@@ -50,7 +50,7 @@ namespace Microsoft.Alm.Authentication
         /// Not supported
         /// </summary>
         /// <param name="targetUri"></param>
-        public void DeleteToken(TargetUri targetUri)
+        public bool DeleteToken(TargetUri targetUri)
         {
             // we've decided to not support registry deletes until the rules are established
             throw new NotSupportedException("Deletes from the registry are not supported by this library.");
@@ -121,13 +121,13 @@ namespace Microsoft.Alm.Authentication
         /// </summary>
         /// <param name="targetUri"></param>
         /// <param name="token"></param>
-        public void WriteToken(TargetUri targetUri, Token token)
+        public bool WriteToken(TargetUri targetUri, Token token)
         {
             // we've decided to not support registry writes until the format is standardized
             throw new NotSupportedException("Writes to the registry are not supported by this library.");
         }
 
-        private IEnumerable<RegistryKey> EnumerateKeys(bool writeable)
+        private static IEnumerable<RegistryKey> EnumerateKeys(bool writeable)
         {
             foreach (var rootKey in EnumerateRootKeys())
             {

@@ -36,7 +36,7 @@ namespace Microsoft.Alm.Authentication
         public static readonly char[] IllegalCharacters = new[] { ':', ';', '\\', '?', '@', '=', '&', '%', '$' };
 
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Design", "CA1031:DoNotCatchGeneralExceptionTypes")]
-        protected void Delete(string targetName)
+        protected bool Delete(string targetName)
         {
             try
             {
@@ -62,7 +62,10 @@ namespace Microsoft.Alm.Authentication
             catch (Exception exception)
             {
                 Debug.WriteLine(exception);
+                return false;
             }
+
+            return true;
         }
 
         protected abstract string GetTargetName(TargetUri targetUri);
@@ -112,6 +115,7 @@ namespace Microsoft.Alm.Authentication
             }
         }
 
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Design", "CA1031:DoNotCatchGeneralExceptionTypes")]
         protected Credential ReadCredentials(string targetName)
         {
             Credential credentials = null;
@@ -134,6 +138,14 @@ namespace Microsoft.Alm.Authentication
                     Git.Trace.WriteLine($"credentials for '{targetName}' read from store.");
                 }
             }
+            catch (Exception exception)
+            {
+                Debug.WriteLine(exception);
+
+                Git.Trace.WriteLine($"failed to read credentials: {exception.GetType().Name}.");
+
+                return null;
+            }
             finally
             {
                 if (credPtr != IntPtr.Zero)
@@ -145,6 +157,7 @@ namespace Microsoft.Alm.Authentication
             return credentials;
         }
 
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Design", "CA1031:DoNotCatchGeneralExceptionTypes")]
         protected Token ReadToken(string targetName)
         {
             Token token = null;
@@ -171,6 +184,14 @@ namespace Microsoft.Alm.Authentication
                     }
                 }
             }
+            catch(Exception exception)
+            {
+                Debug.WriteLine(exception);
+
+                Git.Trace.WriteLine($"failed to read credentials: {exception.GetType().Name}.");
+
+                return null;
+            }
             finally
             {
                 if (credPtr != IntPtr.Zero)
@@ -182,7 +203,8 @@ namespace Microsoft.Alm.Authentication
             return token;
         }
 
-        protected void WriteCredential(string targetName, Credential credentials)
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Design", "CA1031:DoNotCatchGeneralExceptionTypes")]
+        protected bool WriteCredential(string targetName, Credential credentials)
         {
             if (ReferenceEquals(targetName, null))
                 throw new ArgumentNullException(nameof(targetName));
@@ -209,6 +231,14 @@ namespace Microsoft.Alm.Authentication
 
                 Git.Trace.WriteLine($"credentials for '{targetName}' written to store.");
             }
+            catch (Exception exception)
+            {
+                Debug.WriteLine(exception);
+
+                Git.Trace.WriteLine($"failed to write credentials: {exception.GetType().Name}.");
+
+                return false;
+            }
             finally
             {
                 if (credential.CredentialBlob != IntPtr.Zero)
@@ -216,9 +246,12 @@ namespace Microsoft.Alm.Authentication
                     Marshal.FreeCoTaskMem(credential.CredentialBlob);
                 }
             }
+
+            return true;
         }
 
-        protected void WriteToken(string targetName, Token token)
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Design", "CA1031:DoNotCatchGeneralExceptionTypes")]
+        protected bool WriteToken(string targetName, Token token)
         {
             if (ReferenceEquals(targetName, null))
                 throw new ArgumentNullException(nameof(targetName));
@@ -253,6 +286,14 @@ namespace Microsoft.Alm.Authentication
 
                         Git.Trace.WriteLine($"token for '{targetName}' written to store.");
                     }
+                    catch (Exception exception)
+                    {
+                        Debug.WriteLine(exception);
+
+                        Git.Trace.WriteLine($"failed to write credentials: {exception.GetType().Name}.");
+
+                        return false;
+                    }
                     finally
                     {
                         if (credential.CredentialBlob != IntPtr.Zero)
@@ -262,6 +303,8 @@ namespace Microsoft.Alm.Authentication
                     }
                 }
             }
+
+            return true;
         }
 
         [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
