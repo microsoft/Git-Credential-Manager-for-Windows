@@ -31,7 +31,7 @@ namespace Microsoft.Alm.Authentication
         /// Deletes a <see cref="Token"/> from the underlying storage.
         /// </summary>
         /// <param name="targetUri">The key identifying which token is being deleted.</param>
-        void DeleteToken(TargetUri targetUri);
+        bool DeleteToken(TargetUri targetUri);
 
         /// <summary>
         /// Reads a <see cref="Token"/> from the underlying storage.
@@ -47,6 +47,6 @@ namespace Microsoft.Alm.Authentication
         /// Unique identifier for the token, used when reading back from storage.
         /// </param>
         /// <param name="token">The <see cref="Token"/> to be written.</param>
-        void WriteToken(TargetUri targetUri, Token token);
+        bool WriteToken(TargetUri targetUri, Token token);
     }
 }

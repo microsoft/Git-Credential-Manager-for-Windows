@@ -28,7 +28,7 @@ using System.Collections.Generic;
 
 namespace Microsoft.Alm.Authentication
 {
-    public sealed class SecretCache: ICredentialStore, ITokenStore
+    public sealed class SecretCache : ICredentialStore, ITokenStore
     {
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Security", "CA2104:DoNotDeclareReadOnlyMutableReferenceTypes")]
         public static readonly StringComparer KeyComparer = StringComparer.OrdinalIgnoreCase;
@@ -74,7 +74,7 @@ namespace Microsoft.Alm.Authentication
         /// Deletes a credential from the cache.
         /// </summary>
         /// <param name="targetUri">The URI of the target for which credentials are being deleted</param>
-        public void DeleteCredentials(TargetUri targetUri)
+        public bool DeleteCredentials(TargetUri targetUri)
         {
             BaseSecureStore.ValidateTargetUri(targetUri);
 
@@ -82,10 +82,9 @@ namespace Microsoft.Alm.Authentication
 
             lock (_cache)
             {
-                if (_cache.ContainsKey(targetName) && _cache[targetName] is Credential)
-                {
-                    _cache.Remove(targetName);
-                }
+                return _cache.ContainsKey(targetName)
+                    && _cache[targetName] is Credential
+                    && _cache.Remove(targetName);
             }
         }
 
@@ -93,7 +92,7 @@ namespace Microsoft.Alm.Authentication
         /// Deletes a token from the cache.
         /// </summary>
         /// <param name="targetUri">The key which to find and delete the token with.</param>
-        public void DeleteToken(TargetUri targetUri)
+        public bool DeleteToken(TargetUri targetUri)
         {
             BaseSecureStore.ValidateTargetUri(targetUri);
 
@@ -101,10 +100,9 @@ namespace Microsoft.Alm.Authentication
 
             lock (_cache)
             {
-                if (_cache.ContainsKey(targetName) && _cache[targetName] is Token)
-                {
-                    _cache.Remove(targetName);
-                }
+                return _cache.ContainsKey(targetName)
+                    && _cache[targetName] is Token
+                    && _cache.Remove(targetName);
             }
         }
 
@@ -167,7 +165,7 @@ namespace Microsoft.Alm.Authentication
         /// </summary>
         /// <param name="targetUri">The URI of the target for which credentials are being stored</param>
         /// <param name="credentials">The credentials to be stored</param>
-        public void WriteCredentials(TargetUri targetUri, Credential credentials)
+        public bool WriteCredentials(TargetUri targetUri, Credential credentials)
         {
             BaseSecureStore.ValidateTargetUri(targetUri);
             BaseSecureStore.ValidateCredential(credentials);
@@ -185,6 +183,8 @@ namespace Microsoft.Alm.Authentication
                     _cache.Add(targetName, credentials);
                 }
             }
+
+            return true;
         }
 
         /// <summary>
@@ -192,7 +192,7 @@ namespace Microsoft.Alm.Authentication
         /// </summary>
         /// <param name="targetUri">The key which to index the token by.</param>
         /// <param name="token">The token to write to the cache.</param>
-        public void WriteToken(TargetUri targetUri, Token token)
+        public bool WriteToken(TargetUri targetUri, Token token)
         {
             BaseSecureStore.ValidateTargetUri(targetUri);
             Token.Validate(token);
@@ -210,6 +210,8 @@ namespace Microsoft.Alm.Authentication
                     _cache.Add(targetName, token);
                 }
             }
+
+            return true;
         }
 
         /// <summary>

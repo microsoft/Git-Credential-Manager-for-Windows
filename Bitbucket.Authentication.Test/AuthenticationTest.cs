@@ -359,10 +359,11 @@ namespace Atlassian.Bitbucket.Authentication.Test
             get { throw new NotImplementedException(); }
         }
 
-        public void DeleteCredentials(TargetUri targetUri)
+        public bool DeleteCredentials(TargetUri targetUri)
         {
             // do nothing
             RecordMethodCall("DeleteCredentials", new List<string>() { targetUri.ActualUri.AbsoluteUri });
+            return true;
         }
 
         public Credential ReadCredentials(TargetUri targetUri)
@@ -372,10 +373,11 @@ namespace Atlassian.Bitbucket.Authentication.Test
             return Credentials != null && Credentials.Keys.Contains(targetUri.ActualUri.AbsoluteUri) ? Credentials[targetUri.ActualUri.AbsoluteUri] : null;
         }
 
-        public void WriteCredentials(TargetUri targetUri, Credential credentials)
+        public bool WriteCredentials(TargetUri targetUri, Credential credentials)
         {
             // do nothing
             RecordMethodCall("WriteCredentials", new List<string>() { targetUri.ActualUri.AbsoluteUri, credentials.Username, credentials.Password });
+            return true;
         }
 
         private void RecordMethodCall(string methodName, List<string> args)

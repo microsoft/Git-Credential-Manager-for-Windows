@@ -32,10 +32,10 @@ namespace Microsoft.Alm.Authentication
 
         Secret.UriNameConversion UriNameConversion { get; }
 
-        void DeleteCredentials(TargetUri targetUri);
+        bool DeleteCredentials(TargetUri targetUri);
 
         Credential ReadCredentials(TargetUri targetUri);
 
-        void WriteCredentials(TargetUri targetUri, Credential credentials);
+        bool WriteCredentials(TargetUri targetUri, Credential credentials);
     }
 }
