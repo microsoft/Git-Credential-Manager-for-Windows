@@ -31,7 +31,7 @@ namespace Microsoft.Alm.Authentication
     /// Interface to secure secrets storage which indexes values by target and utilizes the operating
     /// system keychain / secrets vault.
     /// </summary>
-    public sealed class SecretStore: BaseSecureStore, ICredentialStore, ITokenStore
+    public sealed class SecretStore : BaseSecureStore, ICredentialStore, ITokenStore
     {
         /// <summary>
         /// Creates a new <see cref="SecretStore"/> backed by the operating system keychain / secrets vault.

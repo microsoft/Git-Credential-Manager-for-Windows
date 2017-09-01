@@ -33,7 +33,7 @@ namespace Microsoft.Alm.Authentication
     /// <summary>
     /// A security token, usually acquired by some authentication and identity services.
     /// </summary>
-    public class Token: Secret, IEquatable<Token>
+    public class Token : Secret, IEquatable<Token>
     {
         public static readonly StringComparer TokenComparer = StringComparer.Ordinal;
 

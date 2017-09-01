@@ -29,7 +29,7 @@ using System.Windows.Controls;
 
 namespace GitHub.Shared.Controls
 {
-    public class PromptTextBox: TextBox
+    public class PromptTextBox : TextBox
     {
         public static readonly DependencyProperty PromptTextProperty =
             DependencyProperty.Register(nameof(PromptText), typeof(string), typeof(PromptTextBox), new UIPropertyMetadata(""));

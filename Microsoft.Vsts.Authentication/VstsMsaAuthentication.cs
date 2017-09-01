@@ -30,7 +30,7 @@ using Microsoft.IdentityModel.Clients.ActiveDirectory;
 
 namespace Microsoft.Alm.Authentication
 {
-    public sealed class VstsMsaAuthentication: BaseVstsAuthentication, IVstsMsaAuthentication
+    public sealed class VstsMsaAuthentication : BaseVstsAuthentication, IVstsMsaAuthentication
     {
         public const string DefaultAuthorityHost = AzureAuthority.AuthorityHostUrlBase + "/live.com";
         internal const string QueryParameters = "domain_hint=live.com&display=popup&site_id=501454&nux=1";
@@ -64,8 +64,7 @@ namespace Microsoft.Alm.Authentication
         /// <param name="targetUri">
         /// The uniform resource indicator of the resource access tokens are being requested for.
         /// </param>
-        /// <param name="options">
-        /// </param>
+        /// <param name="options"></param>
         /// <returns>
         /// A <see cref="Credential"/> for packing into a basic authentication header; otherwise <see langword="null"/>.
         /// </returns>

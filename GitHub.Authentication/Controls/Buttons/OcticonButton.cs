@@ -28,7 +28,7 @@ using System.Windows.Controls;
 
 namespace GitHub.UI
 {
-    public class OcticonButton: Button
+    public class OcticonButton : Button
     {
         public static readonly DependencyProperty IconRotationAngleProperty = DependencyProperty.Register(
             nameof(IconRotationAngle), typeof(double), typeof(OcticonButton),

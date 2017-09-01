@@ -159,14 +159,14 @@ namespace Microsoft.Alm.Authentication
             [Out] out IntPtr credenitalsArrayPtr);
 
         [Flags]
-        internal enum CredentialEnumerateFlags: uint
+        internal enum CredentialEnumerateFlags : uint
         {
             None = 0,
             AllCredentials = 1 << 0,
         }
 
         [Flags]
-        internal enum CredentialFlags: uint
+        internal enum CredentialFlags : uint
         {
             /// <summary>
             /// <para>
@@ -219,7 +219,7 @@ namespace Microsoft.Alm.Authentication
             UsernameTarget = 0x04,
         }
 
-        internal enum CredentialPersist: uint
+        internal enum CredentialPersist : uint
         {
             /// <summary>
             /// <para>The ` <see cref="Credential"/>` persists for the life of the logon session.</para>
@@ -261,7 +261,7 @@ namespace Microsoft.Alm.Authentication
             Enterprise = 0x03
         }
 
-        internal enum CredentialType: uint
+        internal enum CredentialType : uint
         {
             /// <summary> <para>The `<see cref="Credential"/>` is a generic credential. The
             /// credential will not be used by any particular authentication package.</para>

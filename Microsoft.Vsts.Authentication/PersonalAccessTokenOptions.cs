@@ -61,11 +61,10 @@ namespace Microsoft.Alm.Authentication
 
         /// <summary>
         /// <para>
-        /// Requests a limited duration personal access token when specified; otherwise the default duration is requested.
+        /// Requests a limited duration personal access token when specified; otherwise the default
+        /// duration is requested.
         /// </para>
-        /// <para>
-        /// Cannot be less than one hour; values less than one hour (1hr) are ignored.
-        /// </para>
+        /// <para>Cannot be less than one hour; values less than one hour (1hr) are ignored.</para>
         /// </summary>
         public TimeSpan? TokenDuration
         {

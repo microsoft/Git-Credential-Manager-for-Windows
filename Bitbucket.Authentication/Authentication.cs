@@ -36,7 +36,7 @@ namespace Atlassian.Bitbucket.Authentication
     /// <see cref="IAuthentication"/> and providing functionality to manage credentials for Bitbucket
     /// hosting service.
     /// </summary>
-    public class Authentication: BaseAuthentication, IAuthentication
+    public class Authentication : BaseAuthentication, IAuthentication
     {
         public const string BitbucketBaseUrlHost = "bitbucket.org";
 
@@ -106,7 +106,8 @@ namespace Atlassian.Bitbucket.Authentication
                 Trace.WriteLine($"host refresh credentials deleted for {refreshTargetUri.ActualUri}");
             }
 
-            // if we deleted per user then we shoudl try and delete the host level credentials too if they match the username
+            // if we deleted per user then we shoudl try and delete the host level credentials too if
+            // they match the username
             if (targetUri.TargetUriContainsUsername)
             {
                 var hostTargetUri = targetUri.GetHostTargetUri();
@@ -435,7 +436,6 @@ namespace Atlassian.Bitbucket.Authentication
             {
                 userSpecificTargetUri = targetUri.GetPerUserTargetUri(username);
             }
-
 
             if (await BitbucketAuthority.ValidateCredentials(userSpecificTargetUri, username, credentials))
             {

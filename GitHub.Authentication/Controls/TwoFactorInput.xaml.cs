@@ -30,12 +30,12 @@ using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
-using GitHub.Shared.Helpers;
 using GitHub.Shared.Converters;
+using GitHub.Shared.Helpers;
 
 namespace GitHub.UI
 {
-    public class TwoFactorInputToTextBox: ValueConverterMarkupExtension<TwoFactorInputToTextBox>
+    public class TwoFactorInputToTextBox : ValueConverterMarkupExtension<TwoFactorInputToTextBox>
     {
         public override object Convert(object value, Type targetType, object parameter, CultureInfo culture)
         {
@@ -46,7 +46,7 @@ namespace GitHub.UI
     /// <summary>
     /// Interaction logic for TwoFactorInput.xaml
     /// </summary>
-    public partial class TwoFactorInput: UserControl
+    public partial class TwoFactorInput : UserControl
     {
         public static readonly DependencyProperty TextProperty =
             DependencyProperty.Register(nameof(Text), typeof(string), typeof(TwoFactorInput), new PropertyMetadata(""));

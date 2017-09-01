@@ -29,7 +29,7 @@ using System.Windows.Shapes;
 
 namespace GitHub.UI
 {
-    public class OcticonCircleButton: OcticonButton
+    public class OcticonCircleButton : OcticonButton
     {
         public static readonly DependencyProperty ShowSpinnerProperty = DependencyProperty.Register(
             nameof(ShowSpinner), typeof(bool), typeof(OcticonCircleButton));

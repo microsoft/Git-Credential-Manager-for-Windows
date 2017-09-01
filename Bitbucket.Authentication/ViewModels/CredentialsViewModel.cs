@@ -34,7 +34,7 @@ namespace Atlassian.Bitbucket.Authentication.ViewModels
     /// <summary>
     /// The ViewModel behind the Basic Auth username/password UI prompt.
     /// </summary>
-    public class CredentialsViewModel: DialogViewModel
+    public class CredentialsViewModel : DialogViewModel
     {
         public CredentialsViewModel() : this(string.Empty)
         {

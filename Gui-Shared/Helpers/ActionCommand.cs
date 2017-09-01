@@ -31,7 +31,7 @@ namespace GitHub.Shared.Helpers
     /// <summary>
     /// Command that performs the specified action when invoked.
     /// </summary>
-    public class ActionCommand: ICommand
+    public class ActionCommand : ICommand
     {
         private Action<object> _commandAction;
 

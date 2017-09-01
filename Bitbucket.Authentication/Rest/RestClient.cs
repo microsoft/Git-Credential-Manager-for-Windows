@@ -34,29 +34,29 @@ namespace Atlassian.Bitbucket.Authentication.Rest
                         {
                             case HttpStatusCode.OK:
                             case HttpStatusCode.Created:
-                            {
-                                Trace.WriteLine("authentication success: new password token created.");
+                                {
+                                    Trace.WriteLine("authentication success: new password token created.");
 
                                     // Get useername to cross check against supplied one
-                                var responseText = await response.Content.ReadAsStringAsync();
-                                var username = FindUsername(responseText);
-                                return new AuthenticationResult(AuthenticationResultType.Success, username);
-                            }
+                                    var responseText = await response.Content.ReadAsStringAsync();
+                                    var username = FindUsername(responseText);
+                                    return new AuthenticationResult(AuthenticationResultType.Success, username);
+                                }
 
                             case HttpStatusCode.Forbidden:
-                            {
-                                // A 403/Forbidden response indicates the username/password
-                                // are recognized and good but 2FA is on in which case we
-                                // want to indicate that with the TwoFactor result
-                                Trace.WriteLine("two-factor app authentication code required");
-                                return new AuthenticationResult(AuthenticationResultType.TwoFactor);
-                            }
+                                {
+                                    // A 403/Forbidden response indicates the username/password are
+                                    // recognized and good but 2FA is on in which case we want to
+                                    // indicate that with the TwoFactor result
+                                    Trace.WriteLine("two-factor app authentication code required");
+                                    return new AuthenticationResult(AuthenticationResultType.TwoFactor);
+                                }
                             case HttpStatusCode.Unauthorized:
-                            {
-                                // username or password are wrong.
-                                Trace.WriteLine("authentication unauthorised");
-                                return new AuthenticationResult(AuthenticationResultType.Failure);
-                            }
+                                {
+                                    // username or password are wrong.
+                                    Trace.WriteLine("authentication unauthorised");
+                                    return new AuthenticationResult(AuthenticationResultType.Failure);
+                                }
 
                             default:
                                 // any unexpected result can be treated as a failure.

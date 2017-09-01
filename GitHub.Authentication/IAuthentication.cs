@@ -28,7 +28,7 @@ using Microsoft.Alm.Authentication;
 
 namespace GitHub.Authentication
 {
-    public interface IAuthentication: Microsoft.Alm.Authentication.IAuthentication
+    public interface IAuthentication : Microsoft.Alm.Authentication.IAuthentication
     {
         /// <summary>
         /// <para></para>

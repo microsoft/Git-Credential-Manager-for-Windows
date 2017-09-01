@@ -29,7 +29,7 @@ using System.Linq;
 
 namespace GitHub.Shared.Converters
 {
-    public class AspectRatioConverter: DoubleConverter
+    public class AspectRatioConverter : DoubleConverter
     {
         public override object ConvertFrom(ITypeDescriptorContext context, CultureInfo culture, object value)
         {

@@ -7,7 +7,7 @@ namespace GitHub.UI
     /// <summary>
     /// Interaction logic for CredentialsControl.xaml
     /// </summary>
-    public partial class CredentialsControl: DialogUserControl
+    public partial class CredentialsControl : DialogUserControl
     {
         public CredentialsControl()
         {

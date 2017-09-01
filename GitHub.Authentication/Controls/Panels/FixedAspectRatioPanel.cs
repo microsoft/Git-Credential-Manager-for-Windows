@@ -31,7 +31,7 @@ using GitHub.Shared.Converters;
 
 namespace GitHub.UI
 {
-    public class FixedAspectRatioPanel: Panel
+    public class FixedAspectRatioPanel : Panel
     {
         public static readonly DependencyProperty AspectRatioProperty = DependencyProperty.Register(
             nameof(AspectRatio), typeof(double), typeof(FixedAspectRatioPanel), new FrameworkPropertyMetadata(1d)

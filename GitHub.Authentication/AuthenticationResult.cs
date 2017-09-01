@@ -30,7 +30,7 @@ using Microsoft.Alm.Authentication;
 namespace GitHub.Authentication
 {
     [DebuggerDisplay("{Type}")]
-    public struct AuthenticationResult: IEquatable<AuthenticationResult>
+    public struct AuthenticationResult : IEquatable<AuthenticationResult>
     {
         public AuthenticationResult(GitHubAuthenticationResultType type)
         {

@@ -28,7 +28,7 @@ using System.Collections.Generic;
 
 namespace Microsoft.Alm.Authentication
 {
-    public sealed class SecretCache: ICredentialStore, ITokenStore
+    public sealed class SecretCache : ICredentialStore, ITokenStore
     {
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Security", "CA2104:DoNotDeclareReadOnlyMutableReferenceTypes")]
         public static readonly StringComparer KeyComparer = StringComparer.OrdinalIgnoreCase;

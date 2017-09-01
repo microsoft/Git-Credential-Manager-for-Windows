@@ -31,7 +31,7 @@ namespace GitHub.Shared.ViewModels
     /// Rather than bring in all the overhead of an MVVM framework, we'll just do the simplest
     /// possible thing.
     /// </summary>
-    public class ViewModel: INotifyPropertyChanged
+    public class ViewModel : INotifyPropertyChanged
     {
         public event PropertyChangedEventHandler PropertyChanged;
 

@@ -292,9 +292,7 @@ namespace Microsoft.Alm.Authentication
         /// <param name="accessToken">
         /// Azure Directory access token with privileges to grant access to the target resource.
         /// </param>
-        /// <param name="options">
-        /// Set of options related to generation of personal access tokens.
-        /// </param>
+        /// <param name="options">Set of options related to generation of personal access tokens.</param>
         /// <returns><see langword="true"/> if successful; <see langword="false"/> otherwise.</returns>
         protected async Task<Credential> GeneratePersonalAccessToken(
             TargetUri targetUri,

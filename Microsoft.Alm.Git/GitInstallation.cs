@@ -30,7 +30,7 @@ using System.IO;
 
 namespace Microsoft.Alm.Git
 {
-    public struct GitInstallation: IEquatable<GitInstallation>
+    public struct GitInstallation : IEquatable<GitInstallation>
     {
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Security", "CA2104:DoNotDeclareReadOnlyMutableReferenceTypes")]
         public static readonly StringComparer PathComparer = StringComparer.InvariantCultureIgnoreCase;

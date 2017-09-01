@@ -24,7 +24,6 @@
  * WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE."
 **/
 
-using System;
 using System.Collections.Generic;
 using System.Runtime.CompilerServices;
 using ScopeSet = System.Collections.Generic.HashSet<string>;
@@ -34,7 +33,7 @@ namespace Atlassian.Bitbucket.Authentication
     /// <summary>
     /// Defines the available scopes associated with OAuth tokens in Bitbucket.
     /// </summary>
-    public sealed class TokenScope: Microsoft.Alm.Authentication.TokenScope
+    public sealed class TokenScope : Microsoft.Alm.Authentication.TokenScope
     {
         public static readonly TokenScope None = new TokenScope(string.Empty);
 

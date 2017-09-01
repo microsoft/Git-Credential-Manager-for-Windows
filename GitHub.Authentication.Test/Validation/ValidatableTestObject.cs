@@ -5,6 +5,7 @@ namespace GitHub.Authentication.Test.Validation
     public class ValidatableTestObject : ViewModel
     {
         private string _someStringProperty;
+
         public string SomeStringProperty
         {
             get { return _someStringProperty; }
@@ -16,6 +17,7 @@ namespace GitHub.Authentication.Test.Validation
         }
 
         private string _anotherStringProperty;
+
         public string AnotherStringProperty
         {
             get { return _anotherStringProperty; }

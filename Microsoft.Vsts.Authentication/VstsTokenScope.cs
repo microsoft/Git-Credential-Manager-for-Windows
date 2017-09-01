@@ -23,14 +23,13 @@
  * WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE."
 **/
 
-using System;
 using System.Collections.Generic;
 using System.Runtime.CompilerServices;
 using ScopeSet = System.Collections.Generic.HashSet<string>;
 
 namespace Microsoft.Alm.Authentication
 {
-    public class VstsTokenScope: TokenScope
+    public class VstsTokenScope : TokenScope
     {
         public static readonly VstsTokenScope None = new VstsTokenScope(string.Empty);
 

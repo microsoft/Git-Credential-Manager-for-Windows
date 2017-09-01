@@ -42,7 +42,7 @@ namespace Atlassian.Bitbucket.Authentication.Views
     /// prompted with a second UI to ask for OAuth authorisation <see cref="OAuthWindow"/>.
     /// </para>
     /// </summary>
-    partial class CredentialsWindow: AuthenticationDialogWindow
+    partial class CredentialsWindow : AuthenticationDialogWindow
     {
         public CredentialsWindow()
         {

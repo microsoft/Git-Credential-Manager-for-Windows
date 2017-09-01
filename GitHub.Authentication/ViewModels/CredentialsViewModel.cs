@@ -31,7 +31,7 @@ using GitHub.Shared.ViewModels.Validation;
 
 namespace GitHub.Authentication.ViewModels
 {
-    public class CredentialsViewModel: DialogViewModel
+    public class CredentialsViewModel : DialogViewModel
     {
         public CredentialsViewModel()
         {

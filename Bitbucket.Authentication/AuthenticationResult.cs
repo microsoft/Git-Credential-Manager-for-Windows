@@ -91,7 +91,7 @@ namespace Atlassian.Bitbucket.Authentication
         public string RemoteUsername { get; internal set; }
 
         /// <summary>
-        ///     Flag indicating if the results is a success
+        /// Flag indicating if the results is a success
         /// </summary>
         public bool IsSuccess { get { return Type.Equals(AuthenticationResultType.Success); } }
 

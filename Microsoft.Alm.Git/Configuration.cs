@@ -217,7 +217,7 @@ namespace Microsoft.Alm.Git
             }
         }
 
-        internal sealed class Impl: Configuration
+        internal sealed class Impl : Configuration
         {
             internal Impl()
             { }
@@ -424,7 +424,7 @@ namespace Microsoft.Alm.Git
             }
         }
 
-        public struct Entry: IEquatable<Entry>
+        public struct Entry : IEquatable<Entry>
         {
             [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Security", "CA2104:DoNotDeclareReadOnlyMutableReferenceTypes")]
             public static readonly StringComparer KeyComparer = StringComparer.OrdinalIgnoreCase;

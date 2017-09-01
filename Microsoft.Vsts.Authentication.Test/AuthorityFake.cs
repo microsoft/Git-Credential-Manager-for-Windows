@@ -4,7 +4,7 @@ using Xunit;
 
 namespace Microsoft.Alm.Authentication.Test
 {
-    internal class AuthorityFake: IVstsAuthority
+    internal class AuthorityFake : IVstsAuthority
     {
         public AuthorityFake(string expectedQueryParameters)
         {

@@ -40,7 +40,7 @@ namespace Microsoft.Alm
         private const string Kernel32 = "kernel32.dll";
 
         [Flags]
-        public enum ConsoleMode: uint
+        public enum ConsoleMode : uint
         {
             /// <summary>
             /// CTRL+C is processed by the system and is not placed in the input buffer. If the input
@@ -112,7 +112,7 @@ namespace Microsoft.Alm
         }
 
         [Flags]
-        public enum FileAccess: uint
+        public enum FileAccess : uint
         {
             GenericRead = 0x80000000,
             GenericWrite = 0x40000000,
@@ -121,7 +121,7 @@ namespace Microsoft.Alm
         }
 
         [Flags]
-        public enum FileAttributes: uint
+        public enum FileAttributes : uint
         {
             /// <summary>
             /// The file is read only. Applications can read the file, but cannot write to or delete it.
@@ -289,7 +289,7 @@ namespace Microsoft.Alm
             WriteThrough = 0x80000000,
         }
 
-        public enum FileCreationDisposition: uint
+        public enum FileCreationDisposition : uint
         {
             /// <summary>
             /// <para>Creates a new file, only if it does not already exist.</para>
@@ -345,7 +345,7 @@ namespace Microsoft.Alm
         }
 
         [Flags]
-        public enum FileShare: uint
+        public enum FileShare : uint
         {
             /// <summary>
             /// Prevents other processes from opening a file or device if they request delete, read,
@@ -381,7 +381,7 @@ namespace Microsoft.Alm
             Delete = 0x00000004
         }
 
-        public enum FileType: uint
+        public enum FileType : uint
         {
             /// <summary>
             /// Either the type of the specified file is unknown, or the function failed.
@@ -405,7 +405,7 @@ namespace Microsoft.Alm
             Remote = 0x8000,
         };
 
-        public enum StandardHandleType: int
+        public enum StandardHandleType : int
         {
             /// <summary>
             /// The standard input device. Initially, this is the console input buffer, CONIN$.
@@ -422,7 +422,7 @@ namespace Microsoft.Alm
         };
 
         [Flags]
-        public enum CredentialPackFlags: uint
+        public enum CredentialPackFlags : uint
         {
             None = 0,
             ProtectedCredentials = 0x1,
@@ -430,7 +430,7 @@ namespace Microsoft.Alm
             GenericCredentials = 0x4,
         }
 
-        internal enum CredentialType: uint
+        internal enum CredentialType : uint
         {
             /// <summary> <para>The `<see cref="Credential"/>` is a generic credential. The
             /// credential will not be used by any particular authentication package.</para>
@@ -504,7 +504,7 @@ namespace Microsoft.Alm
         }
 
         [Flags]
-        public enum CredentialUiFlags: uint
+        public enum CredentialUiFlags : uint
         {
             None = 0,
             IncorrectPassword = 0x1,
@@ -526,7 +526,7 @@ namespace Microsoft.Alm
             KeepUsername = 0x100000,
         }
 
-        public enum CredentialUiResult: uint
+        public enum CredentialUiResult : uint
         {
             Success = 0,
             Cancelled = 1223,
@@ -539,7 +539,7 @@ namespace Microsoft.Alm
         }
 
         [Flags]
-        public enum CredentialUiWindowsFlags: uint
+        public enum CredentialUiWindowsFlags : uint
         {
             None = 0,
             /// <summary>

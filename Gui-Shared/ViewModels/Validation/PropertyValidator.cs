@@ -31,7 +31,7 @@ using System.Reflection;
 
 namespace GitHub.Shared.ViewModels.Validation
 {
-    public abstract class PropertyValidator: ViewModel
+    public abstract class PropertyValidator : ViewModel
     {
         /// <summary>
         /// Creates a validator for a property. This validator is the starting point to attach other
@@ -67,7 +67,7 @@ namespace GitHub.Shared.ViewModels.Validation
         }
     }
 
-    public class PropertyValidator<TProperty>: PropertyValidator
+    public class PropertyValidator<TProperty> : PropertyValidator
     {
         // This should only be used by PropertyValidator<TObject, TProperty>
         protected PropertyValidator() { }
@@ -120,7 +120,7 @@ namespace GitHub.Shared.ViewModels.Validation
     /// </summary>
     /// <typeparam name="TObject"></typeparam>
     /// <typeparam name="TProperty"></typeparam>
-    public class PropertyValidator<TObject, TProperty>: PropertyValidator<TProperty> where TObject : INotifyPropertyChanged
+    public class PropertyValidator<TObject, TProperty> : PropertyValidator<TProperty> where TObject : INotifyPropertyChanged
     {
         internal PropertyValidator(TObject source, Expression<Func<TObject, TProperty>> propertyExpression)
         {

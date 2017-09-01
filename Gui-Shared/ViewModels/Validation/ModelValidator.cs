@@ -32,7 +32,7 @@ namespace GitHub.Shared.ViewModels.Validation
     /// A validator that represents the validation state of a model. It's true if all the supplied
     /// property validators are true.
     /// </summary>
-    public class ModelValidator: ViewModel
+    public class ModelValidator : ViewModel
     {
         public ModelValidator(params PropertyValidator[] propertyValidators)
         {
@@ -54,6 +54,7 @@ namespace GitHub.Shared.ViewModels.Validation
         }
 
         private bool _isValid;
+
         public bool IsValid
         {
             get { return _isValid; }

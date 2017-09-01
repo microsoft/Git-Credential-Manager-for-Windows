@@ -31,7 +31,7 @@ using System.Windows;
 namespace GitHub.UI
 {
     // http://www.thomaslevesque.com/2011/03/21/wpf-how-to-bind-to-data-when-the-datacontext-is-not-inherited/
-    public class BindingProxy: Freezable
+    public class BindingProxy : Freezable
     {
         protected override Freezable CreateInstanceCore()
         {

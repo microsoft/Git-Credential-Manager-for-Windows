@@ -24,8 +24,6 @@
 **/
 
 using System;
-using System.Net;
-using System.Net.Http;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
@@ -40,7 +38,7 @@ namespace Atlassian.Bitbucket.Authentication
     /// Implementation of <see cref="IAuthority"/> representing the Bitbucket APIs as the authority
     /// that can provide and validate credentials for Bitbucket.
     /// </summary>
-    internal class Authority: IAuthority
+    internal class Authority : IAuthority
     {
         /// <summary>
         /// The root URL for Bitbucket REST API calls.
@@ -87,7 +85,7 @@ namespace Atlassian.Bitbucket.Authentication
                     var authHeader = GetBearerHeaderAuthHeader(result.Token.Value);
                     var userResult = await RestClient.TryGetUser(targetUri, RequestTimeout, restRootUri, authHeader);
 
-                    if(!userResult.IsSuccess)
+                    if (!userResult.IsSuccess)
                     {
                         Trace.WriteLine($"oauth user check failed");
                         return new AuthenticationResult(AuthenticationResultType.Failure);
@@ -102,7 +100,6 @@ namespace Atlassian.Bitbucket.Authentication
 
                     // everything is hunky dory
                     return result;
-
                 }
                 catch (Exception ex)
                 {
@@ -178,7 +175,7 @@ namespace Atlassian.Bitbucket.Authentication
         }
 
         /// <summary>
-        ///     Get the HTTP encoded version of the Credentials secret
+        /// Get the HTTP encoded version of the Credentials secret
         /// </summary>
         private static string GetEncodedCredentials(string username, Credential credentials)
         {
@@ -188,7 +185,7 @@ namespace Atlassian.Bitbucket.Authentication
         }
 
         /// <summary>
-        ///     Get the HTTP encoded version of the Credentials secret
+        /// Get the HTTP encoded version of the Credentials secret
         /// </summary>
         private static string GetEncodedCredentials(string user, string password)
         {

@@ -32,7 +32,7 @@ namespace Microsoft.Alm.Authentication
     /// <summary>
     /// Facilitates Azure Directory authentication.
     /// </summary>
-    public sealed class VstsAadAuthentication: BaseVstsAuthentication, IVstsAadAuthentication
+    public sealed class VstsAadAuthentication : BaseVstsAuthentication, IVstsAadAuthentication
     {
         /// <summary>
         /// </summary>

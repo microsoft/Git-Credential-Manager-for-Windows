@@ -200,84 +200,80 @@ namespace Microsoft.Alm.Cli
                 if (readableStream == Stream.Null || !readableStream.CanRead)
                     throw new InvalidOperationException("Unable to read input.");
 
-                else
+                byte[] buffer = new byte[4096];
+                int read = 0;
+
+                int r;
+                while ((r = readableStream.Read(buffer, read, buffer.Length - read)) > 0)
                 {
-                    //
-                    byte[] buffer = new byte[4096];
-                    int read = 0;
+                    read += r;
 
-                    int r;
-                    while ((r = readableStream.Read(buffer, read, buffer.Length - read)) > 0)
+                    // if we've filled the buffer, make it larger this could hit an out of memory
+                    // condition, but that'd require the called to be attempting to do so, since
+                    // that's not a secyity threat we can safely ignore that and allow NetFx to
+                    // handle it
+                    if (read == buffer.Length)
                     {
-                        read += r;
-
-                        // if we've filled the buffer, make it larger this could hit an out of memory
-                        // condition, but that'd require the called to be attempting to do so, since
-                        // that's not a secyity threat we can safely ignore that and allow NetFx to
-                        // handle it
-                        if (read == buffer.Length)
-                        {
-                            Array.Resize(ref buffer, buffer.Length * 2);
-                        }
-
-                        if ((read > 0 && read < 3 && buffer[read - 1] == '\n'))
-                        {
-                            throw new InvalidDataException("Invalid input, please see 'https://www.kernel.org/pub/software/scm/git/docs/git-credential.html'.");
-                        }
-
-                        // the input ends with LFLF, check for that and break the read loop unless
-                        // input is coming from CLRF system, in which case it'll be CLRFCLRF
-                        if ((buffer[read - 2] == '\n'
-                                && buffer[read - 1] == '\n')
-                            || (buffer[read - 4] == '\r'
-                                && buffer[read - 3] == '\n'
-                                && buffer[read - 2] == '\r'
-                                && buffer[read - 1] == '\n'))
-                            break;
+                        Array.Resize(ref buffer, buffer.Length * 2);
                     }
 
-                    // Git uses UTF-8 for string, don't let the OS decide how to decode it instead
-                    // we'll actively decode the UTF-8 block ourselves
-                    string input = Encoding.UTF8.GetString(buffer, 0, read);
-
-                    // the `StringReader` is just useful
-                    using (StringReader reader = new StringReader(input))
+                    if ((read > 0 && read < 3 && buffer[read - 1] == '\n'))
                     {
-                        string line;
-                        while (!string.IsNullOrWhiteSpace((line = reader.ReadLine())))
+                        throw new InvalidDataException("Invalid input, please see 'https://www.kernel.org/pub/software/scm/git/docs/git-credential.html'.");
+                    }
+
+                    // the input ends with LFLF, check for that and break the read loop unless
+                    // input is coming from CLRF system, in which case it'll be CLRFCLRF
+                    if ((buffer[read - 2] == '\n'
+                            && buffer[read - 1] == '\n')
+                        || (buffer[read - 4] == '\r'
+                            && buffer[read - 3] == '\n'
+                            && buffer[read - 2] == '\r'
+                            && buffer[read - 1] == '\n'))
+                        break;
+                }
+
+                // Git uses UTF-8 for string, don't let the OS decide how to decode it instead
+                // we'll actively decode the UTF-8 block ourselves
+                string input = Encoding.UTF8.GetString(buffer, 0, read);
+
+                // the `StringReader` is just useful
+                using (StringReader reader = new StringReader(input))
+                {
+                    string line;
+                    while (!string.IsNullOrWhiteSpace((line = reader.ReadLine())))
+                    {
+                        string[] pair = line.Split(new[] { '=' }, 2);
+
+                        if (pair.Length == 2)
                         {
-                            string[] pair = line.Split(new[] { '=' }, 2);
-
-                            if (pair.Length == 2)
+                            switch (pair[0])
                             {
-                                switch (pair[0])
-                                {
-                                    case "protocol":
-                                        _queryProtocol = pair[1];
-                                        break;
+                                case "protocol":
+                                    _queryProtocol = pair[1];
+                                    break;
 
-                                    case "host":
-                                        _queryHost = pair[1];
-                                        break;
+                                case "host":
+                                    _queryHost = pair[1];
+                                    break;
 
-                                    case "path":
-                                        _queryPath = pair[1];
-                                        break;
+                                case "path":
+                                    _queryPath = pair[1];
+                                    break;
 
-                                    case "username":
-                                        _username = pair[1];
-                                        break;
+                                case "username":
+                                    _username = pair[1];
+                                    break;
 
-                                    case "password":
-                                        _password = pair[1];
-                                        break;
-                                }
+                                case "password":
+                                    _password = pair[1];
+                                    break;
                             }
                         }
                     }
-
-                    CreateTargetUri();
                 }
+
+                CreateTargetUri();
             }
 
             internal Impl(Uri targetUri)

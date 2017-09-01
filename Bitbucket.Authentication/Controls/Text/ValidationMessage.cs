@@ -32,7 +32,7 @@ using GitHub.Shared.ViewModels.Validation;
 
 namespace Atlassian.Bitbucket.Authentication.Controls
 {
-    public class ValidationMessage: UserControl
+    public class ValidationMessage : UserControl
     {
         private const double defaultTextChangeThrottle = 0.2;
 

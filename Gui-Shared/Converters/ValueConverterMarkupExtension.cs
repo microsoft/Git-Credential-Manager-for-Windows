@@ -43,7 +43,7 @@ namespace GitHub.Shared.Converters
     /// looking at theirs because I know mine will be better. ;)
     /// </remarks>
     /// <typeparam name="T"></typeparam>
-    public abstract class ValueConverterMarkupExtension<T>: MarkupExtension, IValueConverter where T : class, IValueConverter, new()
+    public abstract class ValueConverterMarkupExtension<T> : MarkupExtension, IValueConverter where T : class, IValueConverter, new()
     {
         private static T converter;
 

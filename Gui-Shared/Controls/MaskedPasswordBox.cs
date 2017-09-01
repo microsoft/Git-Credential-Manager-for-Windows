@@ -41,7 +41,7 @@ namespace GitHub.Shared.Controls
     /// make a difference.
     /// </para>
     /// </remarks>
-    public class MaskedPasswordBox: PromptTextBox
+    public class MaskedPasswordBox : PromptTextBox
     {
         // Fake char to display in Visual Tree
         private const char pwdChar = '●';
