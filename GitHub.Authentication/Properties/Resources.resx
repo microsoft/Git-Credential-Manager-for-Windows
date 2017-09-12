@@ -162,4 +162,10 @@
   <data name="ForgotPasswordText" xml:space="preserve">
     <value>Forgot your password?</value>
   </data>
+  <data name="OrganisationLabel" xml:space="preserve">
+    <value>Organisation</value>
+  </data>
+  <data name="RepositoryLabel" xml:space="preserve">
+    <value>Repository</value>
+  </data>
 </root>

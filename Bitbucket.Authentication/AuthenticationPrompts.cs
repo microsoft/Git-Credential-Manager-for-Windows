@@ -80,7 +80,7 @@ namespace Atlassian.Bitbucket.Authentication
         public static bool CredentialModalPrompt(string title, TargetUri targetUri, out string username, out string password)
         {
             // if there is a user in the remote URL then prepopulate the UI with it.
-            var credentialViewModel = new CredentialsViewModel(GetUserFromTargetUri(targetUri));
+            var credentialViewModel = new CredentialsViewModel(GetUserFromTargetUri(targetUri), targetUri.ActualUri.AbsolutePath);
 
             Trace.WriteLine("prompting user for credentials.");
 
@@ -105,7 +105,7 @@ namespace Atlassian.Bitbucket.Authentication
         /// </returns>
         public static bool AuthenticationOAuthModalPrompt(string title, TargetUri targetUri, AuthenticationResultType resultType, string username)
         {
-            var oauthViewModel = new OAuthViewModel(resultType == AuthenticationResultType.TwoFactor);
+            var oauthViewModel = new OAuthViewModel(resultType == AuthenticationResultType.TwoFactor, targetUri.ActualUri.AbsolutePath);
 
             Trace.WriteLine("prompting user for authentication code.");
 

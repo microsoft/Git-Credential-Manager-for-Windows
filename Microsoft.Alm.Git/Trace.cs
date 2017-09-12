@@ -186,7 +186,15 @@ namespace Microsoft.Alm.Git
             {
                 foreach (var writer in _writers)
                 {
-                    writer?.Flush();
+                    try
+                    {
+                        writer?.Flush();
+                    }
+                    catch (Exception e)
+                    {
+                        // swallow any errors as we're shutting down.
+                    }
+                    
                 }
             }
         }

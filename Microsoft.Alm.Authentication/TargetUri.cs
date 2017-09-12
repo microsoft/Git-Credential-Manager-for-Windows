@@ -240,7 +240,7 @@ namespace Microsoft.Alm.Authentication
             // Append some amount of path to the url
             if (path)
             {
-                url += QueryUri.AbsolutePath;
+                url += ActualUri.AbsolutePath;
             }
             else
             {

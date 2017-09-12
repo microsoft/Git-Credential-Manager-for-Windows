@@ -585,7 +585,7 @@ namespace Microsoft.Alm.Cli
                 string actualUrl = null;
                 string queryUrl = null;
                 string proxyUrl = _proxyUri?.OriginalString;
-
+                
                 // when the target requests a path...
                 if (UseHttpPath)
                 {

@@ -23,6 +23,7 @@
  * WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE."
 **/
 
+using System.Windows;
 using System.Windows.Input;
 using GitHub.Authentication.Properties;
 using GitHub.Shared.Helpers;
@@ -38,13 +39,13 @@ namespace GitHub.Authentication.ViewModels
         /// <summary>
         /// This is used by the GitHub.Authentication test application
         /// </summary>
-        public TwoFactorViewModel() : this(false) { }
+        public TwoFactorViewModel() : this(false, string.Empty) { }
 
         /// <summary>
         /// This quite obviously creates an instance of a <see cref="TwoFactorViewModel"/>.
         /// </summary>
         /// <param name="isSms">True if the 2fa authentication code is sent via SMS</param>
-        public TwoFactorViewModel(bool isSms)
+        public TwoFactorViewModel(bool isSms, string path)
         {
             OkCommand = new ActionCommand(_ => Result = AuthenticationDialogResult.Ok);
             CancelCommand = new ActionCommand(_ => Result = AuthenticationDialogResult.Cancel);
@@ -59,6 +60,24 @@ namespace GitHub.Authentication.ViewModels
                     IsValid = AuthenticationCode.Length == 6;
                 }
             };
+
+            HasPath = Visibility.Hidden;
+            if (!string.IsNullOrWhiteSpace(path)
+                && path.Contains("/"))
+            {
+                // bitbucket format should be /org/repo.git
+                var parts = path.Split('/');
+                if (parts.Length == 3)
+                {
+                    Organisation = parts[1];
+                    if (!string.IsNullOrWhiteSpace(parts[2])
+                        && parts[2].EndsWith(".git"))
+                    {
+                        Repository = parts[2].Substring(0, parts[2].Length - ".git".Length);
+                        HasPath = Visibility.Visible;
+                    }
+                }
+            }
         }
 
         private string _authenticationCode;
@@ -87,6 +106,20 @@ namespace GitHub.Authentication.ViewModels
                     : Resources.OpenTwoFactorAuthAppText;
             }
         }
+        /// <summary>
+        ///     Gets the repository name, as found from the path
+        /// </summary>
+        public string Repository { get; }
+
+        /// <summary>
+        ///     Gets the organisation name, as found from the path
+        /// </summary>
+        public string Organisation { get; }
+
+        /// <summary>
+        ///     Gets a flag indicating if there is a org and repo to show
+        /// </summary>
+        public Visibility HasPath { get; }
 
         public ICommand LearnMoreCommand { get; }
             = new HyperLinkCommand();

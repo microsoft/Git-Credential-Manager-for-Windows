@@ -141,11 +141,17 @@
   <data name="OAuthAuthText" xml:space="preserve">
     <value>OAuth Authentication</value>
   </data>
+  <data name="OrganisationLabel" xml:space="preserve">
+    <value>Organisation</value>
+  </data>
   <data name="PasswordPromptText" xml:space="preserve">
     <value>Password</value>
   </data>
   <data name="PasswordRequired" xml:space="preserve">
     <value>A password is required</value>
+  </data>
+  <data name="RepositoryLabel" xml:space="preserve">
+    <value>Repository</value>
   </data>
   <data name="SignUpLinkText" xml:space="preserve">
     <value>Sign up.</value>

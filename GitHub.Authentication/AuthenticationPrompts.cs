@@ -41,7 +41,7 @@ namespace GitHub.Authentication
     {
         public static bool CredentialModalPrompt(TargetUri targetUri, out string username, out string password)
         {
-            var credentialViewModel = new CredentialsViewModel();
+            var credentialViewModel = new CredentialsViewModel(targetUri.ActualUri.AbsolutePath);
 
             Git.Trace.WriteLine($"prompting user for credentials for '{targetUri}'.");
 
@@ -55,7 +55,7 @@ namespace GitHub.Authentication
 
         public static bool AuthenticationCodeModalPrompt(TargetUri targetUri, GitHubAuthenticationResultType resultType, string username, out string authenticationCode)
         {
-            var twoFactorViewModel = new TwoFactorViewModel(resultType == GitHubAuthenticationResultType.TwoFactorSms);
+            var twoFactorViewModel = new TwoFactorViewModel(resultType == GitHubAuthenticationResultType.TwoFactorSms, targetUri.ActualUri.AbsolutePath);
 
             Git.Trace.WriteLine($"prompting user for authentication code for '{targetUri}'.");
 
