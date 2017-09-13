@@ -19,7 +19,7 @@ namespace Atlassian.Bitbucket.Authentication.Properties {
     // class via a tool like ResGen or Visual Studio.
     // To add or remove a member, edit your .ResX file then rerun ResGen
     // with the /str option, or rebuild your VS project.
-    [global::System.CodeDom.Compiler.GeneratedCodeAttribute("System.Resources.Tools.StronglyTypedResourceBuilder", "4.0.0.0")]
+    [global::System.CodeDom.Compiler.GeneratedCodeAttribute("System.Resources.Tools.StronglyTypedResourceBuilder", "15.0.0.0")]
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
     [global::System.Runtime.CompilerServices.CompilerGeneratedAttribute()]
     public class Resources {
@@ -133,6 +133,15 @@ namespace Atlassian.Bitbucket.Authentication.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Organisation.
+        /// </summary>
+        public static string OrganisationLabel {
+            get {
+                return ResourceManager.GetString("OrganisationLabel", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Password.
         /// </summary>
         public static string PasswordPromptText {
@@ -147,6 +156,15 @@ namespace Atlassian.Bitbucket.Authentication.Properties {
         public static string PasswordRequired {
             get {
                 return ResourceManager.GetString("PasswordRequired", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Repository.
+        /// </summary>
+        public static string RepositoryLabel {
+            get {
+                return ResourceManager.GetString("RepositoryLabel", resourceCulture);
             }
         }
         

@@ -23,6 +23,7 @@
  * WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE."
 **/
 
+using System.Windows;
 using System.Windows.Input;
 using GitHub.Authentication.Properties;
 using GitHub.Shared.Helpers;
@@ -33,7 +34,14 @@ namespace GitHub.Authentication.ViewModels
 {
     public class CredentialsViewModel : DialogViewModel
     {
-        public CredentialsViewModel()
+        public CredentialsViewModel() : this(string.Empty)
+        {
+            // without this default constructor get nullreferenceexceptions during binding i guess
+            // 'cos the view is built before the 'official' viewmodel and hence generates it own
+            // viewmodel while building?
+        }
+
+        public CredentialsViewModel(string path)
         {
             LoginCommand = new ActionCommand(_ => Result = AuthenticationDialogResult.Ok);
             CancelCommand = new ActionCommand(_ => Result = AuthenticationDialogResult.Cancel);
@@ -52,6 +60,24 @@ namespace GitHub.Authentication.ViewModels
                     IsValid = ModelValidator.IsValid;
                 }
             };
+
+            HasPath = Visibility.Hidden;
+            if (!string.IsNullOrWhiteSpace(path)
+                && path.Contains("/"))
+            {
+                // bitbucket format should be /org/repo.git
+                var parts = path.Split('/');
+                if (parts.Length == 3)
+                {
+                    Organisation = parts[1];
+                    if (!string.IsNullOrWhiteSpace(parts[2])
+                        && parts[2].EndsWith(".git"))
+                    {
+                        Repository = parts[2].Substring(0, parts[2].Length - ".git".Length);
+                        HasPath = Visibility.Visible;
+                    }
+                }
+            }
         }
 
         private string _login;
@@ -88,6 +114,21 @@ namespace GitHub.Authentication.ViewModels
                 RaisePropertyChangedEvent(nameof(Password));
             }
         }
+
+        /// <summary>
+        ///     Gets the repository name, as found from the path
+        /// </summary>
+        public string Repository { get; }
+
+        /// <summary>
+        ///     Gets the organisation name, as found from the path
+        /// </summary>
+        public string Organisation { get; }
+
+        /// <summary>
+        ///     Gets a flag indicating if there is a org and repo to show
+        /// </summary>
+        public Visibility HasPath { get; }
 
         public PropertyValidator<string> PasswordValidator { get; }
 

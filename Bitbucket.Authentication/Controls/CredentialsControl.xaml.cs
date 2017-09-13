@@ -41,13 +41,17 @@ namespace Atlassian.Bitbucket.Authentication.Controls
 
         protected override void SetFocus()
         {
-            if (string.IsNullOrWhiteSpace(loginTextBox.Text))
+            if (string.IsNullOrWhiteSpace(LoginTextBox.Text))
             {
-                loginTextBox.TryFocus().Wait(TimeSpan.FromSeconds(1));
+                LoginTextBox.TryFocus().Wait(TimeSpan.FromSeconds(1));
+            }
+            else if (string.IsNullOrWhiteSpace(PasswordTextBox.Text))
+            {
+                PasswordTextBox.TryFocus().Wait(TimeSpan.FromSeconds(1));
             }
             else
             {
-                passwordTextBox.TryFocus().Wait(TimeSpan.FromSeconds(1));
+                LoginButton.TryFocus().Wait(TimeSpan.FromSeconds(1));
             }
         }
     }

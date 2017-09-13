@@ -1,4 +1,5 @@
-﻿using GitHub.Authentication.ViewModels;
+﻿using System;
+using GitHub.Authentication.ViewModels;
 using Xunit;
 
 namespace GitHub.Authentication.Test
@@ -8,7 +9,7 @@ namespace GitHub.Authentication.Test
         [Fact]
         public void ValidatesLoginAndPassword()
         {
-            var viewModel = new CredentialsViewModel();
+            var viewModel = new CredentialsViewModel(String.Empty);
             Assert.False(viewModel.LoginValidator.ValidationResult.IsValid);
             Assert.False(viewModel.PasswordValidator.ValidationResult.IsValid);
 
@@ -22,7 +23,7 @@ namespace GitHub.Authentication.Test
         [Fact]
         public void IsValidWhenBothLoginAndPasswordIsValid()
         {
-            var viewModel = new CredentialsViewModel();
+            var viewModel = new CredentialsViewModel(String.Empty);
             Assert.False(viewModel.ModelValidator.IsValid);
             viewModel.Login = "Tyrion";
             Assert.False(viewModel.ModelValidator.IsValid);

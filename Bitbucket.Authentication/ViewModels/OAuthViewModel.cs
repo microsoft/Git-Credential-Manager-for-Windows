@@ -23,6 +23,7 @@
  * WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE."
 **/
 
+using System.Windows;
 using System.Windows.Input;
 using GitHub.Shared.Helpers;
 using GitHub.Shared.ViewModels;
@@ -36,11 +37,11 @@ namespace Atlassian.Bitbucket.Authentication.ViewModels
     {
         private bool _resultType;
 
-        public OAuthViewModel() : this(false)
+        public OAuthViewModel() : this(false, string.Empty)
         {
         }
 
-        public OAuthViewModel(bool resultType)
+        public OAuthViewModel(bool resultType, string path)
         {
             _resultType = resultType;
 
@@ -49,7 +50,40 @@ namespace Atlassian.Bitbucket.Authentication.ViewModels
 
             // just a notification dialog so its always valid.
             IsValid = true;
+
+            HasPath = Visibility.Hidden;
+            if (!string.IsNullOrWhiteSpace(path)
+                && path.Contains("/"))
+            {
+                // bitbucket format should be /org/repo.git
+                var parts = path.Split('/');
+                if (parts.Length == 3)
+                {
+                    Organisation = parts[1];
+                    if (!string.IsNullOrWhiteSpace(parts[2])
+                        && parts[2].EndsWith(".git"))
+                    {
+                        Repository = parts[2].Substring(0, parts[2].Length - ".git".Length);
+                        HasPath = Visibility.Visible;
+                    }
+                }
+            }
         }
+
+        /// <summary>
+        ///     Gets the repository name, as found from the path
+        /// </summary>
+        public string Repository { get; }
+
+        /// <summary>
+        ///     Gets the organisation name, as found from the path
+        /// </summary>
+        public string Organisation { get; }
+
+        /// <summary>
+        ///     Gets a flag indicating if there is a org and repo to show
+        /// </summary>
+        public Visibility HasPath { get; }
 
         /// <summary>
         /// Provides a link to Bitbucket OAuth documentation
