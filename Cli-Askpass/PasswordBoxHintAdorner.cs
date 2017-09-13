@@ -32,7 +32,7 @@ using System.Windows.Media;
 namespace Microsoft.Alm.Gui
 {
     [System.Runtime.InteropServices.ComVisible(false)]
-    public class PasswordBoxHintAdorner: Adorner
+    public class PasswordBoxHintAdorner : Adorner
     {
         public PasswordBoxHintAdorner(UIElement adornedElement, string hintText, Style hintStyle, VisibilityDelegate visibilityCallback)
           : base(adornedElement)

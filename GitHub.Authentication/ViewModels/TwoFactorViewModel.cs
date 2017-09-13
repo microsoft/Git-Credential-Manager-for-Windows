@@ -33,7 +33,7 @@ namespace GitHub.Authentication.ViewModels
     /// <summary>
     /// Simple view model for the GitHub Two Factor dialog.
     /// </summary>
-    public class TwoFactorViewModel: DialogViewModel
+    public class TwoFactorViewModel : DialogViewModel
     {
         /// <summary>
         /// This is used by the GitHub.Authentication test application

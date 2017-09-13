@@ -2,7 +2,7 @@
 
 namespace GitHub.UI
 {
-    public partial class HorizontalShadowDivider: UserControl
+    public partial class HorizontalShadowDivider : UserControl
     {
         public HorizontalShadowDivider()
         {

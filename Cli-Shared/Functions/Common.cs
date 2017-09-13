@@ -554,8 +554,8 @@ namespace Microsoft.Alm.Cli
                                     && (credentials = await basicAuth.AcquireCredentials(operationArguments.TargetUri)) != null))
                             {
                                 Git.Trace.WriteLine("credentials found.");
-                                // no need to save the credentials explicitly, as Git will call back with
-                                // a store command if the credentials are valid.
+                                // no need to save the credentials explicitly, as Git will call back
+                                // with a store command if the credentials are valid.
                             }
                             else
                             {

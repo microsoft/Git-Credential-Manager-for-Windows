@@ -28,7 +28,7 @@ using System.Windows.Controls;
 
 namespace GitHub.UI
 {
-    public class OcticonImage: Control
+    public class OcticonImage : Control
     {
         public Octicon Icon
         {

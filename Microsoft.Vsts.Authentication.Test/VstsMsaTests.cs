@@ -3,7 +3,7 @@ using Xunit;
 
 namespace Microsoft.Alm.Authentication.Test
 {
-    public class VstsMsaTests: AuthenticationTests
+    public class VstsMsaTests : AuthenticationTests
     {
         public VstsMsaTests()
             : base()

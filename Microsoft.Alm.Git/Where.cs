@@ -51,7 +51,8 @@ namespace Microsoft.Alm.Git
 
                 if (string.IsNullOrEmpty(pathext) || string.IsNullOrEmpty(envpath))
                 {
-                    // The user is likely hosed, or a poorly crafted test case - eitherway avoid NRE from the .Split call.
+                    // The user is likely hosed, or a poorly crafted test case - eitherway avoid NRE
+                    // from the .Split call.
                     path = null;
                     return false;
                 }

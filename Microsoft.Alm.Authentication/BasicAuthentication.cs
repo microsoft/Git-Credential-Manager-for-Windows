@@ -33,7 +33,7 @@ namespace Microsoft.Alm.Authentication
     /// <summary>
     /// Facilitates basic authentication using simple username and password schemes.
     /// </summary>
-    public sealed class BasicAuthentication: BaseAuthentication, IAuthentication
+    public sealed class BasicAuthentication : BaseAuthentication, IAuthentication
     {
         public static readonly Credential NtlmCredentials = WwwAuthenticateHelper.Credentials;
 

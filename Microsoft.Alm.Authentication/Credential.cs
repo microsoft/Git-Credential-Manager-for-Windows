@@ -30,7 +30,7 @@ namespace Microsoft.Alm.Authentication
     /// <summary>
     /// Credentials for user authentication.
     /// </summary>
-    public sealed class Credential: Secret, IEquatable<Credential>
+    public sealed class Credential : Secret, IEquatable<Credential>
     {
         public static readonly Credential Empty = new Credential(string.Empty, string.Empty);
 

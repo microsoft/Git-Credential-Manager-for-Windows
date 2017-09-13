@@ -35,7 +35,7 @@ using System.Threading.Tasks;
 
 namespace Microsoft.Alm.Authentication
 {
-    internal class VstsAzureAuthority: AzureAuthority, IVstsAuthority
+    internal class VstsAzureAuthority : AzureAuthority, IVstsAuthority
     {
         public VstsAzureAuthority(string authorityHostUrl = null)
             : base()

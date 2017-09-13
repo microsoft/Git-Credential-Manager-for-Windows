@@ -31,7 +31,7 @@ namespace GitHub.Authentication
     /// <summary>
     /// Interaction logic for CredentialsWindow.xaml
     /// </summary>
-    public partial class CredentialsWindow: AuthenticationDialogWindow
+    public partial class CredentialsWindow : AuthenticationDialogWindow
     {
         public CredentialsWindow()
         {

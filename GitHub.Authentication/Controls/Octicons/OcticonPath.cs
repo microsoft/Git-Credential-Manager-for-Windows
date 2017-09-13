@@ -42,7 +42,7 @@ namespace GitHub.UI
     /// scaled octicon correctly position you'll have to explicitly set the height of the path to
     /// 1024 and wrap it in a viewbox to scale it down to the size you want.
     /// </summary>
-    public class OcticonPath: Shape
+    public class OcticonPath : Shape
     {
         private static readonly Lazy<Dictionary<Octicon, Lazy<Geometry>>> cache =
             new Lazy<Dictionary<Octicon, Lazy<Geometry>>>(PrepareCache);

@@ -54,8 +54,7 @@ namespace Microsoft.Alm.Authentication.Test
             targetUri = new TargetUri(actualUrl, queryUrl, proxyUrl);
             Assert.NotNull(targetUri);
 
-            // Since the actual Uri will substitute for a null query Uri,
-            // test the correct value.
+            // Since the actual Uri will substitute for a null query Uri, test the correct value.
             var uri = queryUri ?? actualUri;
 
             Assert.Equal(uri.AbsolutePath, targetUri.AbsolutePath);

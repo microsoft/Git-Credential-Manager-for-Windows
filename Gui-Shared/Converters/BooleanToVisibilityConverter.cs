@@ -30,7 +30,7 @@ using System.Windows;
 namespace GitHub.Shared.Converters
 {
     [Localizability(LocalizationCategory.NeverLocalize)]
-    public sealed class BooleanToVisibilityConverter: ValueConverterMarkupExtension<BooleanToVisibilityConverter>
+    public sealed class BooleanToVisibilityConverter : ValueConverterMarkupExtension<BooleanToVisibilityConverter>
     {
         private readonly System.Windows.Controls.BooleanToVisibilityConverter converter = new System.Windows.Controls.BooleanToVisibilityConverter();
 

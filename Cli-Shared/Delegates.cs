@@ -35,19 +35,33 @@ namespace Microsoft.Alm.Cli
     partial class Program
     {
         internal delegate Credential BasicCredentialPromptDelegate(Program program, TargetUri targetUri, string titleMessage);
+
         internal delegate bool BitbucketCredentialPromptDelegate(Program program, string titleMessage, TargetUri targetUri, out string username, out string password);
+
         internal delegate bool BitbucketOAuthPromptDelegate(Program program, string title, TargetUri targetUri, Bitbucket.AuthenticationResultType resultType, string username);
+
         internal delegate Task<BaseAuthentication> CreateAuthenticationDelegate(Program program, OperationArguments operationArguments);
+
         internal delegate void DeleteCredentialsDelegate(Program program, OperationArguments operationArguments);
+
         internal delegate void DieExceptionDelegate(Program program, Exception exception, string path, int line, string name);
+
         internal delegate void DieMessageDelegate(Program program, string message, string path, int line, string name);
+
         internal delegate void EnableTraceLoggingDelegate(Program program, OperationArguments operationArguments);
+
         internal delegate void EnableTraceLoggingFileDelegate(Program program, OperationArguments operationArguments, string logFilePath);
+
         internal delegate void ExitDelegate(Program program, int exitcode, string message, string path, int line, string name);
+
         internal delegate bool GitHubAuthCodePromptDelegate(Program program, TargetUri targetUri, Github.GitHubAuthenticationResultType resultType, string username, out string authenticationCode);
+
         internal delegate bool GitHubCredentialPromptDelegate(Program program, TargetUri targetUri, out string username, out string password);
+
         internal delegate void LoadOperationArgumentsDelegate(Program program, OperationArguments operationArguments);
+
         internal delegate void LogEventDelegate(Program program, string message, EventLogEntryType eventType);
+
         internal delegate bool ModalPromptDisplayDialogDelegate(Program program,
                                                                 ref NativeMethods.CredentialUiInfo credUiInfo,
                                                                 ref NativeMethods.CredentialPackFlags authPackage,
@@ -59,15 +73,25 @@ namespace Microsoft.Alm.Cli
                                                                 NativeMethods.CredentialUiWindowsFlags flags,
                                                                 out string username,
                                                                 out string password);
+
         internal delegate Credential ModalPromptForCredentialsDelegate(Program program, TargetUri targetUri, string message);
+
         internal delegate Credential ModalPromptForPasswordDelegate(Program program, TargetUri targetUri, string message, string username);
+
         internal delegate void PrintArgsDelegate(Program program, string[] args);
+
         internal delegate Credential QueryCredentialsDelegate(Program program, OperationArguments operationArguments);
+
         internal delegate ConsoleKeyInfo ReadKeyDelegate(Program program, bool intercept);
+
         internal delegate bool StandardHandleIsTtyDelegate(Program program, NativeMethods.StandardHandleType handleType);
+
         internal delegate bool TryReadBooleanDelegate(Program program, OperationArguments operationArguments, string configKey, string environKey, out bool? value);
+
         internal delegate bool TryReadStringDelegate(Program program, OperationArguments operationArguments, string configKey, string environKey, out string value);
+
         internal delegate void WriteDelegate(Program program, string message);
+
         internal delegate void WriteLineDelegate(Program program, string message);
     }
 }

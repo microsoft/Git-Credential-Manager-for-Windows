@@ -31,7 +31,7 @@ using Microsoft.IdentityModel.Clients.ActiveDirectory;
 
 namespace Microsoft.Alm.Authentication
 {
-    internal class VstsAdalTokenCache: IdentityModel.Clients.ActiveDirectory.TokenCache
+    internal class VstsAdalTokenCache : IdentityModel.Clients.ActiveDirectory.TokenCache
     {
         private readonly IReadOnlyList<IReadOnlyList<string>> AdalCachePaths = new string[][]
         {

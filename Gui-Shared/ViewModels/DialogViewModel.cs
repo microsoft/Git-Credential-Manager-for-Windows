@@ -25,7 +25,7 @@
 
 namespace GitHub.Shared.ViewModels
 {
-    public class DialogViewModel: ViewModel
+    public class DialogViewModel : ViewModel
     {
         private AuthenticationDialogResult _result = AuthenticationDialogResult.None;
 

@@ -35,7 +35,7 @@ using Git = Microsoft.Alm.Git;
 
 namespace GitHub.Authentication
 {
-    internal class Authority: IAuthority
+    internal class Authority : IAuthority
     {
         /// <summary>
         /// The GitHub required HTTP accepts header value

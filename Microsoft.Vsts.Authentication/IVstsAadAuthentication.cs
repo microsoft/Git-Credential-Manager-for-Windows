@@ -40,8 +40,7 @@ namespace Microsoft.Alm.Authentication
         /// <param name="targetUri">
         /// The unique identifier for the resource for which access is to be acquired.
         /// </param>
-        /// <param name="options">
-        /// </param>
+        /// <param name="options"></param>
         /// <returns>
         /// A <see cref="Credential"/> for packing into a basic authentication header; otherwise <see langword="null"/>.
         /// </returns>
@@ -84,8 +83,7 @@ namespace Microsoft.Alm.Authentication
         /// <param name="targetUri">
         /// The unique identifier for the resource for which access is to be acquired.
         /// </param>
-        /// <param name="options">
-        /// </param>
+        /// <param name="options"></param>
         /// <returns>
         /// A <see cref="Credential"/> for packing into a basic authentication header; otherwise <see langword="null"/>.
         /// </returns>

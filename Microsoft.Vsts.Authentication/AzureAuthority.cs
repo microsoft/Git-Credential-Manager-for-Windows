@@ -32,7 +32,7 @@ namespace Microsoft.Alm.Authentication
     /// <summary>
     /// Interfaces with Azure to perform authentication and identity services.
     /// </summary>
-    internal class AzureAuthority: IAzureAuthority
+    internal class AzureAuthority : IAzureAuthority
     {
         /// <summary>
         /// The base URL for logon services in Azure.

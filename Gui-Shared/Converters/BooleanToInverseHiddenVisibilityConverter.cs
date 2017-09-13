@@ -30,7 +30,7 @@ using System.Windows;
 namespace GitHub.Shared.Converters
 {
     [Localizability(LocalizationCategory.NeverLocalize)]
-    public sealed class BooleanToInverseHiddenVisibilityConverter: ValueConverterMarkupExtension<BooleanToInverseHiddenVisibilityConverter>
+    public sealed class BooleanToInverseHiddenVisibilityConverter : ValueConverterMarkupExtension<BooleanToInverseHiddenVisibilityConverter>
     {
         public override object Convert(object value,
             Type targetType,

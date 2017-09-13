@@ -31,7 +31,7 @@ namespace GitHub.Shared.Helpers
     /// <summary>
     /// Command that opens a browser to the URL specified by the command parameter.
     /// </summary>
-    public class HyperLinkCommand: ActionCommand
+    public class HyperLinkCommand : ActionCommand
     {
         public HyperLinkCommand() : base(ExecuteNavigateUrl)
         {

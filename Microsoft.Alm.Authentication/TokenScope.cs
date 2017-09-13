@@ -30,7 +30,7 @@ using ScopeSet = System.Collections.Generic.HashSet<string>;
 
 namespace Microsoft.Alm.Authentication
 {
-    public abstract class TokenScope: IEquatable<TokenScope>
+    public abstract class TokenScope : IEquatable<TokenScope>
     {
         protected TokenScope(string value)
         {

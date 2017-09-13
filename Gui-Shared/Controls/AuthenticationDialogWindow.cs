@@ -29,7 +29,7 @@ using GitHub.Shared.ViewModels;
 
 namespace GitHub.Shared.Controls
 {
-    public abstract class AuthenticationDialogWindow: Window
+    public abstract class AuthenticationDialogWindow : Window
     {
         protected AuthenticationDialogWindow()
         {

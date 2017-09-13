@@ -33,7 +33,7 @@ namespace Microsoft.Alm.Gui
     /// Interaction logic for PassphraseWindow.xaml
     /// </summary>
     [System.Runtime.InteropServices.ComVisible(false)]
-    public partial class UserPromptDialog: Window
+    public partial class UserPromptDialog : Window
     {
         public const string HintTextPassphrase = "SSH Passphrase";
         public const string HintTextPassword = "Password";

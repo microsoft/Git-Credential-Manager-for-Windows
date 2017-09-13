@@ -32,7 +32,7 @@ namespace Atlassian.Bitbucket.Authentication.ViewModels
     /// <summary>
     /// The ViewModel behind the OAuth UI prompt
     /// </summary>
-    public class OAuthViewModel: DialogViewModel
+    public class OAuthViewModel : DialogViewModel
     {
         private bool _resultType;
 

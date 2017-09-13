@@ -29,7 +29,7 @@ using System.Windows.Data;
 
 namespace GitHub.Shared.Converters
 {
-    public class ThicknessConverter: IValueConverter
+    public class ThicknessConverter : IValueConverter
     {
         public object Convert(
             object value,

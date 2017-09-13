@@ -310,10 +310,10 @@ namespace Microsoft.Alm.Authentication
         }
 
         /// <summary>
-        ///     Get a version of this <see cref="TargetUri"/> that contains the specified username.
+        /// Get a version of this <see cref="TargetUri"/> that contains the specified username.
         /// </summary>
         /// <remarks>
-        ///     If the <see cref="TargetUri"/> already contains a username, that one is kept NOT overwritten.
+        /// If the <see cref="TargetUri"/> already contains a username, that one is kept NOT overwritten.
         /// </remarks>
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2234:PassSystemUriObjectsInsteadOfStrings")]
         public TargetUri GetPerUserTargetUri(string username)
@@ -329,7 +329,7 @@ namespace Microsoft.Alm.Authentication
         }
 
         /// <summary>
-        ///     Get a version of this <see cref="TargetUri"/> that does NOT contain any username.
+        /// Get a version of this <see cref="TargetUri"/> that does NOT contain any username.
         /// </summary>
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Design", "CA1024:UsePropertiesWhereAppropriate")]
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2234:PassSystemUriObjectsInsteadOfStrings")]
@@ -346,14 +346,14 @@ namespace Microsoft.Alm.Authentication
         }
 
         /// <summary>
-        ///     Determine if the ActualUri of this <see cref="TargetUri"/> contains UserInfo
+        /// Determine if the ActualUri of this <see cref="TargetUri"/> contains UserInfo
         /// </summary>
-        public bool TargetUriContainsUsername{ get { return ActualUri.AbsoluteUri.Contains("@"); }}
+        public bool TargetUriContainsUsername { get { return ActualUri.AbsoluteUri.Contains("@"); } }
 
         /// <summary>
-        ///     Get username contained in the ActualUri of this <see cref="TargetUri"/>
+        /// Get username contained in the ActualUri of this <see cref="TargetUri"/>
         /// </summary>
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Design", "CA1056:UriPropertiesShouldNotBeStrings")]
-        public string TargetUriUsername { get { return ActualUri.UserInfo; }  }
+        public string TargetUriUsername { get { return ActualUri.UserInfo; } }
     }
 }

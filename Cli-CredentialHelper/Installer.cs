@@ -1037,7 +1037,7 @@ namespace Microsoft.Alm.Cli
             }
         }
 
-        public enum ResultValue: int
+        public enum ResultValue : int
         {
             UnknownFailure = -1,
             Success = 0,

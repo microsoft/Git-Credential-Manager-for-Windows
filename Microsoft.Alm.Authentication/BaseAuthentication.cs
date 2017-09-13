@@ -28,7 +28,7 @@ namespace Microsoft.Alm.Authentication
     /// <summary>
     /// Base authentication mechanisms for setting, retrieving, and deleting stored credentials.
     /// </summary>
-    public abstract class BaseAuthentication: IAuthentication
+    public abstract class BaseAuthentication : IAuthentication
     {
         /// <summary>
         /// Deletes a <see cref="Credential"/> from the storage used by the authentication object.

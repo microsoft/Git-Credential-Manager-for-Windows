@@ -32,7 +32,6 @@ namespace Microsoft.Alm.Git.Test
             Assert.Equal(expected, values[expectedName], ignoreCase ? StringComparer.OrdinalIgnoreCase : StringComparer.Ordinal);
         }
 
-
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2202:Do not dispose objects multiple times")]
         [Fact]
         public void GitConfig_ParseSampleFile()

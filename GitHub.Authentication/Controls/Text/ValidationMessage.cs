@@ -32,7 +32,7 @@ using GitHub.Shared.ViewModels.Validation;
 
 namespace GitHub.UI
 {
-    public class ValidationMessage: UserControl
+    public class ValidationMessage : UserControl
     {
         private const double defaultTextChangeThrottle = 0.2;
 

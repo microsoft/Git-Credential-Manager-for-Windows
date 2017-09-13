@@ -33,7 +33,7 @@ namespace GitHub.Authentication
     /// <summary>
     /// Facilitates GitHub simple and two-factor authentication
     /// </summary>
-    public class Authentication: BaseAuthentication, IAuthentication
+    public class Authentication : BaseAuthentication, IAuthentication
     {
         /// <summary>
         /// Creates a new authentication

@@ -39,7 +39,7 @@ namespace Microsoft.Alm.Git
         void WriteLine(string message, string filePath, int lineNumber, string memberName);
     }
 
-    public sealed class Trace: ITrace, IDisposable
+    public sealed class Trace : ITrace, IDisposable
     {
         public const string EnvironmentVariableKey = "GCM_TRACE";
 

@@ -31,7 +31,7 @@ using ScopeSet = System.Collections.Generic.HashSet<string>;
 
 namespace GitHub.Authentication
 {
-    public sealed class TokenScope: Microsoft.Alm.Authentication.TokenScope, IEquatable<TokenScope>
+    public sealed class TokenScope : Microsoft.Alm.Authentication.TokenScope, IEquatable<TokenScope>
     {
         public static readonly TokenScope None = new TokenScope(string.Empty);
 

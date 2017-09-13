@@ -35,7 +35,7 @@ namespace Atlassian.Bitbucket.Authentication.Views
     /// enabled on their account. Prompts the user to run the OAuth authorization process.
     /// </para>
     /// </summary>
-    public partial class OAuthWindow: AuthenticationDialogWindow
+    public partial class OAuthWindow : AuthenticationDialogWindow
     {
         public OAuthWindow()
         {

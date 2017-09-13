@@ -29,7 +29,7 @@ using System.Windows.Threading;
 
 namespace GitHub.Shared.Controls
 {
-    public abstract class DialogUserControl: UserControl
+    public abstract class DialogUserControl : UserControl
     {
         protected DialogUserControl()
         {

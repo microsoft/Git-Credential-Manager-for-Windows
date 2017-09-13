@@ -51,16 +51,16 @@ namespace Microsoft.Alm.Cli
 
         internal static bool TryParseUrlCredentials(string targetUrl, out string username, out string password)
         {
-            // config stored credentials come in the format of <username>[:<password>]@<url>
-            // with password being optional scheme terminator is actually "://" so we need
-            // adjust to get the correct index
+            // config stored credentials come in the format of <username>[:<password>]@<url> with
+            // password being optional scheme terminator is actually "://" so we need adjust to get
+            // the correct index
             int schemeTerminator = targetUrl.IndexOf(':') + 2;
             int credentialTerminator = targetUrl.IndexOf('@', schemeTerminator + 1);
 
             if (credentialTerminator > 0)
             {
-                // only check within the credential portion of the url, don't look past the
-                // '@' because the port token is the same as the username / password seperator.
+                // only check within the credential portion of the url, don't look past the '@'
+                // because the port token is the same as the username / password seperator.
                 int credentialLength = credentialTerminator - schemeTerminator;
                 credentialLength = Math.Max(0, credentialLength);
 

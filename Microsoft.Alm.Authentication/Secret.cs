@@ -56,8 +56,7 @@ namespace Microsoft.Alm.Authentication
         }
 
         /// <summary>
-        ///     Generate a key based on the ActualUri.
-        ///     This may include username, port, etc
+        /// Generate a key based on the ActualUri. This may include username, port, etc
         /// </summary>
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Design", "CA1055:UriReturnValuesShouldNotBeStrings")]
         public static string UriToActualUrl(TargetUri targetUri, string @namespace)
