@@ -59,8 +59,10 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="ActionCommandTests.cs" />
+    <Compile Include="AuthenticationTests.cs" />
     <Compile Include="Controls\MaskedPasswordBoxTests.cs" />
     <Compile Include="CredentialsViewModelTests.cs" />
+    <Compile Include="Fakes\InMemoryCredentialStore.cs" />
     <Compile Include="GitHubTokenScopeTests.cs" />
     <Compile Include="GlobalSuppressions.cs" />
     <Compile Include="TwoFactorViewModelTests.cs" />
