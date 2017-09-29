@@ -35,6 +35,10 @@ namespace GitHub.Authentication
     /// </summary>
     public class Authentication : BaseAuthentication, IAuthentication
     {
+        const string GitHubBaseUrlHost = "github.com";
+        const string GistBaseUrlHost = "gist." + GitHubBaseUrlHost;
+        static readonly Uri GitHubBaseUri = new Uri("https://" + GitHubBaseUrlHost);
+
         /// <summary>
         /// Creates a new authentication
         /// </summary>
@@ -65,7 +69,7 @@ namespace GitHub.Authentication
             TokenScope = tokenScope;
 
             PersonalAccessTokenStore = personalAccessTokenStore;
-            Authority = new Authority(targetUri);
+            Authority = new Authority(NormalizeUri(targetUri));
 
             AcquireCredentialsCallback = acquireCredentialsCallback;
             AcquireAuthenticationCodeCallback = acquireAuthenticationCodeCallback;
@@ -93,10 +97,11 @@ namespace GitHub.Authentication
         {
             BaseSecureStore.ValidateTargetUri(targetUri);
 
-            if (PersonalAccessTokenStore.ReadCredentials(targetUri) != null)
+            var normalizedTargetUri = NormalizeUri(targetUri);
+            if (PersonalAccessTokenStore.ReadCredentials(normalizedTargetUri) != null)
             {
-                PersonalAccessTokenStore.DeleteCredentials(targetUri);
-                Git.Trace.WriteLine($"credentials for '{targetUri}' deleted");
+                PersonalAccessTokenStore.DeleteCredentials(normalizedTargetUri);
+                Git.Trace.WriteLine($"credentials for '{normalizedTargetUri}' deleted");
             }
         }
 
@@ -120,8 +125,6 @@ namespace GitHub.Authentication
             AcquireAuthenticationCodeDelegate acquireAuthenticationCodeCallback,
             AuthenticationResultDelegate authenticationResultCallback)
         {
-            const string GitHubBaseUrlHost = "github.com";
-
             BaseAuthentication authentication = null;
 
             BaseSecureStore.ValidateTargetUri(targetUri);
@@ -130,8 +133,9 @@ namespace GitHub.Authentication
 
             if (targetUri.DnsSafeHost.EndsWith(GitHubBaseUrlHost, StringComparison.OrdinalIgnoreCase))
             {
-                authentication = new Authentication(targetUri, tokenScope, personalAccessTokenStore, acquireCredentialsCallback, acquireAuthenticationCodeCallback, authenticationResultCallback);
-                Git.Trace.WriteLine($"created GitHub authentication for '{targetUri}'.");
+                var normalizedTargetUri = NormalizeUri(targetUri);
+                authentication = new Authentication(normalizedTargetUri, tokenScope, personalAccessTokenStore, acquireCredentialsCallback, acquireAuthenticationCodeCallback, authenticationResultCallback);
+                Git.Trace.WriteLine($"created GitHub authentication for '{normalizedTargetUri}'.");
             }
             else
             {
@@ -158,9 +162,10 @@ namespace GitHub.Authentication
 
             Credential credentials = null;
 
-            if ((credentials = PersonalAccessTokenStore.ReadCredentials(targetUri)) != null)
+            var normalizedTargetUri = NormalizeUri(targetUri);
+            if ((credentials = PersonalAccessTokenStore.ReadCredentials(normalizedTargetUri)) != null)
             {
-                Git.Trace.WriteLine($"credentials for '{targetUri}' found.");
+                Git.Trace.WriteLine($"credentials for '{normalizedTargetUri}' found.");
             }
 
             return credentials;
@@ -181,19 +186,20 @@ namespace GitHub.Authentication
             string username;
             string password;
 
-            if (AcquireCredentialsCallback(targetUri, out username, out password))
+            var normalizedTargetUri = NormalizeUri(targetUri);
+            if (AcquireCredentialsCallback(normalizedTargetUri, out username, out password))
             {
                 AuthenticationResult result;
 
-                if (result = await Authority.AcquireToken(targetUri, username, password, null, TokenScope))
+                if (result = await Authority.AcquireToken(normalizedTargetUri, username, password, null, TokenScope))
                 {
-                    Git.Trace.WriteLine($"token acquisition for '{targetUri}' succeeded");
+                    Git.Trace.WriteLine($"token acquisition for '{normalizedTargetUri}' succeeded");
 
                     credentials = (Credential)result.Token;
-                    PersonalAccessTokenStore.WriteCredentials(targetUri, credentials);
+                    PersonalAccessTokenStore.WriteCredentials(normalizedTargetUri, credentials);
 
                     // if a result callback was registered, call it
-                    AuthenticationResultCallback?.Invoke(targetUri, result);
+                    AuthenticationResultCallback?.Invoke(normalizedTargetUri, result);
 
                     return credentials;
                 }
@@ -201,17 +207,17 @@ namespace GitHub.Authentication
                         || result == GitHubAuthenticationResultType.TwoFactorSms)
                 {
                     string authenticationCode;
-                    if (AcquireAuthenticationCodeCallback(targetUri, result, username, out authenticationCode))
+                    if (AcquireAuthenticationCodeCallback(normalizedTargetUri, result, username, out authenticationCode))
                     {
-                        if (result = await Authority.AcquireToken(targetUri, username, password, authenticationCode, TokenScope))
+                        if (result = await Authority.AcquireToken(normalizedTargetUri, username, password, authenticationCode, TokenScope))
                         {
-                            Git.Trace.WriteLine($"token acquisition for '{targetUri}' succeeded.");
+                            Git.Trace.WriteLine($"token acquisition for '{normalizedTargetUri}' succeeded.");
 
                             credentials = (Credential)result.Token;
-                            PersonalAccessTokenStore.WriteCredentials(targetUri, credentials);
+                            PersonalAccessTokenStore.WriteCredentials(normalizedTargetUri, credentials);
 
                             // if a result callback was registered, call it
-                            AuthenticationResultCallback?.Invoke(targetUri, result);
+                            AuthenticationResultCallback?.Invoke(normalizedTargetUri, result);
 
                             return credentials;
                         }
@@ -221,11 +227,11 @@ namespace GitHub.Authentication
                 // if a result callback was registered, call it
                 if (AuthenticationResultCallback != null)
                 {
-                    AuthenticationResultCallback(targetUri, result);
+                    AuthenticationResultCallback(normalizedTargetUri, result);
                 }
             }
 
-            Git.Trace.WriteLine($"interactive logon for '{targetUri}' failed.");
+            Git.Trace.WriteLine($"interactive logon for '{normalizedTargetUri}' failed.");
             return credentials;
         }
 
@@ -251,19 +257,19 @@ namespace GitHub.Authentication
                 throw new ArgumentNullException("username", "The `password` parameter is null or invalid.");
 
             Credential credentials = null;
-
+            var normalizedTargetUri = NormalizeUri(targetUri);
             AuthenticationResult result;
-            if (result = await Authority.AcquireToken(targetUri, username, password, authenticationCode, TokenScope))
+            if (result = await Authority.AcquireToken(normalizedTargetUri, username, password, authenticationCode, TokenScope))
             {
-                Git.Trace.WriteLine($"token acquisition for '{targetUri}' succeeded.");
+                Git.Trace.WriteLine($"token acquisition for '{normalizedTargetUri}' succeeded.");
 
                 credentials = (Credential)result.Token;
-                PersonalAccessTokenStore.WriteCredentials(targetUri, credentials);
+                PersonalAccessTokenStore.WriteCredentials(normalizedTargetUri, credentials);
 
                 return credentials;
             }
 
-            Git.Trace.WriteLine($"non-interactive logon for '{targetUri}' failed.");
+            Git.Trace.WriteLine($"non-interactive logon for '{normalizedTargetUri}' failed.");
             return credentials;
         }
 
@@ -282,7 +288,7 @@ namespace GitHub.Authentication
             BaseSecureStore.ValidateTargetUri(targetUri);
             BaseSecureStore.ValidateCredential(credentials);
 
-            PersonalAccessTokenStore.WriteCredentials(targetUri, credentials);
+            PersonalAccessTokenStore.WriteCredentials(NormalizeUri(targetUri), credentials);
         }
 
         /// <summary>
@@ -336,5 +342,15 @@ namespace GitHub.Authentication
         /// </param>
         /// <param name="result">The result of the interactive authentication attempt.</param>
         public delegate void AuthenticationResultDelegate(TargetUri targetUri, GitHubAuthenticationResultType result);
+
+        static Uri NormalizeUri(Uri targetUri)
+        {
+            // Special case for gist.github.com which are git backed repositories under the hood.
+            // Credentials for these repos are the same as the one stored with "github.com"
+            if (targetUri.DnsSafeHost.Equals(GistBaseUrlHost, StringComparison.OrdinalIgnoreCase))
+                return GitHubBaseUri;
+
+            return targetUri;
+        }
     }
 }
