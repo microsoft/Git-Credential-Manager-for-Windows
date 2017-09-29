@@ -36,6 +36,7 @@ namespace GitHub.Authentication
     public class Authentication : BaseAuthentication, IAuthentication
     {
         const string GitHubBaseUrlHost = "github.com";
+        const string GistBaseUrlHost = "gist." + GitHubBaseUrlHost;
         static readonly Uri GitHubBaseUri = new Uri("https://" + GitHubBaseUrlHost);
 
         /// <summary>
@@ -346,7 +347,7 @@ namespace GitHub.Authentication
         {
             // Special case for gist.github.com which are git backed repositories under the hood.
             // Credentials for these repos are the same as the one stored with "github.com"
-            if (targetUri.DnsSafeHost.StartsWith("gist.", StringComparison.OrdinalIgnoreCase) && targetUri.DnsSafeHost.EndsWith(".github.com", StringComparison.OrdinalIgnoreCase))
+            if (targetUri.DnsSafeHost.Equals(GistBaseUrlHost, StringComparison.OrdinalIgnoreCase))
                 return GitHubBaseUri;
 
             return targetUri;
