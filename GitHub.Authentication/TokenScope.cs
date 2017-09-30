@@ -169,54 +169,54 @@ namespace GitHub.Authentication
         }
 
         public override bool Equals(object obj)
-            => Microsoft.Alm.Authentication.TokenScope.Equals(this as Microsoft.Alm.Authentication.TokenScope, obj);
+            => Equals(this as Microsoft.Alm.Authentication.TokenScope, obj);
 
         public bool Equals(TokenScope other)
-            => Microsoft.Alm.Authentication.TokenScope.Equals(this as Microsoft.Alm.Authentication.TokenScope, other as Microsoft.Alm.Authentication.TokenScope);
+            => Equals(this as Microsoft.Alm.Authentication.TokenScope, other as Microsoft.Alm.Authentication.TokenScope);
 
         public override int GetHashCode()
-            => Microsoft.Alm.Authentication.TokenScope.GetHashCode(this as Microsoft.Alm.Authentication.TokenScope);
+            => GetHashCode(this as Microsoft.Alm.Authentication.TokenScope);
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static bool operator ==(TokenScope left, TokenScope right)
-            => Microsoft.Alm.Authentication.TokenScope.Equals(left as Microsoft.Alm.Authentication.TokenScope, right as Microsoft.Alm.Authentication.TokenScope);
+            => Equals(left as Microsoft.Alm.Authentication.TokenScope, right as Microsoft.Alm.Authentication.TokenScope);
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static bool operator !=(TokenScope left, TokenScope right)
-            => !Microsoft.Alm.Authentication.TokenScope.Equals(left as Microsoft.Alm.Authentication.TokenScope, right as Microsoft.Alm.Authentication.TokenScope);
+            => !Equals(left as Microsoft.Alm.Authentication.TokenScope, right as Microsoft.Alm.Authentication.TokenScope);
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static TokenScope operator +(TokenScope left, TokenScope right)
         {
-            var set = Microsoft.Alm.Authentication.TokenScope.UnionWith(left as Microsoft.Alm.Authentication.TokenScope, right as Microsoft.Alm.Authentication.TokenScope);
+            var set = UnionWith(left as Microsoft.Alm.Authentication.TokenScope, right as Microsoft.Alm.Authentication.TokenScope);
             return new TokenScope(set);
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static TokenScope operator -(TokenScope left, TokenScope right)
         {
-            var set = Microsoft.Alm.Authentication.TokenScope.ExceptWith(left as Microsoft.Alm.Authentication.TokenScope, right as Microsoft.Alm.Authentication.TokenScope);
+            var set = ExceptWith(left as Microsoft.Alm.Authentication.TokenScope, right as Microsoft.Alm.Authentication.TokenScope);
             return new TokenScope(set);
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static TokenScope operator |(TokenScope left, TokenScope right)
         {
-            var set = Microsoft.Alm.Authentication.TokenScope.UnionWith(left as Microsoft.Alm.Authentication.TokenScope, right as Microsoft.Alm.Authentication.TokenScope);
+            var set = UnionWith(left as Microsoft.Alm.Authentication.TokenScope, right as Microsoft.Alm.Authentication.TokenScope);
             return new TokenScope(set);
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static TokenScope operator &(TokenScope left, TokenScope right)
         {
-            var set = Microsoft.Alm.Authentication.TokenScope.IntersectWith(left as Microsoft.Alm.Authentication.TokenScope, right as Microsoft.Alm.Authentication.TokenScope);
+            var set = IntersectWith(left as Microsoft.Alm.Authentication.TokenScope, right as Microsoft.Alm.Authentication.TokenScope);
             return new TokenScope(set);
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static TokenScope operator ^(TokenScope left, TokenScope right)
         {
-            var set = Microsoft.Alm.Authentication.TokenScope.SymmetricExceptWith(left as Microsoft.Alm.Authentication.TokenScope, right as Microsoft.Alm.Authentication.TokenScope);
+            var set = SymmetricExceptWith(left as Microsoft.Alm.Authentication.TokenScope, right as Microsoft.Alm.Authentication.TokenScope);
             return new TokenScope(set);
         }
     }
