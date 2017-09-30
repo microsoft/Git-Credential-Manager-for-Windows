@@ -50,7 +50,7 @@ namespace GitHub.Authentication
         public Authority(TargetUri targetUri)
         {
             // The GitHub proper API endpoints
-            if (targetUri.Host == "github.com")
+            if (targetUri.DnsSafeHost.Equals("github.com", StringComparison.OrdinalIgnoreCase))
             {
                 _authorityUrl = "https://api.github.com/authorizations";
                 _validationUrl = "https://api.github.com/user/subscriptions";
