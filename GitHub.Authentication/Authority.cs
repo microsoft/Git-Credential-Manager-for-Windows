@@ -148,7 +148,7 @@ namespace GitHub.Authentication
                                 }
                                 else
                                 {
-                                    Git.Trace.WriteLine($"authentication success: new personal acces token for '{targetUri}' created.");
+                                    Git.Trace.WriteLine($"authentication success: new personal access token for '{targetUri}' created.");
                                     return new AuthenticationResult(GitHubAuthenticationResultType.Success, token);
                                 }
                             }
@@ -177,6 +177,20 @@ namespace GitHub.Authentication
                                     return new AuthenticationResult(GitHubAuthenticationResultType.Failure);
                                 }
                             }
+                        case HttpStatusCode.Forbidden:
+                            // This API only supports Basic authentication. If a valid OAuth token is supplied
+                            // as the password, then a Forbidden response is returned instead of an Unauthorized.
+                            // In that case, the supplied password is an OAuth token and is valid and we don't need
+                            // to create a new personal access token.
+                            var contentBody = await response.Content.ReadAsStringAsync();
+                            if (contentBody.Contains("This API can only be accessed with username and password Basic Auth"))
+                            {
+                                Git.Trace.WriteLine($"authentication success: user supplied personal access token for '{targetUri}'.");
+
+                                return new AuthenticationResult(GitHubAuthenticationResultType.Success, new Token(password, TokenType.Personal));
+                            }
+                            Git.Trace.WriteLine($"authentication failed for '{targetUri}'.");
+                            return new AuthenticationResult(GitHubAuthenticationResultType.Failure);
 
                         default:
                             Git.Trace.WriteLine($"authentication failed for '{targetUri}'.");
