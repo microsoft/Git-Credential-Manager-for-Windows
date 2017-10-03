@@ -57,22 +57,16 @@ namespace GitHub.Authentication
             AcquireAuthenticationCodeDelegate acquireAuthenticationCodeCallback,
             AuthenticationResultDelegate authenticationResultCallback)
         {
-            if (tokenScope == null)
-                throw new ArgumentNullException("tokenScope", "The parameter `tokenScope` is null or invalid.");
-            if (personalAccessTokenStore == null)
-                throw new ArgumentNullException("personalAccessTokenStore", "The parameter `personalAccessTokenStore` is null or invalid.");
-            if (acquireCredentialsCallback == null)
-                throw new ArgumentNullException("acquireCredentialsCallback", "The parameter `acquireCredentialsCallback` is null or invalid.");
-            if (acquireAuthenticationCodeCallback == null)
-                throw new ArgumentNullException("acquireAuthenticationCodeCallback", "The parameter `acquireAuthenticationCodeCallback` is null or invalid.");
+            TokenScope = tokenScope
+                ?? throw new ArgumentNullException("tokenScope", "The parameter `tokenScope` is null or invalid.");
+            PersonalAccessTokenStore = personalAccessTokenStore
+                ?? throw new ArgumentNullException("personalAccessTokenStore", "The parameter `personalAccessTokenStore` is null or invalid.");
+            AcquireCredentialsCallback = acquireCredentialsCallback
+                ?? throw new ArgumentNullException("acquireCredentialsCallback", "The parameter `acquireCredentialsCallback` is null or invalid.");
+            AcquireAuthenticationCodeCallback = acquireAuthenticationCodeCallback
+                ?? throw new ArgumentNullException("acquireAuthenticationCodeCallback", "The parameter `acquireAuthenticationCodeCallback` is null or invalid.");
 
-            TokenScope = tokenScope;
-
-            PersonalAccessTokenStore = personalAccessTokenStore;
             Authority = new Authority(NormalizeUri(targetUri));
-
-            AcquireCredentialsCallback = acquireCredentialsCallback;
-            AcquireAuthenticationCodeCallback = acquireAuthenticationCodeCallback;
             AuthenticationResultCallback = authenticationResultCallback;
         }
 
@@ -224,11 +218,7 @@ namespace GitHub.Authentication
                     }
                 }
 
-                // if a result callback was registered, call it
-                if (AuthenticationResultCallback != null)
-                {
-                    AuthenticationResultCallback(normalizedTargetUri, result);
-                }
+                AuthenticationResultCallback?.Invoke(normalizedTargetUri, result);
             }
 
             Git.Trace.WriteLine($"interactive logon for '{normalizedTargetUri}' failed.");
