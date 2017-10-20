@@ -56,3 +56,7 @@ Once updated, the new configuration tells the GCM to only forward domain credent
 You need to configure SourceTree to use the version of Git installed for the entire system. By default, SourceTree uses a local copy of portable Git.
 
 To fix this go to Tools → Options → Git and click the "Use System Git" button. This works in v1.8.3.0 of SourceTree.
+
+## Q: Why is Git not using the GCM in some of my repositories (but instead using SSH authentication)?
+
+Check that you are using the HTTP(S) URL instead of the SSH URL for your repository. You can do this by running `git remote show origin`. The Fetch URL and Push URL should start with `https://` or `http://`. If this is not the case, look for the HTTP(S) URL in the web interface of VSTS, TFS, GitHub or Bitbucket, and then run `git remote set-url origin <url>`, where `<url>` is the HTTP(S) URL.
