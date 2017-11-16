@@ -9,7 +9,7 @@ namespace Microsoft.Alm.Git.Test
     {
         private static StringComparer PathComparer = StringComparer.InvariantCultureIgnoreCase;
 
-        public static object[] FindAppData
+        public static object[][] FindAppData
         {
             get
             {
