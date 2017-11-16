@@ -6,7 +6,7 @@ namespace Microsoft.Alm.Authentication.Test
 {
     public class TargetUriTests
     {
-        public static object[] UrlData
+        public static object[][] UrlData
         {
             get
             {

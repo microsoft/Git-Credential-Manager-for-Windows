@@ -8,7 +8,7 @@ namespace Microsoft.Alm.Authentication.Test
     {
         private const string Namespace = "test";
 
-        public static object[] CredentialData
+        public static object[][] CredentialData
         {
             get
             {
@@ -39,7 +39,7 @@ namespace Microsoft.Alm.Authentication.Test
             }
         }
 
-        public static object[] UriToNameData
+        public static object[][] UriToNameData
         {
             get
             {

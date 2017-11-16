@@ -115,14 +115,14 @@ namespace Microsoft.Alm.Cli.Test
             var targetUri = new Authentication.TargetUri("https://example.visualstudio.com/");
 
             var opargsMock = new Mock<OperationArguments>();
-            opargsMock.Setup(r => r.EnvironmentVariables)
+            opargsMock.Setup(v => v.EnvironmentVariables)
                       .Returns(envvars);
-            opargsMock.Setup(r => r.GitConfiguration)
+            opargsMock.Setup(v => v.GitConfiguration)
                       .Returns(gitconfig);
-            opargsMock.Setup(r => r.LoadConfiguration());
-            opargsMock.Setup(r => r.TargetUri)
+            opargsMock.Setup(v => v.LoadConfiguration());
+            opargsMock.Setup(v => v.TargetUri)
                       .Returns(targetUri);
-            opargsMock.Setup(r => r.QueryUri)
+            opargsMock.Setup(v => v.QueryUri)
                       .Returns(targetUri);
 
             var program = new Program();

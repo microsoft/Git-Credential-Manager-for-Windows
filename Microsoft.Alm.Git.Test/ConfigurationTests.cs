@@ -7,7 +7,7 @@ namespace Microsoft.Alm.Git.Test
 {
     public class ConfigurationTests
     {
-        public static object[] ParseData
+        public static object[][] ParseData
         {
             get
             {
