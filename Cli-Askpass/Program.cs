@@ -156,11 +156,11 @@ namespace Microsoft.Alm.Cli
                 Uri targetUri = null;
 
                 // Since we're looking for HTTP(s) credentials, we can use NetFx `Uri` class.
-                if (Uri.TryCreate(targetUrl, UriKind.Absolute, out Uri targetUri))
+                if (Uri.TryCreate(targetUrl, UriKind.Absolute, out targetUri))
                 {
                     Git.Trace.WriteLine($"success parsing URL, targetUri = '{targetUri}'.");
 
-                    if (TryParseUrlCredentials(targetUrl, out string username, out string password))
+                    if (TryParseUrlCredentials(targetUrl, out username, out password))
                     {
                         if (password != null
                             && seeking.Equals("Password", StringComparison.OrdinalIgnoreCase))
