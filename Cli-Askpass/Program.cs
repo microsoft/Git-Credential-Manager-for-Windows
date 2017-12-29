@@ -151,6 +151,10 @@ namespace Microsoft.Alm.Cli
                 string seeking = match.Groups[1].Value;
                 string targetUrl = match.Groups[2].Value;
 
+                string username = string.Empty;
+                string password = string.Empty;
+                Uri targetUri = null;
+
                 // Since we're looking for HTTP(s) credentials, we can use NetFx `Uri` class.
                 if (Uri.TryCreate(targetUrl, UriKind.Absolute, out Uri targetUri))
                 {
