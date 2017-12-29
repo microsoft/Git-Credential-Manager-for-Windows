@@ -208,7 +208,7 @@ namespace Microsoft.Alm.Cli
                         Git.Trace.WriteLine($"success parsing URL, targetUri = '{targetUri}'.");
 
                         OperationArguments operationArguments = new OperationArguments.Impl(targetUri);
-                        operationArguments.SetCredentials(username, password);
+                        operationArguments.SetCredentials(username ?? string.Empty, password ?? string.Empty);
 
                         // load up the operation arguments, enable tracing, and query for credentials
                         LoadOperationArguments(operationArguments);
