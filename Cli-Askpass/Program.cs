@@ -151,12 +151,16 @@ namespace Microsoft.Alm.Cli
                 string seeking = match.Groups[1].Value;
                 string targetUrl = match.Groups[2].Value;
 
+                string username = string.Empty;
+                string password = string.Empty;
+                Uri targetUri = null;
+
                 // Since we're looking for HTTP(s) credentials, we can use NetFx `Uri` class.
-                if (Uri.TryCreate(targetUrl, UriKind.Absolute, out Uri targetUri))
+                if (Uri.TryCreate(targetUrl, UriKind.Absolute, out targetUri))
                 {
                     Git.Trace.WriteLine($"success parsing URL, targetUri = '{targetUri}'.");
 
-                    if (TryParseUrlCredentials(targetUrl, out string username, out string password))
+                    if (TryParseUrlCredentials(targetUrl, out username, out password))
                     {
                         if (password != null
                             && seeking.Equals("Password", StringComparison.OrdinalIgnoreCase))
@@ -204,7 +208,7 @@ namespace Microsoft.Alm.Cli
                         Git.Trace.WriteLine($"success parsing URL, targetUri = '{targetUri}'.");
 
                         OperationArguments operationArguments = new OperationArguments.Impl(targetUri);
-                        operationArguments.SetCredentials(username, password);
+                        operationArguments.SetCredentials(username ?? string.Empty, password ?? string.Empty);
 
                         // load up the operation arguments, enable tracing, and query for credentials
                         LoadOperationArguments(operationArguments);
