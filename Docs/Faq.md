@@ -60,3 +60,17 @@ To fix this go to Tools → Options → Git and click the "Use System Git" butto
 ## Q: Why is Git not using the GCM in some of my repositories (but instead using SSH authentication)?
 
 Check that you are using the HTTP(S) URL instead of the SSH URL for your repository. You can do this by running `git remote show origin`. The Fetch URL and Push URL should start with `https://` or `http://`. If this is not the case, look for the HTTP(S) URL in the web interface of VSTS, TFS, GitHub or Bitbucket, and then run `git remote set-url origin <url>`, where `<url>` is the HTTP(S) URL.
+
+## Q: Why is git.exe failing to authenticate after linking/unlinking your Visual Studio Team Services account from Azure Active Directory?
+
+When the tenant backing the Visual Studio Team Services (VSTS) account changes like when you [Connect VSTS account to Azure Active Directory (Azure AD)](https://docs.microsoft.com/en-us/vsts/accounts/connect-account-to-aad), the tenant cache needs to be cleared.  This can be corrected by simply deleting the *%LocalAppData%\GitCredentialManager\tenant.cache* file on each machine returning a login error like below.  The GCM will automatically reacted the file as needed on subsequent login attempts.
+
+**Example Error**
+Opening repositories:
+C:\XXXXXXXXXX
+Error: cannot spawn askpass: No such file or directory
+Error encountered while pushing to the remote repository: Git failed with a fatal error.
+could not read Username for ‘https://XXXXXXXX.visualstudio.com’: terminal prompts disabled
+Pushing to https://XXXXXXXX.visualstudio.com/_git/XXXXXX
+
+Log from git bash : Login failed.
