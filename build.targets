@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="14.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <Target Name="EnumerateProps" BeforeTargets="BeforeBuild">
+    <Message Text="ProjectName = $(ProjectName)" />
+    <Message Text="ProjectUrl = $(ProjectUrl)" />
+    <Message Text="ConfigurationPlatfotm = $(Configuration)|$(Platform)" />
+    <Message Text="TargetFrameworkVersion = $(TargetFrameworkVersion)" />
+    <Message Text="RootNamespace = $(RootNamespace)" />
+    <Message Text="AutoGenerateBindingRedirects = $(AutoGenerateBindingRedirects)" />
+    <Message Text="AssemblyName = $(AssemblyName)" />
+    <Message Text="OutputType = $(OutputType)" />
+    <Message Text="SignType = $(SignType)" />
+  </Target>
+  <Target Name="RemoveDirectories" AfterTargets="CoreClean">
+    <Delete Files="$(OutputPath)\*.*;$(IntermediateOutputPath)\*.*" />
+    <RemoveDir Directories="$(IntermediateOutputPath);$(OutputPath)"/>
+  </Target>
+</Project>
