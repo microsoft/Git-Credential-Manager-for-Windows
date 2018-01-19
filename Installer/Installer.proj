@@ -1,0 +1,120 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="14.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
+  <Import Project="..\packages\MicroBuild.Core.0.2.0\build\MicroBuild.Core.props" Condition="Exists('..\packages\MicroBuild.Core.0.2.0\build\MicroBuild.Core.props')" />
+  <PropertyGroup Label="Globals">
+    <ProjectGuid>{19770407-3808-4B17-9EE0-21DD3468F875}</ProjectGuid>
+    <RootNamespace>Installer</RootNamespace>
+    <ProjectDir Condition=" '$(ProjectDir)' == '' Or '$(ProjectDir)' == '*Undefined*' ">$(MSBuildProjectDirectory)</ProjectDir>
+    <TargetFrameworkVersion>v4.6.2</TargetFrameworkVersion>
+  </PropertyGroup>
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' Or '$(Configuration)' == '*Undefined*' "></Configuration>
+    <Platform Condition=" '$(Platform)' == '' Or  '$(Platform)' == '*Undefined*' " >AnyCPU</Platform>
+    <SolutionDir Condition=" '$(SolutionDir)' == '' Or '$(SolutionDir)' == '*Undefined*' ">$([System.IO.Directory]::GetParent($(ProjectDir)))</SolutionDir>
+    <InputPath Condition=" '$(Configuration)' == 'Debug' ">bin\Debug</InputPath>
+    <InputPath Condition=" '$(Configuration)' == 'Release' ">bin\Release</InputPath>
+    <IntermediateOutputPath>$(ProjectDir)\obj</IntermediateOutputPath>
+    <OutputPath>$(SolutionDir)\Deploy</OutputPath>
+    <AssetsDir Condition=" '$(AssetsDir)' == '' Or '$(AssetDir)' == '*Undefined*' ">$(SolutionDir)\Assets</AssetsDir>
+    <DocsDir Condition=" '$(DocsDir)' == '' Or '$(DocsDir)' == '*Undefined*' ">$(SolutionDir)\Docs</DocsDir>
+    <OutDir>$(OutputPath)</OutDir>
+  </PropertyGroup>
+  <PropertyGroup>
+    <In>$([System.IO.File]::ReadAllText($(SolutionDir)\Cli-CredentialHelper\Properties\AssemblyInfo.cs))</In>
+    <Pattern>^\s*\[assembly\s*:\s*AssemblyVersion\s*\(\s*\s*"(\d+\.\d+\.\d+)\.?\d*\s*"\s*\)</Pattern>
+    <Version>$([System.Text.RegularExpressions.Regex]::Match($(In), $(Pattern), System.Text.RegularExpressions.RegexOptions.Multiline).Groups[1].Value)</Version>
+  </PropertyGroup>
+  <PropertyGroup>
+    <SigningTarget>$(OutputPath)\GCMW-$(Version).exe</SigningTarget>
+  </PropertyGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\Cli-Askpass\Cli-Askpass.csproj">
+      <Project>{19770407-B33A-4EBE-92B8-04C93F43CAE0}</Project>
+      <Name>Cli-Askpass</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\Cli-CredentialHelper\Cli-CredentialHelper.csproj">
+      <Project>{19770407-63D4-40A8-A9DF-F1C4B473308A}</Project>
+      <Name>Cli-CredentialHelper</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\Bitbucket.Authentication\Bitbucket.Authentication.csproj">
+      <Project>{ee663736-5bad-4ca6-a4f8-99978925ad8a}</Project>
+      <Name>Bitbucket.Authentication</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\GitHub.Authentication\GitHub.Authentication.csproj">
+      <Project>{cf306116-bbf0-4cc7-afce-a506ac4752cb}</Project>
+      <Name>GitHub.Authentication</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\Microsoft.Alm.Authentication\Microsoft.Alm.Authentication.csproj">
+      <Project>{19770407-b493-459d-bb4f-04fbefb1ba13}</Project>
+      <Name>Microsoft.Alm.Authentication</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\Microsoft.Alm.Git\Microsoft.Alm.Git.csproj">
+      <Project>{19770407-5c58-406d-ab3f-3700bb0d06fe}</Project>
+      <Name>Microsoft.Alm.Git</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\Microsoft.Vsts.Authentication\Microsoft.Vsts.Authentication.csproj">
+      <Project>{19770407-d7d8-4a37-914c-f552ff4b90d4}</Project>
+      <Name>Microsoft.Vsts.Authentication</Name>
+    </ProjectReference>
+  </ItemGroup>
+  <ItemGroup>
+    <FilesToCopy Include="$(SolutionDir)\Cli-CredentialHelper\$(InputPath)\*.*" />
+    <FilesToCopy Include="$(SolutionDir)\Cli-Askpass\$(InputPath)\git-askpass.exe" />
+    <FilesToCopy Include="$(SolutionDir)\LICENSE.TXT" />
+    <FilesToCopy Include="$(SolutionDir)\README.md" />
+    <FilesToCopy Include="$(ProjectDir)\Setup.iss" />
+  </ItemGroup>
+  <ItemGroup>
+    <FilesToSign Include="$(SigningTarget)">
+      <Authenticode>Microsoft</Authenticode>
+    </FilesToSign>
+  </ItemGroup>
+  <ItemGroup>
+    <ZipContents Include="$(IntermediateOutputPath)\Bitbucket.Authentication.dll" />
+    <ZipContents Include="$(IntermediateOutputPath)\git-askpass.exe" />
+    <ZipContents Include="$(IntermediateOutputPath)\git-askpass.html" />
+    <ZipContents Include="$(IntermediateOutputPath)\git-credential-manager.exe" />
+    <ZipContents Include="$(IntermediateOutputPath)\git-credential-manager.html" />
+    <ZipContents Include="$(IntermediateOutputPath)\GitHub.Authentication.exe" />
+    <ZipContents Include="$(ProjectDir)\install.cmd" />
+    <ZipContents Include="$(SolutionDir)\LICENSE.TXT" />
+    <ZipContents Include="$(IntermediateOutputPath)\Microsoft.Alm.Authentication.dll" />
+    <ZipContents Include="$(IntermediateOutputPath)\Microsoft.Alm.Git.dll" />
+    <ZipContents Include="$(IntermediateOutputPath)\Microsoft.IdentityModel.Clients.ActiveDirectory.dll" />
+    <ZipContents Include="$(IntermediateOutputPath)\Microsoft.IdentityModel.Clients.ActiveDirectory.Platform.dll" />
+    <ZipContents Include="$(IntermediateOutputPath)\Microsoft.Vsts.Authentication.dll" />
+    <ZipContents Include="$(SolutionDir)\README.md" />
+  </ItemGroup>
+  <Target Name="AfterBuild" AfterTargets="Build" />
+  <Target Name="Build" BeforeTargets="AfterBuild">
+    <MakeDir Directories="$(IntermediateOutputPath)" />
+    <MakeDir Directories="$(OutputPath)" />
+    <Copy SourceFiles="@(FilesToCopy)" DestinationFolder="$(IntermediateOutputPath)" />
+    <Exec Command="&quot;$(SolutionDir)\packages\Pandoc.Windows.2.1.0\tools\Pandoc\pandoc.exe&quot; --from=markdown --to=html5 --self-contained --standalone --include-in-header=&quot;$(AssetsDir)\head_css.html&quot; --title=&quot;Git Credential Manager for Windows&quot; --output=&quot;$(IntermediateOutputPath)\git-credential-manager.html&quot; &quot;$(DocsDir)\CredentialManager.md&quot; &quot;$(DocsDir)\Configuration.md&quot; &quot;$(DocsDir)\Faq.md&quot; &quot;$(DocsDir)\Automation.md&quot; &quot;$(DocsDir)\Development.md&quot;" IgnoreExitCode="false" />
+    <Exec Command="&quot;$(SolutionDir)\packages\Pandoc.Windows.2.1.0\tools\Pandoc\pandoc.exe&quot; --from=markdown --to=html5 --self-contained --standalone --include-in-header=&quot;$(AssetsDir)\head_css.html&quot; --title=&quot;Git Askpass Helper for Windows&quot; --output=&quot;$(IntermediateOutputPath)\git-askpass.html&quot; &quot;$(DocsDir)\Askpass.md&quot; &quot;$(DocsDir)\Configuration.md&quot; &quot;$(DocsDir)\Faq.md&quot; &quot;$(DocsDir)\Automation.md&quot; &quot;$(DocsDir)\Development.md&quot;" IgnoreExitCode="false" />
+    <Exec Command="&quot;$(SolutionDir)\packages\Tools.InnoSetup.5.5.9\tools\iscc.exe&quot; &quot;/O$(OutputPath)&quot; &quot;$(IntermediateOutputPath)\Setup.iss&quot;" IgnoreStandardErrorWarningFormat="true" WorkingDirectory="$(IntermediateOutputPath)" />
+    <Zip Files="@(ZipContents)" Flatten="True" ZipFileName="$(OutputPath)\gcmw-v$(Version).zip" WorkingDirectory="$(IntermediateOutputPath)ZipContents" ZipLevel="9" />
+  </Target>
+  <Target Name="Clean">
+    <RemoveDir Directories="$(IntermediateOutputPath);$(OutputPath)"/>
+    <RemoveDir Directories="$(SolutionDir)\TestResults"/>
+  </Target>
+  <Target Name="Rebuild" AfterTargets="Clean" BeforeTargets="Build" />
+  <Target Name="EnsureNuGetPackageBuildImports" BeforeTargets="PrepareForBuild">
+    <PropertyGroup>
+      <ErrorText>This project references NuGet package(s) that are missing on this computer. Use NuGet Package Restore to download them.  For more information, see http://go.microsoft.com/fwlink/?LinkID=322105. The missing file is {0}.</ErrorText>
+    </PropertyGroup>
+    <Error Condition="!Exists('..\packages\MicroBuild.Core.0.2.0\build\MicroBuild.Core.props')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\MicroBuild.Core.0.2.0\build\MicroBuild.Core.props'))" />
+    <Error Condition="!Exists('..\packages\MicroBuild.Core.0.2.0\build\MicroBuild.Core.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\MicroBuild.Core.0.2.0\build\MicroBuild.Core.targets'))" />
+    <Error Condition="!Exists('..\packages\MSBuildTasks.1.5.0.235\build\MSBuildTasks.targets')" Text="$([System.String]::Format('$(ErrorText)', 'MSBuildTasks'))" />
+    <Error Condition="!Exists('..\packages\Pandoc.Windows.2.1.0\tools\Pandoc\pandoc.exe')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\Pandoc.Windows.2.1.0\tools\Pandoc\pandoc.exe'))" />
+    <Error Condition="!Exists('..\packages\Tools.InnoSetup.5.5.9\tools\iscc.exe')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\Tools.InnoSetup.5.5.9\tools\iscc.exe'))" />
+    <Error Condition="!Exists('..\packages\Tools.InnoSetup.Download.1.5.1\tools\InnoDownload\idp.iss')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\Tools.InnoSetup.Download.1.5.1\tools\InnoDownload\idp.iss'))" />
+  </Target>
+  <Target Name="EnsureResourcesExist" BeforeTargets="PrepareForBuild">
+    <Error Condition="!Exists('$(SolutionDir)\Cli-CredentialHelper\Properties\AssemblyInfo.cs)')" Text="File not found: '$(SolutionDir)\Cli-CredentialHelper\Properties\AssemblyInfo.cs)'." />
+  </Target>
+  <Import Project="..\packages\MSBuildTasks.1.5.0.235\build\MSBuildTasks.targets" Condition="Exists('..\packages\MSBuildTasks.1.5.0.235\build\MSBuildTasks.targets')" />
+  <Import Project="..\packages\MicroBuild.Core.0.2.0\build\MicroBuild.Core.targets" Condition="Exists('..\packages\MicroBuild.Core.0.2.0\build\MicroBuild.Core.targets')" />
+</Project>

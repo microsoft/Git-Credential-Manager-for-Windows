@@ -6,20 +6,24 @@
   #error Update your Inno Setup version (5.5.9 or newer)
 #endif
 
-#define deployDir "Deploy\"
+#define binDir "."
 
-#ifnexist deployDir + "git-credential-manager.exe"
+#ifnexist binDir + "\git-credential-manager.exe"
   #error Compile Git Credential Manager first
 #endif
 
-#include <idp.iss>
+#ifnexist "..\..\packages\Tools.InnoSetup.Download.1.5.1\tools\InnoDownload\idp.iss"
+  #error IDP plugin for Inno Setup is also required and can be found at https://mitrichsoftware.wordpress.com/inno-setup-tools/inno-download-plugin/
+#endif
+
+#include <..\..\packages\Tools.InnoSetup.Download.1.5.1\tools\InnoDownload\idp.iss>
 
 #define VerMajor
 #define VerMinor
 #define VerBuild
 #define VerRevision
 
-#expr ParseVersion(deployDir + "git-credential-manager.exe", VerMajor, VerMinor, VerBuild, VerRevision)
+#expr ParseVersion(binDir + "\git-credential-manager.exe", VerMajor, VerMinor, VerBuild, VerRevision)
 
 #define MyAppName "Microsoft Git Credential Manager for Windows"
 #define MyAppVersion str(VerMajor) + "." + str(VerMinor) + "." + str(VerBuild)
@@ -56,7 +60,7 @@ AppReadmeFile=https://github.com/Microsoft/Git-Credential-Manager-for-Windows/bl
 BackColor=clWhite
 BackSolid=yes
 DefaultDirName={userpf}\{#MyAppName}
-LicenseFile={#deployDir}\LICENSE.txt
+LicenseFile={#binDir}\LICENSE.txt
 OutputBaseFilename=GCMW-{#MyAppVersion}
 Compression=lzma2
 InternalCompressLevel=ultra64
@@ -65,10 +69,10 @@ MinVersion=6.1.7600
 DisableDirPage=yes
 DisableReadyPage=yes
 UninstallDisplayIcon={app}\git-credential-manager.exe
-SetupIconFile=Assets\gcmicon.ico
+SetupIconFile=..\..\Assets\gcmicon.ico
 ArchitecturesInstallIn64BitMode=x64
-WizardImageFile=Assets\gcmicon128.bmp
-WizardSmallImageFile=Assets\gcmicon64.bmp
+WizardImageFile=..\..\Assets\gcmicon128.bmp
+WizardSmallImageFile=..\..\Assets\gcmicon64.bmp
 WizardImageStretch=no
 WindowResizable=no
 
@@ -83,17 +87,17 @@ Name: "NetFx"; Description: {#NetFxName}; ExtraDiskSpaceRequired: {#NetFxSpace};
 Name: "Git4Win"; Description: {#Git4WinName}; ExtraDiskSpaceRequired: {#Git4WinSpace}; Types: full; Flags: fixed; Check: DetectGitChecked;
 
 [Files]
-Source: "{#deployDir}\git-credential-manager.exe"; DestDir: "{app}"; Flags: ignoreversion
-Source: "{#deployDir}\Microsoft.Alm.Authentication.dll"; DestDir: "{app}"; Flags: ignoreversion
-Source: "{#deployDir}\Microsoft.Alm.Git.dll"; DestDir: "{app}"; Flags: ignoreversion
-Source: "{#deployDir}\Microsoft.IdentityModel.Clients.ActiveDirectory.dll"; DestDir: "{app}"; Flags: ignoreversion
-Source: "{#deployDir}\Microsoft.IdentityModel.Clients.ActiveDirectory.Platform.dll"; DestDir: "{app}"; Flags: ignoreversion
-Source: "{#deployDir}\Microsoft.Vsts.Authentication.dll"; DestDir: "{app}"; Flags: ignoreversion
-Source: "{#deployDir}\GitHub.Authentication.exe"; DestDir: "{app}"; Flags: ignoreversion
-Source: "{#deployDir}\Bitbucket.Authentication.dll"; DestDir: "{app}"; Flags: ignoreversion
-Source: "{#deployDir}\README.md"; DestDir: "{app}"; Flags: ignoreversion
-Source: "{#deployDir}\git-credential-manager.html"; DestDir: "{app}"; Flags: ignoreversion
-Source: "{#deployDir}\git-askpass.html"; DestDir: "{app}"; Flags: ignoreversion
+Source: "{#binDir}\git-credential-manager.exe"; DestDir: "{app}"; Flags: ignoreversion
+Source: "{#binDir}\Microsoft.Alm.Authentication.dll"; DestDir: "{app}"; Flags: ignoreversion
+Source: "{#binDir}\Microsoft.Alm.Git.dll"; DestDir: "{app}"; Flags: ignoreversion
+Source: "{#binDir}\Microsoft.IdentityModel.Clients.ActiveDirectory.dll"; DestDir: "{app}"; Flags: ignoreversion
+Source: "{#binDir}\Microsoft.IdentityModel.Clients.ActiveDirectory.Platform.dll"; DestDir: "{app}"; Flags: ignoreversion
+Source: "{#binDir}\Microsoft.Vsts.Authentication.dll"; DestDir: "{app}"; Flags: ignoreversion
+Source: "{#binDir}\GitHub.Authentication.exe"; DestDir: "{app}"; Flags: ignoreversion
+Source: "{#binDir}\Bitbucket.Authentication.dll"; DestDir: "{app}"; Flags: ignoreversion
+Source: "{#binDir}\README.md"; DestDir: "{app}"; Flags: ignoreversion
+Source: "{#binDir}\git-credential-manager.html"; DestDir: "{app}"; Flags: ignoreversion
+Source: "{#binDir}\git-askpass.html"; DestDir: "{app}"; Flags: ignoreversion
 
 [Code]
 type NetFx_Version = (
