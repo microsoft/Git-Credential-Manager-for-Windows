@@ -23,6 +23,7 @@
  * WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE."
 **/
 
+using System;
 using System.Threading.Tasks;
 
 namespace Microsoft.Alm.Authentication
@@ -30,89 +31,56 @@ namespace Microsoft.Alm.Authentication
     public interface IVstsAadAuthentication
     {
         /// <summary>
-        /// <para>
-        /// Creates an interactive logon session, using ADAL secure browser GUI, which enables users
-        /// to authenticate with the Azure tenant and acquire the necessary access tokens to exchange
-        /// for a VSTS personal access token.
-        /// </para>
-        /// <para>Tokens acquired are stored in the secure secret stores provided during initialization.</para>
+        /// Creates an interactive logon session, using ADAL secure browser GUI, which enables users to authenticate with the Azure tenant and acquire the necessary access tokens to exchange for a VSTS personal access token.
+        /// <para/>
+        /// Tokens acquired are stored in the secure secret stores provided during initialization.
+        /// <para/>
+        /// Return a `<see cref="Credential"/>` for resource access if successful; otherwise `<see langword="null"/>`.
         /// </summary>
-        /// <param name="targetUri">
-        /// The unique identifier for the resource for which access is to be acquired.
-        /// </param>
-        /// <param name="options"></param>
-        /// <returns>
-        /// A <see cref="Credential"/> for packing into a basic authentication header; otherwise <see langword="null"/>.
-        /// </returns>
+        /// <param name="targetUri">The URI of the VSTS resource.</param>
         Task<Credential> InteractiveLogon(TargetUri targetUri, PersonalAccessTokenOptions options);
 
         /// <summary>
-        /// <para>
-        /// Creates an interactive logon session, using ADAL secure browser GUI, which enables users
-        /// to authenticate with the Azure tenant and acquire the necessary access tokens to exchange
-        /// for a VSTS personal access token.
-        /// </para>
-        /// <para>Tokens acquired are stored in the secure secret stores provided during initialization.</para>
+        /// Creates an interactive logon session, using ADAL secure browser GUI, which enables users to authenticate with the Azure tenant and acquire the necessary access tokens to exchange for a VSTS personal access token.
+        /// <para/>
+        /// Tokens acquired are stored in the secure secret stores provided during initialization.
+        /// <para/>
+        /// Return a `<see cref="Credential"/>` for resource access if successful; otherwise `<see langword="null"/>`.
         /// </summary>
-        /// <param name="targetUri">
-        /// The unique identifier for the resource for which access is to be acquired.
-        /// </param>
+        /// <param name="targetUri">The URI of the VSTS resource.</param>
         /// <param name="requestCompactToken">
-        /// <para>
-        /// Requests a compact format personal access token; otherwise requests a standard personal
-        /// access token.
-        /// </para>
-        /// <para>
-        /// Compact tokens are necessary for clients which have restrictions on the size of the basic
-        /// authentication header which they can create (example: Git).
-        /// </para>
+        /// Requests a compact format personal access token if `<see langword="true"/>`; otherwise requests a standard format personal access token.
+        /// <para/>
+        /// Compact tokens are necessary for clients which have restrictions on the size of the basic authentication header which they can create (example: Git).
         /// </param>
-        /// <returns>
-        /// A <see cref="Credential"/> for packing into a basic authentication header; otherwise <see langword="null"/>.
-        /// </returns>
+        [Obsolete("Please use Task<Credential> InteractiveLogon(TargetUri targetUri, PersonalAccessTokenOptions options) instead.", false)]
         Task<Credential> InteractiveLogon(TargetUri targetUri, bool requestCompactToken);
 
         /// <summary>
-        /// <para>
-        /// Uses Active Directory Federation Services to authenticate with the Azure tenant
-        /// non-interactively and acquire the necessary access tokens to exchange for a VSTS personal
-        /// access token.
-        /// </para>
-        /// <para>Tokens acquired are stored in the secure secret stores provided during initialization.</para>
+        /// Uses Active Directory Federation Services to authenticate with the Azure tenant non-interactively and acquire the necessary access tokens to exchange for a VSTS personal access token.
+        /// <para/>
+        /// Tokens acquired are stored in the secure secret stores provided during initialization.
+        /// <para/>
+        /// Return a `<see cref="Credential"/>` for resource access if successful; otherwise `<see langword="null"/>`.
         /// </summary>
-        /// <param name="targetUri">
-        /// The unique identifier for the resource for which access is to be acquired.
-        /// </param>
-        /// <param name="options"></param>
-        /// <returns>
-        /// A <see cref="Credential"/> for packing into a basic authentication header; otherwise <see langword="null"/>.
-        /// </returns>
+        /// <param name="targetUri">The URL of the VSTS resource.</param>
+        /// <param name="options">Options related to VSTS personal access creation.</param>
         Task<Credential> NoninteractiveLogon(TargetUri targetUri, PersonalAccessTokenOptions options);
 
         /// <summary>
-        /// <para>
-        /// Uses Active Directory Federation Services to authenticate with the Azure tenant
-        /// non-interactively and acquire the necessary access tokens to exchange for a VSTS personal
-        /// access token.
-        /// </para>
-        /// <para>Tokens acquired are stored in the secure secret stores provided during initialization.</para>
+        /// Uses Active Directory Federation Services to authenticate with the Azure tenant non-interactively and acquire the necessary access tokens to exchange for a VSTS personal access token.
+        /// <para/>
+        /// Tokens acquired are stored in the secure secret stores provided during initialization.
+        /// <para/>
+        /// Return a `<see cref="Credential"/>` for resource access if successful; otherwise `<see langword="null"/>`.
         /// </summary>
-        /// <param name="targetUri">
-        /// The unique identifier for the resource for which access is to be acquired.
-        /// </param>
+        /// <param name="targetUri">The URL of the VSTS resource.</param>
         /// <param name="requestCompactToken">
-        /// <para>
-        /// Requests a compact format personal access token; otherwise requests a standard personal
-        /// access token.
-        /// </para>
-        /// <para>
-        /// Compact tokens are necessary for clients which have restrictions on the size of the basic
-        /// authentication header which they can create (example: Git).
-        /// </para>
+        /// Requests a compact format personal access token if `<see langword="true"/>`; otherwise requests a standard format personal access token.
+        /// <para/>
+        /// Compact tokens are necessary for clients which have restrictions on the size of the basic authentication header which they can create (example: Git).
         /// </param>
-        /// <returns>
-        /// A <see cref="Credential"/> for packing into a basic authentication header; otherwise <see langword="null"/>.
-        /// </returns>
-        Task<Credential> NoninteractiveLogon(TargetUri targetUri, bool requestCompactToken);
+        [Obsolete("Please use Task<Credential> NoninteractiveLogon(TargetUri targetUri, PersonalAccessTokenOptions options) instead.", false)]
+        Task <Credential> NoninteractiveLogon(TargetUri targetUri, bool requestCompactToken);
     }
 }

@@ -45,7 +45,7 @@ namespace Microsoft.Alm.Authentication.Test
 
             Assert.Null(aadAuthentication.PersonalAccessTokenStore.ReadCredentials(targetUri));
 
-            Assert.NotNull(aadAuthentication.InteractiveLogon(targetUri, false).Result);
+            Assert.NotNull(aadAuthentication.InteractiveLogon(targetUri, new PersonalAccessTokenOptions { RequireCompactToken = false }).Result);
 
             Assert.NotNull(aadAuthentication.PersonalAccessTokenStore.ReadCredentials(targetUri));
         }
@@ -56,7 +56,7 @@ namespace Microsoft.Alm.Authentication.Test
             TargetUri targetUri = DefaultTargetUri;
             VstsAadAuthentication aadAuthentication = GetVstsAadAuthentication("aad-noninteractive");
 
-            Assert.NotNull(Task.Run(async () => { return await aadAuthentication.NoninteractiveLogon(targetUri, false); }).Result);
+            Assert.NotNull(Task.Run(async () => { return await aadAuthentication.NoninteractiveLogon(targetUri, new PersonalAccessTokenOptions { RequireCompactToken = false }); }).Result);
 
             Assert.NotNull(aadAuthentication.PersonalAccessTokenStore.ReadCredentials(targetUri));
         }
@@ -93,7 +93,7 @@ namespace Microsoft.Alm.Authentication.Test
             TargetUri targetUri = DefaultTargetUri;
             VstsAadAuthentication aadAuthentication = GetVstsAadAuthentication("aad-loginhint");
 
-            Assert.NotNull(Task.Run(async () => { return await aadAuthentication.NoninteractiveLogon(targetUri, false); }).Result);
+            Assert.NotNull(Task.Run(async () => { return await aadAuthentication.NoninteractiveLogon(targetUri, new PersonalAccessTokenOptions { RequireCompactToken = false }); }).Result);
 
             Assert.NotNull(aadAuthentication.PersonalAccessTokenStore.ReadCredentials(targetUri));
         }

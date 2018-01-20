@@ -36,14 +36,9 @@ namespace Microsoft.Alm.Authentication
         private VstsTokenScope _scope;
 
         /// <summary>
-        /// <para>
-        /// Requests a compact format personal access token; otherwise requests a standard personal
-        /// access token.
-        /// </para>
-        /// <para>
-        /// Compact tokens are necessary for clients which have restrictions on the size of the basic
-        /// authentication header which they can create (example: Git).
-        /// </para>
+        /// Requests a compact format personal access token if `<see langword="true"/>`; otherwise requests a standard format personal access token.
+        /// <para/>
+        /// Compact tokens are necessary for clients which have restrictions on the size of the basic authentication header which they can create (example: Git).
         /// </summary>
         public bool RequireCompactToken
         {
@@ -60,11 +55,9 @@ namespace Microsoft.Alm.Authentication
         }
 
         /// <summary>
-        /// <para>
-        /// Requests a limited duration personal access token when specified; otherwise the default
-        /// duration is requested.
-        /// </para>
-        /// <para>Cannot be less than one hour; values less than one hour (1hr) are ignored.</para>
+        /// Requests a limited duration personal access token when specified; otherwise the default duration is requested.
+        /// <para/>
+        /// Cannot be less than one hour; values less than one hour (1hr) are ignored.
         /// </summary>
         public TimeSpan? TokenDuration
         {
@@ -81,9 +74,7 @@ namespace Microsoft.Alm.Authentication
         }
 
         /// <summary>
-        /// <para>
         /// Requests a limited scope personal access token; otherwise the default scope is requested.
-        /// </para>
         /// </summary>
         public VstsTokenScope TokenScope
         {
@@ -99,9 +90,9 @@ namespace Microsoft.Alm.Authentication
             }
         }
 
-        private string DebuggerDisplay
+        internal string DebuggerDisplay
         {
-            get { return $"{(_compact ? "Compact" : "Normal")} {((_scope == null) ? "Default" : _scope.Value)} [{(_duration.HasValue ? _duration.Value.ToString("u") : "Default")}]"; }
+            get { return $"{nameof(VstsTokenScope)}: {(_compact ? "Compact" : "Normal")} {((_scope == null) ? "Default" : _scope.Value)} [{(_duration.HasValue ? _duration.Value.ToString("u") : "Default")}]"; }
         }
 
         public override bool Equals(object obj)
@@ -116,7 +107,7 @@ namespace Microsoft.Alm.Authentication
 
         public override string ToString()
         {
-            return typeof(PersonalAccessTokenOptions).Name;
+            return nameof(VstsTokenScope);
         }
 
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA1801:ReviewUnusedParameters", MessageId = "right")]
