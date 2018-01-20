@@ -14,13 +14,6 @@
     <TargetFrameworkProfile />
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
-  <PropertyGroup Condition=" '$(OutputType)' == 'Exe' Or '$(OutputType)' == 'WinExe' ">
-    <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>
-    <TargetFrameworkVersion>v4.5.2</TargetFrameworkVersion>
-  </PropertyGroup>
-  <PropertyGroup Condition=" '$(OutputType)' == 'Library' ">
-    <TargetFrameworkVersion>v4.5.1</TargetFrameworkVersion>
-  </PropertyGroup>
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' Or '$(Configuration)' == '*Undefined*' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' Or  '$(Platform)' == '*Undefined*' " >AnyCPU</Platform>

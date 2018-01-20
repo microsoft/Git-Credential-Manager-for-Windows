@@ -14,6 +14,8 @@
   </PropertyGroup>
   <Import Project="..\build.props" />
   <PropertyGroup>
+    <ProjectDir>$(MSBuildThisFileDirectory)</ProjectDir>
+    <OutputPath>$(ProjectDir)$(OutputPath)</OutputPath>
     <SigningTarget>$(OutputPath)\$(AssemblyName).dll</SigningTarget>
   </PropertyGroup>
   <ItemGroup>

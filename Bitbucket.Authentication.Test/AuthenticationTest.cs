@@ -44,7 +44,7 @@ namespace Atlassian.Bitbucket.Authentication.Test
                             && wc.Key.Contains(credentials.Username)
                             && wc.Key.Contains(credentials.Password));
 
-            Assert.Equal(writeCalls.Count(), 1);
+            Assert.Single(writeCalls);
         }
 
         [Fact]
@@ -115,7 +115,7 @@ namespace Atlassian.Bitbucket.Authentication.Test
                     .Where(mc => mc.Key.Equals("DeleteCredentials"))
                         .SelectMany(mc => mc.Value);
 
-                Assert.Equal(deleteCalls.Count(), 0);
+                Assert.Empty(deleteCalls);
             });
         }
 
@@ -123,7 +123,7 @@ namespace Atlassian.Bitbucket.Authentication.Test
         public void VerifyDeleteCredentialForBasicAuthReadsTwiceDeletesOnce()
         {
             var credentialStore = new MockCredentialStore();
-            // add a stored basic auth credential to delete.
+            // Add a stored basic authentication credential to delete.
             credentialStore.Credentials.Add("https://example.com/", new Credential("john", "squire"));
 
             var bbAuth = new Authentication(credentialStore, null, null);
@@ -137,17 +137,17 @@ namespace Atlassian.Bitbucket.Authentication.Test
 
             // 2 read calls, 1 for the basic uri and 1 for /refresh_token
             Assert.Equal(2, readCalls.Count());
-            Assert.True(readCalls.Any(rc => rc.Key[0].Equals("https://example.com/")));
-            Assert.True(readCalls.Any(rc => rc.Key[0].Equals("https://example.com/refresh_token")));
+            Assert.Contains(readCalls, rc => rc.Key[0].Equals("https://example.com/"));
+            Assert.Contains(readCalls, rc => rc.Key[0].Equals("https://example.com/refresh_token"));
 
             var deleteCalls = credentialStore.MethodCalls
                 .Where(mc => mc.Key.Equals("DeleteCredentials"))
                     .SelectMany(mc => mc.Value);
 
             // 1 delete call, 1 for the basic uri 0 for /refresh_token as there isn't one
-            Assert.Equal(1, deleteCalls.Count());
-            Assert.True(deleteCalls.Any(rc => rc.Key[0].Equals("https://example.com/")));
-            Assert.False(deleteCalls.Any(rc => rc.Key[0].Equals("https://example.com/refresh_token")));
+            Assert.Single(deleteCalls);
+            Assert.Contains(deleteCalls, rc => rc.Key[0].Equals("https://example.com/"));
+            Assert.DoesNotContain(deleteCalls, rc => rc.Key[0].Equals("https://example.com/refresh_token"));
         }
 
         [Fact]
@@ -169,8 +169,8 @@ namespace Atlassian.Bitbucket.Authentication.Test
 
             // 2 read calls, 1 for the basic uri and 1 for /refresh_token
             Assert.Equal(2, readCalls.Count());
-            Assert.True(readCalls.Any(rc => rc.Key[0].Equals("https://example.com/")));
-            Assert.True(readCalls.Any(rc => rc.Key[0].Equals("https://example.com/refresh_token")));
+            Assert.Contains(readCalls, rc => rc.Key[0].Equals("https://example.com/"));
+            Assert.Contains(readCalls, rc => rc.Key[0].Equals("https://example.com/refresh_token"));
 
             var deleteCalls = credentialStore.MethodCalls
                 .Where(mc => mc.Key.Equals("DeleteCredentials"))
@@ -178,8 +178,8 @@ namespace Atlassian.Bitbucket.Authentication.Test
 
             // 2 delete call, 1 for the basic uri, 1 for /refresh_token as there is one
             Assert.Equal(2, deleteCalls.Count());
-            Assert.True(deleteCalls.Any(rc => rc.Key[0].Equals("https://example.com/")));
-            Assert.True(deleteCalls.Any(rc => rc.Key[0].Equals("https://example.com/refresh_token")));
+            Assert.Contains(deleteCalls, rc => rc.Key[0].Equals("https://example.com/"));
+            Assert.Contains(deleteCalls, rc => rc.Key[0].Equals("https://example.com/refresh_token"));
         }
 
         [Fact]
@@ -222,7 +222,7 @@ namespace Atlassian.Bitbucket.Authentication.Test
             // 1 for the basic uri without username
             Assert.Equal(2, deleteCalls.Count());
             Assert.Equal(1, deleteCalls.Count(rc => rc.Key[0].Equals("https://john@example.com/")));
-            Assert.False(deleteCalls.Any(rc => rc.Key[0].Equals("https://example.com/refresh_token")));
+            Assert.DoesNotContain(deleteCalls, rc => rc.Key[0].Equals("https://example.com/refresh_token"));
             Assert.Equal(1, deleteCalls.Count(rc => rc.Key[0].Equals("https://example.com/")));
         }
 
@@ -261,10 +261,10 @@ namespace Atlassian.Bitbucket.Authentication.Test
             // 1 delete calls
             // 1 for the basic uri with username
             // DOES NOT delete the Host credentials because they are for a different username.
-            Assert.Equal(1, deleteCalls.Count());
+            Assert.Single(deleteCalls);
             Assert.Equal(1, deleteCalls.Count(rc => rc.Key[0].Equals("https://john@example.com/")));
-            Assert.False(deleteCalls.Any(rc => rc.Key[0].Equals("https://example.com/refresh_token")));
-            Assert.False(deleteCalls.Any(rc => rc.Key[0].Equals("https://example.com/")));
+            Assert.DoesNotContain(deleteCalls, rc => rc.Key[0].Equals("https://example.com/refresh_token"));
+            Assert.DoesNotContain(deleteCalls, rc => rc.Key[0].Equals("https://example.com/"));
         }
 
         [Fact]
@@ -282,10 +282,10 @@ namespace Atlassian.Bitbucket.Authentication.Test
             Assert.Equal("https://johnsquire@example.com/", resultUri.ActualUri.AbsoluteUri);
             Assert.Equal("example.com", resultUri.DnsSafeHost);
             Assert.Equal("example.com", resultUri.Host);
-            Assert.Equal(true, resultUri.IsAbsoluteUri);
-            Assert.Equal(true, resultUri.IsDefaultPort);
+            Assert.True(resultUri.IsAbsoluteUri);
+            Assert.True(resultUri.IsDefaultPort);
             Assert.Equal(443, resultUri.Port);
-            Assert.Equal(null, resultUri.ProxyUri);
+            Assert.Null(resultUri.ProxyUri);
             Assert.Equal("https://johnsquire@example.com/", resultUri.QueryUri.AbsoluteUri);
             Assert.Equal("https", resultUri.Scheme);
             Assert.Equal(new WebProxy().Address, resultUri.WebProxy.Address);
@@ -307,10 +307,10 @@ namespace Atlassian.Bitbucket.Authentication.Test
             Assert.Equal("https://johnsquire%40stoneroses.com@example.com/", resultUri.ActualUri.AbsoluteUri);
             Assert.Equal("example.com", resultUri.DnsSafeHost);
             Assert.Equal("example.com", resultUri.Host);
-            Assert.Equal(true, resultUri.IsAbsoluteUri);
-            Assert.Equal(true, resultUri.IsDefaultPort);
+            Assert.True(resultUri.IsAbsoluteUri);
+            Assert.True(resultUri.IsDefaultPort);
             Assert.Equal(443, resultUri.Port);
-            Assert.Equal(null, resultUri.ProxyUri);
+            Assert.Null(resultUri.ProxyUri);
             Assert.Equal("https://johnsquire%40stoneroses.com@example.com/", resultUri.QueryUri.AbsoluteUri);
             Assert.Equal("https", resultUri.Scheme);
             Assert.Equal(new WebProxy().Address, resultUri.WebProxy.Address);
@@ -331,10 +331,10 @@ namespace Atlassian.Bitbucket.Authentication.Test
             Assert.Equal("https://johnsquire@example.com/", resultUri.ActualUri.AbsoluteUri);
             Assert.Equal("example.com", resultUri.DnsSafeHost);
             Assert.Equal("example.com", resultUri.Host);
-            Assert.Equal(true, resultUri.IsAbsoluteUri);
-            Assert.Equal(true, resultUri.IsDefaultPort);
+            Assert.True(resultUri.IsAbsoluteUri);
+            Assert.True(resultUri.IsDefaultPort);
             Assert.Equal(443, resultUri.Port);
-            Assert.Equal(null, resultUri.ProxyUri);
+            Assert.Null(resultUri.ProxyUri);
             Assert.Equal("https://johnsquire@example.com/", resultUri.QueryUri.AbsoluteUri);
             Assert.Equal("https", resultUri.Scheme);
             Assert.Equal(new WebProxy().Address, resultUri.WebProxy.Address);

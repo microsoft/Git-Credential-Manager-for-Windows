@@ -10,6 +10,7 @@
     <OutputType>Library</OutputType>
     <ProjectGuid>{19770407-D7D8-4A37-914C-F552FF4B90D4}</ProjectGuid>
     <RootNamespace>Microsoft.Alm.Authentication</RootNamespace>
+    <TargetFrameworkVersion>v4.5.1</TargetFrameworkVersion>
   </PropertyGroup>
   <Import Project="..\build.props" />
   <PropertyGroup>
