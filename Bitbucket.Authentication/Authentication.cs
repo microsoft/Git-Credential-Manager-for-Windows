@@ -76,7 +76,10 @@ namespace Atlassian.Bitbucket.Authentication
 
         private const string refreshTokenSuffix = "/refresh_token";
 
-        /// <inheritdoc/>
+        /// <summary>
+        /// Deletes a `<see cref="Credential"/>` from the storage used by the authentication object.
+        /// </summary>
+        /// <param name="targetUri">The uniform resource indicator used to uniquely identify the credentials.</param>
         public override void DeleteCredentials(TargetUri targetUri)
         {
             DeleteCredentials(targetUri, null);
@@ -106,7 +109,7 @@ namespace Atlassian.Bitbucket.Authentication
                 Trace.WriteLine($"host refresh credentials deleted for {refreshTargetUri.ActualUri}");
             }
 
-            // if we deleted per user then we shoudl try and delete the host level credentials too if
+            // if we deleted per user then we should try and delete the host level credentials too if
             // they match the username
             if (targetUri.TargetUriContainsUsername)
             {
@@ -148,7 +151,12 @@ namespace Atlassian.Bitbucket.Authentication
             return GetCredentials(targetUri.GetPerUserTargetUri(username));
         }
 
-        /// <inheritdoc/>
+        /// <summary>
+        /// Gets a <see cref="Credential"/> from the storage used by the authentication object.
+        /// <para/>
+        /// Returns a `<see cref="Credential"/>` if successful; otherwise `<see langword="null"/>`.
+        /// </summary>
+        /// <param name="targetUri">The uniform resource indicator used to uniquely identify the credentials.</param>
         public override Credential GetCredentials(TargetUri targetUri)
         {
             BaseSecureStore.ValidateTargetUri(targetUri);
