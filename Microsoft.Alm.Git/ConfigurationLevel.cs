@@ -33,10 +33,29 @@ namespace Microsoft.Alm.Git
     {
         None = 0,
 
+        /// <summary>
+        /// Git portable configuration (only applies to Git for Windows).
+        /// </summary>
         Portable = 1 << 0,
+
+        /// <summary>
+        /// Git system, or per installation, configuration.
+        /// </summary>
         System = 1 << 1,
+
+        /// <summary>
+        /// Git XDG, or X Windows specific, configuration.
+        /// </summary>
         Xdg = 1 << 2,
+
+        /// <summary>
+        /// Git global, or per user, configuration.
+        /// </summary>
         Global = 1 << 3,
+
+        /// <summary>
+        /// Git local, or per repository, configuration.
+        /// </summary>
         Local = 1 << 4,
 
         All = Portable

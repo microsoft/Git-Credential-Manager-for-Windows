@@ -10,6 +10,7 @@
     <OutputType>Library</OutputType>
     <ProjectGuid>{19770407-5C58-406D-AB3F-3700BB0D06FE}</ProjectGuid>
     <RootNamespace>Microsoft.Alm.Git</RootNamespace>
+    <TargetFrameworkVersion>v4.5.1</TargetFrameworkVersion>
   </PropertyGroup>
   <Import Project="..\build.props" />
   <PropertyGroup>

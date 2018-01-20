@@ -36,12 +36,11 @@ namespace Microsoft.Alm.Git
     {
         /// <summary>
         /// Finds the "best" path to an app of a given name.
+        /// <para/>
+        /// Returns `<see langword="true"/>` if successful; otherwise `<see langword="false"/>`.
         /// </summary>
         /// <param name="name">The name of the application, without extension, to find.</param>
-        /// <param name="path">
-        /// Path to the first match file which the operating system considers executable.
-        /// </param>
-        /// <returns><see langword="True"/> if succeeds; <see langword="false"/> otherwise.</returns>
+        /// <param name="path">Path to the first match file which the operating system considers executable.</param>
         static public bool FindApp(string name, out string path)
         {
             if (!string.IsNullOrWhiteSpace(name))
@@ -51,7 +50,7 @@ namespace Microsoft.Alm.Git
 
                 if (string.IsNullOrEmpty(pathext) || string.IsNullOrEmpty(envpath))
                 {
-                    // The user is likely hosed, or a poorly crafted test case - eitherway avoid NRE
+                    // The user is likely hosed, or a poorly crafted test case - either way avoid NRE
                     // from the .Split call.
                     path = null;
                     return false;
@@ -92,14 +91,11 @@ namespace Microsoft.Alm.Git
         }
 
         /// <summary>
-        /// Finds and returns paths to Git installations in common locations.
+        /// Finds and returns path(s) to Git installation(s) in common locations.
+        /// <para/>
+        /// Returns `<see langword="true"/>` if successful; otherwise `<see langword="false"/>`.
         /// </summary>
-        /// <param name="hints">(optional) List of paths the caller believes Git can be found.</param>
-        /// <param name="paths">
-        /// All discovered paths to the root of Git installations, ordered by 'priority' with first
-        /// being the best installation to use when shelling out to Git.exe.
-        /// </param>
-        /// <returns><see langword="True"/> if Git was detected; <see langword="false"/> otherwise.</returns>
+        /// <param name="installations">The list of found Git installation if successful; otherwise `<see langword="null"/>`.</param>
         public static bool FindGitInstallations(out List<GitInstallation> installations)
         {
             const string GitAppName = @"Git";
@@ -166,7 +162,7 @@ namespace Microsoft.Alm.Git
             }
 
             List<GitInstallation> candidates = new List<GitInstallation>();
-            // add candidate locations in order of preference
+            // Add candidate locations in order of preference.
             if (Where.FindApp(GitAppName, out shellPathValue))
             {
                 // `Where.App` returns the path to the executable, truncate to the installation root
@@ -243,9 +239,8 @@ namespace Microsoft.Alm.Git
         }
 
         /// <summary>
-        /// Calculate the path to the user's home directory (~/ or %HOME%) that Git will rely on.
+        /// Returns the path to the user's home directory (~/ or %HOME%) that Git will rely on.
         /// </summary>
-        /// <returns>The path to the user's home directory.</returns>
         public static string Home()
         {
             // Git relies on the %HOME% environment variable to represent the users home directory it
@@ -274,16 +269,16 @@ namespace Microsoft.Alm.Git
                     return path;
             }
 
-            // When all else fails, Git falls back to %USERPROFILE% as the user's home directory, so
-            // should we.
+            // When all else fails, Git falls back to %USERPROFILE% as the user's home directory, so should we.
             return Environment.GetFolderPath(Environment.SpecialFolder.UserProfile);
         }
 
         /// <summary>
-        /// Gets the path to the Git global configuration file.
+        /// Gets the path to Git's global configuration file.
+        /// <para/>
+        /// Returns `<see langword="true"/>` if successful; otherwise `<see langword="false"/>`.
         /// </summary>
-        /// <param name="path">Path to the Git global configuration</param>
-        /// <returns><see langword="True"/> if succeeds; <see langword="false"/> otherwise.</returns>
+        /// <param name="path">Path to Git's global configuration if successful; otherwise `<see langword="null"/>`.</param>
         public static bool GitGlobalConfig(out string path)
         {
             const string GlobalConfigFileName = ".gitconfig";
@@ -293,7 +288,7 @@ namespace Microsoft.Alm.Git
 
             var globalPath = Path.Combine(home, GlobalConfigFileName);
 
-            // if the path is valid, return it to the user.
+            // If the path is valid, return it to the user.
             if (File.Exists(globalPath))
             {
                 path = globalPath;
@@ -305,13 +300,14 @@ namespace Microsoft.Alm.Git
         }
 
         /// <summary>
-        /// Gets the path to the Git local configuration file based on the <paramref name="startingDirectory"/>.
+        /// Gets the path to Git's portable system configuration file.
+        /// <para/>
+        /// Searches starting with `<paramref name="startingDirectory"/>` working up towards the device root.
+        /// <para/>
+        /// Returns `<see langword="true"/>` if successful; otherwise `<see langword="false"/>`.
         /// </summary>
-        /// <param name="startingDirectory">
-        /// A directory of the repository where the configuration file is contained.
-        /// </param>
-        /// <param name="path">Path to the Git local configuration</param>
-        /// <returns><see langword="True"/> if succeeds; <see langword="false"/> otherwise.</returns>
+        /// <param name="startingDirectory">Working directory of the repository to find the configuration.</param>
+        /// <param name="path">Path to Git's local configuration if successful; otherwise `<see langword="null"/>`.</param>
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Performance", "CA1800:DoNotCastUnnecessarily")]
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2202:Do not dispose objects multiple times")]
         public static bool GitLocalConfig(string startingDirectory, out string path)
@@ -417,18 +413,23 @@ namespace Microsoft.Alm.Git
         }
 
         /// <summary>
-        /// Gets the path to the Git local configuration file based on the current working directory.
+        /// Gets the path to Git's local configuration file based on the current working directory.
         /// </summary>
-        /// <param name="path">Path to the Git local configuration.</param>
+        /// <param name="path">Path to Git's local configuration if successful; otherwise `<see langword="null"/>`.</param>
         /// <returns><see langword="True"/> if succeeds; <see langword="false"/> otherwise.</returns>
         public static bool GitLocalConfig(out string path)
         {
             return GitLocalConfig(Environment.CurrentDirectory, out path);
         }
 
-        /// <summary> Gets the path to the Git portable system configuration file. </summary> <param
-        /// name="path">Path to the Git portable system configuration</param> <returns><see
-        /// langword="True"/> if succeeds; <se
+        /// <summary>
+        /// Gets the path to Git's portable system configuration file.
+        /// <para/>
+        /// Searches starting with `<see cref="Environment.CurrentDirectory"/>` working up towards the device root.
+        /// <para/>
+        /// Returns `<see langword="true"/>` if successful; otherwise `<see langword="false"/>`.
+        /// </summary>
+        /// <param name="path">Path to Git's portable system configuration if successful; otherwise `<see langword="null"/>`.</param>
         public static bool GitPortableConfig(out string path)
         {
             const string PortableConfigFolder = "Git";
@@ -447,10 +448,11 @@ namespace Microsoft.Alm.Git
         }
 
         /// <summary>
-        /// Gets the path to the Git system configuration file.
+        /// Gets the path to Git's system configuration file.
+        /// <para/>
+        /// Returns `<see langword="true"/>` if successful; otherwise `<see langword="false"/>`.
         /// </summary>
-        /// <param name="path">Path to the Git system configuration.</param>
-        /// <returns><see langword="True"/> if succeeds; <see langword="false"/> otherwise.</returns>
+        /// <param name="path">Path to Git's system configuration if successful; otherwise `<see langword="null"/>`.</param>
         public static bool GitSystemConfig(GitInstallation? installation, out string path)
         {
             if (installation.HasValue && File.Exists(installation.Value.Config))
@@ -475,6 +477,12 @@ namespace Microsoft.Alm.Git
             return false;
         }
 
+        /// <summary>
+        /// Gets the path to Git's XDG configuration file.
+        /// <para/>
+        /// Returns `<see langword="true"/>` if successful; otherwise `<see langword="false"/>`.
+        /// </summary>
+        /// <param name="path">Path to Git's XDG configuration file if successful; otherwise `<see langword="null"/>`.</param>
         public static bool GitXdgConfig(out string path)
         {
             const string XdgConfigFolder = "Git";
