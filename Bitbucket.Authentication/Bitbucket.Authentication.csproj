@@ -9,6 +9,14 @@
     <RootNamespace>Atlassian.Bitbucket.Authentication</RootNamespace>
     <AssemblyName>Bitbucket.Authentication</AssemblyName>
     <NuGetPackageImportStamp />
+    <TargetFrameworkVersion>v4.5.1</TargetFrameworkVersion>
+    <TargetFrameworkProfile />
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug|AnyCPU'">
+    <Prefer32Bit>false</Prefer32Bit>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Release|AnyCPU'">
+    <Prefer32Bit>false</Prefer32Bit>
   </PropertyGroup>
   <Import Project="..\build.props" />
   <PropertyGroup>
@@ -70,7 +78,7 @@
       <Name>Microsoft.Alm.Authentication</Name>
     </ProjectReference>
     <ProjectReference Include="..\Microsoft.Alm.Git\Microsoft.Alm.Git.csproj">
-      <Project>{19781214-0D26-436A-A8BB-32E58357B36D}</Project>
+      <Project>{19770407-5c58-406d-ab3f-3700bb0d06fe}</Project>
       <Name>Microsoft.Alm.Git</Name>
     </ProjectReference>
   </ItemGroup>

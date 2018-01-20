@@ -98,9 +98,9 @@ namespace Microsoft.Alm.Authentication
         internal Guid TenantId { get; set; }
 
         /// <summary>
-        /// Deletes a set of stored credentials by their target resource.
+        /// Deletes a `<see cref="Credential"/>` from the storage used by the authentication object.
         /// </summary>
-        /// <param name="targetUri">The 'key' by which to identify credentials.</param>
+        /// <param name="targetUri">The uniform resource indicator used to uniquely identify the credentials.</param>
         public override void DeleteCredentials(TargetUri targetUri)
         {
             BaseSecureStore.ValidateTargetUri(targetUri);
@@ -113,14 +113,11 @@ namespace Microsoft.Alm.Authentication
 
         /// <summary>
         /// Detects the backing authority of the end-point.
+        /// <para/>
+        /// Returns `<see langword="true"/>` if the authority is Visual Studio Online, along with the tenant identity; `<see langword="false"/>` otherwise.
         /// </summary>
         /// <param name="targetUri">The resource which the authority protects.</param>
-        /// <param name="tenantId">
-        /// The identity of the authority tenant; <see cref="Guid.Empty"/> otherwise.
-        /// </param>
-        /// <returns>
-        /// <see langword="true"/> if the authority is Visual Studio Online; <see langword="false"/> otherwise
-        /// </returns>
+        /// <param name="tenantId">The identity of the authority tenant; `<see cref="Guid.Empty"/>` otherwise.</param>
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Design", "CA1006:DoNotNestGenericTypesInMemberSignatures")]
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Design", "CA1062:Validate arguments of public methods", MessageId = "0")]
         public static async Task<KeyValuePair<bool, Guid>> DetectAuthority(TargetUri targetUri)
@@ -199,29 +196,21 @@ namespace Microsoft.Alm.Authentication
 
         /// <summary>
         /// Creates a new authentication broker based for the specified resource.
+        /// <para/>
+        /// Returns `<see langword="true"/>` if an authority could be determined; otherwise `<see langword="false"/>`.
         /// </summary>
         /// <param name="targetUri">The resource for which authentication is being requested.</param>
         /// <param name="scope">The scope of the access being requested.</param>
-        /// <param name="personalAccessTokenStore">
-        /// Storage container for personal access token secrets.
-        /// </param>
-        /// <param name="adaRefreshTokenStore">Storage container for Azure access token secrets.</param>
-        /// <param name="authentication">
-        /// An implementation of <see cref="BaseAuthentication"/> if one was detected;
-        /// <see langword="null"/> otherwise.
-        /// </param>
-        /// <returns>
-        /// <see langword="true"/> if an authority could be determined; <see langword="false"/> otherwise.
-        /// </returns>
+        /// <param name="personalAccessTokenStore">Storage container for personal access token secrets.</param>
         public static async Task<BaseAuthentication> GetAuthentication(
             TargetUri targetUri,
             VstsTokenScope scope,
             ICredentialStore personalAccessTokenStore)
         {
             BaseSecureStore.ValidateTargetUri(targetUri);
-            if (ReferenceEquals(scope, null))
+            if (scope is null)
                 throw new ArgumentNullException(nameof(scope));
-            if (ReferenceEquals(personalAccessTokenStore, null))
+            if (personalAccessTokenStore is null)
                 throw new ArgumentNullException(nameof(personalAccessTokenStore));
 
             BaseAuthentication authentication = null;
@@ -234,7 +223,7 @@ namespace Microsoft.Alm.Authentication
             // Query for the tenant's identity
             Guid tenantId = result.Value;
 
-            // empty Guid is MSA, anything else is AAD
+            // empty identity is MSA, anything else is AAD
             if (tenantId == Guid.Empty)
             {
                 Git.Trace.WriteLine("MSA authority detected.");
@@ -251,22 +240,29 @@ namespace Microsoft.Alm.Authentication
         }
 
         /// <summary>
-        /// Attempts to get a set of credentials from storage by their target resource.
+        /// Gets a <see cref="Credential"/> from the storage used by the authentication object.
+        /// <para/>
+        /// Returns a `<see cref="Credential"/>` if successful; otherwise `<see langword="null"/>`.
         /// </summary>
-        /// <param name="targetUri">The 'key' by which to identify credentials.</param>
-        /// <param name="credentials">
-        /// Credentials associated with the URI if successful; <see langword="null"/> otherwise.
-        /// </param>
-        /// <returns><see langword="true"/> if successful; <see langword="false"/> otherwise.</returns>
+        /// <param name="targetUri">The uniform resource indicator used to uniquely identify the credentials.</param>
         public override Credential GetCredentials(TargetUri targetUri)
         {
             BaseSecureStore.ValidateTargetUri(targetUri);
 
             Credential credentials = null;
 
-            if ((credentials = PersonalAccessTokenStore.ReadCredentials(targetUri)) != null)
+            try
             {
-                Git.Trace.WriteLine($"credentials for '{targetUri}' found.");
+                if ((credentials = PersonalAccessTokenStore.ReadCredentials(targetUri)) != null)
+                {
+                    Git.Trace.WriteLine($"credentials for '{targetUri}' found.");
+                }
+            }
+            catch (Exception exception)
+            {
+                System.Diagnostics.Debug.WriteLine(exception);
+
+                Git.Trace.WriteLine($"failed to read credentials from the secure store: {exception.GetType().Name}.");
             }
 
             return credentials;
@@ -274,26 +270,24 @@ namespace Microsoft.Alm.Authentication
 
         /// <summary>
         /// Validates that a set of credentials grants access to the target resource.
+        /// <para/>
+        /// Returns `<see langword="true"/>` if successful; otherwise `<see langword="false"/>`.
         /// </summary>
         /// <param name="targetUri">The target resource to validate against.</param>
         /// <param name="credentials">The credentials to validate.</param>
-        /// <returns><see langword="true"/> if successful; <see langword="false"/> otherwise.</returns>
         public async Task<bool> ValidateCredentials(TargetUri targetUri, Credential credentials)
         {
             return await VstsAuthority.ValidateCredentials(targetUri, credentials);
         }
 
         /// <summary>
-        /// Generates a "personal access token" or service specific, usage resticted access token.
+        /// Generates a "personal access token" or service specific, usage restricted access token.
+        /// <para/>
+        /// Returns a "personal access token" for the user if successful; otherwise `<see langword="null"/>`.
         /// </summary>
-        /// <param name="targetUri">
-        /// The target resource for which to acquire the personal access token for.
-        /// </param>
-        /// <param name="accessToken">
-        /// Azure Directory access token with privileges to grant access to the target resource.
-        /// </param>
+        /// <param name="targetUri">The target resource for which to acquire the personal access token for.</param>
+        /// <param name="accessToken">Azure Directory access token with privileges to grant access to the target resource.</param>
         /// <param name="options">Set of options related to generation of personal access tokens.</param>
-        /// <returns><see langword="true"/> if successful; <see langword="false"/> otherwise.</returns>
         protected async Task<Credential> GeneratePersonalAccessToken(
             TargetUri targetUri,
             Token accessToken,
@@ -301,19 +295,19 @@ namespace Microsoft.Alm.Authentication
         {
             BaseSecureStore.ValidateTargetUri(targetUri);
 
-            if (ReferenceEquals(accessToken, null))
+            if (accessToken is null)
                 throw new ArgumentNullException(nameof(accessToken));
 
             VstsTokenScope requestedScope = TokenScope;
 
             if (options.TokenScope != null)
             {
-                // Take the intersection of the auhority scope and the requested scope
+                // Take the intersection of the authority scope and the requested scope
                 requestedScope &= options.TokenScope;
 
                 // If the result of the intersection is none, then fail
                 if (string.IsNullOrWhiteSpace(requestedScope.Value))
-                    throw new InvalidOperationException("Invalid scope requested. Reqeuested scope would result in no access privileges.");
+                    throw new InvalidOperationException("Invalid scope requested. Requested scope would result in no access privileges.");
             }
 
             Credential credential = null;
@@ -325,25 +319,29 @@ namespace Microsoft.Alm.Authentication
 
                 Git.Trace.WriteLine($"personal access token created for '{targetUri}'.");
 
-                PersonalAccessTokenStore.WriteCredentials(targetUri, credential);
+                try
+                {
+                    PersonalAccessTokenStore.WriteCredentials(targetUri, credential);
+                }
+                catch (Exception exception)
+                {
+                    System.Diagnostics.Debug.WriteLine(exception);
+
+                    Git.Trace.WriteLine($"failed to write credentials to the secure store: {exception.GetType().Name}.");
+                }
             }
 
             return credential;
         }
 
         /// <summary>
-        /// Generates a "personal access token" or service specific, usage resticted access token.
+        /// Generates a "personal access token" or service specific, usage restricted access token.
+        /// <para/>
+        /// Returns `<see langword="true"/>` if successful; `<see langword="false"/>` otherwise.
         /// </summary>
-        /// <param name="targetUri">
-        /// The target resource for which to acquire the personal access token for.
-        /// </param>
-        /// <param name="accessToken">
-        /// Azure Directory access token with privileges to grant access to the target resource.
-        /// </param>
-        /// <param name="requestCompactToken">
-        /// Generates a compact token if <see langword="true"/>; generates a self describing token if <see langword="false"/>.
-        /// </param>
-        /// <returns><see langword="true"/> if successful; <see langword="false"/> otherwise.</returns>
+        /// <param name="targetUri">The target resource for which to acquire the personal access token for.</param>
+        /// <param name="accessToken">Azure Directory access token with privileges to grant access to the target resource.</param>
+        /// <param name="requestCompactToken">Generates a compact token if `<see langword="true"/>`; generates a self describing token if `<see langword="false"/>`.</param>
         protected async Task<Credential> GeneratePersonalAccessToken(
             TargetUri targetUri,
             Token accessToken,
@@ -363,7 +361,16 @@ namespace Microsoft.Alm.Authentication
 
                 Git.Trace.WriteLine($"personal access token created for '{targetUri}'.");
 
-                PersonalAccessTokenStore.WriteCredentials(targetUri, credential);
+                try
+                {
+                    PersonalAccessTokenStore.WriteCredentials(targetUri, credential);
+                }
+                catch (Exception exception)
+                {
+                    System.Diagnostics.Debug.WriteLine(exception);
+
+                    Git.Trace.WriteLine($"failed to write credentials to the secure store: {exception.GetType().Name}.");
+                }
             }
 
             return credential;
@@ -381,6 +388,7 @@ namespace Microsoft.Alm.Authentication
 
             string data = null;
             Dictionary<string, Guid> cache = new Dictionary<string, Guid>(StringComparer.OrdinalIgnoreCase);
+            Exception exception = null;
 
             // Attempt up to five times to read from the cache
             for (int i = 0; i < 5; i += 1)
@@ -401,6 +409,19 @@ namespace Microsoft.Alm.Authentication
                     // Sleep the thread, and wait before trying again using progressive back off
                     System.Threading.Thread.Sleep(i + 1 * 100);
                 }
+                catch (Exception e)
+                {
+                    exception = e;
+                }
+            }
+
+            if (exception != null)
+            {
+                System.Diagnostics.Debug.WriteLine(exception);
+
+                Git.Trace.WriteLine($"failed to deserialize tenant cache: {exception.GetType().Name}.");
+
+                return cache;
             }
 
             // Parse the inflated data
@@ -450,10 +471,14 @@ namespace Microsoft.Alm.Authentication
 
         private static async Task SerializeTenantCache(Dictionary<string, Guid> cache)
         {
+            if (cache is null)
+                throw new ArgumentNullException(nameof(cache));
+
             var encoding = new UTF8Encoding(false);
             string path = GetCachePath();
 
             StringBuilder builder = new StringBuilder();
+            Exception exception = null;
 
             // Write each key/value pair as key=value\0
             foreach (var pair in cache)
@@ -485,6 +510,17 @@ namespace Microsoft.Alm.Authentication
                     // Sleep the thread, and wait before trying again using progressive back off
                     System.Threading.Thread.Sleep(i + 1 * 100);
                 }
+                catch (Exception e)
+                {
+                    exception = e;
+                }
+            }
+
+            if (exception != null)
+            {
+                System.Diagnostics.Debug.WriteLine(exception);
+
+                Git.Trace.WriteLine($"failed to serialize tenant cache: {exception.GetType().Name}.");
             }
         }
     }

@@ -44,15 +44,19 @@ namespace Microsoft.Alm.Authentication
         }
 
         /// <summary>
-        /// Generates a personal access token for use with Visual Studio Online.
+        /// Generates a personal access token for use with Visual Studio Team Services.
+        /// <para/>
+        /// Returns the acquired token if successful; otherwise <see langword="null"/>;
         /// </summary>
-        /// <param name="targetUri">
-        /// The uniform resource indicator of the resource access tokens are being requested for.
+        /// <param name="targetUri">The uniform resource indicator of the resource access tokens are being requested for.</param>
+        /// <param name="accessToken">Access token granted by the identity authority (Azure).</param>
+        /// <param name="tokenScope">The requested access scopes to be granted to the token.</param>
+        /// <param name="requireCompactToken">`<see langword="true"/>` if requesting a compact format token; otherwise `<see langword="false"/>`.</param>
+        /// <param name="tokenDuration">
+        /// The requested lifetime of the requested token.
+        /// <para/>
+        /// The authority granting the token decides the actual lifetime of any token granted, regardless of the duration requested.
         /// </param>
-        /// <param name="accessToken"></param>
-        /// <param name="tokenScope"></param>
-        /// <param name="requireCompactToken"></param>
-        /// <returns></returns>
         public async Task<Token> GeneratePersonalAccessToken(TargetUri targetUri, Token accessToken, VstsTokenScope tokenScope, bool requireCompactToken, TimeSpan? tokenDuration = null)
         {
             BaseSecureStore.ValidateTargetUri(targetUri);
@@ -77,7 +81,7 @@ namespace Microsoft.Alm.Authentication
 
                                 if (!string.IsNullOrWhiteSpace(responseText))
                                 {
-                                    // find the 'token : <value>' portion of the result content, if any
+                                    // Find the 'token : <value>' portion of the result content, if any.
                                     Match tokenMatch = null;
                                     if ((tokenMatch = Regex.Match(responseText, @"\s*""token""\s*:\s*""([^\""]+)""\s*", RegexOptions.Compiled | RegexOptions.CultureInvariant | RegexOptions.IgnoreCase)).Success)
                                     {
@@ -114,12 +118,12 @@ namespace Microsoft.Alm.Authentication
 
             try
             {
-                // create an request to the VSTS deployment data end-point
+                // Create an request to the VSTS deployment data end-point.
                 HttpWebRequest request = GetConnectionDataRequest(targetUri, accessToken);
 
                 Git.Trace.WriteLine($"access token end-point is '{request.Method}' '{request.RequestUri}'.");
 
-                // send the request and wait for the response
+                // Send the request and wait for the response.
                 using (var response = await request.GetResponseAsync())
                 using (var stream = response.GetResponseStream())
                 using (var reader = new StreamReader(stream, Encoding.UTF8))
@@ -151,14 +155,12 @@ namespace Microsoft.Alm.Authentication
         }
 
         /// <summary>
-        /// Validates that <see cref="Credential"/> are valid to grant access to the Visual Studio
-        /// Online service represented by the <paramref name="targetUri"/> parameter.
+        /// Validates that a `<see cref="Credential"/>` is valid to grant access to the VSTS resource referenced by `<paramref name="targetUri"/>`.
+        /// <para/>
+        /// Returns `<see langword="true"/>` if successful; otherwise `<see langword="false"/>`.
         /// </summary>
-        /// <param name="targetUri">Uniform resource identifier for a VSTS service.</param>
-        /// <param name="credentials">
-        /// <see cref="Credential"/> expected to grant access to the VSTS service.
-        /// </param>
-        /// <returns>True if successful; otherwise false.</returns>
+        /// <param name="targetUri">URI of the VSTS resource.</param>
+        /// <param name="credentials">`<see cref="Credential"/>` expected to grant access to the VSTS service.</param>
         public async Task<bool> ValidateCredentials(TargetUri targetUri, Credential credentials)
         {
             BaseSecureStore.ValidateTargetUri(targetUri);
@@ -193,34 +195,32 @@ namespace Microsoft.Alm.Authentication
         }
 
         /// <summary>
-        /// <para>
-        /// Validates that <see cref="Token"/> are valid to grant access to the Visual Studio Online
-        /// service represented by the <paramref name="targetUri"/> parameter.
-        /// </para>
+        /// Validates that a `<see cref="Token"/>` is valid to grant access to the VSTS resource referenced by `<paramref name="targetUri"/>`.
+        /// <para/>
+        /// Returns `<see langword="true"/>` if successful; otherwise `<see langword="false"/>`.
         /// </summary>
-        /// <param name="targetUri">Uniform resource identifier for a VSTS service.</param>
-        /// <param name="token"><see cref="Token"/> expected to grant access to the VSTS service.</param>
-        /// <returns>True if successful; otherwise false.</returns>
+        /// <param name="targetUri">URI of the VSTS resource.</param>
+        /// <param name="token">`<see cref="Token"/>` expected to grant access to the VSTS resource.</param>
         public async Task<bool> ValidateToken(TargetUri targetUri, Token token)
         {
             BaseSecureStore.ValidateTargetUri(targetUri);
             BaseSecureStore.ValidateToken(token);
 
-            // personal access tokens are effectively credentials, treat them as such
+            // Personal access tokens are effectively credentials, treat them as such.
             if (token.Type == TokenType.Personal)
                 return await ValidateCredentials(targetUri, (Credential)token);
 
             try
             {
-                // create an request to the VSTS deployment data end-point
+                // Create an request to the VSTS deployment data end-point.
                 HttpWebRequest request = GetConnectionDataRequest(targetUri, token);
 
                 Git.Trace.WriteLine($"validating token against '{request.Host}'.");
 
-                // send the request and wait for the response
+                // Send the request and wait for the response.
                 using (HttpWebResponse response = await request.GetResponseAsync() as HttpWebResponse)
                 {
-                    // we're looking for 'OK 200' here, anything else is failure
+                    // We're looking for 'OK 200' here, anything else is failure.
                     Git.Trace.WriteLine($"server returned: '{response.StatusCode}'.");
                     return response.StatusCode == HttpStatusCode.OK;
                 }
@@ -287,16 +287,16 @@ namespace Microsoft.Alm.Authentication
             Debug.Assert(uri != null && uri.IsAbsoluteUri, $"The `{nameof(uri)}` parameter is null or invalid");
             Debug.Assert(token != null && (token.Type == TokenType.Access || token.Type == TokenType.Federated), $"The `{nameof(token)}` parameter is null or invalid");
 
-            // create an request to the VSTS deployment data end-point
+            // Create an request to the VSTS deployment data end-point.
             HttpWebRequest request = GetConnectionDataRequest(uri);
 
-            // different types of tokens are packed differently
+            // Different types of tokens are packed differently.
             switch (token.Type)
             {
                 case TokenType.Access:
-                    Git.Trace.WriteLine($"validating adal access token for '{uri}'.");
+                    Git.Trace.WriteLine($"validating ADAL access token for '{uri}'.");
 
-                    // adal access tokens are packed into the Authorization header
+                    // ADAL access tokens are packed into the Authorization header.
                     string sessionAuthHeader = BearerPrefix + token.Value;
                     request.Headers.Add(HttpRequestHeader.Authorization, sessionAuthHeader);
                     break;
@@ -304,7 +304,7 @@ namespace Microsoft.Alm.Authentication
                 case TokenType.Federated:
                     Git.Trace.WriteLine($"validating federated authentication token for '{uri}'.");
 
-                    // federated authentication tokens are sent as cookie(s)
+                    // Federated authentication tokens are sent as cookie(s).
                     request.Headers.Add(HttpRequestHeader.Cookie, token.Value);
                     break;
 
@@ -321,10 +321,10 @@ namespace Microsoft.Alm.Authentication
             Debug.Assert(targetUri != null && targetUri.IsAbsoluteUri, "The targetUri parameter is null or invalid");
             Debug.Assert(credentials != null, "The credentials parameter is null or invalid");
 
-            // create an request to the VSTS deployment data end-point
+            // Create an request to the VSTS deployment data end-point.
             HttpWebRequest request = GetConnectionDataRequest(targetUri);
 
-            // credentials are packed into the 'Authorization' header as a base64 encoded pair
+            // Credentials are packed into the 'Authorization' header as a base64 encoded pair.
             string basicAuthHeader = GetBasicAuthorizationHeader(credentials);
             request.Headers.Add(HttpRequestHeader.Authorization, basicAuthHeader);
 
@@ -337,10 +337,10 @@ namespace Microsoft.Alm.Authentication
 
             Debug.Assert(targetUri != null && targetUri.IsAbsoluteUri, "The targetUri parameter is null or invalid");
 
-            // create a url to the connection data end-point, it's deployment level and "always on".
+            // Create a URL to the connection data end-point, it's deployment level and "always on".
             string validationUrl = string.Format(System.Globalization.CultureInfo.InvariantCulture, VstsValidationUrlFormat, targetUri.Scheme, targetUri.DnsSafeHost);
 
-            // start building the request, only supports GET
+            // Start building the request, only supports GET.
             HttpWebRequest request = WebRequest.CreateHttp(validationUrl);
             request.Timeout = Global.RequestTimeout;
             request.UserAgent = Global.UserAgent;
@@ -386,8 +386,10 @@ namespace Microsoft.Alm.Authentication
             const string ContentTimedJsonFormat = "{{ \"scope\" : \"{0}\", \"targetAccounts\" : [\"{1}\"], \"displayName\" : \"Git: {2} on {3}\", \"validTo\": \"{4:u}\" }}";
             const string HttpJsonContentType = "application/json";
 
-            Debug.Assert(accessToken != null && (accessToken.Type == TokenType.Access || accessToken.Type == TokenType.Federated), "The accessToken parameter is null or invalid");
-            Debug.Assert(tokenScope != null, "The tokenScope parameter is null");
+            if (accessToken is null)
+                throw new ArgumentNullException(nameof(accessToken));
+            if (tokenScope is null)
+                throw new ArgumentNullException(nameof(tokenScope));
 
             Git.Trace.WriteLine($"creating access token scoped to '{tokenScope}' for '{accessToken.TargetIdentity}'");
 
@@ -402,7 +404,8 @@ namespace Microsoft.Alm.Authentication
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Reliability", "CA2000:Dispose objects before losing scope")]
         private static HttpClient CreateHttpClient(TargetUri targetUri)
         {
-            Debug.Assert(targetUri != null, $"The `{nameof(targetUri)}` is null.");
+            if (targetUri is null)
+                throw new ArgumentNullException(nameof(targetUri));
 
             HttpClient httpClient = new HttpClient(targetUri.HttpClientHandler)
             {
@@ -421,6 +424,7 @@ namespace Microsoft.Alm.Authentication
 
             if (client == null)
                 throw new ArgumentNullException(nameof(client));
+
             BaseSecureStore.ValidateTargetUri(targetUri);
 
             Uri idenityServiceUri = await GetIdentityServiceUri(client, targetUri);
@@ -441,7 +445,8 @@ namespace Microsoft.Alm.Authentication
         {
             const string UsernamePasswordFormat = "{0}:{1}";
 
-            Debug.Assert(credentials != null, "The credentials parameter is null or invalid");
+            if (credentials is null)
+                throw new ArgumentNullException(nameof(credentials));
 
             string credPair = string.Format(UsernamePasswordFormat, credentials.Username, credentials.Password);
             byte[] credBytes = Encoding.ASCII.GetBytes(credPair);
@@ -454,7 +459,10 @@ namespace Microsoft.Alm.Authentication
         {
             const string BasicPrefix = "Basic ";
 
-            // credentials are packed into the 'Authorization' header as a base64 encoded pair
+            if (credentials is null)
+                throw new ArgumentNullException(nameof(credentials));
+
+            // Credentials are packed into the 'Authorization' header as a base64 encoded pair.
             string base64enc = GetBase64EncodedCredentials(credentials);
             string basicAuthHeader = BasicPrefix + base64enc;
 

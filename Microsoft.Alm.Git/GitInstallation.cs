@@ -106,13 +106,20 @@ namespace Microsoft.Alm.Git
 
         internal GitInstallation(string path, KnownGitDistribution version)
         {
-            Debug.Assert(!string.IsNullOrWhiteSpace(path), $"The `{nameof(path)}` parameter is null or invalid.");
-            Debug.Assert(CommonConfigPaths.ContainsKey(version), $"The `{nameof(version)}` parameter not found in `{nameof(CommonConfigPaths)}`.");
-            Debug.Assert(CommonCmdPaths.ContainsKey(version), $"The `{nameof(version)}` parameter not found in `{nameof(CommonCmdPaths)}`.");
-            Debug.Assert(CommonGitPaths.ContainsKey(version), $"The `{nameof(version)}` parameter not found in `{nameof(CommonGitPaths)}`.");
-            Debug.Assert(CommonLibexecPaths.ContainsKey(version), $"The `{nameof(version)}` parameter not found in `{nameof(CommonLibexecPaths)}`.");
-            Debug.Assert(CommonShPaths.ContainsKey(version), $"The `{nameof(version)}` parameter not found in `{nameof(CommonShPaths)}`.");
-            Debug.Assert(CommonDocPaths.ContainsKey(version), $"The `{nameof(version)}` parameter not found in `{nameof(CommonDocPaths)}`.");
+            if (string.IsNullOrWhiteSpace(path))
+                throw new ArgumentNullException(nameof(path));
+            if (!CommonConfigPaths.ContainsKey(version))
+                throw new ArgumentOutOfRangeException(nameof(version));
+            if (!CommonCmdPaths.ContainsKey(version))
+                throw new ArgumentOutOfRangeException(nameof(version));
+            if (!CommonGitPaths.ContainsKey(version))
+                throw new ArgumentOutOfRangeException(nameof(version));
+            if (!CommonLibexecPaths.ContainsKey(version))
+                throw new ArgumentOutOfRangeException(nameof(version));
+            if (!CommonShPaths.ContainsKey(version))
+                throw new ArgumentOutOfRangeException(nameof(version));
+            if (!CommonDocPaths.ContainsKey(version))
+                throw new ArgumentOutOfRangeException(nameof(version));
 
             path = path.TrimEnd('\\');
 
@@ -135,11 +142,11 @@ namespace Microsoft.Alm.Git
                 path = path.Substring(0, path.Length - GitExeName.Length);
             }
 
-            // trim off trailing '\' characters to increase compatibility
+            // Trim off trailing '\' characters to increase compatibility.
             path = path.TrimEnd('\\');
 
-            Path = path;
-            Version = version;
+            _path = path;
+            _distribution = version;
             _cmd = null;
             _config = null;
             _doc = null;
@@ -148,91 +155,120 @@ namespace Microsoft.Alm.Git
             _sh = null;
         }
 
+        private string _config;
+        private string _cmd;
+        private string _doc;
+        private string _git;
+        private string _libexec;
+        private string _sh;
+        private readonly string _path;
+        private readonly KnownGitDistribution _distribution;
+
+        /// <summary>
+        /// Gets the path to the installation's gitconfig file (aka system config).
+        /// </summary>
         public string Config
         {
             get
             {
                 if (_config == null)
                 {
-                    _config = System.IO.Path.Combine(Path, CommonConfigPaths[Version]);
+                    _config = System.IO.Path.Combine(_path, CommonConfigPaths[_distribution]);
                 }
                 return _config;
             }
         }
 
-        private string _config;
-
+        /// <summary>
+        /// Gets the path to the installation's cmd/ folder.
+        /// </summary>
         public string Cmd
         {
             get
             {
                 if (_cmd == null)
                 {
-                    _cmd = System.IO.Path.Combine(Path, CommonCmdPaths[Version]);
+                    _cmd = System.IO.Path.Combine(_path, CommonCmdPaths[_distribution]);
                 }
                 return _cmd;
             }
         }
 
-        private string _cmd;
-
+        /// <summary>
+        /// Gets the path to the installation's doc/ folder.
+        /// </summary>
         public string Doc
         {
             get
             {
                 if (_doc == null)
                 {
-                    _doc = System.IO.Path.Combine(Path, CommonDocPaths[Version]);
+                    _doc = System.IO.Path.Combine(_path, CommonDocPaths[_distribution]);
                 }
                 return _doc;
             }
         }
 
-        private string _doc;
-
+        /// <summary>
+        /// Gets the path to the installation's git.exe file.
+        /// </summary>
         public string Git
         {
             get
             {
                 if (_git == null)
                 {
-                    _git = System.IO.Path.Combine(Path, CommonGitPaths[Version]);
+                    _git = System.IO.Path.Combine(_path, CommonGitPaths[_distribution]);
                 }
                 return _git;
             }
         }
 
-        private string _git;
-
+        /// <summary>
+        /// Gets the path to the installation's libexec/ folder.
+        /// </summary>
         public string Libexec
         {
             get
             {
                 if (_libexec == null)
                 {
-                    _libexec = System.IO.Path.Combine(Path, CommonLibexecPaths[Version]);
+                    _libexec = System.IO.Path.Combine(_path, CommonLibexecPaths[_distribution]);
                 }
                 return _libexec;
             }
         }
 
-        private string _libexec;
+        /// <summary>
+        /// Gets the path to the root of the installation.
+        /// </summary>
+        public string Path
+        {
+            get { return _path; }
+        }
 
+        /// <summary>
+        /// Gets the path to the installation's sh.exe file.
+        /// </summary>
         public string Sh
         {
             get
             {
                 if (_sh == null)
                 {
-                    _sh = System.IO.Path.Combine(Path, CommonShPaths[Version]);
+                    _sh = System.IO.Path.Combine(_path, CommonShPaths[_distribution]);
                 }
                 return _sh;
             }
         }
 
-        private string _sh;
-        public readonly string Path;
-        public readonly KnownGitDistribution Version;
+        /// <summary>
+        /// Gets the installation's distribution.
+        /// </summary>
+        public KnownGitDistribution Version
+        {
+            get { return _distribution; }
+        }
 
         public override bool Equals(object obj)
         {
@@ -249,25 +285,25 @@ namespace Microsoft.Alm.Git
 
         public override int GetHashCode()
         {
-            return StringComparer.OrdinalIgnoreCase.GetHashCode(Path);
+            return StringComparer.OrdinalIgnoreCase.GetHashCode(_path);
         }
 
         public override string ToString()
         {
-            return Path;
+            return _path;
         }
 
         internal static bool IsValid(GitInstallation value)
         {
-            return Directory.Exists(value.Path)
+            return Directory.Exists(value._path)
                 && Directory.Exists(value.Libexec)
                 && File.Exists(value.Git);
         }
 
         public static bool operator ==(GitInstallation install1, GitInstallation install2)
         {
-            return install1.Version == install2.Version
-                && PathComparer.Equals(install1.Path, install2.Path);
+            return install1._distribution == install2._distribution
+                && PathComparer.Equals(install1._path, install2._path);
         }
 
         public static bool operator !=(GitInstallation install1, GitInstallation install2)

@@ -184,7 +184,7 @@ namespace Microsoft.Alm.Authentication
                     }
                 }
             }
-            catch(Exception exception)
+            catch (Exception exception)
             {
                 Debug.WriteLine(exception);
 
@@ -310,30 +310,36 @@ namespace Microsoft.Alm.Authentication
         [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
         public static void ValidateCredential(Credential credentials)
         {
-            if (ReferenceEquals(credentials, null))
+            if (credentials is null)
                 throw new ArgumentNullException(nameof(credentials));
             if (credentials.Password.Length > NativeMethods.Credential.PasswordMaxLength)
-                throw new ArgumentOutOfRangeException(nameof(credentials), "Password too long.");
+                throw new ArgumentOutOfRangeException(nameof(credentials), "Password exceeds maximum length (" + NativeMethods.Credential.PasswordMaxLength + ").");
             if (credentials.Username.Length > NativeMethods.Credential.UsernameMaxLength)
-                throw new ArgumentOutOfRangeException(nameof(credentials), "Username too long.");
+                throw new ArgumentOutOfRangeException(nameof(credentials), "Username exceeds maximum length (" + NativeMethods.Credential.UsernameMaxLength + ").");
         }
 
         [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
         public static void ValidateTargetUri(TargetUri targetUri)
         {
-            if (ReferenceEquals(targetUri, null))
+            if (targetUri is null)
                 throw new ArgumentNullException(nameof(targetUri));
             if (!targetUri.IsAbsoluteUri)
-                throw new ArgumentException(nameof(targetUri.IsAbsoluteUri));
+            {
+                var innerException = new UriFormatException("URI is not an absolute.");
+                throw new ArgumentException(innerException.Message, nameof(targetUri), innerException);
+            }
         }
 
         [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
         public static void ValidateToken(Token token)
         {
-            if (ReferenceEquals(token, null))
+            if (token is null)
                 throw new ArgumentNullException(nameof(token));
             if (string.IsNullOrEmpty(token.Value))
-                throw new ArgumentException(nameof(token.Value));
+            {
+                var innerException = new System.IO.InvalidDataException("Empty tokens are invalid.");
+                throw new ArgumentException(innerException.Message, nameof(token), innerException);
+            }
         }
     }
 }

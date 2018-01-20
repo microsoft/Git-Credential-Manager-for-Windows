@@ -44,8 +44,8 @@ namespace Microsoft.Alm.Authentication
 
             Debug.Assert(Enum.IsDefined(typeof(TokenType), type), $"The `{nameof(type)}` parameter is invalid");
 
-            Type = type;
-            Value = value;
+            _type = type;
+            _value = value;
         }
 
         public Token(string value, string typeName)
@@ -62,30 +62,38 @@ namespace Microsoft.Alm.Authentication
 
         public Token(string value, Guid tenantId, TokenType type)
         {
-            if (value == null)
+            if (value is null)
                 throw new ArgumentNullException(nameof(value));
             if ((type & ~(TokenType.Access | TokenType.Federated | TokenType.Personal | TokenType.Test)) != 0)
                 throw new ArgumentOutOfRangeException(nameof(type));
 
-            TargetIdentity = tenantId;
-            Type = type;
-            Value = value;
+            _targetIdentity = tenantId;
+            _type = type;
+            _value = value;
         }
 
+        private readonly TokenType _type;
+        private readonly string _value;
+        private Guid _targetIdentity;
+
         /// <summary>
-        /// The type of the secuity token.
+        /// The type of the security token.
         /// </summary>
-        public readonly TokenType Type;
+        public TokenType Type { get { return _type; } }
 
         /// <summary>
         /// The raw contents of the token.
         /// </summary>
-        public readonly string Value;
+        public string Value { get { return _value; } }
 
         /// <summary>
-        /// The guid form Identity of the target
+        /// The `<see cref="Guid"/>` form Identity of the target
         /// </summary>
-        public Guid TargetIdentity { get; set; }
+        public Guid TargetIdentity
+        {
+            get { return _targetIdentity; }
+            set { _targetIdentity = value; }
+        }
 
         /// <summary>
         /// Compares an object to this <see cref="Token"/> for equality.
@@ -135,8 +143,7 @@ namespace Microsoft.Alm.Authentication
             {
                 type = (TokenType)value;
 
-                string typename;
-                if (GetFriendlyNameFromType(type, out typename))
+                if (GetFriendlyNameFromType(type, out string typename))
                 {
                     if (string.Equals(name, typename, StringComparison.OrdinalIgnoreCase))
                         return true;
@@ -154,18 +161,18 @@ namespace Microsoft.Alm.Authentication
         {
             unchecked
             {
-                return ((int)Type) * Value.GetHashCode();
+                return ((int)_type) * Value.GetHashCode();
             }
         }
 
         /// <summary>
         /// Converts the token to a human friendly string.
+        /// <para/>
+        /// Returns a human readable name of the token.
         /// </summary>
-        /// <returns>Humanish name of the token.</returns>
         public override string ToString()
         {
-            string value;
-            if (GetFriendlyNameFromType(Type, out value))
+            if (GetFriendlyNameFromType(_type, out string value))
                 return value;
             else
                 return base.ToString();
@@ -173,17 +180,17 @@ namespace Microsoft.Alm.Authentication
 
         public static void Validate(Token token)
         {
-            if (token == null)
+            if (token is null)
                 throw new ArgumentNullException(nameof(token));
-            if (string.IsNullOrWhiteSpace(token.Value))
+            if (string.IsNullOrWhiteSpace(token._value))
                 throw new ArgumentException("Value property returned null or empty.", nameof(token));
-            if (token.Value.Length > NativeMethods.Credential.PasswordMaxLength)
+            if (token._value.Length > NativeMethods.Credential.PasswordMaxLength)
                 throw new ArgumentOutOfRangeException(nameof(token));
         }
 
         internal static unsafe bool Deserialize(byte[] bytes, TokenType type, out Token token)
         {
-            if (ReferenceEquals(bytes, null))
+            if (bytes is null)
                 throw new ArgumentNullException(nameof(bytes));
             if (bytes.Length == 0)
                 throw new ArgumentException("Zero length byte array.", nameof(bytes));
@@ -215,13 +222,13 @@ namespace Microsoft.Alm.Authentication
                         if (!string.IsNullOrWhiteSpace(value))
                         {
                             token = new Token(value, type);
-                            token.TargetIdentity = targetIdentity;
+                            token._targetIdentity = targetIdentity;
                         }
                     }
                 }
 
-                // if value hasn't been set yet, fall back to old format decode
-                if (token == null)
+                // If value hasn't been set yet, fall back to old format decode.
+                if (token is null)
                 {
                     string value = Encoding.UTF8.GetString(bytes);
 
@@ -241,23 +248,23 @@ namespace Microsoft.Alm.Authentication
 
         internal static unsafe bool Serialize(Token token, out byte[] bytes)
         {
-            if (ReferenceEquals(token, null))
+            if (token is null)
                 throw new ArgumentNullException(nameof(token));
-            if (string.IsNullOrWhiteSpace(token.Value))
+            if (string.IsNullOrWhiteSpace(token._value))
                 throw new ArgumentException("Value property returned null or empty.", nameof(token));
 
             bytes = null;
 
             try
             {
-                byte[] utf8bytes = Encoding.UTF8.GetBytes(token.Value);
+                byte[] utf8bytes = Encoding.UTF8.GetBytes(token._value);
                 bytes = new byte[utf8bytes.Length + sizeof(TokenType) + sizeof(Guid)];
 
                 fixed (byte* p = bytes)
                 {
-                    *((TokenType*)p) = token.Type;
+                    *((TokenType*)p) = token._type;
                     byte* g = p + sizeof(TokenType);
-                    *(Guid*)g = token.TargetIdentity;
+                    *(Guid*)g = token._targetIdentity;
                 }
 
                 Array.Copy(utf8bytes, 0, bytes, sizeof(TokenType) + sizeof(Guid), utf8bytes.Length);
@@ -271,21 +278,21 @@ namespace Microsoft.Alm.Authentication
         }
 
         /// <summary>
-        /// Explicitly casts a personal access token token into a set of credentials
+        /// Explicitly casts a personal access token into a set of credentials
         /// </summary>
-        /// <param name="token"></param>
+        /// <param name="token">The token to be cast as a `<see cref="Credential"/>`.</param>
         /// <exception cref="InvalidCastException">
-        /// <paramref name="token">Throws if <see cref="Token.Type"/> is not <see cref="TokenType.Personal"/>.</paramref>
+        /// <paramref name="token">Throws if `<see cref="Token.Type"/>` is not `<see cref="TokenType.Personal"/>`.</paramref>
         /// </exception>
         public static explicit operator Credential(Token token)
         {
-            if (token == null)
+            if (token is null)
                 return null;
 
             if (token.Type != TokenType.Personal)
                 throw new InvalidCastException($"`{nameof(Token)}` -> `{nameof(Credential)}`");
 
-            return new Credential(token.ToString(), token.Value);
+            return new Credential(token.ToString(), token._value);
         }
 
         /// <summary>
@@ -298,11 +305,11 @@ namespace Microsoft.Alm.Authentication
         {
             if (ReferenceEquals(left, right))
                 return true;
-            if (ReferenceEquals(left, null) || ReferenceEquals(null, right))
+            if (left is null || right is null)
                 return false;
 
             return left.Type == right.Type
-                && TokenComparer.Equals(left.Value, right.Value);
+                && TokenComparer.Equals(left._value, right._value);
         }
 
         /// <summary>

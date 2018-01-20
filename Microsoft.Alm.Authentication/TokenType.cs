@@ -30,13 +30,13 @@ namespace Microsoft.Alm.Authentication
         Unknown = 0,
 
         /// <summary>
-        /// Azure Directory Access Token
+        /// Azure Directory Access Token.
         /// </summary>
         [System.ComponentModel.Description("Azure Directory Access Token")]
         Access = 1,
 
         /// <summary>
-        /// Azure Directory Refresh Token
+        /// Azure Directory Refresh Token.
         /// </summary>
         [System.Obsolete("Azure Directory no longer directly supports Refresh tokens.", true)]
         [System.ComponentModel.Description("Azure Directory Refresh Token")]
@@ -55,25 +55,25 @@ namespace Microsoft.Alm.Authentication
         Federated = 4,
 
         /// <summary>
-        /// Used only for testing
+        /// Used only for testing.
         /// </summary>
         [System.ComponentModel.Description("Test-only Token")]
         Test = 5,
 
         /// <summary>
-        /// Bitbucket Password Tokens
+        /// Bitbucket Password Tokens.
         /// </summary>
         [System.ComponentModel.Description("Bitbucket Password Token")]
         BitbucketPassword = 6,
 
         /// <summary>
-        /// Bitbucket Access Tokens
+        /// Bitbucket Access Tokens.
         /// </summary>
         [System.ComponentModel.Description("Bitbucket Access Token")]
         BitbucketAccess = 7,
 
         /// <summary>
-        /// Used to auto-refresh Bitbucket Access Tokens
+        /// Used to auto-refresh Bitbucket Access Tokens.
         /// </summary>
         [System.ComponentModel.Description("Bitbucket Refresh Token")]
         BitbucketRefresh = 8,

@@ -35,10 +35,13 @@ namespace Microsoft.Alm.Git
     {
         private const char HostSplitCharacter = '.';
 
-        private static readonly Lazy<Regex> CommentRegex = new Lazy<Regex>(() => new Regex(@"^\s*[#;]", RegexOptions.Compiled | RegexOptions.CultureInvariant));
-        private static readonly Lazy<Regex> KeyValueRegex = new Lazy<Regex>(() => new Regex(@"^\s*(\w+)\s*=\s*(.+)", RegexOptions.Compiled | RegexOptions.CultureInvariant));
-        private static readonly Lazy<Regex> SectionRegex = new Lazy<Regex>(() => new Regex(@"^\s*\[\s*(\w+)\s*(\""[^\]]+){0,1}\]", RegexOptions.Compiled | RegexOptions.CultureInvariant));
+        private static readonly Regex CommentRegex =  new Regex(@"^\s*[#;]", RegexOptions.CultureInvariant);
+        private static readonly Regex KeyValueRegex = new Regex(@"^\s*(\w+)\s*=\s*(.+)", RegexOptions.CultureInvariant);
+        private static readonly Regex SectionRegex =  new Regex(@"^\s*\[\s*(\w+)\s*(\""[^\]]+){0,1}\]", RegexOptions.CultureInvariant);
 
+        /// <summary>
+        /// Gets an enumeration of possible Git configuration levels.
+        /// </summary>
         public static IEnumerable<ConfigurationLevel> Levels
         {
             get
@@ -72,6 +75,14 @@ namespace Microsoft.Alm.Git
         public virtual void LoadGitConfiguration(string directory, ConfigurationLevel types)
              => throw new NotImplementedException();
 
+        /// <summary>
+        /// Reads in Git's configuration files, parses them, and combines them into a single database.
+        /// <para/>
+        /// Returns the combined database of configuration data.
+        /// </summary>
+        /// <param name="directory">Optional working directory of a repository from which to read its Git local configuration.</param>
+        /// <param name="loadLocal">Read, parse, and include Git local configuration values if `<see langword="true"/>`; otherwise do not.</param>
+        /// <param name="loadSystem">Read, parse, and include Git system configuration values if `<see langword="true"/>`; otherwise do not.</param>
         public static Configuration ReadConfiuration(string directory, bool loadLocal, bool loadSystem)
         {
             if (string.IsNullOrWhiteSpace(directory))
@@ -113,30 +124,30 @@ namespace Microsoft.Alm.Git
             Match match = null;
             string section = null;
 
-            // parse each line in the config independently - Git's configs do not accept multi-line values
+            // Parse each line in the config independently - Git's configuration do not accept multi-line values.
             string line;
             while ((line = reader.ReadLine()) != null)
             {
-                // skip empty and commented lines
+                // Skip empty and commented lines
                 if (string.IsNullOrWhiteSpace(line))
                     continue;
-                if (CommentRegex.Value.IsMatch(line))
+                if (CommentRegex.IsMatch(line))
                     continue;
 
-                // sections begin with values like [section] or [section "section name"]. All
-                // subsequent lines, until a new section is encountered, are children of the section
-                if ((match = SectionRegex.Value.Match(line)).Success)
+                // Sections begin with values like [section] or [section "section name"]. All
+                // subsequent lines, until a new section is encountered, are children of the section.
+                if ((match = SectionRegex.Match(line)).Success)
                 {
                     if (match.Groups.Count >= 2 && !string.IsNullOrWhiteSpace(match.Groups[1].Value))
                     {
                         section = match.Groups[1].Value.Trim();
 
-                        // check if the section is named, if so: process the name
+                        // Check if the section is named, if so: process the name.
                         if (match.Groups.Count >= 3 && !string.IsNullOrWhiteSpace(match.Groups[2].Value))
                         {
                             string val = match.Groups[2].Value.Trim();
 
-                            // triming off enclosing quotes makes usage easier, only trim in pairs
+                            // Trim off enclosing quotes to make usage easier, only trim in pairs.
                             if (val.Length > 0 && val[0] == '"')
                             {
                                 if (val[val.Length - 1] == '"' && val.Length > 1)
@@ -153,8 +164,8 @@ namespace Microsoft.Alm.Git
                         }
                     }
                 }
-                // section children should be in the format of name = value pairs
-                else if ((match = KeyValueRegex.Value.Match(line)).Success)
+                // Section children should be in the format of name = value pairs.
+                else if ((match = KeyValueRegex.Match(line)).Success)
                 {
                     if (match.Groups.Count >= 3
                         && !string.IsNullOrEmpty(match.Groups[1].Value)
@@ -163,7 +174,7 @@ namespace Microsoft.Alm.Git
                         string key = section + HostSplitCharacter + match.Groups[1].Value.Trim();
                         string val = match.Groups[2].Value.Trim();
 
-                        // triming off enclosing quotes makes usage easier, only trim in pairs
+                        // Trim off enclosing quotes to make usage easier, only trim in pairs.
                         if (val.Length > 0 && val[0] == '"')
                         {
                             if (val[val.Length - 1] == '"' && val.Length > 1)
@@ -181,8 +192,7 @@ namespace Microsoft.Alm.Git
                         {
                             try
                             {
-                                // This is an include directive, import the configuration values from
-                                // the included file
+                                // This is an include directive, import the configuration values from the included file
                                 string includePath = (val.StartsWith("~/", StringComparison.OrdinalIgnoreCase))
                                     ? Where.Home() + val.Substring(1, val.Length - 1)
                                     : val;
@@ -202,7 +212,7 @@ namespace Microsoft.Alm.Git
                         }
                         else
                         {
-                            // Add or update the (key, value)
+                            // Add or update the (key, value).
                             if (destination.ContainsKey(key))
                             {
                                 destination[key] = val;
@@ -229,7 +239,7 @@ namespace Microsoft.Alm.Git
 
                 _values = new Dictionary<ConfigurationLevel, Dictionary<string, string>>(values.Count);
 
-                // Copy the dictionary
+                // Copy the dictionary.
                 foreach (var level in values)
                 {
                     var levelValues = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
@@ -306,14 +316,14 @@ namespace Microsoft.Alm.Git
                     ? string.Format(System.Globalization.CultureInfo.InvariantCulture, "{0}.{1}", prefix, suffix)
                     : string.Format(System.Globalization.CultureInfo.InvariantCulture, "{0}.{1}.{2}", prefix, key, suffix);
 
-                // if there's a match, return it
+                // If there's a match, return it.
                 if (ContainsKey(match))
                 {
                     entry = new Entry(match, this[match]);
                     return true;
                 }
 
-                // nothing found
+                // Nothing found.
                 entry = default(Entry);
                 return false;
             }
@@ -325,8 +335,7 @@ namespace Microsoft.Alm.Git
 
                 if (targetUri != null)
                 {
-                    // return match seeking from most specific (<prefix>.<scheme>://<host>.<key>) to
-                    // least specific (credential.<key>)
+                    // Return match seeking from most specific (<prefix>.<scheme>://<host>.<key>) to least specific (credential.<key>).
                     if (TryGetEntry(prefix, string.Format(System.Globalization.CultureInfo.InvariantCulture, "{0}://{1}", targetUri.Scheme, targetUri.Host), key, out entry)
                         || TryGetEntry(prefix, targetUri.Host, key, out entry))
                         return true;
@@ -336,8 +345,8 @@ namespace Microsoft.Alm.Git
                         string[] fragments = targetUri.Host.Split(HostSplitCharacter);
                         string host = null;
 
-                        // look for host matches stripping a single sub-domain at a time off don't
-                        // match against a top-level domain (aka ".com")
+                        // Look for host matches stripping a single sub-domain at a time off don't
+                        // match against a top-level domain (aka ".com").
                         for (int i = 1; i < fragments.Length - 1; i++)
                         {
                             host = string.Join(".", fragments, i, fragments.Length - i);
@@ -347,11 +356,11 @@ namespace Microsoft.Alm.Git
                     }
                 }
 
-                // try to find an unadorned match as a complete fallback
+                // Try to find an unadorned match as a complete fallback.
                 if (TryGetEntry(prefix, string.Empty, key, out entry))
                     return true;
 
-                // nothing found
+                // Nothing found.
                 entry = default(Entry);
                 return false;
             }
@@ -364,38 +373,37 @@ namespace Microsoft.Alm.Git
                 string globalConfig = null;
                 string localConfig = null;
 
-                // read Git's four configs from lowest priority to highest, overwriting values as
-                // higher priority configurations are parsed, storing them in a handy lookup table
+                // Read Git's five configuration files from lowest priority to highest, overwriting values as higher priority configurations are parsed, storing them in a handy lookup table.
 
-                // find and parse Git's portable config
+                // Find and parse Git's portable configuration file.
                 if ((types & ConfigurationLevel.Portable) != 0
                     && Where.GitPortableConfig(out portableConfig))
                 {
                     ParseGitConfig(ConfigurationLevel.Portable, portableConfig);
                 }
 
-                // find and parse Git's system config
+                // Find and parse Git's system configuration file.
                 if ((types & ConfigurationLevel.System) != 0
                     && Where.GitSystemConfig(null, out systemConfig))
                 {
                     ParseGitConfig(ConfigurationLevel.System, systemConfig);
                 }
 
-                // find and parse Git's Xdg config
+                // Find and parse Git's XDG configuration file.
                 if ((types & ConfigurationLevel.Xdg) != 0
                     && Where.GitXdgConfig(out xdgConfig))
                 {
                     ParseGitConfig(ConfigurationLevel.Xdg, xdgConfig);
                 }
 
-                // find and parse Git's global config
+                // Find and parse Git's global configuration file.
                 if ((types & ConfigurationLevel.Global) != 0
                     && Where.GitGlobalConfig(out globalConfig))
                 {
                     ParseGitConfig(ConfigurationLevel.Global, globalConfig);
                 }
 
-                // find and parse Git's local config
+                // Find and parse Git's local configuration file.
                 if ((types & ConfigurationLevel.Local) != 0
                     && Where.GitLocalConfig(directory, out localConfig))
                 {
@@ -434,12 +442,22 @@ namespace Microsoft.Alm.Git
 
             public Entry(string key, string value)
             {
-                Key = key;
-                Value = value;
+                _key = key;
+                _value = value;
             }
 
-            public readonly string Key;
-            public readonly string Value;
+            private readonly string _key;
+            private readonly string _value;
+
+            /// <summary>
+            /// The name, or key, of the configuration entry.
+            /// </summary>
+            public string Key { get { return _key; } }
+
+            /// <summary>
+            /// The value of the configuration entry.
+            /// </summary>
+            public string Value { get { return _value; } }
 
             public override bool Equals(object obj)
             {
@@ -449,18 +467,18 @@ namespace Microsoft.Alm.Git
 
             public bool Equals(Entry other)
             {
-                return KeyComparer.Equals(Key, other.Key)
-                    && ValueComparer.Equals(Value, other.Value);
+                return KeyComparer.Equals(_key, other._key)
+                    && ValueComparer.Equals(_value, other._value);
             }
 
             public override int GetHashCode()
             {
-                return KeyComparer.GetHashCode(Key);
+                return KeyComparer.GetHashCode(_key);
             }
 
             public override string ToString()
             {
-                return string.Format(System.Globalization.CultureInfo.InvariantCulture, "{0} = {1}", Key, Value);
+                return string.Format(System.Globalization.CultureInfo.InvariantCulture, "{0} = {1}", _key, _value);
             }
 
             public static bool operator ==(Entry left, Entry right)

@@ -32,8 +32,7 @@ using Microsoft.Win32;
 namespace Microsoft.Alm.Authentication
 {
     /// <summary>
-    /// A token storage object which interacts with the current user's Visual Studio 2015 hive in the
-    /// Windows Registry.
+    /// A token storage object which interacts with the current user's Visual Studio 2015 hive in the Windows Registry.
     /// </summary>
     public sealed class TokenRegistry : ITokenStore
     {
@@ -49,18 +48,19 @@ namespace Microsoft.Alm.Authentication
         /// <summary>
         /// Not supported
         /// </summary>
-        /// <param name="targetUri"></param>
+        /// <exception cref="NotSupportedException">When used.</exception>
         public bool DeleteToken(TargetUri targetUri)
         {
-            // we've decided to not support registry deletes until the rules are established
+            // We've decided to not support registry deletes until the rules are established.
             throw new NotSupportedException("Deletes from the registry are not supported by this library.");
         }
 
         /// <summary>
         /// Reads a token from the current user's Visual Studio hive in the Windows Registry.
+        /// <para/>
+        /// Returns a `<see cref="Token"/>` if successful; otherwise `<see langword="null"/>`.
         /// </summary>
         /// <param name="targetUri">Key used to select the token.</param>
-        /// <returns>A <see cref="Token"/> if successful; otherwise <see langword="null"/>.</returns>
         public Token ReadToken(TargetUri targetUri)
         {
             BaseSecureStore.ValidateTargetUri(targetUri);
@@ -72,11 +72,8 @@ namespace Microsoft.Alm.Authentication
                 if (key == null)
                     continue;
 
-                string url;
-                string type;
-                string value;
 
-                if (KeyIsValid(key, out url, out type, out value))
+                if (KeyIsValid(key, out string url, out string type, out string value))
                 {
                     try
                     {
@@ -119,11 +116,10 @@ namespace Microsoft.Alm.Authentication
         /// <summary>
         /// Not supported
         /// </summary>
-        /// <param name="targetUri"></param>
-        /// <param name="token"></param>
+        /// <exception cref="NotSupportedException">When used.</exception>
         public bool WriteToken(TargetUri targetUri, Token token)
         {
-            // we've decided to not support registry writes until the format is standardized
+            // We've decided to not support registry writes until the format is standardized.
             throw new NotSupportedException("Writes to the registry are not supported by this library.");
         }
 
@@ -142,7 +138,7 @@ namespace Microsoft.Alm.Authentication
                         }
                         catch
                         {
-                            Git.Trace.WriteLine("! failed to open subkey.");
+                            Git.Trace.WriteLine($"! failed to open subkey {rootKey.Name}\\{nodeName}.");
                         }
 
                         if (nodeKey != null)
@@ -158,12 +154,13 @@ namespace Microsoft.Alm.Authentication
 
         private static bool KeyIsValid(RegistryKey registryKey, out string url, out string type, out string value)
         {
-            if (ReferenceEquals(registryKey, null))
+            if (registryKey is null)
                 throw new ArgumentNullException(nameof(registryKey));
-            if (ReferenceEquals(registryKey.Handle, null))
-                throw new ArgumentException("Handle property returned null.", nameof(registryKey));
-            if (registryKey.Handle.IsInvalid)
-                throw new ArgumentException("Handle.IsInvalid property returned true.", nameof(registryKey));
+            if (registryKey.Handle is null || registryKey.Handle.IsInvalid)
+            {
+                var innerException = new NullReferenceException($"The references to `{nameof(registryKey.Handle)}` cannot be null or invalid.");
+                throw new ArgumentException(innerException.Message, nameof(registryKey), innerException);
+            }
 
             url = registryKey.GetValue(RegistryUrlKey, null, RegistryValueOptions.DoNotExpandEnvironmentNames) as string;
             type = registryKey.GetValue(RegistryTypeKey, null, RegistryValueOptions.DoNotExpandEnvironmentNames) as string;

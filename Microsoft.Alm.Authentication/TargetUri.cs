@@ -30,13 +30,13 @@ using System.Net.Http;
 namespace Microsoft.Alm.Authentication
 {
     /// <summary>
-    /// Represents a potentially proxied <see cref="Uri"/>.
+    /// Represents a potentially proxied `<see cref="Uri"/>`.
     /// </summary>
     public sealed class TargetUri
     {
         public TargetUri(Uri actualUri, Uri queryUri, Uri proxyUri)
         {
-            if (actualUri == null)
+            if (actualUri is null)
                 throw new ArgumentNullException(nameof(actualUri));
             if (!actualUri.IsAbsoluteUri)
                 throw new ArgumentException("Uri is not absolute.", nameof(actualUri));
@@ -45,9 +45,9 @@ namespace Microsoft.Alm.Authentication
             if (proxyUri != null && !proxyUri.IsAbsoluteUri)
                 throw new ArgumentException("Uri is not absolute.", nameof(proxyUri));
 
-            ActualUri = actualUri;
-            ProxyUri = proxyUri;
-            QueryUri = queryUri ?? actualUri;
+            _actualUri = actualUri;
+            _proxyUri = proxyUri;
+            _queryUri = queryUri ?? actualUri;
         }
 
         public TargetUri(Uri target)
@@ -56,15 +56,14 @@ namespace Microsoft.Alm.Authentication
 
         public TargetUri(string actualUrl, string queryUrl, string proxyUrl)
         {
-            if (actualUrl == null)
+            if (actualUrl is null)
                 throw new ArgumentNullException(nameof(actualUrl));
 
-            Uri actualUri = null;
+            if (!Uri.TryCreate(actualUrl, UriKind.Absolute, out Uri actualUri))
+                throw new UriFormatException(nameof(actualUrl));
+
             Uri proxyUri = null;
             Uri queryUri = null;
-
-            if (!Uri.TryCreate(actualUrl, UriKind.Absolute, out actualUri))
-                throw new UriFormatException(nameof(actualUrl));
 
             if (queryUrl != null && !Uri.TryCreate(queryUrl, UriKind.Absolute, out queryUri))
                 throw new UriFormatException(nameof(queryUrl));
@@ -75,17 +74,21 @@ namespace Microsoft.Alm.Authentication
             if (proxyUrl != null && !Uri.TryCreate(proxyUrl, UriKind.Absolute, out proxyUri))
                 throw new UriFormatException(nameof(queryUrl));
 
-            ActualUri = actualUri;
-            ProxyUri = proxyUri;
-            QueryUri = queryUri ?? actualUri;
+            _actualUri = actualUri;
+            _proxyUri = proxyUri;
+            _queryUri = queryUri ?? actualUri;
         }
 
         public TargetUri(string targetUrl)
             : this(targetUrl, null, null)
         { }
 
+        private readonly Uri _actualUri;
+        private readonly Uri _proxyUri;
+        private readonly Uri _queryUri;
+
         /// <summary>
-        /// Gets the <see cref="Uri.AbsolutePath"/> of the <see cref="QueryUri"/>.
+        /// Gets the `<see cref="Uri.AbsolutePath"/>` of the `<see cref="QueryUri"/>`.
         /// </summary>
         public string AbsolutePath
         {
@@ -93,12 +96,15 @@ namespace Microsoft.Alm.Authentication
         }
 
         /// <summary>
-        /// The actual <see cref="Uri"/> of the target.
+        /// Gets the actual `<see cref="Uri"/>` of the target.
         /// </summary>
-        public readonly Uri ActualUri;
+        public Uri ActualUri
+        {
+            get { return _actualUri; }
+        }
 
         /// <summary>
-        /// Gets the <see cref="Uri.DnsSafeHost"/> of the <see cref="QueryUri"/>.
+        /// Gets the `<see cref="Uri.DnsSafeHost"/>` of the `<see cref="QueryUri"/>`.
         /// </summary>
         public string DnsSafeHost
         {
@@ -106,73 +112,11 @@ namespace Microsoft.Alm.Authentication
         }
 
         /// <summary>
-        /// Gets the <see cref="Uri.Host"/> of the <see cref="QueryUri"/>.
+        /// Gets the `<see cref="Uri.Host"/>` of the `<see cref="QueryUri"/>`.
         /// </summary>
         public string Host
         {
             get { return QueryUri.Host; }
-        }
-
-        /// <summary>
-        /// Gets whether the <see cref="QueryUri"/> is absolute.
-        /// </summary>
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Performance", "CA1822:MarkMembersAsStatic")]
-        public bool IsAbsoluteUri { get { return true; } }
-
-        /// <summary>
-        /// Gets whether the port value of the <see cref="QueryUri"/> is the default for this scheme.
-        /// </summary>
-        public bool IsDefaultPort { get { return QueryUri.IsDefaultPort; } }
-
-        /// <summary>
-        /// Gets the <see cref="Uri.Port"/> of the <see cref="QueryUri"/>.
-        /// </summary>
-        public int Port
-        {
-            get { return QueryUri.Port; }
-        }
-
-        /// <summary>
-        /// The proxy <see cref="Uri"/> of the target if it exists; otherwise <see langword="null"/>.
-        /// </summary>
-        public readonly Uri ProxyUri;
-
-        /// <summary>
-        /// Gets the <see cref="Uri"/> that should be used for all queries.
-        /// </summary>
-        public readonly Uri QueryUri;
-
-        /// <summary>
-        /// Gets the <see cref="Uri.Scheme"/> name of the <see cref="QueryUri"/>.
-        /// </summary>
-        public string Scheme
-        {
-            get { return QueryUri.Scheme; }
-        }
-
-        /// <summary>
-        /// Determines whether the <see cref="QueryUri"/> is a base of the specified <see cref="Uri"/>.
-        /// </summary>
-        /// <param name="uri">The <see cref="Uri"/> to test.</param>
-        /// <returns><see langword="True"/> if is a base of <param name="uri"/>; otherwise, <see langword="false"/>.</returns>
-        public bool IsBaseOf(Uri uri)
-        {
-            return QueryUri.IsBaseOf(uri);
-        }
-
-        /// <summary>
-        /// Determines whether the <see cref="QueryUri"/> is a base of the specified <paramref name="targetUri"/>.
-        /// </summary>
-        /// <param name="targetUri">The <see cref="TargetUri"/> to test.</param>
-        /// <returns>
-        /// <see langword="True"/> if is a base of <param name="targetUri"/>; otherwise, <see langword="false"/>.
-        /// </returns>
-        public bool IsBaseOf(TargetUri targetUri)
-        {
-            if (targetUri == null)
-                return false;
-
-            return QueryUri.IsBaseOf(targetUri.ActualUri);
         }
 
         /// <summary>
@@ -204,51 +148,53 @@ namespace Microsoft.Alm.Authentication
         }
 
         /// <summary>
-        /// Gets a canonical string representation for the <see cref="QueryUri"/>.
+        /// Gets whether the `<see cref="QueryUri"/>` is absolute.
         /// </summary>
-        /// <returns></returns>
-        public override string ToString()
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Performance", "CA1822:MarkMembersAsStatic")]
+        public bool IsAbsoluteUri { get { return true; } }
+
+        /// <summary>
+        /// Gets whether the port value of the `<see cref="QueryUri"/>` is the default for this scheme.
+        /// </summary>
+        public bool IsDefaultPort { get { return QueryUri.IsDefaultPort; } }
+
+        /// <summary>
+        /// Gets the `<see cref="Uri.Port"/>` of the `<see cref="QueryUri"/>`.
+        /// </summary>
+        public int Port
         {
-            return ToString(false, true, true);
+            get { return QueryUri.Port; }
         }
 
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Design", "CA1026:DefaultParametersShouldNotBeUsed")]
-        public string ToString(bool username = false, bool port = false, bool path = false)
+        /// <summary>
+        /// Gets the proxy `<see cref="Uri"/>` of the target if it exists; otherwise `<see langword="null"/>`.
+        /// </summary>
+        public Uri ProxyUri
         {
-            // Start building up a url with the scheme
-            var url = QueryUri.Scheme + "://";
-
-            // Append the username if asked for an it exiusts.
-            if (username && QueryUri.UserInfo != null)
-            {
-                url += (QueryUri.UserEscaped)
-                        ? QueryUri.UserInfo
-                        : Uri.EscapeDataString(QueryUri.UserInfo);
-                url += '@';
-            }
-
-            // Append the host name
-            url += QueryUri.Host;
-
-            // Append the port information if asked for and relevant
-            if ((port && !QueryUri.IsDefaultPort))
-            {
-                url += ':';
-                url += QueryUri.Port;
-            }
-
-            // Append some amount of path to the url
-            if (path)
-            {
-                url += QueryUri.AbsolutePath;
-            }
-            else
-            {
-                url += '/';
-            }
-
-            return url;
+            get { return _proxyUri; }
         }
+
+        /// <summary>
+        /// Gets the `<see cref="Uri"/>` that should be used for all queries.
+        /// </summary>
+        public Uri QueryUri
+        {
+            get { return _queryUri; }
+        }
+
+        /// <summary>
+        /// Gets the `<see cref="Uri.Scheme"/>` name of the `<see cref="QueryUri"/>`.
+        /// </summary>
+        public string Scheme
+        {
+            get { return QueryUri.Scheme; }
+        }
+
+        /// <summary>
+        /// Gets the `<see cref="Uri.UserInfo"/>` from `<see cref="ActualUri"/>`.
+        /// </summary>
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Design", "CA1056:UriPropertiesShouldNotBeStrings")]
+        public string TargetUriUsername { get { return ActualUri.UserInfo; } }
 
         /// <summary>
         /// Gets the web proxy abstraction for working with proxies as necessary.
@@ -295,25 +241,11 @@ namespace Microsoft.Alm.Authentication
             }
         }
 
-        public static implicit operator Uri(TargetUri targetUri)
-        {
-            return ReferenceEquals(targetUri, null)
-                ? null
-                : targetUri.QueryUri;
-        }
-
-        public static implicit operator TargetUri(Uri uri)
-        {
-            return ReferenceEquals(uri, null)
-                ? null
-                : new TargetUri(uri);
-        }
-
         /// <summary>
-        /// Get a version of this <see cref="TargetUri"/> that contains the specified username.
+        /// Returns a version of this `<see cref="TargetUri"/>` that contains the specified username.
         /// </summary>
         /// <remarks>
-        /// If the <see cref="TargetUri"/> already contains a username, that one is kept NOT overwritten.
+        /// If the `<see cref="TargetUri"/>` already contains a username, that one is kept NOT overwritten.
         /// </remarks>
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2234:PassSystemUriObjectsInsteadOfStrings")]
         public TargetUri GetPerUserTargetUri(string username)
@@ -329,7 +261,7 @@ namespace Microsoft.Alm.Authentication
         }
 
         /// <summary>
-        /// Get a version of this <see cref="TargetUri"/> that does NOT contain any username.
+        /// Returns a version of this `<see cref="TargetUri"/>` that does NOT contain any username.
         /// </summary>
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Design", "CA1024:UsePropertiesWhereAppropriate")]
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2234:PassSystemUriObjectsInsteadOfStrings")]
@@ -346,14 +278,94 @@ namespace Microsoft.Alm.Authentication
         }
 
         /// <summary>
-        /// Determine if the ActualUri of this <see cref="TargetUri"/> contains UserInfo
+        /// Determines whether the `<see cref="QueryUri"/>` is a base of the specified `<see cref="Uri"/>`.
+        /// <para/>
+        /// Returns `<see langword="true"/>` if is a base of `<param name="uri"/>`; otherwise, `<see langword="false"/>`.
+        /// </summary>
+        /// <param name="uri">The `<see cref="Uri"/>` to test.</param>
+        public bool IsBaseOf(Uri uri)
+        {
+            return QueryUri.IsBaseOf(uri);
+        }
+
+        /// <summary>
+        /// Determines whether the `<see cref="QueryUri"/>` is a base of the specified `<paramref name="targetUri"/>`.
+        /// <para/>
+        /// Returns `<see langword="true"/>` if is a base of `<param name="uri"/>`; otherwise, `<see langword="false"/>`.
+        /// </summary>
+        /// <param name="targetUri">The `<see cref="TargetUri"/>` to test.</param>
+        public bool IsBaseOf(TargetUri targetUri)
+        {
+            if (targetUri == null)
+                return false;
+
+            return QueryUri.IsBaseOf(targetUri.ActualUri);
+        }
+
+        /// <summary>
+        /// Returns `<see langword="true"/>` if `<see cref="ActualUri"/>` contains `<see cref="Uri.UserInfo"/>`; otherwise `<see langword="false"/>`.
         /// </summary>
         public bool TargetUriContainsUsername { get { return ActualUri.AbsoluteUri.Contains("@"); } }
 
         /// <summary>
-        /// Get username contained in the ActualUri of this <see cref="TargetUri"/>
+        /// Gets a canonical string representation for the `<see cref="QueryUri"/>`.
         /// </summary>
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Design", "CA1056:UriPropertiesShouldNotBeStrings")]
-        public string TargetUriUsername { get { return ActualUri.UserInfo; } }
+        /// <returns></returns>
+        public override string ToString()
+        {
+            return ToString(false, true, true);
+        }
+
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Design", "CA1026:DefaultParametersShouldNotBeUsed")]
+        public string ToString(bool username = false, bool port = false, bool path = false)
+        {
+            // Start building up a url with the scheme.
+            var url = QueryUri.Scheme + "://";
+
+            // Append the username if asked for an it exiusts.
+            if (username && QueryUri.UserInfo != null)
+            {
+                url += (QueryUri.UserEscaped)
+                        ? QueryUri.UserInfo
+                        : Uri.EscapeDataString(QueryUri.UserInfo);
+                url += '@';
+            }
+
+            // Append the host name.
+            url += QueryUri.Host;
+
+            // Append the port information if asked for and relevant.
+            if ((port && !QueryUri.IsDefaultPort))
+            {
+                url += ':';
+                url += QueryUri.Port;
+            }
+
+            // Append some amount of path to the url.
+            if (path)
+            {
+                url += QueryUri.AbsolutePath;
+            }
+            else
+            {
+                url += '/';
+            }
+
+            return url;
+        }
+
+        public static implicit operator Uri(TargetUri targetUri)
+        {
+            return targetUri is null
+                ? null
+                : targetUri.QueryUri;
+        }
+
+        public static implicit operator TargetUri(Uri uri)
+        {
+            return uri is null
+                ? null
+                : new TargetUri(uri);
+        }
     }
 }

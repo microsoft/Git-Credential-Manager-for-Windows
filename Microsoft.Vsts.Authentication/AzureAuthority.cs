@@ -40,14 +40,14 @@ namespace Microsoft.Alm.Authentication
         public const string AuthorityHostUrlBase = "https://login.microsoftonline.com";
 
         /// <summary>
-        /// The common Url for logon services in Azure.
+        /// The common URL for logon services in Azure.
         /// </summary>
         public const string DefaultAuthorityHostUrl = AuthorityHostUrlBase + "/common";
 
         /// <summary>
-        /// Creates a new <see cref="AzureAuthority"/> with an optional authority host url.
+        /// Creates a new instance of `<see cref="AzureAuthority"/>`.
         /// </summary>
-        /// <param name="authorityHostUrl">Optional: sets a non-default authority host url.</param>
+        /// <param name="authorityHostUrl">A non-default authority host URL; otherwise defaults to `<see cref="DefaultAuthorityHostUrl"/>`.</param>
         public AzureAuthority(string authorityHostUrl = DefaultAuthorityHostUrl)
         {
             if (string.IsNullOrEmpty(authorityHostUrl))
@@ -67,20 +67,15 @@ namespace Microsoft.Alm.Authentication
         public string AuthorityHostUrl { get; protected set; }
 
         /// <summary>
-        /// acquires a <see cref="Token"/> from the authority via an interactive user logon prompt.
+        /// Acquires a <see cref="Token"/> from the authority via an interactive user logon prompt.
+        /// <para/>
+        /// Returns a `<see cref="Token"/>` is successful; otherwise <see langword="null"/>.
         /// </summary>
-        /// <param name="targetUri">
-        /// The uniform resource indicator of the resource access tokens are being requested for.
-        /// </param>
+        /// <param name="targetUri">Uniform resource indicator of the resource access tokens are being requested for.</param>
         /// <param name="clientId">Identifier of the client requesting the token.</param>
-        /// <param name="resource">
-        /// Identifier of the target resource that is the recipient of the requested token.
-        /// </param>
+        /// <param name="resource">Identifier of the target resource that is the recipient of the requested token.</param>
         /// <param name="redirectUri">Address to return to upon receiving a response from the authority.</param>
-        /// <param name="queryParameters">
-        /// Optional: appended as-is to the query string in the HTTP authentication request to the authority.
-        /// </param>
-        /// <returns>If successful a <see cref="TokenPair"/>; otherwise <see langword="null"/>.</returns>
+        /// <param name="queryParameters">optional value, appended as-is to the query string in the HTTP authentication request to the authority.</param>
         public async Task<Token> InteractiveAcquireToken(TargetUri targetUri, string clientId, string resource, Uri redirectUri, string queryParameters = null)
         {
             if (ReferenceEquals(targetUri, null))
@@ -123,17 +118,14 @@ namespace Microsoft.Alm.Authentication
         }
 
         /// <summary>
-        /// Acquires a <see cref="Token"/> from the authority via an non-interactive user logon.
+        /// Acquires a `<see cref="Token"/>` from the authority via an non-interactive user logon.
+        /// <para/>
+        /// Returns the acquired `<see cref="Token"/>` if successful; otherwise `<see langword="null"/>`.
         /// </summary>
-        /// <param name="targetUri">
-        /// The uniform resource indicator of the resource access tokens are being requested for.
-        /// </param>
+        /// <param name="targetUri">Uniform resource indicator of the resource access tokens are being requested for.</param>
         /// <param name="clientId">Identifier of the client requesting the token.</param>
-        /// <param name="resource">
-        /// Identifier of the target resource that is the recipient of the requested token.
-        /// </param>
+        /// <param name="resource">Identifier of the target resource that is the recipient of the requested token.</param>
         /// <param name="redirectUri">Address to return to upon receiving a response from the authority.</param>
-        /// <returns>If successful a <see cref="TokenPair"/>; otherwise <see langword="null"/>.</returns>
         public async Task<Token> NoninteractiveAcquireToken(TargetUri targetUri, string clientId, string resource, Uri redirectUri)
         {
             if (ReferenceEquals(targetUri, null))
@@ -172,6 +164,10 @@ namespace Microsoft.Alm.Authentication
             return token;
         }
 
+        /// <summary>
+        /// Returns the properly formatted URL for the Azure authority given a tenant identity.
+        /// </summary>
+        /// <param name="tenantId">Identity of the tenant.</param>
         public static string GetAuthorityUrl(Guid tenantId)
         {
             return string.Format("{0}/{1:D}", AzureAuthority.AuthorityHostUrlBase, tenantId);

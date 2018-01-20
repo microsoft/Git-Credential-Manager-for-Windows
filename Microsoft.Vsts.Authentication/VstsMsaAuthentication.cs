@@ -58,7 +58,7 @@ namespace Microsoft.Alm.Authentication
         { }
 
         /// <summary>
-        /// Opens an interactive logon prompt to acquire acquire an authentication token from the
+        /// Opens an interactive logon prompt to acquire an authentication token from the
         /// Microsoft Live authentication and identity service.
         /// </summary>
         /// <param name="targetUri">
@@ -92,18 +92,12 @@ namespace Microsoft.Alm.Authentication
         }
 
         /// <summary>
-        /// Opens an interactive logon prompt to acquire acquire an authentication token from the
-        /// Microsoft Live authentication and identity service.
+        /// Opens an interactive logon prompt to acquire an authentication token from the Microsoft Live authentication and identity service.
+        /// <para/>
+        /// Returns a `<see cref="Credential"/>` for packing into a basic authentication header; otherwise `<see langword="null"/>`.
         /// </summary>
-        /// <param name="targetUri">
-        /// The uniform resource indicator of the resource access tokens are being requested for.
-        /// </param>
-        /// <param name="requestCompactToken">
-        /// True if a compact access token is required; false if a standard token is acceptable.
-        /// </param>
-        /// <returns>
-        /// A <see cref="Credential"/> for packing into a basic authentication header; otherwise <see langword="null"/>.
-        /// </returns>
+        /// <param name="targetUri">The URI of the resource access is being requested for.</param>
+        /// <param name="requestCompactToken">`<see langword="true"/>` if requesting a compact format token; otherwise `<see langword="false"/>`.</param>
         public async Task<Credential> InteractiveLogon(TargetUri targetUri, bool requestCompactToken)
         {
             BaseSecureStore.ValidateTargetUri(targetUri);
@@ -131,9 +125,7 @@ namespace Microsoft.Alm.Authentication
         /// Sets credentials for future use with this authentication object.
         /// </summary>
         /// <remarks>Not supported.</remarks>
-        /// <param name="targetUri">
-        /// The uniform resource indicator of the resource access tokens are being set for.
-        /// </param>
+        /// <param name="targetUri">The uniform resource indicator of the resource access tokens are being set for.</param>
         /// <param name="credentials">The credentials being set.</param>
         public override void SetCredentials(TargetUri targetUri, Credential credentials)
         {

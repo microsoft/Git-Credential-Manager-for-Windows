@@ -30,10 +30,38 @@ namespace Microsoft.Alm.Authentication
 {
     internal interface IVstsAuthority : IAzureAuthority
     {
+        /// <summary>
+        /// Generates a personal access token for use with Visual Studio Team Services.
+        /// <para/>
+        /// Returns the acquired token if successful; otherwise <see langword="null"/>;
+        /// </summary>
+        /// <param name="targetUri">The uniform resource indicator of the resource access tokens are being requested for.</param>
+        /// <param name="accessToken">Access token granted by the identity authority (Azure).</param>
+        /// <param name="tokenScope">The requested access scopes to be granted to the token.</param>
+        /// <param name="requireCompactToken">`<see langword="true"/>` if requesting a compact format token; otherwise `<see langword="false"/>`.</param>
+        /// <param name="tokenDuration">
+        /// The requested lifetime of the requested token.
+        /// <para/>
+        /// The authority granting the token decides the actual lifetime of any token granted, regardless of the duration requested.
+        /// </param>
         Task<Token> GeneratePersonalAccessToken(TargetUri targetUri, Token accessToken, VstsTokenScope tokenScope, bool requireCompactToken, TimeSpan? tokenDuration = null);
 
+        /// <summary>
+        /// Validates that a `<see cref="Credential"/>` is valid to grant access to the VSTS resource referenced by `<paramref name="targetUri"/>`.
+        /// <para/>
+        /// Returns `<see langword="true"/>` if successful; otherwise `<see langword="false"/>`.
+        /// </summary>
+        /// <param name="targetUri">URI of the VSTS resource.</param>
+        /// <param name="credentials">`<see cref="Credential"/>` expected to grant access to the VSTS service.</param>
         Task<bool> ValidateCredentials(TargetUri targetUri, Credential credentials);
 
+        /// <summary>
+        /// Validates that a `<see cref="Token"/>` is valid to grant access to the VSTS resource referenced by `<paramref name="targetUri"/>`.
+        /// <para/>
+        /// Returns `<see langword="true"/>` if successful; otherwise `<see langword="false"/>`.
+        /// </summary>
+        /// <param name="targetUri">URI of the VSTS resource.</param>
+        /// <param name="token">`<see cref="Token"/>` expected to grant access to the VSTS resource.</param>
         Task<bool> ValidateToken(TargetUri targetUri, Token token);
     }
 }

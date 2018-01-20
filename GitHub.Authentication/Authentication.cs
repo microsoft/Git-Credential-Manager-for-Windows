@@ -82,11 +82,9 @@ namespace GitHub.Authentication
         internal AuthenticationResultDelegate AuthenticationResultCallback { get; set; }
 
         /// <summary>
-        /// Deletes a <see cref="Credential"/> from the storage used by the authentication object.
+        /// Deletes a `<see cref="Credential"/>` from the storage used by the authentication object.
         /// </summary>
-        /// <param name="targetUri">
-        /// The uniform resource indicator used to uniquely identify the credentials.
-        /// </param>
+        /// <param name="targetUri">The uniform resource indicator used to uniquely identify the credentials.</param>
         public override void DeleteCredentials(TargetUri targetUri)
         {
             BaseSecureStore.ValidateTargetUri(targetUri);
@@ -142,14 +140,10 @@ namespace GitHub.Authentication
 
         /// <summary>
         /// Gets a <see cref="Credential"/> from the storage used by the authentication object.
+        /// <para/>
+        /// Returns a `<see cref="Credential"/>` if successful; otherwise `<see langword="null"/>`.
         /// </summary>
-        /// <param name="targetUri">
-        /// The uniform resource indicator used to uniquely identity the credentials.
-        /// </param>
-        /// <returns>
-        /// <see cref="Credential"/> object from the authentication object, authority or storage;
-        /// otherwise `null`, if successful.
-        /// </returns>
+        /// <param name="targetUri">The uniform resource indicator used to uniquely identify the credentials.</param>
         public override Credential GetCredentials(TargetUri targetUri)
         {
             BaseSecureStore.ValidateTargetUri(targetUri);

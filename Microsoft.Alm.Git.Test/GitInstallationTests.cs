@@ -45,7 +45,7 @@ namespace Microsoft.Alm.Git.Test
 
             Assert.Equal(2, set.Where(x => x.Version == KnownGitDistribution.GitForWindows32v1).Count());
             Assert.Equal(2, set.Where(x => x.Version == KnownGitDistribution.GitForWindows32v2).Count());
-            Assert.Equal(1, set.Where(x => x.Version == KnownGitDistribution.GitForWindows64v2).Count());
+            Assert.Single(set.Where(x => x.Version == KnownGitDistribution.GitForWindows64v2));
 
             foreach (var v in Enum.GetValues(typeof(KnownGitDistribution)))
             {
