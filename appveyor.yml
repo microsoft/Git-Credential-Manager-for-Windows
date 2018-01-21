@@ -13,10 +13,6 @@ before_build:
 build_script:
   - msbuild "GitCredentialManager.sln" /logger:"C:\Program Files\AppVeyor\BuildAgent\Appveyor.MSBuildLogger.dll" /consoleloggerparameters:Verbosity=normal /nodeReuse:false /target:"Build" /property:Configuration="%configuration%";Platform="%platform%"
 
-test:
-  assemblies:
-    - '*.Test\bin\$(configuration)\*.Test.dll'
-
 cache:
   - packages -> **\packages.config
 
