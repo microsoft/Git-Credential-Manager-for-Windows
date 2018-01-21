@@ -37,7 +37,7 @@ namespace Microsoft.Alm.Cli
     {
         public static Credential CredentialPrompt(Program program, TargetUri targetUri, string titleMessage)
         {
-            // ReadConsole 32768 fail, 32767 ok @linquize [https://github.com/Microsoft/Git-Credential-Manager-for-Windows/commit/a62b9a19f430d038dcd85a610d97e5f763980f85]
+            // ReadConsole 32768 fail, 32767 OK @linquize [https://github.com/Microsoft/Git-Credential-Manager-for-Windows/commit/a62b9a19f430d038dcd85a610d97e5f763980f85]
             const int BufferReadSize = 16 * 1024;
 
             Debug.Assert(targetUri != null);
@@ -65,9 +65,8 @@ namespace Microsoft.Alm.Cli
                 string username = null;
                 string password = null;
 
-                // read the current console mode
-                NativeMethods.ConsoleMode consoleMode;
-                if (!NativeMethods.GetConsoleMode(stdin, out consoleMode))
+                // Read the current console mode.
+                if (!NativeMethods.GetConsoleMode(stdin, out NativeMethods.ConsoleMode consoleMode))
                 {
                     int error = Marshal.GetLastWin32Error();
                     throw new Win32Exception(error, "Unable to determine console mode (" + NativeMethods.Win32Error.GetText(error) + ").");
@@ -75,7 +74,7 @@ namespace Microsoft.Alm.Cli
 
                 Git.Trace.WriteLine($"console mode = '{consoleMode}'.");
 
-                // instruct the user as to what they are expected to do
+                // Instruct the user as to what they are expected to do.
                 buffer.Append(titleMessage)
                       .Append(targetUri)
                       .AppendLine();
@@ -85,10 +84,10 @@ namespace Microsoft.Alm.Cli
                     throw new Win32Exception(error, "Unable to write to standard output (" + NativeMethods.Win32Error.GetText(error) + ").");
                 }
 
-                // clear the buffer for the next operation
+                // Clear the buffer for the next operation.
                 buffer.Clear();
 
-                // prompt the user for the username wanted
+                // Prompt the user for the username wanted.
                 buffer.Append("username: ");
                 if (!NativeMethods.WriteConsole(stdout, buffer, (uint)buffer.Length, out written, IntPtr.Zero))
                 {
@@ -96,24 +95,24 @@ namespace Microsoft.Alm.Cli
                     throw new Win32Exception(error, "Unable to write to standard output (" + NativeMethods.Win32Error.GetText(error) + ").");
                 }
 
-                // clear the buffer for the next operation
+                // Clear the buffer for the next operation.
                 buffer.Clear();
 
-                // read input from the user
+                // Read input from the user.
                 if (!NativeMethods.ReadConsole(stdin, buffer, BufferReadSize, out read, IntPtr.Zero))
                 {
                     int error = Marshal.GetLastWin32Error();
                     throw new Win32Exception(error, "Unable to read from standard input (" + NativeMethods.Win32Error.GetText(error) + ").");
                 }
 
-                // record input from the user into local storage, stripping any eol chars
+                // Record input from the user into local storage, stripping any EOL chars.
                 username = buffer.ToString(0, (int)read);
                 username = username.Trim(Environment.NewLine.ToCharArray());
 
-                // clear the buffer for the next operation
+                // Clear the buffer for the next operation.
                 buffer.Clear();
 
-                // set the console mode to current without echo input
+                // Set the console mode to current without echo input.
                 NativeMethods.ConsoleMode consoleMode2 = consoleMode ^ NativeMethods.ConsoleMode.EchoInput;
 
                 try
@@ -126,7 +125,7 @@ namespace Microsoft.Alm.Cli
 
                     Git.Trace.WriteLine($"console mode = '{consoleMode2}'.");
 
-                    // prompt the user for password
+                    // Prompt the user for password.
                     buffer.Append("password: ");
                     if (!NativeMethods.WriteConsole(stdout, buffer, (uint)buffer.Length, out written, IntPtr.Zero))
                     {
@@ -134,24 +133,23 @@ namespace Microsoft.Alm.Cli
                         throw new Win32Exception(error, "Unable to write to standard output (" + NativeMethods.Win32Error.GetText(error) + ").");
                     }
 
-                    // clear the buffer for the next operation
+                    // Clear the buffer for the next operation.
                     buffer.Clear();
 
-                    // read input from the user
+                    // Read input from the user.
                     if (!NativeMethods.ReadConsole(stdin, buffer, BufferReadSize, out read, IntPtr.Zero))
                     {
                         int error = Marshal.GetLastWin32Error();
                         throw new Win32Exception(error, "Unable to read from standard input (" + NativeMethods.Win32Error.GetText(error) + ").");
                     }
 
-                    // record input from the user into local storage, stripping any eol chars
+                    // Record input from the user into local storage, stripping any EOL chars.
                     password = buffer.ToString(0, (int)read);
                     password = password.Trim(Environment.NewLine.ToCharArray());
                 }
-                catch { throw; }
                 finally
                 {
-                    // restore the console mode to its original value
+                    // Restore the console mode to its original value.
                     NativeMethods.SetConsoleMode(stdin, consoleMode);
 
                     Git.Trace.WriteLine($"console mode = '{consoleMode}'.");

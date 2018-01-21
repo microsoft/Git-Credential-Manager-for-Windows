@@ -45,6 +45,9 @@ namespace Microsoft.Alm.Cli
                                         out string username,
                                         out string password)
         {
+            if (program is null)
+                throw new ArgumentNullException(nameof(program));
+
             int error;
 
             try
@@ -69,9 +72,9 @@ namespace Microsoft.Alm.Cli
                 }
 
                 // use `StringBuilder` references instead of string so that they can be written to
-                StringBuilder usernameBuffer = new StringBuilder(512);
-                StringBuilder domainBuffer = new StringBuilder(256);
-                StringBuilder passwordBuffer = new StringBuilder(512);
+                var usernameBuffer = new StringBuilder(512);
+                var domainBuffer = new StringBuilder(256);
+                var passwordBuffer = new StringBuilder(512);
                 int usernameLen = usernameBuffer.Capacity;
                 int passwordLen = passwordBuffer.Capacity;
                 int domainLen = domainBuffer.Capacity;
@@ -114,10 +117,14 @@ namespace Microsoft.Alm.Cli
 
         public static Credential CredentialPrompt(Program program, TargetUri targetUri, string message)
         {
-            Debug.Assert(targetUri != null);
-            Debug.Assert(message != null);
+            if (program is null)
+                throw new ArgumentNullException(nameof(program));
+            if (targetUri is null)
+                throw new ArgumentNullException(nameof(targetUri));
+            if (message is null)
+                throw new ArgumentNullException(nameof(message));
 
-            NativeMethods.CredentialUiInfo credUiInfo = new NativeMethods.CredentialUiInfo
+            var credUiInfo = new NativeMethods.CredentialUiInfo
             {
                 BannerArt = IntPtr.Zero,
                 CaptionText = program.Title,
@@ -125,10 +132,10 @@ namespace Microsoft.Alm.Cli
                 Parent = IntPtr.Zero,
                 Size = Marshal.SizeOf(typeof(NativeMethods.CredentialUiInfo))
             };
-            NativeMethods.CredentialUiWindowsFlags flags = NativeMethods.CredentialUiWindowsFlags.Generic;
-            NativeMethods.CredentialPackFlags authPackage = NativeMethods.CredentialPackFlags.None;
-            IntPtr packedAuthBufferPtr = IntPtr.Zero;
-            IntPtr inBufferPtr = IntPtr.Zero;
+            var flags = NativeMethods.CredentialUiWindowsFlags.Generic;
+            var authPackage = NativeMethods.CredentialPackFlags.None;
+            var packedAuthBufferPtr = IntPtr.Zero;
+            var inBufferPtr = IntPtr.Zero;
             uint packedAuthBufferSize = 0;
             bool saveCredentials = false;
             int inBufferSize = 0;
@@ -154,11 +161,16 @@ namespace Microsoft.Alm.Cli
 
         public static Credential PasswordPrompt(Program program, TargetUri targetUri, string message, string username)
         {
-            Debug.Assert(targetUri != null);
-            Debug.Assert(message != null);
-            Debug.Assert(username != null);
+            if (program is null)
+                throw new ArgumentNullException(nameof(program));
+            if (targetUri is null)
+                throw new ArgumentNullException(nameof(targetUri));
+            if (message is null)
+                throw new ArgumentNullException(nameof(message));
+            if (username is null)
+                throw new ArgumentNullException(nameof(username));
 
-            NativeMethods.CredentialUiInfo credUiInfo = new NativeMethods.CredentialUiInfo
+            var credUiInfo = new NativeMethods.CredentialUiInfo
             {
                 BannerArt = IntPtr.Zero,
                 CaptionText = program.Title,
@@ -166,21 +178,21 @@ namespace Microsoft.Alm.Cli
                 Parent = IntPtr.Zero,
                 Size = Marshal.SizeOf(typeof(NativeMethods.CredentialUiInfo))
             };
-            NativeMethods.CredentialUiWindowsFlags flags = NativeMethods.CredentialUiWindowsFlags.Generic;
-            NativeMethods.CredentialPackFlags authPackage = NativeMethods.CredentialPackFlags.None;
-            IntPtr packedAuthBufferPtr = IntPtr.Zero;
-            IntPtr inBufferPtr = IntPtr.Zero;
+            var flags = NativeMethods.CredentialUiWindowsFlags.Generic;
+            var authPackage = NativeMethods.CredentialPackFlags.None;
+            var packedAuthBufferPtr = IntPtr.Zero;
+            var inBufferPtr = IntPtr.Zero;
             uint packedAuthBufferSize = 0;
             bool saveCredentials = false;
             int inBufferSize = 0;
-            string password;
+            string password = null;
 
             try
             {
                 int error;
 
-                // execute with `null` to determine buffer size always returns false when determining
-                // size, only fail if `inBufferSize` looks bad
+                // Execute with `null` to determine buffer size always returns false when determining
+                // size, only fail if `inBufferSize` looks bad.
                 NativeMethods.CredPackAuthenticationBuffer(flags: authPackage,
                                                            username: username,
                                                            password: string.Empty,
