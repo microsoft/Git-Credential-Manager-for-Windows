@@ -75,8 +75,12 @@ namespace Microsoft.Alm.Git
 
         ~Trace()
         {
-            Dispose();
+            Dispose(true);
         }
+
+        private static ITrace _instance;
+        private static readonly object _syncpoint = new object();
+        private readonly List<TextWriter> _writers;
 
         internal static ITrace Instance
         {
@@ -94,11 +98,6 @@ namespace Microsoft.Alm.Git
             set { _instance = value; }
         }
 
-        private static ITrace _instance;
-
-        private static readonly object _syncpoint = new object();
-        private readonly List<TextWriter> _writers;
-
         /// <summary>
         /// Add a listener to the trace writer.
         /// </summary>
@@ -109,21 +108,7 @@ namespace Microsoft.Alm.Git
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Design", "CA1031:DoNotCatchGeneralExceptionTypes")]
         public void Dispose()
         {
-            lock (_syncpoint)
-            {
-                try
-                {
-                    for (int i = 0; i < _writers.Count; i += 1)
-                    {
-                        using (var writer = _writers[i])
-                        {
-                            _writers.Remove(writer);
-                        }
-                    }
-                }
-                catch
-                { /* squelch */ }
-            }
+            Dispose(false);
 
             GC.SuppressFinalize(this);
         }
@@ -147,6 +132,28 @@ namespace Microsoft.Alm.Git
             [System.Runtime.CompilerServices.CallerLineNumber] int lineNumber = 0,
             [System.Runtime.CompilerServices.CallerMemberName] string memberName = "")
             => Instance.WriteLine(message, filePath, lineNumber, memberName);
+
+        private void Dispose(bool finalizing)
+        {
+            if (!finalizing)
+            {
+                lock (_syncpoint)
+                {
+                    try
+                    {
+                        for (int i = 0; i < _writers.Count; i += 1)
+                        {
+                            using (var writer = _writers[i])
+                            {
+                                _writers.Remove(writer);
+                            }
+                        }
+                    }
+                    catch
+                    { /* squelch */ }
+                }
+            }
+        }
 
         private static string FormatText(string message, string filePath, int lineNumber, string memberName)
         {
@@ -208,7 +215,12 @@ namespace Microsoft.Alm.Git
             {
                 foreach (var writer in _writers)
                 {
-                    writer?.Flush();
+                    try
+                    {
+                        writer?.Flush();
+                    }
+                    catch
+                    { /* squelch */ }
                 }
             }
         }

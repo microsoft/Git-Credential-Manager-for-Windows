@@ -11,7 +11,6 @@ namespace GitHub.Authentication.Test
         [InlineData("https://github.com/", "https://github.com/")]
         [InlineData("https://gist.github.com/", "https://gist.github.com/")]
         [InlineData("https://github.com/", "https://gist.github.com/")]
-        [InlineData("https://gist.github.com/", "https://gist.github.com/")]
         public void GetSetCredentialsNormalizesGistUrls(string writeUriString, string retrieveUriString)
         {
             var retrieveUri = new Uri(retrieveUriString);
