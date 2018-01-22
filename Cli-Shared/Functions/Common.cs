@@ -201,13 +201,13 @@ namespace Microsoft.Alm.Cli
                 case AuthorityType.AzureDirectory:
                 case AuthorityType.MicrosoftAccount:
                     Git.Trace.WriteLine($"deleting VSTS credentials for '{operationArguments.TargetUri}'.");
-                    BaseVstsAuthentication vstsAuth = authentication as BaseVstsAuthentication;
+                    var vstsAuth = authentication as BaseVstsAuthentication;
                     vstsAuth.DeleteCredentials(operationArguments.TargetUri);
                     break;
 
                 case AuthorityType.GitHub:
                     Git.Trace.WriteLine($"deleting GitHub credentials for '{operationArguments.TargetUri}'.");
-                    Github.Authentication ghAuth = authentication as Github.Authentication;
+                    var ghAuth = authentication as Github.Authentication;
                     ghAuth.DeleteCredentials(operationArguments.TargetUri);
                     break;
 
@@ -307,7 +307,7 @@ namespace Microsoft.Alm.Cli
 
             string logFileName = Path.Combine(logFilePath, Path.ChangeExtension(Program.ConfigPrefix, ".log"));
 
-            FileInfo logFileInfo = new FileInfo(logFileName);
+            var logFileInfo = new FileInfo(logFileName);
             if (logFileInfo.Exists && logFileInfo.Length > LogFileMaxLength)
             {
                 for (int i = 1; i < int.MaxValue; i++)
@@ -591,7 +591,7 @@ namespace Microsoft.Alm.Cli
                 default:
                 case AuthorityType.Basic:
                     {
-                        BasicAuthentication basicAuth = authentication as BasicAuthentication;
+                        var basicAuth = authentication as BasicAuthentication;
 
                         Task.Run(async () =>
                         {
@@ -616,8 +616,8 @@ namespace Microsoft.Alm.Cli
 
                 case AuthorityType.AzureDirectory:
                     {
-                        VstsAadAuthentication aadAuth = authentication as VstsAadAuthentication;
-                        PersonalAccessTokenOptions patOptions = new PersonalAccessTokenOptions()
+                        var aadAuth = authentication as VstsAadAuthentication;
+                        var patOptions = new PersonalAccessTokenOptions()
                         {
                             RequireCompactToken = true,
                             TokenDuration = operationArguments.TokenDuration,
@@ -655,8 +655,8 @@ namespace Microsoft.Alm.Cli
 
                 case AuthorityType.MicrosoftAccount:
                     {
-                        VstsMsaAuthentication msaAuth = authentication as VstsMsaAuthentication;
-                        PersonalAccessTokenOptions patOptions = new PersonalAccessTokenOptions()
+                        var msaAuth = authentication as VstsMsaAuthentication;
+                        var patOptions = new PersonalAccessTokenOptions()
                         {
                             RequireCompactToken = true,
                             TokenDuration = operationArguments.TokenDuration,
@@ -690,7 +690,7 @@ namespace Microsoft.Alm.Cli
 
                 case AuthorityType.GitHub:
                     {
-                        Github.Authentication ghAuth = authentication as Github.Authentication;
+                        var ghAuth = authentication as Github.Authentication;
 
                         Task.Run(async () =>
                         {
@@ -765,7 +765,7 @@ namespace Microsoft.Alm.Cli
 
         public static bool TryReadBoolean(Program program, OperationArguments operationArguments, string configKey, string environKey, out bool? value)
         {
-            if (ReferenceEquals(operationArguments, null))
+            if (operationArguments is null)
                 throw new ArgumentNullException(nameof(operationArguments));
 
             var envars = operationArguments.EnvironmentVariables;
@@ -825,7 +825,7 @@ namespace Microsoft.Alm.Cli
 
         public static bool TryReadString(Program program, OperationArguments operationArguments, string configKey, string environKey, out string value)
         {
-            if (ReferenceEquals(operationArguments, null))
+            if (operationArguments is null)
                 throw new ArgumentNullException(nameof(operationArguments));
 
             var envars = operationArguments.EnvironmentVariables;
@@ -840,7 +840,7 @@ namespace Microsoft.Alm.Cli
                 return true;
             }
 
-            var config = operationArguments.GitConfiguration;
+            Configuration config = operationArguments.GitConfiguration;
 
             // Look for an entry in the git config.
             Configuration.Entry entry;

@@ -41,6 +41,7 @@ namespace Microsoft.Alm.Cli
 
         internal const string CommandApprove = "approve";
         internal const string CommandClear = "clear";
+        internal const string CommandConfig = "config";
         internal const string CommandDelete = "delete";
         internal const string CommandDeploy = "deploy";
         internal const string CommandErase = "erase";
@@ -57,6 +58,7 @@ namespace Microsoft.Alm.Cli
         {
             CommandApprove,
             CommandClear,
+            CommandConfig,
             CommandDelete,
             CommandDeploy,
             CommandErase,
@@ -146,6 +148,66 @@ namespace Microsoft.Alm.Cli
             }
         }
 
+        internal void Config()
+        {
+            string[] args = Environment.GetCommandLineArgs();
+
+            // Attempt to parse a target URI from the command line arguments.
+            if (args.Length < 3 || !Uri.TryCreate(args[2], UriKind.Absolute, out Uri targetUri))
+            {
+                targetUri = new Uri("file://localhost");
+            }
+
+            // Create operation arguments, and load configuration data.
+            OperationArguments operationArguments = new OperationArguments.Impl(targetUri);
+
+            LoadOperationArguments(operationArguments);
+            EnableTraceLogging(operationArguments);
+
+            // Create a set of irrelevant environment variable entries.
+            var irrelevantEntries = new HashSet<string>(StringComparer.OrdinalIgnoreCase)
+            {
+                "ToastSettings"
+            };
+
+            // Write out the environment variables.
+            WriteLine("Environment Variables:");
+            foreach (var entry in operationArguments.EnvironmentVariables)
+            {
+                // Skip well-known, irrelevant entries.
+                if (irrelevantEntries.Contains(entry.Key))
+                    continue;
+
+                WriteLine($"  {entry.Key} = {entry.Value}");
+            }
+            WriteLine();
+
+            // Write out the Git configuration.
+            WriteLine("Git Configuration:");
+            foreach (var entry in operationArguments.GitConfiguration)
+            {
+                WriteLine($"  [{entry.Level}] {entry.Key} = {entry.Value}");
+            }
+            WriteLine();
+
+            // Write out the effective settings for GCM.
+            WriteLine($"Effective Manager Configuration for {operationArguments.QueryUri.ToString()}:");
+            WriteLine($"  Executable = {AssemblyTitle} v{Version.ToString(4)} ({ExecutablePath})");
+            WriteLine($"  Authority = {operationArguments.Authority}");
+            WriteLine($"  CustomNamespace = {operationArguments.CustomNamespace}");
+            WriteLine($"  Interactivity = {operationArguments.Interactivity}");
+            WriteLine($"  PreserveCredentials = {operationArguments.PreserveCredentials}");
+            WriteLine($"  QueryUri = {operationArguments.QueryUri}");
+            WriteLine($"  TargetUri = {operationArguments.TargetUri}");
+            WriteLine($"  TokenDuration = {operationArguments.TokenDuration}");
+            WriteLine($"  UseConfigLocal = {operationArguments.UseConfigLocal}");
+            WriteLine($"  UseConfigSystem = {operationArguments.UseConfigSystem}");
+            WriteLine($"  UseHttpPath = {operationArguments.UseHttpPath}");
+            WriteLine($"  UseModalUi = {operationArguments.UseModalUi}");
+            WriteLine($"  ValidateCredentials = {operationArguments.ValidateCredentials}");
+            WriteLine($"  WriteLog = {operationArguments.WriteLog}");
+        }
+
         internal void Delete()
         {
             string[] args = Environment.GetCommandLineArgs();
@@ -170,8 +232,10 @@ namespace Microsoft.Alm.Cli
 
             using (var stdin = Console.OpenStandardInput())
             {
-                OperationArguments operationArguments = new OperationArguments.Impl(stdin);
-                operationArguments.QueryUri = uri;
+                OperationArguments operationArguments = new OperationArguments.Impl(stdin)
+                {
+                    QueryUri = uri
+                };
 
                 LoadOperationArguments(operationArguments);
 
@@ -278,7 +342,7 @@ namespace Microsoft.Alm.Cli
         {
             const string HelpFileName = "git-credential-manager.html";
 
-            WriteLine("usage: git credential-manager [" + string.Join("|", CommandList) + "] [<args>]");
+            WriteLine("usage: " + Name + ".exe [" + string.Join("|", CommandList) + "] [<args>]");
 
             List<Git.GitInstallation> installations;
             if (Git.Where.FindGitInstallations(out installations))
@@ -331,7 +395,7 @@ namespace Microsoft.Alm.Cli
                 LoadOperationArguments(operationArguments);
                 EnableTraceLogging(operationArguments);
 
-                Credential credentials = new Credential(operationArguments.CredUsername, operationArguments.CredPassword);
+                var credentials = new Credential(operationArguments.CredUsername, operationArguments.CredPassword);
                 var task = Task.Run(async () => { return await CreateAuthentication(operationArguments); });
                 BaseAuthentication authentication = task.Result;
 
@@ -385,11 +449,12 @@ namespace Microsoft.Alm.Cli
 
                 PrintArgs(args);
 
-                // list of arg => method associations (case-insensitive)
-                Dictionary<string, Action> actions = new Dictionary<string, Action>(StringComparer.OrdinalIgnoreCase)
+                // List of `arg` => method associations (case-insensitive).
+                var actions = new Dictionary<string, Action>(StringComparer.OrdinalIgnoreCase)
                 {
                     { CommandApprove, Store },
                     { CommandClear, Clear },
+                    { CommandConfig, Config },
                     { CommandDelete, Delete },
                     { CommandDeploy, Deploy },
                     { CommandErase, Erase },
@@ -403,7 +468,7 @@ namespace Microsoft.Alm.Cli
                     { CommandVersion, PrintVersion },
                 };
 
-                // invoke action specified by arg0
+                // Invoke action specified by arg0.
                 if (actions.ContainsKey(args[0]))
                 {
                     actions[args[0]]();
@@ -411,11 +476,11 @@ namespace Microsoft.Alm.Cli
             }
             catch (AggregateException exception)
             {
-                // print out more useful information when an `AggregateException` is encountered
+                // Print out more useful information when an `AggregateException` is encountered.
                 exception = exception.Flatten();
 
-                // find the first inner exception which isn't an `AggregateException` with fallback
-                // to the canonical `.InnerException`
+                // Find the first inner exception which isn't an `AggregateException` with fall-back
+                // to the canonical `.InnerException`.
                 Exception innerException = exception.InnerExceptions.FirstOrDefault(e => !(e is AggregateException))
                                         ?? exception.InnerException;
 
