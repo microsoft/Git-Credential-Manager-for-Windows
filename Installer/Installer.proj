@@ -59,13 +59,6 @@
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
-    <FilesToCopy Include="$(SolutionDir)\Cli-CredentialHelper\$(InputPath)\*.*" />
-    <FilesToCopy Include="$(SolutionDir)\Cli-Askpass\$(InputPath)\git-askpass.exe" />
-    <FilesToCopy Include="$(SolutionDir)\LICENSE.TXT" />
-    <FilesToCopy Include="$(SolutionDir)\README.md" />
-    <FilesToCopy Include="$(ProjectDir)\Setup.iss" />
-  </ItemGroup>
-  <ItemGroup>
     <FilesToSign Include="$(SigningTarget)">
       <Authenticode>Microsoft</Authenticode>
     </FilesToSign>
@@ -89,6 +82,16 @@
   <Target Name="AfterBuild" AfterTargets="Build" />
   <Target Name="Build" BeforeTargets="AfterBuild">
     <MSBuild Projects="@(ProjectReference)" Targets="Build" />
+
+    <!-- need to declare the items after dependencies have built, so that glob enumeration happens after the files are produced-->
+    <ItemGroup>
+      <FilesToCopy Include="$(SolutionDir)\Cli-CredentialHelper\$(InputPath)\*.*" />
+      <FilesToCopy Include="$(SolutionDir)\Cli-Askpass\$(InputPath)\git-askpass.exe" />
+      <FilesToCopy Include="$(SolutionDir)\LICENSE.TXT" />
+      <FilesToCopy Include="$(SolutionDir)\README.md" />
+      <FilesToCopy Include="$(ProjectDir)\Setup.iss" />
+    </ItemGroup>
+
     <MakeDir Directories="$(IntermediateOutputPath)" />
     <MakeDir Directories="$(OutputPath)" />
     <Copy SourceFiles="@(FilesToCopy)" DestinationFolder="$(IntermediateOutputPath)" />
