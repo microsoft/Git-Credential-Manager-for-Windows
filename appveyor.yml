@@ -13,7 +13,7 @@ before_build:
   - nuget restore
 
 build_script:
-  - msbuild "GitCredentialManager.sln" /bl:GitCredentialManager.binlog /logger:"C:\Program Files\AppVeyor\BuildAgent\Appveyor.MSBuildLogger.dll" /consoleloggerparameters:Verbosity=normal /nodeReuse:false /target:"Build" /property:Configuration="%configuration%";Platform="%platform%"
+  - msbuild "GitCredentialManager.sln" /bl:GitCredentialManager.binlog /logger:"C:\Program Files\AppVeyor\BuildAgent\Appveyor.MSBuildLogger.dll" /consoleloggerparameters:Verbosity=normal /m /nodeReuse:false /target:"Build" /property:Configuration="%configuration%";Platform="%platform%"
 
 cache:
   - packages -> **\packages.config
