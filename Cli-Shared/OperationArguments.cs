@@ -208,10 +208,10 @@ namespace Microsoft.Alm.Cli
                 {
                     read += r;
 
-                    // if we've filled the buffer, make it larger this could hit an out of memory
+                    // If we've filled the buffer, make it larger this could hit an out of memory
                     // condition, but that'd require the called to be attempting to do so, since
-                    // that's not a secyity threat we can safely ignore that and allow NetFx to
-                    // handle it
+                    // that's not a security threat we can safely ignore that and allow NetFx to
+                    // handle it.
                     if (read == buffer.Length)
                     {
                         Array.Resize(ref buffer, buffer.Length * 2);
@@ -222,8 +222,8 @@ namespace Microsoft.Alm.Cli
                         throw new InvalidDataException("Invalid input, please see 'https://www.kernel.org/pub/software/scm/git/docs/git-credential.html'.");
                     }
 
-                    // the input ends with LFLF, check for that and break the read loop unless
-                    // input is coming from CLRF system, in which case it'll be CLRFCLRF
+                    // The input ends with LFLF, check for that and break the read loop unless
+                    // input is coming from CLRF system, in which case it'll be CLRFCLRF.
                     if ((buffer[read - 2] == '\n'
                             && buffer[read - 1] == '\n')
                         || (buffer[read - 4] == '\r'
@@ -234,10 +234,10 @@ namespace Microsoft.Alm.Cli
                 }
 
                 // Git uses UTF-8 for string, don't let the OS decide how to decode it instead
-                // we'll actively decode the UTF-8 block ourselves
+                // we'll actively decode the UTF-8 block ourselves.
                 string input = Encoding.UTF8.GetString(buffer, 0, read);
 
-                // the `StringReader` is just useful
+                // The `StringReader` is just useful.
                 using (StringReader reader = new StringReader(input))
                 {
                     string line;

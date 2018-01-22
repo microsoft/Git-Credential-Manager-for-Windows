@@ -24,6 +24,7 @@
 **/
 
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
@@ -31,13 +32,13 @@ using System.Text.RegularExpressions;
 
 namespace Microsoft.Alm.Git
 {
-    public abstract class Configuration
+    public abstract class Configuration : IEnumerable<Configuration.Entry>
     {
         private const char HostSplitCharacter = '.';
 
-        private static readonly Regex CommentRegex =  new Regex(@"^\s*[#;]", RegexOptions.CultureInvariant);
+        private static readonly Regex CommentRegex = new Regex(@"^\s*[#;]", RegexOptions.CultureInvariant);
         private static readonly Regex KeyValueRegex = new Regex(@"^\s*(\w+)\s*=\s*(.+)", RegexOptions.CultureInvariant);
-        private static readonly Regex SectionRegex =  new Regex(@"^\s*\[\s*(\w+)\s*(\""[^\]]+){0,1}\]", RegexOptions.CultureInvariant);
+        private static readonly Regex SectionRegex = new Regex(@"^\s*\[\s*(\w+)\s*(\""[^\]]+){0,1}\]", RegexOptions.CultureInvariant);
 
         /// <summary>
         /// Gets an enumeration of possible Git configuration levels.
@@ -71,6 +72,16 @@ namespace Microsoft.Alm.Git
 
         public virtual bool ContainsKey(ConfigurationLevel levels, string key)
              => throw new NotImplementedException();
+
+        public virtual IEnumerator<Entry> EnumerateEntriesByLevel(ConfigurationLevel level)
+        {
+            throw new NotImplementedException();
+        }
+
+        public virtual IEnumerator<Entry> GetEnumerator()
+        {
+            throw new NotImplementedException();
+        }
 
         public virtual void LoadGitConfiguration(string directory, ConfigurationLevel types)
              => throw new NotImplementedException();
@@ -199,7 +210,7 @@ namespace Microsoft.Alm.Git
 
                                 includePath = Path.GetFullPath(includePath);
 
-                                using (var includeFile = File.Open(includePath, FileMode.Open, FileAccess.Read, FileShare.Read))
+                                using (FileStream includeFile = File.Open(includePath, FileMode.Open, FileAccess.Read, FileShare.Read))
                                 using (var includeReader = new StreamReader(includeFile))
                                 {
                                     ParseGitConfig(includeReader, destination);
@@ -227,6 +238,9 @@ namespace Microsoft.Alm.Git
             }
         }
 
+        IEnumerator IEnumerable.GetEnumerator()
+            => GetEnumerator();
+
         internal sealed class Impl : Configuration
         {
             internal Impl()
@@ -234,17 +248,17 @@ namespace Microsoft.Alm.Git
 
             internal Impl(Dictionary<ConfigurationLevel, Dictionary<string, string>> values)
             {
-                if (ReferenceEquals(values, null))
+                if (values is null)
                     throw new ArgumentNullException(nameof(values));
 
                 _values = new Dictionary<ConfigurationLevel, Dictionary<string, string>>(values.Count);
 
                 // Copy the dictionary.
-                foreach (var level in values)
+                foreach (KeyValuePair<ConfigurationLevel, Dictionary<string, string>> level in values)
                 {
                     var levelValues = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
 
-                    foreach (var item in level.Value)
+                    foreach (KeyValuePair<string, string> item in level.Value)
                     {
                         levelValues.Add(item.Key, item.Value);
                     }
@@ -266,7 +280,7 @@ namespace Microsoft.Alm.Git
             {
                 get
                 {
-                    foreach (var level in Levels)
+                    foreach (ConfigurationLevel level in Levels)
                     {
                         if (_values[level].ContainsKey(key))
                             return _values[level][key];
@@ -295,7 +309,7 @@ namespace Microsoft.Alm.Git
 
             public sealed override bool ContainsKey(ConfigurationLevel levels, string key)
             {
-                foreach (var level in Levels)
+                foreach (ConfigurationLevel level in Levels)
                 {
                     if ((level & levels) != 0
                         && _values[level].ContainsKey(key))
@@ -305,11 +319,41 @@ namespace Microsoft.Alm.Git
                 return false;
             }
 
+            public sealed override IEnumerator<Entry> EnumerateEntriesByLevel(ConfigurationLevel desiredLevels)
+            {
+                ConfigurationLevel[] levels = new[]
+                {
+                    ConfigurationLevel.Portable,
+                    ConfigurationLevel.System,
+                    ConfigurationLevel.Xdg,
+                    ConfigurationLevel.Global,
+                    ConfigurationLevel.Local,
+                };
+
+                foreach (ConfigurationLevel level in levels)
+                {
+                    // Skip levels not present in the mask.
+                    if ((desiredLevels & level) == 0)
+                        continue;
+
+                    if (_values.TryGetValue(level, out Dictionary<string, string> values))
+                    {
+                        foreach (KeyValuePair<string, string> value in values)
+                        {
+                            yield return new Entry(value.Key, value.Value, level);
+                        }
+                    }
+                }
+            }
+
+            public sealed override IEnumerator<Entry> GetEnumerator()
+                => EnumerateEntriesByLevel(ConfigurationLevel.All);
+
             public sealed override bool TryGetEntry(string prefix, string key, string suffix, out Entry entry)
             {
-                if (ReferenceEquals(prefix, null))
+                if (prefix is null)
                     throw new ArgumentNullException(nameof(prefix));
-                if (ReferenceEquals(suffix, null))
+                if (suffix is null)
                     throw new ArgumentNullException(nameof(suffix));
 
                 string match = string.IsNullOrEmpty(key)
@@ -319,8 +363,14 @@ namespace Microsoft.Alm.Git
                 // If there's a match, return it.
                 if (ContainsKey(match))
                 {
-                    entry = new Entry(match, this[match]);
-                    return true;
+                    foreach (ConfigurationLevel level in Levels)
+                    {
+                        if (_values[level].ContainsKey(match))
+                        {
+                            entry = new Entry(key, _values[level][match], level);
+                            return true;
+                        }
+                    }
                 }
 
                 // Nothing found.
@@ -330,7 +380,7 @@ namespace Microsoft.Alm.Git
 
             public sealed override bool TryGetEntry(string prefix, Uri targetUri, string key, out Entry entry)
             {
-                if (ReferenceEquals(key, null))
+                if (key is null)
                     throw new ArgumentNullException(nameof(key));
 
                 if (targetUri != null)
@@ -424,7 +474,7 @@ namespace Microsoft.Alm.Git
                 if (!File.Exists(configPath))
                     return;
 
-                using (var stream = File.OpenRead(configPath))
+                using (FileStream stream = File.OpenRead(configPath))
                 using (var reader = new StreamReader(stream))
                 {
                     ParseGitConfig(reader, _values[level]);
@@ -440,22 +490,29 @@ namespace Microsoft.Alm.Git
             [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Security", "CA2104:DoNotDeclareReadOnlyMutableReferenceTypes")]
             public static readonly StringComparer ValueComparer = StringComparer.OrdinalIgnoreCase;
 
-            public Entry(string key, string value)
+            public Entry(string key, string value, ConfigurationLevel level)
             {
                 _key = key;
+                _level = level;
                 _value = value;
             }
 
             private readonly string _key;
+            private readonly ConfigurationLevel _level;
             private readonly string _value;
 
             /// <summary>
-            /// The name, or key, of the configuration entry.
+            /// Gets the name, or key, of the configuration entry.
             /// </summary>
             public string Key { get { return _key; } }
 
             /// <summary>
-            /// The value of the configuration entry.
+            /// Gets the configuration level of the entry.
+            /// </summary>
+            public ConfigurationLevel Level { get { return _level; } }
+
+            /// <summary>
+            /// Gets the value of the configuration entry.
             /// </summary>
             public string Value { get { return _value; } }
 

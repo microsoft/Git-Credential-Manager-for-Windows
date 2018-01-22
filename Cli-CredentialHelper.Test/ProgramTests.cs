@@ -35,11 +35,12 @@ namespace Microsoft.Alm.Cli.Test
         [Fact]
         public void LoadOperationArgumentsTest()
         {
-            var program = new Program();
-
-            program._dieException = (Program caller, Exception e, string path, int line, string name) => Assert.False(true, $"Error: {e.ToString()}");
-            program._dieMessage = (Program caller, string m, string path, int line, string name) => Assert.False(true, $"Error: {m}");
-            program._exit = (Program caller, int e, string m, string path, int line, string name) => Assert.False(true, $"Error: {e} {m}");
+            var program = new Program
+            {
+                _dieException = (Program caller, Exception e, string path, int line, string name) => Assert.False(true, $"Error: {e.ToString()}"),
+                _dieMessage = (Program caller, string m, string path, int line, string name) => Assert.False(true, $"Error: {m}"),
+                _exit = (Program caller, int e, string m, string path, int line, string name) => Assert.False(true, $"Error: {e} {m}")
+            };
 
             var configs = new Dictionary<Git.ConfigurationLevel, Dictionary<string, string>>
             {
