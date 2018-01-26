@@ -1,6 +1,7 @@
 version: "{build}"
 
-image: Visual Studio 2017
+image:
+  - Visual Studio 2017
 
 clone_depth: 10
 
@@ -12,14 +13,22 @@ platform: Any CPU
 before_build:
   - nuget restore
 
+build:
+  parallel: true
+  verbosity: minimal
+
 build_script:
-  - msbuild "GitCredentialManager.sln" /bl:GitCredentialManager.binlog /logger:"C:\Program Files\AppVeyor\BuildAgent\Appveyor.MSBuildLogger.dll" /consoleloggerparameters:Verbosity=normal /m /nodeReuse:false /target:"Build" /property:Configuration="%configuration%";Platform="%platform%"
+  - msbuild "GitCredentialManager.sln" /bl:GitCredentialManager.binlog /logger:"C:\Program Files\AppVeyor\BuildAgent\Appveyor.MSBuildLogger.dll" /consoleloggerparameters:Verbosity=minimal /maxcpucount /nodeReuse:false /target:"Build" /property:Configuration="%configuration%";Platform="%platform%"
 
 cache:
   - packages -> **\packages.config
 
 matrix:
   fast_finish: true
+
+test:
+  assemblies:
+    - '**\*.Test.dll'
 
 artifacts:
   - path: GitCredentialManager.binlog
