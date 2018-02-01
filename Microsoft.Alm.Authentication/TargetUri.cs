@@ -205,31 +205,27 @@ namespace Microsoft.Alm.Authentication
             {
                 if (ProxyUri != null)
                 {
-                    WebProxy proxy = new WebProxy(ProxyUri);
-
-                    int tokenIndex = ProxyUri.UserInfo.IndexOf(':');
-                    bool hasUserNameAndPassword = tokenIndex != -1;
-                    bool hasAuthenticationSpecified = !string.IsNullOrWhiteSpace(ProxyUri.UserInfo);
+                    WebProxy proxy = new WebProxy(ProxyUri) { UseDefaultCredentials = true };
 
                     // check if the user has specified authentications (comes as UserInfo)
-                    if (hasAuthenticationSpecified && hasUserNameAndPassword)
+                    if (!string.IsNullOrWhiteSpace(ProxyUri.UserInfo) && ProxyUri.UserInfo.Length > 1)
                     {
-                        string userName = ProxyUri.UserInfo.Substring(0, tokenIndex);
-                        string password = ProxyUri.UserInfo.Substring(tokenIndex + 1);
+                        int tokenIndex = ProxyUri.UserInfo.IndexOf(':');
+                        bool hasUserNameAndPassword = tokenIndex != -1;
 
-                        NetworkCredential proxyCreds = new NetworkCredential(
-                            userName,
-                            password
-                        );
+                        if (hasUserNameAndPassword)
+                        {
+                            string userName = ProxyUri.UserInfo.Substring(0, tokenIndex);
+                            string password = ProxyUri.UserInfo.Substring(tokenIndex + 1);
 
-                        proxy.UseDefaultCredentials = false;
-                        proxy.Credentials = proxyCreds;
-                    }
-                    else
-                    {
-                        // if no explicit proxy authentication, set to use default (Credentials will
-                        // be set to DefaultCredentials automatically)
-                        proxy.UseDefaultCredentials = true;
+                            NetworkCredential proxyCreds = new NetworkCredential(
+                                userName,
+                                password
+                            );
+
+                            proxy.UseDefaultCredentials = false;
+                            proxy.Credentials = proxyCreds;
+                        }
                     }
 
                     return proxy;
