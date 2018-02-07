@@ -46,7 +46,7 @@ namespace Microsoft.Alm.Cli.Test
             {
                 {
                     Git.ConfigurationLevel.Local,
-                    new Dictionary<string, string>(StringComparer.Ordinal)
+                    new Dictionary<string, string>(Program.ConfigKeyComparer)
                     {
                         { "credential.validate", "true" },
                         { "credential.useHttpPath", "true" },
@@ -55,22 +55,22 @@ namespace Microsoft.Alm.Cli.Test
                 },
                 {
                     Git.ConfigurationLevel.Global,
-                    new Dictionary<string, string>(StringComparer.Ordinal)
+                    new Dictionary<string, string>(Program.ConfigKeyComparer)
                     {
                         { "credential.validate", "false" },
                     }
                 },
                 {
                     Git.ConfigurationLevel.Xdg,
-                    new Dictionary<string, string>(StringComparer.Ordinal) { }
+                    new Dictionary<string, string>(Program.ConfigKeyComparer) { }
                 },
                 {
                     Git.ConfigurationLevel.System,
-                    new Dictionary<string, string>(StringComparer.Ordinal) { }
+                    new Dictionary<string, string>(Program.ConfigKeyComparer) { }
                 },
                 {
                     Git.ConfigurationLevel.Portable,
-                    new Dictionary<string, string>(StringComparer.Ordinal) { }
+                    new Dictionary<string, string>(Program.ConfigKeyComparer) { }
                 },
             };
             var envvars = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
@@ -102,19 +102,95 @@ namespace Microsoft.Alm.Cli.Test
             Assert.True(opargs.UseHttpPath, "credential.useHttpPath");
         }
 
-        [Fact]
-        public void TryReadBooleanTest()
+        public static object[][] TryReadBooleanData
+        {
+            get
+            {
+                var data = new List<object[]>();
+                var trueValues = new[] { "true", "1", "on", "yes", };
+                var falseValues = new[] { "false", "0", "off", "no", };
+
+                foreach (KeyType key in Enum.GetValues(typeof(KeyType)))
+                {
+                    foreach (var value in trueValues)
+                    {
+                        var upper = value.ToUpper();
+
+                        data.Add(new object[] { (int)key, value, null, true });
+                        data.Add(new object[] { (int)key, null, value, true });
+
+                        if (StringComparer.Ordinal.Equals(upper, value))
+                        {
+                            data.Add(new object[] { (int)key, upper, null, true });
+                            data.Add(new object[] { (int)key, null, upper, true });
+                        }
+                    }
+
+                    foreach (var value in falseValues)
+                    {
+                        var upper = value.ToUpper();
+
+                        data.Add(new object[] { (int)key, value, null, false });
+                        data.Add(new object[] { (int)key, null, value, false });
+
+                        if (StringComparer.Ordinal.Equals(upper, value))
+                        {
+                            data.Add(new object[] { (int)key, upper, null, false });
+                            data.Add(new object[] { (int)key, null, upper, false });
+                        }
+                    }
+                }
+
+                return data.ToArray();
+            }
+        }
+
+        [Theory, MemberData(nameof(TryReadBooleanData), DisableDiscoveryEnumeration = true)]
+        public void TryReadBooleanTest(int keyValue, string configValue, string environValue, bool? expectedValue)
         {
             bool? yesno;
+            KeyType key = (KeyType)keyValue;
 
-            var program = new Program();
+            var program = new Program
+            {
+                _dieException = (Program caller, Exception e, string path, int line, string name) => Assert.False(true, $"Error: {e.ToString()}"),
+                _dieMessage = (Program caller, string m, string path, int line, string name) => Assert.False(true, $"Error: {m}"),
+                _exit = (Program caller, int e, string m, string path, int line, string name) => Assert.False(true, $"Error: {e} {m}")
+            };
 
+            Assert.True(program.EnvironmentKeys.ContainsKey(key));
+
+            var configs = new Dictionary<Git.ConfigurationLevel, Dictionary<string, string>>
+            {
+                { Git.ConfigurationLevel.Local,    new Dictionary<string, string>(Program.ConfigKeyComparer) },
+                { Git.ConfigurationLevel.Global,   new Dictionary<string, string>(Program.ConfigKeyComparer) },
+                { Git.ConfigurationLevel.Xdg,      new Dictionary<string, string>(Program.ConfigKeyComparer) },
+                { Git.ConfigurationLevel.System,   new Dictionary<string, string>(Program.ConfigKeyComparer) },
+                { Git.ConfigurationLevel.Portable, new Dictionary<string, string>(Program.ConfigKeyComparer) },
+            };
             var envvars = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
             {
                 { "HOME", Environment.GetFolderPath(Environment.SpecialFolder.UserProfile) },
-                { program.EnvironmentKeys[KeyType.PreserveCredentials], "no" },
             };
-            var gitconfig = new Git.Configuration.Impl();
+
+            bool setupComplete = false;
+
+            if (!string.IsNullOrEmpty(configValue) && program.ConfigurationKeys.TryGetValue(key, out string configKey))
+            {
+                configs[Git.ConfigurationLevel.Local].Add($"credential.{configKey}", configValue);
+                setupComplete = true;
+            }
+
+            if (!string.IsNullOrEmpty(environValue) && program.EnvironmentKeys.TryGetValue(key, out string environKey))
+            {
+                envvars.Add(environKey, environValue);
+                setupComplete = true;
+            }
+
+            if (!setupComplete)
+                return;
+
+            var gitconfig = new Git.Configuration.Impl(configs);
             var targetUri = new Authentication.TargetUri("https://example.visualstudio.com/");
 
             var opargsMock = new Mock<OperationArguments>();
@@ -128,36 +204,16 @@ namespace Microsoft.Alm.Cli.Test
             opargsMock.Setup(v => v.QueryUri)
                       .Returns(targetUri);
 
-
-            Assert.False(CommonFunctions.TryReadBoolean(program, opargsMock.Object, KeyType.HttpPath, out yesno));
-            Assert.False(yesno.HasValue);
-
-            Assert.True(CommonFunctions.TryReadBoolean(program, opargsMock.Object, KeyType.PreserveCredentials, out yesno));
-            Assert.True(yesno.HasValue);
-            Assert.False(yesno.Value);
-
-            envvars = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+            if (expectedValue.HasValue)
             {
-                { "HOME", Environment.GetFolderPath(Environment.SpecialFolder.UserProfile) },
-                { program.EnvironmentKeys[KeyType.PreserveCredentials], "yes" },
-            };
-            opargsMock.Setup(r => r.EnvironmentVariables)
-                      .Returns(envvars);
-
-            Assert.True(CommonFunctions.TryReadBoolean(program, opargsMock.Object, KeyType.PreserveCredentials, out yesno));
-            Assert.True(yesno.HasValue);
-            Assert.True(yesno.Value);
-
-            envvars = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+                Assert.True(CommonFunctions.TryReadBoolean(program, opargsMock.Object, key, out yesno));
+                Assert.Equal(expectedValue, yesno);
+            }
+            else
             {
-                { "HOME", Environment.GetFolderPath(Environment.SpecialFolder.UserProfile) },
-                { program.EnvironmentKeys[KeyType.PreserveCredentials], string.Empty },
-            };
-            opargsMock.Setup(r => r.EnvironmentVariables)
-                      .Returns(envvars);
-
-            Assert.False(CommonFunctions.TryReadBoolean(program, opargsMock.Object, KeyType.PreserveCredentials, out yesno));
-            Assert.False(yesno.HasValue);
+                Assert.False(CommonFunctions.TryReadBoolean(program, opargsMock.Object, key, out yesno));
+                Assert.False(yesno.HasValue);
+            }
         }
     }
 }
