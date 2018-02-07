@@ -35,8 +35,9 @@ namespace Microsoft.Alm.Authentication
     {
         private readonly IReadOnlyList<IReadOnlyList<string>> AdalCachePaths = new string[][]
         {
-            new [] { @".IdentityService", @"IdentityServiceAdalCache.cache", }, // VS2017 ADAL v3 cache
-            new [] { @"Microsoft\VSCommon\VSAccountManagement", @"AdalCache.cache", }, // VS2015 ADAL v2 cache
+            new [] { @".IdentityService", @"IdentityServiceAdalCache.cache", },          // VS2017 ADAL v3 cache
+            new [] { @"Microsoft\VSCommon\VSAccountManagement", @"AdalCache.cache", },   // VS2015 ADAL v2 cache
+            new [] { @"Microsoft\VSCommon\VSAccountManagement", @"AdalCacheV2.cache", }, // VS2017 ADAL v2 cache
         };
 
         /// <summary>
