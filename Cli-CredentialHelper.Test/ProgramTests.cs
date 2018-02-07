@@ -107,10 +107,12 @@ namespace Microsoft.Alm.Cli.Test
         {
             bool? yesno;
 
+            var program = new Program();
+
             var envvars = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
             {
                 { "HOME", Environment.GetFolderPath(Environment.SpecialFolder.UserProfile) },
-                { Program.EnvironPreserveCredentialsKey, "no" },
+                { program.EnvironmentKeys[KeyType.PreserveCredentials], "no" },
             };
             var gitconfig = new Git.Configuration.Impl();
             var targetUri = new Authentication.TargetUri("https://example.visualstudio.com/");
@@ -126,36 +128,35 @@ namespace Microsoft.Alm.Cli.Test
             opargsMock.Setup(v => v.QueryUri)
                       .Returns(targetUri);
 
-            var program = new Program();
 
-            Assert.False(CommonFunctions.TryReadBoolean(program, opargsMock.Object, "notFound", "notFound", out yesno));
+            Assert.False(CommonFunctions.TryReadBoolean(program, opargsMock.Object, KeyType.HttpPath, out yesno));
             Assert.False(yesno.HasValue);
 
-            Assert.True(CommonFunctions.TryReadBoolean(program, opargsMock.Object, Program.ConfigPreserveCredentialsKey, Program.EnvironPreserveCredentialsKey, out yesno));
+            Assert.True(CommonFunctions.TryReadBoolean(program, opargsMock.Object, KeyType.PreserveCredentials, out yesno));
             Assert.True(yesno.HasValue);
             Assert.False(yesno.Value);
 
             envvars = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
             {
                 { "HOME", Environment.GetFolderPath(Environment.SpecialFolder.UserProfile) },
-                { Program.EnvironPreserveCredentialsKey, "yes" },
+                { program.EnvironmentKeys[KeyType.PreserveCredentials], "yes" },
             };
             opargsMock.Setup(r => r.EnvironmentVariables)
                       .Returns(envvars);
 
-            Assert.True(CommonFunctions.TryReadBoolean(program, opargsMock.Object, Program.ConfigPreserveCredentialsKey, Program.EnvironPreserveCredentialsKey, out yesno));
+            Assert.True(CommonFunctions.TryReadBoolean(program, opargsMock.Object, KeyType.PreserveCredentials, out yesno));
             Assert.True(yesno.HasValue);
             Assert.True(yesno.Value);
 
             envvars = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
             {
                 { "HOME", Environment.GetFolderPath(Environment.SpecialFolder.UserProfile) },
-                { Program.EnvironPreserveCredentialsKey, string.Empty },
+                { program.EnvironmentKeys[KeyType.PreserveCredentials], string.Empty },
             };
             opargsMock.Setup(r => r.EnvironmentVariables)
                       .Returns(envvars);
 
-            Assert.False(CommonFunctions.TryReadBoolean(program, opargsMock.Object, Program.ConfigPreserveCredentialsKey, Program.EnvironPreserveCredentialsKey, out yesno));
+            Assert.False(CommonFunctions.TryReadBoolean(program, opargsMock.Object, KeyType.PreserveCredentials, out yesno));
             Assert.False(yesno.HasValue);
         }
     }

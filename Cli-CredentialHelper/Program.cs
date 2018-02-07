@@ -303,7 +303,7 @@ namespace Microsoft.Alm.Cli
 
                 if (operationArguments.PreserveCredentials)
                 {
-                    Git.Trace.WriteLine($"{ConfigPreserveCredentialsKey} = true, canceling erase request.");
+                    Git.Trace.WriteLine($"{KeyTypeName(KeyType.PreserveCredentials)} = true, canceling erase request.");
                     return;
                 }
 

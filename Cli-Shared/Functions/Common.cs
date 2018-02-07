@@ -352,16 +352,16 @@ namespace Microsoft.Alm.Cli
             string value;
             bool? yesno;
 
-            if (program.TryReadBoolean(operationArguments, null, Program.EnvironConfigNoLocalKey, out yesno))
+            if (program.TryReadBoolean(operationArguments, KeyType.ConfigNoLocal, out yesno))
             {
-                Git.Trace.WriteLine($"{Program.EnvironConfigNoLocalKey} = '{yesno}'.");
+                Git.Trace.WriteLine($"{program.KeyTypeName(KeyType.ConfigNoLocal)} = '{yesno}'.");
 
                 operationArguments.UseConfigLocal = yesno.Value;
             }
 
-            if (program.TryReadBoolean(operationArguments, null, Program.EnvironConfigNoSystemKey, out yesno))
+            if (program.TryReadBoolean(operationArguments, KeyType.ConfigNoSystem, out yesno))
             {
-                Git.Trace.WriteLine($"{Program.EnvironConfigNoSystemKey} = '{yesno}'.");
+                Git.Trace.WriteLine($"{program.KeyTypeName(KeyType.ConfigNoSystem)} = '{yesno}'.");
 
                 operationArguments.UseConfigSystem = yesno.Value;
             }
@@ -370,17 +370,17 @@ namespace Microsoft.Alm.Cli
             operationArguments.LoadConfiguration();
 
             // If a user-agent has been specified in the environment, set it globally.
-            if (program.TryReadString(operationArguments, null, Program.EnvironHttpUserAgent, out value))
+            if (program.TryReadString(operationArguments, KeyType.HttpUserAgent, out value))
             {
-                Git.Trace.WriteLine($"{Program.EnvironHttpUserAgent} = '{value}'.");
+                Git.Trace.WriteLine($"{program.KeyTypeName(KeyType.HttpUserAgent)} = '{value}'.");
 
                 Global.UserAgent = value;
             }
 
             // Look for authority settings.
-            if (program.TryReadString(operationArguments, Program.ConfigAuthorityKey, Program.EnvironAuthorityKey, out value))
+            if (program.TryReadString(operationArguments, KeyType.Authority, out value))
             {
-                Git.Trace.WriteLine($"{Program.ConfigAuthorityKey} = '{value}'.");
+                Git.Trace.WriteLine($"{program.KeyTypeName(KeyType.Authority)} = '{value}'.");
 
                 if (Program.ConfigKeyComparer.Equals(value, "MSA")
                     || Program.ConfigKeyComparer.Equals(value, "Microsoft")
@@ -422,9 +422,9 @@ namespace Microsoft.Alm.Cli
             }
 
             // Look for interactivity config settings.
-            if (program.TryReadString(operationArguments, Program.ConfigInteractiveKey, Program.EnvironInteractiveKey, out value))
+            if (program.TryReadString(operationArguments, KeyType.Interactive, out value))
             {
-                Git.Trace.WriteLine($"{Program.EnvironInteractiveKey} = '{value}'.");
+                Git.Trace.WriteLine($"{program.KeyTypeName(KeyType.Interactive)} = '{value}'.");
 
                 if (Program.ConfigKeyComparer.Equals(value, "always")
                     || Program.ConfigKeyComparer.Equals(value, "true")
@@ -440,59 +440,67 @@ namespace Microsoft.Alm.Cli
             }
 
             // Look for credential validation config settings.
-            if (program.TryReadBoolean(operationArguments, Program.ConfigValidateKey, Program.EnvironValidateKey, out yesno))
+            if (program.TryReadBoolean(operationArguments, KeyType.Validate, out yesno))
             {
-                Git.Trace.WriteLine($"{Program.ConfigValidateKey} = '{yesno}'.");
+                Git.Trace.WriteLine($"{program.KeyTypeName(KeyType.Validate)} = '{yesno}'.");
 
                 operationArguments.ValidateCredentials = yesno.Value;
             }
 
             // Look for write log config settings.
-            if (program.TryReadBoolean(operationArguments, Program.ConfigWritelogKey, Program.EnvironWritelogKey, out yesno))
+            if (program.TryReadBoolean(operationArguments, KeyType.Writelog, out yesno))
             {
-                Git.Trace.WriteLine($"{Program.ConfigWritelogKey} = '{yesno}'.");
+                Git.Trace.WriteLine($"{program.KeyTypeName(KeyType.Writelog)} = '{yesno}'.");
 
                 operationArguments.WriteLog = yesno.Value;
             }
 
             // Look for modal prompt config settings.
-            if (program.TryReadBoolean(operationArguments, Program.ConfigUseModalPromptKey, Program.EnvironModalPromptKey, out yesno))
+            if (program.TryReadBoolean(operationArguments, KeyType.ModalPrompt, out yesno))
             {
-                Git.Trace.WriteLine($"{Program.ConfigUseModalPromptKey} = '{yesno}'.");
+                Git.Trace.WriteLine($"{program.KeyTypeName(KeyType.ModalPrompt)} = '{yesno}'.");
 
                 operationArguments.UseModalUi = yesno.Value;
             }
 
             // Look for credential preservation config settings.
-            if (program.TryReadBoolean(operationArguments, Program.ConfigPreserveCredentialsKey, Program.EnvironPreserveCredentialsKey, out yesno))
+            if (program.TryReadBoolean(operationArguments, KeyType.PreserveCredentials, out yesno))
             {
-                Git.Trace.WriteLine($"{Program.ConfigPreserveCredentialsKey} = '{yesno}'.");
+                Git.Trace.WriteLine($"{program.KeyTypeName(KeyType.PreserveCredentials)} = '{yesno}'.");
 
                 operationArguments.PreserveCredentials = yesno.Value;
             }
 
             // Look for HTTP path usage config settings.
-            if (program.TryReadBoolean(operationArguments, Program.ConfigUseHttpPathKey, null, out yesno))
+            if (program.TryReadBoolean(operationArguments, KeyType.HttpPath, out yesno))
             {
-                Git.Trace.WriteLine($"{Program.ConfigUseHttpPathKey} = '{value}'.");
+                Git.Trace.WriteLine($"{program.KeyTypeName(KeyType.HttpPath)} = '{value}'.");
 
                 operationArguments.UseHttpPath = yesno.Value;
             }
 
             // Look for HTTP proxy config settings.
-            if (program.TryReadString(operationArguments, Program.ConfigHttpProxyKey, Program.EnvironHttpProxyKey, out value))
+            if ((operationArguments.TargetUri.Scheme.Equals(Uri.UriSchemeHttps, StringComparison.OrdinalIgnoreCase)
+                    && program.TryReadString(operationArguments, KeyType.HttpsProxy, out value))
+                || program.TryReadString(operationArguments, KeyType.HttpProxy, out value))
             {
-                Git.Trace.WriteLine($"{Program.ConfigHttpProxyKey} = '{value}'.");
+                Git.Trace.WriteLine($"{program.KeyTypeName(KeyType.HttpProxy)} = '{value}'.");
 
                 operationArguments.SetProxy(value);
             }
             // Check environment variables just-in-case.
-            else if ((operationArguments.EnvironmentVariables.TryGetValue(Program.EnvironGitHttpsProxyKey, out value)
-                    && !string.IsNullOrWhiteSpace(value))
-                || (operationArguments.EnvironmentVariables.TryGetValue(Program.EnvironGitHttpProxyKey, out value)
+            else if ((operationArguments.EnvironmentVariables.TryGetValue("GCM_HTTP_PROXY", out value)
                     && !string.IsNullOrWhiteSpace(value)))
             {
-                Git.Trace.WriteLine($"http.proxy = '{value}'.");
+                Git.Trace.WriteLine($"GCM_HTTP_PROXY = '{value}'.");
+
+                var keyName = (operationArguments.TargetUri.Scheme.Equals(Uri.UriSchemeHttps, StringComparison.OrdinalIgnoreCase))
+                    ? "HTTPS_PROXY"
+                    : "HTTP_PROXY";
+                var warning = $"WARNING: the 'GCM_HTTP_PROXY' variable has been deprecated, use '{ keyName }' instead.";
+
+                Git.Trace.WriteLine(warning);
+                program.WriteLine(warning);
 
                 operationArguments.SetProxy(value);
             }
@@ -510,17 +518,17 @@ namespace Microsoft.Alm.Cli
             }
 
             // Look for custom namespace config settings.
-            if (program.TryReadString(operationArguments, Program.ConfigNamespaceKey, Program.EnvironNamespaceKey, out value))
+            if (program.TryReadString(operationArguments, KeyType.Namespace, out value))
             {
-                Git.Trace.WriteLine($"{Program.ConfigNamespaceKey} = '{value}'.");
+                Git.Trace.WriteLine($"{program.KeyTypeName(KeyType.Namespace)} = '{value}'.");
 
                 operationArguments.CustomNamespace = value;
             }
 
             // Look for custom token duration settings.
-            if (program.TryReadString(operationArguments, Program.ConfigTokenDuration, Program.EnvironTokenDuration, out value))
+            if (program.TryReadString(operationArguments, KeyType.TokenDuration, out value))
             {
-                Git.Trace.WriteLine($"{Program.ConfigTokenDuration} = '{value}'.");
+                Git.Trace.WriteLine($"{program.KeyTypeName(KeyType.TokenDuration)} = '{value}'.");
 
                 int hours;
                 if (int.TryParse(value, out hours))
@@ -773,93 +781,101 @@ namespace Microsoft.Alm.Cli
             return credentials;
         }
 
-        public static bool TryReadBoolean(Program program, OperationArguments operationArguments, string configKey, string environKey, out bool? value)
+        public static bool TryReadBoolean(Program program, OperationArguments operationArguments, KeyType key, out bool? value)
         {
             if (operationArguments is null)
                 throw new ArgumentNullException(nameof(operationArguments));
 
-            var envars = operationArguments.EnvironmentVariables;
-
-            // Look for an entry in the environment variables.
-            string localVal = null;
-            if (!string.IsNullOrWhiteSpace(environKey)
-                && envars.TryGetValue(environKey, out localVal))
+            if (program.ConfigurationKeys.TryGetValue(key, out string configKey)
+                | program.ConfigurationKeys.TryGetValue(key, out string environKey))
             {
-                goto parse_localval;
-            }
+                var envars = operationArguments.EnvironmentVariables;
 
-            var config = operationArguments.GitConfiguration;
+                // Look for an entry in the environment variables.
+                string localVal = null;
+                if (!string.IsNullOrWhiteSpace(environKey)
+                    && envars.TryGetValue(environKey, out localVal))
+                {
+                    goto parse_localval;
+                }
 
-            // Look for an entry in the git config.
-            Configuration.Entry entry;
-            if (!string.IsNullOrWhiteSpace(configKey)
-                && config.TryGetEntry(Program.ConfigPrefix, operationArguments.QueryUri, configKey, out entry))
-            {
-                localVal = entry.Value;
-                goto parse_localval;
-            }
+                var config = operationArguments.GitConfiguration;
 
-            // Parse the value into a bool.
-            parse_localval:
+                // Look for an entry in the git config.
+                Configuration.Entry entry;
+                if (!string.IsNullOrWhiteSpace(configKey)
+                    && config.TryGetEntry(Program.ConfigPrefix, operationArguments.QueryUri, configKey, out entry))
+                {
+                    localVal = entry.Value;
+                    goto parse_localval;
+                }
 
-            // An empty value is unset / should not be there, so treat it as if it isn't.
-            if (string.IsNullOrWhiteSpace(localVal))
-            {
-                value = null;
-                return false;
-            }
+                // Parse the value into a bool.
+                parse_localval:
 
-            // Test `localValue` for a Git 'true' equivalent value.
-            if (Program.ConfigValueComparer.Equals(localVal, "yes")
-                || Program.ConfigValueComparer.Equals(localVal, "true")
-                || Program.ConfigValueComparer.Equals(localVal, "1")
-                || Program.ConfigValueComparer.Equals(localVal, "on"))
-            {
-                value = true;
-                return true;
-            }
+                // An empty value is unset / should not be there, so treat it as if it isn't.
+                if (string.IsNullOrWhiteSpace(localVal))
+                {
+                    value = null;
+                    return false;
+                }
 
-            // Test `localValue` for a Git 'false' equivalent value.
-            if (Program.ConfigValueComparer.Equals(localVal, "no")
-                || Program.ConfigValueComparer.Equals(localVal, "false")
-                || Program.ConfigValueComparer.Equals(localVal, "0")
-                || Program.ConfigValueComparer.Equals(localVal, "off"))
-            {
-                value = false;
-                return true;
+                // Test `localValue` for a Git 'true' equivalent value.
+                if (Program.ConfigValueComparer.Equals(localVal, "yes")
+                    || Program.ConfigValueComparer.Equals(localVal, "true")
+                    || Program.ConfigValueComparer.Equals(localVal, "1")
+                    || Program.ConfigValueComparer.Equals(localVal, "on"))
+                {
+                    value = true;
+                    return true;
+                }
+
+                // Test `localValue` for a Git 'false' equivalent value.
+                if (Program.ConfigValueComparer.Equals(localVal, "no")
+                    || Program.ConfigValueComparer.Equals(localVal, "false")
+                    || Program.ConfigValueComparer.Equals(localVal, "0")
+                    || Program.ConfigValueComparer.Equals(localVal, "off"))
+                {
+                    value = false;
+                    return true;
+                }
             }
 
             value = null;
             return false;
         }
 
-        public static bool TryReadString(Program program, OperationArguments operationArguments, string configKey, string environKey, out string value)
+        public static bool TryReadString(Program program, OperationArguments operationArguments, KeyType key, out string value)
         {
             if (operationArguments is null)
                 throw new ArgumentNullException(nameof(operationArguments));
 
-            var envars = operationArguments.EnvironmentVariables;
-
-            // Look for an entry in the environment variables.
-            string localVal;
-            if (!string.IsNullOrWhiteSpace(environKey)
-                && envars.TryGetValue(environKey, out localVal)
-                && !string.IsNullOrWhiteSpace(localVal))
+            if (program.ConfigurationKeys.TryGetValue(key, out string configKey)
+                | program.ConfigurationKeys.TryGetValue(key, out string environKey))
             {
-                value = localVal;
-                return true;
-            }
+                var envars = operationArguments.EnvironmentVariables;
 
-            Configuration config = operationArguments.GitConfiguration;
+                // Look for an entry in the environment variables.
+                string localVal;
+                if (!string.IsNullOrWhiteSpace(environKey)
+                    && envars.TryGetValue(environKey, out localVal)
+                    && !string.IsNullOrWhiteSpace(localVal))
+                {
+                    value = localVal;
+                    return true;
+                }
 
-            // Look for an entry in the git config.
-            Configuration.Entry entry;
-            if (!string.IsNullOrWhiteSpace(configKey)
-                && config.TryGetEntry(Program.ConfigPrefix, operationArguments.QueryUri, configKey, out entry)
-                && !string.IsNullOrWhiteSpace(entry.Value))
-            {
-                value = entry.Value;
-                return true;
+                Configuration config = operationArguments.GitConfiguration;
+
+                // Look for an entry in the git config.
+                Configuration.Entry entry;
+                if (!string.IsNullOrWhiteSpace(configKey)
+                    && config.TryGetEntry(Program.ConfigPrefix, operationArguments.QueryUri, configKey, out entry)
+                    && !string.IsNullOrWhiteSpace(entry.Value))
+                {
+                    value = entry.Value;
+                    return true;
+                }
             }
 
             value = null;
