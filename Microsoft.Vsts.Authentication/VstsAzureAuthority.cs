@@ -168,21 +168,56 @@ namespace Microsoft.Alm.Authentication
 
             try
             {
-                // create an request to the VSTS deployment data end-point
+                // Create an request to the VSTS deployment data end-point.
                 HttpWebRequest request = GetConnectionDataRequest(targetUri, credentials);
 
                 Git.Trace.WriteLine($"validating credentials against '{request.RequestUri}'.");
 
-                // send the request and wait for the response
+                // Send the request and wait for the response.
                 using (HttpWebResponse response = await request.GetResponseAsync() as HttpWebResponse)
                 {
-                    // we're looking for 'OK 200' here, anything else is failure
-                    Git.Trace.WriteLine($"server returned: '{response.StatusCode}'.");
+                    // We're looking for 'OK 200' here, anything else is failure
+                    Git.Trace.WriteLine($"server returned: ({response.StatusCode}).");
                     return response.StatusCode == HttpStatusCode.OK;
                 }
             }
             catch (WebException webException)
             {
+                // Avoid invalidation credentials based on what is likely a networking problem.
+                switch (webException.Status)
+                {
+                    case WebExceptionStatus.ConnectFailure:
+                    case WebExceptionStatus.ConnectionClosed:
+                    case WebExceptionStatus.NameResolutionFailure:
+                    case WebExceptionStatus.ProxyNameResolutionFailure:
+                    case WebExceptionStatus.ReceiveFailure:
+                    case WebExceptionStatus.RequestCanceled:
+                    case WebExceptionStatus.RequestProhibitedByCachePolicy:
+                    case WebExceptionStatus.RequestProhibitedByProxy:
+                    case WebExceptionStatus.SecureChannelFailure:
+                    case WebExceptionStatus.SendFailure:
+                    case WebExceptionStatus.TrustFailure:
+                        {
+                            Git.Trace.WriteLine($"unable to validate credentials due to '{webException.Status}'.");
+
+                            return true;
+                        }
+                }
+
+                // Even if the service responded, if the issue isn't a 400 class response then
+                // the credentials were likely not rejected.
+                if (webException.Response is HttpWebResponse response)
+                {
+                    int statusCode = (int)response.StatusCode;
+
+                    if (statusCode < 400 && statusCode >= 500)
+                    {
+                        Git.Trace.WriteLine($"server returned: ({statusCode}).");
+
+                        return true;
+                    }
+                }
+
                 Git.Trace.WriteLine($"server returned: '{webException.Message}.");
             }
             catch
