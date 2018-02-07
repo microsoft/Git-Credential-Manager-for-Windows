@@ -26,7 +26,7 @@ namespace Microsoft.Alm.Cli.Test
 
                 memory.Seek(0, SeekOrigin.Begin);
 
-                cut = new OperationArguments.Impl(memory);
+                cut = new OperationArguments(memory);
             }
 
             Assert.Equal("https", cut.QueryProtocol);
@@ -60,7 +60,7 @@ namespace Microsoft.Alm.Cli.Test
 
                 memory.Seek(0, SeekOrigin.Begin);
 
-                cut = new OperationArguments.Impl(memory);
+                cut = new OperationArguments(memory);
             }
 
             Assert.Equal("https", cut.QueryProtocol);
@@ -201,7 +201,7 @@ namespace Microsoft.Alm.Cli.Test
 
                 memory.Seek(0, SeekOrigin.Begin);
 
-                var oparg = new OperationArguments.Impl(memory);
+                var oparg = new OperationArguments(memory);
 
                 Assert.NotNull(oparg);
                 Assert.Equal(input.Protocol ?? string.Empty, oparg.QueryProtocol);
@@ -228,7 +228,7 @@ namespace Microsoft.Alm.Cli.Test
 
                 memory.Seek(0, SeekOrigin.Begin);
 
-                var oparg = new OperationArguments.Impl(memory);
+                var oparg = new OperationArguments(memory);
                 oparg.UseHttpPath = false;
 
                 Assert.NotNull(oparg);
@@ -256,7 +256,7 @@ namespace Microsoft.Alm.Cli.Test
 
                 memory.Seek(0, SeekOrigin.Begin);
 
-                var oparg = new OperationArguments.Impl(memory);
+                var oparg = new OperationArguments(memory);
                 oparg.UseHttpPath = true;
 
                 Assert.NotNull(oparg);

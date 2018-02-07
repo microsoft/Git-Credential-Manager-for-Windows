@@ -112,7 +112,7 @@ namespace Microsoft.Alm.Cli
             {
                 Git.Trace.WriteLine($"converted '{url}' to '{uri.AbsoluteUri}'.");
 
-                OperationArguments operationArguments = new OperationArguments.Impl(uri);
+                OperationArguments operationArguments = new OperationArguments(uri);
 
                 LoadOperationArguments(operationArguments);
                 EnableTraceLogging(operationArguments);
@@ -159,7 +159,7 @@ namespace Microsoft.Alm.Cli
             }
 
             // Create operation arguments, and load configuration data.
-            OperationArguments operationArguments = new OperationArguments.Impl(targetUri);
+            OperationArguments operationArguments = new OperationArguments(targetUri);
 
             LoadOperationArguments(operationArguments);
             EnableTraceLogging(operationArguments);
@@ -232,7 +232,7 @@ namespace Microsoft.Alm.Cli
 
             using (var stdin = Console.OpenStandardInput())
             {
-                OperationArguments operationArguments = new OperationArguments.Impl(stdin)
+                OperationArguments operationArguments = new OperationArguments(stdin)
                 {
                     QueryUri = uri
                 };
@@ -293,7 +293,7 @@ namespace Microsoft.Alm.Cli
             // see: https://www.kernel.org/pub/software/scm/git/docs/git-credential.html
             using (var stdin = Console.OpenStandardInput())
             {
-                OperationArguments operationArguments = new OperationArguments.Impl(stdin);
+                OperationArguments operationArguments = new OperationArguments(stdin);
 
                 Debug.Assert(operationArguments != null, "The operationArguments is null");
                 Debug.Assert(operationArguments.TargetUri != null, "The operationArgument.TargetUri is null");
@@ -318,7 +318,7 @@ namespace Microsoft.Alm.Cli
             // see: https://www.kernel.org/pub/software/scm/git/docs/git-credential.html
             using (var stdin = Console.OpenStandardInput())
             {
-                OperationArguments operationArguments = new OperationArguments.Impl(stdin);
+                OperationArguments operationArguments = new OperationArguments(stdin);
 
                 LoadOperationArguments(operationArguments);
                 EnableTraceLogging(operationArguments);
@@ -386,7 +386,7 @@ namespace Microsoft.Alm.Cli
             // see: https://www.kernel.org/pub/software/scm/git/docs/git-credential.html
             using (var stdin = Console.OpenStandardInput())
             {
-                OperationArguments operationArguments = new OperationArguments.Impl(stdin);
+                OperationArguments operationArguments = new OperationArguments(stdin);
 
                 Debug.Assert(operationArguments != null, "The operationArguments is null");
                 Debug.Assert(operationArguments.CredUsername != null, "The operaionArgument.Username is null");

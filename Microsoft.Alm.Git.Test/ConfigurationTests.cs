@@ -80,7 +80,7 @@ namespace Microsoft.Alm.Git.Test
                     values[level] = dict;
                 }
 
-                cut = new Configuration.Impl(values);
+                cut = new Configuration(values);
             }
 
             Assert.True(cut.ContainsKey("CoRe.AuToCrLf"));

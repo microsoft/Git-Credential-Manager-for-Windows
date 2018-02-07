@@ -52,6 +52,7 @@ namespace Microsoft.Alm.Cli
         PreserveCredentials,
         TokenDuration,
         Validate,
+        VstsScope,
         Writelog,
     }
 
@@ -114,6 +115,7 @@ namespace Microsoft.Alm.Cli
             { KeyType.PreserveCredentials,  "preserve" },
             { KeyType.TokenDuration,  "tokenDuration" },
             { KeyType.Validate,  "validate" },
+            { KeyType.VstsScope, "vstsScope" },
             { KeyType.Writelog,  "writelog" },
         };
         internal readonly Dictionary<KeyType, string> _environmentKeys = new Dictionary<KeyType, string>()
@@ -133,6 +135,7 @@ namespace Microsoft.Alm.Cli
             { KeyType.PreserveCredentials, "GCM_PRESERVE_CREDS" },
             { KeyType.TokenDuration, "GCM_TOKEN_DURATION" },
             { KeyType.Validate, "GCM_VALIDATE" },
+            { KeyType.VstsScope, "GCM_VSTS_SCOPE" },
             { KeyType.Writelog, "GCM_WRITELOG" },
         };
 

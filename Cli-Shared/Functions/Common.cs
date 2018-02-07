@@ -38,6 +38,8 @@ namespace Microsoft.Alm.Cli
 {
     internal static class CommonFunctions
     {
+        public const string TokenScopeSeparatorCharacters = ",; ";
+
         public static async Task<BaseAuthentication> CreateAuthentication(Program program, OperationArguments operationArguments)
         {
             if (operationArguments is null)
@@ -535,6 +537,31 @@ namespace Microsoft.Alm.Cli
                 {
                     operationArguments.TokenDuration = TimeSpan.FromHours(hours);
                 }
+            }
+
+            // Look for custom VSTS scope settings
+            if (program.TryReadString(operationArguments, KeyType.VstsScope, out value))
+            {
+                Git.Trace.WriteLine($"{program.KeyTypeName(KeyType.VstsScope)} = '{value}'.");
+
+                VstsTokenScope vstsTokenScope = VstsTokenScope.None;
+
+                var scopes = value.Split(TokenScopeSeparatorCharacters.ToCharArray(), StringSplitOptions.RemoveEmptyEntries);
+                for (int i = 0; i < scopes.Length; i += 1)
+                {
+                    scopes[i] = scopes[i].Trim();
+
+                    if (VstsTokenScope.Find(scopes[i], out VstsTokenScope scope))
+                    {
+                        vstsTokenScope = vstsTokenScope | scope;
+                    }
+                    else
+                    {
+                        Git.Trace.WriteLine($"Unknown VSTS Token scope: '{scopes[i]}'.");
+                    }
+                }
+
+                operationArguments.VstsTokenScope = vstsTokenScope;
             }
         }
 

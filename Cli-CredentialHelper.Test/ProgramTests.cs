@@ -77,21 +77,20 @@ namespace Microsoft.Alm.Cli.Test
             {
                 { "HOME", Environment.GetFolderPath(Environment.SpecialFolder.UserProfile) },
             };
-            var gitconfig = new Git.Configuration.Impl(configs);
+            var gitconfig = new Git.Configuration(configs);
             var targetUri = new Authentication.TargetUri("https://example.visualstudio.com/");
 
-            var opargsMock = new Mock<OperationArguments>(MockBehavior.Strict);
+            var opargsMock = new Mock<OperationArguments>();
             opargsMock.Setup(r => r.EnvironmentVariables)
                       .Returns(envvars);
             opargsMock.Setup(r => r.GitConfiguration)
                       .Returns(gitconfig);
-            opargsMock.Setup(r => r.LoadConfiguration());
             opargsMock.Setup(r => r.TargetUri)
                       .Returns(targetUri);
             opargsMock.Setup(r => r.QueryUri)
                       .Returns(targetUri);
-            opargsMock.SetupProperty(r => r.UseHttpPath);
-            opargsMock.SetupProperty(r => r.ValidateCredentials);
+            opargsMock.SetupProperty(o => o.UseHttpPath);
+            opargsMock.SetupProperty(o => o.ValidateCredentials);
 
             var opargs = opargsMock.Object;
 
@@ -190,7 +189,7 @@ namespace Microsoft.Alm.Cli.Test
             if (!setupComplete)
                 return;
 
-            var gitconfig = new Git.Configuration.Impl(configs);
+            var gitconfig = new Git.Configuration(configs);
             var targetUri = new Authentication.TargetUri("https://example.visualstudio.com/");
 
             var opargsMock = new Mock<OperationArguments>();
@@ -198,7 +197,6 @@ namespace Microsoft.Alm.Cli.Test
                       .Returns(envvars);
             opargsMock.Setup(v => v.GitConfiguration)
                       .Returns(gitconfig);
-            opargsMock.Setup(v => v.LoadConfiguration());
             opargsMock.Setup(v => v.TargetUri)
                       .Returns(targetUri);
             opargsMock.Setup(v => v.QueryUri)
