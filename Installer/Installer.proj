@@ -61,23 +61,52 @@
   <ItemGroup>
     <FilesToSign Include="$(SigningTarget)">
       <Authenticode>Microsoft</Authenticode>
+      <InProject>false</InProject>
     </FilesToSign>
   </ItemGroup>
   <ItemGroup>
-    <ZipContents Include="$(IntermediateOutputPath)\Bitbucket.Authentication.dll" />
-    <ZipContents Include="$(IntermediateOutputPath)\git-askpass.exe" />
-    <ZipContents Include="$(IntermediateOutputPath)\git-askpass.html" />
-    <ZipContents Include="$(IntermediateOutputPath)\git-credential-manager.exe" />
-    <ZipContents Include="$(IntermediateOutputPath)\git-credential-manager.html" />
-    <ZipContents Include="$(IntermediateOutputPath)\GitHub.Authentication.exe" />
-    <ZipContents Include="$(ProjectDir)\install.cmd" />
-    <ZipContents Include="$(SolutionDir)\LICENSE.TXT" />
-    <ZipContents Include="$(IntermediateOutputPath)\Microsoft.Alm.Authentication.dll" />
-    <ZipContents Include="$(IntermediateOutputPath)\Microsoft.Alm.Git.dll" />
-    <ZipContents Include="$(IntermediateOutputPath)\Microsoft.IdentityModel.Clients.ActiveDirectory.dll" />
-    <ZipContents Include="$(IntermediateOutputPath)\Microsoft.IdentityModel.Clients.ActiveDirectory.Platform.dll" />
-    <ZipContents Include="$(IntermediateOutputPath)\Microsoft.Vsts.Authentication.dll" />
-    <ZipContents Include="$(SolutionDir)\README.md" />
+    <ZipContents Include="$(IntermediateOutputPath)\Bitbucket.Authentication.dll">
+      <InProject>false</InProject>
+    </ZipContents>
+    <ZipContents Include="$(IntermediateOutputPath)\git-askpass.exe">
+      <InProject>false</InProject>
+    </ZipContents>
+    <ZipContents Include="$(IntermediateOutputPath)\git-askpass.html">
+      <InProject>false</InProject>
+    </ZipContents>
+    <ZipContents Include="$(IntermediateOutputPath)\git-credential-manager.exe">
+      <InProject>false</InProject>
+    </ZipContents>
+    <ZipContents Include="$(IntermediateOutputPath)\git-credential-manager.html">
+      <InProject>false</InProject>
+    </ZipContents>
+    <ZipContents Include="$(IntermediateOutputPath)\GitHub.Authentication.exe">
+      <InProject>false</InProject>
+    </ZipContents>
+    <ZipContents Include="$(ProjectDir)\install.cmd">
+      <InProject>false</InProject>
+    </ZipContents>
+    <ZipContents Include="$(SolutionDir)\LICENSE.TXT">
+      <InProject>false</InProject>
+    </ZipContents>
+    <ZipContents Include="$(IntermediateOutputPath)\Microsoft.Alm.Authentication.dll">
+      <InProject>false</InProject>
+    </ZipContents>
+    <ZipContents Include="$(IntermediateOutputPath)\Microsoft.Alm.Git.dll">
+      <InProject>false</InProject>
+    </ZipContents>
+    <ZipContents Include="$(IntermediateOutputPath)\Microsoft.IdentityModel.Clients.ActiveDirectory.dll">
+      <InProject>false</InProject>
+    </ZipContents>
+    <ZipContents Include="$(IntermediateOutputPath)\Microsoft.IdentityModel.Clients.ActiveDirectory.Platform.dll">
+      <InProject>false</InProject>
+    </ZipContents>
+    <ZipContents Include="$(IntermediateOutputPath)\Microsoft.Vsts.Authentication.dll">
+      <InProject>false</InProject>
+    </ZipContents>
+    <ZipContents Include="$(SolutionDir)\README.md">
+      <InProject>false</InProject>
+    </ZipContents>
   </ItemGroup>
   <Target Name="AfterBuild" AfterTargets="Build" />
   <Target Name="Build" BeforeTargets="AfterBuild">
@@ -85,10 +114,18 @@
 
     <!-- need to declare the items after dependencies have built, so that glob enumeration happens after the files are produced-->
     <ItemGroup>
-      <FilesToCopy Include="$(SolutionDir)\Cli-CredentialHelper\$(InputPath)\*.*" />
-      <FilesToCopy Include="$(SolutionDir)\Cli-Askpass\$(InputPath)\git-askpass.exe" />
-      <FilesToCopy Include="$(SolutionDir)\LICENSE.TXT" />
-      <FilesToCopy Include="$(SolutionDir)\README.md" />
+      <FilesToCopy Include="$(SolutionDir)\Cli-CredentialHelper\$(InputPath)\*.*">
+        <InProject>false</InProject>
+      </FilesToCopy>
+      <FilesToCopy Include="$(SolutionDir)\Cli-Askpass\$(InputPath)\git-askpass.exe">
+        <InProject>false</InProject>
+      </FilesToCopy>
+      <FilesToCopy Include="$(SolutionDir)\LICENSE.TXT">
+        <InProject>false</InProject>
+      </FilesToCopy>
+      <FilesToCopy Include="$(SolutionDir)\README.md">
+        <InProject>false</InProject>
+      </FilesToCopy>
       <FilesToCopy Include="$(ProjectDir)\Setup.iss" />
     </ItemGroup>
 
