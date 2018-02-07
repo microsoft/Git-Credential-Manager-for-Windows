@@ -787,7 +787,7 @@ namespace Microsoft.Alm.Cli
                 throw new ArgumentNullException(nameof(operationArguments));
 
             if (program.ConfigurationKeys.TryGetValue(key, out string configKey)
-                | program.ConfigurationKeys.TryGetValue(key, out string environKey))
+                | program.EnvironmentKeys.TryGetValue(key, out string environKey))
             {
                 var envars = operationArguments.EnvironmentVariables;
 
