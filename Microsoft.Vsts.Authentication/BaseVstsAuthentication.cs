@@ -105,10 +105,31 @@ namespace Microsoft.Alm.Authentication
         {
             BaseSecureStore.ValidateTargetUri(targetUri);
 
-            if (PersonalAccessTokenStore.ReadCredentials(targetUri) != null)
+            Credential credentials = PersonalAccessTokenStore.ReadCredentials(targetUri);
+
+            // This ought to be async, but the base type's method isn't.
+            Task.Run(async () =>
             {
-                PersonalAccessTokenStore.DeleteCredentials(targetUri);
-            }
+                // Attempt to validate the credentials, if they're truly invalid delete them.
+                if (!await ValidateCredentials(targetUri, credentials))
+                {
+                    PersonalAccessTokenStore.DeleteCredentials(targetUri);
+
+                    // Remove any related entries from the tenant cache because tenant change
+                    // could the be source of the invalidation, and not purging the cache will
+                    // trap the user in a limbo state of invalid credentials.
+                    
+                    // Deserialize the cache and remove any matching entry.
+                    string tenantUrl = targetUri.ToString();
+                    var cache = await DeserializeTenantCache();
+
+                    // Attempt to remove the URL entry, if successful serialize the cache.
+                    if (cache.Remove(tenantUrl))
+                    {
+                        await SerializeTenantCache(cache);
+                    }
+                }
+            }).Wait();
         }
 
         /// <summary>
