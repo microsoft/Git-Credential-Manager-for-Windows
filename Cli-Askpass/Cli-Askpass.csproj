@@ -86,7 +86,9 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="app.config" />
-    <None Include="packages.config" />
+    <None Include="packages.config">
+      <InProject>false</InProject>
+    </None>
   </ItemGroup>
   <ItemGroup>
     <Page Include="UserPromptDialog.xaml">
@@ -108,6 +110,7 @@
   <ItemGroup>
     <FilesToSign Include="$(SigningTarget)">
       <Authenticode>Microsoft</Authenticode>
+      <InProject>false</InProject>
     </FilesToSign>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

@@ -39,11 +39,14 @@
     <Compile Include="Where.cs" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="packages.config" />
+    <None Include="packages.config">
+      <InProject>false</InProject>
+    </None>
   </ItemGroup>
   <ItemGroup>
     <FilesToSign Include="$(SigningTarget)">
       <Authenticode>Microsoft</Authenticode>
+      <InProject>false</InProject>
     </FilesToSign>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
