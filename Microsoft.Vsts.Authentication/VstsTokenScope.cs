@@ -23,7 +23,9 @@
  * WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE."
 **/
 
+using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Runtime.CompilerServices;
 using ScopeSet = System.Collections.Generic.HashSet<string>;
 
@@ -61,14 +63,14 @@ namespace Microsoft.Alm.Authentication
 
         /// <summary>
         /// Grants the ability to read, update, and delete source code, access metadata about
-        /// commits, changesets, branches, and other version control artifacts. Also grants the
+        /// commits, change-sets, branches, and other version control artifacts. Also grants the
         /// ability to create and manage code repositories, create and manage pull requests and code
         /// reviews, and to receive notifications about version control events via service hooks.
         /// </summary>
         public static readonly VstsTokenScope CodeManage = new VstsTokenScope("vso.code_manage");
 
         /// <summary>
-        /// Grants the ability to read source code and metadata about commits, changesets, branches,
+        /// Grants the ability to read source code and metadata about commits, change-sets, branches,
         /// and other version control artifacts. Also grants the ability to get notified about
         /// version control events via service hooks.
         /// </summary>
@@ -76,7 +78,7 @@ namespace Microsoft.Alm.Authentication
 
         /// <summary>
         /// Grants the ability to read, update, and delete source code, access metadata about
-        /// commits, changesets, branches, and other version control artifacts. Also grants the
+        /// commits, change-sets, branches, and other version control artifacts. Also grants the
         /// ability to create and manage pull requests and code reviews and to receive notifications
         /// about version control events via service hooks.
         /// </summary>
@@ -175,6 +177,13 @@ namespace Microsoft.Alm.Authentication
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Design", "CA1011:ConsiderPassingBaseTypesAsParameters")]
         public bool Equals(VstsTokenScope other)
             => TokenScope.Equals(this as TokenScope, other as TokenScope);
+
+        public static bool Find(string value, out VstsTokenScope vstsScope)
+        {
+            vstsScope = EnumerateValues().FirstOrDefault(v => StringComparer.OrdinalIgnoreCase.Equals(v.Value, value));
+
+            return vstsScope != null;
+        }
 
         public override int GetHashCode()
             => TokenScope.GetHashCode(this as TokenScope);
