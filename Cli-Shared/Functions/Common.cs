@@ -486,9 +486,19 @@ namespace Microsoft.Alm.Cli
 
                 operationArguments.SetProxy(value);
             }
+            // Check environment variables just-in-case.
+            else if ((operationArguments.EnvironmentVariables.TryGetValue(Program.EnvironGitHttpsProxyKey, out value)
+                    && !string.IsNullOrWhiteSpace(value))
+                || (operationArguments.EnvironmentVariables.TryGetValue(Program.EnvironGitHttpProxyKey, out value)
+                    && !string.IsNullOrWhiteSpace(value)))
+            {
+                Git.Trace.WriteLine($"http.proxy = '{value}'.");
+
+                operationArguments.SetProxy(value);
+            }
+            // Check the git-config http.proxy setting just-in-case.
             else
             {
-                // Check the git-config http.proxy setting just-in-case.
                 Configuration.Entry entry;
                 if (operationArguments.GitConfiguration.TryGetEntry("http", operationArguments.QueryUri, "proxy", out entry)
                     && !string.IsNullOrWhiteSpace(entry.Value))
