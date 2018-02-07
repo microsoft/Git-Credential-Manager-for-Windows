@@ -67,6 +67,8 @@ namespace Microsoft.Alm.Cli
         internal const string EnvironPreserveCredentialsKey = "GCM_PRESERVE_CREDS";
         internal const string EnvironValidateKey = "GCM_VALIDATE";
         internal const string EnvironWritelogKey = "GCM_WRITELOG";
+        internal const string EnvironGitHttpProxyKey = "HTTP_PROXY";
+        internal const string EnvironGitHttpsProxyKey = "HTTPS_PROXY";
 
         internal const string EnvironConfigTraceKey = Git.Trace.EnvironmentVariableKey;
 
