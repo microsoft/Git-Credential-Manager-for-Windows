@@ -9,9 +9,13 @@ namespace Microsoft.Alm.Authentication.Test
         public AuthorityFake(string expectedQueryParameters)
         {
             ExpectedQueryParameters = expectedQueryParameters;
+
+            CredentialsAreValid = true;
         }
 
         internal readonly string ExpectedQueryParameters;
+
+        public bool CredentialsAreValid { get; set; }
 
         /// <summary>
         /// Generates a personal access token for use with Visual Studio Team Services.
@@ -77,7 +81,7 @@ namespace Microsoft.Alm.Authentication.Test
                 try
                 {
                     BaseSecureStore.ValidateCredential(credentials);
-                    return true;
+                    return CredentialsAreValid;
                 }
                 catch { }
                 return false;

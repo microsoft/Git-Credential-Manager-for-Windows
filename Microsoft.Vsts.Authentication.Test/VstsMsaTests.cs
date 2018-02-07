@@ -15,6 +15,11 @@ namespace Microsoft.Alm.Authentication.Test
             TargetUri targetUri = DefaultTargetUri;
             VstsMsaAuthentication msaAuthority = GetVstsMsaAuthentication("msa-delete");
 
+            if (msaAuthority.VstsAuthority is AuthorityFake fake)
+            {
+                fake.CredentialsAreValid = false;
+            }
+
             msaAuthority.PersonalAccessTokenStore.WriteCredentials(targetUri, DefaultPersonalAccessToken);
 
             msaAuthority.DeleteCredentials(targetUri);
