@@ -15,6 +15,11 @@ namespace Microsoft.Alm.Authentication.Test
             TargetUri targetUri = DefaultTargetUri;
             VstsAadAuthentication aadAuthentication = GetVstsAadAuthentication("aad-delete");
 
+            if (aadAuthentication.VstsAuthority is AuthorityFake fake)
+            {
+                fake.CredentialsAreValid = false;
+            }
+
             aadAuthentication.PersonalAccessTokenStore.WriteCredentials(targetUri, DefaultPersonalAccessToken);
 
             aadAuthentication.DeleteCredentials(targetUri);
