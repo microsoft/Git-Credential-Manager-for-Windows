@@ -138,7 +138,7 @@ namespace Microsoft.Alm.Cli
                     }
 
                     // Return the allocated authority or a generic AAD backed VSTS authentication object.
-                    return authority ?? new VstsAadAuthentication(tenantId, Program.VstsCredentialScope, secrets);
+                    return authority ?? new VstsAadAuthentication(tenantId, operationArguments.VstsTokenScope, secrets);
 
                 case AuthorityType.Basic:
                     // Enforce basic authentication only.
