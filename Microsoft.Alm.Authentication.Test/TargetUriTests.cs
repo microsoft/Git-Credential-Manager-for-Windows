@@ -25,7 +25,7 @@ namespace Microsoft.Alm.Authentication.Test
         }
 
         [Theory]
-        [MemberData(nameof(UrlData))]
+        [MemberData(nameof(UrlData), DisableDiscoveryEnumeration = true)]
         public void TargetUri_Basics(string actualUrl, string queryUrl, string proxyUrl)
         {
             TargetUri targetUri;
@@ -89,7 +89,7 @@ namespace Microsoft.Alm.Authentication.Test
         }
 
         [Theory]
-        [MemberData(nameof(UrlData))]
+        [MemberData(nameof(UrlData), DisableDiscoveryEnumeration = true)]
         public void TargetUri_WebProxy(string actualUrl, string queryUrl, string proxyUrl)
         {
             var targetUri = new TargetUri(actualUrl, queryUrl, proxyUrl);
@@ -108,7 +108,7 @@ namespace Microsoft.Alm.Authentication.Test
         }
 
         [Theory]
-        [MemberData(nameof(UrlData))]
+        [MemberData(nameof(UrlData), DisableDiscoveryEnumeration = true)]
         public void TargetUri_HttpClientHandler(string actualUrl, string queryUrl, string proxyUrl)
         {
             var targetUri = new TargetUri(actualUrl, queryUrl, proxyUrl);

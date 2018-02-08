@@ -59,7 +59,7 @@ namespace Microsoft.Alm.Authentication.Test
         }
 
         [Theory]
-        [MemberData(nameof(CredentialData))]
+        [MemberData(nameof(CredentialData), DisableDiscoveryEnumeration = true)]
         public void Credential_WriteDelete(bool useCache, string url, string username, string password, bool throws)
         {
             Action action = () =>
@@ -94,7 +94,7 @@ namespace Microsoft.Alm.Authentication.Test
         }
 
         [Theory]
-        [MemberData(nameof(UriToNameData))]
+        [MemberData(nameof(UriToNameData), DisableDiscoveryEnumeration = true)]
         public void UriToName(string original, string expected)
         {
             var uri = new Uri(original);
