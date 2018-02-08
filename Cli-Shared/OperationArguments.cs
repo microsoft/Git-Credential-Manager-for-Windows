@@ -38,7 +38,7 @@ namespace Microsoft.Alm.Cli
         public OperationArguments(Stream readableStream)
                 : this()
         {
-            if (ReferenceEquals(readableStream, null))
+            if (readableStream is null)
                 throw new ArgumentNullException(nameof(readableStream));
 
             if (readableStream == Stream.Null || !readableStream.CanRead)
@@ -123,7 +123,7 @@ namespace Microsoft.Alm.Cli
         public OperationArguments(Uri targetUri)
             : this()
         {
-            if (ReferenceEquals(targetUri, null))
+            if (targetUri is null)
                 throw new ArgumentNullException("targetUri");
 
             _queryProtocol = targetUri.Scheme;
@@ -446,7 +446,7 @@ namespace Microsoft.Alm.Cli
         /// <param name="writableStream">The <see cref="Stream"/> to write to.</param>
         public virtual void WriteToStream(Stream writableStream)
         {
-            if (ReferenceEquals(writableStream, null))
+            if (writableStream is null)
                 throw new ArgumentNullException(nameof(writableStream));
             if (!writableStream.CanWrite)
                 throw new ArgumentException("CanWrite property returned false.", nameof(writableStream));
