@@ -27,7 +27,7 @@ namespace Microsoft.Alm.Git.Test
         }
 
         [Theory]
-        [MemberData(nameof(FindAppData))]
+        [MemberData(nameof(FindAppData), DisableDiscoveryEnumeration = true)]
         public void Where_FindApp(string app)
         {
             string path1;

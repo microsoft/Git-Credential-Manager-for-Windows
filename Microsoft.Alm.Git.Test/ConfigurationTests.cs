@@ -23,7 +23,7 @@ namespace Microsoft.Alm.Git.Test
         }
 
         [Theory]
-        [MemberData(nameof(ParseData))]
+        [MemberData(nameof(ParseData), DisableDiscoveryEnumeration = true)]
         public void GitConfif_Parse(string input, string expectedName, string expected, bool ignoreCase)
         {
             var values = TestParseGitConfig(input);
