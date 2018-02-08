@@ -164,7 +164,7 @@ namespace Microsoft.Alm.Cli.Test
                 _exit = (Program caller, int e, string m, string path, int line, string name) => Assert.False(true, $"Error: {e} {m}")
             };
 
-            Assert.True(program.EnvironmentKeys.ContainsKey(key));
+            Assert.NotEqual("UNKNOWN", program.KeyTypeName(key), StringComparer.Ordinal);
 
             var configs = new Dictionary<Git.ConfigurationLevel, Dictionary<string, string>>
             {
@@ -258,7 +258,7 @@ namespace Microsoft.Alm.Cli.Test
                 _exit = (Program caller, int e, string m, string path, int line, string name) => Assert.False(true, $"Error: {e} {m}")
             };
 
-            Assert.True(program.EnvironmentKeys.ContainsKey(key));
+            Assert.NotEqual("UNKNOWN", program.KeyTypeName(key), StringComparer.Ordinal);
 
             var configs = new Dictionary<Git.ConfigurationLevel, Dictionary<string, string>>
             {
