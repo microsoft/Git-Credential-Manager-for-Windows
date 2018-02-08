@@ -47,9 +47,9 @@ namespace Microsoft.Alm.Authentication
 
         protected BaseVstsAuthentication(VstsTokenScope tokenScope, ICredentialStore personalAccessTokenStore)
         {
-            if (ReferenceEquals(tokenScope, null))
+            if (tokenScope is null)
                 throw new ArgumentNullException(nameof(tokenScope));
-            if (ReferenceEquals(personalAccessTokenStore, null))
+            if (personalAccessTokenStore is null)
                 throw new ArgumentNullException(nameof(personalAccessTokenStore));
 
             ClientId = DefaultClientId;
@@ -65,9 +65,9 @@ namespace Microsoft.Alm.Authentication
             IVstsAuthority vstsAuthority)
             : this(VstsTokenScope.ProfileRead, personalAccessTokenStore)
         {
-            if (ReferenceEquals(vstsIdeTokenCache, null))
+            if (vstsIdeTokenCache is null)
                 throw new ArgumentNullException(nameof(vstsIdeTokenCache));
-            if (ReferenceEquals(vstsAuthority, null))
+            if (vstsAuthority is null)
                 throw new ArgumentNullException(nameof(vstsAuthority));
 
             VstsIdeTokenCache = vstsIdeTokenCache;
@@ -90,8 +90,8 @@ namespace Microsoft.Alm.Authentication
         /// </summary>
         public readonly VstsTokenScope TokenScope;
 
-        internal readonly TokenCache VstsAdalTokenCache;
-        internal readonly ITokenStore VstsIdeTokenCache;
+        internal TokenCache VstsAdalTokenCache { get; private set; }
+        internal ITokenStore VstsIdeTokenCache{ get; private set; }
 
         internal ICredentialStore PersonalAccessTokenStore { get; set; }
         internal IVstsAuthority VstsAuthority { get; set; }
@@ -370,7 +370,7 @@ namespace Microsoft.Alm.Authentication
         {
             BaseSecureStore.ValidateTargetUri(targetUri);
 
-            if (ReferenceEquals(accessToken, null))
+            if (accessToken is null)
                 throw new ArgumentNullException(nameof(accessToken));
 
             Credential credential = null;
