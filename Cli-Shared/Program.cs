@@ -49,6 +49,7 @@ namespace Microsoft.Alm.Cli
         Namespace,
         PreserveCredentials,
         TokenDuration,
+        Username,
         Validate,
         VstsScope,
         Writelog,
@@ -103,7 +104,6 @@ namespace Microsoft.Alm.Cli
         internal readonly Dictionary<KeyType, string> _configurationKeys = new Dictionary<KeyType, string>()
         {
             { KeyType.Authority,  "authority" },
-            { KeyType.HttpPath,  "useHttpPath" },
             { KeyType.HttpProxy,  "httpProxy" },
             { KeyType.HttpsProxy,  "httpsProxy" },
             { KeyType.Interactive,  "interactive" },
@@ -111,16 +111,17 @@ namespace Microsoft.Alm.Cli
             { KeyType.Namespace,  "namespace" },
             { KeyType.PreserveCredentials,  "preserve" },
             { KeyType.TokenDuration,  "tokenDuration" },
+            { KeyType.HttpPath,  "useHttpPath" },
+            { KeyType.Username,  "username" },
             { KeyType.Validate,  "validate" },
             { KeyType.VstsScope, "vstsScope" },
-            { KeyType.Writelog,  "writelog" },
+            { KeyType.Writelog,  "writeLog" },
         };
         internal readonly Dictionary<KeyType, string> _environmentKeys = new Dictionary<KeyType, string>()
         {
             { KeyType.Authority, "GCM_AUTHORITY" },
             { KeyType.ConfigNoLocal, "GCM_CONFIG_NOLOCAL" },
             { KeyType.ConfigNoSystem, "GCM_CONFIG_NOSYSTEM" },
-            { KeyType.HttpPath, "GCM_USE_HTTP_PATH" },
             { KeyType.HttpProxy, "HTTP_PROXY" },
             { KeyType.HttpsProxy, "HTTPS_PROXY" },
             { KeyType.HttpUserAgent, "GCM_HTTP_USER_AGENT" },

@@ -182,6 +182,7 @@ namespace Microsoft.Alm.Cli
         public virtual string CredUsername
         {
             get { return _username; }
+            set { _username = value; }
         }
 
         public virtual string CustomNamespace

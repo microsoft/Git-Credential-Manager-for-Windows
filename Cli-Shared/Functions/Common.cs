@@ -553,7 +553,7 @@ namespace Microsoft.Alm.Cli
                 }
             }
 
-            // Look for custom VSTS scope settings
+            // Look for custom VSTS scope settings.
             if (program.TryReadString(operationArguments, KeyType.VstsScope, out value))
             {
                 Git.Trace.WriteLine($"{program.KeyTypeName(KeyType.VstsScope)} = '{value}'.");
@@ -576,6 +576,14 @@ namespace Microsoft.Alm.Cli
                 }
 
                 operationArguments.VstsTokenScope = vstsTokenScope;
+            }
+
+            // Check for configuration supplied user-info.
+            if (program.TryReadString(operationArguments, KeyType.Username, out value))
+            {
+                Git.Trace.WriteLine($"{program.KeyTypeName(KeyType.Username)} = '{value}'.");
+
+                operationArguments.CredUsername = value;
             }
         }
 
