@@ -472,6 +472,20 @@ namespace Microsoft.Alm.Cli
 
                 operationArguments.PreserveCredentials = yesno.Value;
             }
+            else if (operationArguments.EnvironmentVariables.TryGetValue("GCM_PRESERVE_CREDS", out value))
+            {
+                if (StringComparer.OrdinalIgnoreCase.Equals(value, "true")
+                    || StringComparer.OrdinalIgnoreCase.Equals(value, "yes")
+                    || StringComparer.OrdinalIgnoreCase.Equals(value, "1")
+                    || StringComparer.OrdinalIgnoreCase.Equals(value, "on"))
+                {
+                    Git.Trace.WriteLine($"GCM_PRESERVE_CREDS = '{yesno}'.");
+
+                    operationArguments.PreserveCredentials = true;
+
+                    Git.Trace.WriteLine($"WARNING: the 'GCM_PRESERVE_CREDS' variable has been deprecated, use '{ program.KeyTypeName(KeyType.PreserveCredentials) }' instead.");
+                }
+            }
 
             // Look for HTTP path usage config settings.
             if (program.TryReadBoolean(operationArguments, KeyType.HttpPath, out yesno))
