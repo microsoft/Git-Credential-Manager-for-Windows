@@ -31,33 +31,33 @@ namespace Microsoft.Alm.Cli
     internal enum AuthorityType
     {
         /// <summary>
-        /// Attempt to detect the authority automatically, fallback to <see cref="Basic"/> if unable
+        /// Attempt to detect the authority automatically, fallback to `<see cref="Basic"/>` if unable
         /// to detect an authority.
         /// </summary>
         Auto,
 
         /// <summary>
-        /// Basic username and password scheme
+        /// Basic username and password scheme.
         /// </summary>
         Basic,
 
         /// <summary>
-        /// Username and password scheme using Microsoft's Live system
+        /// Username and password scheme using Microsoft's Live system.
         /// </summary>
         MicrosoftAccount,
 
         /// <summary>
-        /// Azure Directory Authentication based, including support for ADFS
+        /// Azure Directory Authentication based, including support for ADFS.
         /// </summary>
         AzureDirectory,
 
         /// <summary>
-        /// GitHub authentication
+        /// GitHub authentication.
         /// </summary>
         GitHub,
 
         /// <summary>
-        /// Bitbucket authentication
+        /// Bitbucket authentication.
         /// </summary>
         Bitbucket,
 

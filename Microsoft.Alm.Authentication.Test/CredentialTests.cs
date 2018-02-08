@@ -21,7 +21,6 @@ namespace Microsoft.Alm.Authentication.Test
                     new object[] { false, "http://dummy.url/for/testing", "", "blank_usernames_are_legal", false },
                     new object[] { false, "http://dummy.url/for/testing", "null_passwords_are_legal", null, false },
                     new object[] { false, "http://dummy.url/for/testing", "blank_passwords_are_legal", "", false },
-                    new object[] { false, "http://dummy.url/for/testing", "username", "password", false },
                     new object[] { false, "http://dummy.url:999/for/testing", "username", "password", false },
 
                     new object[] { true, "http://dummy.url/for/testing", "username", "password", false },
@@ -31,7 +30,6 @@ namespace Microsoft.Alm.Authentication.Test
                     new object[] { true, "http://dummy.url/for/testing", "", "blank_usernames_are_legal", false },
                     new object[] { true, "http://dummy.url/for/testing", "null_passwords_are_legal", null, false },
                     new object[] { true, "http://dummy.url/for/testing", "blank_passwords_are_legal", "", false },
-                    new object[] { true, "http://dummy.url/for/testing", "username", "password", false },
                     new object[] { true, "http://dummy.url:999/for/testing", "username", "password", false },
                 };
 
@@ -61,7 +59,7 @@ namespace Microsoft.Alm.Authentication.Test
         }
 
         [Theory]
-        [MemberData(nameof(CredentialData))]
+        [MemberData(nameof(CredentialData), DisableDiscoveryEnumeration = true)]
         public void Credential_WriteDelete(bool useCache, string url, string username, string password, bool throws)
         {
             Action action = () =>
@@ -96,7 +94,7 @@ namespace Microsoft.Alm.Authentication.Test
         }
 
         [Theory]
-        [MemberData(nameof(UriToNameData))]
+        [MemberData(nameof(UriToNameData), DisableDiscoveryEnumeration = true)]
         public void UriToName(string original, string expected)
         {
             var uri = new Uri(original);

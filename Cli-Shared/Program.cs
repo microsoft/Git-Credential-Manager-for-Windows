@@ -24,6 +24,7 @@
 **/
 
 using System;
+using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Runtime.CompilerServices;
@@ -34,41 +35,34 @@ using Github = GitHub.Authentication;
 
 namespace Microsoft.Alm.Cli
 {
+    enum KeyType
+    {
+        Authority,
+        ConfigNoLocal,
+        ConfigNoSystem,
+        GcmProxy,
+        HttpPath,
+        HttpProxy,
+        HttpsProxy,
+        HttpUserAgent,
+        Interactive,
+        LoginHint,
+        ModalPrompt,
+        Namespace,
+        PreserveCredentials,
+        TokenDuration,
+        Validate,
+        VstsScope,
+        Writelog,
+    }
+
     partial class Program
     {
         public const string SourceUrl = "https://github.com/Microsoft/Git-Credential-Manager-for-Windows";
         public const string EventSource = "Git Credential Manager";
 
-        internal const string ConfigAuthorityKey = "authority";
-        internal const string ConfigHttpProxyKey = "httpProxy";
-        internal const string ConfigInteractiveKey = "interactive";
-        internal const string ConfigLoginHintKey = "loginhint";
-        internal const string ConfigNamespaceKey = "namespace";
-        internal const string ConfigPreserveCredentialsKey = "preserve";
-        internal const string ConfigTokenDuration = "tokenDuration";
-        internal const string ConfigUseHttpPathKey = "useHttpPath";
-        internal const string ConfigUseModalPromptKey = "modalPrompt";
-        internal const string ConfigValidateKey = "validate";
-        internal const string ConfigWritelogKey = "writelog";
-
         internal static readonly StringComparer ConfigKeyComparer = StringComparer.OrdinalIgnoreCase;
         internal static readonly StringComparer ConfigValueComparer = StringComparer.OrdinalIgnoreCase;
-
-        internal const string EnvironAuthorityKey = "GCM_AUTHORITY";
-        internal const string EnvironConfigNoLocalKey = "GCM_CONFIG_NOLOCAL";
-        internal const string EnvironConfigNoSystemKey = "GCM_CONFIG_NOSYSTEM";
-        internal const string EnvironHttpProxyKey = "GCM_HTTP_PROXY";
-        internal const string EnvironHttpUserAgent = "GCM_HTTP_USER_AGENT";
-        internal const string EnvironInteractiveKey = "GCM_INTERACTIVE";
-        internal const string EnvironLoginHintKey = "GCM_LOGINHINT";
-        internal const string EnvironModalPromptKey = "GCM_MODAL_PROMPT";
-        internal const string EnvironNamespaceKey = "GCM_NAMESPACE";
-        internal const string EnvironTokenDuration = "GCM_TOKEN_DURATION";
-        internal const string EnvironPreserveCredentialsKey = "GCM_PRESERVE_CREDS";
-        internal const string EnvironValidateKey = "GCM_VALIDATE";
-        internal const string EnvironWritelogKey = "GCM_WRITELOG";
-        internal const string EnvironGitHttpProxyKey = "HTTP_PROXY";
-        internal const string EnvironGitHttpsProxyKey = "HTTPS_PROXY";
 
         internal const string EnvironConfigTraceKey = Git.Trace.EnvironmentVariableKey;
 
@@ -108,11 +102,54 @@ namespace Microsoft.Alm.Cli
         internal WriteDelegate _write = ConsoleFunctions.Write;
         internal WriteLineDelegate _writeLine = ConsoleFunctions.WriteLine;
 
+        internal readonly Dictionary<KeyType, string> _configurationKeys = new Dictionary<KeyType, string>()
+        {
+            { KeyType.Authority,  "authority" },
+            { KeyType.HttpPath,  "useHttpPath" },
+            { KeyType.HttpProxy,  "httpProxy" },
+            { KeyType.HttpsProxy,  "httpsProxy" },
+            { KeyType.Interactive,  "interactive" },
+            { KeyType.LoginHint,  "loginhint" },
+            { KeyType.ModalPrompt,  "modalPrompt" },
+            { KeyType.Namespace,  "namespace" },
+            { KeyType.PreserveCredentials,  "preserve" },
+            { KeyType.TokenDuration,  "tokenDuration" },
+            { KeyType.Validate,  "validate" },
+            { KeyType.VstsScope, "vstsScope" },
+            { KeyType.Writelog,  "writelog" },
+        };
+        internal readonly Dictionary<KeyType, string> _environmentKeys = new Dictionary<KeyType, string>()
+        {
+            { KeyType.Authority, "GCM_AUTHORITY" },
+            { KeyType.ConfigNoLocal, "GCM_CONFIG_NOLOCAL" },
+            { KeyType.ConfigNoSystem, "GCM_CONFIG_NOSYSTEM" },
+            { KeyType.GcmProxy, "GCM_HTTP_PROXY" },
+            { KeyType.HttpPath, "GCM_USE_HTTP_PATH" },
+            { KeyType.HttpProxy, "HTTP_PROXY" },
+            { KeyType.HttpsProxy, "HTTPS_PROXY" },
+            { KeyType.HttpUserAgent, "GCM_HTTP_USER_AGENT" },
+            { KeyType.Interactive, "GCM_INTERACTIVE" },
+            { KeyType.LoginHint, "GCM_LOGINHINT" },
+            { KeyType.ModalPrompt, "GCM_MODAL_PROMPT" },
+            { KeyType.Namespace, "GCM_NAMESPACE" },
+            { KeyType.PreserveCredentials, "GCM_PRESERVE_CREDS" },
+            { KeyType.TokenDuration, "GCM_TOKEN_DURATION" },
+            { KeyType.Validate, "GCM_VALIDATE" },
+            { KeyType.VstsScope, "GCM_VSTS_SCOPE" },
+            { KeyType.Writelog, "GCM_WRITELOG" },
+        };
+
         private string _executablePath;
         private string _location;
         private string _name;
         private string _title;
         private Version _version;
+
+        public IReadOnlyDictionary<KeyType, string> ConfigurationKeys
+            => _configurationKeys;
+
+        public IReadOnlyDictionary<KeyType, string> EnvironmentKeys
+            => _environmentKeys;
 
         /// <summary>
         /// Gets the path to the executable.
@@ -291,6 +328,19 @@ namespace Microsoft.Alm.Cli
         internal bool BitbucketOAuthPrompt(string title, TargetUri targetUri, Bitbucket.AuthenticationResultType resultType, string username)
             => _bitbucketOauthPrompt(this, title, targetUri, resultType, username);
 
+        internal string KeyTypeName(KeyType type)
+        {
+            string value = "UNKNOWN";
+
+            if (!_configurationKeys.TryGetValue(type, out value)
+                && !_environmentKeys.TryGetValue(type, out value))
+            {
+                Git.Trace.WriteLine($"BUG: unknown {nameof(KeyType)}: '{type}' encountered.");
+            }
+
+            return value;
+        }
+
         internal bool GitHubAuthCodePrompt(TargetUri targetUri, Github.GitHubAuthenticationResultType resultType, string username, out string authenticationCode)
             => _gitHubAuthCodePrompt(this, targetUri, resultType, username, out authenticationCode);
 
@@ -367,10 +417,10 @@ namespace Microsoft.Alm.Cli
         private bool StandardHandleIsTty(NativeMethods.StandardHandleType handleType)
             => _standardHandleIsTty(this, handleType);
 
-        internal bool TryReadBoolean(OperationArguments operationArguments, string configKey, string environKey, out bool? value)
-            => _tryReadBoolean(this, operationArguments, configKey, environKey, out value);
+        internal bool TryReadBoolean(OperationArguments operationArguments, KeyType key, out bool? value)
+            => _tryReadBoolean(this, operationArguments, key, out value);
 
-        internal bool TryReadString(OperationArguments operationArguments, string configKey, string environKey, out string value)
-            => _tryReadString(this, operationArguments, configKey, environKey, out value);
+        internal bool TryReadString(OperationArguments operationArguments, KeyType key, out string value)
+            => _tryReadString(this, operationArguments, key, out value);
     }
 }

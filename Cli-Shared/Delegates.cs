@@ -86,9 +86,9 @@ namespace Microsoft.Alm.Cli
 
         internal delegate bool StandardHandleIsTtyDelegate(Program program, NativeMethods.StandardHandleType handleType);
 
-        internal delegate bool TryReadBooleanDelegate(Program program, OperationArguments operationArguments, string configKey, string environKey, out bool? value);
+        internal delegate bool TryReadBooleanDelegate(Program program, OperationArguments operationArguments, KeyType key, out bool? value);
 
-        internal delegate bool TryReadStringDelegate(Program program, OperationArguments operationArguments, string configKey, string environKey, out string value);
+        internal delegate bool TryReadStringDelegate(Program program, OperationArguments operationArguments, KeyType key, out string value);
 
         internal delegate void WriteDelegate(Program program, string message);
 

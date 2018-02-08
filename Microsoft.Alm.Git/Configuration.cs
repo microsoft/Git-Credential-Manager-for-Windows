@@ -32,13 +32,46 @@ using System.Text.RegularExpressions;
 
 namespace Microsoft.Alm.Git
 {
-    public abstract class Configuration : IEnumerable<Configuration.Entry>
+    public class Configuration : IEnumerable<Configuration.Entry>
     {
         private const char HostSplitCharacter = '.';
 
         private static readonly Regex CommentRegex = new Regex(@"^\s*[#;]", RegexOptions.CultureInvariant);
         private static readonly Regex KeyValueRegex = new Regex(@"^\s*(\w+)\s*=\s*(.+)", RegexOptions.CultureInvariant);
         private static readonly Regex SectionRegex = new Regex(@"^\s*\[\s*(\w+)\s*(\""[^\]]+){0,1}\]", RegexOptions.CultureInvariant);
+
+        internal Configuration()
+        { }
+
+        internal Configuration(Dictionary<ConfigurationLevel, Dictionary<string, string>> values)
+        {
+            if (values is null)
+                throw new ArgumentNullException(nameof(values));
+
+            _values = new Dictionary<ConfigurationLevel, Dictionary<string, string>>(values.Count);
+
+            // Copy the dictionary.
+            foreach (KeyValuePair<ConfigurationLevel, Dictionary<string, string>> level in values)
+            {
+                var levelValues = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
+
+                foreach (KeyValuePair<string, string> item in level.Value)
+                {
+                    levelValues.Add(item.Key, item.Value);
+                }
+
+                _values.Add(level.Key, levelValues);
+            }
+        }
+
+        private readonly Dictionary<ConfigurationLevel, Dictionary<string, string>> _values = new Dictionary<ConfigurationLevel, Dictionary<string, string>>()
+            {
+                { ConfigurationLevel.Global, new Dictionary<string, string>(Entry.KeyComparer) },
+                { ConfigurationLevel.Local, new Dictionary<string, string>(Entry.KeyComparer) },
+                { ConfigurationLevel.Portable, new Dictionary<string, string>(Entry.KeyComparer) },
+                { ConfigurationLevel.System, new Dictionary<string, string>(Entry.KeyComparer) },
+                { ConfigurationLevel.Xdg, new Dictionary<string, string>(Entry.KeyComparer) },
+            };
 
         /// <summary>
         /// Gets an enumeration of possible Git configuration levels.
@@ -55,36 +88,126 @@ namespace Microsoft.Alm.Git
             }
         }
 
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Design", "CA1065:DoNotRaiseExceptionsInUnexpectedLocations")]
         public virtual string this[string key]
         {
-            get => throw new NotImplementedException();
+            get
+            {
+                foreach (ConfigurationLevel level in Levels)
+                {
+                    if (_values[level].ContainsKey(key))
+                        return _values[level][key];
+                }
+
+                return null;
+            }
         }
 
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Design", "CA1065:DoNotRaiseExceptionsInUnexpectedLocations")]
         public virtual int Count
         {
-            get => throw new NotImplementedException();
+            get
+            {
+                return _values[ConfigurationLevel.Global].Count
+                     + _values[ConfigurationLevel.Local].Count
+                     + _values[ConfigurationLevel.Portable].Count
+                     + _values[ConfigurationLevel.System].Count
+                     + _values[ConfigurationLevel.Xdg].Count;
+            }
         }
 
         public virtual bool ContainsKey(string key)
-             => throw new NotImplementedException();
+        {
+            return ContainsKey(ConfigurationLevel.All, key);
+        }
 
         public virtual bool ContainsKey(ConfigurationLevel levels, string key)
-             => throw new NotImplementedException();
-
-        public virtual IEnumerator<Entry> EnumerateEntriesByLevel(ConfigurationLevel level)
         {
-            throw new NotImplementedException();
+            foreach (ConfigurationLevel level in Levels)
+            {
+                if ((level & levels) != 0
+                    && _values[level].ContainsKey(key))
+                    return true;
+            }
+
+            return false;
+        }
+
+        public virtual IEnumerator<Entry> EnumerateEntriesByLevel(ConfigurationLevel desiredLevels)
+        {
+            ConfigurationLevel[] levels = new[]
+            {
+                    ConfigurationLevel.Portable,
+                    ConfigurationLevel.System,
+                    ConfigurationLevel.Xdg,
+                    ConfigurationLevel.Global,
+                    ConfigurationLevel.Local,
+                };
+
+            foreach (ConfigurationLevel level in levels)
+            {
+                // Skip levels not present in the mask.
+                if ((desiredLevels & level) == 0)
+                    continue;
+
+                if (_values.TryGetValue(level, out Dictionary<string, string> values))
+                {
+                    foreach (KeyValuePair<string, string> value in values)
+                    {
+                        yield return new Entry(value.Key, value.Value, level);
+                    }
+                }
+            }
         }
 
         public virtual IEnumerator<Entry> GetEnumerator()
-        {
-            throw new NotImplementedException();
-        }
+            => EnumerateEntriesByLevel(ConfigurationLevel.All);
 
         public virtual void LoadGitConfiguration(string directory, ConfigurationLevel types)
-             => throw new NotImplementedException();
+        {
+            string portableConfig = null;
+            string systemConfig = null;
+            string xdgConfig = null;
+            string globalConfig = null;
+            string localConfig = null;
+
+            // Read Git's five configuration files from lowest priority to highest, overwriting values as higher priority configurations are parsed, storing them in a handy lookup table.
+
+            // Find and parse Git's portable configuration file.
+            if ((types & ConfigurationLevel.Portable) != 0
+                && Where.GitPortableConfig(out portableConfig))
+            {
+                ParseGitConfig(ConfigurationLevel.Portable, portableConfig);
+            }
+
+            // Find and parse Git's system configuration file.
+            if ((types & ConfigurationLevel.System) != 0
+                && Where.GitSystemConfig(null, out systemConfig))
+            {
+                ParseGitConfig(ConfigurationLevel.System, systemConfig);
+            }
+
+            // Find and parse Git's XDG configuration file.
+            if ((types & ConfigurationLevel.Xdg) != 0
+                && Where.GitXdgConfig(out xdgConfig))
+            {
+                ParseGitConfig(ConfigurationLevel.Xdg, xdgConfig);
+            }
+
+            // Find and parse Git's global configuration file.
+            if ((types & ConfigurationLevel.Global) != 0
+                && Where.GitGlobalConfig(out globalConfig))
+            {
+                ParseGitConfig(ConfigurationLevel.Global, globalConfig);
+            }
+
+            // Find and parse Git's local configuration file.
+            if ((types & ConfigurationLevel.Local) != 0
+                && Where.GitLocalConfig(directory, out localConfig))
+            {
+                ParseGitConfig(ConfigurationLevel.Local, localConfig);
+            }
+
+            Git.Trace.WriteLine($"git {types} config read, {Count} entries.");
+        }
 
         /// <summary>
         /// Reads in Git's configuration files, parses them, and combines them into a single database.
@@ -113,17 +236,76 @@ namespace Microsoft.Alm.Git
                 types ^= ConfigurationLevel.System;
             }
 
-            var config = new Impl();
+            var config = new Configuration();
             config.LoadGitConfiguration(directory, types);
 
             return config;
         }
 
         public virtual bool TryGetEntry(string prefix, string key, string suffix, out Entry entry)
-             => throw new NotImplementedException();
+        {
+            if (prefix is null)
+                throw new ArgumentNullException(nameof(prefix));
+            if (suffix is null)
+                throw new ArgumentNullException(nameof(suffix));
 
+            string match = string.IsNullOrEmpty(key)
+                ? string.Format(System.Globalization.CultureInfo.InvariantCulture, "{0}.{1}", prefix, suffix)
+                : string.Format(System.Globalization.CultureInfo.InvariantCulture, "{0}.{1}.{2}", prefix, key, suffix);
+
+            // If there's a match, return it.
+            if (ContainsKey(match))
+            {
+                foreach (ConfigurationLevel level in Levels)
+                {
+                    if (_values[level].ContainsKey(match))
+                    {
+                        entry = new Entry(key, _values[level][match], level);
+                        return true;
+                    }
+                }
+            }
+
+            // Nothing found.
+            entry = default(Entry);
+            return false;
+        }
         public virtual bool TryGetEntry(string prefix, Uri targetUri, string key, out Entry entry)
-             => throw new NotImplementedException();
+        {
+            if (key is null)
+                throw new ArgumentNullException(nameof(key));
+
+            if (targetUri != null)
+            {
+                // Return match seeking from most specific (<prefix>.<scheme>://<host>.<key>) to least specific (credential.<key>).
+                if (TryGetEntry(prefix, string.Format(System.Globalization.CultureInfo.InvariantCulture, "{0}://{1}", targetUri.Scheme, targetUri.Host), key, out entry)
+                    || TryGetEntry(prefix, targetUri.Host, key, out entry))
+                    return true;
+
+                if (!string.IsNullOrWhiteSpace(targetUri.Host))
+                {
+                    string[] fragments = targetUri.Host.Split(HostSplitCharacter);
+                    string host = null;
+
+                    // Look for host matches stripping a single sub-domain at a time off don't
+                    // match against a top-level domain (aka ".com").
+                    for (int i = 1; i < fragments.Length - 1; i++)
+                    {
+                        host = string.Join(".", fragments, i, fragments.Length - i);
+                        if (TryGetEntry(prefix, host, key, out entry))
+                            return true;
+                    }
+                }
+            }
+
+            // Try to find an unadorned match as a complete fallback.
+            if (TryGetEntry(prefix, string.Empty, key, out entry))
+                return true;
+
+            // Nothing found.
+            entry = default(Entry);
+            return false;
+        }
 
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Design", "CA1031:DoNotCatchGeneralExceptionTypes")]
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Maintainability", "CA1502:AvoidExcessiveComplexity")]
@@ -241,244 +423,21 @@ namespace Microsoft.Alm.Git
         IEnumerator IEnumerable.GetEnumerator()
             => GetEnumerator();
 
-        internal sealed class Impl : Configuration
+        private void ParseGitConfig(ConfigurationLevel level, string configPath)
         {
-            internal Impl()
-            { }
+            Debug.Assert(Enum.IsDefined(typeof(ConfigurationLevel), level), $"The `{nameof(level)}` parameter is not defined.");
+            Debug.Assert(!string.IsNullOrWhiteSpace(configPath), $"The `{nameof(configPath)}` parameter is null or invalid.");
+            Debug.Assert(File.Exists(configPath), $"The `{nameof(configPath)}` parameter references a non-existent file.");
 
-            internal Impl(Dictionary<ConfigurationLevel, Dictionary<string, string>> values)
+            if (!_values.ContainsKey(level))
+                return;
+            if (!File.Exists(configPath))
+                return;
+
+            using (FileStream stream = File.OpenRead(configPath))
+            using (var reader = new StreamReader(stream))
             {
-                if (values is null)
-                    throw new ArgumentNullException(nameof(values));
-
-                _values = new Dictionary<ConfigurationLevel, Dictionary<string, string>>(values.Count);
-
-                // Copy the dictionary.
-                foreach (KeyValuePair<ConfigurationLevel, Dictionary<string, string>> level in values)
-                {
-                    var levelValues = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
-
-                    foreach (KeyValuePair<string, string> item in level.Value)
-                    {
-                        levelValues.Add(item.Key, item.Value);
-                    }
-
-                    _values.Add(level.Key, levelValues);
-                }
-            }
-
-            private readonly Dictionary<ConfigurationLevel, Dictionary<string, string>> _values = new Dictionary<ConfigurationLevel, Dictionary<string, string>>()
-            {
-                { ConfigurationLevel.Global, new Dictionary<string, string>(Entry.KeyComparer) },
-                { ConfigurationLevel.Local, new Dictionary<string, string>(Entry.KeyComparer) },
-                { ConfigurationLevel.Portable, new Dictionary<string, string>(Entry.KeyComparer) },
-                { ConfigurationLevel.System, new Dictionary<string, string>(Entry.KeyComparer) },
-                { ConfigurationLevel.Xdg, new Dictionary<string, string>(Entry.KeyComparer) },
-            };
-
-            public sealed override string this[string key]
-            {
-                get
-                {
-                    foreach (ConfigurationLevel level in Levels)
-                    {
-                        if (_values[level].ContainsKey(key))
-                            return _values[level][key];
-                    }
-
-                    return null;
-                }
-            }
-
-            public sealed override int Count
-            {
-                get
-                {
-                    return _values[ConfigurationLevel.Global].Count
-                         + _values[ConfigurationLevel.Local].Count
-                         + _values[ConfigurationLevel.Portable].Count
-                         + _values[ConfigurationLevel.System].Count
-                         + _values[ConfigurationLevel.Xdg].Count;
-                }
-            }
-
-            public sealed override bool ContainsKey(string key)
-            {
-                return ContainsKey(ConfigurationLevel.All, key);
-            }
-
-            public sealed override bool ContainsKey(ConfigurationLevel levels, string key)
-            {
-                foreach (ConfigurationLevel level in Levels)
-                {
-                    if ((level & levels) != 0
-                        && _values[level].ContainsKey(key))
-                        return true;
-                }
-
-                return false;
-            }
-
-            public sealed override IEnumerator<Entry> EnumerateEntriesByLevel(ConfigurationLevel desiredLevels)
-            {
-                ConfigurationLevel[] levels = new[]
-                {
-                    ConfigurationLevel.Portable,
-                    ConfigurationLevel.System,
-                    ConfigurationLevel.Xdg,
-                    ConfigurationLevel.Global,
-                    ConfigurationLevel.Local,
-                };
-
-                foreach (ConfigurationLevel level in levels)
-                {
-                    // Skip levels not present in the mask.
-                    if ((desiredLevels & level) == 0)
-                        continue;
-
-                    if (_values.TryGetValue(level, out Dictionary<string, string> values))
-                    {
-                        foreach (KeyValuePair<string, string> value in values)
-                        {
-                            yield return new Entry(value.Key, value.Value, level);
-                        }
-                    }
-                }
-            }
-
-            public sealed override IEnumerator<Entry> GetEnumerator()
-                => EnumerateEntriesByLevel(ConfigurationLevel.All);
-
-            public sealed override bool TryGetEntry(string prefix, string key, string suffix, out Entry entry)
-            {
-                if (prefix is null)
-                    throw new ArgumentNullException(nameof(prefix));
-                if (suffix is null)
-                    throw new ArgumentNullException(nameof(suffix));
-
-                string match = string.IsNullOrEmpty(key)
-                    ? string.Format(System.Globalization.CultureInfo.InvariantCulture, "{0}.{1}", prefix, suffix)
-                    : string.Format(System.Globalization.CultureInfo.InvariantCulture, "{0}.{1}.{2}", prefix, key, suffix);
-
-                // If there's a match, return it.
-                if (ContainsKey(match))
-                {
-                    foreach (ConfigurationLevel level in Levels)
-                    {
-                        if (_values[level].ContainsKey(match))
-                        {
-                            entry = new Entry(key, _values[level][match], level);
-                            return true;
-                        }
-                    }
-                }
-
-                // Nothing found.
-                entry = default(Entry);
-                return false;
-            }
-
-            public sealed override bool TryGetEntry(string prefix, Uri targetUri, string key, out Entry entry)
-            {
-                if (key is null)
-                    throw new ArgumentNullException(nameof(key));
-
-                if (targetUri != null)
-                {
-                    // Return match seeking from most specific (<prefix>.<scheme>://<host>.<key>) to least specific (credential.<key>).
-                    if (TryGetEntry(prefix, string.Format(System.Globalization.CultureInfo.InvariantCulture, "{0}://{1}", targetUri.Scheme, targetUri.Host), key, out entry)
-                        || TryGetEntry(prefix, targetUri.Host, key, out entry))
-                        return true;
-
-                    if (!string.IsNullOrWhiteSpace(targetUri.Host))
-                    {
-                        string[] fragments = targetUri.Host.Split(HostSplitCharacter);
-                        string host = null;
-
-                        // Look for host matches stripping a single sub-domain at a time off don't
-                        // match against a top-level domain (aka ".com").
-                        for (int i = 1; i < fragments.Length - 1; i++)
-                        {
-                            host = string.Join(".", fragments, i, fragments.Length - i);
-                            if (TryGetEntry(prefix, host, key, out entry))
-                                return true;
-                        }
-                    }
-                }
-
-                // Try to find an unadorned match as a complete fallback.
-                if (TryGetEntry(prefix, string.Empty, key, out entry))
-                    return true;
-
-                // Nothing found.
-                entry = default(Entry);
-                return false;
-            }
-
-            public sealed override void LoadGitConfiguration(string directory, ConfigurationLevel types)
-            {
-                string portableConfig = null;
-                string systemConfig = null;
-                string xdgConfig = null;
-                string globalConfig = null;
-                string localConfig = null;
-
-                // Read Git's five configuration files from lowest priority to highest, overwriting values as higher priority configurations are parsed, storing them in a handy lookup table.
-
-                // Find and parse Git's portable configuration file.
-                if ((types & ConfigurationLevel.Portable) != 0
-                    && Where.GitPortableConfig(out portableConfig))
-                {
-                    ParseGitConfig(ConfigurationLevel.Portable, portableConfig);
-                }
-
-                // Find and parse Git's system configuration file.
-                if ((types & ConfigurationLevel.System) != 0
-                    && Where.GitSystemConfig(null, out systemConfig))
-                {
-                    ParseGitConfig(ConfigurationLevel.System, systemConfig);
-                }
-
-                // Find and parse Git's XDG configuration file.
-                if ((types & ConfigurationLevel.Xdg) != 0
-                    && Where.GitXdgConfig(out xdgConfig))
-                {
-                    ParseGitConfig(ConfigurationLevel.Xdg, xdgConfig);
-                }
-
-                // Find and parse Git's global configuration file.
-                if ((types & ConfigurationLevel.Global) != 0
-                    && Where.GitGlobalConfig(out globalConfig))
-                {
-                    ParseGitConfig(ConfigurationLevel.Global, globalConfig);
-                }
-
-                // Find and parse Git's local configuration file.
-                if ((types & ConfigurationLevel.Local) != 0
-                    && Where.GitLocalConfig(directory, out localConfig))
-                {
-                    ParseGitConfig(ConfigurationLevel.Local, localConfig);
-                }
-
-                Git.Trace.WriteLine($"git {types} config read, {Count} entries.");
-            }
-
-            private void ParseGitConfig(ConfigurationLevel level, string configPath)
-            {
-                Debug.Assert(Enum.IsDefined(typeof(ConfigurationLevel), level), $"The `{nameof(level)}` parameter is not defined.");
-                Debug.Assert(!string.IsNullOrWhiteSpace(configPath), $"The `{nameof(configPath)}` parameter is null or invalid.");
-                Debug.Assert(File.Exists(configPath), $"The `{nameof(configPath)}` parameter references a non-existent file.");
-
-                if (!_values.ContainsKey(level))
-                    return;
-                if (!File.Exists(configPath))
-                    return;
-
-                using (FileStream stream = File.OpenRead(configPath))
-                using (var reader = new StreamReader(stream))
-                {
-                    ParseGitConfig(reader, _values[level]);
-                }
+                ParseGitConfig(reader, _values[level]);
             }
         }
 
