@@ -51,7 +51,7 @@ namespace Atlassian.Bitbucket.Authentication
         /// <returns></returns>
         public static string GetUserFromTargetUri(TargetUri targetUri)
         {
-            var url = targetUri.ActualUri.AbsoluteUri;
+            var url = targetUri.QueryUri.AbsoluteUri;
             if (!url.Contains("@"))
             {
                 return null;

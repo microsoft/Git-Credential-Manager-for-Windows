@@ -100,7 +100,7 @@ namespace Microsoft.Alm.Authentication
         /// </summary>
         /// <param name="obj">The object to compare.</param>
         /// <returns>True is equal; false otherwise.</returns>
-        public override bool Equals(Object obj)
+        public override bool Equals(object obj)
         {
             return Equals(obj as Token);
         }

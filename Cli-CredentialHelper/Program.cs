@@ -263,11 +263,11 @@ namespace Microsoft.Alm.Cli
                         break;
 
                     case AuthorityType.Bitbucket:
-                        Git.Trace.WriteLine($"deleting Bitbucket credentials for '{operationArguments.CredUsername}@{operationArguments.TargetUri}'.");
+                        Git.Trace.WriteLine($"deleting Bitbucket credentials for '{operationArguments.Username}@{operationArguments.TargetUri}'.");
                         break;
                 }
 
-                authentication.DeleteCredentials(operationArguments.TargetUri, operationArguments.CredUsername);
+                authentication.DeleteCredentials(operationArguments.TargetUri, operationArguments.Username);
             }
 
             return;
@@ -389,13 +389,13 @@ namespace Microsoft.Alm.Cli
                 OperationArguments operationArguments = new OperationArguments(stdin);
 
                 Debug.Assert(operationArguments != null, "The operationArguments is null");
-                Debug.Assert(operationArguments.CredUsername != null, "The operaionArgument.Username is null");
+                Debug.Assert(operationArguments.Username != null, "The operaionArgument.Username is null");
                 Debug.Assert(operationArguments.TargetUri != null, "The operationArgument.TargetUri is null");
 
                 LoadOperationArguments(operationArguments);
                 EnableTraceLogging(operationArguments);
 
-                var credentials = new Credential(operationArguments.CredUsername, operationArguments.CredPassword);
+                var credentials = operationArguments.Credentials;
                 var task = Task.Run(async () => { return await CreateAuthentication(operationArguments); });
                 BaseAuthentication authentication = task.Result;
 

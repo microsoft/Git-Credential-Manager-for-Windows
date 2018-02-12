@@ -381,13 +381,13 @@ namespace Microsoft.Alm.Cli
 
         internal Credential ModalPromptForCredentials(TargetUri targetUri)
         {
-            string message = string.Format("Enter your credentials for {0}.", targetUri.ToString(port: true, path: true));
+            string message = string.Format("Enter your credentials for {0}.", targetUri.ToString(username:false, port: true, path: true));
 
-            if (!string.IsNullOrEmpty(targetUri.ActualUri.UserInfo))
+            if (!string.IsNullOrEmpty(targetUri.QueryUri.UserInfo))
             {
-                string username = targetUri.ActualUri.UserInfo;
+                string username = targetUri.QueryUri.UserInfo;
 
-                if (!targetUri.ActualUri.UserEscaped)
+                if (!targetUri.QueryUri.UserEscaped)
                 {
                     username = Uri.UnescapeDataString(username);
                 }

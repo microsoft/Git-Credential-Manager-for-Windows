@@ -12,12 +12,12 @@ namespace Microsoft.Alm.Authentication.Test
             {
                 List<object[]> data = new List<object[]>()
                 {
-                    new object[] { "https://microsoft.visualstudio.com", "https://github.com", "https://bitbucket.org" },
-                    new object[] { "https://my-host.com", null, "http://proxy-local:8080" },
-                    new object[] { "https://random-host.com", null, null },
-                    new object[] { "https://random-host.com", "https://q.random.com", null },
-                    new object[] { "https://random-host.com", "https://q.random.com", "http://proxy-local:8080" },
-                    new object[] { "http://random-host.com", "http://q.random.com", "https://proxy-local:8080" },
+                    new object[] { "https://microsoft.visualstudio.com", "https://github.com" },
+                    new object[] { "https://my-host.com", "http://proxy-local:8080" },
+                    new object[] { "https://random-host.com", null },
+                    new object[] { "https://random-host.com", "https://q.random.com" },
+                    new object[] { "https://random-host.com", "http://proxy-local:8080" },
+                    new object[] { "http://random-host.com", "http://q.random.com" },
                 };
 
                 return data.ToArray();
@@ -26,36 +26,34 @@ namespace Microsoft.Alm.Authentication.Test
 
         [Theory]
         [MemberData(nameof(UrlData), DisableDiscoveryEnumeration = true)]
-        public void TargetUri_Basics(string actualUrl, string queryUrl, string proxyUrl)
+        public void TargetUri_Basics(string queryUrl, string proxyUrl)
         {
             TargetUri targetUri;
-            Uri actualUri;
             Uri queryUri;
             Uri proxyUri;
 
-            actualUri = new TargetUri(actualUrl);
+            queryUri = new TargetUri(queryUrl);
 
-            targetUri = new TargetUri(actualUrl);
+            targetUri = new TargetUri(queryUri);
             Assert.NotNull(targetUri);
 
-            Assert.Equal(actualUri.AbsolutePath, targetUri.AbsolutePath);
-            Assert.Equal(actualUri.DnsSafeHost, targetUri.DnsSafeHost);
-            Assert.Equal(actualUri.Host, targetUri.Host);
-            Assert.Equal(actualUri.IsAbsoluteUri, targetUri.IsAbsoluteUri);
-            Assert.Equal(actualUri.IsDefaultPort, targetUri.IsDefaultPort);
-            Assert.Equal(actualUri.Port, targetUri.Port);
-            Assert.Equal(actualUri.Scheme, targetUri.Scheme);
-            Assert.Equal(actualUri.UserInfo, targetUri.TargetUriUsername);
+            Assert.Equal(queryUri.AbsolutePath, targetUri.AbsolutePath);
+            Assert.Equal(queryUri.DnsSafeHost, targetUri.DnsSafeHost);
+            Assert.Equal(queryUri.Host, targetUri.Host);
+            Assert.Equal(queryUri.IsAbsoluteUri, targetUri.IsAbsoluteUri);
+            Assert.Equal(queryUri.IsDefaultPort, targetUri.IsDefaultPort);
+            Assert.Equal(queryUri.Port, targetUri.Port);
+            Assert.Equal(queryUri.Scheme, targetUri.Scheme);
+            Assert.Equal(queryUri.UserInfo, targetUri.TargetUriUsername);
 
-            actualUri = actualUrl is null ? null : new Uri(actualUrl);
             queryUri = queryUrl is null ? null : new Uri(queryUrl);
             proxyUri = proxyUrl is null ? null : new Uri(proxyUrl);
 
-            targetUri = new TargetUri(actualUrl, queryUrl, proxyUrl);
+            targetUri = new TargetUri(queryUrl, proxyUrl);
             Assert.NotNull(targetUri);
 
             // Since the actual Uri will substitute for a null query Uri, test the correct value.
-            var uri = queryUri ?? actualUri;
+            var uri = queryUri;
 
             Assert.Equal(uri.AbsolutePath, targetUri.AbsolutePath);
             Assert.Equal(uri.DnsSafeHost, targetUri.DnsSafeHost);
@@ -67,11 +65,10 @@ namespace Microsoft.Alm.Authentication.Test
 
             Assert.Equal(uri.UserInfo, targetUri.TargetUriUsername);
 
-            Assert.Equal(actualUri, targetUri.ActualUri);
             Assert.Equal(uri, targetUri.QueryUri);
             Assert.Equal(proxyUri, targetUri.ProxyUri);
 
-            targetUri = new TargetUri(actualUri, queryUri, proxyUri);
+            targetUri = new TargetUri(queryUri, proxyUri);
             Assert.NotNull(targetUri);
             Assert.Equal(uri.AbsolutePath, targetUri.AbsolutePath);
             Assert.Equal(uri.DnsSafeHost, targetUri.DnsSafeHost);
@@ -83,16 +80,16 @@ namespace Microsoft.Alm.Authentication.Test
 
             Assert.Equal(uri.UserInfo, targetUri.TargetUriUsername);
 
-            Assert.Equal(actualUri, targetUri.ActualUri);
+            Assert.Equal(queryUri, targetUri.QueryUri);
             Assert.Equal(uri, targetUri.QueryUri);
             Assert.Equal(proxyUri, targetUri.ProxyUri);
         }
 
         [Theory]
         [MemberData(nameof(UrlData), DisableDiscoveryEnumeration = true)]
-        public void TargetUri_WebProxy(string actualUrl, string queryUrl, string proxyUrl)
+        public void TargetUri_WebProxy( string queryUrl, string proxyUrl)
         {
-            var targetUri = new TargetUri(actualUrl, queryUrl, proxyUrl);
+            var targetUri = new TargetUri(queryUrl, proxyUrl);
 
             var proxy = targetUri.WebProxy;
             Assert.NotNull(proxy);
@@ -109,9 +106,9 @@ namespace Microsoft.Alm.Authentication.Test
 
         [Theory]
         [MemberData(nameof(UrlData), DisableDiscoveryEnumeration = true)]
-        public void TargetUri_HttpClientHandler(string actualUrl, string queryUrl, string proxyUrl)
+        public void TargetUri_HttpClientHandler(string queryUrl, string proxyUrl)
         {
-            var targetUri = new TargetUri(actualUrl, queryUrl, proxyUrl);
+            var targetUri = new TargetUri( queryUrl, proxyUrl);
 
             var client = targetUri.HttpClientHandler;
             Assert.NotNull(client);

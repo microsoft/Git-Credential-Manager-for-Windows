@@ -216,7 +216,7 @@ namespace Microsoft.Alm.Cli
                 case AuthorityType.Bitbucket:
                     Git.Trace.WriteLine($"deleting Bitbucket credentials for '{operationArguments.TargetUri}'.");
                     var bbAuth = authentication as Bitbucket.Authentication;
-                    bbAuth.DeleteCredentials(operationArguments.TargetUri, operationArguments.CredUsername);
+                    bbAuth.DeleteCredentials(operationArguments.TargetUri, operationArguments.Username);
                     break;
             }
         }
@@ -583,7 +583,7 @@ namespace Microsoft.Alm.Cli
             {
                 Git.Trace.WriteLine($"{program.KeyTypeName(KeyType.Username)} = '{value}'.");
 
-                operationArguments.CredUsername = value;
+                operationArguments.Username = value;
             }
         }
 
@@ -789,20 +789,20 @@ namespace Microsoft.Alm.Cli
                         Task.Run(async () =>
                         {
                             if (((operationArguments.Interactivity != Interactivity.Always)
-                                 && ((credentials = bbcAuth.GetCredentials(operationArguments.TargetUri, operationArguments.CredUsername)) != null)
+                                 && ((credentials = bbcAuth.GetCredentials(operationArguments.TargetUri, operationArguments.Username)) != null)
                                  && (!operationArguments.ValidateCredentials
-                                     || ((credentials = await bbcAuth.ValidateCredentials(operationArguments.TargetUri, operationArguments.CredUsername, credentials)) != null)))
+                                     || ((credentials = await bbcAuth.ValidateCredentials(operationArguments.TargetUri, operationArguments.Username, credentials)) != null)))
                                      || ((operationArguments.Interactivity != Interactivity.Never)
-                                        && ((credentials = await bbcAuth.InteractiveLogon(operationArguments.TargetUri, operationArguments.CredUsername)) != null)
+                                        && ((credentials = await bbcAuth.InteractiveLogon(operationArguments.TargetUri, operationArguments.Username)) != null)
                                         && (!operationArguments.ValidateCredentials
-                                            || ((credentials = await bbcAuth.ValidateCredentials(operationArguments.TargetUri, operationArguments.CredUsername, credentials)) != null))))
+                                            || ((credentials = await bbcAuth.ValidateCredentials(operationArguments.TargetUri, operationArguments.Username, credentials)) != null))))
                             {
                                 Git.Trace.WriteLine($"credentials for '{operationArguments.TargetUri}' found.");
                                 // Bitbucket relies on a username + secret, so make sure there is a
                                 // username to return.
-                                if (operationArguments.CredUsername != null)
+                                if (operationArguments.Username != null)
                                 {
-                                    credentials = new Credential(operationArguments.CredUsername, credentials.Password);
+                                    credentials = new Credential(operationArguments.Username, credentials.Password);
                                 }
                                 program.LogEvent($"Bitbucket credentials for '{operationArguments.TargetUri}' successfully retrieved.", EventLogEntryType.SuccessAudit);
                             }
@@ -824,7 +824,7 @@ namespace Microsoft.Alm.Cli
 
             if (credentials != null)
             {
-                operationArguments.SetCredentials(credentials);
+                operationArguments.Credentials = credentials;
             }
 
             return credentials;

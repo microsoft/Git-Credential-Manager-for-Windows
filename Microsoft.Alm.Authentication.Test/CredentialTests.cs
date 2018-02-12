@@ -37,27 +37,6 @@ namespace Microsoft.Alm.Authentication.Test
             }
         }
 
-        public static object[][] UriToNameData
-        {
-            get
-            {
-                var data = new List<object[]>()
-                {
-                    new object[] { "https://microsoft.visualstudio.com", null },
-                    new object[] { "https://www.github.com", null },
-                    new object[] { "https://bitbucket.org", null },
-                    new object[] { "https://github.com/Microsoft/Git-Credential-Manager-for-Windows.git", null },
-                    new object[] { "https://microsoft.visualstudio.com/", "https://microsoft.visualstudio.com" },
-                    new object[] { "https://mytenant.visualstudio.com/MYTENANT/_git/App.MyApp", null },
-                    new object[] { "file://unc/path", null },
-                    new object[] { "file://tfs01/vc/repos", null },
-                    new object[] { "http://vsts-tfs:8080/tfs", null },
-                };
-
-                return data.ToArray();
-            }
-        }
-
         [Theory]
         [MemberData(nameof(CredentialData), DisableDiscoveryEnumeration = true)]
         public void Credential_WriteDelete(bool useCache, string url, string username, string password, bool throws)
@@ -93,12 +72,78 @@ namespace Microsoft.Alm.Authentication.Test
             }
         }
 
+        public static object[][] UriToNameData
+        {
+            get
+            {
+                return new object[][]
+                {
+                    new object[] { "https://microsoft.visualstudio.com", null },
+                    new object[] { "https://www.github.com", null },
+                    new object[] { "https://bitbucket.org", null },
+                    new object[] { "https://github.com/Microsoft/Git-Credential-Manager-for-Windows.git", null },
+                    new object[] { "https://microsoft.visualstudio.com/", "https://microsoft.visualstudio.com" },
+                    new object[] { "https://mytenant.visualstudio.com/MYTENANT/_git/App.MyApp", null },
+                    new object[] { "file://unc/path", null },
+                    new object[] { "file://tfs01/vc/repos", null },
+                    new object[] { "http://vsts-tfs:8080/tfs", null },
+
+                    new object[] { "https://username@microsoft.visualstudio.com", "https://microsoft.visualstudio.com" },
+                    new object[] { "https://username@www.github.com", "https://www.github.com" },
+                    new object[] { "https://username@bitbucket.org", "https://bitbucket.org" },
+                    new object[] { "https://username@github.com/Microsoft/Git-Credential-Manager-for-Windows.git", "https://github.com/Microsoft/Git-Credential-Manager-for-Windows.git" },
+                    new object[] { "https://username@microsoft.visualstudio.com/", "https://microsoft.visualstudio.com" },
+                    new object[] { "https://username@mytenant.visualstudio.com/MYTENANT/_git/App.MyApp", "https://mytenant.visualstudio.com/MYTENANT/_git/App.MyApp" },
+                    new object[] { "http://username@vsts-tfs:8080/tfs", "http://vsts-tfs:8080/tfs" },
+                };
+            }
+        }
+
         [Theory]
         [MemberData(nameof(UriToNameData), DisableDiscoveryEnumeration = true)]
-        public void UriToName(string original, string expected)
+        public void UriToNameTest(string original, string expected)
         {
             var uri = new Uri(original);
             var actual = Secret.UriToName(uri, Namespace);
+
+            expected = $"{Namespace}:{expected ?? original}";
+
+            Assert.Equal(expected, actual, StringComparer.Ordinal);
+        }
+
+        public static object[][] UriToIdentityNameData
+        {
+            get
+            {
+                return new object[][]
+                {
+                    new object[] { "https://microsoft.visualstudio.com", null },
+                    new object[] { "https://www.github.com", null },
+                    new object[] { "https://bitbucket.org", null },
+                    new object[] { "https://github.com/Microsoft/Git-Credential-Manager-for-Windows.git", null },
+                    new object[] { "https://microsoft.visualstudio.com/", "https://microsoft.visualstudio.com" },
+                    new object[] { "https://mytenant.visualstudio.com/MYTENANT/_git/App.MyApp", null },
+                    new object[] { "file://unc/path", null },
+                    new object[] { "file://tfs01/vc/repos", null },
+                    new object[] { "http://vsts-tfs:8080/tfs", null },
+
+                    new object[] { "https://username@microsoft.visualstudio.com", null },
+                    new object[] { "https://username@www.github.com", null },
+                    new object[] { "https://username@bitbucket.org", null },
+                    new object[] { "https://username@github.com/Microsoft/Git-Credential-Manager-for-Windows.git", null },
+                    new object[] { "https://username@microsoft.visualstudio.com/", "https://username@microsoft.visualstudio.com" },
+                    new object[] { "https://username@mytenant.visualstudio.com/MYTENANT/_git/App.MyApp", null },
+                    new object[] { "http://username@vsts-tfs:8080/tfs", null },
+                };
+            }
+        }
+
+        [Theory]
+        [MemberData(nameof(UriToIdentityNameData), DisableDiscoveryEnumeration = true)]
+        public void UriToIdentityNameTest(string original, string expected)
+        {
+            var uri = new Uri(original);
+            var actual = Secret.UriToIdentityUrl(uri, Namespace);
 
             expected = $"{Namespace}:{expected ?? original}";
 
