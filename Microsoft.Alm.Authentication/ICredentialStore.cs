@@ -30,7 +30,7 @@ namespace Microsoft.Alm.Authentication
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1716:IdentifiersShouldNotMatchKeywords", MessageId = "Namespace")]
         string Namespace { get; }
 
-        Secret.UriNameConversion UriNameConversion { get; }
+        Secret.UriNameConversion UriNameConversion { get; set; }
 
         bool DeleteCredentials(TargetUri targetUri);
 

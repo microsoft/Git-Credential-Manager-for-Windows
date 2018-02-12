@@ -57,6 +57,9 @@ namespace Microsoft.Alm.Authentication
             _getTargetName = credentialStore.UriNameConversion;
         }
 
+        private string _namespace;
+        private Secret.UriNameConversion _getTargetName;
+
         public string Namespace
         {
             get { return _namespace; }
@@ -65,10 +68,14 @@ namespace Microsoft.Alm.Authentication
         public Secret.UriNameConversion UriNameConversion
         {
             get { return _getTargetName; }
-        }
+            set
+            {
+                if (value is null)
+                    throw new ArgumentNullException(nameof(UriNameConversion));
 
-        private readonly string _namespace;
-        private readonly Secret.UriNameConversion _getTargetName;
+                _getTargetName = value;
+            }
+        }
 
         /// <summary>
         /// Deletes a credential from the cache.

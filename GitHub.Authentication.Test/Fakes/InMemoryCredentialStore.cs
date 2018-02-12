@@ -10,7 +10,11 @@ namespace GitHub.Authentication.Test.Fakes
 
         public string Namespace => "??";
 
-        public Secret.UriNameConversion UriNameConversion => null;
+        public Secret.UriNameConversion UriNameConversion
+        {
+            get { return null; }
+            set {; }
+        }
 
         public bool DeleteCredentials(TargetUri targetUri)
         {
