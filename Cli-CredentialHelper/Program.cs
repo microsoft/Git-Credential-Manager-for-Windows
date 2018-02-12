@@ -205,6 +205,7 @@ namespace Microsoft.Alm.Cli
             WriteLine($"  UseHttpPath = {operationArguments.UseHttpPath}");
             WriteLine($"  UseModalUi = {operationArguments.UseModalUi}");
             WriteLine($"  ValidateCredentials = {operationArguments.ValidateCredentials}");
+            WriteLine($"  VstsTokenScope = {operationArguments.VstsTokenScope}");
             WriteLine($"  WriteLog = {operationArguments.WriteLog}");
         }
 
