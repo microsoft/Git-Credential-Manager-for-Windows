@@ -90,6 +90,14 @@ namespace Microsoft.Alm.Authentication
         /// </summary>
         public readonly VstsTokenScope TokenScope;
 
+        /// <summary>
+        /// Gets the expected URI name conversion delegate for this authentication type.
+        /// </summary>
+        public static Secret.UriNameConversion UriNameConversion
+        {
+            get { return Secret.UriToIdentityUrl; }
+        }
+
         internal TokenCache VstsAdalTokenCache { get; private set; }
         internal ITokenStore VstsIdeTokenCache{ get; private set; }
 
