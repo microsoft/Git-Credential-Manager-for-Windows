@@ -33,9 +33,8 @@ namespace Microsoft.Alm.Authentication
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Security", "CA2104:DoNotDeclareReadOnlyMutableReferenceTypes")]
         public static readonly StringComparer KeyComparer = StringComparer.OrdinalIgnoreCase;
 
-        private static readonly Dictionary<string, Secret> _cache = new Dictionary<string, Secret>(KeyComparer);
-
         public SecretCache(string @namespace, Secret.UriNameConversion getTargetName)
+            : this()
         {
             if (string.IsNullOrWhiteSpace(@namespace))
                 throw new ArgumentNullException(@namespace);
@@ -49,6 +48,7 @@ namespace Microsoft.Alm.Authentication
         { }
 
         internal SecretCache(ICredentialStore credentialStore)
+            : this()
         {
             if (credentialStore == null)
                 throw new ArgumentNullException(nameof(credentialStore));
@@ -57,6 +57,12 @@ namespace Microsoft.Alm.Authentication
             _getTargetName = credentialStore.UriNameConversion;
         }
 
+        private SecretCache()
+        {
+            _cache = new Dictionary<string, Secret>(KeyComparer);
+        }
+
+        private Dictionary<string, Secret> _cache;
         private string _namespace;
         private Secret.UriNameConversion _getTargetName;
 
@@ -111,6 +117,18 @@ namespace Microsoft.Alm.Authentication
                     && _cache[targetName] is Token
                     && _cache.Remove(targetName);
             }
+        }
+
+        public IEnumerable<KeyValuePair<string, Secret>> EnumerateSecrets()
+        {
+            List<KeyValuePair<string, Secret>> array = null;
+
+            lock (_cache)
+            {
+                array = new List<KeyValuePair<string, Secret>>(_cache);
+            }
+
+            return array;
         }
 
         /// <summary>

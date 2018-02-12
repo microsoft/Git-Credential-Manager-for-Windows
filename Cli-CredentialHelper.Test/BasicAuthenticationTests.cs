@@ -24,9 +24,6 @@
 **/
 
 using System;
-using System.Net;
-using System.Text;
-using System.Threading.Tasks;
 using Microsoft.Alm.Authentication;
 using Xunit;
 
@@ -35,14 +32,20 @@ namespace Microsoft.Alm.CredentialHelper.Test
     public class BasicAuthenticationTests
     {
         [Fact]
-        public async Task UserinfoAndUsername()
+        public void UserinfoAndUsername()
         {
-            var credentialCache = new SecretCache("git");
+            const string Namespace = "test";
+
+            var credentialCache = new SecretCache(Namespace);
             var basicAuthentication = new BasicAuthentication(credentialCache);
             var targetUri = new Uri("https://username@domain.not");
 
             var credentials = new Credential("real", "pass");
             basicAuthentication.SetCredentials(targetUri, credentials);
+
+            var expected = Secret.UriToName(targetUri, Namespace);
+
+            Assert.Contains(credentialCache.EnumerateSecrets(), k => k.Key.Equals(expected, StringComparison.OrdinalIgnoreCase));
         }
     }
 }
