@@ -51,7 +51,6 @@ namespace Microsoft.Alm.Cli
             }
 
             var secretsNamespace = operationArguments.CustomNamespace ?? Program.SecretsNamespace;
-            var secrets = new SecretStore(secretsNamespace, null, null, Secret.UriToName);
             BaseAuthentication authority = null;
 
             var basicCredentialCallback = (operationArguments.UseModalUi)
@@ -86,15 +85,15 @@ namespace Microsoft.Alm.Cli
                     // Detect the authority.
                     authority = await BaseVstsAuthentication.GetAuthentication(operationArguments.TargetUri,
                                                                                Program.VstsCredentialScope,
-                                                                               secrets)
+                                                                               new SecretStore(secretsNamespace, BaseVstsAuthentication.UriNameConversion))
                              ?? Github.Authentication.GetAuthentication(operationArguments.TargetUri,
                                                                         Program.GitHubCredentialScope,
-                                                                        secrets,
+                                                                        new SecretStore(secretsNamespace, Secret.UriToName),
                                                                         githubCredentialCallback,
                                                                         githubAuthcodeCallback,
                                                                         null)
                             ?? Bitbucket.Authentication.GetAuthentication(operationArguments.TargetUri,
-                                                                          new SecretStore(secretsNamespace, Secret.UriToActualUrl),
+                                                                          new SecretStore(secretsNamespace, Secret.UriToIdentityUrl),
                                                                           bitbucketCredentialCallback,
                                                                           bitbucketOauthCallback);
 
@@ -138,7 +137,9 @@ namespace Microsoft.Alm.Cli
                     }
 
                     // Return the allocated authority or a generic AAD backed VSTS authentication object.
-                    return authority ?? new VstsAadAuthentication(tenantId, operationArguments.VstsTokenScope, secrets);
+                    return authority ?? new VstsAadAuthentication(tenantId,
+                                                                  operationArguments.VstsTokenScope, 
+                                                                  new SecretStore(secretsNamespace, VstsAadAuthentication.UriNameConversion));
 
                 case AuthorityType.Basic:
                     // Enforce basic authentication only.
@@ -151,7 +152,7 @@ namespace Microsoft.Alm.Cli
                     // Return a GitHub authentication object.
                     return authority ?? new Github.Authentication(operationArguments.TargetUri,
                                                                   Program.GitHubCredentialScope,
-                                                                  secrets,
+                                                                  new SecretStore(secretsNamespace, Secret.UriToName),
                                                                   githubCredentialCallback,
                                                                   githubAuthcodeCallback,
                                                                   null);
@@ -160,7 +161,7 @@ namespace Microsoft.Alm.Cli
                     Git.Trace.WriteLine($"authority for '{operationArguments.TargetUri}'  is Bitbucket");
 
                     // Return a Bitbucket authentication object.
-                    return authority ?? new Bitbucket.Authentication(secrets,
+                    return authority ?? new Bitbucket.Authentication(new SecretStore(secretsNamespace, Secret.UriToIdentityUrl),
                                                                      bitbucketCredentialCallback,
                                                                      bitbucketOauthCallback);
 
@@ -168,7 +169,8 @@ namespace Microsoft.Alm.Cli
                     Git.Trace.WriteLine($"authority for '{operationArguments.TargetUri}' is Microsoft Live.");
 
                     // Return the allocated authority or a generic MSA backed VSTS authentication object.
-                    return authority ?? new VstsMsaAuthentication(Program.VstsCredentialScope, secrets);
+                    return authority ?? new VstsMsaAuthentication(operationArguments.VstsTokenScope,
+                                                                  new SecretStore(secretsNamespace, VstsMsaAuthentication.UriNameConversion));
 
                 case AuthorityType.Ntlm:
                     // Enforce NTLM authentication only.
@@ -179,7 +181,10 @@ namespace Microsoft.Alm.Cli
                     Git.Trace.WriteLine($"authority for '{operationArguments.TargetUri}' is basic with NTLM={basicNtlmSupport}.");
 
                     // Return a generic username + password authentication object.
-                    return authority ?? new BasicAuthentication(secrets, basicNtlmSupport, basicCredentialCallback, null);
+                    return authority ?? new BasicAuthentication(new SecretStore(secretsNamespace, Secret.UriToName),
+                                                                basicNtlmSupport,
+                                                                basicCredentialCallback,
+                                                                null);
             }
         }
 

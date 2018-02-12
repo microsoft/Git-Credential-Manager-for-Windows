@@ -96,8 +96,8 @@ namespace Microsoft.Alm.Authentication.Test
         {
             string expectedQueryParameters = null;
 
-            ICredentialStore tokenStore1 = new SecretCache(@namespace + 1);
-            ITokenStore tokenStore2 = new SecretCache(@namespace + 2);
+            ICredentialStore tokenStore1 = new SecretCache(@namespace + 1, Secret.UriToIdentityUrl);
+            ITokenStore tokenStore2 = new SecretCache(@namespace + 2, Secret.UriToIdentityUrl);
             IVstsAuthority vstsAuthority = new AuthorityFake(expectedQueryParameters);
             return new VstsAadAuthentication(tokenStore1, tokenStore2, vstsAuthority);
         }
