@@ -180,23 +180,43 @@ namespace Microsoft.Alm.Authentication
 
                     try
                     {
-                        // build a request that we expect to fail, do not allow redirect to sign in url
+                        // Build a request that we expect to fail, do not allow redirect to sign in url
                         var request = WebRequest.CreateHttp(targetUri);
                         request.UserAgent = Global.UserAgent;
                         request.Method = "HEAD";
                         request.AllowAutoRedirect = false;
-                        // get the response from the server
+                        // Get the response from the server
                         response = await request.GetResponseAsync();
                     }
                     catch (WebException exception)
                     {
+                        Git.Trace.WriteLine($"unable to get response from '{targetUri}' due to '{exception.Status}'.");
+
+                        // Given the number proxy related failures we see, emit a message about the failure potentially
+                        // being related to a proxy or gateway misconfiguration.
+                        switch (exception.Status)
+                        {
+                            case WebExceptionStatus.ConnectFailure:
+                            case WebExceptionStatus.PipelineFailure:
+                            case WebExceptionStatus.ProtocolError:
+                            case WebExceptionStatus.ReceiveFailure:
+                            case WebExceptionStatus.SecureChannelFailure:
+                            case WebExceptionStatus.SendFailure:
+                            case WebExceptionStatus.ServerProtocolViolation:
+                            case WebExceptionStatus.TrustFailure:
+                                {
+                                    Git.Trace.WriteLine($"is there a proxy or gateway incorrectly configured?");
+                                }
+                                break;
+                        }
+
                         response = exception.Response;
                     }
 
-                    // if the response exists and we have headers, parse them
+                    // If the response exists and we have headers, parse them
                     if (response != null && response.SupportsHeaders)
                     {
-                        // find the VSTS resource tenant entry
+                        // Find the VSTS resource tenant entry
                         tenant = response.Headers[VstsResourceTenantHeader];
 
                         if (!string.IsNullOrWhiteSpace(tenant)
