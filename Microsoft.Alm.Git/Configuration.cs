@@ -161,6 +161,15 @@ namespace Microsoft.Alm.Git
         public virtual IEnumerator<Entry> GetEnumerator()
             => EnumerateEntriesByLevel(ConfigurationLevel.All);
 
+        public static bool PaserBoolean(string value)
+        {
+            return value != null
+                && ((int.TryParse(value, out int ival) && ival > 0)
+                    || StringComparer.OrdinalIgnoreCase.Equals(value, "true")
+                    || StringComparer.OrdinalIgnoreCase.Equals(value, "yes")
+                    || StringComparer.OrdinalIgnoreCase.Equals(value, "on"));
+        }
+
         public virtual void LoadGitConfiguration(string directory, ConfigurationLevel types)
         {
             string portableConfig = null;
@@ -270,6 +279,7 @@ namespace Microsoft.Alm.Git
             entry = default(Entry);
             return false;
         }
+
         public virtual bool TryGetEntry(string prefix, Uri targetUri, string key, out Entry entry)
         {
             if (key is null)
