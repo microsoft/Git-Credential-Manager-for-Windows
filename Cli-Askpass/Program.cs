@@ -134,7 +134,7 @@ namespace Microsoft.Alm.Cli
 
                     Git.Trace.WriteLine("passphase acquired.");
 
-                    Console.Out.Write(passphase + "\n");
+                    Out.Write(passphase + "\n");
                     return;
                 }
 
@@ -165,14 +165,14 @@ namespace Microsoft.Alm.Cli
                         if (password != null
                             && seeking.Equals("Password", StringComparison.OrdinalIgnoreCase))
                         {
-                            Console.Out.Write(password + '\n');
+                            Out.Write(password + '\n');
                             return;
                         }
 
                         // print the username if it sought
                         if (seeking.Equals("Username", StringComparison.OrdinalIgnoreCase))
                         {
-                            Console.Out.Write(username + '\n');
+                            Out.Write(username + '\n');
                             return;
                         }
                     }
@@ -221,7 +221,7 @@ namespace Microsoft.Alm.Cli
                             {
                                 Git.Trace.WriteLine($"username for '{targetUrl}' asked for and found.");
 
-                                Console.Out.Write(credentials.Username + '\n');
+                                Out.Write(credentials.Username + '\n');
                                 return;
                             }
 
@@ -229,7 +229,7 @@ namespace Microsoft.Alm.Cli
                             {
                                 Git.Trace.WriteLine($"password for '{targetUrl}' asked for and found.");
 
-                                Console.Out.Write(credentials.Password + '\n');
+                                Out.Write(credentials.Password + '\n');
                                 return;
                             }
                         }
@@ -266,12 +266,12 @@ namespace Microsoft.Alm.Cli
                 if (prompt.Failed)
                 {
                     Git.Trace.WriteLine("denied authorization of host.");
-                    Console.Out.Write("no\n");
+                    Out.Write("no\n");
                 }
                 else
                 {
                     Git.Trace.WriteLine("approved authorization of host.");
-                    Console.Out.Write("yes\n");
+                    Out.Write("yes\n");
                 }
 
                 return;
@@ -284,7 +284,7 @@ namespace Microsoft.Alm.Cli
         {
             const string HelpFileName = "git-askpass.html";
 
-            Console.Out.WriteLine("usage: git askpass '<user_prompt_text>'");
+            Out.WriteLine("usage: git askpass '<user_prompt_text>'");
 
             List<Git.GitInstallation> installations;
             if (Git.Where.FindGitInstallations(out installations))

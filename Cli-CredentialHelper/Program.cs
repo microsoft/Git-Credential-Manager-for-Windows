@@ -95,7 +95,7 @@ namespace Microsoft.Alm.Cli
                 Git.Trace.WriteLine("prompting user for url.");
 
                 WriteLine(" Target Url:");
-                url = Console.In.ReadLine();
+                url = In.ReadLine();
             }
             else
             {
@@ -231,7 +231,7 @@ namespace Microsoft.Alm.Cli
                     goto error_parse;
             }
 
-            using (var stdin = Console.OpenStandardInput())
+            using (var stdin = InStream)
             {
                 OperationArguments operationArguments = new OperationArguments(stdin)
                 {
@@ -292,7 +292,7 @@ namespace Microsoft.Alm.Cli
             // parse the operations arguments from stdin (this is how git sends commands)
             // see: https://www.kernel.org/pub/software/scm/git/docs/technical/api-credentials.html
             // see: https://www.kernel.org/pub/software/scm/git/docs/git-credential.html
-            using (var stdin = Console.OpenStandardInput())
+            using (var stdin = InStream)
             {
                 OperationArguments operationArguments = new OperationArguments(stdin);
 
@@ -317,7 +317,7 @@ namespace Microsoft.Alm.Cli
             // parse the operations arguments from stdin (this is how git sends commands)
             // see: https://www.kernel.org/pub/software/scm/git/docs/technical/api-credentials.html
             // see: https://www.kernel.org/pub/software/scm/git/docs/git-credential.html
-            using (var stdin = Console.OpenStandardInput())
+            using (var stdin = InStream)
             {
                 OperationArguments operationArguments = new OperationArguments(stdin);
 
@@ -331,7 +331,7 @@ namespace Microsoft.Alm.Cli
                 }
                 else
                 {
-                    using (var stdout = Console.OpenStandardOutput())
+                    using (var stdout = OutStream)
                     {
                         operationArguments.WriteToStream(stdout);
                     }
@@ -385,7 +385,7 @@ namespace Microsoft.Alm.Cli
             // parse the operations arguments from stdin (this is how git sends commands)
             // see: https://www.kernel.org/pub/software/scm/git/docs/technical/api-credentials.html
             // see: https://www.kernel.org/pub/software/scm/git/docs/git-credential.html
-            using (var stdin = Console.OpenStandardInput())
+            using (var stdin = InStream)
             {
                 OperationArguments operationArguments = new OperationArguments(stdin);
 
