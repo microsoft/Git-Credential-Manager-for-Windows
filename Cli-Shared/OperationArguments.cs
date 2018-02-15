@@ -33,8 +33,6 @@ namespace Microsoft.Alm.Cli
 {
     internal class OperationArguments
     {
-        private static readonly char[] SeperatorCharacters = { '/', '\\' };
-
         public OperationArguments(Stream readableStream)
                 : this()
         {
