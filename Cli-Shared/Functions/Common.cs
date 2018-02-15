@@ -178,7 +178,7 @@ namespace Microsoft.Alm.Cli
                     Git.Trace.WriteLine($"authority for '{operationArguments.TargetUri}' is basic with NTLM={basicNtlmSupport}.");
 
                     // Return a generic username + password authentication object.
-                    return authority ?? new BasicAuthentication(new SecretStore(secretsNamespace, Secret.UriToName),
+                    return authority ?? new BasicAuthentication(new SecretStore(secretsNamespace, Secret.UriToIdentityUrl),
                                                                 basicNtlmSupport,
                                                                 basicCredentialCallback,
                                                                 null);

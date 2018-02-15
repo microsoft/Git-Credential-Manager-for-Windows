@@ -407,6 +407,10 @@ namespace Microsoft.Alm.Cli
                         Git.Trace.WriteLine($"storing basic credentials for '{operationArguments.TargetUri}'.");
                         break;
 
+                    case AuthorityType.Bitbucket:
+                        Git.Trace.WriteLine($"storing Bitbucket credentials for '{operationArguments.TargetUri}'.");
+                        break;
+
                     case AuthorityType.AzureDirectory:
                     case AuthorityType.MicrosoftAccount:
                         Git.Trace.WriteLine($"storing VSTS credentials for '{operationArguments.TargetUri}'.");
