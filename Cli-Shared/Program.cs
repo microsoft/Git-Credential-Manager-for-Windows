@@ -27,6 +27,7 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
+using System.Net;
 using System.Runtime.CompilerServices;
 using System.Threading.Tasks;
 using Microsoft.Alm.Authentication;
@@ -143,6 +144,12 @@ namespace Microsoft.Alm.Cli
             { KeyType.VstsScope, "GCM_VSTS_SCOPE" },
             { KeyType.Writelog, "GCM_WRITELOG" },
         };
+
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Performance", "CA1810:InitializeReferenceTypeStaticFieldsInline")]
+        static Program()
+        {
+            ServicePointManager.SecurityProtocol = ServicePointManager.SecurityProtocol | SecurityProtocolType.Tls12;
+        }
 
         private string _executablePath;
         private string _location;

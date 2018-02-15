@@ -26,7 +26,6 @@
 using System;
 using System.Diagnostics;
 using System.IO;
-using System.Net;
 using System.Text;
 using System.Threading.Tasks;
 using Microsoft.Alm.Authentication;
@@ -74,8 +73,6 @@ namespace Microsoft.Alm.Cli
                     : new Github.Authentication.AcquireAuthenticationCodeDelegate(program.GitHubAuthCodePrompt);
 
             NtlmSupport basicNtlmSupport = NtlmSupport.Auto;
-
-            ServicePointManager.SecurityProtocol = ServicePointManager.SecurityProtocol | SecurityProtocolType.Tls12;
 
             switch (operationArguments.Authority)
             {
