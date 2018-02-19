@@ -423,6 +423,7 @@ namespace Microsoft.Alm.Authentication
                     using (var reader = new StreamReader(inflate, encoding))
                     {
                         data = await reader.ReadToEndAsync();
+                        break;
                     }
                 }
                 catch when (i < 5)
@@ -524,6 +525,7 @@ namespace Microsoft.Alm.Authentication
                     using (var writer = new StreamWriter(deflate, encoding))
                     {
                         await writer.WriteAsync(data);
+                        break;
                     }
                 }
                 catch when (i < 5)
