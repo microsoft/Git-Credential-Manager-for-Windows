@@ -36,19 +36,6 @@ namespace Microsoft.Alm.Authentication
             if (string.IsNullOrWhiteSpace(@namespace))
                 throw new ArgumentNullException(@namespace);
 
-            string targetName = $"{@namespace}:{targetUri}";
-            targetName = targetName.TrimEnd('/', '\\');
-
-            return targetName;
-        }
-
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Design", "CA1055:UriReturnValuesShouldNotBeStrings")]
-        public static string UriToUrl(TargetUri targetUri, string @namespace)
-        {
-            BaseSecureStore.ValidateTargetUri(targetUri);
-            if (string.IsNullOrWhiteSpace(@namespace))
-                throw new ArgumentNullException(@namespace);
-
             string targetName = $"{@namespace}:{targetUri.ToString(false, true, true)}";
             targetName = targetName.TrimEnd('/', '\\');
 
@@ -59,13 +46,13 @@ namespace Microsoft.Alm.Authentication
         /// Generate a key based on the ActualUri. This may include username, port, etc
         /// </summary>
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Design", "CA1055:UriReturnValuesShouldNotBeStrings")]
-        public static string UriToActualUrl(TargetUri targetUri, string @namespace)
+        public static string UriToIdentityUrl(TargetUri targetUri, string @namespace)
         {
             BaseSecureStore.ValidateTargetUri(targetUri);
             if (string.IsNullOrWhiteSpace(@namespace))
                 throw new ArgumentNullException(@namespace);
 
-            string targetName = $"{@namespace}:{targetUri.ActualUri.AbsoluteUri}";
+            string targetName = $"{@namespace}:{targetUri.ToString(true, true, true)}";
             targetName = targetName.TrimEnd('/', '\\');
 
             return targetName;

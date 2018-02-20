@@ -23,19 +23,30 @@
  * WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE."
 **/
 
-namespace Microsoft.Alm.Authentication
+using System;
+using Microsoft.Alm.Authentication;
+using Xunit;
+
+namespace Microsoft.Alm.CredentialHelper.Test
 {
-    public interface ICredentialStore
+    public class BasicAuthenticationTests
     {
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1716:IdentifiersShouldNotMatchKeywords", MessageId = "Namespace")]
-        string Namespace { get; }
+        [Fact]
+        public void UserinfoAndUsername()
+        {
+            const string Namespace = "test";
 
-        Secret.UriNameConversion UriNameConversion { get; set; }
+            var credentialCache = new SecretCache(Namespace);
+            var basicAuthentication = new BasicAuthentication(credentialCache);
+            var targetUri = new Uri("https://username@domain.not");
 
-        bool DeleteCredentials(TargetUri targetUri);
+            var credentials = new Credential("real", "pass");
+            basicAuthentication.SetCredentials(targetUri, credentials);
 
-        Credential ReadCredentials(TargetUri targetUri);
+            var expected = Secret.UriToName(targetUri, Namespace);
 
-        bool WriteCredentials(TargetUri targetUri, Credential credentials);
+            Assert.Contains(credentialCache.EnumerateSecrets(), 
+                            k => k.Key.Equals(expected, StringComparison.OrdinalIgnoreCase));
+        }
     }
 }

@@ -26,7 +26,6 @@
 using System;
 using System.Diagnostics;
 using System.IO;
-using System.Net;
 using System.Text;
 using System.Threading.Tasks;
 using Microsoft.Alm.Authentication;
@@ -51,7 +50,6 @@ namespace Microsoft.Alm.Cli
             }
 
             var secretsNamespace = operationArguments.CustomNamespace ?? Program.SecretsNamespace;
-            var secrets = new SecretStore(secretsNamespace, null, null, Secret.UriToName);
             BaseAuthentication authority = null;
 
             var basicCredentialCallback = (operationArguments.UseModalUi)
@@ -76,8 +74,6 @@ namespace Microsoft.Alm.Cli
 
             NtlmSupport basicNtlmSupport = NtlmSupport.Auto;
 
-            ServicePointManager.SecurityProtocol = ServicePointManager.SecurityProtocol | SecurityProtocolType.Tls12;
-
             switch (operationArguments.Authority)
             {
                 case AuthorityType.Auto:
@@ -86,15 +82,15 @@ namespace Microsoft.Alm.Cli
                     // Detect the authority.
                     authority = await BaseVstsAuthentication.GetAuthentication(operationArguments.TargetUri,
                                                                                Program.VstsCredentialScope,
-                                                                               secrets)
+                                                                               new SecretStore(secretsNamespace, BaseVstsAuthentication.UriNameConversion))
                              ?? Github.Authentication.GetAuthentication(operationArguments.TargetUri,
                                                                         Program.GitHubCredentialScope,
-                                                                        secrets,
+                                                                        new SecretStore(secretsNamespace, Secret.UriToName),
                                                                         githubCredentialCallback,
                                                                         githubAuthcodeCallback,
                                                                         null)
                             ?? Bitbucket.Authentication.GetAuthentication(operationArguments.TargetUri,
-                                                                          new SecretStore(secretsNamespace, Secret.UriToActualUrl),
+                                                                          new SecretStore(secretsNamespace, Secret.UriToIdentityUrl),
                                                                           bitbucketCredentialCallback,
                                                                           bitbucketOauthCallback);
 
@@ -138,7 +134,9 @@ namespace Microsoft.Alm.Cli
                     }
 
                     // Return the allocated authority or a generic AAD backed VSTS authentication object.
-                    return authority ?? new VstsAadAuthentication(tenantId, operationArguments.VstsTokenScope, secrets);
+                    return authority ?? new VstsAadAuthentication(tenantId,
+                                                                  operationArguments.VstsTokenScope, 
+                                                                  new SecretStore(secretsNamespace, VstsAadAuthentication.UriNameConversion));
 
                 case AuthorityType.Basic:
                     // Enforce basic authentication only.
@@ -151,7 +149,7 @@ namespace Microsoft.Alm.Cli
                     // Return a GitHub authentication object.
                     return authority ?? new Github.Authentication(operationArguments.TargetUri,
                                                                   Program.GitHubCredentialScope,
-                                                                  secrets,
+                                                                  new SecretStore(secretsNamespace, Secret.UriToName),
                                                                   githubCredentialCallback,
                                                                   githubAuthcodeCallback,
                                                                   null);
@@ -160,7 +158,7 @@ namespace Microsoft.Alm.Cli
                     Git.Trace.WriteLine($"authority for '{operationArguments.TargetUri}'  is Bitbucket");
 
                     // Return a Bitbucket authentication object.
-                    return authority ?? new Bitbucket.Authentication(secrets,
+                    return authority ?? new Bitbucket.Authentication(new SecretStore(secretsNamespace, Secret.UriToIdentityUrl),
                                                                      bitbucketCredentialCallback,
                                                                      bitbucketOauthCallback);
 
@@ -168,7 +166,8 @@ namespace Microsoft.Alm.Cli
                     Git.Trace.WriteLine($"authority for '{operationArguments.TargetUri}' is Microsoft Live.");
 
                     // Return the allocated authority or a generic MSA backed VSTS authentication object.
-                    return authority ?? new VstsMsaAuthentication(Program.VstsCredentialScope, secrets);
+                    return authority ?? new VstsMsaAuthentication(operationArguments.VstsTokenScope,
+                                                                  new SecretStore(secretsNamespace, VstsMsaAuthentication.UriNameConversion));
 
                 case AuthorityType.Ntlm:
                     // Enforce NTLM authentication only.
@@ -179,7 +178,10 @@ namespace Microsoft.Alm.Cli
                     Git.Trace.WriteLine($"authority for '{operationArguments.TargetUri}' is basic with NTLM={basicNtlmSupport}.");
 
                     // Return a generic username + password authentication object.
-                    return authority ?? new BasicAuthentication(secrets, basicNtlmSupport, basicCredentialCallback, null);
+                    return authority ?? new BasicAuthentication(new SecretStore(secretsNamespace, Secret.UriToIdentityUrl),
+                                                                basicNtlmSupport,
+                                                                basicCredentialCallback,
+                                                                null);
             }
         }
 
@@ -216,7 +218,7 @@ namespace Microsoft.Alm.Cli
                 case AuthorityType.Bitbucket:
                     Git.Trace.WriteLine($"deleting Bitbucket credentials for '{operationArguments.TargetUri}'.");
                     var bbAuth = authentication as Bitbucket.Authentication;
-                    bbAuth.DeleteCredentials(operationArguments.TargetUri, operationArguments.CredUsername);
+                    bbAuth.DeleteCredentials(operationArguments.TargetUri, operationArguments.Username);
                     break;
             }
         }
@@ -472,6 +474,20 @@ namespace Microsoft.Alm.Cli
 
                 operationArguments.PreserveCredentials = yesno.Value;
             }
+            else if (operationArguments.EnvironmentVariables.TryGetValue("GCM_PRESERVE_CREDS", out value))
+            {
+                if (StringComparer.OrdinalIgnoreCase.Equals(value, "true")
+                    || StringComparer.OrdinalIgnoreCase.Equals(value, "yes")
+                    || StringComparer.OrdinalIgnoreCase.Equals(value, "1")
+                    || StringComparer.OrdinalIgnoreCase.Equals(value, "on"))
+                {
+                    Git.Trace.WriteLine($"GCM_PRESERVE_CREDS = '{yesno}'.");
+
+                    operationArguments.PreserveCredentials = true;
+
+                    Git.Trace.WriteLine($"WARNING: the 'GCM_PRESERVE_CREDS' variable has been deprecated, use '{ program.KeyTypeName(KeyType.PreserveCredentials) }' instead.");
+                }
+            }
 
             // Look for HTTP path usage config settings.
             if (program.TryReadBoolean(operationArguments, KeyType.HttpPath, out yesno))
@@ -539,7 +555,7 @@ namespace Microsoft.Alm.Cli
                 }
             }
 
-            // Look for custom VSTS scope settings
+            // Look for custom VSTS scope settings.
             if (program.TryReadString(operationArguments, KeyType.VstsScope, out value))
             {
                 Git.Trace.WriteLine($"{program.KeyTypeName(KeyType.VstsScope)} = '{value}'.");
@@ -562,6 +578,14 @@ namespace Microsoft.Alm.Cli
                 }
 
                 operationArguments.VstsTokenScope = vstsTokenScope;
+            }
+
+            // Check for configuration supplied user-info.
+            if (program.TryReadString(operationArguments, KeyType.Username, out value))
+            {
+                Git.Trace.WriteLine($"{program.KeyTypeName(KeyType.Username)} = '{value}'.");
+
+                operationArguments.Username = value;
             }
         }
 
@@ -767,20 +791,20 @@ namespace Microsoft.Alm.Cli
                         Task.Run(async () =>
                         {
                             if (((operationArguments.Interactivity != Interactivity.Always)
-                                 && ((credentials = bbcAuth.GetCredentials(operationArguments.TargetUri, operationArguments.CredUsername)) != null)
+                                 && ((credentials = bbcAuth.GetCredentials(operationArguments.TargetUri, operationArguments.Username)) != null)
                                  && (!operationArguments.ValidateCredentials
-                                     || ((credentials = await bbcAuth.ValidateCredentials(operationArguments.TargetUri, operationArguments.CredUsername, credentials)) != null)))
+                                     || ((credentials = await bbcAuth.ValidateCredentials(operationArguments.TargetUri, operationArguments.Username, credentials)) != null)))
                                      || ((operationArguments.Interactivity != Interactivity.Never)
-                                        && ((credentials = await bbcAuth.InteractiveLogon(operationArguments.TargetUri, operationArguments.CredUsername)) != null)
+                                        && ((credentials = await bbcAuth.InteractiveLogon(operationArguments.TargetUri, operationArguments.Username)) != null)
                                         && (!operationArguments.ValidateCredentials
-                                            || ((credentials = await bbcAuth.ValidateCredentials(operationArguments.TargetUri, operationArguments.CredUsername, credentials)) != null))))
+                                            || ((credentials = await bbcAuth.ValidateCredentials(operationArguments.TargetUri, operationArguments.Username, credentials)) != null))))
                             {
                                 Git.Trace.WriteLine($"credentials for '{operationArguments.TargetUri}' found.");
                                 // Bitbucket relies on a username + secret, so make sure there is a
                                 // username to return.
-                                if (operationArguments.CredUsername != null)
+                                if (operationArguments.Username != null)
                                 {
-                                    credentials = new Credential(operationArguments.CredUsername, credentials.Password);
+                                    credentials = new Credential(operationArguments.Username, credentials.Password);
                                 }
                                 program.LogEvent($"Bitbucket credentials for '{operationArguments.TargetUri}' successfully retrieved.", EventLogEntryType.SuccessAudit);
                             }
@@ -802,7 +826,7 @@ namespace Microsoft.Alm.Cli
 
             if (credentials != null)
             {
-                operationArguments.SetCredentials(credentials);
+                operationArguments.Credentials = credentials;
             }
 
             return credentials;

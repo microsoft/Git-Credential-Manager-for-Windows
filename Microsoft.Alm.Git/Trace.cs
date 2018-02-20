@@ -51,11 +51,9 @@ namespace Microsoft.Alm.Git
             try
             {
                 string traceValue = Environment.GetEnvironmentVariable(EnvironmentVariableKey);
-                int val = 0;
 
                 // if the value is true or a number greater than zero, then trace to standard error
-                if (StringComparer.OrdinalIgnoreCase.Equals(traceValue, "true")
-                    || (Int32.TryParse(traceValue, out val) && val > 0))
+                if (Configuration.PaserBoolean(traceValue))
                 {
                     _writers.Add(Console.Error);
                 }

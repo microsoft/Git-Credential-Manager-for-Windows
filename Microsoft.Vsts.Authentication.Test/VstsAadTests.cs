@@ -92,23 +92,12 @@ namespace Microsoft.Alm.Authentication.Test
             Assert.True(Task.Run(async () => { return await aadAuthentication.ValidateCredentials(DefaultTargetUri, credentials); }).Result, "Credential validation unexpectedly failed.");
         }
 
-        [Fact]
-        public void VstsAadValidateLoginHintTest()
-        {
-            TargetUri targetUri = DefaultTargetUri;
-            VstsAadAuthentication aadAuthentication = GetVstsAadAuthentication("aad-loginhint");
-
-            Assert.NotNull(Task.Run(async () => { return await aadAuthentication.NoninteractiveLogon(targetUri, new PersonalAccessTokenOptions { RequireCompactToken = false }); }).Result);
-
-            Assert.NotNull(aadAuthentication.PersonalAccessTokenStore.ReadCredentials(targetUri));
-        }
-
         private static VstsAadAuthentication GetVstsAadAuthentication(string @namespace)
         {
             string expectedQueryParameters = null;
 
-            ICredentialStore tokenStore1 = new SecretCache(@namespace + 1);
-            ITokenStore tokenStore2 = new SecretCache(@namespace + 2);
+            ICredentialStore tokenStore1 = new SecretCache(@namespace + 1, Secret.UriToIdentityUrl);
+            ITokenStore tokenStore2 = new SecretCache(@namespace + 2, Secret.UriToIdentityUrl);
             IVstsAuthority vstsAuthority = new AuthorityFake(expectedQueryParameters);
             return new VstsAadAuthentication(tokenStore1, tokenStore2, vstsAuthority);
         }

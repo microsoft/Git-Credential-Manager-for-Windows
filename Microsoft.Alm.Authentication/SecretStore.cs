@@ -73,13 +73,19 @@ namespace Microsoft.Alm.Authentication
         public Secret.UriNameConversion UriNameConversion
         {
             get { return _getTargetName; }
+            set
+            {
+                if (value is null)
+                    throw new ArgumentNullException(nameof(UriNameConversion));
+
+                _getTargetName = value;
+            }
         }
 
         private string _namespace;
         private ICredentialStore _credentialCache;
+        private Secret.UriNameConversion _getTargetName;
         private ITokenStore _tokenCache;
-
-        private readonly Secret.UriNameConversion _getTargetName;
 
         /// <summary>
         /// Deletes credentials for target URI from the credential store

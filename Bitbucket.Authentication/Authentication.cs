@@ -90,14 +90,14 @@ namespace Atlassian.Bitbucket.Authentication
         {
             BaseSecureStore.ValidateTargetUri(targetUri);
 
-            Trace.WriteLine($"Deleting Bitbucket Credentials for {targetUri.ActualUri}");
+            Trace.WriteLine($"Deleting Bitbucket Credentials for {targetUri.QueryUri}");
 
             Credential credentials = null;
             if ((credentials = PersonalAccessTokenStore.ReadCredentials(targetUri)) != null)
             {
                 // try to delete the credentials for the explicit target uri first
                 PersonalAccessTokenStore.DeleteCredentials(targetUri);
-                Trace.WriteLine($"host credentials deleted for {targetUri.ActualUri}");
+                Trace.WriteLine($"host credentials deleted for {targetUri.QueryUri}");
             }
 
             // tidy up and delete any related refresh tokens
@@ -106,14 +106,14 @@ namespace Atlassian.Bitbucket.Authentication
             {
                 // try to delete the credentials for the explicit target uri first
                 PersonalAccessTokenStore.DeleteCredentials(refreshTargetUri);
-                Trace.WriteLine($"host refresh credentials deleted for {refreshTargetUri.ActualUri}");
+                Trace.WriteLine($"host refresh credentials deleted for {refreshTargetUri.QueryUri}");
             }
 
             // if we deleted per user then we should try and delete the host level credentials too if
             // they match the username
             if (targetUri.TargetUriContainsUsername)
             {
-                var hostTargetUri = targetUri.GetHostTargetUri();
+                var hostTargetUri = new TargetUri(targetUri.ToString(false, true, true));
                 var hostCredentials = GetCredentials(hostTargetUri);
                 var encodedUsername = Uri.EscapeDataString(targetUri.TargetUriUsername);
                 if (encodedUsername != username)
@@ -123,7 +123,7 @@ namespace Atlassian.Bitbucket.Authentication
 
                 if (hostCredentials != null && hostCredentials.Username.Equals(encodedUsername))
                 {
-                    DeleteCredentials(targetUri.GetHostTargetUri(), username);
+                    DeleteCredentials(hostTargetUri, username);
                 }
             }
         }
@@ -136,7 +136,7 @@ namespace Atlassian.Bitbucket.Authentication
         /// <returns></returns>
         private static TargetUri GetRefreshTokenTargetUri(TargetUri targetUri)
         {
-            var uri = new Uri(targetUri.ActualUri, refreshTokenSuffix);
+            var uri = new Uri(targetUri.QueryUri, refreshTokenSuffix);
             return new TargetUri(uri);
         }
 
@@ -203,7 +203,7 @@ namespace Atlassian.Bitbucket.Authentication
             if (currentCredentials != null && currentCredentials.Username != null && !currentCredentials.Username.Equals(credentials.Username))
             {
                 // do nothing as the default is for another username and we don't want to overwrite it
-                Trace.WriteLine($"skipping for {targetUri.ActualUri} new username {currentCredentials.Username} != {credentials.Username}");
+                Trace.WriteLine($"skipping for {targetUri.QueryUri} new username {currentCredentials.Username} != {credentials.Username}");
                 return;
             }
 
@@ -236,7 +236,7 @@ namespace Atlassian.Bitbucket.Authentication
             BaseSecureStore.ValidateTargetUri(targetUri);
             BaseSecureStore.ValidateCredential(credentials);
 
-            Trace.WriteLine($"{credentials.Username} at {targetUri.ActualUri.AbsoluteUri}");
+            Trace.WriteLine($"{credentials.Username} at {targetUri.QueryUri.AbsoluteUri}");
 
             // if the url doesn't contain a username then save with an explicit username.
             if (!targetUri.TargetUriContainsUsername && (!string.IsNullOrWhiteSpace(username)
@@ -283,7 +283,7 @@ namespace Atlassian.Bitbucket.Authentication
             if (personalAccessTokenStore == null)
                 throw new ArgumentNullException(nameof(personalAccessTokenStore), $"The `{nameof(personalAccessTokenStore)}` is null or invalid.");
 
-            if (targetUri.ActualUri.DnsSafeHost.EndsWith(BitbucketBaseUrlHost, StringComparison.OrdinalIgnoreCase))
+            if (targetUri.QueryUri.DnsSafeHost.EndsWith(BitbucketBaseUrlHost, StringComparison.OrdinalIgnoreCase))
             {
                 authentication = new Authentication(personalAccessTokenStore, acquireCredentialsCallback, acquireAuthenticationOAuthCallback);
                 Trace.WriteLine("authentication for Bitbucket created");

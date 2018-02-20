@@ -27,6 +27,7 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
+using System.Net;
 using System.Runtime.CompilerServices;
 using System.Threading.Tasks;
 using Microsoft.Alm.Authentication;
@@ -40,17 +41,16 @@ namespace Microsoft.Alm.Cli
         Authority,
         ConfigNoLocal,
         ConfigNoSystem,
-        GcmProxy,
         HttpPath,
         HttpProxy,
         HttpsProxy,
         HttpUserAgent,
         Interactive,
-        LoginHint,
         ModalPrompt,
         Namespace,
         PreserveCredentials,
         TokenDuration,
+        Username,
         Validate,
         VstsScope,
         Writelog,
@@ -93,9 +93,18 @@ namespace Microsoft.Alm.Cli
         internal ModalPromptDisplayDialogDelegate _modalPromptDisplayDialog = DialogFunctions.DisplayModal;
         internal ModalPromptForCredentialsDelegate _modalPromptForCredentials = DialogFunctions.CredentialPrompt;
         internal ModalPromptForPasswordDelegate _modalPromptForPassword = DialogFunctions.PasswordPrompt;
+        internal OpenStandardHandleDelegate _openStandardErrorStream = ConsoleFunctions.OpenStandardErrorStream;
+        internal GetStandardWriterDelegate _openStandardErrorWriter = ConsoleFunctions.OpenStandardErrorWriter;
+        internal OpenStandardHandleDelegate _openStandardInputStream = ConsoleFunctions.OpenStandardInputStream;
+        internal GetStandardReaderDelegate _openStandardInputReader = ConsoleFunctions.OpenStandardInputReader;
+        internal OpenStandardHandleDelegate _openStandardOutputStream = ConsoleFunctions.OpenStandardOutputStream;
+        internal GetStandardWriterDelegate _openStandardOutputWriter = ConsoleFunctions.OpenStandardOutputWriter;
         internal PrintArgsDelegate _printArgs = CommonFunctions.PrintArgs;
         internal QueryCredentialsDelegate _queryCredentials = CommonFunctions.QueryCredentials;
         internal ReadKeyDelegate _readKey = ConsoleFunctions.ReadKey;
+        internal SetStandardWriterDelegate _setStandardErrorWriter = ConsoleFunctions.SetStandardErrorWriter;
+        internal SetStandardReaderDelegate _setStandardInputReader = ConsoleFunctions.SetStandardInputReader;
+        internal SetStandardWriterDelegate _setStandardOutputWriter = ConsoleFunctions.SetStandardOutputWriter;
         internal StandardHandleIsTtyDelegate _standardHandleIsTty = ConsoleFunctions.StandardHandleIsTty;
         internal TryReadBooleanDelegate _tryReadBoolean = CommonFunctions.TryReadBoolean;
         internal TryReadStringDelegate _tryReadString = CommonFunctions.TryReadString;
@@ -105,43 +114,53 @@ namespace Microsoft.Alm.Cli
         internal readonly Dictionary<KeyType, string> _configurationKeys = new Dictionary<KeyType, string>()
         {
             { KeyType.Authority,  "authority" },
-            { KeyType.HttpPath,  "useHttpPath" },
             { KeyType.HttpProxy,  "httpProxy" },
             { KeyType.HttpsProxy,  "httpsProxy" },
             { KeyType.Interactive,  "interactive" },
-            { KeyType.LoginHint,  "loginhint" },
             { KeyType.ModalPrompt,  "modalPrompt" },
             { KeyType.Namespace,  "namespace" },
             { KeyType.PreserveCredentials,  "preserve" },
             { KeyType.TokenDuration,  "tokenDuration" },
+            { KeyType.HttpPath,  "useHttpPath" },
+            { KeyType.Username,  "username" },
             { KeyType.Validate,  "validate" },
             { KeyType.VstsScope, "vstsScope" },
-            { KeyType.Writelog,  "writelog" },
+            { KeyType.Writelog,  "writeLog" },
         };
         internal readonly Dictionary<KeyType, string> _environmentKeys = new Dictionary<KeyType, string>()
         {
             { KeyType.Authority, "GCM_AUTHORITY" },
             { KeyType.ConfigNoLocal, "GCM_CONFIG_NOLOCAL" },
             { KeyType.ConfigNoSystem, "GCM_CONFIG_NOSYSTEM" },
-            { KeyType.GcmProxy, "GCM_HTTP_PROXY" },
-            { KeyType.HttpPath, "GCM_USE_HTTP_PATH" },
             { KeyType.HttpProxy, "HTTP_PROXY" },
             { KeyType.HttpsProxy, "HTTPS_PROXY" },
             { KeyType.HttpUserAgent, "GCM_HTTP_USER_AGENT" },
             { KeyType.Interactive, "GCM_INTERACTIVE" },
-            { KeyType.LoginHint, "GCM_LOGINHINT" },
             { KeyType.ModalPrompt, "GCM_MODAL_PROMPT" },
             { KeyType.Namespace, "GCM_NAMESPACE" },
-            { KeyType.PreserveCredentials, "GCM_PRESERVE_CREDS" },
+            { KeyType.PreserveCredentials, "GCM_PRESERVE" },
             { KeyType.TokenDuration, "GCM_TOKEN_DURATION" },
             { KeyType.Validate, "GCM_VALIDATE" },
             { KeyType.VstsScope, "GCM_VSTS_SCOPE" },
             { KeyType.Writelog, "GCM_WRITELOG" },
         };
 
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Performance", "CA1810:InitializeReferenceTypeStaticFieldsInline")]
+        static Program()
+        {
+            ServicePointManager.SecurityProtocol = ServicePointManager.SecurityProtocol | SecurityProtocolType.Tls12;
+        }
+
         private string _executablePath;
         private string _location;
         private string _name;
+        private Stream _stdErrStream;
+        private TextWriter _stdErrWriter;
+        private Stream _stdInStream;
+        private TextReader _stdInReader;
+        private Stream _stdOutStream;
+        private TextWriter _stdOutWriter;
+        private readonly object _syncpoint = new object();
         private string _title;
         private Version _version;
 
@@ -253,6 +272,102 @@ namespace Microsoft.Alm.Cli
             }
         }
 
+        internal TextWriter Error
+        {
+            get
+            {
+                lock (_syncpoint)
+                {
+                    if (_stdErrWriter is null)
+                    {
+                        _stdErrWriter = _openStandardErrorWriter(this);
+                    }
+
+                    return _stdErrWriter;
+                }
+            }
+        }
+
+        internal Stream ErrorStream
+        {
+            get
+            {
+                lock (_syncpoint)
+                {
+                    if (_stdErrStream is null)
+                    {
+                        _stdErrStream = _openStandardErrorStream(this);
+                    }
+
+                    return _stdErrStream;
+                }
+            }
+        }
+
+        internal TextReader In
+        {
+            get
+            {
+                lock (_syncpoint)
+                {
+                    if (_stdInReader is null)
+                    {
+                        _stdInReader = _openStandardInputReader(this);
+                    }
+
+                    return _stdInReader;
+                }
+            }
+        }
+
+        internal Stream InStream
+        {
+            get
+            {
+                lock (_syncpoint)
+                {
+                    if (_stdInStream is null)
+                    {
+                        _stdInStream = _openStandardInputStream(this);
+                    }
+
+                    return _stdInStream;
+                }
+            }
+        }
+
+        internal TextWriter Out
+        {
+            get
+            {
+                lock (_syncpoint)
+                {
+                    if (_stdOutWriter is null)
+                    {
+                        _stdOutWriter = _openStandardOutputWriter(this);
+                    }
+
+                    return _stdOutWriter;
+                }
+            }
+        }
+
+        internal Stream OutStream
+        {
+            get
+            {
+                lock (_syncpoint)
+                {
+                    if (_stdOutStream is null)
+                    {
+                        _stdOutStream = _openStandardOutputStream(this);
+                    }
+
+                    return _stdOutStream;
+                }
+            }
+        }
+
         internal void Die(Exception exception,
                                 [CallerFilePath] string path = "",
                                 [CallerLineNumber] int line = 0,
@@ -302,18 +417,18 @@ namespace Microsoft.Alm.Cli
         internal Task<BaseAuthentication> CreateAuthentication(OperationArguments operationArguments)
             => _createAuthentication(this, operationArguments);
 
-        private void DeleteCredentials(OperationArguments operationArguments)
+        internal void DeleteCredentials(OperationArguments operationArguments)
             => _deleteCredentials(this, operationArguments);
 
-        private void PrintArgs(string[] args)
+        internal void PrintArgs(string[] args)
             => _printArgs(this, args);
 
         [Conditional("DEBUG")]
-        private static void EnableDebugTrace()
+        internal void EnableDebugTrace()
         {
             // use the stderr stream for the trace as stdout is used in the cross-process
             // communications protocol
-            Git.Trace.AddListener(Console.Error);
+            Git.Trace.AddListener(Error);
         }
 
         internal void EnableTraceLogging(OperationArguments operationArguments)
@@ -385,13 +500,13 @@ namespace Microsoft.Alm.Cli
 
         internal Credential ModalPromptForCredentials(TargetUri targetUri)
         {
-            string message = string.Format("Enter your credentials for {0}.", targetUri.ToString(port: true, path: true));
+            string message = string.Format("Enter your credentials for {0}.", targetUri.ToString(username: false, port: true, path: true));
 
-            if (!string.IsNullOrEmpty(targetUri.ActualUri.UserInfo))
+            if (!string.IsNullOrEmpty(targetUri.QueryUri.UserInfo))
             {
-                string username = targetUri.ActualUri.UserInfo;
+                string username = targetUri.QueryUri.UserInfo;
 
-                if (!targetUri.ActualUri.UserEscaped)
+                if (!targetUri.QueryUri.UserEscaped)
                 {
                     username = Uri.UnescapeDataString(username);
                 }
@@ -405,7 +520,7 @@ namespace Microsoft.Alm.Cli
         private Credential ModalPromptForPassword(TargetUri targetUri, string message, string username)
             => _modalPromptForPassword(this, targetUri, message, username);
 
-        private void PrintVersion()
+        internal void PrintVersion()
         {
 #if DEBUG
             WriteLine($"{Title} version {Version.ToString(4)}");
@@ -414,7 +529,22 @@ namespace Microsoft.Alm.Cli
 #endif
         }
 
-        private bool StandardHandleIsTty(NativeMethods.StandardHandleType handleType)
+        internal void SetError(TextWriter writer)
+        {
+            _setStandardErrorWriter(this, writer);
+        }
+
+        internal void SetIn(TextReader reader)
+        {
+            _setStandardInputReader(this, reader);
+        }
+
+        internal void SetOut(TextWriter writer)
+        {
+            _setStandardOutputWriter(this, writer);
+        }
+
+        internal bool StandardHandleIsTty(NativeMethods.StandardHandleType handleType)
             => _standardHandleIsTty(this, handleType);
 
         internal bool TryReadBoolean(OperationArguments operationArguments, KeyType key, out bool? value)

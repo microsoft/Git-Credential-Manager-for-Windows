@@ -153,7 +153,7 @@ namespace Microsoft.Alm.Authentication
         {
             BaseSecureStore.ValidateTargetUri(targetUri);
 
-            CredentialStore.DeleteCredentials(targetUri);
+            _credentialStore.DeleteCredentials(targetUri);
         }
 
         /// <summary>
@@ -166,7 +166,7 @@ namespace Microsoft.Alm.Authentication
         {
             BaseSecureStore.ValidateTargetUri(targetUri);
 
-            return CredentialStore.ReadCredentials(targetUri);
+            return _credentialStore.ReadCredentials(targetUri);
         }
 
         /// <summary>
@@ -181,7 +181,12 @@ namespace Microsoft.Alm.Authentication
             BaseSecureStore.ValidateTargetUri(targetUri);
             BaseSecureStore.ValidateCredential(credentials);
 
-            CredentialStore.WriteCredentials(targetUri, credentials);
+            // Credentials are stored during a GET operation when `AcquireCredentials` is called,
+            // and because there is more information available during a GET operation the outcome is
+            // likely different than when `SetCredentials` is called as part of a STORE operation.
+            // This means there is potential for credentials to be double stored. For example:
+            // https://user@domain.not and https://domain.not.
+            _credentialStore.WriteCredentials(targetUri, credentials);
         }
     }
 }

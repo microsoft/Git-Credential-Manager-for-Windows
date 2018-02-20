@@ -81,8 +81,8 @@ namespace Microsoft.Alm.Authentication.Test
 
         private static VstsMsaAuthentication GetVstsMsaAuthentication(string @namespace)
         {
-            ICredentialStore tokenStore1 = new SecretCache(@namespace + 1);
-            ITokenStore tokenStore2 = new SecretCache(@namespace + 2);
+            ICredentialStore tokenStore1 = new SecretCache(@namespace + 1, Secret.UriToIdentityUrl);
+            ITokenStore tokenStore2 = new SecretCache(@namespace + 2, Secret.UriToIdentityUrl);
             IVstsAuthority liveAuthority = new AuthorityFake(VstsMsaAuthentication.QueryParameters);
             return new VstsMsaAuthentication(tokenStore1, tokenStore2, liveAuthority);
         }

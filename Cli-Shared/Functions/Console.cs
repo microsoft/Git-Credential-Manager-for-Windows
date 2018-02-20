@@ -26,6 +26,7 @@
 using System;
 using System.ComponentModel;
 using System.Diagnostics;
+using System.IO;
 using System.Runtime.InteropServices;
 using System.Text;
 using Microsoft.Alm.Authentication;
@@ -175,12 +176,39 @@ namespace Microsoft.Alm.Cli
             Environment.Exit(exitcode);
         }
 
+        public static Stream OpenStandardErrorStream(Program program)
+            => Console.OpenStandardError();
+
+        public static TextWriter OpenStandardErrorWriter(Program program)
+            => Console.Error;
+
+        public static Stream OpenStandardInputStream(Program program)
+            => Console.OpenStandardInput();
+
+        public static TextReader OpenStandardInputReader(Program program)
+            => Console.In;
+
+        public static Stream OpenStandardOutputStream(Program program)
+            => Console.OpenStandardOutput();
+
+        public static TextWriter OpenStandardOutputWriter(Program program)
+            => Console.Out;
+
         public static ConsoleKeyInfo ReadKey(Program program, bool intercept)
         {
             return (program.StandardInputIsTty)
                 ? Console.ReadKey(intercept)
                 : new ConsoleKeyInfo(' ', ConsoleKey.Escape, false, false, false);
         }
+
+        public static void SetStandardErrorWriter(Program program, TextWriter writer)
+            => Console.SetError(writer);
+
+        public static void SetStandardInputReader(Program program, TextReader reader)
+            => Console.SetIn(reader);
+
+        public static void SetStandardOutputWriter(Program program, TextWriter writer)
+            => Console.SetOut(writer);
 
         public static bool StandardHandleIsTty(Program program, NativeMethods.StandardHandleType handleType)
         {

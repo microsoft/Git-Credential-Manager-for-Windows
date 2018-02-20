@@ -49,25 +49,19 @@ namespace Microsoft.Alm.Authentication
             {
                 try
                 {
-                    // Try the query uri
+                    // Try the query URI
                     string queryUrl = targetUri.QueryUri.ToString();
-                    // Try the actual uri
-                    string actualUrl = targetUri.ActualUri.ToString();
 
                     // Send off the HTTP requests and wait for them to complete
-                    var results = await Task.WhenAll(RequestAuthenticate(targetUri, queryUrl),
-                                                     RequestAuthenticate(targetUri, actualUrl));
+                    var result = await RequestAuthenticate(targetUri, queryUrl);
 
                     // If any of then returned true, then we're looking at a TFS server
                     HashSet<AuthenticationHeaderValue> set = new HashSet<AuthenticationHeaderValue>();
 
-                    // combine the results into a unique set
-                    foreach (var result in results)
+                    // Combine the results into a unique set
+                    foreach (var item in result)
                     {
-                        foreach (var item in result)
-                        {
-                            set.Add(item);
-                        }
+                        set.Add(item);
                     }
 
                     return set.ToArray();

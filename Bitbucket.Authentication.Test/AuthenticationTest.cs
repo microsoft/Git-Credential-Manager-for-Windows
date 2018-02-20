@@ -279,7 +279,7 @@ namespace Atlassian.Bitbucket.Authentication.Test
             var resultUri = targetUri.GetPerUserTargetUri(username);
 
             Assert.Equal("/", resultUri.AbsolutePath);
-            Assert.Equal("https://johnsquire@example.com/", resultUri.ActualUri.AbsoluteUri);
+            Assert.Equal("https://johnsquire@example.com/", resultUri.QueryUri.AbsoluteUri);
             Assert.Equal("example.com", resultUri.DnsSafeHost);
             Assert.Equal("example.com", resultUri.Host);
             Assert.True(resultUri.IsAbsoluteUri);
@@ -289,7 +289,7 @@ namespace Atlassian.Bitbucket.Authentication.Test
             Assert.Equal("https://johnsquire@example.com/", resultUri.QueryUri.AbsoluteUri);
             Assert.Equal("https", resultUri.Scheme);
             Assert.Equal(new WebProxy().Address, resultUri.WebProxy.Address);
-            Assert.Equal("https://example.com/", resultUri.ToString());
+            Assert.Equal("https://example.com/", resultUri.ToString(false, true, true));
         }
 
         [Fact]
@@ -304,7 +304,7 @@ namespace Atlassian.Bitbucket.Authentication.Test
             var resultUri = targetUri.GetPerUserTargetUri(username);
 
             Assert.Equal("/", resultUri.AbsolutePath);
-            Assert.Equal("https://johnsquire%40stoneroses.com@example.com/", resultUri.ActualUri.AbsoluteUri);
+            Assert.Equal("https://johnsquire%40stoneroses.com@example.com/", resultUri.QueryUri.AbsoluteUri);
             Assert.Equal("example.com", resultUri.DnsSafeHost);
             Assert.Equal("example.com", resultUri.Host);
             Assert.True(resultUri.IsAbsoluteUri);
@@ -314,7 +314,7 @@ namespace Atlassian.Bitbucket.Authentication.Test
             Assert.Equal("https://johnsquire%40stoneroses.com@example.com/", resultUri.QueryUri.AbsoluteUri);
             Assert.Equal("https", resultUri.Scheme);
             Assert.Equal(new WebProxy().Address, resultUri.WebProxy.Address);
-            Assert.Equal("https://example.com/", resultUri.ToString());
+            Assert.Equal("https://example.com/", resultUri.ToString(false, true, true));
         }
         [Fact]
         public void VerifyGetPerUserTargetUriDoesNotDuplicateUsernameOnActualUri()
@@ -328,7 +328,7 @@ namespace Atlassian.Bitbucket.Authentication.Test
             var resultUri = targetUri.GetPerUserTargetUri(username);
 
             Assert.Equal("/", resultUri.AbsolutePath);
-            Assert.Equal("https://johnsquire@example.com/", resultUri.ActualUri.AbsoluteUri);
+            Assert.Equal("https://johnsquire@example.com/", resultUri.QueryUri.AbsoluteUri);
             Assert.Equal("example.com", resultUri.DnsSafeHost);
             Assert.Equal("example.com", resultUri.Host);
             Assert.True(resultUri.IsAbsoluteUri);
@@ -338,7 +338,7 @@ namespace Atlassian.Bitbucket.Authentication.Test
             Assert.Equal("https://johnsquire@example.com/", resultUri.QueryUri.AbsoluteUri);
             Assert.Equal("https", resultUri.Scheme);
             Assert.Equal(new WebProxy().Address, resultUri.WebProxy.Address);
-            Assert.Equal("https://example.com/", resultUri.ToString());
+            Assert.Equal("https://example.com/", resultUri.ToString(false, true, true));
         }
     }
 
@@ -357,26 +357,27 @@ namespace Atlassian.Bitbucket.Authentication.Test
         public Secret.UriNameConversion UriNameConversion
         {
             get { throw new NotImplementedException(); }
+            set { throw new NotImplementedException(); }
         }
 
         public bool DeleteCredentials(TargetUri targetUri)
         {
             // do nothing
-            RecordMethodCall("DeleteCredentials", new List<string>() { targetUri.ActualUri.AbsoluteUri });
+            RecordMethodCall("DeleteCredentials", new List<string>() { targetUri.QueryUri.AbsoluteUri });
             return true;
         }
 
         public Credential ReadCredentials(TargetUri targetUri)
         {
             // do nothing
-            RecordMethodCall("ReadCredentials", new List<string>() { targetUri.ActualUri.AbsoluteUri });
-            return Credentials != null && Credentials.Keys.Contains(targetUri.ActualUri.AbsoluteUri) ? Credentials[targetUri.ActualUri.AbsoluteUri] : null;
+            RecordMethodCall("ReadCredentials", new List<string>() { targetUri.QueryUri.AbsoluteUri });
+            return Credentials != null && Credentials.Keys.Contains(targetUri.QueryUri.AbsoluteUri) ? Credentials[targetUri.QueryUri.AbsoluteUri] : null;
         }
 
         public bool WriteCredentials(TargetUri targetUri, Credential credentials)
         {
             // do nothing
-            RecordMethodCall("WriteCredentials", new List<string>() { targetUri.ActualUri.AbsoluteUri, credentials.Username, credentials.Password });
+            RecordMethodCall("WriteCredentials", new List<string>() { targetUri.QueryUri.AbsoluteUri, credentials.Username, credentials.Password });
             return true;
         }
 

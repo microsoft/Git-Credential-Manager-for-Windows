@@ -25,6 +25,7 @@
 
 using System;
 using System.Diagnostics;
+using System.IO;
 using System.Threading.Tasks;
 using Microsoft.Alm.Authentication;
 using Bitbucket = Atlassian.Bitbucket.Authentication;
@@ -54,6 +55,10 @@ namespace Microsoft.Alm.Cli
 
         internal delegate void ExitDelegate(Program program, int exitcode, string message, string path, int line, string name);
 
+        internal delegate TextReader GetStandardReaderDelegate(Program program);
+
+        internal delegate TextWriter GetStandardWriterDelegate(Program program);
+
         internal delegate bool GitHubAuthCodePromptDelegate(Program program, TargetUri targetUri, Github.GitHubAuthenticationResultType resultType, string username, out string authenticationCode);
 
         internal delegate bool GitHubCredentialPromptDelegate(Program program, TargetUri targetUri, out string username, out string password);
@@ -78,11 +83,17 @@ namespace Microsoft.Alm.Cli
 
         internal delegate Credential ModalPromptForPasswordDelegate(Program program, TargetUri targetUri, string message, string username);
 
+        internal delegate Stream OpenStandardHandleDelegate(Program program);
+
         internal delegate void PrintArgsDelegate(Program program, string[] args);
 
         internal delegate Credential QueryCredentialsDelegate(Program program, OperationArguments operationArguments);
 
         internal delegate ConsoleKeyInfo ReadKeyDelegate(Program program, bool intercept);
+
+        internal delegate void SetStandardReaderDelegate(Program program, TextReader writer);
+
+        internal delegate void SetStandardWriterDelegate(Program program, TextWriter writer);
 
         internal delegate bool StandardHandleIsTtyDelegate(Program program, NativeMethods.StandardHandleType handleType);
 
