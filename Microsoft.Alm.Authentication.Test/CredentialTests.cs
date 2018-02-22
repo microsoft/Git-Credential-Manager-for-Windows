@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Threading.Tasks;
 using Xunit;
 
 namespace Microsoft.Alm.Authentication.Test
@@ -41,34 +42,34 @@ namespace Microsoft.Alm.Authentication.Test
         [MemberData(nameof(CredentialData), DisableDiscoveryEnumeration = true)]
         public void Credential_WriteDelete(bool useCache, string url, string username, string password, bool throws)
         {
-            Action action = () =>
+            Action action = async () =>
             {
                 var uri = new TargetUri(url);
                 var writeCreds = new Credential(username, password);
                 var credentialStore = useCache
-                ? new SecretCache("test", Secret.UriToName) as ICredentialStore
-                : new SecretStore("test", null, null, Secret.UriToName) as ICredentialStore;
+                    ? new SecretCache("test", Secret.UriToName) as ICredentialStore
+                    : new SecretStore("test", null, null, Secret.UriToName) as ICredentialStore;
                 Credential readCreds = null;
 
-                credentialStore.WriteCredentials(uri, writeCreds);
+                await credentialStore.WriteCredentials(uri, writeCreds);
 
-                readCreds = credentialStore.ReadCredentials(uri);
+                readCreds = await credentialStore.ReadCredentials(uri);
                 Assert.NotNull(readCreds);
                 Assert.Equal(writeCreds.Password, readCreds.Password);
                 Assert.Equal(writeCreds.Username, readCreds.Username);
 
-                credentialStore.DeleteCredentials(uri);
+                await credentialStore.DeleteCredentials(uri);
 
-                Assert.Null(readCreds = credentialStore.ReadCredentials(uri));
+                Assert.Null(readCreds = await credentialStore.ReadCredentials(uri));
             };
 
             if (throws)
             {
-                Assert.Throws<ArgumentNullException>(action);
+                Assert.ThrowsAsync<ArgumentNullException>(() => Task.Run(action));
             }
             else
             {
-                action();
+                Task.Run(action).Wait();
             }
         }
 

@@ -115,6 +115,13 @@ namespace Microsoft.Alm.Authentication
             return this == other;
         }
 
+        /// <summary>
+        /// Produces the friendly name for a given token type.
+        /// <para/>
+        /// Returns `<see langword="true"/>` if successful; otherwise `<see langword="false"/>`.
+        /// </summary>
+        /// <param name="type">The type of token.</param>
+        /// <param name="name">The name of the token type.</param>
         public static bool GetFriendlyNameFromType(TokenType type, out string name)
         {
             Debug.Assert(Enum.IsDefined(typeof(TokenType), type), "The type parameter is invalid");
@@ -132,6 +139,13 @@ namespace Microsoft.Alm.Authentication
             return name != null;
         }
 
+        /// <summary>
+        /// Produces the token type for a given friendly name.
+        /// <para/>
+        /// Returns `<see langword="true"/>` if successful; otherwise `<see langword="false"/>`.
+        /// </summary>
+        /// <param name="name">The name of the token type.</param>
+        /// <param name="type">The type of token.</param>
         public static bool GetTypeFromFriendlyName(string name, out TokenType type)
         {
             if (string.IsNullOrWhiteSpace(name))
@@ -178,14 +192,27 @@ namespace Microsoft.Alm.Authentication
                 return base.ToString();
         }
 
+        /// <summary>
+        /// Validates a `<see cref="Token"/>`.
+        /// </summary>
+        /// <param name="token">The token to validate.</param>
+        /// <exception cref="ArgumentNullException">When `<paramref name="token"/>` is `<see langword="null"/>`.</exception>
+        /// <exception cref="ArgumentException">When `<paramref name="token"/>` value is `<see langword="null"/>`.</exception>
+        /// <exception cref="ArgumentOutOfRangeException">When `<paramref name="token"/>` value is too long.</exception>
         public static void Validate(Token token)
         {
             if (token is null)
                 throw new ArgumentNullException(nameof(token));
             if (string.IsNullOrWhiteSpace(token._value))
-                throw new ArgumentException("Value property returned null or empty.", nameof(token));
+            {
+                var inner = new NullReferenceException(nameof(token.Value));
+                throw new ArgumentException(inner.Message, nameof(token), inner);
+            }
             if (token._value.Length > NativeMethods.Credential.PasswordMaxLength)
-                throw new ArgumentOutOfRangeException(nameof(token));
+            {
+                var inner = new IndexOutOfRangeException(nameof(token.Value));
+                throw new ArgumentOutOfRangeException(nameof(token), token._value.Length, inner.Message);
+            }
         }
 
         internal static unsafe bool Deserialize(byte[] bytes, TokenType type, out Token token)
@@ -290,7 +317,10 @@ namespace Microsoft.Alm.Authentication
                 return null;
 
             if (token.Type != TokenType.Personal)
-                throw new InvalidCastException($"`{nameof(Token)}` -> `{nameof(Credential)}`");
+            {
+                var inner = new InvalidCastException("Only tokens of type '" + TokenType.Personal + "' can be cast to credentials.");
+                throw new ArgumentException(inner.Message, nameof(token), inner);
+            }
 
             return new Credential(token.ToString(), token._value);
         }
@@ -298,29 +328,29 @@ namespace Microsoft.Alm.Authentication
         /// <summary>
         /// Compares two tokens for equality.
         /// </summary>
-        /// <param name="left">Token to compare.</param>
-        /// <param name="right">Token to compare.</param>
+        /// <param name="lhs">Token to compare.</param>
+        /// <param name="rhs">Token to compare.</param>
         /// <returns><see langword="true"/> if equal; otherwise <see langword="false"/>.</returns>
-        public static bool operator ==(Token left, Token right)
+        public static bool operator ==(Token lhs, Token rhs)
         {
-            if (ReferenceEquals(left, right))
+            if (ReferenceEquals(lhs, rhs))
                 return true;
-            if (left is null || right is null)
+            if (lhs is null || rhs is null)
                 return false;
 
-            return left.Type == right.Type
-                && TokenComparer.Equals(left._value, right._value);
+            return lhs.Type == rhs.Type
+                && TokenComparer.Equals(lhs._value, rhs._value);
         }
 
         /// <summary>
         /// Compares two tokens for inequality.
         /// </summary>
-        /// <param name="left">Token to compare.</param>
-        /// <param name="right">Token to compare.</param>
+        /// <param name="lhs">Token to compare.</param>
+        /// <param name="rhs">Token to compare.</param>
         /// <returns><see langword="false"/> if equal; otherwise <see langword="true"/>.</returns>
-        public static bool operator !=(Token left, Token right)
+        public static bool operator !=(Token lhs, Token rhs)
         {
-            return !(left == right);
+            return !(lhs == rhs);
         }
     }
 }

@@ -23,19 +23,46 @@
  * WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE."
 **/
 
+using System.Threading.Tasks;
+
 namespace Microsoft.Alm.Authentication
 {
     public interface ICredentialStore
     {
+        /// <summary>
+        /// Gets the namespace use by this store when reading / writing tokens.
+        /// </summary>
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1716:IdentifiersShouldNotMatchKeywords", MessageId = "Namespace")]
         string Namespace { get; }
 
+        /// <summary>
+        /// Gets or sets the name conversion delegate used when reading / writing tokens.
+        /// </summary>
         Secret.UriNameConversion UriNameConversion { get; set; }
 
-        bool DeleteCredentials(TargetUri targetUri);
+        /// <summary>
+        /// Deletes a `<see cref="Credential"/>` from the underlying storage.
+        /// <para/>
+        /// Returns `<see langword="true"/>` if successful; otherwise `<see langword="false"/>`.
+        /// </summary>
+        /// <param name="targetUri">The key identifying which credential is being deleted.</param>
+        Task<bool> DeleteCredentials(TargetUri targetUri);
 
-        Credential ReadCredentials(TargetUri targetUri);
+        /// <summary>
+        /// Reads a `<see cref="Credential"/>` from the underlying storage.
+        /// <para/>
+        /// Returns a `<see cref="Credential"/>` from the store is successful; otherwise `<see langword="null"/>`.
+        /// </summary>
+        /// <param name="targetUri">The key identifying which credential to read.</param>
+        Task<Credential> ReadCredentials(TargetUri targetUri);
 
-        bool WriteCredentials(TargetUri targetUri, Credential credentials);
+        /// <summary>
+        /// Writes a `<see cref="Credential"/>` to the underlying storage.
+        /// </summary>
+        /// <param name="targetUri">
+        /// Unique identifier for the credential, used when reading back from storage.
+        /// </param>
+        /// <param name="token">The `<see cref="Credential"/>` to be written.</param>
+        Task<bool> WriteCredentials(TargetUri targetUri, Credential credentials);
     }
 }

@@ -28,283 +28,310 @@ using System.ComponentModel;
 using System.Diagnostics;
 using System.Runtime.InteropServices;
 using System.Text;
+using System.Threading.Tasks;
 
 namespace Microsoft.Alm.Authentication
 {
+#pragma warning disable CA1031
     public abstract class BaseSecureStore
     {
         public static readonly char[] IllegalCharacters = new[] { ':', ';', '\\', '?', '@', '=', '&', '%', '$' };
 
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Design", "CA1031:DoNotCatchGeneralExceptionTypes")]
-        protected bool Delete(string targetName)
+        protected Task<bool> Delete(string targetName)
         {
-            try
-            {
-                if (!NativeMethods.CredDelete(targetName, NativeMethods.CredentialType.Generic, 0))
-                {
-                    int error = Marshal.GetLastWin32Error();
-                    switch (error)
-                    {
-                        case NativeMethods.Win32Error.NotFound:
-                        case NativeMethods.Win32Error.NoSuchLogonSession:
-                            Git.Trace.WriteLine($"credentials not found for '{targetName}'.");
-                            break;
+            if (targetName is null)
+                throw new ArgumentNullException(nameof(targetName));
 
-                        default:
-                            throw new Win32Exception(error, "Failed to delete credentials for " + targetName);
+            return Task.Run(() =>
+            {
+                try
+                {
+                    if (!NativeMethods.CredDelete(targetName, NativeMethods.CredentialType.Generic, 0))
+                    {
+                        int error = Marshal.GetLastWin32Error();
+                        switch (error)
+                        {
+                            case NativeMethods.Win32Error.NotFound:
+                            case NativeMethods.Win32Error.NoSuchLogonSession:
+                                Git.Trace.WriteLine($"credentials not found for '{targetName}'.");
+                                break;
+
+                            default:
+                                throw new Win32Exception(error, "Failed to delete credentials for " + targetName);
+                        }
+                    }
+                    else
+                    {
+                        Git.Trace.WriteLine($"credentials for '{targetName}' deleted from store.");
                     }
                 }
-                else
+                catch (Exception exception)
                 {
-                    Git.Trace.WriteLine($"credentials for '{targetName}' deleted from store.");
+                    Debug.WriteLine(exception);
+                    return false;
                 }
-            }
-            catch (Exception exception)
-            {
-                Debug.WriteLine(exception);
-                return false;
-            }
 
-            return true;
+                return true;
+            });
         }
 
         protected abstract string GetTargetName(TargetUri targetUri);
 
-        protected void PurgeCredentials(string @namespace)
+        protected Task PurgeCredentials(string @namespace)
         {
-            string filter = @namespace + "*";
-            int count;
-            IntPtr credentialArrayPtr;
+            if (@namespace is null)
+                throw new ArgumentNullException(nameof(@namespace));
 
-            if (NativeMethods.CredEnumerate(filter, 0, out count, out credentialArrayPtr))
+            return Task.Run(() =>
             {
-                for (int i = 0; i < count; i += 1)
+                string filter = @namespace + "*";
+                int count;
+                IntPtr credentialArrayPtr;
+
+                if (NativeMethods.CredEnumerate(filter, 0, out count, out credentialArrayPtr))
                 {
-                    int offset = i * Marshal.SizeOf(typeof(IntPtr));
-                    IntPtr credentialPtr = Marshal.ReadIntPtr(credentialArrayPtr, offset);
-
-                    if (credentialPtr != IntPtr.Zero)
+                    for (int i = 0; i < count; i += 1)
                     {
-                        NativeMethods.Credential credential = Marshal.PtrToStructure<NativeMethods.Credential>(credentialPtr);
+                        int offset = i * Marshal.SizeOf(typeof(IntPtr));
+                        IntPtr credentialPtr = Marshal.ReadIntPtr(credentialArrayPtr, offset);
 
-                        if (!NativeMethods.CredDelete(credential.TargetName, credential.Type, 0))
+                        if (credentialPtr != IntPtr.Zero)
                         {
-                            int error = Marshal.GetLastWin32Error();
-                            if (error != NativeMethods.Win32Error.FileNotFound)
+                            NativeMethods.Credential credential = Marshal.PtrToStructure<NativeMethods.Credential>(credentialPtr);
+
+                            if (!NativeMethods.CredDelete(credential.TargetName, credential.Type, 0))
                             {
-                                Debug.Fail("Failed with error code " + error.ToString("X"));
+                                int error = Marshal.GetLastWin32Error();
+                                if (error != NativeMethods.Win32Error.FileNotFound)
+                                {
+                                    Debug.Fail("Failed with error code " + error.ToString("X"));
+                                }
+                            }
+                            else
+                            {
+                                Git.Trace.WriteLine($"credentials for '{@namespace}' purged from store.");
                             }
                         }
-                        else
-                        {
-                            Git.Trace.WriteLine($"credentials for '{@namespace}' purged from store.");
-                        }
                     }
+
+                    NativeMethods.CredFree(credentialArrayPtr);
                 }
-
-                NativeMethods.CredFree(credentialArrayPtr);
-            }
-            else
-            {
-                int error = Marshal.GetLastWin32Error();
-                if (error != NativeMethods.Win32Error.FileNotFound
-                    && error != NativeMethods.Win32Error.NotFound)
-                {
-                    Debug.Fail("Failed with error code " + error.ToString("X"));
-                }
-            }
-        }
-
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Design", "CA1031:DoNotCatchGeneralExceptionTypes")]
-        protected Credential ReadCredentials(string targetName)
-        {
-            Credential credentials = null;
-            IntPtr credPtr = IntPtr.Zero;
-
-            try
-            {
-                if (NativeMethods.CredRead(targetName, NativeMethods.CredentialType.Generic, 0, out credPtr))
-                {
-                    NativeMethods.Credential credStruct = (NativeMethods.Credential)Marshal.PtrToStructure(credPtr, typeof(NativeMethods.Credential));
-                    int passwordLength = (int)credStruct.CredentialBlobSize;
-
-                    string password = passwordLength > 0
-                                    ? Marshal.PtrToStringUni(credStruct.CredentialBlob, passwordLength / sizeof(char))
-                                    : string.Empty;
-                    string username = credStruct.UserName ?? string.Empty;
-
-                    credentials = new Credential(username, password);
-
-                    Git.Trace.WriteLine($"credentials for '{targetName}' read from store.");
-                }
-            }
-            catch (Exception exception)
-            {
-                Debug.WriteLine(exception);
-
-                Git.Trace.WriteLine($"failed to read credentials: {exception.GetType().Name}.");
-
-                return null;
-            }
-            finally
-            {
-                if (credPtr != IntPtr.Zero)
-                {
-                    NativeMethods.CredFree(credPtr);
-                }
-            }
-
-            return credentials;
-        }
-
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Design", "CA1031:DoNotCatchGeneralExceptionTypes")]
-        protected Token ReadToken(string targetName)
-        {
-            Token token = null;
-            IntPtr credPtr = IntPtr.Zero;
-
-            try
-            {
-                if (NativeMethods.CredRead(targetName, NativeMethods.CredentialType.Generic, 0, out credPtr))
-                {
-                    NativeMethods.Credential credStruct = (NativeMethods.Credential)Marshal.PtrToStructure(credPtr, typeof(NativeMethods.Credential));
-                    if (credStruct.CredentialBlob != null && credStruct.CredentialBlobSize > 0)
-                    {
-                        int size = (int)credStruct.CredentialBlobSize;
-                        byte[] bytes = new byte[size];
-                        Marshal.Copy(credStruct.CredentialBlob, bytes, 0, size);
-
-                        TokenType type;
-                        if (Token.GetTypeFromFriendlyName(credStruct.UserName, out type))
-                        {
-                            Token.Deserialize(bytes, type, out token);
-                        }
-
-                        Git.Trace.WriteLine($"token for '{targetName}' read from store.");
-                    }
-                }
-            }
-            catch (Exception exception)
-            {
-                Debug.WriteLine(exception);
-
-                Git.Trace.WriteLine($"failed to read credentials: {exception.GetType().Name}.");
-
-                return null;
-            }
-            finally
-            {
-                if (credPtr != IntPtr.Zero)
-                {
-                    NativeMethods.CredFree(credPtr);
-                }
-            }
-
-            return token;
-        }
-
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Design", "CA1031:DoNotCatchGeneralExceptionTypes")]
-        protected bool WriteCredential(string targetName, Credential credentials)
-        {
-            if (ReferenceEquals(targetName, null))
-                throw new ArgumentNullException(nameof(targetName));
-            if (ReferenceEquals(credentials, null))
-                throw new ArgumentNullException(nameof(credentials));
-
-            NativeMethods.Credential credential = new NativeMethods.Credential()
-            {
-                Type = NativeMethods.CredentialType.Generic,
-                TargetName = targetName,
-                CredentialBlob = Marshal.StringToCoTaskMemUni(credentials.Password),
-                CredentialBlobSize = (uint)Encoding.Unicode.GetByteCount(credentials.Password),
-                Persist = NativeMethods.CredentialPersist.LocalMachine,
-                AttributeCount = 0,
-                UserName = credentials.Username,
-            };
-            try
-            {
-                if (!NativeMethods.CredWrite(ref credential, 0))
+                else
                 {
                     int error = Marshal.GetLastWin32Error();
-                    throw new Win32Exception(error, "Failed to write credentials");
+                    if (error != NativeMethods.Win32Error.FileNotFound
+                        && error != NativeMethods.Win32Error.NotFound)
+                    {
+                        Debug.Fail("Failed with error code " + error.ToString("X"));
+                    }
                 }
-
-                Git.Trace.WriteLine($"credentials for '{targetName}' written to store.");
-            }
-            catch (Exception exception)
-            {
-                Debug.WriteLine(exception);
-
-                Git.Trace.WriteLine($"failed to write credentials: {exception.GetType().Name}.");
-
-                return false;
-            }
-            finally
-            {
-                if (credential.CredentialBlob != IntPtr.Zero)
-                {
-                    Marshal.FreeCoTaskMem(credential.CredentialBlob);
-                }
-            }
-
-            return true;
+            });
         }
 
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Design", "CA1031:DoNotCatchGeneralExceptionTypes")]
-        protected bool WriteToken(string targetName, Token token)
+        protected Task<Credential> ReadCredentials(string targetName)
         {
-            if (ReferenceEquals(targetName, null))
+            if (targetName is null)
                 throw new ArgumentNullException(nameof(targetName));
-            if (ReferenceEquals(token, null))
-                throw new ArgumentNullException(nameof(token));
 
-            byte[] bytes = null;
-            if (Token.Serialize(token, out bytes))
+            return Task.Run(() =>
             {
-                string name;
-                if (Token.GetFriendlyNameFromType(token.Type, out name))
+                Credential credentials = null;
+                IntPtr credPtr = IntPtr.Zero;
+
+                try
                 {
-                    NativeMethods.Credential credential = new NativeMethods.Credential()
+                    if (NativeMethods.CredRead(targetName, NativeMethods.CredentialType.Generic, 0, out credPtr))
                     {
-                        Type = NativeMethods.CredentialType.Generic,
-                        TargetName = targetName,
-                        CredentialBlobSize = (uint)bytes.Length,
-                        Persist = NativeMethods.CredentialPersist.LocalMachine,
-                        AttributeCount = 0,
-                        UserName = name,
-                    };
-                    try
-                    {
-                        credential.CredentialBlob = Marshal.AllocCoTaskMem(bytes.Length);
-                        Marshal.Copy(bytes, 0, credential.CredentialBlob, bytes.Length);
+                        NativeMethods.Credential credStruct = (NativeMethods.Credential)Marshal.PtrToStructure(credPtr, typeof(NativeMethods.Credential));
+                        int passwordLength = (int)credStruct.CredentialBlobSize;
 
-                        if (!NativeMethods.CredWrite(ref credential, 0))
-                        {
-                            int error = Marshal.GetLastWin32Error();
-                            throw new Win32Exception(error, "Failed to write credentials");
-                        }
+                        string password = passwordLength > 0
+                                        ? Marshal.PtrToStringUni(credStruct.CredentialBlob, passwordLength / sizeof(char))
+                                        : string.Empty;
+                        string username = credStruct.UserName ?? string.Empty;
 
-                        Git.Trace.WriteLine($"token for '{targetName}' written to store.");
+                        credentials = new Credential(username, password);
+
+                        Git.Trace.WriteLine($"credentials for '{targetName}' read from store.");
                     }
-                    catch (Exception exception)
+                }
+                catch (Exception exception)
+                {
+                    Debug.WriteLine(exception);
+
+                    Git.Trace.WriteLine($"failed to read credentials: {exception.GetType().Name}.");
+
+                    return null;
+                }
+                finally
+                {
+                    if (credPtr != IntPtr.Zero)
                     {
-                        Debug.WriteLine(exception);
-
-                        Git.Trace.WriteLine($"failed to write credentials: {exception.GetType().Name}.");
-
-                        return false;
+                        NativeMethods.CredFree(credPtr);
                     }
-                    finally
+                }
+
+                return credentials;
+            });
+        }
+
+        protected Task<Token> ReadToken(string targetName)
+        {
+            if (targetName is null)
+                throw new ArgumentNullException(nameof(targetName));
+
+            return Task.Run(() =>
+            {
+                Token token = null;
+                IntPtr credPtr = IntPtr.Zero;
+
+                try
+                {
+                    if (NativeMethods.CredRead(targetName, NativeMethods.CredentialType.Generic, 0, out credPtr))
                     {
-                        if (credential.CredentialBlob != IntPtr.Zero)
+                        NativeMethods.Credential credStruct = (NativeMethods.Credential)Marshal.PtrToStructure(credPtr, typeof(NativeMethods.Credential));
+                        if (credStruct.CredentialBlob != null && credStruct.CredentialBlobSize > 0)
                         {
-                            Marshal.FreeCoTaskMem(credential.CredentialBlob);
+                            int size = (int)credStruct.CredentialBlobSize;
+                            byte[] bytes = new byte[size];
+                            Marshal.Copy(credStruct.CredentialBlob, bytes, 0, size);
+
+                            TokenType type;
+                            if (Token.GetTypeFromFriendlyName(credStruct.UserName, out type))
+                            {
+                                Token.Deserialize(bytes, type, out token);
+                            }
+
+                            Git.Trace.WriteLine($"token for '{targetName}' read from store.");
                         }
                     }
                 }
-            }
+                catch (Exception exception)
+                {
+                    Debug.WriteLine(exception);
 
-            return true;
+                    Git.Trace.WriteLine($"failed to read credentials: {exception.GetType().Name}.");
+
+                    return null;
+                }
+                finally
+                {
+                    if (credPtr != IntPtr.Zero)
+                    {
+                        NativeMethods.CredFree(credPtr);
+                    }
+                }
+
+                return token;
+            });
+        }
+
+        protected Task<bool> WriteCredential(string targetName, Credential credentials)
+        {
+            if (targetName is null)
+                throw new ArgumentNullException(nameof(targetName));
+            if (credentials is null)
+                throw new ArgumentNullException(nameof(credentials));
+
+            return Task.Run(() =>
+            {
+                NativeMethods.Credential credential = new NativeMethods.Credential()
+                {
+                    Type = NativeMethods.CredentialType.Generic,
+                    TargetName = targetName,
+                    CredentialBlob = Marshal.StringToCoTaskMemUni(credentials.Password),
+                    CredentialBlobSize = (uint)Encoding.Unicode.GetByteCount(credentials.Password),
+                    Persist = NativeMethods.CredentialPersist.LocalMachine,
+                    AttributeCount = 0,
+                    UserName = credentials.Username,
+                };
+                try
+                {
+                    if (!NativeMethods.CredWrite(ref credential, 0))
+                    {
+                        int error = Marshal.GetLastWin32Error();
+                        throw new Win32Exception(error, "Failed to write credentials");
+                    }
+
+                    Git.Trace.WriteLine($"credentials for '{targetName}' written to store.");
+                }
+                catch (Exception exception)
+                {
+                    Debug.WriteLine(exception);
+
+                    Git.Trace.WriteLine($"failed to write credentials: {exception.GetType().Name}.");
+
+                    return false;
+                }
+                finally
+                {
+                    if (credential.CredentialBlob != IntPtr.Zero)
+                    {
+                        Marshal.FreeCoTaskMem(credential.CredentialBlob);
+                    }
+                }
+
+                return true;
+            });
+        }
+
+        protected Task<bool> WriteToken(string targetName, Token token)
+        {
+            if (targetName is null)
+                throw new ArgumentNullException(nameof(targetName));
+            if (token is null)
+                throw new ArgumentNullException(nameof(token));
+
+            return Task.Run(() =>
+            {
+                byte[] bytes = null;
+                if (Token.Serialize(token, out bytes))
+                {
+                    string name;
+                    if (Token.GetFriendlyNameFromType(token.Type, out name))
+                    {
+                        NativeMethods.Credential credential = new NativeMethods.Credential()
+                        {
+                            Type = NativeMethods.CredentialType.Generic,
+                            TargetName = targetName,
+                            CredentialBlobSize = (uint)bytes.Length,
+                            Persist = NativeMethods.CredentialPersist.LocalMachine,
+                            AttributeCount = 0,
+                            UserName = name,
+                        };
+                        try
+                        {
+                            credential.CredentialBlob = Marshal.AllocCoTaskMem(bytes.Length);
+                            Marshal.Copy(bytes, 0, credential.CredentialBlob, bytes.Length);
+
+                            if (!NativeMethods.CredWrite(ref credential, 0))
+                            {
+                                int error = Marshal.GetLastWin32Error();
+                                throw new Win32Exception(error, "Failed to write credentials");
+                            }
+
+                            Git.Trace.WriteLine($"token for '{targetName}' written to store.");
+                        }
+                        catch (Exception exception)
+                        {
+                            Debug.WriteLine(exception);
+
+                            Git.Trace.WriteLine($"failed to write credentials: {exception.GetType().Name}.");
+
+                            return false;
+                        }
+                        finally
+                        {
+                            if (credential.CredentialBlob != IntPtr.Zero)
+                            {
+                                Marshal.FreeCoTaskMem(credential.CredentialBlob);
+                            }
+                        }
+                    }
+                }
+
+                return true;
+            });
         }
 
         [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
@@ -341,5 +368,7 @@ namespace Microsoft.Alm.Authentication
                 throw new ArgumentException(innerException.Message, nameof(token), innerException);
             }
         }
+
+#pragma warning restore CA1031
     }
 }

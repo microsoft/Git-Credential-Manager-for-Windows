@@ -34,9 +34,9 @@ namespace Microsoft.Alm.Authentication
 {
     internal class WwwAuthenticateHelper
     {
-        internal static readonly Credential Credentials = new Credential(string.Empty, string.Empty);
-        internal static readonly AuthenticationHeaderValue NtlmHeader = new AuthenticationHeaderValue("NTLM");
-        internal static readonly AuthenticationHeaderValue NegotiateHeader = new AuthenticationHeaderValue("Negotiate");
+        public static readonly Credential Credentials = new Credential(string.Empty, string.Empty);
+        public static readonly AuthenticationHeaderValue NtlmHeader = new AuthenticationHeaderValue("NTLM");
+        public static readonly AuthenticationHeaderValue NegotiateHeader = new AuthenticationHeaderValue("Negotiate");
 
         private static readonly AuthenticationHeaderValue[] NullResult = new AuthenticationHeaderValue[0];
 

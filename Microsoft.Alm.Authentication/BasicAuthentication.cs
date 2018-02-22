@@ -44,7 +44,7 @@ namespace Microsoft.Alm.Authentication
         /// <param name="ntlmSupport">
         /// /The level of NTLM support to be provided by this instance./
         /// <para/>
-        /// If ` <see cref="NtlmSupport.Always"/>` is used, the `<paramref name="acquireCredentialsCallback"/>` and `<paramref name="acquireResultCallback"/>` will be ignored by ` <see cref="GetCredentials(TargetUri)"/>`.
+        /// If `<see cref="NtlmSupport.Always"/>` is used, the `<paramref name="acquireCredentialsCallback"/>` and `<paramref name="acquireResultCallback"/>` will be ignored by ` <see cref="GetCredentials(TargetUri)"/>`.
         /// </param>
         /// <param name="acquireCredentialsCallback">(optional) delegate for acquiring credentials.</param>
         /// <param name="acquireResultCallback">Optional delegate for notification of acquisition results.</param>
@@ -54,7 +54,7 @@ namespace Microsoft.Alm.Authentication
             AcquireCredentialsDelegate acquireCredentialsCallback,
             AcquireResultDelegate acquireResultCallback)
         {
-            if (credentialStore == null)
+            if (credentialStore is null)
                 throw new ArgumentNullException(nameof(credentialStore));
 
             _acquireCredentials = acquireCredentialsCallback;
@@ -68,7 +68,7 @@ namespace Microsoft.Alm.Authentication
         { }
 
         /// <summary>
-        /// Gets the underlying credential store for this instance of `<see cref="BasicAuthentication"/>`.
+        /// Gets the underlying credential store for this instance.
         /// </summary>
         internal ICredentialStore CredentialStore
         {
@@ -76,7 +76,7 @@ namespace Microsoft.Alm.Authentication
         }
 
         /// <summary>
-        /// Gets the level of NTLM support for this instance of `<see cref="BasicAuthentication"/>`.
+        /// Gets the level of NTLM support for this instance.
         /// </summary>
         public NtlmSupport NtlmSupport
         {
@@ -92,7 +92,7 @@ namespace Microsoft.Alm.Authentication
         /// <summary>
         /// Acquires credentials via the registered callbacks.
         /// <para/>
-        /// Returns `<see cref="Credential"/>` from the authentication object, authority or storage if successful; otherwise `<see langword="null"/>`.
+        /// Returns `<see cref="Credential"/>` from the authentication object, authority, or storage if successful; otherwise `<see langword="null"/>`.
         /// </summary>
         /// <param name="targetUri">
         /// The uniform resource indicator used to uniquely identify the credentials.
@@ -124,7 +124,7 @@ namespace Microsoft.Alm.Authentication
             {
                 Git.Trace.WriteLine($"prompting user for credentials for '{targetUri}'.");
 
-                credentials = _acquireCredentials(targetUri);
+                credentials = await _acquireCredentials(targetUri);
 
                 if (_acquireResult != null)
                 {
@@ -132,14 +132,14 @@ namespace Microsoft.Alm.Authentication
                         ? AcquireCredentialResult.Failed
                         : AcquireCredentialResult.Suceeded;
 
-                    _acquireResult(targetUri, result);
+                    await _acquireResult(targetUri, result);
                 }
             }
 
             // If credentials have been acquired, write them to the secret store.
             if (credentials != null)
             {
-                _credentialStore.WriteCredentials(targetUri, credentials);
+                await _credentialStore.WriteCredentials(targetUri, credentials);
             }
 
             return credentials;
@@ -149,11 +149,11 @@ namespace Microsoft.Alm.Authentication
         /// Deletes `<see cref="Credential"/>` from the storage used by the authentication object.
         /// </summary>
         /// <param name="targetUri">The uniform resource indicator used to uniquely identify the credentials.</param>
-        public override void DeleteCredentials(TargetUri targetUri)
+        public override async Task<bool> DeleteCredentials(TargetUri targetUri)
         {
             BaseSecureStore.ValidateTargetUri(targetUri);
 
-            _credentialStore.DeleteCredentials(targetUri);
+            return await _credentialStore.DeleteCredentials(targetUri);
         }
 
         /// <summary>
@@ -162,11 +162,11 @@ namespace Microsoft.Alm.Authentication
         /// Returns a `<see cref="Credential"/>` if successful; otherwise `<see langword="null"/>`.
         /// </summary>
         /// <param name="targetUri">The uniform resource indicator used to uniquely identify the credentials.</param>
-        public override Credential GetCredentials(TargetUri targetUri)
+        public override async Task<Credential> GetCredentials(TargetUri targetUri)
         {
             BaseSecureStore.ValidateTargetUri(targetUri);
 
-            return _credentialStore.ReadCredentials(targetUri);
+            return await _credentialStore.ReadCredentials(targetUri);
         }
 
         /// <summary>
@@ -176,7 +176,7 @@ namespace Microsoft.Alm.Authentication
         /// The uniform resource indicator used to uniquely identify the credentials.
         /// </param>
         /// <param name="credentials">The value to be stored.</param>
-        public override void SetCredentials(TargetUri targetUri, Credential credentials)
+        public override async Task<bool> SetCredentials(TargetUri targetUri, Credential credentials)
         {
             BaseSecureStore.ValidateTargetUri(targetUri);
             BaseSecureStore.ValidateCredential(credentials);
@@ -186,7 +186,7 @@ namespace Microsoft.Alm.Authentication
             // likely different than when `SetCredentials` is called as part of a STORE operation.
             // This means there is potential for credentials to be double stored. For example:
             // https://user@domain.not and https://domain.not.
-            _credentialStore.WriteCredentials(targetUri, credentials);
+            return await _credentialStore.WriteCredentials(targetUri, credentials);
         }
     }
 }

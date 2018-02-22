@@ -24,17 +24,18 @@
 **/
 
 using System;
+using System.Threading.Tasks;
 
 namespace Microsoft.Alm.Authentication
 {
     /// <summary>
     /// Interface to secure secrets storage which indexes values by target and utilizes the operating
-    /// system keychain / secrets vault.
+    /// system key-chain / secrets vault.
     /// </summary>
     public sealed class SecretStore : BaseSecureStore, ICredentialStore, ITokenStore
     {
         /// <summary>
-        /// Creates a new <see cref="SecretStore"/> backed by the operating system keychain / secrets vault.
+        /// Creates a new `<see cref="SecretStore"/>` backed by the operating system key-chain / secrets vault.
         /// </summary>
         /// <param name="namespace">The namespace of the secrets written and read by this store.</param>
         /// <param name="credentialCache">
@@ -65,11 +66,22 @@ namespace Microsoft.Alm.Authentication
             : this(@namespace, null, null, null)
         { }
 
+        private string _namespace;
+        private ICredentialStore _credentialCache;
+        private Secret.UriNameConversion _getTargetName;
+        private ITokenStore _tokenCache;
+
+        /// <summary>
+        /// Gets the namespace use by this store when reading / writing tokens.
+        /// </summary>
         public string Namespace
         {
             get { return _namespace; }
         }
 
+        /// <summary>
+        /// Gets or sets the name conversion delegate used when reading / writing tokens.
+        /// </summary>
         public Secret.UriNameConversion UriNameConversion
         {
             get { return _getTargetName; }
@@ -82,115 +94,118 @@ namespace Microsoft.Alm.Authentication
             }
         }
 
-        private string _namespace;
-        private ICredentialStore _credentialCache;
-        private Secret.UriNameConversion _getTargetName;
-        private ITokenStore _tokenCache;
-
         /// <summary>
-        /// Deletes credentials for target URI from the credential store
+        /// Deletes credentials for target URI from the credential store.
+        /// <para/>
+        /// Returns `<see langword="true"/>` if successful; otherwise `<see langword="false"/>`.
         /// </summary>
         /// <param name="targetUri">The URI of the target for which credentials are being deleted</param>
-        public bool DeleteCredentials(TargetUri targetUri)
+        public async Task<bool> DeleteCredentials(TargetUri targetUri)
         {
             ValidateTargetUri(targetUri);
 
             string targetName = GetTargetName(targetUri);
 
-            return Delete(targetName)
-                && _credentialCache.DeleteCredentials(targetUri);
+            return await Delete(targetName)
+                && await _credentialCache.DeleteCredentials(targetUri);
         }
 
         /// <summary>
-        /// Deletes the token for target URI from the token store
+        /// Deletes the token for target URI from the token store.
+        /// <para/>
+        /// Returns `<see langword="true"/>` if successful; otherwise `<see langword="false"/>`.
         /// </summary>
         /// <param name="targetUri">The URI of the target for which the token is being deleted</param>
-        public bool DeleteToken(TargetUri targetUri)
+        public async Task<bool> DeleteToken(TargetUri targetUri)
         {
             ValidateTargetUri(targetUri);
 
             string targetName = GetTargetName(targetUri);
 
-            return Delete(targetName)
-                && _tokenCache.DeleteToken(targetUri);
+            return await Delete(targetName)
+                && await _tokenCache.DeleteToken(targetUri);
         }
 
         /// <summary>
         /// Purges all credentials from the store.
         /// </summary>
-        public void PurgeCredentials()
+        public async Task PurgeCredentials()
         {
-            PurgeCredentials(_namespace);
+            await PurgeCredentials(_namespace);
         }
 
         /// <summary>
-        /// Reads credentials for a target URI from the credential store
+        /// Reads credentials for a target URI from the credential store.
+        /// <para/>
+        /// Returns `<see cref="Credential"/>` from the store if successful; otherwise `<see langword="null"/>`.
         /// </summary>
         /// <param name="targetUri">The URI of the target for which credentials are being read</param>
-        /// <param name="credentials"></param>
-        /// <returns>A <see cref="Credential"/> from the store is successful; otherwise <see langword="null"/>.</returns>
-        public Credential ReadCredentials(TargetUri targetUri)
+        public async Task<Credential> ReadCredentials(TargetUri targetUri)
         {
             ValidateTargetUri(targetUri);
 
             string targetName = GetTargetName(targetUri);
 
-            return _credentialCache.ReadCredentials(targetUri)
-                ?? ReadCredentials(targetName);
+            return await _credentialCache.ReadCredentials(targetUri)
+                ?? await ReadCredentials(targetName);
         }
 
         /// <summary>
-        /// Reads a token for a target URI from the token store
+        /// Reads a token for a target URI from the token store.
+        /// <para/>
+        /// Returns `<see cref="Token"/>` from the store if successful; otherwise `<see langword="null"/>`.
         /// </summary>
         /// <param name="targetUri">The URI of the target for which a token is being read</param>
-        /// <returns>A <see cref="Token"/> from the store is successful; otherwise <see langword="null"/>.</returns>
-        public Token ReadToken(TargetUri targetUri)
+        public async Task<Token> ReadToken(TargetUri targetUri)
         {
             ValidateTargetUri(targetUri);
 
             string targetName = GetTargetName(targetUri);
 
-            return _tokenCache.ReadToken(targetUri)
-                ?? ReadToken(targetName);
+            return await _tokenCache.ReadToken(targetUri)
+                ?? await ReadToken(targetName);
         }
 
         /// <summary>
-        /// Writes credentials for a target URI to the credential store
+        /// Writes credentials for a target URI to the credential store.
+        /// <para/>
+        /// Returns `<see langword="true"/>` if successful; otherwise `<see langword="false"/>`.
         /// </summary>
         /// <param name="targetUri">The URI of the target for which credentials are being stored</param>
         /// <param name="credentials">The credentials to be stored</param>
-        public bool WriteCredentials(TargetUri targetUri, Credential credentials)
+        public async Task<bool> WriteCredentials(TargetUri targetUri, Credential credentials)
         {
             ValidateTargetUri(targetUri);
             BaseSecureStore.ValidateCredential(credentials);
 
             string targetName = GetTargetName(targetUri);
 
-            return WriteCredential(targetName, credentials)
-                && _credentialCache.WriteCredentials(targetUri, credentials);
+            return await WriteCredential(targetName, credentials)
+                && await _credentialCache.WriteCredentials(targetUri, credentials);
         }
 
         /// <summary>
-        /// Writes a token for a target URI to the token store
+        /// Writes a token for a target URI to the token store.
+        /// <para/>
+        /// Returns `<see langword="true"/>` if successful; otherwise `<see langword="false"/>`.
         /// </summary>
         /// <param name="targetUri">The URI of the target for which a token is being stored</param>
         /// <param name="token">The token to be stored</param>
-        public bool WriteToken(TargetUri targetUri, Token token)
+        public async Task<bool> WriteToken(TargetUri targetUri, Token token)
         {
             ValidateTargetUri(targetUri);
             Token.Validate(token);
 
             string targetName = GetTargetName(targetUri);
 
-            return WriteToken(targetName, token)
-                && _tokenCache.WriteToken(targetUri, token);
+            return await WriteToken(targetName, token)
+                && await _tokenCache.WriteToken(targetUri, token);
         }
 
         /// <summary>
-        /// Formats a TargetName string based on the TargetUri base on the format started by git-credential-winstore
+        /// Returns a formatted TargetName string based on the TargetUri base on the format started by "git-credential-winstore".
         /// </summary>
         /// <param name="targetUri">Uri of the target</param>
-        /// <returns>Properly formatted TargetName string</returns>
         protected override string GetTargetName(TargetUri targetUri)
         {
             BaseSecureStore.ValidateTargetUri(targetUri);
