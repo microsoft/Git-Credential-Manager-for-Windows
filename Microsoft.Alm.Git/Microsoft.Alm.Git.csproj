@@ -29,7 +29,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Configuration.cs" />
+    <Compile Include="ConfigurationCollection.cs" />
     <Compile Include="ConfigurationLevel.cs" />
     <Compile Include="GitInstallation.cs" />
     <Compile Include="GlobalSuppressions.cs" />

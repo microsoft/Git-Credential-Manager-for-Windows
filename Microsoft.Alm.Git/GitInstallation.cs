@@ -171,7 +171,7 @@ namespace Microsoft.Alm.Git
         {
             get
             {
-                if (_config == null)
+                if (_config is null)
                 {
                     _config = System.IO.Path.Combine(_path, CommonConfigPaths[_distribution]);
                 }
@@ -186,7 +186,7 @@ namespace Microsoft.Alm.Git
         {
             get
             {
-                if (_cmd == null)
+                if (_cmd is null)
                 {
                     _cmd = System.IO.Path.Combine(_path, CommonCmdPaths[_distribution]);
                 }
@@ -201,7 +201,7 @@ namespace Microsoft.Alm.Git
         {
             get
             {
-                if (_doc == null)
+                if (_doc is null)
                 {
                     _doc = System.IO.Path.Combine(_path, CommonDocPaths[_distribution]);
                 }
@@ -216,7 +216,7 @@ namespace Microsoft.Alm.Git
         {
             get
             {
-                if (_git == null)
+                if (_git is null)
                 {
                     _git = System.IO.Path.Combine(_path, CommonGitPaths[_distribution]);
                 }
@@ -231,7 +231,7 @@ namespace Microsoft.Alm.Git
         {
             get
             {
-                if (_libexec == null)
+                if (_libexec is null)
                 {
                     _libexec = System.IO.Path.Combine(_path, CommonLibexecPaths[_distribution]);
                 }
@@ -272,8 +272,8 @@ namespace Microsoft.Alm.Git
 
         public override bool Equals(object obj)
         {
-            if (obj is GitInstallation)
-                return this == (GitInstallation)obj;
+            if (obj is GitInstallation other)
+                return Equals(other);
 
             return false;
         }

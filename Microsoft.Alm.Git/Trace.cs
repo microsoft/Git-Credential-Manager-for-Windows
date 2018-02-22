@@ -27,6 +27,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Text;
+using System.Threading.Tasks;
 
 namespace Microsoft.Alm.Git
 {
@@ -34,9 +35,9 @@ namespace Microsoft.Alm.Git
     {
         void AddListener(TextWriter listener);
 
-        void Flush();
+        Task Flush();
 
-        void WriteLine(string message, string filePath, int lineNumber, string memberName);
+        Task WriteLine(string message, string filePath, int lineNumber, string memberName);
     }
 
     public sealed class Trace : ITrace, IDisposable
@@ -53,7 +54,7 @@ namespace Microsoft.Alm.Git
                 string traceValue = Environment.GetEnvironmentVariable(EnvironmentVariableKey);
 
                 // if the value is true or a number greater than zero, then trace to standard error
-                if (Configuration.PaserBoolean(traceValue))
+                if (ConfigurationCollection.PaserBoolean(traceValue))
                 {
                     _writers.Add(Console.Error);
                 }
@@ -207,42 +208,48 @@ namespace Microsoft.Alm.Git
             }
         }
 
-        void ITrace.Flush()
+        Task ITrace.Flush()
         {
-            lock (_syncpoint)
+            return Task.Run(() =>
             {
-                foreach (var writer in _writers)
+                lock (_syncpoint)
                 {
-                    try
+                    foreach (var writer in _writers)
                     {
-                        writer?.Flush();
+                        try
+                        {
+                            writer?.Flush();
+                        }
+                        catch
+                        { /* squelch */ }
                     }
-                    catch
-                    { /* squelch */ }
                 }
-            }
+            });
         }
 
-        void ITrace.WriteLine(string message, string filePath, int lineNumber, string memberName)
+        Task ITrace.WriteLine(string message, string filePath, int lineNumber, string memberName)
         {
-            lock (_syncpoint)
+            return Task.Run(() =>
             {
-                if (_writers.Count == 0)
-                    return;
-
-                string text = FormatText(message, filePath, lineNumber, memberName);
-
-                foreach (var writer in _writers)
+                lock (_syncpoint)
                 {
-                    try
+                    if (_writers.Count == 0)
+                        return;
+
+                    string text = FormatText(message, filePath, lineNumber, memberName);
+
+                    foreach (var writer in _writers)
                     {
-                        writer?.Write(text);
-                        writer?.Write('\n');
-                        writer?.Flush();
+                        try
+                        {
+                            writer?.Write(text);
+                            writer?.Write('\n');
+                            writer?.Flush();
+                        }
+                        catch { /* squelch */ }
                     }
-                    catch { /* squelch */ }
                 }
-            }
+            });
         }
     }
 }
