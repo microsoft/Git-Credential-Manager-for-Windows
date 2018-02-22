@@ -48,11 +48,11 @@ For systems looking for **silent installation without any prompts**, use the `--
 
 #### Additional Resources
 
-* [Configuration Options](Configuration.md)
-* [Usage Options](CredentialManager.md)
-* [Environmental Variables](Environment.md)
-* [Build Agent and Automation Support](Automation.md)
 * [Frequently Asked Questions](Faq.md)
+* [Configuration Options](Configuration.md)
+* [Environmental Variables](Environment.md)
+* [Usage Options](CredentialManager.md)
+* [Build Agent and Automation Support](Automation.md)
 * [Development and Debugging](Development.md)
 * [Bitbucket Support](Bitbucket.md)
 
