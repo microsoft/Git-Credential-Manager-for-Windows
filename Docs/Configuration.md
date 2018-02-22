@@ -41,7 +41,7 @@ Defaults to `Auto`.
 
     git config --global credential.microsoft.visualstudio.com.authority AAD
 
-See [GCM_AUTHORITY](Environment.md#GCM_AUTHORITY)
+See [GCM_AUTHORITY](Environment.md#gcm_authority)
 
 ### httpProxy
 
@@ -54,7 +54,7 @@ Defaults to not using a proxy server.
 
     git config --global credential.github.com.httpProxy https://myproxy:8080
 
-See [HTTP_PROXY](Environment.md#HTTP_PROXY%20/%20HTTPS_PROXY)
+See [HTTP_PROXY](Environment.md#http_proxy--https_proxy)
 
 ### interactive
 
@@ -64,7 +64,7 @@ See [HTTP_PROXY](Environment.md#HTTP_PROXY%20/%20HTTPS_PROXY)
 
     git config --global credential.microsoft.visualstudio.com.interactive never
 
-See [GCM_INTERACTIVE](Environment.md#GCM_INTERACTIVE)
+See [GCM_INTERACTIVE](Environment.md#gcm_interactive)
 
 ### modalPrompt
 
@@ -74,7 +74,7 @@ Supports `true` or `false`. Defaults to `true`.
 
     git config --global credential.modalPrompt true
 
-See [GCM_MODAL_PROMPT](Environment.md#GCM_MODAL_PROMPT)
+See [GCM_MODAL_PROMPT](Environment.md#gcm_modal_prompt)
 
 ### namespace
 
@@ -86,7 +86,7 @@ Supports any ASCII, alpha-numeric only value. Defaults to `git`.
 
     git config --global credential.namespace name
 
-See [GCM_NAMESPACE](Environment.md#GCM_NAMESPACE)
+See [GCM_NAMESPACE](Environment.md#gcm_namespace)
 
 ### preserve
 
@@ -97,7 +97,7 @@ Supports `true` or `false`. Defaults to `false`.
 
     git config --global credential.visualstudio.com.preserve true
 
-See [GCM_PRESERVE](Environment.md#GCM_PRESERVE)
+See [GCM_PRESERVE](Environment.md#gcm_preserve)
 
 ### tokenDuration
 
@@ -110,7 +110,7 @@ Defaults to the account token duration. Honored when authority is set to `AAD` o
 
     git config --global credential.visualstudio.com.tokenDuration 24
 
-See [GCM_TOKEN_DURATION](Environment.md#GCM_TOKEN_DURATION)
+See [GCM_TOKEN_DURATION](Environment.md#gcm_token_duration)
 
 ### useHttpPath
 
@@ -145,7 +145,7 @@ Supports `true` or `false`. Defaults to `true`. Ignored when authority is set to
 
     git config --global credential.microsoft.visualstudio.com.validate false
 
-See [GCM_VALIDATE](Environment.md#GCM_VALIDATE)
+See [GCM_VALIDATE](Environment.md#gcm_validate)
 
 ### vstsScope
 
@@ -156,7 +156,7 @@ Defaults to `vso.code_write|vso.packaging`; Honored when host is 'visualstudio.c
 
     git config --global credential.microsoft.visualstudio.com.vstsScope vso.code_write|vso.packaging_write|vso.test_write
 
-See [GCM_VSTS_SCOPE](Environment.md#GCM_VSTS_SCOPE)
+See [GCM_VSTS_SCOPE](Environment.md#gcm_vsts_scope)
 
 ### writeLog
 
@@ -169,7 +169,7 @@ Supports `true` or `false`. Defaults to `false`.
 
     git config --global credential.writeLog true
 
-See [GCM_WRITELOG](Environment.md#GCM_WRITELOG)
+See [GCM_WRITELOG](Environment.md#gcm_writelog)
 
 ## Sample Configuration
 

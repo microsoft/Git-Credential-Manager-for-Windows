@@ -25,6 +25,8 @@ Use `Integrated` or `NTLM` if the host is a Team Foundation, or other NTLM authe
 
 Defaults to `Auto`.
 
+See [credential.authority](Configuration.md#authority).
+
 ### GCM_CONFIG_NOLOCAL
 
 Determines if the the GCM should ignore Git local configuration values.
@@ -50,7 +52,7 @@ The value should the URL of the proxy server.
 
 Defaults to not using a proxy server.
 
-See [credential.httpProxy](Configuration.md#httpProxy).
+See [credential.httpProxy](Configuration.md#httpproxy).
 
 ### GCM_HTTP_USER_AGENT
 
@@ -74,7 +76,7 @@ Forces authentication to use a modal dialog instead of asking for credentials at
 
 Supports `true` or `false`. Defaults to `true`.
 
-See [credential.modalPrompt](Configuration.md#modalPrompt).
+See [credential.modalPrompt](Configuration.md#modalprompt).
 
 ### GCM_NAMESPACE
 
@@ -101,7 +103,7 @@ If the value is greater than the maximum duration set for the account, the accou
 
 Defaults to the account token duration. Honored when authority is set to `AAD` or `MSA`.
 
-See [credential.tokenDuration](Configuration.md#tokenDuration).
+See [credential.tokenDuration](Configuration.md#tokenduration).
 
 ### GCM_TRACE
 
@@ -140,7 +142,7 @@ The supported format is one or more [scope values](https://docs.microsoft.com/en
 
 Defaults to `vso.code_write|vso.packaging`; Honored when host is 'visualstudio.com'.
 
-See [credential.vstsScope](Configuration.md#vstsScope).
+See [credential.vstsScope](Configuration.md#vstsscope).
 
 ### GCM_WRITELOG
 
@@ -149,4 +151,4 @@ Logs are written to the local .git/ folder at the root of the repository.
 
 __Note:__ This setting will not override the `GCM_TRACE` environment variable.
 
-See [credential.writeLog](Configuration.md#writeLog).
+See [credential.writeLog](Configuration.md#writelog).
