@@ -407,13 +407,13 @@ namespace Microsoft.Alm.Cli
                                  [CallerMemberName] string name = "")
             => _exit(this, exitcode, message, path, line, name);
 
-        internal void LoadOperationArguments(OperationArguments operationArguments)
+        internal Task LoadOperationArguments(OperationArguments operationArguments)
             => _loadOperationArguments(this, operationArguments);
 
         internal void LogEvent(string message, EventLogEntryType eventType)
             => _logEvent(this, message, eventType);
 
-        internal Credential QueryCredentials(OperationArguments operationArguments)
+        internal Task<Credential> QueryCredentials(OperationArguments operationArguments)
             => _queryCredentials(this, operationArguments);
 
         internal ConsoleKeyInfo ReadKey(bool intercept = true)
@@ -425,19 +425,19 @@ namespace Microsoft.Alm.Cli
         internal void WriteLine(string message = null)
             => _writeLine(this, message);
 
-        internal Credential BasicCredentialPrompt(TargetUri targetUri)
+        internal async Task<Credential> BasicCredentialPrompt(TargetUri targetUri)
         {
             string message = "Please enter your credentials for ";
-            return BasicCredentialPrompt(targetUri, message);
+            return await BasicCredentialPrompt(targetUri, message);
         }
 
-        internal Credential BasicCredentialPrompt(TargetUri targetUri, string titleMessage)
+        internal Task<Credential> BasicCredentialPrompt(TargetUri targetUri, string titleMessage)
             => _basicCredentialPrompt(this, targetUri, titleMessage);
 
         internal Task<BaseAuthentication> CreateAuthentication(OperationArguments operationArguments)
             => _createAuthentication(this, operationArguments);
 
-        internal void DeleteCredentials(OperationArguments operationArguments)
+        internal Task<bool> DeleteCredentials(OperationArguments operationArguments)
             => _deleteCredentials(this, operationArguments);
 
         internal void PrintArgs(string[] args)
@@ -457,10 +457,10 @@ namespace Microsoft.Alm.Cli
         internal void EnableTraceLogging(OperationArguments operationArguments, string logFilePath)
             => _enableTraceLoggingFile(this, operationArguments, logFilePath);
 
-        internal bool BitbucketCredentialPrompt(string titleMessage, TargetUri targetUri, out string username, out string password)
-            => _bitbucketCredentialPrompt(this, titleMessage, targetUri, out username, out password);
+        internal Task<Credential> BitbucketCredentialPrompt(string titleMessage, TargetUri targetUri)
+            => _bitbucketCredentialPrompt(this, titleMessage, targetUri);
 
-        internal bool BitbucketOAuthPrompt(string title, TargetUri targetUri, Bitbucket.AuthenticationResultType resultType, string username)
+        internal Task<bool> BitbucketOAuthPrompt(string title, TargetUri targetUri, Bitbucket.AuthenticationResultType resultType, string username)
             => _bitbucketOauthPrompt(this, title, targetUri, resultType, username);
 
         internal string KeyTypeName(KeyType type)
@@ -476,49 +476,48 @@ namespace Microsoft.Alm.Cli
             return value;
         }
 
-        internal bool GitHubAuthCodePrompt(TargetUri targetUri, Github.GitHubAuthenticationResultType resultType, string username, out string authenticationCode)
-            => _gitHubAuthCodePrompt(this, targetUri, resultType, username, out authenticationCode);
+        internal Task<string> GitHubAuthCodePrompt(TargetUri targetUri, Github.GitHubAuthenticationResultType resultType)
+            => _gitHubAuthCodePrompt(this, targetUri, resultType);
 
-        internal bool GitHubCredentialPrompt(TargetUri targetUri, out string username, out string password)
-            => _gitHubCredentialPrompt(this, targetUri, out username, out password);
+        internal Task<Credential> GitHubCredentialPrompt(TargetUri targetUri)
+            => _gitHubCredentialPrompt(this, targetUri);
 
-        private void LoadAssemblyInformation()
+        private Task LoadAssemblyInformation()
         {
-            var assembly = System.Reflection.Assembly.GetEntryAssembly();
-            var asseName = assembly.GetName();
+            return Task.Run(() =>
+            {
+                var assembly = System.Reflection.Assembly.GetEntryAssembly();
+                var asseName = assembly.GetName();
 
-            _executablePath = assembly.Location;
-            _location = Path.GetDirectoryName(_executablePath);
-            _name = asseName.Name;
-            _version = asseName.Version;
+                _executablePath = assembly.Location;
+                _location = Path.GetDirectoryName(_executablePath);
+                _name = asseName.Name;
+                _version = asseName.Version;
+            });
         }
 
-        internal bool ModalPromptDisplayDialog(ref NativeMethods.CredentialUiInfo credUiInfo,
-                                               ref NativeMethods.CredentialPackFlags authPackage,
-                                               IntPtr packedAuthBufferPtr,
-                                               uint packedAuthBufferSize,
-                                               IntPtr inBufferPtr,
-                                               int inBufferSize,
-                                               bool saveCredentials,
-                                               NativeMethods.CredentialUiWindowsFlags flags,
-                                               out string username,
-                                               out string password)
+        internal Task<Credential> ModalPromptDisplayDialog(NativeMethods.CredentialUiInfo credUiInfo,
+                                                           NativeMethods.CredentialPackFlags authPackage,
+                                                           IntPtr packedAuthBufferPtr,
+                                                           uint packedAuthBufferSize,
+                                                           IntPtr inBufferPtr,
+                                                           int inBufferSize,
+                                                           bool saveCredentials,
+                                                           NativeMethods.CredentialUiWindowsFlags flags)
             => _modalPromptDisplayDialog(this,
-                                         ref credUiInfo,
-                                         ref authPackage,
+                                         credUiInfo,
+                                         authPackage,
                                          packedAuthBufferPtr,
                                          packedAuthBufferSize,
                                          inBufferPtr,
                                          inBufferSize,
                                          saveCredentials,
-                                         flags,
-                                         out username,
-                                         out password);
+                                         flags);
 
-        internal Credential ModalPromptForCredentials(TargetUri targetUri, string message)
+        internal Task<Credential> ModalPromptForCredentials(TargetUri targetUri, string message)
             => _modalPromptForCredentials(this, targetUri, message);
 
-        internal Credential ModalPromptForCredentials(TargetUri targetUri)
+        internal async Task<Credential> ModalPromptForCredentials(TargetUri targetUri)
         {
             string message = string.Format("Enter your credentials for {0}.", targetUri.ToString(username: false, port: true, path: true));
 
@@ -531,13 +530,13 @@ namespace Microsoft.Alm.Cli
                     username = Uri.UnescapeDataString(username);
                 }
 
-                return ModalPromptForPassword(targetUri, message, username);
+                return await ModalPromptForPassword(targetUri, message, username);
             }
 
-            return ModalPromptForCredentials(targetUri, message);
+            return await ModalPromptForCredentials(targetUri, message);
         }
 
-        private Credential ModalPromptForPassword(TargetUri targetUri, string message, string username)
+        private Task<Credential> ModalPromptForPassword(TargetUri targetUri, string message, string username)
             => _modalPromptForPassword(this, targetUri, message, username);
 
         internal void PrintVersion()

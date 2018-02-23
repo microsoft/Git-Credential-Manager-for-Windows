@@ -27,6 +27,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Text;
+using System.Threading.Tasks;
 using Microsoft.Alm.Authentication;
 
 namespace Microsoft.Alm.Cli
@@ -165,7 +166,7 @@ namespace Microsoft.Alm.Cli
         }
 
         private AuthorityType _authorityType;
-        private Git.Configuration _configuration;
+        private Git.ConfigurationCollection _configuration;
         private Credential _credentials;
         private string _customNamespace;
         private Dictionary<string, string> _environmentVariables;
@@ -228,16 +229,9 @@ namespace Microsoft.Alm.Cli
         /// Gets the process's Git configuration based on current working directory, user's folder,
         /// and Git's system directory.
         /// </summary>
-        public virtual Git.Configuration GitConfiguration
+        public virtual Git.ConfigurationCollection GitConfiguration
         {
-            get
-            {
-                if (_configuration == null)
-                {
-                    LoadConfiguration();
-                }
-                return _configuration;
-            }
+            get { return _configuration; }
         }
 
         public virtual Interactivity Interactivity
@@ -405,9 +399,9 @@ namespace Microsoft.Alm.Cli
             set { _writeLog = true; }
         }
 
-        public virtual void LoadConfiguration()
+        public virtual async Task LoadConfiguration()
         {
-            _configuration = Git.Configuration.ReadConfiuration(Environment.CurrentDirectory, UseConfigLocal, UseConfigSystem);
+            _configuration = await Git.ConfigurationCollection.ReadConfiuration(Environment.CurrentDirectory, UseConfigLocal, UseConfigSystem);
         }
 
         public virtual void SetCredentials(string username, string password)
