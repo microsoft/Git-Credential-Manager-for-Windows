@@ -25,6 +25,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.Threading.Tasks;
 using Moq;
 using Xunit;
 
@@ -33,7 +34,7 @@ namespace Microsoft.Alm.Cli.Test
     public class ProgramTests
     {
         [Fact]
-        public void LoadOperationArgumentsTest()
+        public async Task LoadOperationArgumentsTest()
         {
             var program = new Program
             {
@@ -78,7 +79,7 @@ namespace Microsoft.Alm.Cli.Test
             {
                 { "HOME", Environment.GetFolderPath(Environment.SpecialFolder.UserProfile) },
             };
-            var gitconfig = new Git.Configuration(configs);
+            var gitconfig = new Git.ConfigurationCollection(configs);
             var targetUri = new Authentication.TargetUri("https://example.visualstudio.com/");
 
             var opargsMock = new Mock<OperationArguments>();
@@ -96,7 +97,7 @@ namespace Microsoft.Alm.Cli.Test
 
             var opargs = opargsMock.Object;
 
-            program.LoadOperationArguments(opargs);
+            await program.LoadOperationArguments(opargs);
 
             Assert.NotNull(opargs);
             Assert.True(opargs.ValidateCredentials, "credential.validate");
@@ -196,7 +197,7 @@ namespace Microsoft.Alm.Cli.Test
             if (!setupComplete)
                 return;
 
-            var gitconfig = new Git.Configuration(configs);
+            var gitconfig = new Git.ConfigurationCollection(configs);
             var targetUri = new Authentication.TargetUri("https://example.visualstudio.com/");
 
             var opargsMock = new Mock<OperationArguments>();
@@ -290,7 +291,7 @@ namespace Microsoft.Alm.Cli.Test
             if (!setupComplete)
                 return;
 
-            var gitconfig = new Git.Configuration(configs);
+            var gitconfig = new Git.ConfigurationCollection(configs);
             var targetUri = new Authentication.TargetUri("https://example.visualstudio.com/");
 
             var opargsMock = new Mock<OperationArguments>();

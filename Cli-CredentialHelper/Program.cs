@@ -324,18 +324,21 @@ namespace Microsoft.Alm.Cli
                 LoadOperationArguments(operationArguments);
                 EnableTraceLogging(operationArguments);
 
-                Credential credentials;
-                if ((credentials = QueryCredentials(operationArguments)) == null)
+                Task.Run(() =>
                 {
-                    Exit(-1, "Logon failed, use ctrl+c to cancel basic credential prompt.");
-                }
-                else
-                {
-                    using (var stdout = OutStream)
+                    Credential credentials;
+                    if ((credentials = QueryCredentials(operationArguments).Result) == null)
                     {
-                        operationArguments.WriteToStream(stdout);
+                        Exit(-1, "Logon failed, use ctrl+c to cancel basic credential prompt.");
                     }
-                }
+                    else
+                    {
+                        using (var stdout = OutStream)
+                        {
+                            operationArguments.WriteToStream(stdout);
+                        }
+                    }
+                });
             }
         }
 
