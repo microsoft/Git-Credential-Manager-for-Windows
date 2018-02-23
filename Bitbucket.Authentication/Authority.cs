@@ -35,7 +35,7 @@ using Trace = Microsoft.Alm.Git.Trace;
 namespace Atlassian.Bitbucket.Authentication
 {
     /// <summary>
-    /// Implementation of <see cref="IAuthority"/> representing the Bitbucket APIs as the authority
+    /// Implementation of `<see cref="IAuthority"/>` representing the Bitbucket APIs as the authority
     /// that can provide and validate credentials for Bitbucket.
     /// </summary>
     internal class Authority : IAuthority
@@ -63,11 +63,11 @@ namespace Atlassian.Bitbucket.Authentication
         private readonly string _restRootUrl;
 
         /// <inheritdoc/>
-        public async Task<AuthenticationResult> AcquireToken(TargetUri targetUri, string username, string password, AuthenticationResultType resultType, TokenScope scope)
+        public async Task<AuthenticationResult> AcquireToken(TargetUri targetUri, Credential credentials, AuthenticationResultType resultType, TokenScope scope)
         {
             if (resultType == AuthenticationResultType.TwoFactor)
             {
-                // a previous attempt to aquire a token failed in a way that suggests the user has
+                // A previous attempt to acquire a token failed in a way that suggests the user has
                 // Bitbucket 2FA turned on. so attempt to run the OAuth dance...
                 OAuth.OAuthAuthenticator oauth = new OAuth.OAuthAuthenticator();
                 try
@@ -91,9 +91,9 @@ namespace Atlassian.Bitbucket.Authentication
                         return new AuthenticationResult(AuthenticationResultType.Failure);
                     }
 
-                    if (!string.IsNullOrWhiteSpace(userResult.RemoteUsername) && !username.Equals(userResult.RemoteUsername))
+                    if (!string.IsNullOrWhiteSpace(userResult.RemoteUsername) && !credentials.Username.Equals(userResult.RemoteUsername))
                     {
-                        Trace.WriteLine($"Remote username [{userResult.RemoteUsername}] != [{username}] supplied username");
+                        Trace.WriteLine($"Remote username [{userResult.RemoteUsername}] != [{credentials.Username}] supplied username");
                         // make sure the 'real' username is returned
                         return new AuthenticationResult(AuthenticationResultType.Success, result.Token, result.RefreshToken, userResult.RemoteUsername);
                     }
@@ -113,7 +113,7 @@ namespace Atlassian.Bitbucket.Authentication
                 try
                 {
                     var restRootUri = new Uri(_restRootUrl);
-                    return await basicauth.GetAuthAsync(targetUri, scope, RequestTimeout, restRootUri, username, password);
+                    return await basicauth.GetAuthAsync(targetUri, scope, RequestTimeout, restRootUri, credentials);
                 }
                 catch (Exception ex)
                 {

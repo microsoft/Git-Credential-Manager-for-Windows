@@ -9,12 +9,12 @@ namespace Atlassian.Bitbucket.Authentication.BasicAuth
 {
     internal class BasicAuthAuthenticator
     {
-        public async Task<AuthenticationResult> GetAuthAsync(TargetUri targetUri, TokenScope scope, int requestTimeout, Uri restRootUrl, string username, string password)
+        public async Task<AuthenticationResult> GetAuthAsync(TargetUri targetUri, TokenScope scope, int requestTimeout, Uri restRootUrl, Credential credentials)
         {
             // use the provided username and password and attempt a Basic Auth request to a known
             // REST API resource.
 
-            string basicAuthValue = string.Format("{0}:{1}", username, password);
+            string basicAuthValue = string.Format("{0}:{1}", credentials.Username, credentials.Password);
             byte[] authBytes = Encoding.UTF8.GetBytes(basicAuthValue);
             basicAuthValue = Convert.ToBase64String(authBytes);
             var authHeader = "Basic " + basicAuthValue;
@@ -25,10 +25,10 @@ namespace Atlassian.Bitbucket.Authentication.BasicAuth
             {
                 // Success with username/passord indicates 2FA is not on so the 'token' is actually
                 // the password if we had a successful call then the password is good.
-                var token = new Token(password, TokenType.Personal);
-                if (!string.IsNullOrWhiteSpace(result.RemoteUsername) && !username.Equals(result.RemoteUsername))
+                var token = new Token(credentials.Password, TokenType.Personal);
+                if (!string.IsNullOrWhiteSpace(result.RemoteUsername) && !credentials.Username.Equals(result.RemoteUsername))
                 {
-                    Trace.WriteLine($"Remote username [{result.RemoteUsername}] != [{username}] supplied username");
+                    Trace.WriteLine($"Remote username [{result.RemoteUsername}] != [{credentials.Username}] supplied username");
                     return new AuthenticationResult(AuthenticationResultType.Success, token, result.RemoteUsername);
                 }
 
