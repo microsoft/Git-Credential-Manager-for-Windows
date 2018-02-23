@@ -29,6 +29,7 @@ using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Text.RegularExpressions;
+using System.Threading.Tasks;
 using Microsoft.Alm.Authentication;
 
 namespace Microsoft.Alm.Cli
@@ -214,30 +215,33 @@ namespace Microsoft.Alm.Cli
                         LoadOperationArguments(operationArguments);
                         EnableTraceLogging(operationArguments);
 
-                        Credential credentials;
-                        if ((credentials = QueryCredentials(operationArguments)) != null)
+                        Task.Run(async () =>
                         {
-                            if (seeking.Equals("Username", StringComparison.OrdinalIgnoreCase))
+                            Credential credentials = await QueryCredentials(operationArguments);
+                            if (credentials != null)
                             {
-                                Git.Trace.WriteLine($"username for '{targetUrl}' asked for and found.");
+                                if (seeking.Equals("Username", StringComparison.OrdinalIgnoreCase))
+                                {
+                                    Git.Trace.WriteLine($"username for '{targetUrl}' asked for and found.");
 
-                                Out.Write(credentials.Username + '\n');
+                                    Out.Write(credentials.Username + '\n');
+                                    return;
+                                }
+
+                                if (seeking.Equals("Password", StringComparison.OrdinalIgnoreCase))
+                                {
+                                    Git.Trace.WriteLine($"password for '{targetUrl}' asked for and found.");
+
+                                    Out.Write(credentials.Password + '\n');
+                                    return;
+                                }
+                            }
+                            else
+                            {
+                                Git.Trace.WriteLine($"user cancelled credential dialog.");
                                 return;
                             }
-
-                            if (seeking.Equals("Password", StringComparison.OrdinalIgnoreCase))
-                            {
-                                Git.Trace.WriteLine($"password for '{targetUrl}' asked for and found.");
-
-                                Out.Write(credentials.Password + '\n');
-                                return;
-                            }
-                        }
-                        else
-                        {
-                            Git.Trace.WriteLine($"user cancelled credential dialog.");
-                            return;
-                        }
+                        }).Wait();
                     }
                     else
                     {
