@@ -43,7 +43,7 @@ namespace Microsoft.Alm.Git.Test
             using (var rs = us.GetManifestResourceStream(me, "sample.gitconfig"))
             using (var sr = new StreamReader(rs))
             {
-                Configuration.ParseGitConfig(sr, values);
+                ConfigurationCollection.ParseGitConfig(sr, values);
             }
 
             Assert.Equal(36, values.Count);
@@ -66,27 +66,27 @@ namespace Microsoft.Alm.Git.Test
                     "[credential]\n" +
                     "    helper = manager\n" +
                     "";
-            Configuration cut;
+            ConfigurationCollection cut;
 
             using (var reader = new StringReader(input))
             {
                 var dict = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
-                Configuration.ParseGitConfig(reader, dict);
+                ConfigurationCollection.ParseGitConfig(reader, dict);
 
                 var values = new Dictionary<ConfigurationLevel, Dictionary<string, string>>();
 
-                foreach (var level in Configuration.Levels)
+                foreach (var level in ConfigurationCollection.Levels)
                 {
                     values[level] = dict;
                 }
 
-                cut = new Configuration(values);
+                cut = new ConfigurationCollection(values);
             }
 
             Assert.True(cut.ContainsKey("CoRe.AuToCrLf"));
             Assert.Equal("false", cut["CoRe.AuToCrLf"], StringComparer.OrdinalIgnoreCase);
 
-            Configuration.Entry entry;
+            ConfigurationCollection.Entry entry;
             Assert.True(cut.TryGetEntry("core", (string)null, "autocrlf", out entry));
             Assert.Equal("false", entry.Value, StringComparer.OrdinalIgnoreCase);
 
@@ -106,7 +106,7 @@ namespace Microsoft.Alm.Git.Test
 
             using (var sr = new StringReader(input))
             {
-                Configuration.ParseGitConfig(sr, values);
+                ConfigurationCollection.ParseGitConfig(sr, values);
             }
             return values;
         }
