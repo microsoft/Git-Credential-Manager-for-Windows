@@ -61,7 +61,7 @@ namespace Microsoft.Alm.Authentication
         {
             BaseSecureStore.ValidateTargetUri(targetUri);
             BaseSecureStore.ValidateToken(accessToken);
-            if (ReferenceEquals(tokenScope, null))
+            if (tokenScope is null)
                 throw new ArgumentNullException(nameof(tokenScope));
 
             try

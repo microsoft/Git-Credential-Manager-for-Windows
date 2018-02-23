@@ -27,6 +27,7 @@ using System;
 using System.Collections.Generic;
 using System.Security.Cryptography;
 using System.Text;
+using System.Threading.Tasks;
 using Microsoft.Win32;
 
 namespace Microsoft.Alm.Authentication
@@ -46,10 +47,27 @@ namespace Microsoft.Alm.Authentication
         { }
 
         /// <summary>
+        /// Not supported.
+        /// </summary>
+        public string Namespace
+        {
+            get { throw new NotSupportedException(); }
+        }
+
+        /// <summary>
+        /// Not supported.
+        /// </summary>
+        public Secret.UriNameConversion UriNameConversion
+        {
+            get { throw new NotSupportedException(); }
+            set { throw new NotSupportedException(); }
+        }
+
+        /// <summary>
         /// Not supported
         /// </summary>
         /// <exception cref="NotSupportedException">When used.</exception>
-        public bool DeleteToken(TargetUri targetUri)
+        public Task<bool> DeleteToken(TargetUri targetUri)
         {
             // We've decided to not support registry deletes until the rules are established.
             throw new NotSupportedException("Deletes from the registry are not supported by this library.");
@@ -61,63 +79,65 @@ namespace Microsoft.Alm.Authentication
         /// Returns a `<see cref="Token"/>` if successful; otherwise `<see langword="null"/>`.
         /// </summary>
         /// <param name="targetUri">Key used to select the token.</param>
-        public Token ReadToken(TargetUri targetUri)
+        public Task<Token> ReadToken(TargetUri targetUri)
         {
             BaseSecureStore.ValidateTargetUri(targetUri);
 
-            Token token = null;
-
-            foreach (var key in EnumerateKeys(false))
+            return Task.Run(() =>
             {
-                if (key == null)
-                    continue;
+                Token token = null;
 
-
-                if (KeyIsValid(key, out string url, out string type, out string value))
+                foreach (var key in EnumerateKeys(false))
                 {
-                    try
+                    if (key == null)
+                        continue;
+
+                    if (KeyIsValid(key, out string url, out string type, out string value))
                     {
-                        Uri tokenUri = new Uri(url);
-                        if (tokenUri.IsBaseOf(targetUri))
+                        try
                         {
-                            byte[] data = Convert.FromBase64String(value);
-
-                            data = ProtectedData.Unprotect(data, null, DataProtectionScope.CurrentUser);
-
-                            value = Encoding.UTF8.GetString(data);
-
-                            TokenType tokenType;
-                            if (string.Equals(type, "Federated", StringComparison.OrdinalIgnoreCase))
+                            Uri tokenUri = new Uri(url);
+                            if (tokenUri.IsBaseOf(targetUri))
                             {
-                                tokenType = TokenType.Federated;
+                                byte[] data = Convert.FromBase64String(value);
+
+                                data = ProtectedData.Unprotect(data, null, DataProtectionScope.CurrentUser);
+
+                                value = Encoding.UTF8.GetString(data);
+
+                                TokenType tokenType;
+                                if (string.Equals(type, "Federated", StringComparison.OrdinalIgnoreCase))
+                                {
+                                    tokenType = TokenType.Federated;
+                                }
+                                else
+                                {
+                                    throw new InvalidOperationException("Unexpected token type encountered");
+                                }
+
+                                token = new Token(value, tokenType);
+
+                                Git.Trace.WriteLine($"token for '{targetUri}' read from registry.");
+
+                                return token;
                             }
-                            else
-                            {
-                                throw new InvalidOperationException("Unexpected token type encountered");
-                            }
-
-                            token = new Token(value, tokenType);
-
-                            Git.Trace.WriteLine($"token for '{targetUri}' read from registry.");
-
-                            return token;
+                        }
+                        catch
+                        {
+                            Git.Trace.WriteLine("! token read from registry was corrupt.");
                         }
                     }
-                    catch
-                    {
-                        Git.Trace.WriteLine("! token read from registry was corrupt.");
-                    }
                 }
-            }
 
-            return token;
+                return token;
+            });
         }
 
         /// <summary>
         /// Not supported
         /// </summary>
         /// <exception cref="NotSupportedException">When used.</exception>
-        public bool WriteToken(TargetUri targetUri, Token token)
+        public Task<bool> WriteToken(TargetUri targetUri, Token token)
         {
             // We've decided to not support registry writes until the format is standardized.
             throw new NotSupportedException("Writes to the registry are not supported by this library.");

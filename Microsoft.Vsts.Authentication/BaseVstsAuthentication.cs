@@ -99,45 +99,47 @@ namespace Microsoft.Alm.Authentication
         }
 
         internal TokenCache VstsAdalTokenCache { get; private set; }
-        internal ITokenStore VstsIdeTokenCache{ get; private set; }
+
+        internal ITokenStore VstsIdeTokenCache { get; private set; }
 
         internal ICredentialStore PersonalAccessTokenStore { get; set; }
+
         internal IVstsAuthority VstsAuthority { get; set; }
+
         internal Guid TenantId { get; set; }
 
         /// <summary>
         /// Deletes a `<see cref="Credential"/>` from the storage used by the authentication object.
         /// </summary>
         /// <param name="targetUri">The uniform resource indicator used to uniquely identify the credentials.</param>
-        public override void DeleteCredentials(TargetUri targetUri)
+        public override async Task<bool> DeleteCredentials(TargetUri targetUri)
         {
             BaseSecureStore.ValidateTargetUri(targetUri);
 
-            Credential credentials = PersonalAccessTokenStore.ReadCredentials(targetUri);
+            Credential credentials = await PersonalAccessTokenStore.ReadCredentials(targetUri);
+            bool result = false;
 
-            // This ought to be async, but the base type's method isn't.
-            Task.Run(async () =>
+            // Attempt to validate the credentials, if they're truly invalid delete them.
+            if (!await ValidateCredentials(targetUri, credentials))
             {
-                // Attempt to validate the credentials, if they're truly invalid delete them.
-                if (!await ValidateCredentials(targetUri, credentials))
+                result = await PersonalAccessTokenStore.DeleteCredentials(targetUri);
+
+                // Remove any related entries from the tenant cache because tenant change
+                // could the be source of the invalidation, and not purging the cache will
+                // trap the user in a limbo state of invalid credentials.
+
+                // Deserialize the cache and remove any matching entry.
+                string tenantUrl = targetUri.ToString();
+                var cache = await DeserializeTenantCache();
+
+                // Attempt to remove the URL entry, if successful serialize the cache.
+                if (cache.Remove(tenantUrl))
                 {
-                    PersonalAccessTokenStore.DeleteCredentials(targetUri);
-
-                    // Remove any related entries from the tenant cache because tenant change
-                    // could the be source of the invalidation, and not purging the cache will
-                    // trap the user in a limbo state of invalid credentials.
-                    
-                    // Deserialize the cache and remove any matching entry.
-                    string tenantUrl = targetUri.ToString();
-                    var cache = await DeserializeTenantCache();
-
-                    // Attempt to remove the URL entry, if successful serialize the cache.
-                    if (cache.Remove(tenantUrl))
-                    {
-                        await SerializeTenantCache(cache);
-                    }
+                    await SerializeTenantCache(cache);
                 }
-            }).Wait();
+            }
+
+            return result;
         }
 
         /// <summary>
@@ -294,7 +296,7 @@ namespace Microsoft.Alm.Authentication
         /// Returns a `<see cref="Credential"/>` if successful; otherwise `<see langword="null"/>`.
         /// </summary>
         /// <param name="targetUri">The uniform resource indicator used to uniquely identify the credentials.</param>
-        public override Credential GetCredentials(TargetUri targetUri)
+        public override async Task<Credential> GetCredentials(TargetUri targetUri)
         {
             BaseSecureStore.ValidateTargetUri(targetUri);
 
@@ -302,7 +304,7 @@ namespace Microsoft.Alm.Authentication
 
             try
             {
-                if ((credentials = PersonalAccessTokenStore.ReadCredentials(targetUri)) != null)
+                if ((credentials = await PersonalAccessTokenStore.ReadCredentials(targetUri)) != null)
                 {
                     Git.Trace.WriteLine($"credentials for '{targetUri}' found.");
                 }
@@ -370,7 +372,7 @@ namespace Microsoft.Alm.Authentication
 
                 try
                 {
-                    PersonalAccessTokenStore.WriteCredentials(targetUri, credential);
+                    await PersonalAccessTokenStore.WriteCredentials(targetUri, credential);
                 }
                 catch (Exception exception)
                 {
@@ -412,7 +414,7 @@ namespace Microsoft.Alm.Authentication
 
                 try
                 {
-                    PersonalAccessTokenStore.WriteCredentials(targetUri, credential);
+                    await PersonalAccessTokenStore.WriteCredentials(targetUri, credential);
                 }
                 catch (Exception exception)
                 {
