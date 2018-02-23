@@ -5,11 +5,13 @@
 [![GitHub Downloads](https://img.shields.io/github/downloads/Microsoft/Git-Credential-Manager-for-Windows/total.svg?style=flat-square)](https://github.com/Microsoft/Git-Credential-Manager-for-Windows/releases)
 [![@MicrosoftGit on Twitter](https://img.shields.io/twitter/follow/microsoftgit.svg?style=social&label=Follow%20%40microsoftgit)](https://twitter.com/microsoftgit)
 
-# NOTICE: If you are seeing errors with GitHub READ THIS:
+* * *
 
-As of 22 Feb 2018, [GitHub has disabled support for weak encryption](https://githubengineering.com/crypto-deprecation-notice/) which many users will suddenly find themselves unable to authenticate using a Git for Windows which is older than v2.16.2. DO NOT PANIC, there's a fix. Update Git for Windows to the latest (or at least v2.16.2.windows.1).
+# NOTICE: Experiencing GitHub push/fetch problems?
 
-The most common signature users see is an experience like:
+As of 22 Feb 2018, [GitHub has disabled support for weak encryption](https://githubengineering.com/crypto-deprecation-notice/) which means many users will suddenly find themselves unable to authenticate using a Git for Windows which (impacts versions older than v2.16.0). **DO NOT PANIC**, there's a fix. [Update Git for Windows](https://github.com/git-for-windows/git/releases) to the latest (or at least v2.16.0).
+
+The most common error users see looks like:
 
 ```Text
 fatal: HttpRequestException encountered.
@@ -19,9 +21,11 @@ fatal: HttpRequestException encountered.
 Username for 'https://github.com': 
 ```
 
-If after updating Git for Windows you are still having problems authenticating with GitHub, please read this [Developer Community](https://developercommunity.visualstudio.com/content/problem/201457/unable-to-connect-to-github-due-to-tls-12-only-cha.html) topic which contains additional remedial actions you can take to resolve the problem.
+If, after updating Git for Windows, you are still having problems authenticating with GitHub, please read this [Developer Community](https://developercommunity.visualstudio.com/content/problem/201457/unable-to-connect-to-github-due-to-tls-12-only-cha.html) topic which contains additional remedial actions you can take to resolve the problem.
 
-If you are experiencing issue when using Visual Studio, please read [Unable to connect to GitHub with Visual Studio](https://developercommunity.visualstudio.com/content/problem/201457/unable-to-connect-to-github-due-to-tls-12-only-cha.html).
+If you are experiencing issue when using **Visual Studio**, please read **[Unable to connect to GitHub with Visual Studio](https://developercommunity.visualstudio.com/content/problem/201457/unable-to-connect-to-github-due-to-tls-12-only-cha.html)**.
+
+* * *
 
 The [Git Credential Manager for Windows](https://github.com/Microsoft/Git-Credential-Manager-for-Windows) (GCM) provides secure Git credential storage for Windows. It's the successor to the [Windows Credential Store for Git](https://gitcredentialstore.codeplex.com/) (git-credential-winstore), which is no longer maintained. Compared to Git's built-in credential storage for Windows ([wincred](https://git-scm.com/book/en/v2/Git-Tools-Credential-Storage)), which provides single-factor authentication support working on any HTTP enabled Git repository, GCM provides multi-factor authentication support for [Visual Studio Team Services](https://www.visualstudio.com/), [Team Foundation Server](Docs/Faq.md#q-i-thought-microsoft-was-maintaining-this-why-does-the-gcm-not-work-as-expected-with-tfs), GitHub, and Bitbucket.
 
