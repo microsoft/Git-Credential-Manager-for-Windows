@@ -85,16 +85,20 @@ namespace GitHub.Authentication
         /// Deletes a `<see cref="Credential"/>` from the storage used by the authentication object.
         /// </summary>
         /// <param name="targetUri">The uniform resource indicator used to uniquely identify the credentials.</param>
-        public override void DeleteCredentials(TargetUri targetUri)
+        public override async Task<bool> DeleteCredentials(TargetUri targetUri)
         {
             BaseSecureStore.ValidateTargetUri(targetUri);
+
+            bool result = false;
 
             var normalizedTargetUri = NormalizeUri(targetUri);
             if (PersonalAccessTokenStore.ReadCredentials(normalizedTargetUri) != null)
             {
-                PersonalAccessTokenStore.DeleteCredentials(normalizedTargetUri);
+                result = await PersonalAccessTokenStore.DeleteCredentials(normalizedTargetUri);
                 Git.Trace.WriteLine($"credentials for '{normalizedTargetUri}' deleted");
             }
+
+            return result;
         }
 
         /// <summary>
@@ -144,14 +148,14 @@ namespace GitHub.Authentication
         /// Returns a `<see cref="Credential"/>` if successful; otherwise `<see langword="null"/>`.
         /// </summary>
         /// <param name="targetUri">The uniform resource indicator used to uniquely identify the credentials.</param>
-        public override Credential GetCredentials(TargetUri targetUri)
+        public override async Task<Credential> GetCredentials(TargetUri targetUri)
         {
             BaseSecureStore.ValidateTargetUri(targetUri);
 
             Credential credentials = null;
 
             var normalizedTargetUri = NormalizeUri(targetUri);
-            if ((credentials = PersonalAccessTokenStore.ReadCredentials(normalizedTargetUri)) != null)
+            if ((credentials = await PersonalAccessTokenStore.ReadCredentials(normalizedTargetUri)) != null)
             {
                 Git.Trace.WriteLine($"credentials for '{normalizedTargetUri}' found.");
             }
@@ -170,23 +174,24 @@ namespace GitHub.Authentication
         /// <returns>Acquired <see cref="Credential"/> if successful; otherwise <see langword="null"/>.</returns>
         public async Task<Credential> InteractiveLogon(TargetUri targetUri)
         {
-            Credential credentials = null;
-            string username;
-            string password;
+            if (targetUri is null)
+                throw new ArgumentNullException(nameof(targetUri));
 
-            var normalizedTargetUri = NormalizeUri(targetUri);
-            if (AcquireCredentialsCallback(normalizedTargetUri, out username, out password))
+            Uri normalizedTargetUri = NormalizeUri(targetUri);
+            Credential credentials = await AcquireCredentialsCallback(normalizedTargetUri);
+
+            if (credentials != null)
             {
                 AuthenticationResult result;
 
-                if (result = await Authority.AcquireToken(normalizedTargetUri, username, password, null, TokenScope))
+                if (result = await Authority.AcquireToken(normalizedTargetUri, credentials, null, TokenScope))
                 {
                     Git.Trace.WriteLine($"token acquisition for '{normalizedTargetUri}' succeeded");
 
                     credentials = (Credential)result.Token;
-                    PersonalAccessTokenStore.WriteCredentials(normalizedTargetUri, credentials);
+                    await PersonalAccessTokenStore.WriteCredentials(normalizedTargetUri, credentials);
 
-                    // if a result callback was registered, call it
+                    // If a result callback was registered, call it.
                     AuthenticationResultCallback?.Invoke(normalizedTargetUri, result);
 
                     return credentials;
@@ -194,18 +199,18 @@ namespace GitHub.Authentication
                 else if (result == GitHubAuthenticationResultType.TwoFactorApp
                         || result == GitHubAuthenticationResultType.TwoFactorSms)
                 {
-                    string authenticationCode;
-                    if (AcquireAuthenticationCodeCallback(normalizedTargetUri, result, username, out authenticationCode))
+                    string authenticationCode = await AcquireAuthenticationCodeCallback(normalizedTargetUri, result);
+                    if (authenticationCode != null)
                     {
-                        if (result = await Authority.AcquireToken(normalizedTargetUri, username, password, authenticationCode, TokenScope))
+                        if (result = await Authority.AcquireToken(normalizedTargetUri, credentials, authenticationCode, TokenScope))
                         {
                             Git.Trace.WriteLine($"token acquisition for '{normalizedTargetUri}' succeeded.");
 
                             credentials = (Credential)result.Token;
-                            PersonalAccessTokenStore.WriteCredentials(normalizedTargetUri, credentials);
+                            await PersonalAccessTokenStore.WriteCredentials(normalizedTargetUri, credentials);
 
-                            // if a result callback was registered, call it
-                            AuthenticationResultCallback?.Invoke(normalizedTargetUri, result);
+                            // Ff a result callback was registered, call it.
+                            await AuthenticationResultCallback?.Invoke(normalizedTargetUri, result);
 
                             return credentials;
                         }
@@ -232,33 +237,30 @@ namespace GitHub.Authentication
         /// The two-factor authentication code for use in access acquisition.
         /// </param>
         /// <returns>Acquired <see cref="Credential"/> if successful; otherwise <see langword="null"/>.</returns>
-        public async Task<Credential> NoninteractiveLogonWithCredentials(TargetUri targetUri, string username, string password, string authenticationCode)
+        public async Task<Credential> NoninteractiveLogonWithCredentials(TargetUri targetUri, Credential credentials, string authenticationCode)
         {
             BaseSecureStore.ValidateTargetUri(targetUri);
-            if (string.IsNullOrWhiteSpace(username))
-                throw new ArgumentNullException("username", "The `username` parameter is null or invalid.");
-            if (string.IsNullOrWhiteSpace(password))
-                throw new ArgumentNullException("username", "The `password` parameter is null or invalid.");
+            BaseSecureStore.ValidateCredential(credentials);
 
-            Credential credentials = null;
-            var normalizedTargetUri = NormalizeUri(targetUri);
+            Uri normalizedTargetUri = NormalizeUri(targetUri);
             AuthenticationResult result;
-            if (result = await Authority.AcquireToken(normalizedTargetUri, username, password, authenticationCode, TokenScope))
+
+            if (result = await Authority.AcquireToken(normalizedTargetUri, credentials, authenticationCode, TokenScope))
             {
                 Git.Trace.WriteLine($"token acquisition for '{normalizedTargetUri}' succeeded.");
 
                 credentials = (Credential)result.Token;
-                PersonalAccessTokenStore.WriteCredentials(normalizedTargetUri, credentials);
+                await PersonalAccessTokenStore.WriteCredentials(normalizedTargetUri, credentials);
 
                 return credentials;
             }
 
             Git.Trace.WriteLine($"non-interactive logon for '{normalizedTargetUri}' failed.");
-            return credentials;
+            return null;
         }
 
-        public Task<Credential> NoninteractiveLogonWithCredentials(TargetUri targetUri, string username, string password)
-            => NoninteractiveLogonWithCredentials(targetUri, username, password, null);
+        public Task<Credential> NoninteractiveLogonWithCredentials(TargetUri targetUri, Credential credentials)
+            => NoninteractiveLogonWithCredentials(targetUri, credentials, null);
 
         /// <summary>
         /// Sets a <see cref="Credential"/> in the storage used by the authentication object.
@@ -267,12 +269,12 @@ namespace GitHub.Authentication
         /// The uniform resource indicator used to uniquely identify the credentials.
         /// </param>
         /// <param name="credentials">The value to be stored.</param>
-        public override void SetCredentials(TargetUri targetUri, Credential credentials)
+        public override Task<bool> SetCredentials(TargetUri targetUri, Credential credentials)
         {
             BaseSecureStore.ValidateTargetUri(targetUri);
             BaseSecureStore.ValidateCredential(credentials);
 
-            PersonalAccessTokenStore.WriteCredentials(NormalizeUri(targetUri), credentials);
+            return PersonalAccessTokenStore.WriteCredentials(NormalizeUri(targetUri), credentials);
         }
 
         /// <summary>
@@ -283,49 +285,45 @@ namespace GitHub.Authentication
         /// </param>
         /// <param name="credentials">The credentials to validate.</param>
         /// <returns>True is successful; otherwise false.</returns>
-        public async Task<bool> ValidateCredentials(TargetUri targetUri, Credential credentials)
+        public Task<bool> ValidateCredentials(TargetUri targetUri, Credential credentials)
         {
             BaseSecureStore.ValidateTargetUri(targetUri);
             BaseSecureStore.ValidateCredential(credentials);
 
-            return await Authority.ValidateCredentials(targetUri, credentials);
+            return Authority.ValidateCredentials(targetUri, credentials);
         }
 
         /// <summary>
         /// Delegate for credential acquisition from the UX.
+        /// <para/>
+        /// Returns credentials is successful; otherwise `<see langword="null"/>`.
         /// </summary>
         /// <param name="targetUri">
         /// The uniform resource indicator used to uniquely identify the credentials.
         /// </param>
-        /// <param name="username">The username supplied by the user.</param>
-        /// <param name="password">The password supplied by the user.</param>
-        /// <returns>True if successful; otherwise false.</returns>
-        public delegate bool AcquireCredentialsDelegate(TargetUri targetUri, out string username, out string password);
+        public delegate Task<Credential> AcquireCredentialsDelegate(TargetUri targetUri);
 
         /// <summary>
         /// Delegate for authentication code acquisition from the UX.
+        /// <para/>
+        /// Returns the authentication code provided by the user if successful; otherwise `<see langword="null"/>`.
         /// </summary>
         /// <param name="targetUri">
         /// The uniform resource indicator used to uniquely identify the credentials.
         /// </param>
         /// <param name="resultType">
-        /// <para>The result of initial logon attempt, using the results of <see cref="AcquireCredentialsDelegate"/>.</para>
-        /// <para>
-        /// Should be either <see cref="GitHubAuthenticationResultType.TwoFactorApp"/> or <see cref="GitHubAuthenticationResultType.TwoFactorSms"/>.
-        /// </para>
+        /// The result of initial logon attempt, using the results of <see cref="AcquireCredentialsDelegate"/>.
+        /// <para/>
+        /// Should be either `<see cref="GitHubAuthenticationResultType.TwoFactorApp"/>` or `<see cref="GitHubAuthenticationResultType.TwoFactorSms"/>`.
         /// </param>
-        /// <param name="authenticationCode">The authentication code provided by the user.</param>
-        /// <returns>True if successful; otherwise false.</returns>
-        public delegate bool AcquireAuthenticationCodeDelegate(TargetUri targetUri, GitHubAuthenticationResultType resultType, string username, out string authenticationCode);
+        public delegate Task<string> AcquireAuthenticationCodeDelegate(TargetUri targetUri, GitHubAuthenticationResultType resultType);
 
         /// <summary>
         /// Delegate for reporting the success, or not, of an authentication attempt.
         /// </summary>
-        /// <param name="targetUri">
-        /// The uniform resource indicator used to uniquely identify the credentials.
-        /// </param>
+        /// <param name="targetUri">The uniform resource indicator used to uniquely identify the credentials.</param>
         /// <param name="result">The result of the interactive authentication attempt.</param>
-        public delegate void AuthenticationResultDelegate(TargetUri targetUri, GitHubAuthenticationResultType result);
+        public delegate Task AuthenticationResultDelegate(TargetUri targetUri, GitHubAuthenticationResultType result);
 
         static Uri NormalizeUri(Uri targetUri)
         {

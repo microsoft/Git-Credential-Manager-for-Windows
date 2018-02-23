@@ -1,6 +1,7 @@
 ﻿using GitHub.Authentication.Test.Fakes;
 using Microsoft.Alm.Authentication;
 using System;
+using System.Threading.Tasks;
 using Xunit;
 
 namespace GitHub.Authentication.Test
@@ -11,7 +12,7 @@ namespace GitHub.Authentication.Test
         [InlineData("https://github.com/", "https://github.com/")]
         [InlineData("https://gist.github.com/", "https://gist.github.com/")]
         [InlineData("https://github.com/", "https://gist.github.com/")]
-        public void GetSetCredentialsNormalizesGistUrls(string writeUriString, string retrieveUriString)
+        public async Task GetSetCredentialsNormalizesGistUrls(string writeUriString, string retrieveUriString)
         {
             var retrieveUri = new Uri(retrieveUriString);
             var credentialStore = new InMemoryCredentialStore();
@@ -24,12 +25,16 @@ namespace GitHub.Authentication.Test
                 new Authentication.AcquireAuthenticationCodeDelegate(AuthenticationPrompts.AuthenticationCodeModalPrompt),
                 null);
 
-            authentication.SetCredentials(new Uri(writeUriString), new Credential("haacked"));
-            Assert.Equal("haacked", authentication.GetCredentials(retrieveUri).Username);
+            Assert.True(await authentication.SetCredentials(new Uri(writeUriString), new Credential("haacked")));
+
+            var credentials = await authentication.GetCredentials(retrieveUri);
+            Assert.NotNull(credentials);
+
+            Assert.Equal("haacked", credentials.Username, StringComparer.Ordinal);
         }
 
         [Fact]
-        public void GetSetCredentialsDoesNotReturnCredentialForRandomUrl()
+        public async Task GetSetCredentialsDoesNotReturnCredentialForRandomUrl()
         {
             var retrieveUri = new Uri("https://example.com/");
             var credentialStore = new InMemoryCredentialStore();
@@ -42,9 +47,9 @@ namespace GitHub.Authentication.Test
                 new Authentication.AcquireAuthenticationCodeDelegate(AuthenticationPrompts.AuthenticationCodeModalPrompt),
                 null);
 
-            authentication.SetCredentials(new Uri("https://github.com/"), new Credential("haacked"));
+            Assert.True(await authentication.SetCredentials(new Uri("https://github.com/"), new Credential("haacked")));
 
-            Assert.Null(authentication.GetCredentials(retrieveUri));
+            Assert.Null(await authentication.GetCredentials(retrieveUri));
         }
     }
 }

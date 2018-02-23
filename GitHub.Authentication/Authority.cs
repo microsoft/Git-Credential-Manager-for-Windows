@@ -68,8 +68,7 @@ namespace GitHub.Authentication
 
         public async Task<AuthenticationResult> AcquireToken(
             TargetUri targetUri,
-            string username,
-            string password,
+            Credential credentials,
             string authenticationCode,
             TokenScope scope)
         {
@@ -86,9 +85,7 @@ namespace GitHub.Authentication
                 httpClient.DefaultRequestHeaders.Add("User-Agent", Global.UserAgent);
                 httpClient.DefaultRequestHeaders.Add("Accept", GitHubApiAcceptsHeaderValue);
 
-                string basicAuthValue = string.Format("{0}:{1}", username, password);
-                byte[] authBytes = Encoding.UTF8.GetBytes(basicAuthValue);
-                basicAuthValue = Convert.ToBase64String(authBytes);
+                string basicAuthValue = credentials.ToBase64String();
 
                 httpClient.DefaultRequestHeaders.Add("Authorization", "Basic " + basicAuthValue);
 
@@ -187,7 +184,7 @@ namespace GitHub.Authentication
                             {
                                 Git.Trace.WriteLine($"authentication success: user supplied personal access token for '{targetUri}'.");
 
-                                return new AuthenticationResult(GitHubAuthenticationResultType.Success, new Token(password, TokenType.Personal));
+                                return new AuthenticationResult(GitHubAuthenticationResultType.Success, new Token(credentials.Password, TokenType.Personal));
                             }
                             Git.Trace.WriteLine($"authentication failed for '{targetUri}'.");
                             return new AuthenticationResult(GitHubAuthenticationResultType.Failure);

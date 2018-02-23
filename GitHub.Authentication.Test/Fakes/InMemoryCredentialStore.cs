@@ -1,6 +1,7 @@
 ﻿using Microsoft.Alm.Authentication;
 using System;
 using System.Collections.Generic;
+using System.Threading.Tasks;
 
 namespace GitHub.Authentication.Test.Fakes
 {
@@ -16,24 +17,25 @@ namespace GitHub.Authentication.Test.Fakes
             set {; }
         }
 
-        public bool DeleteCredentials(TargetUri targetUri)
+        public Task<bool> DeleteCredentials(TargetUri targetUri)
         {
             _credentials.Remove(targetUri);
-            return true;
+            return Task.FromResult(true);
         }
 
-        public Credential ReadCredentials(TargetUri targetUri)
+        public Task<Credential> ReadCredentials(TargetUri targetUri)
         {
-            Credential result;
-            return _credentials.TryGetValue(targetUri, out result)
+            Credential result = _credentials.TryGetValue(targetUri, out result)
                 ? result
                 : null;
+
+            return Task.FromResult(result);
         }
 
-        public bool WriteCredentials(TargetUri targetUri, Credential credentials)
+        public Task<bool> WriteCredentials(TargetUri targetUri, Credential credentials)
         {
             _credentials[targetUri] = credentials;
-            return true;
+            return Task.FromResult(true);
         }
     }
 }

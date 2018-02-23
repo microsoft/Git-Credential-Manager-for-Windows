@@ -39,45 +39,43 @@ namespace GitHub.Authentication
 {
     public static class AuthenticationPrompts
     {
-        public static bool CredentialModalPrompt(TargetUri targetUri, out string username, out string password)
+        public static async Task<Credential> CredentialModalPrompt(TargetUri targetUri)
         {
             var credentialViewModel = new CredentialsViewModel();
 
             Git.Trace.WriteLine($"prompting user for credentials for '{targetUri}'.");
 
-            bool credentialValid = ShowViewModel(credentialViewModel, () => new CredentialsWindow());
+            Credential result = null;
 
-            username = credentialViewModel.Login;
-            password = credentialViewModel.Password;
-
-            return credentialValid;
+            if (await ShowViewModel(credentialViewModel, () => new CredentialsWindow()))
+            {
+                result = new Credential(credentialViewModel.Login, credentialViewModel.Password);
+            }
+            return result;
         }
 
-        public static bool AuthenticationCodeModalPrompt(TargetUri targetUri, GitHubAuthenticationResultType resultType, string username, out string authenticationCode)
+        public static async Task<string> AuthenticationCodeModalPrompt(TargetUri targetUri, GitHubAuthenticationResultType resultType)
         {
             var twoFactorViewModel = new TwoFactorViewModel(resultType == GitHubAuthenticationResultType.TwoFactorSms);
 
             Git.Trace.WriteLine($"prompting user for authentication code for '{targetUri}'.");
 
-            bool authenticationCodeValid = ShowViewModel(twoFactorViewModel, () => new TwoFactorWindow());
+            bool authenticationCodeValid = await ShowViewModel(twoFactorViewModel, () => new TwoFactorWindow());
 
-            authenticationCode = authenticationCodeValid
+            return authenticationCodeValid
                 ? twoFactorViewModel.AuthenticationCode
                 : null;
-
-            return authenticationCodeValid;
         }
 
-        private static bool ShowViewModel(DialogViewModel viewModel, Func<AuthenticationDialogWindow> windowCreator)
+        private static async Task<bool> ShowViewModel(DialogViewModel viewModel, Func<AuthenticationDialogWindow> windowCreator)
         {
-            StartSTATask(() =>
+            await StartSTATask(() =>
             {
                 EnsureApplicationResources();
                 var window = windowCreator();
                 window.DataContext = viewModel;
                 window.ShowDialog();
-            })
-            .Wait();
+            });
 
             return viewModel.Result == AuthenticationDialogResult.Ok
                 && viewModel.IsValid;

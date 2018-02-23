@@ -31,43 +31,55 @@ namespace GitHub.Authentication
     public interface IAuthentication : Microsoft.Alm.Authentication.IAuthentication
     {
         /// <summary>
-        /// <para></para>
-        /// <para>Tokens acquired are stored in the secure secret store provided during initialization.</para>
+        /// Tokens acquired are stored in the secure secret store provided during initialization.
+        /// <para/>
+        /// Returns acquired `<see cref="Credential"/>` if successful; otherwise `<see langword="null"/>`.
         /// </summary>
         /// <param name="targetUri">
         /// The unique identifier for the resource for which access is to be acquired.
         /// </param>
-        /// ///
-        /// <returns>Acquired <see cref="Credential"/> if successful; otherwise <see langword="null"/>.</returns>
         Task<Credential> InteractiveLogon(TargetUri targetUri);
 
         /// <summary>
-        /// <para></para>
-        /// <para>Tokens acquired are stored in the secure secret store provided during initialization.</para>
+        /// Tokens acquired are stored in the secure secret store provided during initialization.
+        /// <para/>
+        /// Returns acquired `<see cref="Credential"/>` if successful; otherwise `<see langword="null"/>`.
         /// </summary>
         /// <param name="targetUri">
         /// The unique identifier for the resource for which access is to be acquired.
         /// </param>
-        /// <param name="username">The username of the account for which access is to be acquired.</param>
-        /// <param name="password">The password of the account for which access is to be acquired.</param>
+        /// <param name="credentials">
+        /// The credentials of the account for which access is to be acquired.
+        /// </param>
         /// <param name="authenticationCode">
         /// The two-factor authentication code for use in access acquisition.
         /// </param>
-        /// <returns>Acquired <see cref="Credential"/> if successful; otherwise <see langword="null"/>.</returns>
-        Task<Credential> NoninteractiveLogonWithCredentials(TargetUri targetUri, string username, string password, string authenticationCode);
+        Task<Credential> NoninteractiveLogonWithCredentials(TargetUri targetUri, Credential credentials, string authenticationCode);
 
         /// <summary>
-        /// <para></para>
-        /// <para>Tokens acquired are stored in the secure secret store provided during initialization.</para>
+        /// Tokens acquired are stored in the secure secret store provided during initialization.
+        /// <para/>
+        /// Returns acquired `<see cref="Credential"/>` if successful; otherwise `<see langword="null"/>`.
         /// </summary>
         /// <param name="targetUri">
         /// The unique identifier for the resource for which access is to be acquired.
         /// </param>
-        /// <param name="username">The username of the account for which access is to be acquired.</param>
-        /// <param name="password">The password of the account for which access is to be acquired.</param>
-        /// <returns>Acquired <see cref="Credential"/> if successful; otherwise <see langword="null"/>.</returns>
-        Task<Credential> NoninteractiveLogonWithCredentials(TargetUri targetUri, string username, string password);
+        /// <param name="credentials">
+        /// The credentials of the account for which access is to be acquired.
+        /// </param>
+        Task<Credential> NoninteractiveLogonWithCredentials(TargetUri targetUri, Credential credentials);
 
+        /// <summary>
+        /// Tests the validity of a set of credentials.
+        /// <para/>
+        /// Returns `<see langword="true"/>` if the credentials are still valid; otherwise `<see langword="false"/>`.
+        /// </summary>
+        /// <param name="targetUri">
+        /// The unique identifier for the resource for which access is to be validated against.
+        /// </param>
+        /// <param name="credentials">
+        /// The credentials of the account for which access is to be validated.
+        /// </param>
         Task<bool> ValidateCredentials(TargetUri targetUri, Credential credentials);
     }
 }

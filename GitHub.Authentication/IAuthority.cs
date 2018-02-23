@@ -32,8 +32,7 @@ namespace GitHub.Authentication
     {
         Task<AuthenticationResult> AcquireToken(
             TargetUri targetUri,
-            string username,
-            string password,
+            Credential credentials,
             string authenticationCode,
             TokenScope scope);
 
