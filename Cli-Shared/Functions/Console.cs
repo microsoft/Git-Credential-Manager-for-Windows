@@ -43,18 +43,13 @@ namespace Microsoft.Alm.Cli
 
             Debug.Assert(targetUri != null);
 
-            if (!program.StandardErrorIsTty || !program.StandardInputIsTty)
-            {
-                Git.Trace.WriteLine("not a tty detected, abandoning prompt.");
-                return null;
-            }
-
             titleMessage = titleMessage ?? "Please enter your credentials for ";
 
             StringBuilder buffer = new StringBuilder(BufferReadSize);
             uint read = 0;
             uint written = 0;
 
+            NativeMethods.ConsoleMode consoleMode = 0;
             NativeMethods.FileAccess fileAccessFlags = NativeMethods.FileAccess.GenericRead | NativeMethods.FileAccess.GenericWrite;
             NativeMethods.FileAttributes fileAttributes = NativeMethods.FileAttributes.Normal;
             NativeMethods.FileCreationDisposition fileCreationDisposition = NativeMethods.FileCreationDisposition.OpenExisting;
@@ -63,17 +58,23 @@ namespace Microsoft.Alm.Cli
             using (SafeFileHandle stdout = NativeMethods.CreateFile(NativeMethods.ConsoleOutName, fileAccessFlags, fileShareFlags, IntPtr.Zero, fileCreationDisposition, fileAttributes, IntPtr.Zero))
             using (SafeFileHandle stdin = NativeMethods.CreateFile(NativeMethods.ConsoleInName, fileAccessFlags, fileShareFlags, IntPtr.Zero, fileCreationDisposition, fileAttributes, IntPtr.Zero))
             {
-                string username = null;
-                string password = null;
 
                 // Read the current console mode.
-                if (!NativeMethods.GetConsoleMode(stdin, out NativeMethods.ConsoleMode consoleMode))
+                if (stdin.IsInvalid || stdout.IsInvalid)
+                {
+                    Git.Trace.WriteLine("not a tty detected, abandoning prompt.");
+                    return null;
+                }
+                else if (!NativeMethods.GetConsoleMode(stdin, out consoleMode))
                 {
                     int error = Marshal.GetLastWin32Error();
                     throw new Win32Exception(error, "Unable to determine console mode (" + NativeMethods.Win32Error.GetText(error) + ").");
                 }
 
                 Git.Trace.WriteLine($"console mode = '{consoleMode}'.");
+
+                string username = null;
+                string password = null;
 
                 // Instruct the user as to what they are expected to do.
                 buffer.Append(titleMessage)

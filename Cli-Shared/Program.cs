@@ -64,6 +64,7 @@ namespace Microsoft.Alm.Cli
         internal static readonly StringComparer ConfigKeyComparer = StringComparer.OrdinalIgnoreCase;
         internal static readonly StringComparer ConfigValueComparer = StringComparer.OrdinalIgnoreCase;
 
+        internal const string EnvironConfigDebugKey = "GCM_DEBUG";
         internal const string EnvironConfigTraceKey = Git.Trace.EnvironmentVariableKey;
 
         internal static readonly StringComparer EnvironKeyComparer = StringComparer.OrdinalIgnoreCase;
@@ -148,6 +149,8 @@ namespace Microsoft.Alm.Cli
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Performance", "CA1810:InitializeReferenceTypeStaticFieldsInline")]
         static Program()
         {
+            DebuggerLaunch();
+
             ServicePointManager.SecurityProtocol = ServicePointManager.SecurityProtocol | SecurityProtocolType.Tls12;
         }
 
@@ -365,6 +368,23 @@ namespace Microsoft.Alm.Cli
 
                     return _stdOutStream;
                 }
+            }
+        }
+
+        internal static void DebuggerLaunch()
+        {
+            if (Debugger.IsAttached)
+                return;
+
+            string debug = Environment.GetEnvironmentVariable(EnvironConfigDebugKey);
+            if (debug != null
+                && (StringComparer.OrdinalIgnoreCase.Equals(debug, "true")
+                    || StringComparer.OrdinalIgnoreCase.Equals(debug, "1")
+                    || StringComparer.OrdinalIgnoreCase.Equals(debug, "debug")))
+            {
+                Git.Trace.WriteLine($"'{EnvironConfigDebugKey}': '{debug}', launching debugger...");
+
+                Debugger.Launch();
             }
         }
 
