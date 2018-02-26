@@ -23,58 +23,49 @@
  * WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE."
 **/
 
-namespace Microsoft.Alm.Authentication
+using System;
+
+namespace Microsoft.Alm.Authentication.Git
 {
-    public enum TokenType
+    [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1714:FlagsEnumsShouldHavePluralNames")]
+    [Flags]
+    public enum ConfigurationLevel
     {
-        Unknown = 0,
+        None = 0,
 
         /// <summary>
-        /// Azure Directory Access Token.
+        /// Git portable configuration (only applies to Git for Windows).
         /// </summary>
-        [System.ComponentModel.Description("Azure Directory Access Token")]
-        AzureAccess = 1,
+        Portable = 1 << 0,
 
         /// <summary>
-        /// Azure Directory Refresh Token.
+        /// Git system, or per installation, configuration.
         /// </summary>
-        [System.ComponentModel.Description("Azure Directory Refresh Token")]
-        AzureRefresh = 2,
+        System = 1 << 1,
 
         /// <summary>
-        /// Personal Access Token.
+        /// Git XDG, or X Windows specific, configuration.
         /// </summary>
-        [System.ComponentModel.Description("Personal Access Token")]
-        PersonalAccess = 3,
+        Xdg = 1 << 2,
 
         /// <summary>
-        /// Federated Authentication (aka FedAuth) Token
+        /// Git global, or per user, configuration.
         /// </summary>
-        [System.ComponentModel.Description("Federated Authentication Token")]
-        AzureFederated = 4,
+        Global = 1 << 3,
 
         /// <summary>
-        /// Used only for testing.
+        /// Git local, or per repository, configuration.
         /// </summary>
-        [System.ComponentModel.Description("Test-only Token")]
-        Test = 5,
+        Local = 1 << 4,
 
-        /// <summary>
-        /// Bitbucket Password Tokens.
-        /// </summary>
-        [System.ComponentModel.Description("Bitbucket Password Token")]
-        BitbucketPassword = 6,
+        All = Portable
+            | System
+            | Xdg
+            | Global
+            | Local,
 
-        /// <summary>
-        /// Bitbucket Access Tokens.
-        /// </summary>
-        [System.ComponentModel.Description("Bitbucket Access Token")]
-        BitbucketAccess = 7,
-
-        /// <summary>
-        /// Used to auto-refresh Bitbucket Access Tokens.
-        /// </summary>
-        [System.ComponentModel.Description("Bitbucket Refresh Token")]
-        BitbucketRefresh = 8,
+        NoLocal = All & ~Local,
+        NoSystem = All & ~(Portable | System),
+        UserOnly = All & ~(Portable | System | Local)
     }
 }

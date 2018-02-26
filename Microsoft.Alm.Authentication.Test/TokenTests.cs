@@ -35,8 +35,8 @@ namespace Microsoft.Alm.Authentication.Test
         public async Task Token_WriteDelete(bool useCache, string secretName, string url, string token)
         {
             var tokenStore = useCache
-                ? new SecretCache(secretName) as ITokenStore
-                : new SecretStore(secretName) as ITokenStore;
+                ? new SecretCache(RuntimeContext.Default, secretName) as ITokenStore
+                : new SecretStore(RuntimeContext.Default, secretName) as ITokenStore;
             var uri = new TargetUri(url);
 
             var writeToken = new Token(token, TokenType.Test);

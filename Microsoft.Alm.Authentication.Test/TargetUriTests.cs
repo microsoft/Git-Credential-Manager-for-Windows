@@ -84,50 +84,5 @@ namespace Microsoft.Alm.Authentication.Test
             Assert.Equal(uri, targetUri.QueryUri);
             Assert.Equal(proxyUri, targetUri.ProxyUri);
         }
-
-        [Theory]
-        [MemberData(nameof(UrlData), DisableDiscoveryEnumeration = true)]
-        public void TargetUri_WebProxy( string queryUrl, string proxyUrl)
-        {
-            var targetUri = new TargetUri(queryUrl, proxyUrl);
-
-            var proxy = targetUri.WebProxy;
-            Assert.NotNull(proxy);
-
-            if (!(proxyUrl is null))
-            {
-                Assert.Equal(new Uri(proxyUrl), proxy.Address);
-            }
-            else
-            {
-                Assert.Null(proxy.Address);
-            }
-        }
-
-        [Theory]
-        [MemberData(nameof(UrlData), DisableDiscoveryEnumeration = true)]
-        public void TargetUri_HttpClientHandler(string queryUrl, string proxyUrl)
-        {
-            var targetUri = new TargetUri( queryUrl, proxyUrl);
-
-            var client = targetUri.HttpClientHandler;
-            Assert.NotNull(client);
-
-            if (!(proxyUrl is null))
-            {
-                Assert.True(client.UseProxy);
-                Assert.NotNull(client.Proxy);
-
-                if (client.Proxy is System.Net.WebProxy proxy)
-                {
-                    Assert.Equal(new Uri(proxyUrl), proxy.Address);
-                }
-            }
-            else
-            {
-                Assert.Null(client.Proxy);
-                Assert.False(client.UseProxy);
-            }
-        }
     }
 }

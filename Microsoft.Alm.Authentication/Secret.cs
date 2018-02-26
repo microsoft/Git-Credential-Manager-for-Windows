@@ -24,11 +24,40 @@
 **/
 
 using System;
+using System.Collections.Generic;
 
 namespace Microsoft.Alm.Authentication
 {
-    public abstract class Secret
+    [System.Diagnostics.DebuggerDisplay("{DebuggerDisplay, nq}")]
+    public abstract class Secret: IEquatable<Secret>, System.Net.ICredentials
     {
+        private static readonly SecretComparer Comparer = new SecretComparer();
+
+        public abstract string Value { get; }
+
+        internal virtual string DebuggerDisplay
+        {
+            get { return $"{nameof(Secret)}: {ToString()}"; }
+        }
+
+        public bool Equals(Secret other)
+            => Comparer.Equals(this, other);
+
+        public override bool Equals(object obj)
+        {
+            return (obj is Secret other
+                    && Equals(other))
+                || base.Equals(obj);
+        }
+
+        public abstract System.Net.NetworkCredential GetCredential(Uri uri, string authType);
+
+        public override int GetHashCode()
+            => Comparer.GetHashCode(this);
+
+        public override string ToString()
+            => Value;
+
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Design", "CA1055:UriReturnValuesShouldNotBeStrings")]
         public static string UriToName(TargetUri targetUri, string @namespace)
         {
@@ -46,7 +75,7 @@ namespace Microsoft.Alm.Authentication
         /// Generate a key based on the ActualUri. This may include username, port, etc
         /// </summary>
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Design", "CA1055:UriReturnValuesShouldNotBeStrings")]
-        public static string UriToIdentityUrl(TargetUri targetUri, string @namespace)
+        public static string UriToLongName(TargetUri targetUri, string @namespace)
         {
             BaseSecureStore.ValidateTargetUri(targetUri);
             if (string.IsNullOrWhiteSpace(@namespace))
@@ -58,6 +87,6 @@ namespace Microsoft.Alm.Authentication
             return targetName;
         }
 
-        public delegate string UriNameConversion(TargetUri targetUri, string @namespace);
+        public delegate string UriNameConversionDelegate(TargetUri targetUri, string @namespace);
     }
 }

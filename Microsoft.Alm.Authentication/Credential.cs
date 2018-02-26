@@ -24,6 +24,7 @@
 **/
 
 using System;
+using System.Net;
 using System.Text;
 
 namespace Microsoft.Alm.Authentication
@@ -33,7 +34,7 @@ namespace Microsoft.Alm.Authentication
     /// </summary>
     public sealed class Credential : Secret, IEquatable<Credential>
     {
-        public static readonly Credential Empty = new Credential(string.Empty, string.Empty);
+        private static readonly CredentialComparer Comparer = new CredentialComparer();
 
         /// <summary>
         /// Creates a credential object with a username and password pair.
@@ -76,6 +77,9 @@ namespace Microsoft.Alm.Authentication
             get { return _username; }
         }
 
+        public override string Value
+            => ToString();
+
         /// <summary>
         /// Compares a <see cref="Credential"/> to this <see cref="Credential"/> for equality.
         /// <para/>
@@ -83,24 +87,35 @@ namespace Microsoft.Alm.Authentication
         /// </summary>
         /// <param name="other">Credential to be compared.</param>
         public bool Equals(Credential other)
-        {
-            return this == other;
-        }
+            => Comparer.Equals(this, other);
 
         public override bool Equals(object obj)
         {
-            return this == obj as Credential;
+            return (obj is Credential other
+                    && Equals(other))
+                || base.Equals(obj);
+        }
+
+        /// <summary>
+        /// Returns a credentials associated with a specified URL, and authentication type.
+        /// </summary>
+        /// <param name="uri">The URI the credentials are for.</param>
+        /// <param name="authType">The type of authentication the credentials are for.</param>
+        public override NetworkCredential GetCredential(Uri uri, string authType)
+        {
+            if (StringComparer.OrdinalIgnoreCase.Equals(authType, "basic"))
+                return new NetworkCredential(_username, _password);
+
+            return null;
         }
 
         public override int GetHashCode()
-        {
-            unchecked
-            {
-                return Username.GetHashCode() 
-                     + 7 * Password.GetHashCode();
-            }
-        }
+            => Comparer.GetHashCode(this);
 
+        /// <summary>
+        /// Returns the credentials in a base64 encoded `"{username}:{password}" format.
+        /// </summary>
+        /// <returns></returns>
         public string ToBase64String()
         {
             // Get the simple {username}:{password} format.

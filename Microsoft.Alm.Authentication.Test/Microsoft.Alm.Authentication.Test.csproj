@@ -43,6 +43,7 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="TargetUriTests.cs" />
     <Compile Include="TokenTests.cs" />
+    <Compile Include="WhereTests.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\Microsoft.Alm.Authentication\Microsoft.Alm.Authentication.csproj">
@@ -56,6 +57,7 @@
       <InProject>false</InProject>
     </None>
     <None Include="packages.config" />
+    <EmbeddedResource Include="sample.gitconfig" />
   </ItemGroup>
   <ItemGroup>
     <Analyzer Include="..\packages\xunit.analyzers.0.8.0\analyzers\dotnet\cs\xunit.analyzers.dll" />

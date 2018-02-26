@@ -32,13 +32,13 @@ namespace Microsoft.Alm.Authentication
     /// <summary>
     /// In-memory credential cache.
     /// </summary>
-    public sealed class SecretCache : ICredentialStore, ITokenStore
+    public sealed class SecretCache : BaseType, ICredentialStore, ITokenStore
     {
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Security", "CA2104:DoNotDeclareReadOnlyMutableReferenceTypes")]
         public static readonly StringComparer KeyComparer = StringComparer.OrdinalIgnoreCase;
 
-        public SecretCache(string @namespace, Secret.UriNameConversion getTargetName)
-            : this()
+        public SecretCache(RuntimeContext context, string @namespace, Secret.UriNameConversionDelegate getTargetName)
+            : this(context)
         {
             if (string.IsNullOrWhiteSpace(@namespace))
                 throw new ArgumentNullException(@namespace);
@@ -47,12 +47,12 @@ namespace Microsoft.Alm.Authentication
             _getTargetName = getTargetName ?? Secret.UriToName;
         }
 
-        public SecretCache(string @namespace)
-            : this(@namespace, null)
+        public SecretCache(RuntimeContext context, string @namespace)
+            : this(context, @namespace, null)
         { }
 
-        internal SecretCache(ICredentialStore credentialStore)
-            : this()
+        internal SecretCache(RuntimeContext serviceProvider, ICredentialStore credentialStore)
+            : this(serviceProvider)
         {
             if (credentialStore == null)
                 throw new ArgumentNullException(nameof(credentialStore));
@@ -61,14 +61,18 @@ namespace Microsoft.Alm.Authentication
             _getTargetName = credentialStore.UriNameConversion;
         }
 
-        private SecretCache()
+        private SecretCache(RuntimeContext context)
+            : base(context)
         {
+            if (context is null)
+                throw new ArgumentNullException(nameof(context));
+
             _cache = new Dictionary<string, Secret>(KeyComparer);
         }
 
         private Dictionary<string, Secret> _cache;
         private string _namespace;
-        private Secret.UriNameConversion _getTargetName;
+        private Secret.UriNameConversionDelegate _getTargetName;
 
         /// <summary>
         /// Gets the namespace use by this store when reading / writing tokens.
@@ -81,7 +85,7 @@ namespace Microsoft.Alm.Authentication
         /// <summary>
         /// Gets or sets the name conversion delegate used when reading / writing tokens.
         /// </summary>
-        public Secret.UriNameConversion UriNameConversion
+        public Secret.UriNameConversionDelegate UriNameConversion
         {
             get { return _getTargetName; }
             set

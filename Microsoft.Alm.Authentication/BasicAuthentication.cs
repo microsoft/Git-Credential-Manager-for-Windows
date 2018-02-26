@@ -24,9 +24,12 @@
 **/
 
 using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Net.Http.Headers;
 using System.Threading.Tasks;
+
+using Git = Microsoft.Alm.Authentication.Git;
 
 namespace Microsoft.Alm.Authentication
 {
@@ -42,17 +45,19 @@ namespace Microsoft.Alm.Authentication
         /// </summary>
         /// <param name="credentialStore">The `<see cref="ICredentialStore"/>` to delegate to.</param>
         /// <param name="ntlmSupport">
-        /// /The level of NTLM support to be provided by this instance./
+        /// The level of NTLM support to be provided by this instance.
         /// <para/>
         /// If `<see cref="NtlmSupport.Always"/>` is used, the `<paramref name="acquireCredentialsCallback"/>` and `<paramref name="acquireResultCallback"/>` will be ignored by ` <see cref="GetCredentials(TargetUri)"/>`.
         /// </param>
         /// <param name="acquireCredentialsCallback">(optional) delegate for acquiring credentials.</param>
         /// <param name="acquireResultCallback">Optional delegate for notification of acquisition results.</param>
         public BasicAuthentication(
+            RuntimeContext context,
             ICredentialStore credentialStore,
             NtlmSupport ntlmSupport,
             AcquireCredentialsDelegate acquireCredentialsCallback,
             AcquireResultDelegate acquireResultCallback)
+            : base(context)
         {
             if (credentialStore is null)
                 throw new ArgumentNullException(nameof(credentialStore));
@@ -63,17 +68,15 @@ namespace Microsoft.Alm.Authentication
             _ntlmSupport = ntlmSupport;
         }
 
-        public BasicAuthentication(ICredentialStore credentialStore)
-            : this(credentialStore, NtlmSupport.Auto, null, null)
+        public BasicAuthentication(RuntimeContext context, ICredentialStore credentialStore)
+            : this(context, credentialStore, NtlmSupport.Auto, null, null)
         { }
 
-        /// <summary>
-        /// Gets the underlying credential store for this instance.
-        /// </summary>
-        internal ICredentialStore CredentialStore
-        {
-            get { return _credentialStore; }
-        }
+        private readonly AcquireCredentialsDelegate _acquireCredentials;
+        private readonly AcquireResultDelegate _acquireResult;
+        private readonly ICredentialStore _credentialStore;
+        private IReadOnlyList<AuthenticationHeaderValue> _httpAuthenticateOptions;
+        private NtlmSupport _ntlmSupport;
 
         /// <summary>
         /// Gets the level of NTLM support for this instance.
@@ -83,11 +86,10 @@ namespace Microsoft.Alm.Authentication
             get { return _ntlmSupport; }
         }
 
-        private readonly AcquireCredentialsDelegate _acquireCredentials;
-        private readonly AcquireResultDelegate _acquireResult;
-        private readonly ICredentialStore _credentialStore;
-        private AuthenticationHeaderValue[] _httpAuthenticateOptions;
-        private NtlmSupport _ntlmSupport;
+        internal ICredentialStore CredentialStore
+        {
+            get { return _credentialStore; }
+        }
 
         /// <summary>
         /// Acquires credentials via the registered callbacks.
@@ -106,13 +108,13 @@ namespace Microsoft.Alm.Authentication
                 // Get the WWW-Authenticate headers (if any).
                 if (_httpAuthenticateOptions == null)
                 {
-                    _httpAuthenticateOptions = await WwwAuthenticateHelper.GetHeaderValues(targetUri);
+                    _httpAuthenticateOptions = await WwwAuthenticateHelper.GetHeaderValues(Context, targetUri);
                 }
 
                 // If the headers contain NTLM as an option, then fall back to NTLM.
                 if (_httpAuthenticateOptions.Any(x => WwwAuthenticateHelper.IsNtlm(x)))
                 {
-                    Git.Trace.WriteLine($"'{targetUri}' supports NTLM, sending NTLM credentials instead");
+                    Trace.WriteLine($"'{targetUri}' supports NTLM, sending NTLM credentials instead");
 
                     return NtlmCredentials;
                 }
@@ -122,7 +124,7 @@ namespace Microsoft.Alm.Authentication
 
             if (_ntlmSupport != NtlmSupport.Always && _acquireCredentials != null)
             {
-                Git.Trace.WriteLine($"prompting user for credentials for '{targetUri}'.");
+                Trace.WriteLine($"prompting user for credentials for '{targetUri}'.");
 
                 credentials = await _acquireCredentials(targetUri);
 

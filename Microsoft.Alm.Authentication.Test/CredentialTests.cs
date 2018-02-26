@@ -47,8 +47,8 @@ namespace Microsoft.Alm.Authentication.Test
                 var uri = new TargetUri(url);
                 var writeCreds = new Credential(username, password);
                 var credentialStore = useCache
-                    ? new SecretCache("test", Secret.UriToName) as ICredentialStore
-                    : new SecretStore("test", null, null, Secret.UriToName) as ICredentialStore;
+                    ? new SecretCache(RuntimeContext.Default, "test", Secret.UriToName) as ICredentialStore
+                    : new SecretStore(RuntimeContext.Default, "test", null, null, Secret.UriToName) as ICredentialStore;
                 Credential readCreds = null;
 
                 await credentialStore.WriteCredentials(uri, writeCreds);
@@ -104,7 +104,7 @@ namespace Microsoft.Alm.Authentication.Test
         [MemberData(nameof(UriToNameData), DisableDiscoveryEnumeration = true)]
         public void UriToNameTest(string original, string expected)
         {
-            var uri = new Uri(original);
+            var uri = new TargetUri(original);
             var actual = Secret.UriToName(uri, Namespace);
 
             expected = $"{Namespace}:{expected ?? original}";
@@ -143,8 +143,8 @@ namespace Microsoft.Alm.Authentication.Test
         [MemberData(nameof(UriToIdentityNameData), DisableDiscoveryEnumeration = true)]
         public void UriToIdentityNameTest(string original, string expected)
         {
-            var uri = new Uri(original);
-            var actual = Secret.UriToIdentityUrl(uri, Namespace);
+            var uri = new TargetUri(original);
+            var actual = Secret.UriToLongName(uri, Namespace);
 
             expected = $"{Namespace}:{expected ?? original}";
 

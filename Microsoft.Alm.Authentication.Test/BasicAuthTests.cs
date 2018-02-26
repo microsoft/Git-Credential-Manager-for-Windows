@@ -8,7 +8,7 @@ namespace Microsoft.Alm.Authentication.Test
     {
         public BasicAuthTests()
         {
-            Trace.Listeners.AddRange(Debug.Listeners);
+            System.Diagnostics.Trace.Listeners.AddRange(Debug.Listeners);
         }
 
         [Fact]
@@ -71,9 +71,9 @@ namespace Microsoft.Alm.Authentication.Test
 
         private BasicAuthentication GetBasicAuthentication(string @namespace)
         {
-            ICredentialStore credentialStore = new SecretCache(@namespace);
+            ICredentialStore credentialStore = new SecretCache(RuntimeContext.Default, @namespace);
 
-            return new BasicAuthentication(credentialStore, NtlmSupport.Auto, null, null);
+            return new BasicAuthentication(RuntimeContext.Default, credentialStore, NtlmSupport.Auto, null, null);
         }
     }
 }

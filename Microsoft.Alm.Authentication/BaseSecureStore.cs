@@ -33,9 +33,13 @@ using System.Threading.Tasks;
 namespace Microsoft.Alm.Authentication
 {
 #pragma warning disable CA1031
-    public abstract class BaseSecureStore
+    public abstract class BaseSecureStore: BaseType
     {
         public static readonly char[] IllegalCharacters = new[] { ':', ';', '\\', '?', '@', '=', '&', '%', '$' };
+
+        protected BaseSecureStore(RuntimeContext context)
+            : base(context)
+        { }
 
         protected Task<bool> Delete(string targetName)
         {
@@ -53,7 +57,7 @@ namespace Microsoft.Alm.Authentication
                         {
                             case NativeMethods.Win32Error.NotFound:
                             case NativeMethods.Win32Error.NoSuchLogonSession:
-                                Git.Trace.WriteLine($"credentials not found for '{targetName}'.");
+                                Trace.WriteLine($"credentials not found for '{targetName}'.");
                                 break;
 
                             default:
@@ -62,7 +66,7 @@ namespace Microsoft.Alm.Authentication
                     }
                     else
                     {
-                        Git.Trace.WriteLine($"credentials for '{targetName}' deleted from store.");
+                        Trace.WriteLine($"credentials for '{targetName}' deleted from store.");
                     }
                 }
                 catch (Exception exception)
@@ -109,7 +113,7 @@ namespace Microsoft.Alm.Authentication
                             }
                             else
                             {
-                                Git.Trace.WriteLine($"credentials for '{@namespace}' purged from store.");
+                                Trace.WriteLine($"credentials for '{@namespace}' purged from store.");
                             }
                         }
                     }
@@ -152,14 +156,14 @@ namespace Microsoft.Alm.Authentication
 
                         credentials = new Credential(username, password);
 
-                        Git.Trace.WriteLine($"credentials for '{targetName}' read from store.");
+                        Trace.WriteLine($"credentials for '{targetName}' read from store.");
                     }
                 }
                 catch (Exception exception)
                 {
                     Debug.WriteLine(exception);
 
-                    Git.Trace.WriteLine($"failed to read credentials: {exception.GetType().Name}.");
+                    Trace.WriteLine($"failed to read credentials: {exception.GetType().Name}.");
 
                     return null;
                 }
@@ -199,10 +203,10 @@ namespace Microsoft.Alm.Authentication
                             TokenType type;
                             if (Token.GetTypeFromFriendlyName(credStruct.UserName, out type))
                             {
-                                Token.Deserialize(bytes, type, out token);
+                                Token.Deserialize(Context, bytes, type, out token);
                             }
 
-                            Git.Trace.WriteLine($"token for '{targetName}' read from store.");
+                            Trace.WriteLine($"token for '{targetName}' read from store.");
                         }
                     }
                 }
@@ -210,7 +214,7 @@ namespace Microsoft.Alm.Authentication
                 {
                     Debug.WriteLine(exception);
 
-                    Git.Trace.WriteLine($"failed to read credentials: {exception.GetType().Name}.");
+                    Trace.WriteLine($"failed to read credentials: {exception.GetType().Name}.");
 
                     return null;
                 }
@@ -253,13 +257,13 @@ namespace Microsoft.Alm.Authentication
                         throw new Win32Exception(error, "Failed to write credentials");
                     }
 
-                    Git.Trace.WriteLine($"credentials for '{targetName}' written to store.");
+                    Trace.WriteLine($"credentials for '{targetName}' written to store.");
                 }
                 catch (Exception exception)
                 {
                     Debug.WriteLine(exception);
 
-                    Git.Trace.WriteLine($"failed to write credentials: {exception.GetType().Name}.");
+                    Trace.WriteLine($"failed to write credentials: {exception.GetType().Name}.");
 
                     return false;
                 }
@@ -284,8 +288,7 @@ namespace Microsoft.Alm.Authentication
 
             return Task.Run(() =>
             {
-                byte[] bytes = null;
-                if (Token.Serialize(token, out bytes))
+                if (Token.Serialize(Context, token, out byte[] bytes))
                 {
                     string name;
                     if (Token.GetFriendlyNameFromType(token.Type, out name))
@@ -310,13 +313,13 @@ namespace Microsoft.Alm.Authentication
                                 throw new Win32Exception(error, "Failed to write credentials");
                             }
 
-                            Git.Trace.WriteLine($"token for '{targetName}' written to store.");
+                            Trace.WriteLine($"token for '{targetName}' written to store.");
                         }
                         catch (Exception exception)
                         {
                             Debug.WriteLine(exception);
 
-                            Git.Trace.WriteLine($"failed to write credentials: {exception.GetType().Name}.");
+                            Trace.WriteLine($"failed to write credentials: {exception.GetType().Name}.");
 
                             return false;
                         }

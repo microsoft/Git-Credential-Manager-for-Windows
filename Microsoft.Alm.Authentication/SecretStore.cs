@@ -25,6 +25,7 @@
 
 using System;
 using System.Threading.Tasks;
+using Microsoft.Alm.Authentication.Git;
 
 namespace Microsoft.Alm.Authentication
 {
@@ -44,7 +45,13 @@ namespace Microsoft.Alm.Authentication
         /// <param name="tokenCache">
         /// Write-through, read-first cache. Default cache is used if a custom cache is not provided.
         /// </param>
-        public SecretStore(string @namespace, ICredentialStore credentialCache, ITokenStore tokenCache, Secret.UriNameConversion getTargetName)
+        public SecretStore(
+            RuntimeContext context,
+            string @namespace,
+            ICredentialStore credentialCache,
+            ITokenStore tokenCache,
+            Secret.UriNameConversionDelegate getTargetName)
+            : base(context)
         {
             if (string.IsNullOrWhiteSpace(@namespace))
                 throw new ArgumentNullException(nameof(@namespace));
@@ -54,21 +61,21 @@ namespace Microsoft.Alm.Authentication
             _getTargetName = getTargetName ?? Secret.UriToName;
 
             _namespace = @namespace;
-            _credentialCache = credentialCache ?? new SecretCache(@namespace, _getTargetName);
-            _tokenCache = tokenCache ?? new SecretCache(@namespace, _getTargetName);
+            _credentialCache = credentialCache ?? new SecretCache(context, @namespace, _getTargetName);
+            _tokenCache = tokenCache ?? new SecretCache(context, @namespace, _getTargetName);
         }
 
-        public SecretStore(string @namespace, Secret.UriNameConversion getTargetName)
-            : this(@namespace, null, null, getTargetName)
+        public SecretStore(RuntimeContext context, string @namespace, Secret.UriNameConversionDelegate getTargetName)
+            : this(context, @namespace, null, null, getTargetName)
         { }
 
-        public SecretStore(string @namespace)
-            : this(@namespace, null, null, null)
+        public SecretStore(RuntimeContext context, string @namespace)
+            : this(context, @namespace, null, null, null)
         { }
 
         private string _namespace;
         private ICredentialStore _credentialCache;
-        private Secret.UriNameConversion _getTargetName;
+        private Secret.UriNameConversionDelegate _getTargetName;
         private ITokenStore _tokenCache;
 
         /// <summary>
@@ -82,7 +89,7 @@ namespace Microsoft.Alm.Authentication
         /// <summary>
         /// Gets or sets the name conversion delegate used when reading / writing tokens.
         /// </summary>
-        public Secret.UriNameConversion UriNameConversion
+        public Secret.UriNameConversionDelegate UriNameConversion
         {
             get { return _getTargetName; }
             set

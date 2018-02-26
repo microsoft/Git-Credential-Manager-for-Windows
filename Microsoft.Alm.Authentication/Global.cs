@@ -39,9 +39,13 @@ namespace Microsoft.Alm.Authentication
         /// </summary>
         public const int RequestTimeout = 15 * 1000; // 15 second limit
 
+        private static string _useragent = null;
+        private static readonly object _syncpoint = new object();
+
         /// <summary>
-        /// <para>Gets or sets the user-agent string sent as part of the header in any HTTP operations.</para>
-        /// <para>Defaults to a value contrived based on the executing assembly.</para>
+        /// Gets or sets the user-agent string sent as part of the header in any HTTP operations.
+        /// <para/>
+        /// Defaults to a value contrived based on the executing assembly.
         /// </summary>
         public static string UserAgent
         {
@@ -61,10 +65,6 @@ namespace Microsoft.Alm.Authentication
                 lock (_syncpoint) _useragent = value;
             }
         }
-
-        private static string _useragent = null;
-
-        private static readonly object _syncpoint = new object();
 
         /// <summary>
         /// Creates the correct user-agent string for HTTP calls.

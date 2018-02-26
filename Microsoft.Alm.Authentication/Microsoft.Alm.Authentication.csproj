@@ -28,14 +28,19 @@
     <Reference Include="System.Security" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\Microsoft.Alm.Git\Microsoft.Alm.Git.csproj">
-      <Project>{19770407-5c58-406d-ab3f-3700bb0d06fe}</Project>
-      <Name>Microsoft.Alm.Git</Name>
-    </ProjectReference>
-  </ItemGroup>
-  <ItemGroup>
+    <Compile Include="BaseType.cs" />
+    <Compile Include="RuntimeContext.cs" />
+    <Compile Include="Git\ConfigurationCollection.cs" />
+    <Compile Include="Git\ConfigurationLevel.cs" />
+    <Compile Include="FileSystem.cs" />
+    <Compile Include="Git\GitInstallation.cs" />
+    <Compile Include="Git\KnownGitDistribution.cs" />
+    <Compile Include="SecretComparer.cs" />
+    <Compile Include="Trace.cs" />
+    <Compile Include="Where.cs" />
     <Compile Include="Global.cs" />
     <Compile Include="GlobalSuppressions.cs" />
+    <Compile Include="Network.cs" />
     <Compile Include="NtlmSupport.cs" />
     <Compile Include="SecretCache.cs" />
     <Compile Include="TargetUri.cs" />

@@ -38,7 +38,7 @@ namespace Microsoft.Alm.Authentication
         /// <summary>
         /// Gets or sets the name conversion delegate used when reading / writing tokens.
         /// </summary>
-        Secret.UriNameConversion UriNameConversion { get; set; }
+        Secret.UriNameConversionDelegate UriNameConversion { get; set; }
 
         /// <summary>
         /// Deletes a `<see cref="Credential"/>` from the underlying storage.
