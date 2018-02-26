@@ -33,17 +33,22 @@ using GitHub.Authentication.ViewModels;
 using GitHub.Shared.Controls;
 using GitHub.Shared.ViewModels;
 using Microsoft.Alm.Authentication;
-using Git = Microsoft.Alm.Git;
 
 namespace GitHub.Authentication
 {
-    public static class AuthenticationPrompts
+    public class AuthenticationPrompts: BaseType
     {
-        public static async Task<Credential> CredentialModalPrompt(TargetUri targetUri)
+        public AuthenticationPrompts(RuntimeContext context)
+            : base(context)
+        { }
+
+        public async Task<Credential> CredentialModalPrompt(TargetUri targetUri)
         {
+            BaseSecureStore.ValidateTargetUri(targetUri);
+
             var credentialViewModel = new CredentialsViewModel();
 
-            Git.Trace.WriteLine($"prompting user for credentials for '{targetUri}'.");
+            Trace.WriteLine($"prompting user for credentials for '{targetUri}'.");
 
             Credential result = null;
 
@@ -54,11 +59,13 @@ namespace GitHub.Authentication
             return result;
         }
 
-        public static async Task<string> AuthenticationCodeModalPrompt(TargetUri targetUri, GitHubAuthenticationResultType resultType)
+        public async Task<string> AuthenticationCodeModalPrompt(TargetUri targetUri, GitHubAuthenticationResultType resultType)
         {
+            BaseSecureStore.ValidateTargetUri(targetUri);
+
             var twoFactorViewModel = new TwoFactorViewModel(resultType == GitHubAuthenticationResultType.TwoFactorSms);
 
-            Git.Trace.WriteLine($"prompting user for authentication code for '{targetUri}'.");
+            Trace.WriteLine($"prompting user for authentication code for '{targetUri}'.");
 
             bool authenticationCodeValid = await ShowViewModel(twoFactorViewModel, () => new TwoFactorWindow());
 
@@ -67,7 +74,7 @@ namespace GitHub.Authentication
                 : null;
         }
 
-        private static async Task<bool> ShowViewModel(DialogViewModel viewModel, Func<AuthenticationDialogWindow> windowCreator)
+        private async Task<bool> ShowViewModel(DialogViewModel viewModel, Func<AuthenticationDialogWindow> windowCreator)
         {
             await StartSTATask(() =>
             {
@@ -81,7 +88,7 @@ namespace GitHub.Authentication
                 && viewModel.IsValid;
         }
 
-        private static Task StartSTATask(Action action)
+        private Task StartSTATask(Action action)
         {
             var completionSource = new TaskCompletionSource<object>();
             var thread = new Thread(() =>
@@ -101,7 +108,7 @@ namespace GitHub.Authentication
             return completionSource.Task;
         }
 
-        private static void EnsureApplicationResources()
+        private  void EnsureApplicationResources()
         {
             if (!UriParser.IsKnownScheme("pack"))
             {

@@ -11,7 +11,7 @@ namespace GitHub.Authentication.Test.Fakes
 
         public string Namespace => "??";
 
-        public Secret.UriNameConversion UriNameConversion
+        public Secret.UriNameConversionDelegate UriNameConversion
         {
             get { return null; }
             set {; }
