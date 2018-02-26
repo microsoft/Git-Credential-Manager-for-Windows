@@ -27,8 +27,6 @@ using System;
 using System.Threading.Tasks;
 using Microsoft.Alm.Authentication;
 
-using Trace = Microsoft.Alm.Git.Trace;
-
 namespace Atlassian.Bitbucket.Authentication
 {
     /// <summary>
@@ -47,19 +45,24 @@ namespace Atlassian.Bitbucket.Authentication
         /// </summary>
         /// <param name="personalAccessTokenStore">where to store validated credentials</param>
         /// <param name="acquireCredentialsCallback">
-        /// what to call to promot the user for Basic Auth credentials
+        /// what to call to prompt the user for basic authentication credentials.
         /// </param>
         /// <param name="acquireAuthenticationOAuthCallback">
         /// what to call to prompt the user to run the OAuth process
         /// </param>
-        public Authentication(ICredentialStore personalAccessTokenStore, AcquireCredentialsDelegate acquireCredentialsCallback, AcquireAuthenticationOAuthDelegate acquireAuthenticationOAuthCallback)
+        public Authentication(
+            RuntimeContext context,
+            ICredentialStore personalAccessTokenStore, 
+            AcquireCredentialsDelegate acquireCredentialsCallback, 
+            AcquireAuthenticationOAuthDelegate acquireAuthenticationOAuthCallback)
+            : base(context)
         {
-            if (personalAccessTokenStore == null)
+            if (personalAccessTokenStore is null)
                 throw new ArgumentNullException(nameof(personalAccessTokenStore), $"The parameter `{nameof(personalAccessTokenStore)}` is null or invalid.");
 
             PersonalAccessTokenStore = personalAccessTokenStore;
 
-            BitbucketAuthority = new Authority();
+            BitbucketAuthority = new Authority(context);
             TokenScope = TokenScope.SnippetWrite | TokenScope.RepositoryWrite;
 
             AcquireCredentialsCallback = acquireCredentialsCallback;
@@ -78,7 +81,6 @@ namespace Atlassian.Bitbucket.Authentication
         internal AcquireAuthenticationOAuthDelegate AcquireAuthenticationOAuthCallback { get; set; }
 
         internal AuthenticationResultDelegate AuthenticationResultCallback { get; set; }
-
 
         /// <summary>
         /// Deletes a `<see cref="Credential"/>` from the storage used by the authentication object.
@@ -99,22 +101,22 @@ namespace Atlassian.Bitbucket.Authentication
             Credential credentials = null;
             if ((credentials = await PersonalAccessTokenStore.ReadCredentials(targetUri)) != null)
             {
-                // try to delete the credentials for the explicit target uri first
+                // Try to delete the credentials for the explicit target URI first.
                 result = await PersonalAccessTokenStore.DeleteCredentials(targetUri);
                 Trace.WriteLine($"host credentials deleted for {targetUri.QueryUri}");
             }
 
-            // tidy up and delete any related refresh tokens
+            // Tidy up and delete any related refresh tokens.
             var refreshTargetUri = GetRefreshTokenTargetUri(targetUri);
             if ((credentials = await PersonalAccessTokenStore.ReadCredentials(refreshTargetUri)) != null)
             {
-                // try to delete the credentials for the explicit target uri first
+                // Try to delete the credentials for the explicit target URI first.
                 await PersonalAccessTokenStore.DeleteCredentials(refreshTargetUri);
                 Trace.WriteLine($"host refresh credentials deleted for {refreshTargetUri.QueryUri}");
             }
 
-            // if we deleted per user then we should try and delete the host level credentials too if
-            // they match the username
+            // If we deleted per user then we should try and delete the host level credentials too if
+            // they match the username.
             if (targetUri.TargetUriContainsUsername)
             {
                 var hostTargetUri = new TargetUri(targetUri.ToString(false, true, true));
@@ -199,11 +201,16 @@ namespace Atlassian.Bitbucket.Authentication
         /// <inheritdoc/>
         public override async Task<bool> SetCredentials(TargetUri targetUri, Credential credentials)
         {
+            if (targetUri is null)
+                throw new ArgumentNullException(nameof(targetUri));
+            if (credentials is null)
+                throw new ArgumentNullException(nameof(credentials));
+
             // This is only called from the `Store()` method so only applies to default host entries
             // calling this from elsewhere may have unintended consequences, use
             // `SetCredentials(targetUri, credentials, username)` instead.
 
-            // Only store the credentials as received if they match the uri and user of the existing
+            // Only store the credentials as received if they match the URI and user of the existing
             // default entry.
             var currentCredentials = await GetCredentials(targetUri);
             if (currentCredentials != null && currentCredentials.Username != null && !currentCredentials.Username.Equals(credentials.Username))
@@ -215,7 +222,7 @@ namespace Atlassian.Bitbucket.Authentication
 
             await SetCredentials(targetUri, credentials, null);
 
-            // `Store()` will not call with a username url.
+            // `Store()` will not call with a username URL.
             if (targetUri.TargetUriContainsUsername)
                 return false;
 
@@ -246,7 +253,7 @@ namespace Atlassian.Bitbucket.Authentication
 
             Trace.WriteLine($"{credentials.Username} at {targetUri.QueryUri.AbsoluteUri}");
 
-            // If the url doesn't contain a username then save with an explicit username.
+            // If the URL doesn't contain a username then save with an explicit username.
             if (!targetUri.TargetUriContainsUsername && (!string.IsNullOrWhiteSpace(username)
                 || !string.IsNullOrWhiteSpace(credentials.Username)))
             {
@@ -276,25 +283,35 @@ namespace Atlassian.Bitbucket.Authentication
         }
 
         /// <summary>
-        /// Identify the Hosting service from the the targetUri.
+        /// Identify the Hosting service from the targetUri.
         /// </summary>
         /// <param name="targetUri"></param>
         /// <returns>
         /// A <see cref="BaseAuthentication"/> instance if the targetUri represents Bitbucket, null otherwise.
         /// </returns>
-        public static BaseAuthentication GetAuthentication(TargetUri targetUri, ICredentialStore personalAccessTokenStore, AcquireCredentialsDelegate acquireCredentialsCallback, AcquireAuthenticationOAuthDelegate acquireAuthenticationOAuthCallback)
+        public static BaseAuthentication GetAuthentication(
+            RuntimeContext context,
+            TargetUri targetUri,
+            ICredentialStore personalAccessTokenStore,
+            AcquireCredentialsDelegate acquireCredentialsCallback,
+            AcquireAuthenticationOAuthDelegate acquireAuthenticationOAuthCallback)
         {
-            BaseAuthentication authentication = null;
+            if (context is null)
+                throw new ArgumentNullException(nameof(context));
 
             BaseSecureStore.ValidateTargetUri(targetUri);
 
-            if (personalAccessTokenStore == null)
-                throw new ArgumentNullException(nameof(personalAccessTokenStore), $"The `{nameof(personalAccessTokenStore)}` is null or invalid.");
+            if (targetUri is null)
+                throw new ArgumentNullException(nameof(targetUri));
+            if (personalAccessTokenStore is null)
+                throw new ArgumentNullException(nameof(personalAccessTokenStore));
+
+            BaseAuthentication authentication = null;
 
             if (targetUri.QueryUri.DnsSafeHost.EndsWith(BitbucketBaseUrlHost, StringComparison.OrdinalIgnoreCase))
             {
-                authentication = new Authentication(personalAccessTokenStore, acquireCredentialsCallback, acquireAuthenticationOAuthCallback);
-                Trace.WriteLine("authentication for Bitbucket created");
+                authentication = new Authentication(context, personalAccessTokenStore, acquireCredentialsCallback, acquireAuthenticationOAuthCallback);
+                context.Trace.WriteLine("authentication for Bitbucket created");
             }
             else
             {
@@ -306,10 +323,11 @@ namespace Atlassian.Bitbucket.Authentication
 
         /// <summary>
         /// Prompt the user for authentication credentials.
+        /// <para/>
+        /// Returns a valid instance of `<see cref="Credential"/>` or null.
         /// </summary>
         /// <param name="targetUri"></param>
         /// <param name="username"></param>
-        /// <returns>a valid instance of <see cref="Credential"/> or null</returns>
         public async Task<Credential> InteractiveLogon(TargetUri targetUri, string username)
         {
             if (string.IsNullOrWhiteSpace(username) || targetUri.TargetUriContainsUsername)
@@ -332,7 +350,7 @@ namespace Atlassian.Bitbucket.Authentication
 
                 if (result = await BitbucketAuthority.AcquireToken(targetUri, credentials, AuthenticationResultType.None, TokenScope))
                 {
-                    Trace.WriteLine("token acquisition succeeded");
+                    Trace.WriteLine("token acquisition succeeded.");
 
                     credentials = GenerateCredentials(targetUri, credentials.Username, result);
                     await SetCredentials(targetUri, credentials, credentials.Username);
@@ -347,13 +365,13 @@ namespace Atlassian.Bitbucket.Authentication
                 }
                 else if (result == AuthenticationResultType.TwoFactor)
                 {
-                    // Basic Auth attempt returned a result indicating the user has 2FA on so prompt
+                    // Basic authentication attempt returned a result indicating the user has 2FA on so prompt
                     // the user to run the OAuth dance.
                     if (await AcquireAuthenticationOAuthCallback("", targetUri, result, credentials.Username))
                     {
                         if (result = await BitbucketAuthority.AcquireToken(targetUri, credentials, AuthenticationResultType.TwoFactor, TokenScope))
                         {
-                            Trace.WriteLine("token acquisition succeeded");
+                            Trace.WriteLine("token acquisition succeeded.");
 
                             credentials = GenerateCredentials(targetUri, credentials.Username, result);
                             await SetCredentials(targetUri, credentials);
@@ -371,7 +389,7 @@ namespace Atlassian.Bitbucket.Authentication
                 }
             }
 
-            Trace.WriteLine("interactive logon failed");
+            Trace.WriteLine("interactive logon failed.");
             return credentials;
         }
 
@@ -395,7 +413,7 @@ namespace Atlassian.Bitbucket.Authentication
 
             if (!targetUri.TargetUriContainsUsername)
             {
-                // no user info in uri so personalize the credentials
+                // No user info in URI so personalize the credentials.
                 credentials = new Credential(realUsername, credentials.Password);
             }
 
@@ -407,7 +425,7 @@ namespace Atlassian.Bitbucket.Authentication
         /// <para>
         /// Bitbucket always wants the username as well as the password/token so if the username
         /// isn't explicit in the remote URL then we need to ensure the credentials are stored with a
-        /// real username rather than 'Personal Access Token' etc. This applies to the refesh token
+        /// real username rather than 'Personal Access Token' etc. This applies to the refresh token
         /// as well.
         /// </para>
         /// <para></para>
@@ -423,7 +441,7 @@ namespace Atlassian.Bitbucket.Authentication
 
             if (!targetUri.TargetUriContainsUsername)
             {
-                // no user info in uri so personalize the credentials
+                // No user info in URI so personalize the credentials.
                 credentials = new Credential(username, result.RefreshToken.Value);
             }
             else
@@ -492,12 +510,12 @@ namespace Atlassian.Bitbucket.Authentication
                 var tempCredentials = GenerateCredentials(targetUri, username, result);
                 if (!await BitbucketAuthority.ValidateCredentials(targetUri, username, tempCredentials))
                 {
-                    // oddly our new access_token failed to work, maybe we've been revoked in the
+                    // Oddly our new access_token failed to work, maybe we've been revoked in the
                     // last millisecond?
                     return credentials;
                 }
 
-                // the new access_token is good, so store it and store the refresh_token used to get it.
+                // The new access_token is good, so store it and store the refresh_token used to get it.
                 await SetCredentials(targetUri, tempCredentials, null);
                 var newRefreshCredentials = GenerateRefreshCredentials(targetUri, username, ref result);
                 await SetCredentials(GetRefreshTokenTargetUri(targetUri), newRefreshCredentials, username);
@@ -511,7 +529,7 @@ namespace Atlassian.Bitbucket.Authentication
         private IAuthority BitbucketAuthority { get; }
 
         /// <summary>
-        /// Delegate for Basic Auth credential acquisition from the UX.
+        /// Delegate for basic authentication credential acquisition from the UX.
         /// </summary>
         /// <param name="titleMessage">the title to display to the user.</param>
         /// <param name="targetUri">

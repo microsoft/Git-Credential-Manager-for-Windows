@@ -3,29 +3,26 @@ using System.Text;
 using System.Threading.Tasks;
 using Atlassian.Bitbucket.Authentication.Rest;
 using Microsoft.Alm.Authentication;
-using Microsoft.Alm.Git;
 
 namespace Atlassian.Bitbucket.Authentication.BasicAuth
 {
-    internal class BasicAuthAuthenticator
+    internal class BasicAuthAuthenticator: BaseType
     {
+        public BasicAuthAuthenticator(RuntimeContext context)
+            : base(context)
+        { }
+
         public async Task<AuthenticationResult> GetAuthAsync(TargetUri targetUri, TokenScope scope, int requestTimeout, Uri restRootUrl, Credential credentials)
         {
             // use the provided username and password and attempt a Basic Auth request to a known
             // REST API resource.
-
-            string basicAuthValue = string.Format("{0}:{1}", credentials.Username, credentials.Password);
-            byte[] authBytes = Encoding.UTF8.GetBytes(basicAuthValue);
-            basicAuthValue = Convert.ToBase64String(authBytes);
-            var authHeader = "Basic " + basicAuthValue;
-
-            var result = await RestClient.TryGetUser(targetUri, requestTimeout, restRootUrl, authHeader);
+            var result = await new RestClient(Context).TryGetUser(targetUri, requestTimeout, restRootUrl, credentials);
 
             if (result.Type.Equals(AuthenticationResultType.Success))
             {
-                // Success with username/passord indicates 2FA is not on so the 'token' is actually
+                // Success with username/password indicates 2FA is not on so the 'token' is actually
                 // the password if we had a successful call then the password is good.
-                var token = new Token(credentials.Password, TokenType.Personal);
+                var token = new Token(credentials.Password, TokenType.PersonalAccess);
                 if (!string.IsNullOrWhiteSpace(result.RemoteUsername) && !credentials.Username.Equals(result.RemoteUsername))
                 {
                     Trace.WriteLine($"Remote username [{result.RemoteUsername}] != [{credentials.Username}] supplied username");
