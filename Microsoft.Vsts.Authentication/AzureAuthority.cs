@@ -25,14 +25,15 @@
 
 using System;
 using System.Threading.Tasks;
-using Microsoft.IdentityModel.Clients.ActiveDirectory;
+
+using Adal = Microsoft.IdentityModel.Clients.ActiveDirectory;
 
 namespace Microsoft.Alm.Authentication
 {
     /// <summary>
     /// Interfaces with Azure to perform authentication and identity services.
     /// </summary>
-    internal class AzureAuthority : IAzureAuthority
+    internal class AzureAuthority : BaseType, IAzureAuthority
     {
         /// <summary>
         /// The base URL for logon services in Azure.
@@ -48,28 +49,43 @@ namespace Microsoft.Alm.Authentication
         /// Creates a new instance of `<see cref="AzureAuthority"/>`.
         /// </summary>
         /// <param name="authorityHostUrl">A non-default authority host URL; otherwise defaults to `<see cref="DefaultAuthorityHostUrl"/>`.</param>
-        public AzureAuthority(string authorityHostUrl = DefaultAuthorityHostUrl)
+        public AzureAuthority(RuntimeContext context, string authorityHostUrl = DefaultAuthorityHostUrl)
+            : base(context)
         {
-            if (string.IsNullOrEmpty(authorityHostUrl))
+            if (authorityHostUrl is null)
                 throw new ArgumentNullException(nameof(authorityHostUrl));
             if (!Uri.IsWellFormedUriString(authorityHostUrl, UriKind.Absolute))
-                throw new ArgumentException("Uri is not Absolute.", nameof(authorityHostUrl));
+            {
+                var inner = new UriFormatException("Authority URL must be absolute.");
+                throw new ArgumentException(inner.Message, nameof(authorityHostUrl), inner);
+            }
 
-            AuthorityHostUrl = authorityHostUrl;
-            _adalTokenCache = new VstsAdalTokenCache();
+            _authorityHostUrl = authorityHostUrl;
+            _adalTokenCache = new VstsAdalTokenCache(context);
         }
 
         private readonly VstsAdalTokenCache _adalTokenCache;
+        private string _authorityHostUrl;
 
         /// <summary>
         /// The URL used to interact with the Azure identity service.
         /// </summary>
-        public string AuthorityHostUrl { get; protected set; }
+        public string AuthorityHostUrl
+        {
+            get { return _authorityHostUrl; }
+            protected set
+            {
+                if (value is null)
+                    throw new ArgumentNullException(nameof(AuthorityHostUrl));
+
+                _authorityHostUrl = value;
+            }
+        }
 
         /// <summary>
-        /// Acquires a <see cref="Token"/> from the authority via an interactive user logon prompt.
+        /// Acquires a `<see cref="Token"/>` from the authority via an interactive user logon prompt.
         /// <para/>
-        /// Returns a `<see cref="Token"/>` is successful; otherwise <see langword="null"/>.
+        /// Returns a `<see cref="Token"/>` is successful; otherwise `<see langword="null"/>`.
         /// </summary>
         /// <param name="targetUri">Uniform resource indicator of the resource access tokens are being requested for.</param>
         /// <param name="clientId">Identifier of the client requesting the token.</param>
@@ -78,13 +94,13 @@ namespace Microsoft.Alm.Authentication
         /// <param name="queryParameters">optional value, appended as-is to the query string in the HTTP authentication request to the authority.</param>
         public async Task<Token> InteractiveAcquireToken(TargetUri targetUri, string clientId, string resource, Uri redirectUri, string queryParameters = null)
         {
-            if (ReferenceEquals(targetUri, null))
+            if (targetUri is null)
                 throw new ArgumentNullException(nameof(targetUri));
             if (string.IsNullOrWhiteSpace(clientId))
                 throw new ArgumentNullException(nameof(clientId));
             if (string.IsNullOrWhiteSpace(resource))
                 throw new ArgumentNullException(nameof(resource));
-            if (ReferenceEquals(redirectUri, null))
+            if (redirectUri is null)
                 throw new ArgumentNullException(nameof(redirectUri));
             if (!redirectUri.IsAbsoluteUri)
                 throw new ArgumentException(nameof(redirectUri));
@@ -94,24 +110,24 @@ namespace Microsoft.Alm.Authentication
 
             try
             {
-                AuthenticationContext authCtx = new AuthenticationContext(AuthorityHostUrl, _adalTokenCache);
-                AuthenticationResult authResult = await authCtx.AcquireTokenAsync(resource,
-                                                                                  clientId,
-                                                                                  redirectUri,
-                                                                                  new PlatformParameters(PromptBehavior.Always),
-                                                                                  UserIdentifier.AnyUser,
-                                                                                  queryParameters);
+                Adal.AuthenticationContext authCtx = new Adal.AuthenticationContext(AuthorityHostUrl, _adalTokenCache);
+                Adal.AuthenticationResult authResult = await authCtx.AcquireTokenAsync(resource,
+                                                                                       clientId,
+                                                                                       redirectUri,
+                                                                                       new Adal.PlatformParameters(Adal.PromptBehavior.Always),
+                                                                                       Adal.UserIdentifier.AnyUser,
+                                                                                       queryParameters);
                 Guid tenantId;
                 if (Guid.TryParse(authResult.TenantId, out tenantId))
                 {
-                    token = new Token(authResult.AccessToken, tenantId, TokenType.Access);
+                    token = new Token(authResult.AccessToken, tenantId, TokenType.AzureAccess);
                 }
 
-                Git.Trace.WriteLine($"authority host URL = '{AuthorityHostUrl}', token acquisition succeeded.");
+                Trace.WriteLine($"authority host URL = '{AuthorityHostUrl}', token acquisition succeeded.");
             }
-            catch (AdalException)
+            catch (Adal.AdalException)
             {
-                Git.Trace.WriteLine($"authority host URL = '{AuthorityHostUrl}', token acquisition failed.");
+                Trace.WriteLine($"authority host URL = '{AuthorityHostUrl}', token acquisition failed.");
             }
 
             return token;
@@ -128,13 +144,13 @@ namespace Microsoft.Alm.Authentication
         /// <param name="redirectUri">Address to return to upon receiving a response from the authority.</param>
         public async Task<Token> NoninteractiveAcquireToken(TargetUri targetUri, string clientId, string resource, Uri redirectUri)
         {
-            if (ReferenceEquals(targetUri, null))
+            if (targetUri is null)
                 throw new ArgumentNullException(nameof(targetUri));
             if (string.IsNullOrWhiteSpace(clientId))
                 throw new ArgumentNullException(nameof(clientId));
             if (string.IsNullOrWhiteSpace(resource))
                 throw new ArgumentNullException(nameof(resource));
-            if (ReferenceEquals(redirectUri, null))
+            if (redirectUri is null)
                 throw new ArgumentNullException(nameof(redirectUri));
             if (!redirectUri.IsAbsoluteUri)
                 throw new ArgumentException(nameof(redirectUri));
@@ -143,22 +159,25 @@ namespace Microsoft.Alm.Authentication
 
             try
             {
-                AuthenticationContext authCtx = new AuthenticationContext(AuthorityHostUrl, _adalTokenCache);
-                AuthenticationResult authResult = await authCtx.AcquireTokenAsync(resource,
-                                                                                  clientId,
-                                                                                  new UserCredential());
+                Adal.AuthenticationContext authCtx = new Adal.AuthenticationContext(AuthorityHostUrl, _adalTokenCache);
+                Adal.AuthenticationResult authResult = await Adal.AuthenticationContextIntegratedAuthExtensions.AcquireTokenAsync(authCtx,
+                                                                                                                                  resource,
+                                                                                                                                  clientId,
+                                                                                                                                  new Adal.UserCredential());
+
+
 
                 Guid tentantId;
                 if (Guid.TryParse(authResult.TenantId, out tentantId))
                 {
-                    token = new Token(authResult.AccessToken, tentantId, TokenType.Access);
+                    token = new Token(authResult.AccessToken, tentantId, TokenType.AzureAccess);
 
-                    Git.Trace.WriteLine($"token acquisition for authority host URL = '{AuthorityHostUrl}' succeeded.");
+                    Trace.WriteLine($"token acquisition for authority host URL = '{AuthorityHostUrl}' succeeded.");
                 }
             }
-            catch (AdalException)
+            catch (Adal.AdalException)
             {
-                Git.Trace.WriteLine($"token acquisition for authority host URL = '{AuthorityHostUrl}' failed.");
+                Trace.WriteLine($"token acquisition for authority host URL = '{AuthorityHostUrl}' failed.");
             }
 
             return token;

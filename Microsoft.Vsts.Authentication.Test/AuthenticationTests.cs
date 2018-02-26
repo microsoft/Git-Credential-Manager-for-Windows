@@ -27,9 +27,9 @@ namespace Microsoft.Alm.Authentication.Test
 
         protected AuthenticationTests()
         {
-            if (Trace.Listeners.Count == 0)
+            if (System.Diagnostics.Trace.Listeners.Count == 0)
             {
-                Trace.Listeners.AddRange(Debug.Listeners);
+                System.Diagnostics.Trace.Listeners.AddRange(Debug.Listeners);
             }
         }
     }

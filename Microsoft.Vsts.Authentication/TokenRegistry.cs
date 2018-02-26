@@ -35,7 +35,7 @@ namespace Microsoft.Alm.Authentication
     /// <summary>
     /// A token storage object which interacts with the current user's Visual Studio 2015 hive in the Windows Registry.
     /// </summary>
-    public sealed class TokenRegistry : ITokenStore
+    public sealed class TokenRegistry : BaseType, ITokenStore
     {
         private const string RegistryTokenKey = "Token";
         private const string RegistryTypeKey = "Type";
@@ -43,7 +43,8 @@ namespace Microsoft.Alm.Authentication
         private const string RegistryPathFormat = @"Software\Microsoft\VSCommon\{0}\ClientServices\TokenStorage\VisualStudio\VssApp";
         private static readonly string[] Versions = new[] { "14.0" }; // only VS 2015 supported
 
-        public TokenRegistry()
+        public TokenRegistry(RuntimeContext context)
+            : base(context)
         { }
 
         /// <summary>
@@ -57,7 +58,7 @@ namespace Microsoft.Alm.Authentication
         /// <summary>
         /// Not supported.
         /// </summary>
-        public Secret.UriNameConversion UriNameConversion
+        public Secret.UriNameConversionDelegate UriNameConversion
         {
             get { throw new NotSupportedException(); }
             set { throw new NotSupportedException(); }
@@ -108,7 +109,7 @@ namespace Microsoft.Alm.Authentication
                                 TokenType tokenType;
                                 if (string.Equals(type, "Federated", StringComparison.OrdinalIgnoreCase))
                                 {
-                                    tokenType = TokenType.Federated;
+                                    tokenType = TokenType.AzureFederated;
                                 }
                                 else
                                 {
@@ -117,14 +118,14 @@ namespace Microsoft.Alm.Authentication
 
                                 token = new Token(value, tokenType);
 
-                                Git.Trace.WriteLine($"token for '{targetUri}' read from registry.");
+                                Trace.WriteLine($"token for '{targetUri}' read from registry.");
 
                                 return token;
                             }
                         }
                         catch
                         {
-                            Git.Trace.WriteLine("! token read from registry was corrupt.");
+                            Trace.WriteLine("! token read from registry was corrupt.");
                         }
                     }
                 }
@@ -143,7 +144,7 @@ namespace Microsoft.Alm.Authentication
             throw new NotSupportedException("Writes to the registry are not supported by this library.");
         }
 
-        private static IEnumerable<RegistryKey> EnumerateKeys(bool writeable)
+        private IEnumerable<RegistryKey> EnumerateKeys(bool writeable)
         {
             foreach (var rootKey in EnumerateRootKeys())
             {
@@ -158,7 +159,7 @@ namespace Microsoft.Alm.Authentication
                         }
                         catch
                         {
-                            Git.Trace.WriteLine($"! failed to open subkey {rootKey.Name}\\{nodeName}.");
+                            Trace.WriteLine($"! failed to open subkey {rootKey.Name}\\{nodeName}.");
                         }
 
                         if (nodeKey != null)
@@ -191,7 +192,7 @@ namespace Microsoft.Alm.Authentication
                 && Uri.IsWellFormedUriString(url, UriKind.Absolute);
         }
 
-        private static IEnumerable<RegistryKey> EnumerateRootKeys()
+        private IEnumerable<RegistryKey> EnumerateRootKeys()
         {
             foreach (string version in Versions)
             {
@@ -205,7 +206,7 @@ namespace Microsoft.Alm.Authentication
                 }
                 catch (Exception exception)
                 {
-                    Git.Trace.WriteLine($"! {exception.Message}");
+                    Trace.WriteLine($"! {exception.Message}");
                 }
 
                 yield return result;
