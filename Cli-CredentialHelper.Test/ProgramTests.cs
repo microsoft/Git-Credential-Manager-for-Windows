@@ -26,8 +26,11 @@
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
+using Microsoft.Alm.Authentication;
 using Moq;
 using Xunit;
+
+using Git = Microsoft.Alm.Authentication.Git;
 
 namespace Microsoft.Alm.Cli.Test
 {
@@ -36,14 +39,14 @@ namespace Microsoft.Alm.Cli.Test
         [Fact]
         public async Task LoadOperationArgumentsTest()
         {
-            var program = new Program
+            var program = new Program(RuntimeContext.Default)
             {
                 _dieException = (Program caller, Exception e, string path, int line, string name) => Assert.False(true, $"Error: {e.ToString()}"),
                 _dieMessage = (Program caller, string m, string path, int line, string name) => Assert.False(true, $"Error: {m}"),
                 _exit = (Program caller, int e, string m, string path, int line, string name) => Assert.False(true, $"Error: {e} {m}")
             };
 
-            var configs = new Dictionary<Git.ConfigurationLevel, Dictionary<string, string>>
+            var configuration = new Dictionary<Git.ConfigurationLevel, Dictionary<string, string>>
             {
                 {
                     Git.ConfigurationLevel.Local,
@@ -79,8 +82,8 @@ namespace Microsoft.Alm.Cli.Test
             {
                 { "HOME", Environment.GetFolderPath(Environment.SpecialFolder.UserProfile) },
             };
-            var gitconfig = new Git.ConfigurationCollection(configs);
-            var targetUri = new Authentication.TargetUri("https://example.visualstudio.com/");
+            var gitconfig = new Git.ConfigurationCollection(RuntimeContext.Default, configuration);
+            var targetUri = new TargetUri("https://example.visualstudio.com/");
 
             var opargsMock = new Mock<OperationArguments>();
             opargsMock.Setup(o => o.EnvironmentVariables)
@@ -158,7 +161,7 @@ namespace Microsoft.Alm.Cli.Test
             bool? yesno;
             KeyType key = (KeyType)keyValue;
 
-            var program = new Program
+            var program = new Program(RuntimeContext.Default)
             {
                 _dieException = (Program caller, Exception e, string path, int line, string name) => Assert.False(true, $"Error: {e.ToString()}"),
                 _dieMessage = (Program caller, string m, string path, int line, string name) => Assert.False(true, $"Error: {m}"),
@@ -167,7 +170,7 @@ namespace Microsoft.Alm.Cli.Test
 
             Assert.NotEqual("UNKNOWN", program.KeyTypeName(key), StringComparer.Ordinal);
 
-            var configs = new Dictionary<Git.ConfigurationLevel, Dictionary<string, string>>
+            var configuration = new Dictionary<Git.ConfigurationLevel, Dictionary<string, string>>
             {
                 { Git.ConfigurationLevel.Local,    new Dictionary<string, string>(Program.ConfigKeyComparer) },
                 { Git.ConfigurationLevel.Global,   new Dictionary<string, string>(Program.ConfigKeyComparer) },
@@ -184,7 +187,7 @@ namespace Microsoft.Alm.Cli.Test
 
             if (!string.IsNullOrEmpty(configValue) && program.ConfigurationKeys.TryGetValue(key, out string configKey))
             {
-                configs[Git.ConfigurationLevel.Local].Add($"credential.{configKey}", configValue);
+                configuration[Git.ConfigurationLevel.Local].Add($"credential.{configKey}", configValue);
                 setupComplete = true;
             }
 
@@ -197,8 +200,8 @@ namespace Microsoft.Alm.Cli.Test
             if (!setupComplete)
                 return;
 
-            var gitconfig = new Git.ConfigurationCollection(configs);
-            var targetUri = new Authentication.TargetUri("https://example.visualstudio.com/");
+            var gitconfig = new Git.ConfigurationCollection(RuntimeContext.Default, configuration);
+            var targetUri = new TargetUri("https://example.visualstudio.com/");
 
             var opargsMock = new Mock<OperationArguments>();
             opargsMock.Setup(v => v.EnvironmentVariables)
@@ -252,7 +255,7 @@ namespace Microsoft.Alm.Cli.Test
         {
             KeyType key = (KeyType)keyValue;
 
-            var program = new Program
+            var program = new Program(RuntimeContext.Default)
             {
                 _dieException = (Program caller, Exception e, string path, int line, string name) => Assert.False(true, $"Error: {e.ToString()}"),
                 _dieMessage = (Program caller, string m, string path, int line, string name) => Assert.False(true, $"Error: {m}"),
@@ -261,7 +264,7 @@ namespace Microsoft.Alm.Cli.Test
 
             Assert.NotEqual("UNKNOWN", program.KeyTypeName(key), StringComparer.Ordinal);
 
-            var configs = new Dictionary<Git.ConfigurationLevel, Dictionary<string, string>>
+            var configuration = new Dictionary<Git.ConfigurationLevel, Dictionary<string, string>>
             {
                 { Git.ConfigurationLevel.Local,    new Dictionary<string, string>(Program.ConfigKeyComparer) },
                 { Git.ConfigurationLevel.Global,   new Dictionary<string, string>(Program.ConfigKeyComparer) },
@@ -278,7 +281,7 @@ namespace Microsoft.Alm.Cli.Test
 
             if (!string.IsNullOrEmpty(configValue) && program.ConfigurationKeys.TryGetValue(key, out string configKey))
             {
-                configs[Git.ConfigurationLevel.Local].Add($"credential.{configKey}", configValue);
+                configuration[Git.ConfigurationLevel.Local].Add($"credential.{configKey}", configValue);
                 setupComplete = true;
             }
 
@@ -291,8 +294,8 @@ namespace Microsoft.Alm.Cli.Test
             if (!setupComplete)
                 return;
 
-            var gitconfig = new Git.ConfigurationCollection(configs);
-            var targetUri = new Authentication.TargetUri("https://example.visualstudio.com/");
+            var gitconfig = new Git.ConfigurationCollection(RuntimeContext.Default, configuration);
+            var targetUri = new TargetUri("https://example.visualstudio.com/");
 
             var opargsMock = new Mock<OperationArguments>();
             opargsMock.Setup(v => v.EnvironmentVariables)

@@ -30,7 +30,8 @@ namespace Microsoft.Alm.Cli.Test
 
                 memory.Seek(0, SeekOrigin.Begin);
 
-                cut = new OperationArguments(memory);
+                cut = new OperationArguments();
+                cut.LoadFromStream(memory);
             }
 
             Assert.Equal(input.Protocol, cut.QueryProtocol);
@@ -68,7 +69,8 @@ namespace Microsoft.Alm.Cli.Test
 
                 memory.Seek(0, SeekOrigin.Begin);
 
-                cut = new OperationArguments(memory);
+                cut = new OperationArguments();
+                cut.LoadFromStream(memory);
             }
 
             Assert.Equal(input.Protocol, cut.QueryProtocol, StringComparer.Ordinal);
@@ -194,7 +196,8 @@ namespace Microsoft.Alm.Cli.Test
 
                 memory.Seek(0, SeekOrigin.Begin);
 
-                var oparg = new OperationArguments(memory);
+                var oparg = new OperationArguments();
+                oparg.LoadFromStream(memory);
 
                 Assert.NotNull(oparg);
                 Assert.Equal(input.Protocol ?? string.Empty, oparg.QueryProtocol, StringComparer.Ordinal);

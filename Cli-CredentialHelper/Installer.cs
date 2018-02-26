@@ -28,8 +28,11 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
-using Microsoft.Alm.Git;
+using System.Threading.Tasks;
+using Microsoft.Alm.Authentication;
 using Microsoft.Win32;
+
+using Git = Microsoft.Alm.Authentication.Git;
 
 namespace Microsoft.Alm.Cli
 {
@@ -46,7 +49,7 @@ namespace Microsoft.Alm.Cli
         {
             "Microsoft.Vsts.Authentication.dll",
             "Microsoft.Alm.Authentication.dll",
-            "Microsoft.Alm.Git.dll",
+            "Microsoft.Alm.Authentication.Git.dll",
             "Microsoft.IdentityModel.Clients.ActiveDirectory.dll",
             "Microsoft.IdentityModel.Clients.ActiveDirectory.Platform.dll",
             "Bitbucket.Authentication.dll",
@@ -66,6 +69,7 @@ namespace Microsoft.Alm.Cli
             _program = program;
 
             var args = Environment.GetCommandLineArgs();
+            var trace = program.Context.Trace;
 
             // parse arguments
             for (int i = 2; i < args.Length; i++)
@@ -77,20 +81,20 @@ namespace Microsoft.Alm.Cli
                         i += 1;
                         _customPath = args[i];
 
-                        Git.Trace.WriteLine($"{ParamPathKey} = '{_customPath}'.");
+                        trace.WriteLine($"{ParamPathKey} = '{_customPath}'.");
                     }
                 }
                 else if (string.Equals(args[i], ParamPassiveKey, StringComparison.OrdinalIgnoreCase))
                 {
                     _isPassive = true;
 
-                    Git.Trace.WriteLine($"{ParamPassiveKey} = true.");
+                    trace.WriteLine($"{ParamPassiveKey} = true.");
                 }
                 else if (string.Equals(args[i], ParamForceKey, StringComparison.OrdinalIgnoreCase))
                 {
                     _isForced = true;
 
-                    Git.Trace.WriteLine($"{ParamForceKey} = true.");
+                    trace.WriteLine($"{ParamForceKey} = true.");
                 }
             }
         }
@@ -121,23 +125,26 @@ namespace Microsoft.Alm.Cli
                     const string Cygwin32GitPath = @"cygwin\usr\libexec\git-core\";
                     const string Cygwin64GitPath = @"cygwin64\usr\libexec\git-core";
 
-                    foreach (var drive in DriveInfo.GetDrives())
-                    {
-                        string path = Path.Combine(drive.RootDirectory.FullName, Cygwin64GitPath);
+                    var fs = _program.Context.FileSystem;
+                    var trace = _program.Context.Trace;
 
-                        if (Directory.Exists(path))
+                    foreach (var drive in fs.GetDriveRoots())
+                    {
+                        string path = Path.Combine(drive, Cygwin64GitPath);
+
+                        if (fs.DirectoryExists(path))
                         {
-                            Git.Trace.WriteLine($"cygwin directory found at '{path}'.");
+                            trace.WriteLine($"cygwin directory found at '{path}'.");
 
                             _cygwinPath = path;
                             break;
                         }
 
-                        path = Path.Combine(drive.RootDirectory.FullName, Cygwin32GitPath);
+                        path = Path.Combine(drive, Cygwin32GitPath);
 
-                        if (Directory.Exists(path))
+                        if (fs.DirectoryExists(path))
                         {
-                            Git.Trace.WriteLine($"cygwin directory found at '{path}'.");
+                            trace.WriteLine($"cygwin directory found at '{path}'.");
 
                             _cygwinPath = path;
                             break;
@@ -163,22 +170,24 @@ namespace Microsoft.Alm.Cli
                     string val1 = null;
                     string val2 = null;
                     string val3 = null;
-                    var vars = Environment.GetEnvironmentVariables(EnvironmentVariableTarget.Process);
+
+                    var fs = Program.Context.FileSystem;
 
                     // Git for Windows checks %HOME% first
-                    if ((val1 = vars["HOME"] as string) != null
-                        && Directory.Exists(val1))
+                    if ((val1 = Environment.GetEnvironmentVariables(EnvironmentVariableTarget.Process)["HOME"] as string) != null
+                        && fs.DirectoryExists(val1))
                     {
                         _userBinPath = val1;
                     }
                     // Git for Windows checks %HOMEDRIVE%%HOMEPATH% second
-                    else if ((val1 = vars["HOMEDRIVE"] as string) != null && (val2 = vars["HOMEPATH"] as string) != null
-                        && Directory.Exists(val3 = val1 + val2))
+                    else if ((val1 = Environment.GetEnvironmentVariables(EnvironmentVariableTarget.Process)["HOMEDRIVE"] as string) != null
+                            && (val2 = Environment.GetEnvironmentVariables(EnvironmentVariableTarget.Process)["HOMEPATH"] as string) != null
+                        && fs.DirectoryExists(val3 = val1 + val2))
                     {
                         _userBinPath = val3;
                     }
                     // Git for Windows checks %USERPROFILE% last
-                    else if ((val1 = vars["USERPROFILE"] as string) != null)
+                    else if ((val1 = Environment.GetEnvironmentVariables(EnvironmentVariableTarget.Process)["USERPROFILE"] as string) != null)
                     {
                         _userBinPath = val1;
                     }
@@ -188,7 +197,7 @@ namespace Microsoft.Alm.Cli
                         // Git for Windows adds %HOME%\bin to %PATH%
                         _userBinPath = Path.Combine(_userBinPath, "bin");
 
-                        Git.Trace.WriteLine($"user bin found at '{_userBinPath}'.");
+                        _program.Context.Trace.WriteLine($"user bin found at '{_userBinPath}'.");
                     }
                 }
                 return _userBinPath;
@@ -208,12 +217,16 @@ namespace Microsoft.Alm.Cli
                     return;
                 }
 
-                List<GitInstallation> installations = null;
+                var fs = _program.Context.FileSystem;
+                var trace = _program.Context.Trace;
+                var where = _program.Context.Where;
+
+                List<Git.GitInstallation> installations = null;
 
                 // use the custom installation path if supplied
                 if (!string.IsNullOrEmpty(_customPath))
                 {
-                    if (!Directory.Exists(_customPath))
+                    if (!fs.DirectoryExists(_customPath))
                     {
                         Program.LogEvent("No Git installation found, unable to continue deployment.", EventLogEntryType.Error);
                         Program.Out.WriteLine();
@@ -228,16 +241,18 @@ namespace Microsoft.Alm.Cli
                     Program.Out.WriteLine($"Deploying to custom path: '{_customPath}'.");
 
                     // if the custom path points to a git location then treat it properly
-                    GitInstallation installation;
-                    if (Where.FindGitInstallation(_customPath, KnownGitDistribution.GitForWindows64v2, out installation)
-                        || Where.FindGitInstallation(_customPath, KnownGitDistribution.GitForWindows32v2, out installation)
-                        || Where.FindGitInstallation(_customPath, KnownGitDistribution.GitForWindows32v1, out installation))
+                    Git.GitInstallation installation;
+                    if (where.FindGitInstallation(_customPath, Git.KnownGitDistribution.GitForWindows64v2, out installation)
+                        || where.FindGitInstallation(_customPath, Git.KnownGitDistribution.GitForWindows32v2, out installation)
+                        || where.FindGitInstallation(_customPath, Git.KnownGitDistribution.GitForWindows32v1, out installation))
                     {
-                        Git.Trace.WriteLine($"   Git found: '{installation.Path}'.");
+                        trace.WriteLine($"   Git found: '{installation.Path}'.");
 
                         // track known Git installations
-                        installations = new List<GitInstallation>();
-                        installations.Add(installation);
+                        installations = new List<Git.GitInstallation>
+                        {
+                            installation
+                        };
                     }
 
                     Program.LogEvent($"Custom path deployed to: '{_customPath}'", EventLogEntryType.Information);
@@ -248,7 +263,7 @@ namespace Microsoft.Alm.Cli
                     Program.Out.WriteLine();
                     Program.Out.WriteLine("Looking for Git installation(s)...");
 
-                    if (Where.FindGitInstallations(out installations))
+                    if (where.FindGitInstallations(out installations))
                     {
                         foreach (var installation in installations)
                         {
@@ -260,7 +275,7 @@ namespace Microsoft.Alm.Cli
                 if (installations == null)
                 {
                     Program.LogEvent("No Git installation found, unable to continue.", EventLogEntryType.Error);
-                    Program.Out.WriteLine();
+                    Program.WriteLine();
                     Program.WriteLine("Fatal: Git was not detected, unable to continue. {FailFace}");
                     Pause();
 
@@ -283,8 +298,8 @@ namespace Microsoft.Alm.Cli
                             Program.Out.WriteLine($"  {file}");
                         }
 
-                        // copy help documents
-                        if (Directory.Exists(installation.Doc)
+                        // Copy help documents.
+                        if (fs.DirectoryExists(installation.Doc)
                             && CopyFiles(Program.Location, installation.Doc, DocsList, out copiedFiles))
                         {
                             copiedCount += copiedFiles.Count;
@@ -317,9 +332,9 @@ namespace Microsoft.Alm.Cli
                 Program.Out.WriteLine();
                 Program.Out.WriteLine($"Deploying from '{Program.Location}' to '{UserBinPath}'.");
 
-                if (!Directory.Exists(UserBinPath))
+                if (!fs.DirectoryExists(UserBinPath))
                 {
-                    Directory.CreateDirectory(UserBinPath);
+                    fs.CreateDirectory(UserBinPath);
                 }
 
                 if (CopyFiles(Program.Location, UserBinPath, FileList, out copiedFiles))
@@ -359,7 +374,7 @@ namespace Microsoft.Alm.Cli
                     return;
                 }
 
-                if (CygwinPath != null && Directory.Exists(CygwinPath))
+                if (CygwinPath != null && fs.DirectoryExists(CygwinPath))
                 {
                     if (CopyFiles(Program.Location, CygwinPath, FileList, out copiedFiles))
                     {
@@ -399,12 +414,12 @@ namespace Microsoft.Alm.Cli
                     }
                 }
 
-                ConfigurationLevel types = ConfigurationLevel.Global;
+                Git.ConfigurationLevel types = Git.ConfigurationLevel.Global;
 
-                ConfigurationLevel updateTypes;
+                Git.ConfigurationLevel updateTypes;
                 if (SetGitConfig(installations, GitConfigAction.Set, types, out updateTypes))
                 {
-                    if ((updateTypes & ConfigurationLevel.Global) == ConfigurationLevel.Global)
+                    if ((updateTypes & Git.ConfigurationLevel.Global) == Git.ConfigurationLevel.Global)
                     {
                         Program.Out.WriteLine("Updated your ~/.gitconfig [git config --global]");
                     }
@@ -443,17 +458,15 @@ namespace Microsoft.Alm.Cli
             // default to not found state
             version = null;
 
-            string netfxString = null;
             Version netfxVerson = null;
 
             // query for existing installations of .NET
-            if ((netfxString = Registry.GetValue(NetFxKeyClient, ValueName, DefaultValue) as string) != null
-                    && Version.TryParse(netfxString, out netfxVerson)
+            if (Registry.GetValue(NetFxKeyClient, ValueName, DefaultValue) is string netfxString && Version.TryParse(netfxString, out netfxVerson)
                 || (netfxString = Registry.GetValue(NetFxKeyFull, ValueName, DefaultValue) as string) != null
                     && Version.TryParse(netfxString, out netfxVerson))
             {
                 Program.LogEvent($"NetFx version {netfxVerson.ToString(3)} detected.", EventLogEntryType.Information);
-                Git.Trace.WriteLine($"NetFx version {netfxVerson.ToString(3)} detected.");
+                Program.Context.Trace.WriteLine($"NetFx version {netfxVerson.ToString(3)} detected.");
 
                 version = netfxVerson;
             }
@@ -474,12 +487,16 @@ namespace Microsoft.Alm.Cli
                     return;
                 }
 
-                List<GitInstallation> installations = null;
+                var fs = Program.Context.FileSystem;
+                var trace = Program.Context.Trace;
+                var where = Program.Context.Where;
 
-                // use the custom installation path if supplied
+                List<Git.GitInstallation> installations = null;
+
+                // Use the custom installation path if supplied.
                 if (!string.IsNullOrEmpty(_customPath))
                 {
-                    if (!Directory.Exists(_customPath))
+                    if (!fs.DirectoryExists(_customPath))
                     {
                         Program.Out.WriteLine();
                         Program.WriteLine($"fatal: custom path does not exist: '{_customPath}'. U_U");
@@ -492,26 +509,28 @@ namespace Microsoft.Alm.Cli
                     Program.Out.WriteLine();
                     Program.Out.WriteLine($"Removing from custom path: '{_customPath}'.");
 
-                    // if the custom path points to a git location then treat it properly
-                    GitInstallation installation;
-                    if (Where.FindGitInstallation(_customPath, KnownGitDistribution.GitForWindows64v2, out installation)
-                        || Where.FindGitInstallation(_customPath, KnownGitDistribution.GitForWindows32v2, out installation)
-                        || Where.FindGitInstallation(_customPath, KnownGitDistribution.GitForWindows32v1, out installation))
+                    // If the custom path points to a git location then treat it properly.
+                    Git.GitInstallation installation;
+                    if (where.FindGitInstallation(_customPath, Git.KnownGitDistribution.GitForWindows64v2, out installation)
+                        || where.FindGitInstallation(_customPath, Git.KnownGitDistribution.GitForWindows32v2, out installation)
+                        || where.FindGitInstallation(_customPath, Git.KnownGitDistribution.GitForWindows32v1, out installation))
                     {
-                        Git.Trace.WriteLine($"Git found: '{installation.Path}'.");
+                        trace.WriteLine($"Git found: '{installation.Path}'.");
 
                         // track known Git installations
-                        installations = new List<GitInstallation>();
-                        installations.Add(installation);
+                        installations = new List<Git.GitInstallation>
+                        {
+                            installation
+                        };
                     }
                 }
-                // since no custom installation path was supplied, use default logic
+                // Since no custom installation path was supplied, use default logic.
                 else
                 {
                     Program.Out.WriteLine();
                     Program.Out.WriteLine("Looking for Git installation(s)...");
 
-                    if (Where.FindGitInstallations(out installations))
+                    if (where.FindGitInstallations(out installations))
                     {
                         foreach (var installation in installations)
                         {
@@ -531,12 +550,12 @@ namespace Microsoft.Alm.Cli
                     return;
                 }
 
-                ConfigurationLevel types = ConfigurationLevel.Global | ConfigurationLevel.System;
+                Git.ConfigurationLevel types = Git.ConfigurationLevel.Global | Git.ConfigurationLevel.System;
 
-                ConfigurationLevel updateTypes;
+                Git.ConfigurationLevel updateTypes;
                 if (SetGitConfig(installations, GitConfigAction.Unset, types, out updateTypes))
                 {
-                    if ((updateTypes & ConfigurationLevel.System) == ConfigurationLevel.System)
+                    if ((updateTypes & Git.ConfigurationLevel.System) == Git.ConfigurationLevel.System)
                     {
                         Program.Out.WriteLine();
                         Program.Out.WriteLine("Updated your /etc/gitconfig [git config --system]");
@@ -545,7 +564,7 @@ namespace Microsoft.Alm.Cli
                     {
                         Program.Out.WriteLine();
 
-                        // updating /etc/gitconfig should not fail installation when forced
+                        // Updating /etc/gitconfig should not fail installation when forced.
                         if (!_isForced)
                         {
                             // only 'fatal' when not forced
@@ -558,7 +577,7 @@ namespace Microsoft.Alm.Cli
                         Program.WriteLine("Unable to update your /etc/gitconfig correctly.");
                     }
 
-                    if ((updateTypes & ConfigurationLevel.Global) == ConfigurationLevel.Global)
+                    if ((updateTypes & Git.ConfigurationLevel.Global) == Git.ConfigurationLevel.Global)
                     {
                         Program.Out.WriteLine("Updated your ~/.gitconfig [git config --global]");
                     }
@@ -587,8 +606,8 @@ namespace Microsoft.Alm.Cli
                             Program.Out.WriteLine($"  {file}");
                         }
 
-                        // clean help documents
-                        if (Directory.Exists(installation.Doc)
+                        // Clean help documents.
+                        if (fs.DirectoryExists(installation.Doc)
                             && CleanFiles(installation.Doc, DocsList, out cleanedFiles))
                         {
                             cleanedCount += cleanedFiles.Count;
@@ -615,7 +634,7 @@ namespace Microsoft.Alm.Cli
                     }
                 }
 
-                if (Directory.Exists(UserBinPath))
+                if (fs.DirectoryExists(UserBinPath))
                 {
                     Program.Out.WriteLine();
                     Program.Out.WriteLine($"Removing from '{UserBinPath}'.");
@@ -655,7 +674,7 @@ namespace Microsoft.Alm.Cli
                     }
                 }
 
-                if (CygwinPath != null && Directory.Exists(CygwinPath))
+                if (CygwinPath != null && fs.DirectoryExists(CygwinPath))
                 {
                     if (CleanFiles(CygwinPath, FileList, out cleanedFiles))
                     {
@@ -680,7 +699,7 @@ namespace Microsoft.Alm.Cli
                     }
                 }
 
-                // all necessary content has been deployed to the system
+                // All necessary content has been deployed to the system.
                 Result = ResultValue.Success;
 
                 Program.LogEvent($"{Program.Title} successfully removed.", EventLogEntryType.Information);
@@ -695,19 +714,22 @@ namespace Microsoft.Alm.Cli
             }
         }
 
-        public bool SetGitConfig(List<GitInstallation> installations, GitConfigAction action, ConfigurationLevel type, out ConfigurationLevel updated)
+        public bool SetGitConfig(List<Git.GitInstallation> installations, GitConfigAction action, Git.ConfigurationLevel type, out Git.ConfigurationLevel updated)
         {
-            Git.Trace.WriteLine($"action = '{action}'.");
+            var trace = Program.Context.Trace;
+            var where = Program.Context.Where;
 
-            updated = ConfigurationLevel.None;
+            trace.WriteLine($"action = '{action}'.");
 
-            if ((installations == null || installations.Count == 0) && !Where.FindGitInstallations(out installations))
+            updated = Git.ConfigurationLevel.None;
+
+            if ((installations == null || installations.Count == 0) && !where.FindGitInstallations(out installations))
             {
-                Git.Trace.WriteLine("No Git installations detected to update.");
+                trace.WriteLine("No Git installations detected to update.");
                 return false;
             }
 
-            if ((type & ConfigurationLevel.Global) == ConfigurationLevel.Global)
+            if ((type & Git.ConfigurationLevel.Global) == Git.ConfigurationLevel.Global)
             {
                 // the 0 entry in the installations list is the "preferred" instance of Git
                 string gitCmdPath = installations[0].Git;
@@ -717,13 +739,13 @@ namespace Microsoft.Alm.Cli
 
                 if (ExecuteGit(gitCmdPath, globalCmd, 0, 5))
                 {
-                    Git.Trace.WriteLine("updating ~/.gitconfig succeeded.");
+                    trace.WriteLine("updating ~/.gitconfig succeeded.");
 
-                    updated |= ConfigurationLevel.Global;
+                    updated |= Git.ConfigurationLevel.Global;
                 }
                 else
                 {
-                    Git.Trace.WriteLine("updating ~/.gitconfig failed.");
+                    trace.WriteLine("updating ~/.gitconfig failed.");
 
                     Program.Out.WriteLine();
                     Program.Error.WriteLine("Fatal: Unable to update ~/.gitconfig.");
@@ -732,7 +754,7 @@ namespace Microsoft.Alm.Cli
                 }
             }
 
-            if ((type & ConfigurationLevel.System) == ConfigurationLevel.System)
+            if ((type & Git.ConfigurationLevel.System) == Git.ConfigurationLevel.System)
             {
                 string systemCmd = action == GitConfigAction.Set
                     ? "config --system credential.helper manager"
@@ -744,19 +766,19 @@ namespace Microsoft.Alm.Cli
                 {
                     if (ExecuteGit(installation.Git, systemCmd, 0, 5))
                     {
-                        Git.Trace.WriteLine("updating /etc/gitconfig succeeded.");
+                        trace.WriteLine("updating /etc/gitconfig succeeded.");
 
                         successCount++;
                     }
                     else
                     {
-                        Git.Trace.WriteLine("updating ~/.gitconfig failed.");
+                        trace.WriteLine("updating ~/.gitconfig failed.");
                     }
                 }
 
                 if (successCount == installations.Count)
                 {
-                    updated |= ConfigurationLevel.System;
+                    updated |= Git.ConfigurationLevel.System;
                 }
                 else
                 {
@@ -767,13 +789,16 @@ namespace Microsoft.Alm.Cli
             return true;
         }
 
-        private static bool CleanFiles(string path, IReadOnlyList<string> files, out List<string> cleanedFiles)
+        private bool CleanFiles(string path, IReadOnlyList<string> files, out List<string> cleanedFiles)
         {
             cleanedFiles = new List<string>();
 
-            if (!Directory.Exists(path))
+            var fs = Program.Context.FileSystem;
+            var trace = Program.Context.Trace;
+
+            if (!fs.DirectoryExists(path))
             {
-                Git.Trace.WriteLine($"path '{path}' does not exist.");
+                trace.WriteLine($"path '{path}' does not exist.");
                 return false;
             }
 
@@ -783,9 +808,9 @@ namespace Microsoft.Alm.Cli
                 {
                     string target = Path.Combine(path, file);
 
-                    Git.Trace.WriteLine($"clean '{target}'.");
+                    trace.WriteLine($"clean '{target}'.");
 
-                    File.Delete(target);
+                    fs.FileDelete(target);
 
                     cleanedFiles.Add(file);
                 }
@@ -794,33 +819,43 @@ namespace Microsoft.Alm.Cli
             }
             catch
             {
-                Git.Trace.WriteLine($"clean of '{path}' failed.");
+                trace.WriteLine($"clean of '{path}' failed.");
                 return false;
             }
         }
 
-        private static bool CopyFiles(string srcPath, string dstPath, IReadOnlyList<string> files, out List<string> copiedFiles)
+        private bool CopyFiles(string srcPath, string dstPath, IReadOnlyList<string> files, out List<string> copiedFiles)
         {
+            if (srcPath is null)
+                throw new ArgumentNullException(nameof(srcPath));
+            if (dstPath is null)
+                throw new ArgumentNullException(nameof(dstPath));
+            if (files is null)
+                throw new ArgumentNullException(nameof(files));
+
+            var fs = Program.Context.FileSystem;
+            var trace = Program.Context.Trace;
+
             copiedFiles = new List<string>();
 
-            if (!Directory.Exists(srcPath))
+            if (!fs.DirectoryExists(srcPath))
             {
-                Git.Trace.WriteLine($"source '{srcPath}' does not exist.");
+                trace.WriteLine($"source '{srcPath}' does not exist.");
                 return false;
             }
 
-            if (Directory.Exists(dstPath))
+            if (fs.DirectoryExists(dstPath))
             {
                 try
                 {
                     foreach (string file in files)
                     {
-                        Git.Trace.WriteLine($"copy '{file}' from '{srcPath}' to '{dstPath}'.");
+                        trace.WriteLine($"copy '{file}' from '{srcPath}' to '{dstPath}'.");
 
                         string src = Path.Combine(srcPath, file);
                         string dst = Path.Combine(dstPath, file);
 
-                        File.Copy(src, dst, true);
+                        fs.FileCopy(src, dst, true);
 
                         copiedFiles.Add(file);
                     }
@@ -829,16 +864,16 @@ namespace Microsoft.Alm.Cli
                 }
                 catch
                 {
-                    Git.Trace.WriteLine("copy failed.");
+                    trace.WriteLine("copy failed.");
                     return false;
                 }
             }
             else
             {
-                Git.Trace.WriteLine($"destination '{dstPath}' does not exist.");
+                trace.WriteLine($"destination '{dstPath}' does not exist.");
             }
 
-            Git.Trace.WriteLine("copy failed.");
+            trace.WriteLine("copy failed.");
             return false;
         }
 
@@ -874,6 +909,8 @@ namespace Microsoft.Alm.Cli
                              .Append("\"");
                 }
 
+                var trace = Program.Context.Trace;
+
                 // build process start options
                 var options = new ProcessStartInfo()
                 {
@@ -884,7 +921,7 @@ namespace Microsoft.Alm.Cli
                     WorkingDirectory = Program.Location,
                 };
 
-                Git.Trace.WriteLine($"create process: cmd '{options.Verb}' '{options.FileName}' '{options.Arguments}' .");
+                trace.WriteLine($"create process: cmd '{options.Verb}' '{options.FileName}' '{options.Arguments}' .");
 
                 try
                 {
@@ -894,25 +931,28 @@ namespace Microsoft.Alm.Cli
                     // wait for the process to complete
                     elevated.WaitForExit();
 
-                    Git.Trace.WriteLine($"process exited with {elevated.ExitCode}.");
+                    trace.WriteLine($"process exited with {elevated.ExitCode}.");
 
                     // exit with the elevated process' exit code
                     ExitCode = elevated.ExitCode;
                 }
                 catch (Exception exception)
                 {
-                    Git.Trace.WriteLine($"process failed with '{exception.Message}'");
+                    trace.WriteLine($"process failed with '{exception.Message}'");
                     Result = ResultValue.Unprivileged;
                 }
             }
         }
 
-        private static bool ExecuteGit(string gitCmdPath, string command, params int[] allowedExitCodes)
+        private bool ExecuteGit(string gitCmdPath, string command, params int[] allowedExitCodes)
         {
             if (string.IsNullOrEmpty(gitCmdPath) || string.IsNullOrEmpty(command))
                 return false;
 
-            if (!File.Exists(gitCmdPath))
+            var fs = Program.Context.FileSystem;
+            var trace = Program.Context.Trace;
+
+            if (!fs.FileExists(gitCmdPath))
                 return false;
 
             var options = new ProcessStartInfo()
@@ -923,13 +963,13 @@ namespace Microsoft.Alm.Cli
                 UseShellExecute = false,
             };
 
-            Git.Trace.WriteLine($"create process: cmd '{options.FileName}' '{options.Arguments}' .");
+            trace.WriteLine($"create process: cmd '{options.FileName}' '{options.Arguments}' .");
 
             var gitProcess = Process.Start(options);
 
             gitProcess.WaitForExit();
 
-            Git.Trace.WriteLine($"Git exited with {gitProcess.ExitCode}.");
+            trace.WriteLine($"Git exited with {gitProcess.ExitCode}.");
 
             if (allowedExitCodes != null && allowedExitCodes.Length > 0)
                 return allowedExitCodes.Contains(gitProcess.ExitCode);
@@ -989,7 +1029,9 @@ namespace Microsoft.Alm.Cli
                     WorkingDirectory = Program.Location,
                 };
 
-                Git.Trace.WriteLine($"create process: cmd '{options.Verb}' '{options.FileName}' '{options.Arguments}' .");
+                var trace = Program.Context.Trace;
+
+                trace.WriteLine($"create process: cmd '{options.Verb}' '{options.FileName}' '{options.Arguments}' .");
 
                 try
                 {
@@ -999,14 +1041,14 @@ namespace Microsoft.Alm.Cli
                     // wait for the process to complete
                     elevated.WaitForExit();
 
-                    Git.Trace.WriteLine($"process exited with {elevated.ExitCode}.");
+                    trace.WriteLine($"process exited with {elevated.ExitCode}.");
 
                     // exit with the elevated process' exit code
                     ExitCode = elevated.ExitCode;
                 }
                 catch (Exception exception)
                 {
-                    Git.Trace.WriteLine($"! process failed with '{exception.Message}'.");
+                    trace.WriteLine($"! process failed with '{exception.Message}'.");
                     Result = ResultValue.Unprivileged;
                 }
             }
