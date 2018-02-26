@@ -65,7 +65,7 @@ namespace Microsoft.Alm.Cli
                         ? "app"
                         : "sms";
 
-                    Git.Trace.WriteLine($"2fa type = '{type}'.");
+                    program.Context.Trace.WriteLine($"2fa type = '{type}'.");
 
                     buffer.AppendLine()
                           .Append("authcode (")

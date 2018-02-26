@@ -32,16 +32,125 @@ using Microsoft.Alm.Authentication;
 
 namespace Microsoft.Alm.Cli
 {
-    internal class OperationArguments
+    internal class OperationArguments: BaseType
     {
-        public OperationArguments(Stream readableStream)
-                : this()
+        public OperationArguments(RuntimeContext context, Uri targetUri)
+            : base(context)
+        {
+            if (targetUri is null)
+                throw new ArgumentNullException("targetUri");
+
+            _queryProtocol = targetUri.Scheme;
+            _queryHost = (targetUri.IsDefaultPort)
+                ? targetUri.Host
+                : string.Format(System.Globalization.CultureInfo.InvariantCulture, "{0}:{1}", targetUri.Host, targetUri.Port);
+            _queryPath = targetUri.AbsolutePath;
+
+            CreateTargetUri();
+        }
+
+        public OperationArguments(RuntimeContext context)
+            : base(context)
+        {
+            _authorityType = AuthorityType.Auto;
+            _context = RuntimeContext.Default;
+            _interactivity = Interactivity.Auto;
+            _useLocalConfig = true;
+            _useModalUi = true;
+            _useSystemConfig = true;
+            _validateCredentials = true;
+            _vstsTokenScope = Program.VstsCredentialScope;
+        }
+
+        public OperationArguments()
+            : this(RuntimeContext.Default)
+        { }
+
+        private AuthorityType _authorityType;
+        private Authentication.Git.ConfigurationCollection _configuration;
+        private readonly RuntimeContext _context;
+        private Credential _credentials;
+        private string _customNamespace;
+        private Dictionary<string, string> _environmentVariables;
+        private Interactivity _interactivity;
+        private bool _preserveCredentials;
+        private Uri _proxyUri;
+        private string _queryHost;
+        private string _queryPath;
+        private string _queryProtocol;
+        private TargetUri _targetUri;
+        private TimeSpan? _tokenDuration;
+        private bool _useHttpPath;
+        private bool _useLocalConfig;
+        private bool _useModalUi;
+        private string _username;
+        private bool _useSystemConfig;
+        private bool _validateCredentials;
+        private VstsTokenScope _vstsTokenScope;
+        private bool _writeLog;
+
+        public virtual AuthorityType Authority
+        {
+            get { return _authorityType; }
+            set { _authorityType = value; }
+        }
+
+        public virtual Credential Credentials
+        {
+            get { return _credentials; }
+            set { _credentials = value; }
+        }
+
+        public virtual string CustomNamespace
+        {
+            get { return _customNamespace; }
+            set { _customNamespace = value; }
+        }
+
+        /// <summary>
+        /// Gets a map of the process's environmental variables keyed on case-insensitive names.
+        /// </summary>
+        public virtual IReadOnlyDictionary<string, string> EnvironmentVariables
+        {
+            get
+            {
+                if (_environmentVariables == null)
+                {
+                    _environmentVariables = new Dictionary<string, string>(Program.EnvironKeyComparer);
+                    var iter = Environment.GetEnvironmentVariables().GetEnumerator();
+                    while (iter.MoveNext())
+                    {
+                        _environmentVariables[iter.Key as string] = iter.Value as string;
+                    }
+                }
+                return _environmentVariables;
+            }
+        }
+
+        /// <summary>
+        /// Gets the process's Git configuration based on current working directory, user's folder,
+        /// and Git's system directory.
+        /// </summary>
+        public virtual Authentication.Git.ConfigurationCollection GitConfiguration
+        {
+            get { return _configuration; }
+        }
+
+        public virtual Interactivity Interactivity
+        {
+            get { return _interactivity; }
+            set { _interactivity = value; }
+        }
+
+        public virtual void LoadFromStream(Stream readableStream)
         {
             if (readableStream is null)
                 throw new ArgumentNullException(nameof(readableStream));
-
             if (readableStream == Stream.Null || !readableStream.CanRead)
-                throw new InvalidOperationException("Unable to read input.");
+            {
+                var inner = new InvalidOperationException("Unable to read read from stream.");
+                throw new ArgumentException(inner.Message, nameof(readableStream), inner);
+            }
 
             byte[] buffer = new byte[4096];
             int read = 0;
@@ -137,107 +246,6 @@ namespace Microsoft.Alm.Cli
             }
 
             CreateTargetUri();
-        }
-
-        public OperationArguments(Uri targetUri)
-            : this()
-        {
-            if (targetUri is null)
-                throw new ArgumentNullException("targetUri");
-
-            _queryProtocol = targetUri.Scheme;
-            _queryHost = (targetUri.IsDefaultPort)
-                ? targetUri.Host
-                : string.Format(System.Globalization.CultureInfo.InvariantCulture, "{0}:{1}", targetUri.Host, targetUri.Port);
-            _queryPath = targetUri.AbsolutePath;
-
-            CreateTargetUri();
-        }
-
-        public OperationArguments()
-        {
-            _authorityType = AuthorityType.Auto;
-            _interactivity = Interactivity.Auto;
-            _useLocalConfig = true;
-            _useModalUi = true;
-            _useSystemConfig = true;
-            _validateCredentials = true;
-            _vstsTokenScope = Program.VstsCredentialScope;
-        }
-
-        private AuthorityType _authorityType;
-        private Git.ConfigurationCollection _configuration;
-        private Credential _credentials;
-        private string _customNamespace;
-        private Dictionary<string, string> _environmentVariables;
-        private Interactivity _interactivity;
-        private bool _preserveCredentials;
-        private Uri _proxyUri;
-        private string _queryHost;
-        private string _queryPath;
-        private string _queryProtocol;
-        private TargetUri _targetUri;
-        private TimeSpan? _tokenDuration;
-        private bool _useHttpPath;
-        private bool _useLocalConfig;
-        private bool _useModalUi;
-        private string _username;
-        private bool _useSystemConfig;
-        private bool _validateCredentials;
-        private VstsTokenScope _vstsTokenScope;
-        private bool _writeLog;
-
-        public virtual AuthorityType Authority
-        {
-            get { return _authorityType; }
-            set { _authorityType = value; }
-        }
-
-        public virtual Credential Credentials
-        {
-            get { return _credentials; }
-            set { _credentials = value; }
-        }
-
-        public virtual string CustomNamespace
-        {
-            get { return _customNamespace; }
-            set { _customNamespace = value; }
-        }
-
-        /// <summary>
-        /// Gets a map of the process's environmental variables keyed on case-insensitive names.
-        /// </summary>
-        public virtual IReadOnlyDictionary<string, string> EnvironmentVariables
-        {
-            get
-            {
-                if (_environmentVariables == null)
-                {
-                    _environmentVariables = new Dictionary<string, string>(Program.EnvironKeyComparer);
-                    var iter = Environment.GetEnvironmentVariables().GetEnumerator();
-                    while (iter.MoveNext())
-                    {
-                        _environmentVariables[iter.Key as string] = iter.Value as string;
-                    }
-                }
-                return _environmentVariables;
-            }
-        }
-
-        /// <summary>
-        /// Gets the process's Git configuration based on current working directory, user's folder,
-        /// and Git's system directory.
-        /// </summary>
-        public virtual Git.ConfigurationCollection GitConfiguration
-        {
-            get { return _configuration; }
-        }
-
-        public virtual Interactivity Interactivity
-        {
-            get { return _interactivity; }
-            set { _interactivity = value; }
         }
 
         public virtual string Password
@@ -401,7 +409,7 @@ namespace Microsoft.Alm.Cli
 
         public virtual async Task LoadConfiguration()
         {
-            _configuration = await Git.ConfigurationCollection.ReadConfiuration(Environment.CurrentDirectory, UseConfigLocal, UseConfigSystem);
+            _configuration = await Authentication.Git.ConfigurationCollection.ReadConfiuration(_context, Environment.CurrentDirectory, UseConfigLocal, UseConfigSystem);
         }
 
         public virtual void SetCredentials(string username, string password)
@@ -415,16 +423,16 @@ namespace Microsoft.Alm.Cli
 
             if (Uri.TryCreate(url, UriKind.Absolute, out tmp))
             {
-                Git.Trace.WriteLine($"successfully set proxy to '{tmp.AbsoluteUri}'.");
+                Trace.WriteLine($"successfully set proxy to '{tmp.AbsoluteUri}'.");
             }
             else
             {
                 if (!string.IsNullOrWhiteSpace(url))
                 {
-                    Git.Trace.WriteLine($"failed to parse '{url}'.");
+                    Trace.WriteLine($"failed to parse '{url}'.");
                 }
 
-                Git.Trace.WriteLine("proxy cleared.");
+                Trace.WriteLine("proxy cleared.");
             }
 
             ProxyUri = tmp;
@@ -485,7 +493,7 @@ namespace Microsoft.Alm.Cli
             writableStream.Write(bytes, 0, bytes.Length);
         }
 
-        internal virtual void CreateTargetUri()
+        internal void CreateTargetUri()
         {
             string queryUrl = null;
             string proxyUrl = _proxyUri?.OriginalString;

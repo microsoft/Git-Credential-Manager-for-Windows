@@ -32,6 +32,7 @@ using System.Runtime.CompilerServices;
 using System.Threading.Tasks;
 using Microsoft.Alm.Authentication;
 using Bitbucket = Atlassian.Bitbucket.Authentication;
+using Git = Microsoft.Alm.Authentication.Git;
 using Github = GitHub.Authentication;
 
 namespace Microsoft.Alm.Cli
@@ -56,7 +57,7 @@ namespace Microsoft.Alm.Cli
         Writelog,
     }
 
-    partial class Program
+    partial class Program : BaseType
     {
         public const string SourceUrl = "https://github.com/Microsoft/Git-Credential-Manager-for-Windows";
         public const string EventSource = "Git Credential Manager";
@@ -65,7 +66,7 @@ namespace Microsoft.Alm.Cli
         internal static readonly StringComparer ConfigValueComparer = StringComparer.OrdinalIgnoreCase;
 
         internal const string EnvironConfigDebugKey = "GCM_DEBUG";
-        internal const string EnvironConfigTraceKey = Git.Trace.EnvironmentVariableKey;
+        internal const string EnvironConfigTraceKey = Authentication.Trace.EnvironmentVariableKey;
 
         internal static readonly StringComparer EnvironKeyComparer = StringComparer.OrdinalIgnoreCase;
 
@@ -275,6 +276,11 @@ namespace Microsoft.Alm.Cli
             }
         }
 
+        internal new RuntimeContext Context
+        {
+            get { return base.Context; }
+        }
+
         internal TextWriter Error
         {
             get
@@ -382,29 +388,27 @@ namespace Microsoft.Alm.Cli
                     || StringComparer.OrdinalIgnoreCase.Equals(debug, "1")
                     || StringComparer.OrdinalIgnoreCase.Equals(debug, "debug")))
             {
-                Git.Trace.WriteLine($"'{EnvironConfigDebugKey}': '{debug}', launching debugger...");
-
                 Debugger.Launch();
             }
         }
 
         internal void Die(Exception exception,
-                                [CallerFilePath] string path = "",
-                                [CallerLineNumber] int line = 0,
-                                [CallerMemberName] string name = "")
+                          [CallerFilePath] string path = "",
+                          [CallerLineNumber] int line = 0,
+                          [CallerMemberName] string name = "")
             => _dieException(this, exception, path, line, name);
 
         internal void Die(string message,
-                                [CallerFilePath] string path = "",
-                                [CallerLineNumber] int line = 0,
-                                [CallerMemberName] string name = "")
+                          [CallerFilePath] string path = "",
+                          [CallerLineNumber] int line = 0,
+                          [CallerMemberName] string name = "")
             => _dieMessage(this, message, path, line, name);
 
         internal void Exit(int exitcode = 0,
-                                  string message = null,
-                                 [CallerFilePath] string path = "",
-                                 [CallerLineNumber] int line = 0,
-                                 [CallerMemberName] string name = "")
+                           string message = null,
+                           [CallerFilePath] string path = "",
+                           [CallerLineNumber] int line = 0,
+                           [CallerMemberName] string name = "")
             => _exit(this, exitcode, message, path, line, name);
 
         internal Task LoadOperationArguments(OperationArguments operationArguments)
@@ -448,7 +452,7 @@ namespace Microsoft.Alm.Cli
         {
             // use the stderr stream for the trace as stdout is used in the cross-process
             // communications protocol
-            Git.Trace.AddListener(Error);
+            Trace.AddListener(Error);
         }
 
         internal void EnableTraceLogging(OperationArguments operationArguments)
@@ -470,7 +474,7 @@ namespace Microsoft.Alm.Cli
             if (!_configurationKeys.TryGetValue(type, out value)
                 && !_environmentKeys.TryGetValue(type, out value))
             {
-                Git.Trace.WriteLine($"BUG: unknown {nameof(KeyType)}: '{type}' encountered.");
+                Trace.WriteLine($"BUG: unknown {nameof(KeyType)}: '{type}' encountered.");
             }
 
             return value;
@@ -482,18 +486,15 @@ namespace Microsoft.Alm.Cli
         internal Task<Credential> GitHubCredentialPrompt(TargetUri targetUri)
             => _gitHubCredentialPrompt(this, targetUri);
 
-        private Task LoadAssemblyInformation()
+        private void LoadAssemblyInformation()
         {
-            return Task.Run(() =>
-            {
-                var assembly = System.Reflection.Assembly.GetEntryAssembly();
-                var asseName = assembly.GetName();
+            var assembly = System.Reflection.Assembly.GetEntryAssembly();
+            var asseName = assembly.GetName();
 
-                _executablePath = assembly.Location;
-                _location = Path.GetDirectoryName(_executablePath);
-                _name = asseName.Name;
-                _version = asseName.Version;
-            });
+            _executablePath = assembly.Location;
+            _location = Path.GetDirectoryName(_executablePath);
+            _name = asseName.Name;
+            _version = asseName.Version;
         }
 
         internal Task<Credential> ModalPromptDisplayDialog(NativeMethods.CredentialUiInfo credUiInfo,
@@ -539,13 +540,14 @@ namespace Microsoft.Alm.Cli
         private Task<Credential> ModalPromptForPassword(TargetUri targetUri, string message, string username)
             => _modalPromptForPassword(this, targetUri, message, username);
 
-        internal void PrintVersion()
+        internal Task PrintVersion()
         {
 #if DEBUG
             WriteLine($"{Title} version {Version.ToString(4)}");
 #else
             WriteLine($"{Title} version {Version.ToString(3)}");
 #endif
+            return Task.FromResult(true);
         }
 
         internal void SetError(TextWriter writer)
