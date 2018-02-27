@@ -109,7 +109,7 @@ namespace Microsoft.Alm.Authentication
                     _httpAuthenticateOptions = await WwwAuthenticateHelper.GetHeaderValues(targetUri);
                 }
 
-                // If the headers contain NTML as an option, then fall back to NTLM.
+                // If the headers contain NTLM as an option, then fall back to NTLM.
                 if (_httpAuthenticateOptions.Any(x => WwwAuthenticateHelper.IsNtlm(x)))
                 {
                     Git.Trace.WriteLine($"'{targetUri}' supports NTLM, sending NTLM credentials instead");
