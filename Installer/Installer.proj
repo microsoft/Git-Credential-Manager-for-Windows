@@ -49,10 +49,6 @@
       <Project>{19770407-b493-459d-bb4f-04fbefb1ba13}</Project>
       <Name>Microsoft.Alm.Authentication</Name>
     </ProjectReference>
-    <ProjectReference Include="..\Microsoft.Alm.Git\Microsoft.Alm.Git.csproj">
-      <Project>{19770407-5c58-406d-ab3f-3700bb0d06fe}</Project>
-      <Name>Microsoft.Alm.Git</Name>
-    </ProjectReference>
     <ProjectReference Include="..\Microsoft.Vsts.Authentication\Microsoft.Vsts.Authentication.csproj">
       <Project>{19770407-d7d8-4a37-914c-f552ff4b90d4}</Project>
       <Name>Microsoft.Vsts.Authentication</Name>
@@ -90,9 +86,6 @@
       <InProject>false</InProject>
     </ZipContents>
     <ZipContents Include="$(IntermediateOutputPath)\Microsoft.Alm.Authentication.dll">
-      <InProject>false</InProject>
-    </ZipContents>
-    <ZipContents Include="$(IntermediateOutputPath)\Microsoft.Alm.Git.dll">
       <InProject>false</InProject>
     </ZipContents>
     <ZipContents Include="$(IntermediateOutputPath)\Microsoft.IdentityModel.Clients.ActiveDirectory.dll">
