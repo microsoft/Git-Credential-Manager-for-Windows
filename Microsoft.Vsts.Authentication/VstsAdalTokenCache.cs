@@ -27,13 +27,14 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Security.Cryptography;
-using Microsoft.IdentityModel.Clients.ActiveDirectory;
+
+using Adal = Microsoft.IdentityModel.Clients.ActiveDirectory;
 
 namespace Microsoft.Alm.Authentication
 {
-    internal class VstsAdalTokenCache : IdentityModel.Clients.ActiveDirectory.TokenCache
+    internal class VstsAdalTokenCache : Adal.TokenCache
     {
-        private readonly IReadOnlyList<IReadOnlyList<string>> AdalCachePaths = new string[][]
+        private static readonly IReadOnlyList<IReadOnlyList<string>> AdalCachePaths = new string[][]
         {
             new [] { @".IdentityService", @"IdentityServiceAdalCache.cache", },          // VS2017 ADAL v3 cache
             new [] { @"Microsoft\VSCommon\VSAccountManagement", @"AdalCache.cache", },   // VS2015 ADAL v2 cache
@@ -43,19 +44,28 @@ namespace Microsoft.Alm.Authentication
         /// <summary>
         /// Default constructor.
         /// </summary>
-        public VstsAdalTokenCache()
+        public VstsAdalTokenCache(RuntimeContext context)
         {
+            if (context is null)
+                throw new ArgumentNullException(nameof(context));
+
+            _context = context;
+            _fileSystem = context.FileSystem;
+            _trace = context.Trace;
+
             string localAppDataPath = Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData);
 
             AfterAccess = AfterAccessNotification;
             BeforeAccess = BeforeAccessNotification;
+
+            var fs = _context.FileSystem;
 
             for (int i = 0; i < AdalCachePaths.Count; i += 1)
             {
                 string directoryPath = Path.Combine(localAppDataPath, AdalCachePaths[i][0]);
                 string filePath = Path.Combine(directoryPath, AdalCachePaths[i][1]);
 
-                if (File.Exists(filePath))
+                if (fs.FileExists(filePath))
                 {
                     _cacheFilePath = filePath;
                     break;
@@ -66,13 +76,16 @@ namespace Microsoft.Alm.Authentication
         }
 
         private readonly string _cacheFilePath;
+        private readonly RuntimeContext _context;
+        private readonly IFileSystem _fileSystem;
         private readonly object _syncpoint = new object();
+        private readonly ITrace _trace;
 
-        private void AfterAccessNotification(TokenCacheNotificationArgs args)
+        private void AfterAccessNotification(Adal.TokenCacheNotificationArgs args)
         {
             lock (_syncpoint)
             {
-                if (File.Exists(_cacheFilePath) && HasStateChanged)
+                if (_fileSystem.FileExists(_cacheFilePath) && HasStateChanged)
                 {
                     try
                     {
@@ -80,27 +93,27 @@ namespace Microsoft.Alm.Authentication
 
                         byte[] data = ProtectedData.Protect(state, null, DataProtectionScope.CurrentUser);
 
-                        File.WriteAllBytes(_cacheFilePath, data);
+                        _fileSystem.FileWriteAllBytes(_cacheFilePath, data);
 
                         HasStateChanged = false;
                     }
                     catch (Exception exception)
                     {
-                        Git.Trace.WriteLine($"error: {nameof(VstsAdalTokenCache)} \"{_cacheFilePath}\": {exception.Message}");
+                        _trace.WriteLine($"error: {nameof(VstsAdalTokenCache)} \"{_cacheFilePath}\": {exception.Message}");
                     }
                 }
             }
         }
 
-        private void BeforeAccessNotification(TokenCacheNotificationArgs args)
+        private void BeforeAccessNotification(Adal.TokenCacheNotificationArgs args)
         {
             lock (_syncpoint)
             {
-                if (File.Exists(_cacheFilePath))
+                if (_fileSystem.FileExists(_cacheFilePath))
                 {
                     try
                     {
-                        byte[] data = File.ReadAllBytes(_cacheFilePath);
+                        byte[] data = _fileSystem.FileReadAllBytes(_cacheFilePath);
 
                         byte[] state = ProtectedData.Unprotect(data, null, DataProtectionScope.CurrentUser);
 
@@ -108,7 +121,7 @@ namespace Microsoft.Alm.Authentication
                     }
                     catch (Exception exception)
                     {
-                        Git.Trace.WriteLine($"error: {nameof(VstsAdalTokenCache)} \"{_cacheFilePath}\": {exception.Message}");
+                        _trace.WriteLine($"error: {nameof(VstsAdalTokenCache)} \"{_cacheFilePath}\": {exception.Message}");
                     }
                 }
             }

@@ -27,6 +27,7 @@ using System;
 using System.Collections.Generic;
 using System.Security.Cryptography;
 using System.Text;
+using System.Threading.Tasks;
 using Microsoft.Win32;
 
 namespace Microsoft.Alm.Authentication
@@ -34,7 +35,7 @@ namespace Microsoft.Alm.Authentication
     /// <summary>
     /// A token storage object which interacts with the current user's Visual Studio 2015 hive in the Windows Registry.
     /// </summary>
-    public sealed class TokenRegistry : ITokenStore
+    public sealed class TokenRegistry : BaseType, ITokenStore
     {
         private const string RegistryTokenKey = "Token";
         private const string RegistryTypeKey = "Type";
@@ -42,14 +43,32 @@ namespace Microsoft.Alm.Authentication
         private const string RegistryPathFormat = @"Software\Microsoft\VSCommon\{0}\ClientServices\TokenStorage\VisualStudio\VssApp";
         private static readonly string[] Versions = new[] { "14.0" }; // only VS 2015 supported
 
-        public TokenRegistry()
+        public TokenRegistry(RuntimeContext context)
+            : base(context)
         { }
+
+        /// <summary>
+        /// Not supported.
+        /// </summary>
+        public string Namespace
+        {
+            get { throw new NotSupportedException(); }
+        }
+
+        /// <summary>
+        /// Not supported.
+        /// </summary>
+        public Secret.UriNameConversionDelegate UriNameConversion
+        {
+            get { throw new NotSupportedException(); }
+            set { throw new NotSupportedException(); }
+        }
 
         /// <summary>
         /// Not supported
         /// </summary>
         /// <exception cref="NotSupportedException">When used.</exception>
-        public bool DeleteToken(TargetUri targetUri)
+        public Task<bool> DeleteToken(TargetUri targetUri)
         {
             // We've decided to not support registry deletes until the rules are established.
             throw new NotSupportedException("Deletes from the registry are not supported by this library.");
@@ -61,69 +80,71 @@ namespace Microsoft.Alm.Authentication
         /// Returns a `<see cref="Token"/>` if successful; otherwise `<see langword="null"/>`.
         /// </summary>
         /// <param name="targetUri">Key used to select the token.</param>
-        public Token ReadToken(TargetUri targetUri)
+        public Task<Token> ReadToken(TargetUri targetUri)
         {
             BaseSecureStore.ValidateTargetUri(targetUri);
 
-            Token token = null;
-
-            foreach (var key in EnumerateKeys(false))
+            return Task.Run(() =>
             {
-                if (key == null)
-                    continue;
+                Token token = null;
 
-
-                if (KeyIsValid(key, out string url, out string type, out string value))
+                foreach (var key in EnumerateKeys(false))
                 {
-                    try
+                    if (key == null)
+                        continue;
+
+                    if (KeyIsValid(key, out string url, out string type, out string value))
                     {
-                        Uri tokenUri = new Uri(url);
-                        if (tokenUri.IsBaseOf(targetUri))
+                        try
                         {
-                            byte[] data = Convert.FromBase64String(value);
-
-                            data = ProtectedData.Unprotect(data, null, DataProtectionScope.CurrentUser);
-
-                            value = Encoding.UTF8.GetString(data);
-
-                            TokenType tokenType;
-                            if (string.Equals(type, "Federated", StringComparison.OrdinalIgnoreCase))
+                            Uri tokenUri = new Uri(url);
+                            if (tokenUri.IsBaseOf(targetUri))
                             {
-                                tokenType = TokenType.Federated;
+                                byte[] data = Convert.FromBase64String(value);
+
+                                data = ProtectedData.Unprotect(data, null, DataProtectionScope.CurrentUser);
+
+                                value = Encoding.UTF8.GetString(data);
+
+                                TokenType tokenType;
+                                if (string.Equals(type, "Federated", StringComparison.OrdinalIgnoreCase))
+                                {
+                                    tokenType = TokenType.AzureFederated;
+                                }
+                                else
+                                {
+                                    throw new InvalidOperationException("Unexpected token type encountered");
+                                }
+
+                                token = new Token(value, tokenType);
+
+                                Trace.WriteLine($"token for '{targetUri}' read from registry.");
+
+                                return token;
                             }
-                            else
-                            {
-                                throw new InvalidOperationException("Unexpected token type encountered");
-                            }
-
-                            token = new Token(value, tokenType);
-
-                            Git.Trace.WriteLine($"token for '{targetUri}' read from registry.");
-
-                            return token;
+                        }
+                        catch
+                        {
+                            Trace.WriteLine("! token read from registry was corrupt.");
                         }
                     }
-                    catch
-                    {
-                        Git.Trace.WriteLine("! token read from registry was corrupt.");
-                    }
                 }
-            }
 
-            return token;
+                return token;
+            });
         }
 
         /// <summary>
         /// Not supported
         /// </summary>
         /// <exception cref="NotSupportedException">When used.</exception>
-        public bool WriteToken(TargetUri targetUri, Token token)
+        public Task<bool> WriteToken(TargetUri targetUri, Token token)
         {
             // We've decided to not support registry writes until the format is standardized.
             throw new NotSupportedException("Writes to the registry are not supported by this library.");
         }
 
-        private static IEnumerable<RegistryKey> EnumerateKeys(bool writeable)
+        private IEnumerable<RegistryKey> EnumerateKeys(bool writeable)
         {
             foreach (var rootKey in EnumerateRootKeys())
             {
@@ -138,7 +159,7 @@ namespace Microsoft.Alm.Authentication
                         }
                         catch
                         {
-                            Git.Trace.WriteLine($"! failed to open subkey {rootKey.Name}\\{nodeName}.");
+                            Trace.WriteLine($"! failed to open subkey {rootKey.Name}\\{nodeName}.");
                         }
 
                         if (nodeKey != null)
@@ -171,7 +192,7 @@ namespace Microsoft.Alm.Authentication
                 && Uri.IsWellFormedUriString(url, UriKind.Absolute);
         }
 
-        private static IEnumerable<RegistryKey> EnumerateRootKeys()
+        private IEnumerable<RegistryKey> EnumerateRootKeys()
         {
             foreach (string version in Versions)
             {
@@ -185,7 +206,7 @@ namespace Microsoft.Alm.Authentication
                 }
                 catch (Exception exception)
                 {
-                    Git.Trace.WriteLine($"! {exception.Message}");
+                    Trace.WriteLine($"! {exception.Message}");
                 }
 
                 yield return result;

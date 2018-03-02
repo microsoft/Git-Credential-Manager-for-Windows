@@ -23,30 +23,46 @@
  * WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE."
 **/
 
+using System.Threading.Tasks;
+
 namespace Microsoft.Alm.Authentication
 {
     public interface ITokenStore
     {
         /// <summary>
-        /// Deletes a <see cref="Token"/> from the underlying storage.
+        /// Gets the namespace use by this store when reading / writing tokens.
+        /// </summary>
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1716:IdentifiersShouldNotMatchKeywords", MessageId = "Namespace")]
+        string Namespace { get; }
+
+        /// <summary>
+        /// Gets or sets the name conversion delegate used when reading / writing tokens.
+        /// </summary>
+        Secret.UriNameConversionDelegate UriNameConversion { get; set; }
+
+        /// <summary>
+        /// Deletes a `<see cref="Token"/>` from the underlying storage.
+        /// <para/>
+        /// Returns `<see langword="true"/>` if successful; otherwise `<see langword="false"/>`.
         /// </summary>
         /// <param name="targetUri">The key identifying which token is being deleted.</param>
-        bool DeleteToken(TargetUri targetUri);
+        Task<bool> DeleteToken(TargetUri targetUri);
 
         /// <summary>
-        /// Reads a <see cref="Token"/> from the underlying storage.
+        /// Reads a `<see cref="Token"/>` from the underlying storage.
+        /// <para/>
+        /// Returns a `<see cref="Token"/>` from the store is successful; otherwise `<see langword="null"/>`.
         /// </summary>
         /// <param name="targetUri">The key identifying which token to read.</param>
-        /// <returns>A <see cref="Token"/> from the store is successful; otherwise <see langword="null"/>.</returns>
-        Token ReadToken(TargetUri targetUri);
+        Task<Token> ReadToken(TargetUri targetUri);
 
         /// <summary>
-        /// Writes a <see cref="Token"/> to the underlying storage.
+        /// Writes a `<see cref="Token"/>` to the underlying storage.
         /// </summary>
         /// <param name="targetUri">
         /// Unique identifier for the token, used when reading back from storage.
         /// </param>
-        /// <param name="token">The <see cref="Token"/> to be written.</param>
-        bool WriteToken(TargetUri targetUri, Token token);
+        /// <param name="token">The `<see cref="Token"/>` to be written.</param>
+        Task<bool> WriteToken(TargetUri targetUri, Token token);
     }
 }

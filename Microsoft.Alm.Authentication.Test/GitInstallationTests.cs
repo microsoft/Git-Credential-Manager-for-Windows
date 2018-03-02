@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using Xunit;
 
-namespace Microsoft.Alm.Git.Test
+namespace Microsoft.Alm.Authentication.Git.Test
 {
     /// <summary>
     /// A class to test <see cref="GitInstallation"/>.
@@ -15,23 +15,23 @@ namespace Microsoft.Alm.Git.Test
         {
             List<GitInstallation> list = new List<GitInstallation>
             {
-                new GitInstallation(@"C:\Program Files (x86)\Git", KnownGitDistribution.GitForWindows32v1),
-                new GitInstallation(@"C:\Program Files (x86)\Git", KnownGitDistribution.GitForWindows32v2),
-                new GitInstallation(@"C:\Program Files\Git", KnownGitDistribution.GitForWindows32v1),
-                new GitInstallation(@"C:\Program Files\Git", KnownGitDistribution.GitForWindows32v2),
-                new GitInstallation(@"C:\Program Files\Git", KnownGitDistribution.GitForWindows64v2),
+                new GitInstallation(ServiceProvider.Default, @"C:\Program Files (x86)\Git", KnownGitDistribution.GitForWindows32v1),
+                new GitInstallation(ServiceProvider.Default, @"C:\Program Files (x86)\Git", KnownGitDistribution.GitForWindows32v2),
+                new GitInstallation(ServiceProvider.Default, @"C:\Program Files\Git", KnownGitDistribution.GitForWindows32v1),
+                new GitInstallation(ServiceProvider.Default, @"C:\Program Files\Git", KnownGitDistribution.GitForWindows32v2),
+                new GitInstallation(ServiceProvider.Default, @"C:\Program Files\Git", KnownGitDistribution.GitForWindows64v2),
                 // ToLower versions
-                new GitInstallation(@"C:\Program Files (x86)\Git".ToLower(), KnownGitDistribution.GitForWindows32v1),
-                new GitInstallation(@"C:\Program Files (x86)\Git".ToLower(), KnownGitDistribution.GitForWindows32v2),
-                new GitInstallation(@"C:\Program Files\Git".ToLower(), KnownGitDistribution.GitForWindows32v1),
-                new GitInstallation(@"C:\Program Files\Git".ToLower(), KnownGitDistribution.GitForWindows32v2),
-                new GitInstallation(@"C:\Program Files\Git".ToLower(), KnownGitDistribution.GitForWindows64v2),
+                new GitInstallation(ServiceProvider.Default, @"C:\Program Files (x86)\Git".ToLower(), KnownGitDistribution.GitForWindows32v1),
+                new GitInstallation(ServiceProvider.Default, @"C:\Program Files (x86)\Git".ToLower(), KnownGitDistribution.GitForWindows32v2),
+                new GitInstallation(ServiceProvider.Default, @"C:\Program Files\Git".ToLower(), KnownGitDistribution.GitForWindows32v1),
+                new GitInstallation(ServiceProvider.Default, @"C:\Program Files\Git".ToLower(), KnownGitDistribution.GitForWindows32v2),
+                new GitInstallation(ServiceProvider.Default, @"C:\Program Files\Git".ToLower(), KnownGitDistribution.GitForWindows64v2),
                 // ToUpper versions
-                new GitInstallation(@"C:\Program Files (x86)\Git".ToUpper(), KnownGitDistribution.GitForWindows32v1),
-                new GitInstallation(@"C:\Program Files (x86)\Git".ToUpper(), KnownGitDistribution.GitForWindows32v2),
-                new GitInstallation(@"C:\Program Files\Git".ToUpper(), KnownGitDistribution.GitForWindows32v1),
-                new GitInstallation(@"C:\Program Files\Git".ToUpper(), KnownGitDistribution.GitForWindows32v2),
-                new GitInstallation(@"C:\Program Files\Git".ToUpper(), KnownGitDistribution.GitForWindows64v2),
+                new GitInstallation(ServiceProvider.Default, @"C:\Program Files (x86)\Git".ToUpper(), KnownGitDistribution.GitForWindows32v1),
+                new GitInstallation(ServiceProvider.Default, @"C:\Program Files (x86)\Git".ToUpper(), KnownGitDistribution.GitForWindows32v2),
+                new GitInstallation(ServiceProvider.Default, @"C:\Program Files\Git".ToUpper(), KnownGitDistribution.GitForWindows32v1),
+                new GitInstallation(ServiceProvider.Default, @"C:\Program Files\Git".ToUpper(), KnownGitDistribution.GitForWindows32v2),
+                new GitInstallation(ServiceProvider.Default, @"C:\Program Files\Git".ToUpper(), KnownGitDistribution.GitForWindows64v2),
             };
 
             HashSet<GitInstallation> set = new HashSet<GitInstallation>(list);

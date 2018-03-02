@@ -2,8 +2,11 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Net;
+using System.Threading.Tasks;
 using Microsoft.Alm.Authentication;
 using Xunit;
+
+using Git = Microsoft.Alm.Authentication.Git;
 
 namespace Atlassian.Bitbucket.Authentication.Test
 {
@@ -13,7 +16,7 @@ namespace Atlassian.Bitbucket.Authentication.Test
         public void VerifyBitbucketOrgIsIdentified()
         {
             var targetUri = new TargetUri("https://bitbucket.org");
-            var bbAuth = Authentication.GetAuthentication(targetUri, new MockCredentialStore(), null, null);
+            var bbAuth = Authentication.GetAuthentication(RuntimeContext.Default, targetUri, new MockCredentialStore(), null, null);
 
             Assert.NotNull(bbAuth);
         }
@@ -22,20 +25,20 @@ namespace Atlassian.Bitbucket.Authentication.Test
         public void VerifyNonBitbucketOrgIsIgnored()
         {
             var targetUri = new TargetUri("https://example.com");
-            var bbAuth = Authentication.GetAuthentication(targetUri, new MockCredentialStore(), null, null);
+            var bbAuth = Authentication.GetAuthentication(RuntimeContext.Default, targetUri, new MockCredentialStore(), null, null);
 
             Assert.Null(bbAuth);
         }
 
         [Fact]
-        public void VerifySetCredentialStoresValidCredentials()
+        public async Task VerifySetCredentialStoresValidCredentials()
         {
             var targetUri = new TargetUri("https://example.com");
             var credentialStore = new MockCredentialStore();
             var credentials = new Credential("a", "b");
-            var bbAuth = new Authentication(credentialStore, null, null);
+            var bbAuth = new Authentication(RuntimeContext.Default, credentialStore, null, null);
 
-            bbAuth.SetCredentials(targetUri, credentials);
+            await bbAuth.SetCredentials(targetUri, credentials);
 
             var writeCalls = credentialStore.MethodCalls
                 .Where(mc => mc.Key.Equals("WriteCredentials"))
@@ -50,86 +53,86 @@ namespace Atlassian.Bitbucket.Authentication.Test
         [Fact]
         public void VerifySetCredentialDoesNotStoreForNullTargetUri()
         {
-            Assert.Throws<ArgumentNullException>(() =>
+            Assert.ThrowsAsync<ArgumentNullException>(()=>Task.Run(async () =>
             {
                 var credentialStore = new MockCredentialStore();
                 var credentials = new Credential("a", "b");
-                var bbAuth = new Authentication(credentialStore, null, null);
+                var bbAuth = new Authentication(RuntimeContext.Default, credentialStore, null, null);
 
-                bbAuth.SetCredentials(null, credentials);
-            });
+                await bbAuth.SetCredentials(null, credentials);
+            }));
         }
 
         [Fact]
         public void VerifySetCredentialDoesNotStoresForNullCredentials()
         {
-            Assert.Throws<ArgumentNullException>(() =>
-            {
-                var targetUri = new TargetUri("https://example.com");
-                var credentialStore = new MockCredentialStore();
-                var bbAuth = new Authentication(credentialStore, null, null);
+            Assert.ThrowsAsync<ArgumentNullException>(() => Task.Run(async () =>
+             {
+                 var targetUri = new TargetUri("https://example.com");
+                 var credentialStore = new MockCredentialStore();
+                 var bbAuth = new Authentication(RuntimeContext.Default, credentialStore, null, null);
 
-                bbAuth.SetCredentials(targetUri, null);
-            });
+                 await bbAuth.SetCredentials(targetUri, null);
+             }));
         }
 
         [Fact]
         public void VerifySetCredentialDoesNotStoreForTooLongPassword()
         {
-            Assert.Throws<ArgumentOutOfRangeException>(() =>
+            Assert.ThrowsAsync<ArgumentOutOfRangeException>(()=>Task.Run(async () =>
             {
                 var targetUri = new TargetUri("https://example.com");
                 var credentialStore = new MockCredentialStore();
                 var credentials = new Credential("a", new string('x', 2047 + 1));
-                var bbAuth = new Authentication(credentialStore, null, null);
+                var bbAuth = new Authentication(RuntimeContext.Default, credentialStore, null, null);
 
-                bbAuth.SetCredentials(targetUri, credentials);
-            });
+                await bbAuth.SetCredentials(targetUri, credentials);
+            }));
         }
 
         [Fact]
         public void VerifySetCredentialDoesNotStoreForTooLongUsername()
         {
-            Assert.Throws<ArgumentOutOfRangeException>(() =>
+            Assert.ThrowsAsync<ArgumentOutOfRangeException>(() => Task.Run(async () =>
             {
                 var targetUri = new TargetUri("https://example.com");
                 var credentialStore = new MockCredentialStore();
                 var credentials = new Credential(new string('x', 2047 + 1), "b");
-                var bbAuth = new Authentication(credentialStore, null, null);
+                var bbAuth = new Authentication(RuntimeContext.Default, credentialStore, null, null);
 
-                bbAuth.SetCredentials(targetUri, credentials);
-            });
+                await bbAuth.SetCredentials(targetUri, credentials);
+            }));
         }
 
         [Fact]
         public void VerifyDeleteCredentialDoesNotDeleteForNullTargetUri()
         {
-            Assert.Throws<ArgumentNullException>(() =>
-            {
-                var credentialStore = new MockCredentialStore();
-                var bbAuth = new Authentication(credentialStore, null, null);
+            Assert.ThrowsAsync<ArgumentNullException>(() => Task.Run(async () =>
+              {
+                  var credentialStore = new MockCredentialStore();
+                  var bbAuth = new Authentication(RuntimeContext.Default, credentialStore, null, null);
 
-                bbAuth.DeleteCredentials(null);
+                  await bbAuth.DeleteCredentials(null);
 
-                var deleteCalls = credentialStore.MethodCalls
-                    .Where(mc => mc.Key.Equals("DeleteCredentials"))
-                        .SelectMany(mc => mc.Value);
+                  var deleteCalls = credentialStore.MethodCalls
+                      .Where(mc => mc.Key.Equals("DeleteCredentials"))
+                          .SelectMany(mc => mc.Value);
 
-                Assert.Empty(deleteCalls);
-            });
+                  Assert.Empty(deleteCalls);
+              }));
         }
 
         [Fact]
-        public void VerifyDeleteCredentialForBasicAuthReadsTwiceDeletesOnce()
+        public async Task VerifyDeleteCredentialForBasicAuthReadsTwiceDeletesOnce()
         {
             var credentialStore = new MockCredentialStore();
             // Add a stored basic authentication credential to delete.
             credentialStore.Credentials.Add("https://example.com/", new Credential("john", "squire"));
 
-            var bbAuth = new Authentication(credentialStore, null, null);
+            var bbAuth = new Authentication(RuntimeContext.Default, credentialStore, null, null);
 
             var targetUri = new TargetUri("https://example.com/");
-            bbAuth.DeleteCredentials(targetUri);
+            await bbAuth.DeleteCredentials(targetUri);
 
             var readCalls = credentialStore.MethodCalls
                 .Where(mc => mc.Key.Equals("ReadCredentials"))
@@ -151,17 +154,17 @@ namespace Atlassian.Bitbucket.Authentication.Test
         }
 
         [Fact]
-        public void VerifyDeleteCredentialForOAuthReadsTwiceDeletesTwice()
+        public async Task VerifyDeleteCredentialForOAuthReadsTwiceDeletesTwice()
         {
             var credentialStore = new MockCredentialStore();
             // add a stored basic auth credential to delete.
             credentialStore.Credentials.Add("https://example.com/", new Credential("john", "a1b2c3"));
             credentialStore.Credentials.Add("https://example.com/refresh_token", new Credential("john", "d4e5f6"));
 
-            var bbAuth = new Authentication(credentialStore, null, null);
+            var bbAuth = new Authentication(RuntimeContext.Default, credentialStore, null, null);
 
             var targetUri = new TargetUri("https://example.com/");
-            bbAuth.DeleteCredentials(targetUri);
+            await bbAuth.DeleteCredentials(targetUri);
 
             var readCalls = credentialStore.MethodCalls
                 .Where(mc => mc.Key.Equals("ReadCredentials"))
@@ -183,7 +186,7 @@ namespace Atlassian.Bitbucket.Authentication.Test
         }
 
         [Fact]
-        public void VerifyDeleteCredentialForBasicAuthReadsQuinceDeletesTwiceIfHostCredentialsExistAndShareUsername()
+        public async Task VerifyDeleteCredentialForBasicAuthReadsQuinceDeletesTwiceIfHostCredentialsExistAndShareUsername()
         {
             var credentialStore = new MockCredentialStore();
             // add a stored basic auth credential to delete.
@@ -192,10 +195,10 @@ namespace Atlassian.Bitbucket.Authentication.Test
             // per user credentials
             credentialStore.Credentials.Add("https://john@example.com/", new Credential("john", "squire"));
 
-            var bbAuth = new Authentication(credentialStore, null, null);
+            var bbAuth = new Authentication(RuntimeContext.Default, credentialStore, null, null);
 
             var targetUri = new TargetUri("https://john@example.com/");
-            bbAuth.DeleteCredentials(targetUri);
+            await bbAuth.DeleteCredentials(targetUri);
 
             var readCalls = credentialStore.MethodCalls
                 .Where(mc => mc.Key.Equals("ReadCredentials"))
@@ -227,7 +230,7 @@ namespace Atlassian.Bitbucket.Authentication.Test
         }
 
         [Fact]
-        public void VerifyDeleteCredentialForBasicAuthReadsThriceDeletesOnceIfHostCredentialsExistAndDoNotShareUsername()
+        public async Task VerifyDeleteCredentialForBasicAuthReadsThriceDeletesOnceIfHostCredentialsExistAndDoNotShareUsername()
         {
             var credentialStore = new MockCredentialStore();
             // add a stored basic auth credential to delete.
@@ -236,10 +239,10 @@ namespace Atlassian.Bitbucket.Authentication.Test
             // per user credentials
             credentialStore.Credentials.Add("https://john@example.com/", new Credential("john", "squire"));
 
-            var bbAuth = new Authentication(credentialStore, null, null);
+            var bbAuth = new Authentication(RuntimeContext.Default, credentialStore, null, null);
 
             var targetUri = new TargetUri("https://john@example.com/");
-            bbAuth.DeleteCredentials(targetUri);
+            await bbAuth.DeleteCredentials(targetUri);
 
             var readCalls = credentialStore.MethodCalls
                 .Where(mc => mc.Key.Equals("ReadCredentials"))
@@ -271,7 +274,7 @@ namespace Atlassian.Bitbucket.Authentication.Test
         public void VerifyGetPerUserTargetUriInsertsMissingUsernameToActualUri()
         {
             var credentialStore = new MockCredentialStore();
-            var bbAuth = new Authentication(credentialStore, null, null);
+            var bbAuth = new Authentication(RuntimeContext.Default, credentialStore, null, null);
 
             var targetUri = new TargetUri("https://example.com");
             var username = "johnsquire";
@@ -288,7 +291,6 @@ namespace Atlassian.Bitbucket.Authentication.Test
             Assert.Null(resultUri.ProxyUri);
             Assert.Equal("https://johnsquire@example.com/", resultUri.QueryUri.AbsoluteUri);
             Assert.Equal("https", resultUri.Scheme);
-            Assert.Equal(new WebProxy().Address, resultUri.WebProxy.Address);
             Assert.Equal("https://example.com/", resultUri.ToString(false, true, true));
         }
 
@@ -296,7 +298,7 @@ namespace Atlassian.Bitbucket.Authentication.Test
         public void VerifyGetPerUserTargetUriFormatsEmailUsernames()
         {
             var credentialStore = new MockCredentialStore();
-            var bbAuth = new Authentication(credentialStore, null, null);
+            var bbAuth = new Authentication(RuntimeContext.Default, credentialStore, null, null);
 
             var targetUri = new TargetUri("https://example.com");
             var username = "johnsquire@stoneroses.com";
@@ -313,14 +315,13 @@ namespace Atlassian.Bitbucket.Authentication.Test
             Assert.Null(resultUri.ProxyUri);
             Assert.Equal("https://johnsquire%40stoneroses.com@example.com/", resultUri.QueryUri.AbsoluteUri);
             Assert.Equal("https", resultUri.Scheme);
-            Assert.Equal(new WebProxy().Address, resultUri.WebProxy.Address);
             Assert.Equal("https://example.com/", resultUri.ToString(false, true, true));
         }
         [Fact]
         public void VerifyGetPerUserTargetUriDoesNotDuplicateUsernameOnActualUri()
         {
             var credentialStore = new MockCredentialStore();
-            var bbAuth = new Authentication(credentialStore, null, null);
+            var bbAuth = new Authentication(RuntimeContext.Default, credentialStore, null, null);
 
             var targetUri = new TargetUri("https://johnsquire@example.com");
             var username = "johnsquire";
@@ -337,7 +338,6 @@ namespace Atlassian.Bitbucket.Authentication.Test
             Assert.Null(resultUri.ProxyUri);
             Assert.Equal("https://johnsquire@example.com/", resultUri.QueryUri.AbsoluteUri);
             Assert.Equal("https", resultUri.Scheme);
-            Assert.Equal(new WebProxy().Address, resultUri.WebProxy.Address);
             Assert.Equal("https://example.com/", resultUri.ToString(false, true, true));
         }
     }
@@ -354,31 +354,35 @@ namespace Atlassian.Bitbucket.Authentication.Test
             get { throw new NotImplementedException(); }
         }
 
-        public Secret.UriNameConversion UriNameConversion
+        public Secret.UriNameConversionDelegate UriNameConversion
         {
             get { throw new NotImplementedException(); }
             set { throw new NotImplementedException(); }
         }
 
-        public bool DeleteCredentials(TargetUri targetUri)
+        public Task<bool> DeleteCredentials(TargetUri targetUri)
         {
-            // do nothing
+            // Do nothing.
             RecordMethodCall("DeleteCredentials", new List<string>() { targetUri.QueryUri.AbsoluteUri });
-            return true;
+            return Task.FromResult(true);
         }
 
-        public Credential ReadCredentials(TargetUri targetUri)
+        public Task<Credential> ReadCredentials(TargetUri targetUri)
         {
-            // do nothing
+            // Do nothing.
             RecordMethodCall("ReadCredentials", new List<string>() { targetUri.QueryUri.AbsoluteUri });
-            return Credentials != null && Credentials.Keys.Contains(targetUri.QueryUri.AbsoluteUri) ? Credentials[targetUri.QueryUri.AbsoluteUri] : null;
+            Credential result = Credentials != null && Credentials.Keys.Contains(targetUri.QueryUri.AbsoluteUri)
+                ? Credentials[targetUri.QueryUri.AbsoluteUri]
+                : null;
+
+            return Task.FromResult(result);
         }
 
-        public bool WriteCredentials(TargetUri targetUri, Credential credentials)
+        public Task<bool> WriteCredentials(TargetUri targetUri, Credential credentials)
         {
-            // do nothing
+            // Do nothing.
             RecordMethodCall("WriteCredentials", new List<string>() { targetUri.QueryUri.AbsoluteUri, credentials.Username, credentials.Password });
-            return true;
+            return Task.FromResult(true);
         }
 
         private void RecordMethodCall(string methodName, List<string> args)

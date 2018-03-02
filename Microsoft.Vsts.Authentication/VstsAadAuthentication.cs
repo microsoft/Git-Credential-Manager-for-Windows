@@ -25,7 +25,8 @@
 
 using System;
 using System.Threading.Tasks;
-using Microsoft.IdentityModel.Clients.ActiveDirectory;
+
+using Adal = Microsoft.IdentityModel.Clients.ActiveDirectory;
 
 namespace Microsoft.Alm.Authentication
 {
@@ -37,6 +38,9 @@ namespace Microsoft.Alm.Authentication
         /// <summary>
         /// Creates a new instance of `<see cref="VstsAadAuthentication"/>`.
         /// </summary>
+        /// <param name="context">
+        /// The execution context which contains "global" utilities.
+        /// </param>
         /// <param name="tenantId">
         /// URI of the responsible Azure tenant.
         /// <para/>
@@ -46,20 +50,21 @@ namespace Microsoft.Alm.Authentication
         /// <param name="personalAccessTokenStore">The secure secret store for storing any personal access tokens acquired.</param>
         /// <param name="adaRefreshTokenStore">The secure secret store for storing any Azure tokens acquired.</param>
         public VstsAadAuthentication(
+            RuntimeContext context,
             Guid tenantId,
             VstsTokenScope tokenScope,
             ICredentialStore personalAccessTokenStore)
-            : base(tokenScope, personalAccessTokenStore)
+            : base(context, tokenScope, personalAccessTokenStore)
         {
             if (tenantId == Guid.Empty)
             {
-                VstsAuthority = new VstsAzureAuthority(AzureAuthority.DefaultAuthorityHostUrl);
+                VstsAuthority = new VstsAzureAuthority(context, AzureAuthority.DefaultAuthorityHostUrl);
             }
             else
             {
                 // Create an authority host URL in the format of https://login.microsoft.com/12345678-9ABC-DEF0-1234-56789ABCDEF0.
                 string authorityHost = AzureAuthority.GetAuthorityUrl(tenantId);
-                VstsAuthority = new VstsAzureAuthority(authorityHost);
+                VstsAuthority = new VstsAzureAuthority(context, authorityHost);
             }
         }
 
@@ -67,10 +72,12 @@ namespace Microsoft.Alm.Authentication
         /// Test constructor which allows for using fake credential stores.
         /// </summary>
         internal VstsAadAuthentication(
+            RuntimeContext context, 
             ICredentialStore personalAccessTokenStore,
             ITokenStore vstsIdeTokenCache,
             IVstsAuthority vstsAuthority)
-            : base(personalAccessTokenStore,
+            : base(context,
+                   personalAccessTokenStore,
                    vstsIdeTokenCache,
                    vstsAuthority)
         { }
@@ -92,17 +99,17 @@ namespace Microsoft.Alm.Authentication
                 Token token;
                 if ((token = await VstsAuthority.InteractiveAcquireToken(targetUri, ClientId, Resource, new Uri(RedirectUrl), null)) != null)
                 {
-                    Git.Trace.WriteLine($"token acquisition for '{targetUri}' succeeded.");
+                    Trace.WriteLine($"token acquisition for '{targetUri}' succeeded.");
 
                     return await GeneratePersonalAccessToken(targetUri, token, options);
                 }
             }
-            catch (AdalException)
+            catch (Adal.AdalException)
             {
-                Git.Trace.WriteLine($"token acquisition for '{targetUri}' failed.");
+                Trace.WriteLine($"token acquisition for '{targetUri}' failed.");
             }
 
-            Git.Trace.WriteLine($"interactive logon for '{targetUri}' failed");
+            Trace.WriteLine($"interactive logon for '{targetUri}' failed");
             return null;
         }
 
@@ -129,17 +136,17 @@ namespace Microsoft.Alm.Authentication
                 Token token;
                 if ((token = await VstsAuthority.InteractiveAcquireToken(targetUri, ClientId, Resource, new Uri(RedirectUrl), null)) != null)
                 {
-                    Git.Trace.WriteLine($"token acquisition for '{targetUri}' succeeded.");
+                    Trace.WriteLine($"token acquisition for '{targetUri}' succeeded.");
 
                     return await GeneratePersonalAccessToken(targetUri, token, requestCompactToken);
                 }
             }
-            catch (AdalException)
+            catch (Adal.AdalException)
             {
-                Git.Trace.WriteLine($"token acquisition for '{targetUri}' failed.");
+                Trace.WriteLine($"token acquisition for '{targetUri}' failed.");
             }
 
-            Git.Trace.WriteLine($"interactive logon for '{targetUri}' failed");
+            Trace.WriteLine($"interactive logon for '{targetUri}' failed");
             return null;
         }
 
@@ -161,17 +168,17 @@ namespace Microsoft.Alm.Authentication
                 Token token;
                 if ((token = await VstsAuthority.NoninteractiveAcquireToken(targetUri, ClientId, Resource, new Uri(RedirectUrl))) != null)
                 {
-                    Git.Trace.WriteLine($"token acquisition for '{targetUri}' succeeded");
+                    Trace.WriteLine($"token acquisition for '{targetUri}' succeeded");
 
                     return await GeneratePersonalAccessToken(targetUri, token, options);
                 }
             }
-            catch (AdalException)
+            catch (Adal.AdalException)
             {
-                Git.Trace.WriteLine($"failed to acquire for '{targetUri}' token from VstsAuthority.");
+                Trace.WriteLine($"failed to acquire for '{targetUri}' token from VstsAuthority.");
             }
 
-            Git.Trace.WriteLine($"non-interactive logon for '{targetUri}' failed");
+            Trace.WriteLine($"non-interactive logon for '{targetUri}' failed");
             return null;
         }
 
@@ -198,32 +205,36 @@ namespace Microsoft.Alm.Authentication
                 Token token;
                 if ((token = await VstsAuthority.NoninteractiveAcquireToken(targetUri, ClientId, Resource, new Uri(RedirectUrl))) != null)
                 {
-                    Git.Trace.WriteLine($"token acquisition for '{targetUri}' succeeded");
+                    Trace.WriteLine($"token acquisition for '{targetUri}' succeeded");
 
                     return await GeneratePersonalAccessToken(targetUri, token, requestCompactToken);
                 }
             }
-            catch (AdalException)
+            catch (Adal.AdalException)
             {
-                Git.Trace.WriteLine($"failed to acquire for '{targetUri}' token from VstsAuthority.");
+                Trace.WriteLine($"failed to acquire for '{targetUri}' token from VstsAuthority.");
             }
 
-            Git.Trace.WriteLine($"non-interactive logon for '{targetUri}' failed");
+            Trace.WriteLine($"non-interactive logon for '{targetUri}' failed");
             return null;
         }
 
         /// <summary>
         /// Sets credentials for future use with this authentication object.
+        /// <para/>
+        /// Returns `<see langword="true"/>` is successful; otherwise `<see langword="false"/>`.
         /// </summary>
         /// <remarks>Not supported.</remarks>
         /// <param name="targetUri">
         /// The uniform resource indicator of the resource access tokens are being set for.
         /// </param>
         /// <param name="credentials">The credentials being set.</param>
-        public override void SetCredentials(TargetUri targetUri, Credential credentials)
+        public override Task<bool> SetCredentials(TargetUri targetUri, Credential credentials)
         {
             BaseSecureStore.ValidateTargetUri(targetUri);
             BaseSecureStore.ValidateCredential(credentials);
+
+            return Task.FromResult(true);
         }
     }
 }

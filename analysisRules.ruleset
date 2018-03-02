@@ -1,13 +1,15 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
-<RuleSet Name="GCM Analysis Rules" Description="This rule set contains all Microsoft rules except the annoying ones." ToolsVersion="14.0">
+<RuleSet Name="GCM Analysis Rules" Description="This rule set contains all Microsoft rules except the annoying ones." ToolsVersion="15.0">
   <IncludeAll Action="Warning" />
   <Rules AnalyzerId="Microsoft.Analyzers.ManagedCodeAnalysis" RuleNamespace="Microsoft.Rules.Managed">
     <Rule Id="CA1014" Action="None" />
     <Rule Id="CA1017" Action="None" />
     <Rule Id="CA1021" Action="None" />
+    <Rule Id="CA1031" Action="None" />
     <Rule Id="CA1032" Action="None" />
     <Rule Id="CA1034" Action="None" />
     <Rule Id="CA1051" Action="None" />
+    <Rule Id="CA1054" Action="None" />
     <Rule Id="CA1303" Action="None" />
     <Rule Id="CA1305" Action="None" />
     <Rule Id="CA1702" Action="None" />
@@ -19,8 +21,10 @@
     <Rule Id="CA1724" Action="None" />
     <Rule Id="CA1726" Action="None" />
     <Rule Id="CA2104" Action="Warning" />
+    <Rule Id="CA2201" Action="None" />
     <Rule Id="CA2202" Action="None" />
     <Rule Id="CA2204" Action="None" />
+    <Rule Id="CA2208" Action="None" />
     <Rule Id="CA2210" Action="None" />
     <Rule Id="CA2225" Action="None" />
   </Rules>

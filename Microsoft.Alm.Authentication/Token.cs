@@ -24,8 +24,10 @@
 **/
 
 using System;
+using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
+using System.Net;
 using System.Text;
 
 namespace Microsoft.Alm.Authentication
@@ -35,7 +37,7 @@ namespace Microsoft.Alm.Authentication
     /// </summary>
     public class Token : Secret, IEquatable<Token>
     {
-        public static readonly StringComparer TokenComparer = StringComparer.Ordinal;
+        private static readonly IEqualityComparer<Token> Comparer = new TokenComparer();
 
         public Token(string value, TokenType type)
         {
@@ -64,8 +66,22 @@ namespace Microsoft.Alm.Authentication
         {
             if (value is null)
                 throw new ArgumentNullException(nameof(value));
-            if ((type & ~(TokenType.Access | TokenType.Federated | TokenType.Personal | TokenType.Test)) != 0)
-                throw new ArgumentOutOfRangeException(nameof(type));
+
+            switch(type)
+            {
+                case TokenType.AzureAccess:
+                case TokenType.AzureFederated:
+                case TokenType.AzureRefresh:
+                case TokenType.BitbucketAccess:
+                case TokenType.BitbucketPassword:
+                case TokenType.BitbucketRefresh:
+                case TokenType.Test:
+                case TokenType.PersonalAccess:
+                    break;
+
+                default:
+                    throw new ArgumentOutOfRangeException(nameof(type));
+            }
 
             _targetIdentity = tenantId;
             _type = type;
@@ -79,15 +95,21 @@ namespace Microsoft.Alm.Authentication
         /// <summary>
         /// The type of the security token.
         /// </summary>
-        public TokenType Type { get { return _type; } }
+        public TokenType Type
+        {
+            get { return _type; }
+        }
 
         /// <summary>
         /// The raw contents of the token.
         /// </summary>
-        public string Value { get { return _value; } }
+        public override string Value
+        {
+            get { return _value; }
+        }
 
         /// <summary>
-        /// The `<see cref="Guid"/>` form Identity of the target
+        /// The `<see cref="Guid"/>` form of the identity of the target.
         /// </summary>
         public Guid TargetIdentity
         {
@@ -96,25 +118,42 @@ namespace Microsoft.Alm.Authentication
         }
 
         /// <summary>
+        /// Compares a <see cref="Token"/> to this Token for equality.
+        /// </summary>
+        /// <param name="other">The token to compare.</param>
+        /// <returns>True if equal; false otherwise.</returns>
+        public bool Equals(Token other)
+            => Comparer.Equals(this, other);
+
+        /// <summary>
         /// Compares an object to this <see cref="Token"/> for equality.
         /// </summary>
         /// <param name="obj">The object to compare.</param>
         /// <returns>True is equal; false otherwise.</returns>
         public override bool Equals(object obj)
         {
-            return Equals(obj as Token);
+            return (obj is Token other
+                    && Equals(other))
+                || base.Equals(obj);
         }
 
         /// <summary>
-        /// Compares a <see cref="Token"/> to this Token for equality.
+        /// Returns a credentials associated with a specified URL, and authentication type.
         /// </summary>
-        /// <param name="other">The token to compare.</param>
-        /// <returns>True if equal; false otherwise.</returns>
-        public bool Equals(Token other)
+        /// <param name="uri">The URI the credentials are for.</param>
+        /// <param name="authType">The type of authentication the credentials are for.</param>
+        public override NetworkCredential GetCredential(Uri uri, string authType)
         {
-            return this == other;
+            return ((Credential)this).GetCredential(uri, authType);
         }
 
+        /// <summary>
+        /// Produces the friendly name for a given token type.
+        /// <para/>
+        /// Returns `<see langword="true"/>` if successful; otherwise `<see langword="false"/>`.
+        /// </summary>
+        /// <param name="type">The type of token.</param>
+        /// <param name="name">The name of the token type.</param>
         public static bool GetFriendlyNameFromType(TokenType type, out string name)
         {
             Debug.Assert(Enum.IsDefined(typeof(TokenType), type), "The type parameter is invalid");
@@ -132,6 +171,13 @@ namespace Microsoft.Alm.Authentication
             return name != null;
         }
 
+        /// <summary>
+        /// Produces the token type for a given friendly name.
+        /// <para/>
+        /// Returns `<see langword="true"/>` if successful; otherwise `<see langword="false"/>`.
+        /// </summary>
+        /// <param name="name">The name of the token type.</param>
+        /// <param name="type">The type of token.</param>
         public static bool GetTypeFromFriendlyName(string name, out TokenType type)
         {
             if (string.IsNullOrWhiteSpace(name))
@@ -158,12 +204,7 @@ namespace Microsoft.Alm.Authentication
         /// </summary>
         /// <returns>32-bit hash code.</returns>
         public override int GetHashCode()
-        {
-            unchecked
-            {
-                return ((int)_type) * Value.GetHashCode();
-            }
-        }
+            => Comparer.GetHashCode(this);
 
         /// <summary>
         /// Converts the token to a human friendly string.
@@ -178,18 +219,33 @@ namespace Microsoft.Alm.Authentication
                 return base.ToString();
         }
 
+        /// <summary>
+        /// Validates a `<see cref="Token"/>`.
+        /// </summary>
+        /// <param name="token">The token to validate.</param>
+        /// <exception cref="ArgumentNullException">When `<paramref name="token"/>` is `<see langword="null"/>`.</exception>
+        /// <exception cref="ArgumentException">When `<paramref name="token"/>` value is `<see langword="null"/>`.</exception>
+        /// <exception cref="ArgumentOutOfRangeException">When `<paramref name="token"/>` value is too long.</exception>
         public static void Validate(Token token)
         {
             if (token is null)
                 throw new ArgumentNullException(nameof(token));
             if (string.IsNullOrWhiteSpace(token._value))
-                throw new ArgumentException("Value property returned null or empty.", nameof(token));
+            {
+                var inner = new NullReferenceException(nameof(token.Value));
+                throw new ArgumentException(inner.Message, nameof(token), inner);
+            }
             if (token._value.Length > NativeMethods.Credential.PasswordMaxLength)
-                throw new ArgumentOutOfRangeException(nameof(token));
+            {
+                var inner = new IndexOutOfRangeException(nameof(token.Value));
+                throw new ArgumentOutOfRangeException(nameof(token), token._value.Length, inner.Message);
+            }
         }
 
-        internal static unsafe bool Deserialize(byte[] bytes, TokenType type, out Token token)
+        internal static unsafe bool Deserialize(RuntimeContext context, byte[] bytes, TokenType type, out Token token)
         {
+            if (context is null)
+                throw new ArgumentNullException(nameof(context));
             if (bytes is null)
                 throw new ArgumentNullException(nameof(bytes));
             if (bytes.Length == 0)
@@ -221,8 +277,10 @@ namespace Microsoft.Alm.Authentication
 
                         if (!string.IsNullOrWhiteSpace(value))
                         {
-                            token = new Token(value, type);
-                            token._targetIdentity = targetIdentity;
+                            token = new Token(value, type)
+                            {
+                                _targetIdentity = targetIdentity
+                            };
                         }
                     }
                 }
@@ -240,14 +298,16 @@ namespace Microsoft.Alm.Authentication
             }
             catch
             {
-                Git.Trace.WriteLine("! token deserialization error.");
+                context.Trace.WriteLine("! token deserialization error.");
             }
 
             return token != null;
         }
 
-        internal static unsafe bool Serialize(Token token, out byte[] bytes)
+        internal static unsafe bool Serialize(RuntimeContext context, Token token, out byte[] bytes)
         {
+            if (context is null)
+                throw new ArgumentNullException(nameof(context));
             if (token is null)
                 throw new ArgumentNullException(nameof(token));
             if (string.IsNullOrWhiteSpace(token._value))
@@ -271,7 +331,7 @@ namespace Microsoft.Alm.Authentication
             }
             catch
             {
-                Git.Trace.WriteLine("! token serialization error.");
+                context.Trace.WriteLine("! token serialization error.");
             }
 
             return bytes != null;
@@ -282,15 +342,18 @@ namespace Microsoft.Alm.Authentication
         /// </summary>
         /// <param name="token">The token to be cast as a `<see cref="Credential"/>`.</param>
         /// <exception cref="InvalidCastException">
-        /// <paramref name="token">Throws if `<see cref="Token.Type"/>` is not `<see cref="TokenType.Personal"/>`.</paramref>
+        /// <paramref name="token">Throws if `<see cref="Token.Type"/>` is not `<see cref="TokenType.PersonalAccess"/>`.</paramref>
         /// </exception>
         public static explicit operator Credential(Token token)
         {
             if (token is null)
                 return null;
 
-            if (token.Type != TokenType.Personal)
-                throw new InvalidCastException($"`{nameof(Token)}` -> `{nameof(Credential)}`");
+            if (token.Type != TokenType.PersonalAccess)
+            {
+                var inner = new InvalidCastException("Only tokens of type '" + TokenType.PersonalAccess + "' can be cast to credentials.");
+                throw new ArgumentException(inner.Message, nameof(token), inner);
+            }
 
             return new Credential(token.ToString(), token._value);
         }
@@ -298,29 +361,19 @@ namespace Microsoft.Alm.Authentication
         /// <summary>
         /// Compares two tokens for equality.
         /// </summary>
-        /// <param name="left">Token to compare.</param>
-        /// <param name="right">Token to compare.</param>
+        /// <param name="lhs">Token to compare.</param>
+        /// <param name="rhs">Token to compare.</param>
         /// <returns><see langword="true"/> if equal; otherwise <see langword="false"/>.</returns>
-        public static bool operator ==(Token left, Token right)
-        {
-            if (ReferenceEquals(left, right))
-                return true;
-            if (left is null || right is null)
-                return false;
-
-            return left.Type == right.Type
-                && TokenComparer.Equals(left._value, right._value);
-        }
+        public static bool operator ==(Token lhs, Token rhs)
+            => Comparer.Equals(lhs, rhs);
 
         /// <summary>
         /// Compares two tokens for inequality.
         /// </summary>
-        /// <param name="left">Token to compare.</param>
-        /// <param name="right">Token to compare.</param>
+        /// <param name="lhs">Token to compare.</param>
+        /// <param name="rhs">Token to compare.</param>
         /// <returns><see langword="false"/> if equal; otherwise <see langword="true"/>.</returns>
-        public static bool operator !=(Token left, Token right)
-        {
-            return !(left == right);
-        }
+        public static bool operator !=(Token lhs, Token rhs)
+            => !Comparer.Equals(lhs, rhs);
     }
 }

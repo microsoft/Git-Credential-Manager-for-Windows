@@ -26,7 +26,8 @@
 using System;
 using System.Diagnostics;
 using System.Threading.Tasks;
-using Microsoft.IdentityModel.Clients.ActiveDirectory;
+
+using Adal = Microsoft.IdentityModel.Clients.ActiveDirectory;
 
 namespace Microsoft.Alm.Authentication
 {
@@ -35,24 +36,25 @@ namespace Microsoft.Alm.Authentication
         public const string DefaultAuthorityHost = AzureAuthority.AuthorityHostUrlBase + "/live.com";
         internal const string QueryParameters = "domain_hint=live.com&display=popup&site_id=501454&nux=1";
 
-        public VstsMsaAuthentication(VstsTokenScope tokenScope, ICredentialStore personalAccessTokenStore)
-            : base(tokenScope, personalAccessTokenStore)
+        public VstsMsaAuthentication(
+            RuntimeContext context,
+            VstsTokenScope tokenScope,
+            ICredentialStore personalAccessTokenStore)
+            : base(context, tokenScope, personalAccessTokenStore)
         {
-            VstsAuthority = new VstsAzureAuthority(DefaultAuthorityHost);
+            VstsAuthority = new VstsAzureAuthority(context, DefaultAuthorityHost);
         }
 
         /// <summary>
         /// Test constructor which allows for using fake credential stores
         /// </summary>
-        /// <param name="personalAccessTokenStore"></param>
-        /// <param name="adaRefreshTokenStore"></param>
-        /// <param name="vstsIdeTokenCache"></param>
-        /// <param name="liveAuthority"></param>
         internal VstsMsaAuthentication(
+            RuntimeContext context,
             ICredentialStore personalAccessTokenStore,
             ITokenStore vstsIdeTokenCache,
             IVstsAuthority liveAuthority)
-            : base(personalAccessTokenStore,
+            : base(context,
+                   personalAccessTokenStore,
                    vstsIdeTokenCache,
                    liveAuthority)
         { }
@@ -77,17 +79,17 @@ namespace Microsoft.Alm.Authentication
                 Token token;
                 if ((token = await VstsAuthority.InteractiveAcquireToken(targetUri, ClientId, Resource, new Uri(RedirectUrl), QueryParameters)) != null)
                 {
-                    Git.Trace.WriteLine($"token '{targetUri}' successfully acquired.");
+                    Trace.WriteLine($"token '{targetUri}' successfully acquired.");
 
                     return await GeneratePersonalAccessToken(targetUri, token, options);
                 }
             }
-            catch (AdalException exception)
+            catch (Adal.AdalException exception)
             {
                 Debug.Write(exception);
             }
 
-            Git.Trace.WriteLine($"failed to acquire token for '{targetUri}'.");
+            Trace.WriteLine($"failed to acquire token for '{targetUri}'.");
             return null;
         }
 
@@ -107,30 +109,34 @@ namespace Microsoft.Alm.Authentication
                 Token token;
                 if ((token = await VstsAuthority.InteractiveAcquireToken(targetUri, ClientId, Resource, new Uri(RedirectUrl), QueryParameters)) != null)
                 {
-                    Git.Trace.WriteLine($"token '{targetUri}' successfully acquired.");
+                    Trace.WriteLine($"token '{targetUri}' successfully acquired.");
 
                     return await GeneratePersonalAccessToken(targetUri, token, requestCompactToken);
                 }
             }
-            catch (AdalException exception)
+            catch (Adal.AdalException exception)
             {
                 Debug.Write(exception);
             }
 
-            Git.Trace.WriteLine($"failed to acquire token for '{targetUri}'.");
+            Trace.WriteLine($"failed to acquire token for '{targetUri}'.");
             return null;
         }
 
         /// <summary>
         /// Sets credentials for future use with this authentication object.
+        /// <para/>
+        /// Returns `<see langword="true"/>` is successful; otherwise `<see langword="false"/>`.
         /// </summary>
         /// <remarks>Not supported.</remarks>
         /// <param name="targetUri">The uniform resource indicator of the resource access tokens are being set for.</param>
         /// <param name="credentials">The credentials being set.</param>
-        public override void SetCredentials(TargetUri targetUri, Credential credentials)
+        public override Task<bool> SetCredentials(TargetUri targetUri, Credential credentials)
         {
             BaseSecureStore.ValidateTargetUri(targetUri);
             BaseSecureStore.ValidateCredential(credentials);
+
+            return Task.FromResult(true);
         }
     }
 }

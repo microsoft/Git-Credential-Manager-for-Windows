@@ -8,14 +8,19 @@ namespace Microsoft.Alm.Authentication.Test
     {
         public AuthorityFake(string expectedQueryParameters)
         {
-            ExpectedQueryParameters = expectedQueryParameters;
+            _expectedQueryParameters = expectedQueryParameters;
 
             CredentialsAreValid = true;
         }
 
-        internal readonly string ExpectedQueryParameters;
+        private readonly string _expectedQueryParameters;
 
         public bool CredentialsAreValid { get; set; }
+
+        public string ExpectedQueryParameters
+        {
+            get { return _expectedQueryParameters; }
+        }
 
         /// <summary>
         /// Generates a personal access token for use with Visual Studio Team Services.
@@ -33,7 +38,7 @@ namespace Microsoft.Alm.Authentication.Test
         /// </param>
         public async Task<Token> GeneratePersonalAccessToken(TargetUri targetUri, Token accessToken, VstsTokenScope tokenScope, bool requireCompactToken, TimeSpan? tokenDuration)
         {
-            return await Task.FromResult(new Token("personal-access-token", TokenType.Personal));
+            return await Task.FromResult(new Token("personal-access-token", TokenType.PersonalAccess));
         }
 
         /// <summary>
@@ -48,9 +53,9 @@ namespace Microsoft.Alm.Authentication.Test
         /// <param name="queryParameters">optional value, appended as-is to the query string in the HTTP authentication request to the authority.</param>
         public async Task<Token> InteractiveAcquireToken(TargetUri targetUri, string clientId, string resource, Uri redirectUri, string queryParameters = null)
         {
-            Assert.Equal(ExpectedQueryParameters, queryParameters);
+            Assert.Equal(_expectedQueryParameters, queryParameters);
 
-            return await Task.FromResult(new Token("token-access", TokenType.Access));
+            return await Task.FromResult(new Token("token-access", TokenType.AzureAccess));
         }
 
         /// <summary>
@@ -64,7 +69,7 @@ namespace Microsoft.Alm.Authentication.Test
         /// <param name="redirectUri">Address to return to upon receiving a response from the authority.</param>
         public async Task<Token> NoninteractiveAcquireToken(TargetUri targetUri, string clientId, string resource, Uri redirectUri)
         {
-            return await Task.FromResult(new Token("token-access", TokenType.Access));
+            return await Task.FromResult(new Token("token-access", TokenType.AzureAccess));
         }
 
         /// <summary>

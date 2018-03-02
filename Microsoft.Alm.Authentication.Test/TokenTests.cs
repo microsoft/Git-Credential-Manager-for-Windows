@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using System.Threading.Tasks;
 using Xunit;
 
 namespace Microsoft.Alm.Authentication.Test
@@ -31,26 +32,26 @@ namespace Microsoft.Alm.Authentication.Test
 
         [Theory]
         [MemberData(nameof(TokenStoreData), DisableDiscoveryEnumeration = true)]
-        public void Token_WriteDelete(bool useCache, string secretName, string url, string token)
+        public async Task Token_WriteDelete(bool useCache, string secretName, string url, string token)
         {
             var tokenStore = useCache
-                ? new SecretCache(secretName) as ITokenStore
-                : new SecretStore(secretName) as ITokenStore;
+                ? new SecretCache(RuntimeContext.Default, secretName) as ITokenStore
+                : new SecretStore(RuntimeContext.Default, secretName) as ITokenStore;
             var uri = new TargetUri(url);
 
             var writeToken = new Token(token, TokenType.Test);
             Token readToken = null;
 
-            tokenStore.WriteToken(uri, writeToken);
+            await tokenStore.WriteToken(uri, writeToken);
 
-            readToken = tokenStore.ReadToken(uri);
+            readToken = await tokenStore.ReadToken(uri);
             Assert.NotNull(readToken);
             Assert.Equal(writeToken.Value, readToken.Value);
             Assert.Equal(writeToken.Type, readToken.Type);
 
-            tokenStore.DeleteToken(uri);
+            await tokenStore.DeleteToken(uri);
 
-            Assert.Null(readToken = tokenStore.ReadToken(uri));
+            Assert.Null(readToken = await tokenStore.ReadToken(uri));
         }
     }
 }

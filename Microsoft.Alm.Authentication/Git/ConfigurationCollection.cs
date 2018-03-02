@@ -29,10 +29,14 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Text.RegularExpressions;
+using System.Threading.Tasks;
 
-namespace Microsoft.Alm.Git
+namespace Microsoft.Alm.Authentication.Git
 {
-    public class Configuration : IEnumerable<Configuration.Entry>
+    /// <summary>
+    /// Collection of Git configuration value by key, level, and value.
+    /// </summary>
+    public class ConfigurationCollection : BaseType, IEnumerable<ConfigurationCollection.Entry>
     {
         private const char HostSplitCharacter = '.';
 
@@ -40,10 +44,12 @@ namespace Microsoft.Alm.Git
         private static readonly Regex KeyValueRegex = new Regex(@"^\s*(\w+)\s*=\s*(.+)", RegexOptions.CultureInvariant);
         private static readonly Regex SectionRegex = new Regex(@"^\s*\[\s*(\w+)\s*(\""[^\]]+){0,1}\]", RegexOptions.CultureInvariant);
 
-        internal Configuration()
+        internal ConfigurationCollection(RuntimeContext context)
+            : base(context)
         { }
 
-        internal Configuration(Dictionary<ConfigurationLevel, Dictionary<string, string>> values)
+        internal ConfigurationCollection(RuntimeContext context, Dictionary<ConfigurationLevel, Dictionary<string, string>> values)
+            : this(context)
         {
             if (values is null)
                 throw new ArgumentNullException(nameof(values));
@@ -88,6 +94,12 @@ namespace Microsoft.Alm.Git
             }
         }
 
+        /// <summary>
+        /// Gets the value of a configuration for `<paramref name="key"/>` if successful; otherwise `<see langword=""="null"/>`.
+        /// <para/>
+        /// Configuration values are sorted by `<see cref="ConfigurationLevel"/>` with the highest level value being returned.
+        /// </summary>
+        /// <param name="key">The configuration key used to find a key, level, value tuple.</param>
         public virtual string this[string key]
         {
             get
@@ -102,6 +114,9 @@ namespace Microsoft.Alm.Git
             }
         }
 
+        /// <summary>
+        /// Gets the number of key, level, value tuples contained in the collection.
+        /// </summary>
         public virtual int Count
         {
             get
@@ -114,11 +129,20 @@ namespace Microsoft.Alm.Git
             }
         }
 
+        /// <summary>
+        /// Returns `<see langword=""="true"/>` if the collection contains an entry for `<paramref name="key"/>`; otherwise `<see langword="false"/>.
+        /// </summary>
+        /// <param name="key">The configuration key used to find a key, level, value tuple.</param>
         public virtual bool ContainsKey(string key)
         {
             return ContainsKey(ConfigurationLevel.All, key);
         }
 
+        /// <summary>
+        /// Returns `<see langword=""="true"/>` if the collection contains an entry for `<paramref name="key"/>` filtered by `<paramref name="levels"/>`; otherwise `<see langword="false"/>.
+        /// </summary>
+        /// <param name="levels">The configuration levels admissible.</param>
+        /// <param name="key">The configuration key used to find a key, level, value tuple.</param>
         public virtual bool ContainsKey(ConfigurationLevel levels, string key)
         {
             foreach (ConfigurationLevel level in Levels)
@@ -131,6 +155,10 @@ namespace Microsoft.Alm.Git
             return false;
         }
 
+        /// <summary>
+        /// Enumerates all entries filtered by `<paramref name="desiredLevels"/>`.
+        /// </summary>
+        /// <param name="desiredLevels">The configuration levels admissible.</param>
         public virtual IEnumerator<Entry> EnumerateEntriesByLevel(ConfigurationLevel desiredLevels)
         {
             ConfigurationLevel[] levels = new[]
@@ -170,7 +198,14 @@ namespace Microsoft.Alm.Git
                     || StringComparer.OrdinalIgnoreCase.Equals(value, "on"));
         }
 
-        public virtual void LoadGitConfiguration(string directory, ConfigurationLevel types)
+        /// <summary>
+        /// Loads configuration values into the collection from `<paramref name="directory"/>` filtered by `<paramref name="types"/>`.
+        /// <para/>
+        /// The value of `<paramref name="directory"/>` is only relevant if `<paramref name="types"/>` contains `<see cref="ConfigurationLevel.Local"/>`.
+        /// </summary>
+        /// <param name="directory">Path to a Git repository from which to load local configuration value.</param>
+        /// <param name="types">The levels of configuration values the collection should load.</param>
+        public virtual async Task LoadGitConfiguration(string directory, ConfigurationLevel types)
         {
             string portableConfig = null;
             string systemConfig = null;
@@ -184,38 +219,38 @@ namespace Microsoft.Alm.Git
             if ((types & ConfigurationLevel.Portable) != 0
                 && Where.GitPortableConfig(out portableConfig))
             {
-                ParseGitConfig(ConfigurationLevel.Portable, portableConfig);
+                await ParseGitConfig(ConfigurationLevel.Portable, portableConfig);
             }
 
             // Find and parse Git's system configuration file.
             if ((types & ConfigurationLevel.System) != 0
                 && Where.GitSystemConfig(null, out systemConfig))
             {
-                ParseGitConfig(ConfigurationLevel.System, systemConfig);
+                await ParseGitConfig(ConfigurationLevel.System, systemConfig);
             }
 
             // Find and parse Git's XDG configuration file.
             if ((types & ConfigurationLevel.Xdg) != 0
                 && Where.GitXdgConfig(out xdgConfig))
             {
-                ParseGitConfig(ConfigurationLevel.Xdg, xdgConfig);
+                await ParseGitConfig(ConfigurationLevel.Xdg, xdgConfig);
             }
 
             // Find and parse Git's global configuration file.
             if ((types & ConfigurationLevel.Global) != 0
                 && Where.GitGlobalConfig(out globalConfig))
             {
-                ParseGitConfig(ConfigurationLevel.Global, globalConfig);
+                await ParseGitConfig(ConfigurationLevel.Global, globalConfig);
             }
 
             // Find and parse Git's local configuration file.
             if ((types & ConfigurationLevel.Local) != 0
                 && Where.GitLocalConfig(directory, out localConfig))
             {
-                ParseGitConfig(ConfigurationLevel.Local, localConfig);
+                await ParseGitConfig(ConfigurationLevel.Local, localConfig);
             }
 
-            Git.Trace.WriteLine($"git {types} config read, {Count} entries.");
+            Trace.WriteLine($"git {types} config read, {Count} entries.");
         }
 
         /// <summary>
@@ -226,12 +261,18 @@ namespace Microsoft.Alm.Git
         /// <param name="directory">Optional working directory of a repository from which to read its Git local configuration.</param>
         /// <param name="loadLocal">Read, parse, and include Git local configuration values if `<see langword="true"/>`; otherwise do not.</param>
         /// <param name="loadSystem">Read, parse, and include Git system configuration values if `<see langword="true"/>`; otherwise do not.</param>
-        public static Configuration ReadConfiuration(string directory, bool loadLocal, bool loadSystem)
+        public static async Task<ConfigurationCollection> ReadConfiuration(RuntimeContext context, string directory, bool loadLocal, bool loadSystem)
         {
+            if (context is null)
+                throw new ArgumentNullException(nameof(context));
             if (string.IsNullOrWhiteSpace(directory))
-                throw new ArgumentNullException("directory");
-            if (!Directory.Exists(directory))
-                throw new DirectoryNotFoundException(directory);
+                throw new ArgumentNullException(nameof(directory));
+
+            if (!context.FileSystem.DirectoryExists(directory))
+            {
+                var inner = new DirectoryNotFoundException(directory);
+                throw new ArgumentException(inner.Message, nameof(directory), inner);
+            }
 
             ConfigurationLevel types = ConfigurationLevel.All;
 
@@ -245,8 +286,8 @@ namespace Microsoft.Alm.Git
                 types ^= ConfigurationLevel.System;
             }
 
-            var config = new Configuration();
-            config.LoadGitConfiguration(directory, types);
+            var config = new ConfigurationCollection(context);
+            await config.LoadGitConfiguration(directory, types);
 
             return config;
         }
@@ -319,17 +360,21 @@ namespace Microsoft.Alm.Git
 
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Design", "CA1031:DoNotCatchGeneralExceptionTypes")]
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Maintainability", "CA1502:AvoidExcessiveComplexity")]
-        internal static void ParseGitConfig(TextReader reader, IDictionary<string, string> destination)
+        internal static async Task ParseGitConfig(RuntimeContext context, TextReader reader, IDictionary<string, string> destination)
         {
-            Debug.Assert(reader != null, $"The `{nameof(reader)}` parameter is null.");
-            Debug.Assert(destination != null, $"The `{nameof(destination)}` parameter is null.");
+            if (context is null)
+                throw new ArgumentNullException(nameof(context));
+            if (reader is null)
+                throw new ArgumentNullException(nameof(reader));
+            if (destination is null)
+                throw new ArgumentNullException(nameof(destination));
 
             Match match = null;
             string section = null;
 
             // Parse each line in the config independently - Git's configuration do not accept multi-line values.
             string line;
-            while ((line = reader.ReadLine()) != null)
+            while ((line = await reader.ReadLineAsync()) != null)
             {
                 // Skip empty and commented lines
                 if (string.IsNullOrWhiteSpace(line))
@@ -397,20 +442,20 @@ namespace Microsoft.Alm.Git
                             {
                                 // This is an include directive, import the configuration values from the included file
                                 string includePath = (val.StartsWith("~/", StringComparison.OrdinalIgnoreCase))
-                                    ? Where.Home() + val.Substring(1, val.Length - 1)
+                                    ? context.Where.Home() + val.Substring(1, val.Length - 1)
                                     : val;
 
                                 includePath = Path.GetFullPath(includePath);
 
-                                using (FileStream includeFile = File.Open(includePath, FileMode.Open, FileAccess.Read, FileShare.Read))
+                                using (FileStream includeFile = context.FileSystem.FileOpen(includePath, FileMode.Open, FileAccess.Read, FileShare.Read))
                                 using (var includeReader = new StreamReader(includeFile))
                                 {
-                                    ParseGitConfig(includeReader, destination);
+                                    await ParseGitConfig(context, includeReader, destination);
                                 }
                             }
                             catch (Exception exception)
                             {
-                                Trace.WriteLine($"failed to parse config file: {val}. {exception.Message}");
+                                context.Trace.WriteLine($"failed to parse config file: {val}. {exception.Message}");
                             }
                         }
                         else
@@ -433,21 +478,28 @@ namespace Microsoft.Alm.Git
         IEnumerator IEnumerable.GetEnumerator()
             => GetEnumerator();
 
-        private void ParseGitConfig(ConfigurationLevel level, string configPath)
+        private async Task ParseGitConfig(ConfigurationLevel level, string configPath)
         {
             Debug.Assert(Enum.IsDefined(typeof(ConfigurationLevel), level), $"The `{nameof(level)}` parameter is not defined.");
-            Debug.Assert(!string.IsNullOrWhiteSpace(configPath), $"The `{nameof(configPath)}` parameter is null or invalid.");
-            Debug.Assert(File.Exists(configPath), $"The `{nameof(configPath)}` parameter references a non-existent file.");
+
+            if (configPath is null)
+                throw new ArgumentNullException(nameof(configPath));
 
             if (!_values.ContainsKey(level))
                 return;
-            if (!File.Exists(configPath))
+            if (!FileSystem.FileExists(configPath))
                 return;
 
-            using (FileStream stream = File.OpenRead(configPath))
+            if (!FileSystem.FileExists(configPath))
+            {
+                var inner = new FileNotFoundException(configPath);
+                throw new ArgumentException(inner.Message, nameof(configPath), inner);
+            }
+
+            using (FileStream stream = FileSystem.FileOpen(configPath, FileMode.Open, FileAccess.Read, FileShare.Read))
             using (var reader = new StreamReader(stream))
             {
-                ParseGitConfig(reader, _values[level]);
+                await ParseGitConfig(Context, reader, _values[level]);
             }
         }
 
@@ -487,8 +539,8 @@ namespace Microsoft.Alm.Git
 
             public override bool Equals(object obj)
             {
-                return (obj is Entry)
-                        && Equals((Entry)obj);
+                return (obj is Entry other)
+                        && Equals(other);
             }
 
             public bool Equals(Entry other)
@@ -507,13 +559,13 @@ namespace Microsoft.Alm.Git
                 return string.Format(System.Globalization.CultureInfo.InvariantCulture, "{0} = {1}", _key, _value);
             }
 
-            public static bool operator ==(Entry left, Entry right)
+            public static bool operator ==(Entry lhs, Entry rhs)
             {
-                return left.Equals(right);
+                return lhs.Equals(rhs);
             }
 
-            public static bool operator !=(Entry left, Entry right)
-                => !(left == right);
+            public static bool operator !=(Entry lhs, Entry rhs)
+                => !(lhs == rhs);
         }
     }
 }

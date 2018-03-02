@@ -1,4 +1,5 @@
 ﻿using System.Diagnostics;
+using System.Threading.Tasks;
 using Microsoft.Alm.Authentication;
 using Xunit;
 
@@ -8,73 +9,80 @@ namespace Atlassian.Bitbucket.Authentication.Test
     {
         public BitbucketAuthTests()
         {
-            Trace.Listeners.AddRange(Debug.Listeners);
+            System.Diagnostics.Trace.Listeners.AddRange(Debug.Listeners);
         }
 
         [Fact]
-        public void BitbucketAuthDeleteCredentialsTest()
+        public async Task BitbucketAuthDeleteCredentialsTest()
         {
             var targetUri = new TargetUri("http://localhost");
-            var bitbucketAuth = GetBitbucketAuthentication("Bitbucket-delete");
+            var bitbucketAuth = GetBitbucketAuthentication(RuntimeContext.Default, "Bitbucket-delete");
 
-            bitbucketAuth.PersonalAccessTokenStore.WriteCredentials(targetUri, new Credential("username", "password"));
+            await bitbucketAuth.PersonalAccessTokenStore.WriteCredentials(targetUri, new Credential("username", "password"));
 
             Credential credentials;
 
-            bitbucketAuth.DeleteCredentials(targetUri);
+            await bitbucketAuth.DeleteCredentials(targetUri);
 
             // "User credentials were not deleted as expected"
-            Assert.Null(credentials = bitbucketAuth.PersonalAccessTokenStore.ReadCredentials(targetUri));
+            Assert.Null(credentials = await bitbucketAuth.PersonalAccessTokenStore.ReadCredentials(targetUri));
         }
 
         [Fact]
-        public void BitbucketAuthGetCredentialsTest()
+        public async Task BitbucketAuthGetCredentialsTest()
         {
             var targetUri = new TargetUri("http://localhost");
-            var bitbucketAuth = GetBitbucketAuthentication("Bitbucket-get");
+            var bitbucketAuth = GetBitbucketAuthentication(RuntimeContext.Default, "Bitbucket-get");
 
             Credential credentials = null;
 
             // "User credentials were unexpectedly retrieved."
-            Assert.Null(credentials = bitbucketAuth.GetCredentials(targetUri));
+            Assert.Null(credentials = await bitbucketAuth.GetCredentials(targetUri));
 
             credentials = new Credential("username", "password");
 
-            bitbucketAuth.PersonalAccessTokenStore.WriteCredentials(targetUri, credentials);
+            await bitbucketAuth.PersonalAccessTokenStore.WriteCredentials(targetUri, credentials);
 
             // "User credentials were unexpectedly not retrieved."
-            Assert.NotNull(credentials = bitbucketAuth.GetCredentials(targetUri));
+            Assert.NotNull(credentials = await bitbucketAuth.GetCredentials(targetUri));
         }
 
         [Fact]
-        public void BitbucketAuthSetCredentialsTest()
+        public async Task BitbucketAuthSetCredentialsTest()
         {
             var targetUri = new TargetUri("http://localhost");
-            var bitbucketAuth = GetBitbucketAuthentication("Bitbucket-set");
+            var bitbucketAuth = GetBitbucketAuthentication(RuntimeContext.Default, "Bitbucket-set");
 
             Credential credentials = null;
 
             // "User credentials were unexpectedly retrieved."
-            Assert.Null(credentials = bitbucketAuth.GetCredentials(targetUri));
+            Assert.Null(credentials = await bitbucketAuth.GetCredentials(targetUri));
 
             Assert.Throws<System.ArgumentNullException>(() =>
             {
-                bitbucketAuth.SetCredentials(targetUri, credentials);
+                try
+                {
+                    var b = bitbucketAuth.SetCredentials(targetUri, credentials).Result;
+                }
+                catch (System.AggregateException exception)
+                {
+                    throw exception.Flatten().InnerException;
+                }
             });
 
             credentials = new Credential("username", "password");
 
-            bitbucketAuth.SetCredentials(targetUri, credentials);
+            await bitbucketAuth.SetCredentials(targetUri, credentials);
 
             // "User credentials were unexpectedly not retrieved."
-            Assert.NotNull(credentials = bitbucketAuth.GetCredentials(targetUri));
+            Assert.NotNull(credentials = await bitbucketAuth.GetCredentials(targetUri));
         }
 
-        private Authentication GetBitbucketAuthentication(string @namespace)
+        private Authentication GetBitbucketAuthentication(RuntimeContext context, string @namespace)
         {
-            ICredentialStore credentialStore = new SecretCache(@namespace);
+            ICredentialStore credentialStore = new SecretCache(context, @namespace);
 
-            return new Authentication(credentialStore, null, null);
+            return new Authentication(context, credentialStore, null, null);
         }
     }
 }

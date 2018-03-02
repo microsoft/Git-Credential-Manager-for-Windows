@@ -23,25 +23,31 @@
  * WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE."
 **/
 
+using System.Threading.Tasks;
+
 namespace Microsoft.Alm.Authentication
 {
     /// <summary>
     /// Base authentication mechanisms for setting, retrieving, and deleting stored credentials.
     /// </summary>
-    public abstract class BaseAuthentication : IAuthentication
+    public abstract class BaseAuthentication : BaseType, IAuthentication
     {
+        protected BaseAuthentication(RuntimeContext context)
+            : base(context)
+        { }
+
         /// <summary>
         /// Deletes a `<see cref="Credential"/>` from the storage used by the authentication object.
         /// </summary>
         /// <param name="targetUri">The uniform resource indicator used to uniquely identify the credentials.</param>
-        public abstract void DeleteCredentials(TargetUri targetUri);
+        public abstract Task<bool> DeleteCredentials(TargetUri targetUri);
 
         /// <summary>
         /// Deletes a `<see cref="Credential"/>` from the storage used by the authentication object.
         /// </summary>
         /// <param name="targetUri">The uniform resource indicator used to uniquely identify the credentials.</param>
         /// <param name="username">The username of the credentials to be deleted.</param>
-        public virtual void DeleteCredentials(TargetUri targetUri, string username)
+        public virtual Task<bool> DeleteCredentials(TargetUri targetUri, string username)
             => DeleteCredentials(targetUri, null);
 
         /// <summary>
@@ -50,14 +56,14 @@ namespace Microsoft.Alm.Authentication
         /// Returns a `<see cref="Credential"/>` if successful; otherwise `<see langword="null"/>`.
         /// </summary>
         /// <param name="targetUri">The uniform resource indicator used to uniquely identify the credentials.</param>
-        public abstract Credential GetCredentials(TargetUri targetUri);
+        public abstract Task<Credential> GetCredentials(TargetUri targetUri);
 
         /// <summary>
         /// Sets a <see cref="Credential"/> in the storage used by the authentication object.
         /// </summary>
         /// <param name="targetUri">The uniform resource indicator used to uniquely identify the credentials.</param>
         /// <param name="credentials">The value to be stored.</param>
-        public abstract void SetCredentials(TargetUri targetUri, Credential credentials);
+        public abstract Task<bool> SetCredentials(TargetUri targetUri, Credential credentials);
     }
 
     /// <summary>
@@ -81,15 +87,15 @@ namespace Microsoft.Alm.Authentication
     /// <summary>
     /// Delegate for interactively acquiring credentials.
     /// <para/>
-    /// Returns a <see cref="Credential"/> object from the authentication object, authority or storage if successful; otherwise <see langword="null"/>.
+    /// Returns a `<see cref="Credential"/>` object from the authentication object, authority, or storage if successful; otherwise `<see langword="null"/>`.
     /// </summary>
     /// <param name="targetUri">The uniform resource indicator used to uniquely identify the credentials.</param>
-    public delegate Credential AcquireCredentialsDelegate(TargetUri targetUri);
+    public delegate Task<Credential> AcquireCredentialsDelegate(TargetUri targetUri);
 
     /// <summary>
     /// Delegate for interactivity related to credential acquisition.
     /// </summary>
     /// <param name="targetUri">The uniform resource indicator used to uniquely identify the credentials.</param>
     /// <param name="result">Result of previous attempt to acquire credentials.</param>
-    public delegate void AcquireResultDelegate(TargetUri targetUri, AcquireCredentialResult result);
+    public delegate Task AcquireResultDelegate(TargetUri targetUri, AcquireCredentialResult result);
 }

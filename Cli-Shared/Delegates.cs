@@ -35,15 +35,15 @@ namespace Microsoft.Alm.Cli
 {
     partial class Program
     {
-        internal delegate Credential BasicCredentialPromptDelegate(Program program, TargetUri targetUri, string titleMessage);
+        internal delegate Task<Credential> BasicCredentialPromptDelegate(Program program, TargetUri targetUri, string titleMessage);
 
-        internal delegate bool BitbucketCredentialPromptDelegate(Program program, string titleMessage, TargetUri targetUri, out string username, out string password);
+        internal delegate Task<Credential> BitbucketCredentialPromptDelegate(Program program, string titleMessage, TargetUri targetUri);
 
-        internal delegate bool BitbucketOAuthPromptDelegate(Program program, string title, TargetUri targetUri, Bitbucket.AuthenticationResultType resultType, string username);
+        internal delegate Task<bool> BitbucketOAuthPromptDelegate(Program program, string title, TargetUri targetUri, Bitbucket.AuthenticationResultType resultType, string username);
 
         internal delegate Task<BaseAuthentication> CreateAuthenticationDelegate(Program program, OperationArguments operationArguments);
 
-        internal delegate void DeleteCredentialsDelegate(Program program, OperationArguments operationArguments);
+        internal delegate Task<bool> DeleteCredentialsDelegate(Program program, OperationArguments operationArguments);
 
         internal delegate void DieExceptionDelegate(Program program, Exception exception, string path, int line, string name);
 
@@ -59,35 +59,33 @@ namespace Microsoft.Alm.Cli
 
         internal delegate TextWriter GetStandardWriterDelegate(Program program);
 
-        internal delegate bool GitHubAuthCodePromptDelegate(Program program, TargetUri targetUri, Github.GitHubAuthenticationResultType resultType, string username, out string authenticationCode);
+        internal delegate Task<string> GitHubAuthCodePromptDelegate(Program program, TargetUri targetUri, Github.GitHubAuthenticationResultType resultType);
 
-        internal delegate bool GitHubCredentialPromptDelegate(Program program, TargetUri targetUri, out string username, out string password);
+        internal delegate Task<Credential> GitHubCredentialPromptDelegate(Program program, TargetUri targetUri);
 
-        internal delegate void LoadOperationArgumentsDelegate(Program program, OperationArguments operationArguments);
+        internal delegate Task LoadOperationArgumentsDelegate(Program program, OperationArguments operationArguments);
 
         internal delegate void LogEventDelegate(Program program, string message, EventLogEntryType eventType);
 
-        internal delegate bool ModalPromptDisplayDialogDelegate(Program program,
-                                                                ref NativeMethods.CredentialUiInfo credUiInfo,
-                                                                ref NativeMethods.CredentialPackFlags authPackage,
-                                                                IntPtr packedAuthBufferPtr,
-                                                                uint packedAuthBufferSize,
-                                                                IntPtr inBufferPtr,
-                                                                int inBufferSize,
-                                                                bool saveCredentials,
-                                                                NativeMethods.CredentialUiWindowsFlags flags,
-                                                                out string username,
-                                                                out string password);
+        internal delegate Task<Credential> ModalPromptDisplayDialogDelegate(Program program,
+                                                                            NativeMethods.CredentialUiInfo credUiInfo,
+                                                                            NativeMethods.CredentialPackFlags authPackage,
+                                                                            IntPtr packedAuthBufferPtr,
+                                                                            uint packedAuthBufferSize,
+                                                                            IntPtr inBufferPtr,
+                                                                            int inBufferSize,
+                                                                            bool saveCredentials,
+                                                                            NativeMethods.CredentialUiWindowsFlags flags);
 
-        internal delegate Credential ModalPromptForCredentialsDelegate(Program program, TargetUri targetUri, string message);
+        internal delegate Task<Credential> ModalPromptForCredentialsDelegate(Program program, TargetUri targetUri, string message);
 
-        internal delegate Credential ModalPromptForPasswordDelegate(Program program, TargetUri targetUri, string message, string username);
+        internal delegate Task<Credential> ModalPromptForPasswordDelegate(Program program, TargetUri targetUri, string message, string username);
 
         internal delegate Stream OpenStandardHandleDelegate(Program program);
 
         internal delegate void PrintArgsDelegate(Program program, string[] args);
 
-        internal delegate Credential QueryCredentialsDelegate(Program program, OperationArguments operationArguments);
+        internal delegate Task<Credential> QueryCredentialsDelegate(Program program, OperationArguments operationArguments);
 
         internal delegate ConsoleKeyInfo ReadKeyDelegate(Program program, bool intercept);
 

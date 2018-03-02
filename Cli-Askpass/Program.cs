@@ -29,6 +29,7 @@ using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Text.RegularExpressions;
+using System.Threading.Tasks;
 using Microsoft.Alm.Authentication;
 
 namespace Microsoft.Alm.Cli
@@ -44,7 +45,8 @@ namespace Microsoft.Alm.Cli
         private static readonly Regex AskPasswordRegex = new Regex(@"(\S+)'s\s+password:\s*", RegexOptions.Compiled | RegexOptions.CultureInvariant | RegexOptions.IgnoreCase);
         private static readonly Regex AskAuthenticityRegex = new Regex(@"^\s*The authenticity of host '([^']+)' can't be established.\s+RSA key fingerprint is ([^\s:]+:[^\.]+).", RegexOptions.Compiled | RegexOptions.CultureInvariant | RegexOptions.IgnoreCase);
 
-        internal Program()
+        internal Program(RuntimeContext context)
+            : base(context)
         {
             Title = AssemblyTitle;
         }
@@ -112,9 +114,11 @@ namespace Microsoft.Alm.Cli
                 promptKind = Gui.UserPromptKind.SshPassphrase;
             }
 
+            var trace = Context.Trace;
+
             if (match.Success)
             {
-                Git.Trace.WriteLine("querying for passphrase key.");
+                trace.WriteLine("querying for passphrase key.");
 
                 if (match.Groups.Count < 2)
                     throw new ArgumentException("Unable to understand command.");
@@ -122,7 +126,7 @@ namespace Microsoft.Alm.Cli
                 // string request = match.Groups[0].Value;
                 string resource = match.Groups[1].Value;
 
-                Git.Trace.WriteLine($"open dialog for '{resource}'.");
+                trace.WriteLine($"open dialog for '{resource}'.");
 
                 System.Windows.Application application = new System.Windows.Application();
                 Gui.UserPromptDialog prompt = new Gui.UserPromptDialog(promptKind, resource);
@@ -132,7 +136,7 @@ namespace Microsoft.Alm.Cli
                 {
                     string passphase = prompt.Response;
 
-                    Git.Trace.WriteLine("passphase acquired.");
+                    trace.WriteLine("passphase acquired.");
 
                     Out.Write(passphase + "\n");
                     return;
@@ -143,7 +147,7 @@ namespace Microsoft.Alm.Cli
 
             if ((match = AskCredentialRegex.Match(args[0])).Success)
             {
-                Git.Trace.WriteLine("querying for basic credentials.");
+                trace.WriteLine("querying for basic credentials.");
 
                 if (match.Groups.Count < 3)
                     throw new ArgumentException("Unable to understand command.");
@@ -158,7 +162,7 @@ namespace Microsoft.Alm.Cli
                 // Since we're looking for HTTP(s) credentials, we can use NetFx `Uri` class.
                 if (Uri.TryCreate(targetUrl, UriKind.Absolute, out targetUri))
                 {
-                    Git.Trace.WriteLine($"success parsing URL, targetUri = '{targetUri}'.");
+                    trace.WriteLine($"success parsing URL, targetUri = '{targetUri}'.");
 
                     if (TryParseUrlCredentials(targetUrl, out username, out password))
                     {
@@ -177,7 +181,7 @@ namespace Microsoft.Alm.Cli
                         }
                     }
 
-                    // create a target Url with the credential portion stripped, because Git doesn't
+                    // create a target URL with the credential portion stripped, because Git doesn't
                     // report hosts with credentials
                     targetUrl = targetUri.Scheme + "://";
 
@@ -205,48 +209,51 @@ namespace Microsoft.Alm.Cli
 
                     if (Uri.TryCreate(targetUrl, UriKind.Absolute, out targetUri))
                     {
-                        Git.Trace.WriteLine($"success parsing URL, targetUri = '{targetUri}'.");
+                        trace.WriteLine($"success parsing URL, targetUri = '{targetUri}'.");
 
-                        OperationArguments operationArguments = new OperationArguments(targetUri);
+                        OperationArguments operationArguments = new OperationArguments(Context, targetUri);
                         operationArguments.SetCredentials(username ?? string.Empty, password ?? string.Empty);
 
                         // load up the operation arguments, enable tracing, and query for credentials
                         LoadOperationArguments(operationArguments);
                         EnableTraceLogging(operationArguments);
 
-                        Credential credentials;
-                        if ((credentials = QueryCredentials(operationArguments)) != null)
+                        Task.Run(async () =>
                         {
-                            if (seeking.Equals("Username", StringComparison.OrdinalIgnoreCase))
+                            Credential credentials = await QueryCredentials(operationArguments);
+                            if (credentials != null)
                             {
-                                Git.Trace.WriteLine($"username for '{targetUrl}' asked for and found.");
+                                if (seeking.Equals("Username", StringComparison.OrdinalIgnoreCase))
+                                {
+                                    trace.WriteLine($"username for '{targetUrl}' asked for and found.");
 
-                                Out.Write(credentials.Username + '\n');
+                                    Out.Write(credentials.Username + '\n');
+                                    return;
+                                }
+
+                                if (seeking.Equals("Password", StringComparison.OrdinalIgnoreCase))
+                                {
+                                    trace.WriteLine($"password for '{targetUrl}' asked for and found.");
+
+                                    Out.Write(credentials.Password + '\n');
+                                    return;
+                                }
+                            }
+                            else
+                            {
+                                trace.WriteLine($"user canceled credential dialog.");
                                 return;
                             }
-
-                            if (seeking.Equals("Password", StringComparison.OrdinalIgnoreCase))
-                            {
-                                Git.Trace.WriteLine($"password for '{targetUrl}' asked for and found.");
-
-                                Out.Write(credentials.Password + '\n');
-                                return;
-                            }
-                        }
-                        else
-                        {
-                            Git.Trace.WriteLine($"user cancelled credential dialog.");
-                            return;
-                        }
+                        }).Wait();
                     }
                     else
                     {
-                        Git.Trace.WriteLine("error: unable to parse target URL.");
+                        trace.WriteLine("error: unable to parse target URL.");
                     }
                 }
                 else
                 {
-                    Git.Trace.WriteLine("error: unable to parse supplied URL.");
+                    trace.WriteLine("error: unable to parse supplied URL.");
                 }
 
                 Die($"failed to detect {seeking} in target URL.");
@@ -257,7 +264,7 @@ namespace Microsoft.Alm.Cli
                 string host = match.Groups[1].Value;
                 string fingerprint = match.Groups[2].Value;
 
-                Git.Trace.WriteLine($"requesting authorization to add {host} ({fingerprint}) to known hosts.");
+                trace.WriteLine($"requesting authorization to add {host} ({fingerprint}) to known hosts.");
 
                 System.Windows.Application application = new System.Windows.Application();
                 Gui.UserPromptDialog prompt = new Gui.UserPromptDialog(host, fingerprint);
@@ -265,12 +272,12 @@ namespace Microsoft.Alm.Cli
 
                 if (prompt.Failed)
                 {
-                    Git.Trace.WriteLine("denied authorization of host.");
+                    trace.WriteLine("denied authorization of host.");
                     Out.Write("no\n");
                 }
                 else
                 {
-                    Git.Trace.WriteLine("approved authorization of host.");
+                    trace.WriteLine("approved authorization of host.");
                     Out.Write("yes\n");
                 }
 
@@ -286,19 +293,23 @@ namespace Microsoft.Alm.Cli
 
             Out.WriteLine("usage: git askpass '<user_prompt_text>'");
 
-            List<Git.GitInstallation> installations;
-            if (Git.Where.FindGitInstallations(out installations))
+            var fs = Context.FileSystem;
+            var trace = Context.Trace;
+            var where = Context.Where;
+
+            List<Authentication.Git.GitInstallation> installations;
+            if (where.FindGitInstallations(out installations))
             {
                 foreach (var installation in installations)
                 {
-                    if (Directory.Exists(installation.Doc))
+                    if (fs.DirectoryExists(installation.Doc))
                     {
                         string doc = Path.Combine(installation.Doc, HelpFileName);
 
                         // if the help file exists, send it to the operating system to display to the user
-                        if (File.Exists(doc))
+                        if (fs.FileExists(doc))
                         {
-                            Git.Trace.WriteLine($"opening help documentation '{doc}'.");
+                            trace.WriteLine($"opening help documentation '{doc}'.");
 
                             Process.Start(doc);
 
@@ -314,7 +325,7 @@ namespace Microsoft.Alm.Cli
         [STAThread]
         private static void Main(string[] args)
         {
-            Program program = new Program();
+            Program program = new Program(RuntimeContext.Default);
 
             program.Run(args);
         }
@@ -355,7 +366,7 @@ namespace Microsoft.Alm.Cli
                 Die(exception);
             }
 
-            Trace.Flush();
+            Context.Trace.Flush();
         }
     }
 }

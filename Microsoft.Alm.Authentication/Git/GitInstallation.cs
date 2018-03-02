@@ -28,7 +28,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 
-namespace Microsoft.Alm.Git
+namespace Microsoft.Alm.Authentication.Git
 {
     public struct GitInstallation : IEquatable<GitInstallation>
     {
@@ -104,8 +104,10 @@ namespace Microsoft.Alm.Git
                 { KnownGitDistribution.GitForWindows64v2, Version2Doc64Path },
             };
 
-        internal GitInstallation(string path, KnownGitDistribution version)
+        internal GitInstallation(RuntimeContext context, string path, KnownGitDistribution version)
         {
+            if (context is null)
+                throw new ArgumentNullException(nameof(context));
             if (string.IsNullOrWhiteSpace(path))
                 throw new ArgumentNullException(nameof(path));
             if (!CommonConfigPaths.ContainsKey(version))
@@ -152,6 +154,7 @@ namespace Microsoft.Alm.Git
             _doc = null;
             _git = null;
             _libexec = null;
+            _context = context;
             _sh = null;
         }
 
@@ -160,6 +163,7 @@ namespace Microsoft.Alm.Git
         private string _doc;
         private string _git;
         private string _libexec;
+        private readonly RuntimeContext _context;
         private string _sh;
         private readonly string _path;
         private readonly KnownGitDistribution _distribution;
@@ -171,7 +175,7 @@ namespace Microsoft.Alm.Git
         {
             get
             {
-                if (_config == null)
+                if (_config is null)
                 {
                     _config = System.IO.Path.Combine(_path, CommonConfigPaths[_distribution]);
                 }
@@ -186,7 +190,7 @@ namespace Microsoft.Alm.Git
         {
             get
             {
-                if (_cmd == null)
+                if (_cmd is null)
                 {
                     _cmd = System.IO.Path.Combine(_path, CommonCmdPaths[_distribution]);
                 }
@@ -201,7 +205,7 @@ namespace Microsoft.Alm.Git
         {
             get
             {
-                if (_doc == null)
+                if (_doc is null)
                 {
                     _doc = System.IO.Path.Combine(_path, CommonDocPaths[_distribution]);
                 }
@@ -216,7 +220,7 @@ namespace Microsoft.Alm.Git
         {
             get
             {
-                if (_git == null)
+                if (_git is null)
                 {
                     _git = System.IO.Path.Combine(_path, CommonGitPaths[_distribution]);
                 }
@@ -231,7 +235,7 @@ namespace Microsoft.Alm.Git
         {
             get
             {
-                if (_libexec == null)
+                if (_libexec is null)
                 {
                     _libexec = System.IO.Path.Combine(_path, CommonLibexecPaths[_distribution]);
                 }
@@ -272,8 +276,8 @@ namespace Microsoft.Alm.Git
 
         public override bool Equals(object obj)
         {
-            if (obj is GitInstallation)
-                return this == (GitInstallation)obj;
+            if (obj is GitInstallation other)
+                return Equals(other);
 
             return false;
         }
@@ -295,9 +299,11 @@ namespace Microsoft.Alm.Git
 
         internal static bool IsValid(GitInstallation value)
         {
-            return Directory.Exists(value._path)
-                && Directory.Exists(value.Libexec)
-                && File.Exists(value.Git);
+            var fs = value._context.FileSystem;
+
+            return fs.DirectoryExists(value._path)
+                && fs.DirectoryExists(value.Libexec)
+                && fs.FileExists(value.Git);
         }
 
         public static bool operator ==(GitInstallation install1, GitInstallation install2)

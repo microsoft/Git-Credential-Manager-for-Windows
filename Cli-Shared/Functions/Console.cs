@@ -29,6 +29,7 @@ using System.Diagnostics;
 using System.IO;
 using System.Runtime.InteropServices;
 using System.Text;
+using System.Threading.Tasks;
 using Microsoft.Alm.Authentication;
 using Microsoft.Win32.SafeHandles;
 
@@ -36,99 +37,68 @@ namespace Microsoft.Alm.Cli
 {
     internal static class ConsoleFunctions
     {
-        public static Credential CredentialPrompt(Program program, TargetUri targetUri, string titleMessage)
+        public static Task<Credential> CredentialPrompt(Program program, TargetUri targetUri, string titleMessage)
         {
             // ReadConsole 32768 fail, 32767 OK @linquize [https://github.com/Microsoft/Git-Credential-Manager-for-Windows/commit/a62b9a19f430d038dcd85a610d97e5f763980f85]
             const int BufferReadSize = 16 * 1024;
 
-            Debug.Assert(targetUri != null);
+            if (program is null)
+                throw new ArgumentNullException(nameof(program));
+            if (targetUri is null)
+                throw new ArgumentNullException(nameof(targetUri));
 
-            titleMessage = titleMessage ?? "Please enter your credentials for ";
+            var trace = program.Context.Trace;
 
-            StringBuilder buffer = new StringBuilder(BufferReadSize);
-            uint read = 0;
-            uint written = 0;
-
-            NativeMethods.ConsoleMode consoleMode = 0;
-            NativeMethods.FileAccess fileAccessFlags = NativeMethods.FileAccess.GenericRead | NativeMethods.FileAccess.GenericWrite;
-            NativeMethods.FileAttributes fileAttributes = NativeMethods.FileAttributes.Normal;
-            NativeMethods.FileCreationDisposition fileCreationDisposition = NativeMethods.FileCreationDisposition.OpenExisting;
-            NativeMethods.FileShare fileShareFlags = NativeMethods.FileShare.Read | NativeMethods.FileShare.Write;
-
-            using (SafeFileHandle stdout = NativeMethods.CreateFile(NativeMethods.ConsoleOutName, fileAccessFlags, fileShareFlags, IntPtr.Zero, fileCreationDisposition, fileAttributes, IntPtr.Zero))
-            using (SafeFileHandle stdin = NativeMethods.CreateFile(NativeMethods.ConsoleInName, fileAccessFlags, fileShareFlags, IntPtr.Zero, fileCreationDisposition, fileAttributes, IntPtr.Zero))
+            return Task.Run(() =>
             {
+                titleMessage = titleMessage ?? "Please enter your credentials for ";
 
-                // Read the current console mode.
-                if (stdin.IsInvalid || stdout.IsInvalid)
+                StringBuilder buffer = new StringBuilder(BufferReadSize);
+                uint read = 0;
+                uint written = 0;
+
+                NativeMethods.ConsoleMode consoleMode = 0;
+                NativeMethods.FileAccess fileAccessFlags = NativeMethods.FileAccess.GenericRead | NativeMethods.FileAccess.GenericWrite;
+                NativeMethods.FileAttributes fileAttributes = NativeMethods.FileAttributes.Normal;
+                NativeMethods.FileCreationDisposition fileCreationDisposition = NativeMethods.FileCreationDisposition.OpenExisting;
+                NativeMethods.FileShare fileShareFlags = NativeMethods.FileShare.Read | NativeMethods.FileShare.Write;
+
+                using (SafeFileHandle stdout = NativeMethods.CreateFile(NativeMethods.ConsoleOutName, fileAccessFlags, fileShareFlags, IntPtr.Zero, fileCreationDisposition, fileAttributes, IntPtr.Zero))
+                using (SafeFileHandle stdin = NativeMethods.CreateFile(NativeMethods.ConsoleInName, fileAccessFlags, fileShareFlags, IntPtr.Zero, fileCreationDisposition, fileAttributes, IntPtr.Zero))
                 {
-                    Git.Trace.WriteLine("not a tty detected, abandoning prompt.");
-                    return null;
-                }
-                else if (!NativeMethods.GetConsoleMode(stdin, out consoleMode))
-                {
-                    int error = Marshal.GetLastWin32Error();
-                    throw new Win32Exception(error, "Unable to determine console mode (" + NativeMethods.Win32Error.GetText(error) + ").");
-                }
 
-                Git.Trace.WriteLine($"console mode = '{consoleMode}'.");
-
-                string username = null;
-                string password = null;
-
-                // Instruct the user as to what they are expected to do.
-                buffer.Append(titleMessage)
-                      .Append(targetUri)
-                      .AppendLine();
-                if (!NativeMethods.WriteConsole(stdout, buffer, (uint)buffer.Length, out written, IntPtr.Zero))
-                {
-                    int error = Marshal.GetLastWin32Error();
-                    throw new Win32Exception(error, "Unable to write to standard output (" + NativeMethods.Win32Error.GetText(error) + ").");
-                }
-
-                // Clear the buffer for the next operation.
-                buffer.Clear();
-
-                // Prompt the user for the username wanted.
-                buffer.Append("username: ");
-                if (!NativeMethods.WriteConsole(stdout, buffer, (uint)buffer.Length, out written, IntPtr.Zero))
-                {
-                    int error = Marshal.GetLastWin32Error();
-                    throw new Win32Exception(error, "Unable to write to standard output (" + NativeMethods.Win32Error.GetText(error) + ").");
-                }
-
-                // Clear the buffer for the next operation.
-                buffer.Clear();
-
-                // Read input from the user.
-                if (!NativeMethods.ReadConsole(stdin, buffer, BufferReadSize, out read, IntPtr.Zero))
-                {
-                    int error = Marshal.GetLastWin32Error();
-                    throw new Win32Exception(error, "Unable to read from standard input (" + NativeMethods.Win32Error.GetText(error) + ").");
-                }
-
-                // Record input from the user into local storage, stripping any EOL chars.
-                username = buffer.ToString(0, (int)read);
-                username = username.Trim(Environment.NewLine.ToCharArray());
-
-                // Clear the buffer for the next operation.
-                buffer.Clear();
-
-                // Set the console mode to current without echo input.
-                NativeMethods.ConsoleMode consoleMode2 = consoleMode ^ NativeMethods.ConsoleMode.EchoInput;
-
-                try
-                {
-                    if (!NativeMethods.SetConsoleMode(stdin, consoleMode2))
+                    // Read the current console mode.
+                    if (stdin.IsInvalid || stdout.IsInvalid)
+                    {
+                        trace.WriteLine("not a tty detected, abandoning prompt.");
+                        return null;
+                    }
+                    else if (!NativeMethods.GetConsoleMode(stdin, out consoleMode))
                     {
                         int error = Marshal.GetLastWin32Error();
-                        throw new Win32Exception(error, "Unable to set console mode (" + NativeMethods.Win32Error.GetText(error) + ").");
+                        throw new Win32Exception(error, "Unable to determine console mode (" + NativeMethods.Win32Error.GetText(error) + ").");
                     }
 
-                    Git.Trace.WriteLine($"console mode = '{consoleMode2}'.");
+                    trace.WriteLine($"console mode = '{consoleMode}'.");
 
-                    // Prompt the user for password.
-                    buffer.Append("password: ");
+                    string username = null;
+                    string password = null;
+
+                    // Instruct the user as to what they are expected to do.
+                    buffer.Append(titleMessage)
+                          .Append(targetUri)
+                          .AppendLine();
+                    if (!NativeMethods.WriteConsole(stdout, buffer, (uint)buffer.Length, out written, IntPtr.Zero))
+                    {
+                        int error = Marshal.GetLastWin32Error();
+                        throw new Win32Exception(error, "Unable to write to standard output (" + NativeMethods.Win32Error.GetText(error) + ").");
+                    }
+
+                    // Clear the buffer for the next operation.
+                    buffer.Clear();
+
+                    // Prompt the user for the username wanted.
+                    buffer.Append("username: ");
                     if (!NativeMethods.WriteConsole(stdout, buffer, (uint)buffer.Length, out written, IntPtr.Zero))
                     {
                         int error = Marshal.GetLastWin32Error();
@@ -146,33 +116,74 @@ namespace Microsoft.Alm.Cli
                     }
 
                     // Record input from the user into local storage, stripping any EOL chars.
-                    password = buffer.ToString(0, (int)read);
-                    password = password.Trim(Environment.NewLine.ToCharArray());
+                    username = buffer.ToString(0, (int)read);
+                    username = username.Trim(Environment.NewLine.ToCharArray());
+
+                    // Clear the buffer for the next operation.
+                    buffer.Clear();
+
+                    // Set the console mode to current without echo input.
+                    NativeMethods.ConsoleMode consoleMode2 = consoleMode ^ NativeMethods.ConsoleMode.EchoInput;
+
+                    try
+                    {
+                        if (!NativeMethods.SetConsoleMode(stdin, consoleMode2))
+                        {
+                            int error = Marshal.GetLastWin32Error();
+                            throw new Win32Exception(error, "Unable to set console mode (" + NativeMethods.Win32Error.GetText(error) + ").");
+                        }
+
+                        trace.WriteLine($"console mode = '{consoleMode2}'.");
+
+                        // Prompt the user for password.
+                        buffer.Append("password: ");
+                        if (!NativeMethods.WriteConsole(stdout, buffer, (uint)buffer.Length, out written, IntPtr.Zero))
+                        {
+                            int error = Marshal.GetLastWin32Error();
+                            throw new Win32Exception(error, "Unable to write to standard output (" + NativeMethods.Win32Error.GetText(error) + ").");
+                        }
+
+                        // Clear the buffer for the next operation.
+                        buffer.Clear();
+
+                        // Read input from the user.
+                        if (!NativeMethods.ReadConsole(stdin, buffer, BufferReadSize, out read, IntPtr.Zero))
+                        {
+                            int error = Marshal.GetLastWin32Error();
+                            throw new Win32Exception(error, "Unable to read from standard input (" + NativeMethods.Win32Error.GetText(error) + ").");
+                        }
+
+                        // Record input from the user into local storage, stripping any EOL chars.
+                        password = buffer.ToString(0, (int)read);
+                        password = password.Trim(Environment.NewLine.ToCharArray());
+                    }
+                    finally
+                    {
+                        // Restore the console mode to its original value.
+                        NativeMethods.SetConsoleMode(stdin, consoleMode);
+
+                        trace.WriteLine($"console mode = '{consoleMode}'.");
+                    }
+
+                    if (username != null && password != null)
+                        return new Credential(username, password);
                 }
-                finally
-                {
-                    // Restore the console mode to its original value.
-                    NativeMethods.SetConsoleMode(stdin, consoleMode);
 
-                    Git.Trace.WriteLine($"console mode = '{consoleMode}'.");
-                }
-
-                if (username != null && password != null)
-                    return new Credential(username, password);
-            }
-
-            return null;
+                return null;
+            });
         }
 
         public static void Exit(Program program, int exitcode, string message, string path, int line, string name)
         {
+            var trace = program.Context.Trace;
+
             if (!string.IsNullOrWhiteSpace(message))
             {
-                Git.Trace.WriteLine(message, path, line, name);
+                trace.WriteLine(message, path, line, name);
                 program.WriteLine(message);
             }
 
-            Git.Trace.Flush();
+            trace.Flush();
 
             Environment.Exit(exitcode);
         }

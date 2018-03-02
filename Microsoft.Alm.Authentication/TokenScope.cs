@@ -30,6 +30,9 @@ using ScopeSet = System.Collections.Generic.HashSet<string>;
 
 namespace Microsoft.Alm.Authentication
 {
+    /// <summary>
+    /// Data set type which represents a set of privileges related to access tokens.
+    /// </summary>
     public abstract class TokenScope : IEquatable<TokenScope>
     {
         protected TokenScope(string value)
@@ -63,9 +66,12 @@ namespace Microsoft.Alm.Authentication
             _scopes = result;
         }
 
-        public string Value { get { return string.Join(" ", _scopes); } }
-
         protected readonly IReadOnlyList<string> _scopes;
+
+        /// <summary>
+        /// Get the concatenated list of privileges separated by `' '`.
+        /// </summary>
+        public string Value { get { return string.Join(" ", _scopes); } }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         protected static bool Equals(TokenScope left, TokenScope right)

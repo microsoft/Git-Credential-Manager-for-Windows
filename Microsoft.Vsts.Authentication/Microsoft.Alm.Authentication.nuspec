@@ -18,7 +18,6 @@
     <tags>Git VSTS Visual Studio Team Services TFS GitHub Active Directory NTLM Basic Authentication Library ADAL Directory Azure AD AAD Identity Authentication .NET Windows</tags>
   </metadata>
   <files>
-    <file src="Microsoft.Alm.Git.dll" target="lib\net451\Microsoft.Alm.Git.dll" />
     <file src="Microsoft.Alm.Authentication.dll" target="lib\net451\Microsoft.Alm.Authentication.dll" />
     <file src="Microsoft.Vsts.Authentication.dll" target="lib\net451\Microsoft.Vsts.Authentication.dll" />
   </files>

@@ -1,4 +1,5 @@
 ﻿using System.Threading.Tasks;
+using Microsoft.Alm.Authentication.Git;
 using Xunit;
 
 namespace Microsoft.Alm.Authentication.Test
@@ -10,96 +11,96 @@ namespace Microsoft.Alm.Authentication.Test
         { }
 
         [Fact]
-        public void VstsAadDeleteCredentialsTest()
+        public async Task VstsAadDeleteCredentialsTest()
         {
             TargetUri targetUri = DefaultTargetUri;
-            VstsAadAuthentication aadAuthentication = GetVstsAadAuthentication("aad-delete");
+            VstsAadAuthentication aadAuthentication = GetVstsAadAuthentication(RuntimeContext.Default, "aad-delete");
 
             if (aadAuthentication.VstsAuthority is AuthorityFake fake)
             {
                 fake.CredentialsAreValid = false;
             }
 
-            aadAuthentication.PersonalAccessTokenStore.WriteCredentials(targetUri, DefaultPersonalAccessToken);
+            await aadAuthentication.PersonalAccessTokenStore.WriteCredentials(targetUri, DefaultPersonalAccessToken);
 
-            aadAuthentication.DeleteCredentials(targetUri);
-            Assert.Null(aadAuthentication.PersonalAccessTokenStore.ReadCredentials(targetUri));
+            await aadAuthentication.DeleteCredentials(targetUri);
+            Assert.Null(await aadAuthentication.PersonalAccessTokenStore.ReadCredentials(targetUri));
 
-            aadAuthentication.DeleteCredentials(targetUri);
-            Assert.Null(aadAuthentication.PersonalAccessTokenStore.ReadCredentials(targetUri));
+            await aadAuthentication.DeleteCredentials(targetUri);
+            Assert.Null(await aadAuthentication.PersonalAccessTokenStore.ReadCredentials(targetUri));
         }
 
         [Fact]
-        public void VstsAadGetCredentialsTest()
+        public async Task VstsAadGetCredentialsTest()
         {
             TargetUri targetUri = DefaultTargetUri;
-            VstsAadAuthentication aadAuthentication = GetVstsAadAuthentication("aad-get");
+            VstsAadAuthentication aadAuthentication = GetVstsAadAuthentication(RuntimeContext.Default, "aad-get");
 
-            Assert.Null(aadAuthentication.GetCredentials(targetUri));
+            Assert.Null(await aadAuthentication.GetCredentials(targetUri));
 
-            aadAuthentication.PersonalAccessTokenStore.WriteCredentials(targetUri, DefaultPersonalAccessToken);
+            await aadAuthentication.PersonalAccessTokenStore.WriteCredentials(targetUri, DefaultPersonalAccessToken);
 
-            Assert.NotNull(aadAuthentication.GetCredentials(targetUri));
+            Assert.NotNull(await aadAuthentication.GetCredentials(targetUri));
         }
 
         [Fact]
-        public void VstsAadInteractiveLogonTest()
+        public async Task VstsAadInteractiveLogonTest()
         {
             TargetUri targetUri = DefaultTargetUri;
-            VstsAadAuthentication aadAuthentication = GetVstsAadAuthentication("aad-logon");
+            VstsAadAuthentication aadAuthentication = GetVstsAadAuthentication(RuntimeContext.Default, "aad-logon");
 
-            Assert.Null(aadAuthentication.PersonalAccessTokenStore.ReadCredentials(targetUri));
+            Assert.Null(await aadAuthentication.PersonalAccessTokenStore.ReadCredentials(targetUri));
 
-            Assert.NotNull(aadAuthentication.InteractiveLogon(targetUri, new PersonalAccessTokenOptions { RequireCompactToken = false }).Result);
+            Assert.NotNull(await aadAuthentication.InteractiveLogon(targetUri, new PersonalAccessTokenOptions { RequireCompactToken = false }));
 
-            Assert.NotNull(aadAuthentication.PersonalAccessTokenStore.ReadCredentials(targetUri));
+            Assert.NotNull(await aadAuthentication.PersonalAccessTokenStore.ReadCredentials(targetUri));
         }
 
         [Fact]
-        public void VstsAadNoninteractiveLogonTest()
+        public async Task VstsAadNoninteractiveLogonTest()
         {
             TargetUri targetUri = DefaultTargetUri;
-            VstsAadAuthentication aadAuthentication = GetVstsAadAuthentication("aad-noninteractive");
+            VstsAadAuthentication aadAuthentication = GetVstsAadAuthentication(RuntimeContext.Default, "aad-noninteractive");
 
-            Assert.NotNull(Task.Run(async () => { return await aadAuthentication.NoninteractiveLogon(targetUri, new PersonalAccessTokenOptions { RequireCompactToken = false }); }).Result);
+            Assert.NotNull(await aadAuthentication.NoninteractiveLogon(targetUri, new PersonalAccessTokenOptions { RequireCompactToken = false }));
 
-            Assert.NotNull(aadAuthentication.PersonalAccessTokenStore.ReadCredentials(targetUri));
+            Assert.NotNull(await aadAuthentication.PersonalAccessTokenStore.ReadCredentials(targetUri));
         }
 
         [Fact]
-        public void VstsAadSetCredentialsTest()
+        public async Task VstsAadSetCredentialsTest()
         {
             TargetUri targetUri = DefaultTargetUri;
-            VstsAadAuthentication aadAuthentication = GetVstsAadAuthentication("aad-set");
+            VstsAadAuthentication aadAuthentication = GetVstsAadAuthentication(RuntimeContext.Default, "aad-set");
             Credential credentials = DefaultCredentials;
 
-            aadAuthentication.SetCredentials(targetUri, credentials);
+            await aadAuthentication.SetCredentials(targetUri, credentials);
 
-            Assert.Null(aadAuthentication.PersonalAccessTokenStore.ReadCredentials(targetUri));
-            Assert.Null(credentials = aadAuthentication.GetCredentials(targetUri));
+            Assert.Null(await aadAuthentication.PersonalAccessTokenStore.ReadCredentials(targetUri));
+            Assert.Null(credentials = await aadAuthentication.GetCredentials(targetUri));
         }
 
         [Fact]
-        public void VstsAadValidateCredentialsTest()
+        public async Task VstsAadValidateCredentialsTest()
         {
-            VstsAadAuthentication aadAuthentication = GetVstsAadAuthentication("aad-validate");
+            VstsAadAuthentication aadAuthentication = GetVstsAadAuthentication(RuntimeContext.Default, "aad-validate");
             Credential credentials = null;
 
-            Assert.False(Task.Run(async () => { return await aadAuthentication.ValidateCredentials(DefaultTargetUri, credentials); }).Result, "Credential validation unexpectedly failed.");
+            Assert.False(await aadAuthentication.ValidateCredentials(DefaultTargetUri, credentials), "Credential validation unexpectedly failed.");
 
             credentials = DefaultCredentials;
 
-            Assert.True(Task.Run(async () => { return await aadAuthentication.ValidateCredentials(DefaultTargetUri, credentials); }).Result, "Credential validation unexpectedly failed.");
+            Assert.True(await aadAuthentication.ValidateCredentials(DefaultTargetUri, credentials), "Credential validation unexpectedly failed.");
         }
 
-        private static VstsAadAuthentication GetVstsAadAuthentication(string @namespace)
+        private static VstsAadAuthentication GetVstsAadAuthentication(RuntimeContext context, string @namespace)
         {
             string expectedQueryParameters = null;
 
-            ICredentialStore tokenStore1 = new SecretCache(@namespace + 1, Secret.UriToIdentityUrl);
-            ITokenStore tokenStore2 = new SecretCache(@namespace + 2, Secret.UriToIdentityUrl);
+            ICredentialStore tokenStore1 = new SecretCache(context, @namespace + 1, Secret.UriToLongName);
+            ITokenStore tokenStore2 = new SecretCache(context, @namespace + 2, Secret.UriToLongName);
             IVstsAuthority vstsAuthority = new AuthorityFake(expectedQueryParameters);
-            return new VstsAadAuthentication(tokenStore1, tokenStore2, vstsAuthority);
+            return new VstsAadAuthentication(context, tokenStore1, tokenStore2, vstsAuthority);
         }
     }
 }

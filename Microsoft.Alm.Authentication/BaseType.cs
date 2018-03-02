@@ -1,6 +1,6 @@
 ﻿/**** Git Credential Manager for Windows ****
  *
- * Copyright (c) GitHub Corporation
+ * Copyright (c) Microsoft Corporation
  * All rights reserved.
  *
  * MIT License
@@ -23,19 +23,41 @@
  * WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE."
 **/
 
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
 using System.Threading.Tasks;
-using Microsoft.Alm.Authentication;
 
-namespace GitHub.Authentication
+namespace Microsoft.Alm.Authentication
 {
-    public interface IAuthority
+    public abstract class BaseType
     {
-        Task<AuthenticationResult> AcquireToken(
-            TargetUri targetUri,
-            Credential credentials,
-            string authenticationCode,
-            TokenScope scope);
+        protected BaseType(RuntimeContext context)
+        {
+            if (context is null)
+                throw new ArgumentNullException(nameof(context));
 
-        Task<bool> ValidateCredentials(TargetUri targetUri, Credential credentials);
+            _context = context;
+        }
+
+        private RuntimeContext _context;
+
+        protected RuntimeContext Context
+        {
+            get { return _context; }
+        }
+
+        protected IFileSystem FileSystem
+            => _context.FileSystem;
+
+        protected INetwork Network
+            => _context.Network;
+
+        protected ITrace Trace
+            => _context.Trace;
+
+        protected IWhere Where
+            => _context.Where;
     }
 }

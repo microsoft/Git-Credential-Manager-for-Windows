@@ -35,21 +35,24 @@ using Atlassian.Bitbucket.Authentication.Views;
 using GitHub.Shared.Controls;
 using GitHub.Shared.ViewModels;
 using Microsoft.Alm.Authentication;
-using Trace = Microsoft.Alm.Git.Trace;
 
 namespace Atlassian.Bitbucket.Authentication
 {
     /// <summary>
     /// Defines how to call the UI elements to request authentication details from the user.
     /// </summary>
-    public static class AuthenticationPrompts
+    public class AuthenticationPrompts : BaseType
     {
+        public AuthenticationPrompts(RuntimeContext context)
+            : base(context)
+        { }
+
         /// <summary>
         /// Utility method used to extract a username from a URL of the form http(s)://username@domain/
         /// </summary>
         /// <param name="targetUri"></param>
         /// <returns></returns>
-        public static string GetUserFromTargetUri(TargetUri targetUri)
+        public string GetUserFromTargetUri(TargetUri targetUri)
         {
             var url = targetUri.QueryUri.AbsoluteUri;
             if (!url.Contains("@"))
@@ -67,7 +70,7 @@ namespace Atlassian.Bitbucket.Authentication
         }
 
         /// <summary>
-        /// Opens a Modal UI prompting the user for Basic Auth credentials.
+        /// Opens a Modal UI prompting the user for Basic credentials.
         /// </summary>
         /// <param name="title"></param>
         /// <param name="targetUri">contains the URL etc of the Authority</param>
@@ -77,19 +80,21 @@ namespace Atlassian.Bitbucket.Authentication
         /// returns true if the user provides credentials which are then successfully validated,
         /// false otherwise
         /// </returns>
-        public static bool CredentialModalPrompt(string title, TargetUri targetUri, out string username, out string password)
+        public async Task<Credential> CredentialModalPrompt(string title, TargetUri targetUri)
         {
-            // if there is a user in the remote URL then prepopulate the UI with it.
+            // If there is a user in the remote URL then prepopulate the UI with it.
             var credentialViewModel = new CredentialsViewModel(GetUserFromTargetUri(targetUri));
 
             Trace.WriteLine("prompting user for credentials.");
 
-            bool credentialValid = ShowViewModel(credentialViewModel, () => new CredentialsWindow());
+            Credential credentials = null;
 
-            username = credentialViewModel.Login;
-            password = credentialViewModel.Password;
+            if( await ShowViewModel(credentialViewModel, () => new CredentialsWindow()))
+            {
+                credentials = new Credential(credentialViewModel.Login, credentialViewModel.Password);
+            }
 
-            return credentialValid;
+            return credentials;
         }
 
         /// <summary>
@@ -103,33 +108,34 @@ namespace Atlassian.Bitbucket.Authentication
         /// returns true if the user successfully completes the OAuth dance and the returned
         /// access_token is validated, false otherwise
         /// </returns>
-        public static bool AuthenticationOAuthModalPrompt(string title, TargetUri targetUri, AuthenticationResultType resultType, string username)
+        public Task<bool> AuthenticationOAuthModalPrompt(
+            string title,
+            TargetUri targetUri,
+            AuthenticationResultType resultType,
+            string username)
         {
             var oauthViewModel = new OAuthViewModel(resultType == AuthenticationResultType.TwoFactor);
 
             Trace.WriteLine("prompting user for authentication code.");
 
-            bool useOAuth = ShowViewModel(oauthViewModel, () => new OAuthWindow());
-
-            return useOAuth;
+            return ShowViewModel(oauthViewModel, () => new OAuthWindow());
         }
 
-        private static bool ShowViewModel(DialogViewModel viewModel, Func<AuthenticationDialogWindow> windowCreator)
+        private async Task<bool> ShowViewModel(DialogViewModel viewModel, Func<AuthenticationDialogWindow> windowCreator)
         {
-            StartSTATask(() =>
+            await StartSTATask(() =>
                 {
                     EnsureApplicationResources();
                     var window = windowCreator();
                     window.DataContext = viewModel;
                     window.ShowDialog();
-                })
-                .Wait();
+                });
 
             return viewModel.Result == AuthenticationDialogResult.Ok
                    && viewModel.IsValid;
         }
 
-        private static Task StartSTATask(Action action)
+        private Task StartSTATask(Action action)
         {
             var completionSource = new TaskCompletionSource<object>();
             var thread = new Thread(() =>
@@ -149,7 +155,7 @@ namespace Atlassian.Bitbucket.Authentication
             return completionSource.Task;
         }
 
-        private static void EnsureApplicationResources()
+        private void EnsureApplicationResources()
         {
             if (!UriParser.IsKnownScheme("pack"))
             {

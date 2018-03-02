@@ -33,26 +33,25 @@ namespace Microsoft.Alm.Authentication
         /// Azure Directory Access Token.
         /// </summary>
         [System.ComponentModel.Description("Azure Directory Access Token")]
-        Access = 1,
+        AzureAccess = 1,
 
         /// <summary>
         /// Azure Directory Refresh Token.
         /// </summary>
-        [System.Obsolete("Azure Directory no longer directly supports Refresh tokens.", true)]
         [System.ComponentModel.Description("Azure Directory Refresh Token")]
-        Refresh = 2,
+        AzureRefresh = 2,
 
         /// <summary>
-        /// Personal Access Token, can be compact or not.
+        /// Personal Access Token.
         /// </summary>
         [System.ComponentModel.Description("Personal Access Token")]
-        Personal = 3,
+        PersonalAccess = 3,
 
         /// <summary>
         /// Federated Authentication (aka FedAuth) Token
         /// </summary>
         [System.ComponentModel.Description("Federated Authentication Token")]
-        Federated = 4,
+        AzureFederated = 4,
 
         /// <summary>
         /// Used only for testing.

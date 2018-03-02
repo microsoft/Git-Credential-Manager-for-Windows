@@ -33,57 +33,62 @@ using GitHub.Authentication.ViewModels;
 using GitHub.Shared.Controls;
 using GitHub.Shared.ViewModels;
 using Microsoft.Alm.Authentication;
-using Git = Microsoft.Alm.Git;
 
 namespace GitHub.Authentication
 {
-    public static class AuthenticationPrompts
+    public class AuthenticationPrompts: BaseType
     {
-        public static bool CredentialModalPrompt(TargetUri targetUri, out string username, out string password)
+        public AuthenticationPrompts(RuntimeContext context)
+            : base(context)
+        { }
+
+        public async Task<Credential> CredentialModalPrompt(TargetUri targetUri)
         {
+            BaseSecureStore.ValidateTargetUri(targetUri);
+
             var credentialViewModel = new CredentialsViewModel();
 
-            Git.Trace.WriteLine($"prompting user for credentials for '{targetUri}'.");
+            Trace.WriteLine($"prompting user for credentials for '{targetUri}'.");
 
-            bool credentialValid = ShowViewModel(credentialViewModel, () => new CredentialsWindow());
+            Credential result = null;
 
-            username = credentialViewModel.Login;
-            password = credentialViewModel.Password;
-
-            return credentialValid;
+            if (await ShowViewModel(credentialViewModel, () => new CredentialsWindow()))
+            {
+                result = new Credential(credentialViewModel.Login, credentialViewModel.Password);
+            }
+            return result;
         }
 
-        public static bool AuthenticationCodeModalPrompt(TargetUri targetUri, GitHubAuthenticationResultType resultType, string username, out string authenticationCode)
+        public async Task<string> AuthenticationCodeModalPrompt(TargetUri targetUri, GitHubAuthenticationResultType resultType)
         {
+            BaseSecureStore.ValidateTargetUri(targetUri);
+
             var twoFactorViewModel = new TwoFactorViewModel(resultType == GitHubAuthenticationResultType.TwoFactorSms);
 
-            Git.Trace.WriteLine($"prompting user for authentication code for '{targetUri}'.");
+            Trace.WriteLine($"prompting user for authentication code for '{targetUri}'.");
 
-            bool authenticationCodeValid = ShowViewModel(twoFactorViewModel, () => new TwoFactorWindow());
+            bool authenticationCodeValid = await ShowViewModel(twoFactorViewModel, () => new TwoFactorWindow());
 
-            authenticationCode = authenticationCodeValid
+            return authenticationCodeValid
                 ? twoFactorViewModel.AuthenticationCode
                 : null;
-
-            return authenticationCodeValid;
         }
 
-        private static bool ShowViewModel(DialogViewModel viewModel, Func<AuthenticationDialogWindow> windowCreator)
+        private async Task<bool> ShowViewModel(DialogViewModel viewModel, Func<AuthenticationDialogWindow> windowCreator)
         {
-            StartSTATask(() =>
+            await StartSTATask(() =>
             {
                 EnsureApplicationResources();
                 var window = windowCreator();
                 window.DataContext = viewModel;
                 window.ShowDialog();
-            })
-            .Wait();
+            });
 
             return viewModel.Result == AuthenticationDialogResult.Ok
                 && viewModel.IsValid;
         }
 
-        private static Task StartSTATask(Action action)
+        private Task StartSTATask(Action action)
         {
             var completionSource = new TaskCompletionSource<object>();
             var thread = new Thread(() =>
@@ -103,7 +108,7 @@ namespace GitHub.Authentication
             return completionSource.Task;
         }
 
-        private static void EnsureApplicationResources()
+        private  void EnsureApplicationResources()
         {
             if (!UriParser.IsKnownScheme("pack"))
             {

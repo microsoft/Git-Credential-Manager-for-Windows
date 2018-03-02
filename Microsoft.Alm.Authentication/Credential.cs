@@ -24,6 +24,8 @@
 **/
 
 using System;
+using System.Net;
+using System.Text;
 
 namespace Microsoft.Alm.Authentication
 {
@@ -32,98 +34,121 @@ namespace Microsoft.Alm.Authentication
     /// </summary>
     public sealed class Credential : Secret, IEquatable<Credential>
     {
-        public static readonly Credential Empty = new Credential(string.Empty, string.Empty);
+        private static readonly CredentialComparer Comparer = new CredentialComparer();
 
         /// <summary>
         /// Creates a credential object with a username and password pair.
         /// </summary>
-        /// <param name="username">The username value of the <see cref="Credential"/>.</param>
-        /// <param name="password">The password value of the <see cref="Credential"/>.</param>
+        /// <param name="username">The username value of the `<see cref="Credential"/>`.</param>
+        /// <param name="password">The password value of the `<see cref="Credential"/>`.</param>
         public Credential(string username, string password)
         {
             if (username is null)
                 throw new ArgumentNullException(nameof(username));
 
-            Username = username;
-            Password = password ?? string.Empty;
+            _username = username;
+            _password = password ?? string.Empty;
         }
 
         /// <summary>
         /// Creates a credential object with only a username.
         /// </summary>
-        /// <param name="username">The username value of the <see cref="Credential"/>.</param>
+        /// <param name="username">The username value of the `<see cref="Credential"/>`.</param>
         public Credential(string username)
             : this(username, string.Empty)
         { }
 
+        private string _username;
+        private string _password;
+
         /// <summary>
         /// Secret related to the username.
         /// </summary>
-        public readonly string Password;
+        public string Password
+        {
+            get { return _password; }
+        }
 
         /// <summary>
         /// Unique identifier of the user.
         /// </summary>
-        public readonly string Username;
-
-        /// <summary>
-        /// Compares an object to this <see cref="Credential"/> for equality.
-        /// </summary>
-        /// <param name="obj">The object to compare.</param>
-        /// <returns><see langword="true"/> if equal; <see langword="false"/> otherwise.</returns>
-        public override bool Equals(Object obj)
+        public string Username
         {
-            return this == obj as Credential;
+            get { return _username; }
         }
+
+        public override string Value
+            => ToString();
 
         /// <summary>
         /// Compares a <see cref="Credential"/> to this <see cref="Credential"/> for equality.
+        /// <para/>
+        /// Returns `<see langword="true"/>` if equal; otherwise `<see langword="false"/>`.
         /// </summary>
         /// <param name="other">Credential to be compared.</param>
-        /// <returns><see langword="true"/> if equal; <see langword="false"/> otherwise.</returns>
         public bool Equals(Credential other)
+            => Comparer.Equals(this, other);
+
+        public override bool Equals(object obj)
         {
-            return this == other;
+            return (obj is Credential other
+                    && Equals(other))
+                || base.Equals(obj);
         }
 
         /// <summary>
-        /// Gets a hash code based on the contents of the <see cref="Credential"/>.
+        /// Returns a credentials associated with a specified URL, and authentication type.
         /// </summary>
-        /// <returns>32-bit hash code.</returns>
-        public override Int32 GetHashCode()
+        /// <param name="uri">The URI the credentials are for.</param>
+        /// <param name="authType">The type of authentication the credentials are for.</param>
+        public override NetworkCredential GetCredential(Uri uri, string authType)
         {
-            unchecked
-            {
-                return Username.GetHashCode() + 7 * Password.GetHashCode();
-            }
+            if (StringComparer.OrdinalIgnoreCase.Equals(authType, "basic"))
+                return new NetworkCredential(_username, _password);
+
+            return null;
         }
 
+        public override int GetHashCode()
+            => Comparer.GetHashCode(this);
+
         /// <summary>
-        /// Compares two credentials for equality.
+        /// Returns the credentials in a base64 encoded `"{username}:{password}" format.
         /// </summary>
-        /// <param name="credential1">Credential to compare.</param>
-        /// <param name="credential2">Credential to compare.</param>
-        /// <returns><see langword="true"/> if equal; <see langword="false"/> otherwise.</returns>
-        public static bool operator ==(Credential credential1, Credential credential2)
+        /// <returns></returns>
+        public string ToBase64String()
         {
-            if (ReferenceEquals(credential1, credential2))
+            // Get the simple {username}:{password} format.
+            string basicAuthValue = ToString();
+
+            // Convert the string into UTF-8 encoded bytes.
+            byte[] authBytes = Encoding.UTF8.GetBytes(basicAuthValue);
+
+            // Base64 encode the bytes (as another string).
+            basicAuthValue = Convert.ToBase64String(authBytes);
+
+            return basicAuthValue;
+        }
+
+        public override string ToString()
+        {
+            return string.Format(System.Globalization.CultureInfo.InvariantCulture, "{0}:{1}", _username, _password);
+        }
+
+        public static bool operator ==(Credential lhs, Credential rhs)
+        {
+            if (ReferenceEquals(lhs, rhs))
                 return true;
-            if (ReferenceEquals(credential1, null) || ReferenceEquals(null, credential2))
+            if (lhs is null || rhs is null)
                 return false;
 
-            return string.Equals(credential1.Username, credential2.Username, StringComparison.Ordinal)
-                && string.Equals(credential1.Password, credential2.Password, StringComparison.Ordinal);
+            return string.Equals(lhs.Username, rhs.Username, StringComparison.Ordinal)
+                && string.Equals(lhs.Password, rhs.Password, StringComparison.Ordinal);
         }
 
-        /// <summary>
-        /// Compares two credentials for inequality.
-        /// </summary>
-        /// <param name="credential1">Credential to compare.</param>
-        /// <param name="credential2">Credential to compare.</param>
-        /// <returns><see langword="false"/> if equal; <see langword="true"/> otherwise.</returns>
-        public static bool operator !=(Credential credential1, Credential credential2)
+        public static bool operator !=(Credential lhs, Credential rhs)
         {
-            return !(credential1 == credential2);
+            return !(lhs == rhs);
         }
     }
 }

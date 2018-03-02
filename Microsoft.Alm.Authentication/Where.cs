@@ -30,9 +30,9 @@ using System.Linq;
 using System.Text.RegularExpressions;
 using Microsoft.Win32;
 
-namespace Microsoft.Alm.Git
+namespace Microsoft.Alm.Authentication
 {
-    public static class Where
+    public interface IWhere
     {
         /// <summary>
         /// Finds the "best" path to an app of a given name.
@@ -41,7 +41,83 @@ namespace Microsoft.Alm.Git
         /// </summary>
         /// <param name="name">The name of the application, without extension, to find.</param>
         /// <param name="path">Path to the first match file which the operating system considers executable.</param>
-        static public bool FindApp(string name, out string path)
+        bool FindApp(string name, out string path);
+
+        bool FindGitInstallation(string path, Git.KnownGitDistribution distro, out Git.GitInstallation installation);
+
+        /// <summary>
+        /// Finds and returns path(s) to Git installation(s) in common locations.
+        /// <para/>
+        /// Returns `<see langword="true"/>` if successful; otherwise `<see langword="false"/>`.
+        /// </summary>
+        /// <param name="installations">The list of found Git installation if successful; otherwise `<see langword="null"/>`.</param>
+        bool FindGitInstallations(out List<Git.GitInstallation> installations);
+
+        /// <summary>
+        /// Gets the path to Git's global configuration file.
+        /// <para/>
+        /// Returns `<see langword="true"/>` if successful; otherwise `<see langword="false"/>`.
+        /// </summary>
+        /// <param name="path">Path to Git's global configuration if successful; otherwise `<see langword="null"/>`.</param>
+        bool GitGlobalConfig(out string path);
+
+        /// <summary>
+        /// Gets the path to Git's local configuration file based on the current working directory.
+        /// </summary>
+        /// <param name="path">Path to Git's local configuration if successful; otherwise `<see langword="null"/>`.</param>
+        /// <returns><see langword="True"/> if succeeds; <see langword="false"/> otherwise.</returns>
+        bool GitLocalConfig(out string path);
+
+        /// <summary>
+        /// Gets the path to Git's portable system configuration file.
+        /// <para/>
+        /// Searches starting with `<paramref name="startingDirectory"/>` working up towards the device root.
+        /// <para/>
+        /// Returns `<see langword="true"/>` if successful; otherwise `<see langword="false"/>`.
+        /// </summary>
+        /// <param name="startingDirectory">Working directory of the repository to find the configuration.</param>
+        /// <param name="path">Path to Git's local configuration if successful; otherwise `<see langword="null"/>`.</param>
+        bool GitLocalConfig(string startingDirectory, out string path);
+
+        /// <summary>
+        /// Gets the path to Git's portable system configuration file.
+        /// <para/>
+        /// Searches starting with `<see cref="Environment.CurrentDirectory"/>` working up towards the device root.
+        /// <para/>
+        /// Returns `<see langword="true"/>` if successful; otherwise `<see langword="false"/>`.
+        /// </summary>
+        /// <param name="path">Path to Git's portable system configuration if successful; otherwise `<see langword="null"/>`.</param>
+        bool GitPortableConfig(out string path);
+
+        /// <summary>
+        /// Gets the path to Git's system configuration file.
+        /// <para/>
+        /// Returns `<see langword="true"/>` if successful; otherwise `<see langword="false"/>`.
+        /// </summary>
+        /// <param name="path">Path to Git's system configuration if successful; otherwise `<see langword="null"/>`.</param>
+        bool GitSystemConfig(Git.GitInstallation? installation, out string path);
+
+        /// <summary>
+        /// Gets the path to Git's XDG configuration file.
+        /// <para/>
+        /// Returns `<see langword="true"/>` if successful; otherwise `<see langword="false"/>`.
+        /// </summary>
+        /// <param name="path">Path to Git's XDG configuration file if successful; otherwise `<see langword="null"/>`.</param>
+        bool GitXdgConfig(out string path);
+
+        /// <summary>
+        /// Returns the path to the user's home directory (~/ or %HOME%) that Git will rely on.
+        /// </summary>
+        string Home();
+    }
+
+    internal class Where : BaseType, IWhere
+    {
+        public Where(RuntimeContext context)
+            : base(context)
+        { }
+
+        public bool FindApp(string name, out string path)
         {
             if (!string.IsNullOrWhiteSpace(name))
             {
@@ -70,7 +146,7 @@ namespace Microsoft.Alm.Git
                             continue;
 
                         string value = string.Format("{0}\\{1}{2}", paths[i], name, exts[j]);
-                        if (File.Exists(value))
+                        if (FileSystem.FileExists(value))
                         {
                             value = value.Replace("\\\\", "\\");
                             path = value;
@@ -84,19 +160,13 @@ namespace Microsoft.Alm.Git
             return false;
         }
 
-        public static bool FindGitInstallation(string path, KnownGitDistribution distro, out GitInstallation installation)
+        public bool FindGitInstallation(string path, Git.KnownGitDistribution distro, out Git.GitInstallation installation)
         {
-            installation = new GitInstallation(path, distro);
-            return GitInstallation.IsValid(installation);
+            installation = new Git.GitInstallation(Context, path, distro);
+            return Git.GitInstallation.IsValid(installation);
         }
 
-        /// <summary>
-        /// Finds and returns path(s) to Git installation(s) in common locations.
-        /// <para/>
-        /// Returns `<see langword="true"/>` if successful; otherwise `<see langword="false"/>`.
-        /// </summary>
-        /// <param name="installations">The list of found Git installation if successful; otherwise `<see langword="null"/>`.</param>
-        public static bool FindGitInstallations(out List<GitInstallation> installations)
+        public bool FindGitInstallations(out List<Git.GitInstallation> installations)
         {
             const string GitAppName = @"Git";
             const string GitSubkeyName = @"SOFTWARE\Microsoft\Windows\CurrentVersion\Uninstall\Git_is1";
@@ -161,71 +231,71 @@ namespace Microsoft.Alm.Git
                 programDataPath = Path.Combine(programDataPath, GitAppName);
             }
 
-            List<GitInstallation> candidates = new List<GitInstallation>();
+            List<Git.GitInstallation> candidates = new List<Git.GitInstallation>();
             // Add candidate locations in order of preference.
-            if (Where.FindApp(GitAppName, out shellPathValue))
+            if (FindApp(GitAppName, out shellPathValue))
             {
                 // `Where.App` returns the path to the executable, truncate to the installation root
-                if (shellPathValue.EndsWith(GitInstallation.AllVersionCmdPath, StringComparison.OrdinalIgnoreCase))
+                if (shellPathValue.EndsWith(Git.GitInstallation.AllVersionCmdPath, StringComparison.OrdinalIgnoreCase))
                 {
-                    shellPathValue = shellPathValue.Substring(0, shellPathValue.Length - GitInstallation.AllVersionCmdPath.Length);
+                    shellPathValue = shellPathValue.Substring(0, shellPathValue.Length - Git.GitInstallation.AllVersionCmdPath.Length);
                 }
 
-                candidates.Add(new GitInstallation(shellPathValue, KnownGitDistribution.GitForWindows64v2));
-                candidates.Add(new GitInstallation(shellPathValue, KnownGitDistribution.GitForWindows32v2));
-                candidates.Add(new GitInstallation(shellPathValue, KnownGitDistribution.GitForWindows32v1));
+                candidates.Add(new Git.GitInstallation(Context, shellPathValue, Git.KnownGitDistribution.GitForWindows64v2));
+                candidates.Add(new Git.GitInstallation(Context, shellPathValue, Git.KnownGitDistribution.GitForWindows32v2));
+                candidates.Add(new Git.GitInstallation(Context, shellPathValue, Git.KnownGitDistribution.GitForWindows32v1));
             }
 
             if (!string.IsNullOrEmpty(reg64HklmPath))
             {
-                candidates.Add(new GitInstallation(reg64HklmPath, KnownGitDistribution.GitForWindows64v2));
+                candidates.Add(new Git.GitInstallation(Context, reg64HklmPath, Git.KnownGitDistribution.GitForWindows64v2));
             }
             if (!string.IsNullOrEmpty(programFiles32Path))
             {
-                candidates.Add(new GitInstallation(programFiles64Path, KnownGitDistribution.GitForWindows64v2));
+                candidates.Add(new Git.GitInstallation(Context, programFiles64Path, Git.KnownGitDistribution.GitForWindows64v2));
             }
             if (!string.IsNullOrEmpty(reg64HkcuPath))
             {
-                candidates.Add(new GitInstallation(reg64HkcuPath, KnownGitDistribution.GitForWindows64v2));
+                candidates.Add(new Git.GitInstallation(Context, reg64HkcuPath, Git.KnownGitDistribution.GitForWindows64v2));
             }
             if (!string.IsNullOrEmpty(reg32HklmPath))
             {
-                candidates.Add(new GitInstallation(reg32HklmPath, KnownGitDistribution.GitForWindows32v2));
-                candidates.Add(new GitInstallation(reg32HklmPath, KnownGitDistribution.GitForWindows32v1));
+                candidates.Add(new Git.GitInstallation(Context, reg32HklmPath, Git.KnownGitDistribution.GitForWindows32v2));
+                candidates.Add(new Git.GitInstallation(Context, reg32HklmPath, Git.KnownGitDistribution.GitForWindows32v1));
             }
             if (!string.IsNullOrEmpty(programFiles32Path))
             {
-                candidates.Add(new GitInstallation(programFiles32Path, KnownGitDistribution.GitForWindows32v2));
-                candidates.Add(new GitInstallation(programFiles32Path, KnownGitDistribution.GitForWindows32v1));
+                candidates.Add(new Git.GitInstallation(Context, programFiles32Path, Git.KnownGitDistribution.GitForWindows32v2));
+                candidates.Add(new Git.GitInstallation(Context, programFiles32Path, Git.KnownGitDistribution.GitForWindows32v1));
             }
             if (!string.IsNullOrEmpty(reg32HkcuPath))
             {
-                candidates.Add(new GitInstallation(reg32HkcuPath, KnownGitDistribution.GitForWindows32v2));
-                candidates.Add(new GitInstallation(reg32HkcuPath, KnownGitDistribution.GitForWindows32v1));
+                candidates.Add(new Git.GitInstallation(Context, reg32HkcuPath, Git.KnownGitDistribution.GitForWindows32v2));
+                candidates.Add(new Git.GitInstallation(Context, reg32HkcuPath, Git.KnownGitDistribution.GitForWindows32v1));
             }
             if (!string.IsNullOrEmpty(programDataPath))
             {
-                candidates.Add(new GitInstallation(programDataPath, KnownGitDistribution.GitForWindows64v2));
-                candidates.Add(new GitInstallation(programDataPath, KnownGitDistribution.GitForWindows32v2));
-                candidates.Add(new GitInstallation(programDataPath, KnownGitDistribution.GitForWindows32v1));
+                candidates.Add(new Git.GitInstallation(Context, programDataPath, Git.KnownGitDistribution.GitForWindows64v2));
+                candidates.Add(new Git.GitInstallation(Context, programDataPath, Git.KnownGitDistribution.GitForWindows32v2));
+                candidates.Add(new Git.GitInstallation(Context, programDataPath, Git.KnownGitDistribution.GitForWindows32v1));
             }
             if (!string.IsNullOrEmpty(appDataLocalPath))
             {
-                candidates.Add(new GitInstallation(appDataLocalPath, KnownGitDistribution.GitForWindows64v2));
-                candidates.Add(new GitInstallation(appDataLocalPath, KnownGitDistribution.GitForWindows32v2));
-                candidates.Add(new GitInstallation(appDataLocalPath, KnownGitDistribution.GitForWindows32v1));
+                candidates.Add(new Git.GitInstallation(Context, appDataLocalPath, Git.KnownGitDistribution.GitForWindows64v2));
+                candidates.Add(new Git.GitInstallation(Context, appDataLocalPath, Git.KnownGitDistribution.GitForWindows32v2));
+                candidates.Add(new Git.GitInstallation(Context, appDataLocalPath, Git.KnownGitDistribution.GitForWindows32v1));
             }
             if (!string.IsNullOrEmpty(appDataRoamingPath))
             {
-                candidates.Add(new GitInstallation(appDataRoamingPath, KnownGitDistribution.GitForWindows64v2));
-                candidates.Add(new GitInstallation(appDataRoamingPath, KnownGitDistribution.GitForWindows32v2));
-                candidates.Add(new GitInstallation(appDataRoamingPath, KnownGitDistribution.GitForWindows32v1));
+                candidates.Add(new Git.GitInstallation(Context, appDataRoamingPath, Git.KnownGitDistribution.GitForWindows64v2));
+                candidates.Add(new Git.GitInstallation(Context, appDataRoamingPath, Git.KnownGitDistribution.GitForWindows32v2));
+                candidates.Add(new Git.GitInstallation(Context, appDataRoamingPath, Git.KnownGitDistribution.GitForWindows32v1));
             }
 
-            HashSet<GitInstallation> pathSet = new HashSet<GitInstallation>();
+            HashSet<Git.GitInstallation> pathSet = new HashSet<Git.GitInstallation>();
             foreach (var candidate in candidates)
             {
-                if (GitInstallation.IsValid(candidate))
+                if (Git.GitInstallation.IsValid(candidate))
                 {
                     pathSet.Add(candidate);
                 }
@@ -233,15 +303,12 @@ namespace Microsoft.Alm.Git
 
             installations = pathSet.ToList();
 
-            Git.Trace.WriteLine($"found {installations.Count} Git installation(s).");
+            Trace.WriteLine($"found {installations.Count} Git installation(s).");
 
             return installations.Count > 0;
         }
 
-        /// <summary>
-        /// Returns the path to the user's home directory (~/ or %HOME%) that Git will rely on.
-        /// </summary>
-        public static string Home()
+        public string Home()
         {
             // Git relies on the %HOME% environment variable to represent the users home directory it
             // can contain embedded environment variables, so we need to expand it
@@ -252,7 +319,7 @@ namespace Microsoft.Alm.Git
                 path = Environment.ExpandEnvironmentVariables(path);
 
                 // If the path is good, return it.
-                if (Directory.Exists(path))
+                if (FileSystem.DirectoryExists(path))
                     return path;
             }
 
@@ -265,7 +332,7 @@ namespace Microsoft.Alm.Git
             {
                 path = homeDrive + homePath;
 
-                if (Directory.Exists(path))
+                if (FileSystem.DirectoryExists(path))
                     return path;
             }
 
@@ -273,13 +340,7 @@ namespace Microsoft.Alm.Git
             return Environment.GetFolderPath(Environment.SpecialFolder.UserProfile);
         }
 
-        /// <summary>
-        /// Gets the path to Git's global configuration file.
-        /// <para/>
-        /// Returns `<see langword="true"/>` if successful; otherwise `<see langword="false"/>`.
-        /// </summary>
-        /// <param name="path">Path to Git's global configuration if successful; otherwise `<see langword="null"/>`.</param>
-        public static bool GitGlobalConfig(out string path)
+        public bool GitGlobalConfig(out string path)
         {
             const string GlobalConfigFileName = ".gitconfig";
 
@@ -289,7 +350,7 @@ namespace Microsoft.Alm.Git
             var globalPath = Path.Combine(home, GlobalConfigFileName);
 
             // If the path is valid, return it to the user.
-            if (File.Exists(globalPath))
+            if (FileSystem.FileExists(globalPath))
             {
                 path = globalPath;
                 return true;
@@ -299,68 +360,65 @@ namespace Microsoft.Alm.Git
             return false;
         }
 
-        /// <summary>
-        /// Gets the path to Git's portable system configuration file.
-        /// <para/>
-        /// Searches starting with `<paramref name="startingDirectory"/>` working up towards the device root.
-        /// <para/>
-        /// Returns `<see langword="true"/>` if successful; otherwise `<see langword="false"/>`.
-        /// </summary>
-        /// <param name="startingDirectory">Working directory of the repository to find the configuration.</param>
-        /// <param name="path">Path to Git's local configuration if successful; otherwise `<see langword="null"/>`.</param>
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Performance", "CA1800:DoNotCastUnnecessarily")]
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2202:Do not dispose objects multiple times")]
-        public static bool GitLocalConfig(string startingDirectory, out string path)
+        public bool GitLocalConfig(string startingDirectory, out string path)
         {
             const string GitFolderName = ".git";
             const string LocalConfigFileName = "config";
 
             if (!string.IsNullOrWhiteSpace(startingDirectory))
             {
-                var dir = new DirectoryInfo(startingDirectory);
+                var dir = startingDirectory;
 
-                if (dir.Exists)
+                if (FileSystem.DirectoryExists(dir))
                 {
-                    Func<DirectoryInfo, FileSystemInfo> hasOdb = (DirectoryInfo info) =>
+                    string hasOdb(string odbPath)
                     {
-                        if (info == null || !info.Exists)
+                        if (odbPath == null || !FileSystem.FileExists(odbPath))
                             return null;
 
-                        foreach (var item in info.EnumerateFileSystemInfos())
+                        foreach (var item in FileSystem.EnumerateFileSystemEntries(odbPath))
                         {
                             if (item != null
-                                && item.Exists
-                                && (GitFolderName.Equals(item.Name, StringComparison.OrdinalIgnoreCase)
-                                    || LocalConfigFileName.Equals(item.Name, StringComparison.OrdinalIgnoreCase)))
+                                && FileSystem.FileExists(item)
+                                && (GitFolderName.Equals(FileSystem.GetFileName(item), StringComparison.OrdinalIgnoreCase)
+                                    || LocalConfigFileName.Equals(FileSystem.GetFileName(item), StringComparison.OrdinalIgnoreCase)))
                                 return item;
                         }
 
                         return null;
-                    };
+                    }
 
-                    FileSystemInfo result = null;
-                    while (dir != null && dir.Exists && dir.Parent != null && dir.Parent.Exists)
+                    string parent = null;
+                    string result = null;
+
+                    while (dir != null 
+                        && FileSystem.DirectoryExists(dir) 
+                        && (parent = FileSystem.GetParent(dir)) != null 
+                        && (FileSystem.DirectoryExists(parent)))
                     {
                         if ((result = hasOdb(dir)) != null)
                             break;
 
-                        dir = dir.Parent;
+                        dir = parent;
                     }
 
-                    if (result != null && result.Exists)
+                    if (result != null && FileSystem.DirectoryExists(result))
                     {
-                        if (result is DirectoryInfo)
+                        if (FileSystem.DirectoryExists(result))
                         {
-                            var localPath = Path.Combine(result.FullName, LocalConfigFileName);
-                            if (File.Exists(localPath))
+                            var localPath = Path.Combine(FileSystem.GetFullPath(result), LocalConfigFileName);
+                            if (FileSystem.FileExists(localPath))
                             {
                                 path = localPath;
                                 return true;
                             }
                         }
-                        else if (result.Name == LocalConfigFileName && result is FileInfo)
+                        else if (LocalConfigFileName.Equals(FileSystem.GetFileName(result), StringComparison.OrdinalIgnoreCase)
+                            && FileSystem.FileExists(result))
                         {
-                            path = result.FullName;
+                            path = FileSystem.GetFullPath(result);
                             return true;
                         }
                         else
@@ -368,14 +426,14 @@ namespace Microsoft.Alm.Git
                             // parse the file like gitdir: ../.git/modules/libgit2sharp
                             string content = null;
 
-                            using (FileStream stream = (result as FileInfo).OpenRead())
+                            using (FileStream stream = FileSystem.FileOpen(result, FileMode.Open, FileAccess.Read, FileShare.Read))
                             using (StreamReader reader = new StreamReader(stream))
                             {
                                 content = reader.ReadToEnd();
                             }
 
                             Match match;
-                            if ((match = Regex.Match(content, @"gitdir\s*:\s*([^\r\n]+)", RegexOptions.Compiled | RegexOptions.CultureInvariant | RegexOptions.IgnoreCase)).Success
+                            if ((match = Regex.Match(content, @"gitdir\s*:\s*([^\r\n]+)", RegexOptions.CultureInvariant | RegexOptions.IgnoreCase)).Success
                                 && match.Groups.Count > 1)
                             {
                                 content = match.Groups[1].Value;
@@ -389,14 +447,15 @@ namespace Microsoft.Alm.Git
                                 }
                                 else
                                 {
-                                    localPath = Path.GetDirectoryName(result.FullName);
+                                    localPath = FileSystem.GetParent(FileSystem.GetFullPath(result));
                                     localPath = Path.Combine(localPath, content);
                                 }
 
-                                if (Directory.Exists(localPath))
+                                if (FileSystem.DirectoryExists(localPath))
                                 {
                                     localPath = Path.Combine(localPath, LocalConfigFileName);
-                                    if (File.Exists(localPath))
+
+                                    if (FileSystem.FileExists(localPath))
                                     {
                                         path = localPath;
                                         return true;
@@ -412,25 +471,12 @@ namespace Microsoft.Alm.Git
             return false;
         }
 
-        /// <summary>
-        /// Gets the path to Git's local configuration file based on the current working directory.
-        /// </summary>
-        /// <param name="path">Path to Git's local configuration if successful; otherwise `<see langword="null"/>`.</param>
-        /// <returns><see langword="True"/> if succeeds; <see langword="false"/> otherwise.</returns>
-        public static bool GitLocalConfig(out string path)
+        public bool GitLocalConfig(out string path)
         {
             return GitLocalConfig(Environment.CurrentDirectory, out path);
         }
 
-        /// <summary>
-        /// Gets the path to Git's portable system configuration file.
-        /// <para/>
-        /// Searches starting with `<see cref="Environment.CurrentDirectory"/>` working up towards the device root.
-        /// <para/>
-        /// Returns `<see langword="true"/>` if successful; otherwise `<see langword="false"/>`.
-        /// </summary>
-        /// <param name="path">Path to Git's portable system configuration if successful; otherwise `<see langword="null"/>`.</param>
-        public static bool GitPortableConfig(out string path)
+        public bool GitPortableConfig(out string path)
         {
             const string PortableConfigFolder = "Git";
             const string PortableConfigFileName = "config";
@@ -439,7 +485,7 @@ namespace Microsoft.Alm.Git
 
             var portableConfigPath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.CommonApplicationData), PortableConfigFolder, PortableConfigFileName);
 
-            if (File.Exists(portableConfigPath))
+            if (FileSystem.FileExists(portableConfigPath))
             {
                 path = portableConfigPath;
             }
@@ -447,15 +493,9 @@ namespace Microsoft.Alm.Git
             return path != null;
         }
 
-        /// <summary>
-        /// Gets the path to Git's system configuration file.
-        /// <para/>
-        /// Returns `<see langword="true"/>` if successful; otherwise `<see langword="false"/>`.
-        /// </summary>
-        /// <param name="path">Path to Git's system configuration if successful; otherwise `<see langword="null"/>`.</param>
-        public static bool GitSystemConfig(GitInstallation? installation, out string path)
+        public bool GitSystemConfig(Git.GitInstallation? installation, out string path)
         {
-            if (installation.HasValue && File.Exists(installation.Value.Config))
+            if (installation.HasValue && FileSystem.FileExists(installation.Value.Config))
             {
                 path = installation.Value.Path;
                 return true;
@@ -463,10 +503,10 @@ namespace Microsoft.Alm.Git
             // find Git on the local disk - the system config is stored relative to it
             else
             {
-                List<GitInstallation> installations;
+                List<Git.GitInstallation> installations;
 
                 if (FindGitInstallations(out installations)
-                    && File.Exists(installations[0].Config))
+                    && FileSystem.FileExists(installations[0].Config))
                 {
                     path = installations[0].Config;
                     return true;
@@ -477,13 +517,7 @@ namespace Microsoft.Alm.Git
             return false;
         }
 
-        /// <summary>
-        /// Gets the path to Git's XDG configuration file.
-        /// <para/>
-        /// Returns `<see langword="true"/>` if successful; otherwise `<see langword="false"/>`.
-        /// </summary>
-        /// <param name="path">Path to Git's XDG configuration file if successful; otherwise `<see langword="null"/>`.</param>
-        public static bool GitXdgConfig(out string path)
+        public bool GitXdgConfig(out string path)
         {
             const string XdgConfigFolder = "Git";
             const string XdgConfigFileName = "config";
@@ -494,11 +528,11 @@ namespace Microsoft.Alm.Git
             // The XDG config home is defined by an environment variable.
             xdgConfigHome = Environment.GetEnvironmentVariable("XDG_CONFIG_HOME");
 
-            if (Directory.Exists(xdgConfigHome))
+            if (FileSystem.DirectoryExists(xdgConfigHome))
             {
                 xdgConfigPath = Path.Combine(xdgConfigHome, XdgConfigFolder, XdgConfigFileName);
 
-                if (File.Exists(xdgConfigPath))
+                if (FileSystem.FileExists(xdgConfigPath))
                 {
                     path = xdgConfigPath;
                     return true;
@@ -510,7 +544,7 @@ namespace Microsoft.Alm.Git
 
             xdgConfigPath = Path.Combine(xdgConfigHome, XdgConfigFolder, XdgConfigFileName);
 
-            if (File.Exists(xdgConfigPath))
+            if (FileSystem.FileExists(xdgConfigPath))
             {
                 path = xdgConfigPath;
                 return true;

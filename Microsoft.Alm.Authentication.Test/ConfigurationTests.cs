@@ -1,9 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Threading.Tasks;
 using Xunit;
 
-namespace Microsoft.Alm.Git.Test
+namespace Microsoft.Alm.Authentication.Git.Test
 {
     public class ConfigurationTests
     {
@@ -24,9 +25,9 @@ namespace Microsoft.Alm.Git.Test
 
         [Theory]
         [MemberData(nameof(ParseData), DisableDiscoveryEnumeration = true)]
-        public void GitConfif_Parse(string input, string expectedName, string expected, bool ignoreCase)
+        public async Task GitConfif_Parse(string input, string expectedName, string expected, bool ignoreCase)
         {
-            var values = TestParseGitConfig(input);
+            var values = await TestParseGitConfig(input);
             Assert.NotNull(values);
 
             Assert.Equal(expected, values[expectedName], ignoreCase ? StringComparer.OrdinalIgnoreCase : StringComparer.Ordinal);
@@ -34,7 +35,7 @@ namespace Microsoft.Alm.Git.Test
 
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2202:Do not dispose objects multiple times")]
         [Fact]
-        public void GitConfig_ParseSampleFile()
+        public async Task GitConfig_ParseSampleFile()
         {
             var values = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
             var me = GetType();
@@ -43,7 +44,7 @@ namespace Microsoft.Alm.Git.Test
             using (var rs = us.GetManifestResourceStream(me, "sample.gitconfig"))
             using (var sr = new StreamReader(rs))
             {
-                Configuration.ParseGitConfig(sr, values);
+                await ConfigurationCollection.ParseGitConfig(ServiceProvider.Default, sr, values);
             }
 
             Assert.Equal(36, values.Count);
@@ -52,7 +53,7 @@ namespace Microsoft.Alm.Git.Test
         }
 
         [Fact]
-        public void GitConfig_ReadThrough()
+        public async Task GitConfig_ReadThrough()
         {
             const string input = "\n" +
                     "[core]\n" +
@@ -66,27 +67,27 @@ namespace Microsoft.Alm.Git.Test
                     "[credential]\n" +
                     "    helper = manager\n" +
                     "";
-            Configuration cut;
+            ConfigurationCollection cut;
 
             using (var reader = new StringReader(input))
             {
                 var dict = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
-                Configuration.ParseGitConfig(reader, dict);
+                await ConfigurationCollection.ParseGitConfig(ServiceProvider.Default, reader, dict);
 
                 var values = new Dictionary<ConfigurationLevel, Dictionary<string, string>>();
 
-                foreach (var level in Configuration.Levels)
+                foreach (var level in ConfigurationCollection.Levels)
                 {
                     values[level] = dict;
                 }
 
-                cut = new Configuration(values);
+                cut = new ConfigurationCollection(ServiceProvider.Default, values);
             }
 
             Assert.True(cut.ContainsKey("CoRe.AuToCrLf"));
             Assert.Equal("false", cut["CoRe.AuToCrLf"], StringComparer.OrdinalIgnoreCase);
 
-            Configuration.Entry entry;
+            ConfigurationCollection.Entry entry;
             Assert.True(cut.TryGetEntry("core", (string)null, "autocrlf", out entry));
             Assert.Equal("false", entry.Value, StringComparer.OrdinalIgnoreCase);
 
@@ -100,13 +101,13 @@ namespace Microsoft.Alm.Git.Test
             Assert.Equal("NTLM", entry.Value, StringComparer.OrdinalIgnoreCase);
         }
 
-        private static Dictionary<string, string> TestParseGitConfig(string input)
+        private static async Task<Dictionary<string, string>> TestParseGitConfig(string input)
         {
             var values = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
 
             using (var sr = new StringReader(input))
             {
-                Configuration.ParseGitConfig(sr, values);
+                await ConfigurationCollection.ParseGitConfig(ServiceProvider.Default, sr, values);
             }
             return values;
         }

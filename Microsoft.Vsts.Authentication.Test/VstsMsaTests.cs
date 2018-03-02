@@ -10,81 +10,81 @@ namespace Microsoft.Alm.Authentication.Test
         { }
 
         [Fact]
-        public void VstsMsaDeleteCredentialsTest()
+        public async Task VstsMsaDeleteCredentialsTest()
         {
             TargetUri targetUri = DefaultTargetUri;
-            VstsMsaAuthentication msaAuthority = GetVstsMsaAuthentication("msa-delete");
+            VstsMsaAuthentication msaAuthority = GetVstsMsaAuthentication(RuntimeContext.Default, "msa-delete");
 
             if (msaAuthority.VstsAuthority is AuthorityFake fake)
             {
                 fake.CredentialsAreValid = false;
             }
 
-            msaAuthority.PersonalAccessTokenStore.WriteCredentials(targetUri, DefaultPersonalAccessToken);
+            Assert.True(await msaAuthority.PersonalAccessTokenStore.WriteCredentials(targetUri, DefaultPersonalAccessToken));
 
-            msaAuthority.DeleteCredentials(targetUri);
-            Assert.Null(msaAuthority.PersonalAccessTokenStore.ReadCredentials(targetUri));
+            Assert.True(await msaAuthority.DeleteCredentials(targetUri));
+            Assert.Null(await msaAuthority.PersonalAccessTokenStore.ReadCredentials(targetUri));
 
-            msaAuthority.DeleteCredentials(targetUri);
-            Assert.Null(msaAuthority.PersonalAccessTokenStore.ReadCredentials(targetUri));
+            Assert.False(await msaAuthority.DeleteCredentials(targetUri));
+            Assert.Null(await msaAuthority.PersonalAccessTokenStore.ReadCredentials(targetUri));
         }
 
         [Fact]
-        public void VstsMsaGetCredentialsTest()
+        public async Task VstsMsaGetCredentialsTest()
         {
             TargetUri targetUri = DefaultTargetUri;
-            VstsMsaAuthentication msaAuthority = GetVstsMsaAuthentication("msa-get");
+            VstsMsaAuthentication msaAuthority = GetVstsMsaAuthentication(RuntimeContext.Default, "msa-get");
 
-            Assert.Null(msaAuthority.GetCredentials(targetUri));
+            Assert.Null(await msaAuthority.GetCredentials(targetUri));
 
-            msaAuthority.PersonalAccessTokenStore.WriteCredentials(targetUri, DefaultPersonalAccessToken);
+            Assert.True(await msaAuthority.PersonalAccessTokenStore.WriteCredentials(targetUri, DefaultPersonalAccessToken));
 
-            Assert.NotNull(msaAuthority.GetCredentials(targetUri));
+            Assert.NotNull(await msaAuthority.GetCredentials(targetUri));
         }
 
         [Fact]
-        public void VstsMsaInteractiveLogonTest()
+        public async Task VstsMsaInteractiveLogonTest()
         {
             TargetUri targetUri = DefaultTargetUri;
-            VstsMsaAuthentication msaAuthority = GetVstsMsaAuthentication("msa-logon");
+            VstsMsaAuthentication msaAuthority = GetVstsMsaAuthentication(RuntimeContext.Default, "msa-logon");
 
-            Assert.Null(msaAuthority.PersonalAccessTokenStore.ReadCredentials(targetUri));
+            Assert.Null(await msaAuthority.PersonalAccessTokenStore.ReadCredentials(targetUri));
 
-            Assert.NotNull(msaAuthority.InteractiveLogon(targetUri, false).Result);
+            Assert.NotNull(await msaAuthority.InteractiveLogon(targetUri, false));
 
-            Assert.NotNull(msaAuthority.PersonalAccessTokenStore.ReadCredentials(targetUri));
+            Assert.NotNull(await msaAuthority.PersonalAccessTokenStore.ReadCredentials(targetUri));
         }
 
         [Fact]
-        public void VstsMsaSetCredentialsTest()
+        public async Task VstsMsaSetCredentialsTest()
         {
             TargetUri targetUri = DefaultTargetUri;
-            VstsMsaAuthentication msaAuthority = GetVstsMsaAuthentication("msa-set");
+            VstsMsaAuthentication msaAuthority = GetVstsMsaAuthentication(RuntimeContext.Default, "msa-set");
 
-            msaAuthority.SetCredentials(targetUri, DefaultCredentials);
+            Assert.True(await msaAuthority.SetCredentials(targetUri, DefaultCredentials));
 
-            Assert.Null(msaAuthority.PersonalAccessTokenStore.ReadCredentials(targetUri));
+            Assert.Null(await msaAuthority.PersonalAccessTokenStore.ReadCredentials(targetUri));
         }
 
         [Fact]
-        public void VstsMsaValidateCredentialsTest()
+        public async Task VstsMsaValidateCredentialsTest()
         {
-            VstsMsaAuthentication msaAuthority = GetVstsMsaAuthentication("msa-validate");
+            VstsMsaAuthentication msaAuthority = GetVstsMsaAuthentication(RuntimeContext.Default, "msa-validate");
             Credential credentials = null;
 
-            Assert.False(Task.Run(async () => { return await msaAuthority.ValidateCredentials(DefaultTargetUri, credentials); }).Result, "Credential validation unexpectedly failed.");
+            Assert.False(await msaAuthority.ValidateCredentials(DefaultTargetUri, credentials), "Credential validation unexpectedly failed.");
 
             credentials = DefaultCredentials;
 
-            Assert.True(Task.Run(async () => { return await msaAuthority.ValidateCredentials(DefaultTargetUri, credentials); }).Result, "Credential validation unexpectedly failed.");
+            Assert.True(await msaAuthority.ValidateCredentials(DefaultTargetUri, credentials), "Credential validation unexpectedly failed.");
         }
 
-        private static VstsMsaAuthentication GetVstsMsaAuthentication(string @namespace)
+        private static VstsMsaAuthentication GetVstsMsaAuthentication(RuntimeContext context, string @namespace)
         {
-            ICredentialStore tokenStore1 = new SecretCache(@namespace + 1, Secret.UriToIdentityUrl);
-            ITokenStore tokenStore2 = new SecretCache(@namespace + 2, Secret.UriToIdentityUrl);
+            ICredentialStore tokenStore1 = new SecretCache(context, @namespace + 1, Secret.UriToLongName);
+            ITokenStore tokenStore2 = new SecretCache(context, @namespace + 2, Secret.UriToLongName);
             IVstsAuthority liveAuthority = new AuthorityFake(VstsMsaAuthentication.QueryParameters);
-            return new VstsMsaAuthentication(tokenStore1, tokenStore2, liveAuthority);
+            return new VstsMsaAuthentication(context, tokenStore1, tokenStore2, liveAuthority);
         }
     }
 }

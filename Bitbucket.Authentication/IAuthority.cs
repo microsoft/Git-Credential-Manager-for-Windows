@@ -49,7 +49,7 @@ namespace Atlassian.Bitbucket.Authentication
         /// </param>
         /// <param name="scope">the access scopes to request</param>
         /// <returns></returns>
-        Task<AuthenticationResult> AcquireToken(TargetUri targetUri, string username, string password, AuthenticationResultType resultType, TokenScope scope);
+        Task<AuthenticationResult> AcquireToken(TargetUri targetUri, Credential credentials, AuthenticationResultType resultType, TokenScope scope);
 
         /// <summary>
         /// Use an existing refresh token to request a new access token from the specified Authority
