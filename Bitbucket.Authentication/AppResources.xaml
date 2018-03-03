@@ -27,6 +27,7 @@
 <ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation">
     <ResourceDictionary.MergedDictionaries>
         <ResourceDictionary Source="Assets/Styles.xaml" />
+        <ResourceDictionary Source="Assets/ADG3Colours.xaml" />
         <ResourceDictionary Source="Assets/ADG.xaml" />
         <ResourceDictionary Source="Assets/TextBlocks.xaml" />
         <ResourceDictionary Source="Assets/ValidationMessage.xaml" />
