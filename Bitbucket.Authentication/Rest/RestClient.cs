@@ -4,7 +4,7 @@ using System.Net.Http;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using Microsoft.Alm.Authentication;
-using Microsoft.Alm.Git;
+using Microsoft.Alm.Authentication.Git;
 
 namespace Atlassian.Bitbucket.Authentication.Rest
 {

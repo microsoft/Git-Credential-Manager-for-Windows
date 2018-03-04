@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using Xunit;
 
-namespace Microsoft.Alm.Git.Test
+namespace Microsoft.Alm.Authentication.Git.Test
 {
     public class ConfigurationTests
     {
@@ -37,10 +37,10 @@ namespace Microsoft.Alm.Git.Test
         public void GitConfig_ParseSampleFile()
         {
             var values = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
-            var me = GetType();
-            var us = me.Assembly;
+            var type = GetType();
+            var assembly = type.Assembly;
 
-            using (var rs = us.GetManifestResourceStream(me, "sample.gitconfig"))
+            using (var rs = assembly.GetManifestResourceStream("Microsoft.Alm.Authentication.Test.Git.sample.gitconfig"))
             using (var sr = new StreamReader(rs))
             {
                 Configuration.ParseGitConfig(sr, values);

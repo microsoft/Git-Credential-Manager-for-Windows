@@ -31,7 +31,7 @@ using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using Microsoft.Alm.Authentication;
-using Git = Microsoft.Alm.Git;
+using Git = Microsoft.Alm.Authentication.Git;
 
 namespace GitHub.Authentication
 {

@@ -28,7 +28,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Text;
 
-namespace Microsoft.Alm.Git
+namespace Microsoft.Alm.Authentication.Git
 {
     internal interface ITrace
     {

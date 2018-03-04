@@ -30,7 +30,7 @@ using System.Linq;
 using System.Text.RegularExpressions;
 using Microsoft.Win32;
 
-namespace Microsoft.Alm.Git
+namespace Microsoft.Alm.Authentication.Git
 {
     public static class Where
     {

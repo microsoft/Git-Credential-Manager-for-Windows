@@ -30,7 +30,7 @@ using System.Diagnostics;
 using System.IO;
 using System.Text.RegularExpressions;
 
-namespace Microsoft.Alm.Git
+namespace Microsoft.Alm.Authentication.Git
 {
     public class Configuration : IEnumerable<Configuration.Entry>
     {

@@ -29,6 +29,8 @@ using System.IO;
 using System.Text;
 using Microsoft.Alm.Authentication;
 
+using Git = Microsoft.Alm.Authentication.Git;
+
 namespace Microsoft.Alm.Cli
 {
     internal class OperationArguments

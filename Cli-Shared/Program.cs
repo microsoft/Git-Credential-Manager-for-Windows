@@ -32,6 +32,7 @@ using System.Runtime.CompilerServices;
 using System.Threading.Tasks;
 using Microsoft.Alm.Authentication;
 using Bitbucket = Atlassian.Bitbucket.Authentication;
+using Git = Microsoft.Alm.Authentication.Git;
 using Github = GitHub.Authentication;
 
 namespace Microsoft.Alm.Cli

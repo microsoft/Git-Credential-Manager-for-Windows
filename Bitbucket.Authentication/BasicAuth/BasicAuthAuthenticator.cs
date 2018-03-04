@@ -3,7 +3,7 @@ using System.Text;
 using System.Threading.Tasks;
 using Atlassian.Bitbucket.Authentication.Rest;
 using Microsoft.Alm.Authentication;
-using Microsoft.Alm.Git;
+using Microsoft.Alm.Authentication.Git;
 
 namespace Atlassian.Bitbucket.Authentication.BasicAuth
 {

@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using Xunit;
 
-namespace Microsoft.Alm.Git.Test
+namespace Microsoft.Alm.Authentication.Git.Test
 {
     /// <summary>
     /// A class to test <see cref="GitInstallation"/>.

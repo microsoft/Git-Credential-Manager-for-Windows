@@ -24,10 +24,11 @@
 **/
 
 using System;
-using System.Diagnostics;
 using System.Runtime.InteropServices;
 using System.Text;
 using Microsoft.Alm.Authentication;
+
+using Git = Microsoft.Alm.Authentication.Git;
 
 namespace Microsoft.Alm.Cli
 {

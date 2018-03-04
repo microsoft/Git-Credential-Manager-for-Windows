@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using Xunit;
 
-namespace Microsoft.Alm.Git.Test
+namespace Microsoft.Alm.Authentication.Git.Test
 {
     public class WhereTests
     {

@@ -25,7 +25,7 @@
 
 using System;
 
-namespace Microsoft.Alm.Git
+namespace Microsoft.Alm.Authentication.Git
 {
     [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1714:FlagsEnumsShouldHavePluralNames")]
     [Flags]

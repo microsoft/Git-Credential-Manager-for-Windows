@@ -35,7 +35,7 @@ using Atlassian.Bitbucket.Authentication.Views;
 using GitHub.Shared.Controls;
 using GitHub.Shared.ViewModels;
 using Microsoft.Alm.Authentication;
-using Trace = Microsoft.Alm.Git.Trace;
+using Trace = Microsoft.Alm.Authentication.Git.Trace;
 
 namespace Atlassian.Bitbucket.Authentication
 {

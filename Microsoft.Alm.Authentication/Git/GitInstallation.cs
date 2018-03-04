@@ -28,7 +28,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 
-namespace Microsoft.Alm.Git
+namespace Microsoft.Alm.Authentication.Git
 {
     public struct GitInstallation : IEquatable<GitInstallation>
     {

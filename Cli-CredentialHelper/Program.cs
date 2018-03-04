@@ -31,6 +31,8 @@ using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.Alm.Authentication;
 
+using Git = Microsoft.Alm.Authentication.Git;
+
 namespace Microsoft.Alm.Cli
 {
     [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA1806:DoNotIgnoreMethodResults")]

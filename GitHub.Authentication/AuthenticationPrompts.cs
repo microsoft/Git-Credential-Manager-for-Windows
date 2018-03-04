@@ -33,7 +33,7 @@ using GitHub.Authentication.ViewModels;
 using GitHub.Shared.Controls;
 using GitHub.Shared.ViewModels;
 using Microsoft.Alm.Authentication;
-using Git = Microsoft.Alm.Git;
+using Git = Microsoft.Alm.Authentication.Git;
 
 namespace GitHub.Authentication
 {

@@ -28,8 +28,10 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
-using Microsoft.Alm.Git;
+using Microsoft.Alm.Authentication.Git;
 using Microsoft.Win32;
+
+using Git = Microsoft.Alm.Authentication.Git;
 
 namespace Microsoft.Alm.Cli
 {
@@ -46,7 +48,7 @@ namespace Microsoft.Alm.Cli
         {
             "Microsoft.Vsts.Authentication.dll",
             "Microsoft.Alm.Authentication.dll",
-            "Microsoft.Alm.Git.dll",
+            "Microsoft.Alm.Authentication.Git.dll",
             "Microsoft.IdentityModel.Clients.ActiveDirectory.dll",
             "Microsoft.IdentityModel.Clients.ActiveDirectory.Platform.dll",
             "Bitbucket.Authentication.dll",

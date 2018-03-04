@@ -31,6 +31,8 @@ using System.Linq;
 using System.Text.RegularExpressions;
 using Microsoft.Alm.Authentication;
 
+using Git = Microsoft.Alm.Authentication.Git;
+
 namespace Microsoft.Alm.Cli
 {
     internal partial class Program
