@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
+﻿<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="14.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
   <Import Project="..\packages\MicroBuild.Core.0.2.0\build\MicroBuild.Core.props" Condition="Exists('..\packages\MicroBuild.Core.0.2.0\build\MicroBuild.Core.props')" />
@@ -9,8 +9,9 @@
     <TargetFrameworkVersion>v4.6.2</TargetFrameworkVersion>
   </PropertyGroup>
   <PropertyGroup>
-    <Configuration Condition=" '$(Configuration)' == '' Or '$(Configuration)' == '*Undefined*' "></Configuration>
-    <Platform Condition=" '$(Platform)' == '' Or  '$(Platform)' == '*Undefined*' " >AnyCPU</Platform>
+    <Configuration Condition=" '$(Configuration)' == '' Or '$(Configuration)' == '*Undefined*' ">
+    </Configuration>
+    <Platform Condition=" '$(Platform)' == '' Or  '$(Platform)' == '*Undefined*' ">AnyCPU</Platform>
     <SolutionDir Condition=" '$(SolutionDir)' == '' Or '$(SolutionDir)' == '*Undefined*' ">$([System.IO.Directory]::GetParent($(ProjectDir)))</SolutionDir>
     <InputPath Condition=" '$(Configuration)' == 'Debug' ">bin\Debug</InputPath>
     <InputPath Condition=" '$(Configuration)' == 'Release' ">bin\Release</InputPath>
@@ -48,10 +49,6 @@
     <ProjectReference Include="..\Microsoft.Alm.Authentication\Microsoft.Alm.Authentication.csproj">
       <Project>{19770407-b493-459d-bb4f-04fbefb1ba13}</Project>
       <Name>Microsoft.Alm.Authentication</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\Microsoft.Alm.Git\Microsoft.Alm.Git.csproj">
-      <Project>{19770407-5c58-406d-ab3f-3700bb0d06fe}</Project>
-      <Name>Microsoft.Alm.Git</Name>
     </ProjectReference>
     <ProjectReference Include="..\Microsoft.Vsts.Authentication\Microsoft.Vsts.Authentication.csproj">
       <Project>{19770407-d7d8-4a37-914c-f552ff4b90d4}</Project>
@@ -92,9 +89,6 @@
     <ZipContents Include="$(IntermediateOutputPath)\Microsoft.Alm.Authentication.dll">
       <InProject>false</InProject>
     </ZipContents>
-    <ZipContents Include="$(IntermediateOutputPath)\Microsoft.Alm.Git.dll">
-      <InProject>false</InProject>
-    </ZipContents>
     <ZipContents Include="$(IntermediateOutputPath)\Microsoft.IdentityModel.Clients.ActiveDirectory.dll">
       <InProject>false</InProject>
     </ZipContents>
@@ -111,7 +105,6 @@
   <Target Name="AfterBuild" AfterTargets="Build" />
   <Target Name="Build" BeforeTargets="AfterBuild">
     <MSBuild Projects="@(ProjectReference)" Targets="Build" />
-
     <!-- need to declare the items after dependencies have built, so that glob enumeration happens after the files are produced-->
     <ItemGroup>
       <FilesToCopy Include="$(SolutionDir)\Cli-CredentialHelper\$(InputPath)\*.*">
@@ -128,7 +121,6 @@
       </FilesToCopy>
       <FilesToCopy Include="$(ProjectDir)\Setup.iss" />
     </ItemGroup>
-
     <MakeDir Directories="$(IntermediateOutputPath)" />
     <MakeDir Directories="$(OutputPath)" />
     <Copy SourceFiles="@(FilesToCopy)" DestinationFolder="$(IntermediateOutputPath)" />
@@ -138,8 +130,8 @@
     <Zip Files="@(ZipContents)" Flatten="True" ZipFileName="$(OutputPath)\gcmw-v$(Version).zip" WorkingDirectory="$(IntermediateOutputPath)ZipContents" ZipLevel="9" />
   </Target>
   <Target Name="Clean">
-    <RemoveDir Directories="$(IntermediateOutputPath);$(OutputPath)"/>
-    <RemoveDir Directories="$(SolutionDir)\TestResults"/>
+    <RemoveDir Directories="$(IntermediateOutputPath);$(OutputPath)" />
+    <RemoveDir Directories="$(SolutionDir)\TestResults" />
   </Target>
   <Target Name="Rebuild" AfterTargets="Clean" BeforeTargets="Build" />
   <Target Name="EnsureNuGetPackageBuildImports" BeforeTargets="PrepareForBuild">

@@ -10,7 +10,7 @@
     <AssemblyName>GitHub.Authentication</AssemblyName>
     <ProjectTypeGuids>{60dc8134-eba5-43b8-bcc9-bb4bc16c2548};{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}</ProjectTypeGuids>
     <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>
-    <NuGetPackageImportStamp/>
+    <NuGetPackageImportStamp />
     <TargetFrameworkVersion>v4.5.1</TargetFrameworkVersion>
   </PropertyGroup>
   <Import Project="..\build.props" />
@@ -181,10 +181,6 @@
     <ProjectReference Include="..\Microsoft.Alm.Authentication\Microsoft.Alm.Authentication.csproj">
       <Project>{19770407-B493-459D-BB4F-04FBEFB1BA13}</Project>
       <Name>Microsoft.Alm.Authentication</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\Microsoft.Alm.Git\Microsoft.Alm.Git.csproj">
-      <Project>{19770407-5C58-406D-AB3F-3700BB0D06FE}</Project>
-      <Name>Microsoft.Alm.Git</Name>
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
