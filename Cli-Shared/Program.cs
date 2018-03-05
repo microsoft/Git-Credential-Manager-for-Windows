@@ -414,7 +414,7 @@ namespace Microsoft.Alm.Cli
         internal void LogEvent(string message, EventLogEntryType eventType)
             => _logEvent(this, message, eventType);
 
-        internal Credential QueryCredentials(OperationArguments operationArguments)
+        internal Task<Credential> QueryCredentials(OperationArguments operationArguments)
             => _queryCredentials(this, operationArguments);
 
         internal ConsoleKeyInfo ReadKey(bool intercept = true)
@@ -438,7 +438,7 @@ namespace Microsoft.Alm.Cli
         internal Task<BaseAuthentication> CreateAuthentication(OperationArguments operationArguments)
             => _createAuthentication(this, operationArguments);
 
-        internal void DeleteCredentials(OperationArguments operationArguments)
+        internal Task<bool> DeleteCredentials(OperationArguments operationArguments)
             => _deleteCredentials(this, operationArguments);
 
         internal void PrintArgs(string[] args)

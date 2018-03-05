@@ -43,7 +43,7 @@ namespace Microsoft.Alm.Cli
 
         internal delegate Task<BaseAuthentication> CreateAuthenticationDelegate(Program program, OperationArguments operationArguments);
 
-        internal delegate void DeleteCredentialsDelegate(Program program, OperationArguments operationArguments);
+        internal delegate Task<bool> DeleteCredentialsDelegate(Program program, OperationArguments operationArguments);
 
         internal delegate void DieExceptionDelegate(Program program, Exception exception, string path, int line, string name);
 
@@ -87,7 +87,7 @@ namespace Microsoft.Alm.Cli
 
         internal delegate void PrintArgsDelegate(Program program, string[] args);
 
-        internal delegate Credential QueryCredentialsDelegate(Program program, OperationArguments operationArguments);
+        internal delegate Task<Credential> QueryCredentialsDelegate(Program program, OperationArguments operationArguments);
 
         internal delegate ConsoleKeyInfo ReadKeyDelegate(Program program, bool intercept);
 

@@ -116,33 +116,36 @@ namespace Microsoft.Alm.Cli
 
                 OperationArguments operationArguments = new OperationArguments(uri);
 
-                Task.Run(async () => { await LoadOperationArguments(operationArguments); }).Wait();
-                EnableTraceLogging(operationArguments);
-
-                if (operationArguments.PreserveCredentials && !forced)
+                Task.Run(async () =>
                 {
-                    Git.Trace.WriteLine("attempting to delete preserved credentials without force, prompting user for interactivity.");
+                    await LoadOperationArguments(operationArguments);
+                    EnableTraceLogging(operationArguments);
 
-                    if (!StandardInputIsTty || !StandardErrorIsTty)
+                    if (operationArguments.PreserveCredentials && !forced)
                     {
-                        Git.Trace.WriteLine("standard input is not TTY, abandoning prompt.");
-                        return;
-                    }
+                        Git.Trace.WriteLine("attempting to delete preserved credentials without force, prompting user for interactivity.");
 
-                    WriteLine(" credentials are protected by preserve flag, clear anyways? [Y]es, [N]o.");
-
-                    ConsoleKeyInfo key;
-                    while ((key = ReadKey(true)).Key != ConsoleKey.Escape)
-                    {
-                        if (key.KeyChar == 'N' || key.KeyChar == 'n')
+                        if (!StandardInputIsTty || !StandardErrorIsTty)
+                        {
+                            Git.Trace.WriteLine("standard input is not TTY, abandoning prompt.");
                             return;
+                        }
 
-                        if (key.KeyChar == 'Y' || key.KeyChar == 'y')
-                            break;
+                        WriteLine(" credentials are protected by preserve flag, clear anyways? [Y]es, [N]o.");
+
+                        ConsoleKeyInfo key;
+                        while ((key = ReadKey(true)).Key != ConsoleKey.Escape)
+                        {
+                            if (key.KeyChar == 'N' || key.KeyChar == 'n')
+                                return;
+
+                            if (key.KeyChar == 'Y' || key.KeyChar == 'y')
+                                break;
+                        }
                     }
-                }
 
-                DeleteCredentials(operationArguments);
+                    await DeleteCredentials(operationArguments);
+                }).Wait();
             }
             else
             {
@@ -301,16 +304,19 @@ namespace Microsoft.Alm.Cli
                 Debug.Assert(operationArguments != null, "The operationArguments is null");
                 Debug.Assert(operationArguments.TargetUri != null, "The operationArgument.TargetUri is null");
 
-                Task.Run(async () => { await LoadOperationArguments(operationArguments); }).Wait();
-                EnableTraceLogging(operationArguments);
-
-                if (operationArguments.PreserveCredentials)
+                Task.Run(async () =>
                 {
-                    Git.Trace.WriteLine($"{KeyTypeName(KeyType.PreserveCredentials)} = true, canceling erase request.");
-                    return;
-                }
+                    await LoadOperationArguments(operationArguments);
+                    EnableTraceLogging(operationArguments);
 
-                DeleteCredentials(operationArguments);
+                    if (operationArguments.PreserveCredentials)
+                    {
+                        Git.Trace.WriteLine($"{KeyTypeName(KeyType.PreserveCredentials)} = true, canceling erase request.");
+                        return;
+                    }
+
+                    await DeleteCredentials(operationArguments);
+                }).Wait();
             }
         }
 
@@ -323,21 +329,24 @@ namespace Microsoft.Alm.Cli
             {
                 OperationArguments operationArguments = new OperationArguments(stdin);
 
-                Task.Run(async () => { await LoadOperationArguments(operationArguments); }).Wait();
-                EnableTraceLogging(operationArguments);
+                Task.Run(async () =>
+                {
+                    await LoadOperationArguments(operationArguments);
+                    EnableTraceLogging(operationArguments);
 
-                Credential credentials;
-                if ((credentials = QueryCredentials(operationArguments)) == null)
-                {
-                    Exit(-1, "Logon failed, use ctrl+c to cancel basic credential prompt.");
-                }
-                else
-                {
-                    using (var stdout = OutStream)
+                    Credential credentials;
+                    if ((credentials = await QueryCredentials(operationArguments)) == null)
                     {
-                        operationArguments.WriteToStream(stdout);
+                        Exit(-1, "Logon failed, use ctrl+c to cancel basic credential prompt.");
                     }
-                }
+                    else
+                    {
+                        using (var stdout = OutStream)
+                        {
+                            operationArguments.WriteToStream(stdout);
+                        }
+                    }
+                }).Wait();
             }
         }
 

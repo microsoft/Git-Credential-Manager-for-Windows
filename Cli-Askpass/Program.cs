@@ -214,33 +214,36 @@ namespace Microsoft.Alm.Cli
                         operationArguments.SetCredentials(username ?? string.Empty, password ?? string.Empty);
 
                         // Load up the operation arguments, enable tracing, and query for credentials.
-                        Task.Run(async () => { await LoadOperationArguments(operationArguments); }).Wait();
-                        EnableTraceLogging(operationArguments);
-
-                        Credential credentials;
-                        if ((credentials = QueryCredentials(operationArguments)) != null)
+                        Task.Run(async () =>
                         {
-                            if (seeking.Equals("Username", StringComparison.OrdinalIgnoreCase))
-                            {
-                                Git.Trace.WriteLine($"username for '{targetUrl}' asked for and found.");
+                            await LoadOperationArguments(operationArguments);
+                            EnableTraceLogging(operationArguments);
 
-                                Out.Write(credentials.Username + '\n');
+                            Credential credentials;
+                            if ((credentials = await QueryCredentials(operationArguments)) != null)
+                            {
+                                if (seeking.Equals("Username", StringComparison.OrdinalIgnoreCase))
+                                {
+                                    Git.Trace.WriteLine($"username for '{targetUrl}' asked for and found.");
+
+                                    Out.Write(credentials.Username + '\n');
+                                    return;
+                                }
+
+                                if (seeking.Equals("Password", StringComparison.OrdinalIgnoreCase))
+                                {
+                                    Git.Trace.WriteLine($"password for '{targetUrl}' asked for and found.");
+
+                                    Out.Write(credentials.Password + '\n');
+                                    return;
+                                }
+                            }
+                            else
+                            {
+                                Git.Trace.WriteLine($"user cancelled credential dialog.");
                                 return;
                             }
-
-                            if (seeking.Equals("Password", StringComparison.OrdinalIgnoreCase))
-                            {
-                                Git.Trace.WriteLine($"password for '{targetUrl}' asked for and found.");
-
-                                Out.Write(credentials.Password + '\n');
-                                return;
-                            }
-                        }
-                        else
-                        {
-                            Git.Trace.WriteLine($"user cancelled credential dialog.");
-                            return;
-                        }
+                        }).Wait();
                     }
                     else
                     {
