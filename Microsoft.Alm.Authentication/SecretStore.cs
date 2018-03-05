@@ -74,6 +74,7 @@ namespace Microsoft.Alm.Authentication
             get { return _namespace; }
         }
 
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2208:InstantiateArgumentExceptionsCorrectly")]
         public Secret.UriNameConversionDelegate UriNameConversion
         {
             get { return _getTargetName; }

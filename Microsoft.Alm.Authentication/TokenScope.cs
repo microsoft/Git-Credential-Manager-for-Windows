@@ -26,6 +26,7 @@
 using System;
 using System.Collections.Generic;
 using System.Runtime.CompilerServices;
+
 using ScopeSet = System.Collections.Generic.HashSet<string>;
 
 namespace Microsoft.Alm.Authentication
@@ -63,9 +64,12 @@ namespace Microsoft.Alm.Authentication
             _scopes = result;
         }
 
-        public string Value { get { return string.Join(" ", _scopes); } }
-
         protected readonly IReadOnlyList<string> _scopes;
+
+        /// <summary>
+        /// Gets the scopes as a single string with values seperated by whitespace.
+        /// </summary>
+        public string Value { get { return string.Join(" ", _scopes); } }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         protected static bool Equals(TokenScope left, TokenScope right)

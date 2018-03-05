@@ -72,6 +72,7 @@ namespace Microsoft.Alm.Authentication
             get { return _namespace; }
         }
 
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2208:InstantiateArgumentExceptionsCorrectly")]
         public Secret.UriNameConversionDelegate UriNameConversion
         {
             get { return _getTargetName; }
@@ -126,13 +127,21 @@ namespace Microsoft.Alm.Authentication
             return Task.FromResult(result);
         }
 
-        public IEnumerable<KeyValuePair<string, Secret>> EnumerateSecrets()
+        /// <summary>
+        /// Returns an enumerable of all the secrets contained in the store.
+        /// </summary>
+        public IEnumerable<NamedSecret> EnumerateSecrets()
         {
-            List<KeyValuePair<string, Secret>> array = null;
+            List<NamedSecret> array = null;
 
             lock (_cache)
             {
-                array = new List<KeyValuePair<string, Secret>>(_cache);
+                array = new List<NamedSecret>(_cache.Count);
+
+                foreach(var kvp in _cache)
+                {
+                    array.Add(new NamedSecret(kvp.Key, kvp.Value));
+                }
             }
 
             return array;
@@ -256,6 +265,28 @@ namespace Microsoft.Alm.Authentication
             BaseSecureStore.ValidateTargetUri(targetUri);
 
             return _getTargetName(targetUri, _namespace);
+        }
+
+        public struct NamedSecret
+        {
+            public NamedSecret(string name, Secret secret)
+            {
+                _name = name;
+                _secret = secret;
+            }
+
+            private readonly string _name;
+            private readonly Secret _secret;
+
+            public string Name
+            {
+                get { return _name; }
+            }
+
+            public Secret Secret
+            {
+                get { return _secret; }
+            }
         }
     }
 }
