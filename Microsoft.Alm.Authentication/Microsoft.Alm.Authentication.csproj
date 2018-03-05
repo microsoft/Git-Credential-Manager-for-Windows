@@ -32,7 +32,7 @@
     <Compile Include="Git\ConfigurationLevel.cs" />
     <Compile Include="Git\GitInstallation.cs" />
     <Compile Include="Git\GlobalSuppressions.cs" />
-    <Compile Include="Git\KnownGitDistribution.cs" />
+    <Compile Include="Git\KnownDistribution.cs" />
     <Compile Include="Git\Trace.cs" />
     <Compile Include="Git\Where.cs" />
     <Compile Include="Global.cs" />

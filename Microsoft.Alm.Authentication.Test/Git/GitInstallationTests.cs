@@ -15,23 +15,23 @@ namespace Microsoft.Alm.Authentication.Git.Test
         {
             List<GitInstallation> list = new List<GitInstallation>
             {
-                new GitInstallation(@"C:\Program Files (x86)\Git", KnownGitDistribution.GitForWindows32v1),
-                new GitInstallation(@"C:\Program Files (x86)\Git", KnownGitDistribution.GitForWindows32v2),
-                new GitInstallation(@"C:\Program Files\Git", KnownGitDistribution.GitForWindows32v1),
-                new GitInstallation(@"C:\Program Files\Git", KnownGitDistribution.GitForWindows32v2),
-                new GitInstallation(@"C:\Program Files\Git", KnownGitDistribution.GitForWindows64v2),
+                new GitInstallation(@"C:\Program Files (x86)\Git", KnownDistribution.GitForWindows32v1),
+                new GitInstallation(@"C:\Program Files (x86)\Git", KnownDistribution.GitForWindows32v2),
+                new GitInstallation(@"C:\Program Files\Git", KnownDistribution.GitForWindows32v1),
+                new GitInstallation(@"C:\Program Files\Git", KnownDistribution.GitForWindows32v2),
+                new GitInstallation(@"C:\Program Files\Git", KnownDistribution.GitForWindows64v2),
                 // ToLower versions
-                new GitInstallation(@"C:\Program Files (x86)\Git".ToLower(), KnownGitDistribution.GitForWindows32v1),
-                new GitInstallation(@"C:\Program Files (x86)\Git".ToLower(), KnownGitDistribution.GitForWindows32v2),
-                new GitInstallation(@"C:\Program Files\Git".ToLower(), KnownGitDistribution.GitForWindows32v1),
-                new GitInstallation(@"C:\Program Files\Git".ToLower(), KnownGitDistribution.GitForWindows32v2),
-                new GitInstallation(@"C:\Program Files\Git".ToLower(), KnownGitDistribution.GitForWindows64v2),
+                new GitInstallation(@"C:\Program Files (x86)\Git".ToLower(), KnownDistribution.GitForWindows32v1),
+                new GitInstallation(@"C:\Program Files (x86)\Git".ToLower(), KnownDistribution.GitForWindows32v2),
+                new GitInstallation(@"C:\Program Files\Git".ToLower(), KnownDistribution.GitForWindows32v1),
+                new GitInstallation(@"C:\Program Files\Git".ToLower(), KnownDistribution.GitForWindows32v2),
+                new GitInstallation(@"C:\Program Files\Git".ToLower(), KnownDistribution.GitForWindows64v2),
                 // ToUpper versions
-                new GitInstallation(@"C:\Program Files (x86)\Git".ToUpper(), KnownGitDistribution.GitForWindows32v1),
-                new GitInstallation(@"C:\Program Files (x86)\Git".ToUpper(), KnownGitDistribution.GitForWindows32v2),
-                new GitInstallation(@"C:\Program Files\Git".ToUpper(), KnownGitDistribution.GitForWindows32v1),
-                new GitInstallation(@"C:\Program Files\Git".ToUpper(), KnownGitDistribution.GitForWindows32v2),
-                new GitInstallation(@"C:\Program Files\Git".ToUpper(), KnownGitDistribution.GitForWindows64v2),
+                new GitInstallation(@"C:\Program Files (x86)\Git".ToUpper(), KnownDistribution.GitForWindows32v1),
+                new GitInstallation(@"C:\Program Files (x86)\Git".ToUpper(), KnownDistribution.GitForWindows32v2),
+                new GitInstallation(@"C:\Program Files\Git".ToUpper(), KnownDistribution.GitForWindows32v1),
+                new GitInstallation(@"C:\Program Files\Git".ToUpper(), KnownDistribution.GitForWindows32v2),
+                new GitInstallation(@"C:\Program Files\Git".ToUpper(), KnownDistribution.GitForWindows64v2),
             };
 
             HashSet<GitInstallation> set = new HashSet<GitInstallation>(list);
@@ -39,17 +39,17 @@ namespace Microsoft.Alm.Authentication.Git.Test
             Assert.Equal(15, list.Count);
             Assert.Equal(5, set.Count);
 
-            Assert.Equal(6, list.Where(x => x.Version == KnownGitDistribution.GitForWindows32v1).Count());
-            Assert.Equal(6, list.Where(x => x.Version == KnownGitDistribution.GitForWindows32v2).Count());
-            Assert.Equal(3, list.Where(x => x.Version == KnownGitDistribution.GitForWindows64v2).Count());
+            Assert.Equal(6, list.Where(x => x.Version == KnownDistribution.GitForWindows32v1).Count());
+            Assert.Equal(6, list.Where(x => x.Version == KnownDistribution.GitForWindows32v2).Count());
+            Assert.Equal(3, list.Where(x => x.Version == KnownDistribution.GitForWindows64v2).Count());
 
-            Assert.Equal(2, set.Where(x => x.Version == KnownGitDistribution.GitForWindows32v1).Count());
-            Assert.Equal(2, set.Where(x => x.Version == KnownGitDistribution.GitForWindows32v2).Count());
-            Assert.Single(set.Where(x => x.Version == KnownGitDistribution.GitForWindows64v2));
+            Assert.Equal(2, set.Where(x => x.Version == KnownDistribution.GitForWindows32v1).Count());
+            Assert.Equal(2, set.Where(x => x.Version == KnownDistribution.GitForWindows32v2).Count());
+            Assert.Single(set.Where(x => x.Version == KnownDistribution.GitForWindows64v2));
 
-            foreach (var v in Enum.GetValues(typeof(KnownGitDistribution)))
+            foreach (var v in Enum.GetValues(typeof(KnownDistribution)))
             {
-                KnownGitDistribution kgd = (KnownGitDistribution)v;
+                KnownDistribution kgd = (KnownDistribution)v;
 
                 var a = list.Where(x => x.Version == kgd);
                 Assert.True(a.All(x => x != a.First() || GitInstallation.PathComparer.Equals(x.Cmd, a.First().Cmd)));

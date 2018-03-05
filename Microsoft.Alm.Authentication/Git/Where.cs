@@ -84,7 +84,7 @@ namespace Microsoft.Alm.Authentication.Git
             return false;
         }
 
-        public static bool FindGitInstallation(string path, KnownGitDistribution distro, out GitInstallation installation)
+        public static bool FindGitInstallation(string path, KnownDistribution distro, out GitInstallation installation)
         {
             installation = new GitInstallation(path, distro);
             return GitInstallation.IsValid(installation);
@@ -171,55 +171,55 @@ namespace Microsoft.Alm.Authentication.Git
                     shellPathValue = shellPathValue.Substring(0, shellPathValue.Length - GitInstallation.AllVersionCmdPath.Length);
                 }
 
-                candidates.Add(new GitInstallation(shellPathValue, KnownGitDistribution.GitForWindows64v2));
-                candidates.Add(new GitInstallation(shellPathValue, KnownGitDistribution.GitForWindows32v2));
-                candidates.Add(new GitInstallation(shellPathValue, KnownGitDistribution.GitForWindows32v1));
+                candidates.Add(new GitInstallation(shellPathValue, KnownDistribution.GitForWindows64v2));
+                candidates.Add(new GitInstallation(shellPathValue, KnownDistribution.GitForWindows32v2));
+                candidates.Add(new GitInstallation(shellPathValue, KnownDistribution.GitForWindows32v1));
             }
 
             if (!string.IsNullOrEmpty(reg64HklmPath))
             {
-                candidates.Add(new GitInstallation(reg64HklmPath, KnownGitDistribution.GitForWindows64v2));
+                candidates.Add(new GitInstallation(reg64HklmPath, KnownDistribution.GitForWindows64v2));
             }
             if (!string.IsNullOrEmpty(programFiles32Path))
             {
-                candidates.Add(new GitInstallation(programFiles64Path, KnownGitDistribution.GitForWindows64v2));
+                candidates.Add(new GitInstallation(programFiles64Path, KnownDistribution.GitForWindows64v2));
             }
             if (!string.IsNullOrEmpty(reg64HkcuPath))
             {
-                candidates.Add(new GitInstallation(reg64HkcuPath, KnownGitDistribution.GitForWindows64v2));
+                candidates.Add(new GitInstallation(reg64HkcuPath, KnownDistribution.GitForWindows64v2));
             }
             if (!string.IsNullOrEmpty(reg32HklmPath))
             {
-                candidates.Add(new GitInstallation(reg32HklmPath, KnownGitDistribution.GitForWindows32v2));
-                candidates.Add(new GitInstallation(reg32HklmPath, KnownGitDistribution.GitForWindows32v1));
+                candidates.Add(new GitInstallation(reg32HklmPath, KnownDistribution.GitForWindows32v2));
+                candidates.Add(new GitInstallation(reg32HklmPath, KnownDistribution.GitForWindows32v1));
             }
             if (!string.IsNullOrEmpty(programFiles32Path))
             {
-                candidates.Add(new GitInstallation(programFiles32Path, KnownGitDistribution.GitForWindows32v2));
-                candidates.Add(new GitInstallation(programFiles32Path, KnownGitDistribution.GitForWindows32v1));
+                candidates.Add(new GitInstallation(programFiles32Path, KnownDistribution.GitForWindows32v2));
+                candidates.Add(new GitInstallation(programFiles32Path, KnownDistribution.GitForWindows32v1));
             }
             if (!string.IsNullOrEmpty(reg32HkcuPath))
             {
-                candidates.Add(new GitInstallation(reg32HkcuPath, KnownGitDistribution.GitForWindows32v2));
-                candidates.Add(new GitInstallation(reg32HkcuPath, KnownGitDistribution.GitForWindows32v1));
+                candidates.Add(new GitInstallation(reg32HkcuPath, KnownDistribution.GitForWindows32v2));
+                candidates.Add(new GitInstallation(reg32HkcuPath, KnownDistribution.GitForWindows32v1));
             }
             if (!string.IsNullOrEmpty(programDataPath))
             {
-                candidates.Add(new GitInstallation(programDataPath, KnownGitDistribution.GitForWindows64v2));
-                candidates.Add(new GitInstallation(programDataPath, KnownGitDistribution.GitForWindows32v2));
-                candidates.Add(new GitInstallation(programDataPath, KnownGitDistribution.GitForWindows32v1));
+                candidates.Add(new GitInstallation(programDataPath, KnownDistribution.GitForWindows64v2));
+                candidates.Add(new GitInstallation(programDataPath, KnownDistribution.GitForWindows32v2));
+                candidates.Add(new GitInstallation(programDataPath, KnownDistribution.GitForWindows32v1));
             }
             if (!string.IsNullOrEmpty(appDataLocalPath))
             {
-                candidates.Add(new GitInstallation(appDataLocalPath, KnownGitDistribution.GitForWindows64v2));
-                candidates.Add(new GitInstallation(appDataLocalPath, KnownGitDistribution.GitForWindows32v2));
-                candidates.Add(new GitInstallation(appDataLocalPath, KnownGitDistribution.GitForWindows32v1));
+                candidates.Add(new GitInstallation(appDataLocalPath, KnownDistribution.GitForWindows64v2));
+                candidates.Add(new GitInstallation(appDataLocalPath, KnownDistribution.GitForWindows32v2));
+                candidates.Add(new GitInstallation(appDataLocalPath, KnownDistribution.GitForWindows32v1));
             }
             if (!string.IsNullOrEmpty(appDataRoamingPath))
             {
-                candidates.Add(new GitInstallation(appDataRoamingPath, KnownGitDistribution.GitForWindows64v2));
-                candidates.Add(new GitInstallation(appDataRoamingPath, KnownGitDistribution.GitForWindows32v2));
-                candidates.Add(new GitInstallation(appDataRoamingPath, KnownGitDistribution.GitForWindows32v1));
+                candidates.Add(new GitInstallation(appDataRoamingPath, KnownDistribution.GitForWindows64v2));
+                candidates.Add(new GitInstallation(appDataRoamingPath, KnownDistribution.GitForWindows32v2));
+                candidates.Add(new GitInstallation(appDataRoamingPath, KnownDistribution.GitForWindows32v1));
             }
 
             HashSet<GitInstallation> pathSet = new HashSet<GitInstallation>();

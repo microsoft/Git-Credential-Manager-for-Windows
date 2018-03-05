@@ -51,60 +51,60 @@ namespace Microsoft.Alm.Authentication.Git
         internal const string Version2Libexec64Path = @"mingw64\libexec\git-core";
 
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Security", "CA2104:DoNotDeclareReadOnlyMutableReferenceTypes")]
-        public static readonly IReadOnlyDictionary<KnownGitDistribution, string> CommonCmdPaths
-           = new Dictionary<KnownGitDistribution, string>
+        public static readonly IReadOnlyDictionary<KnownDistribution, string> CommonCmdPaths
+           = new Dictionary<KnownDistribution, string>
            {
-                { KnownGitDistribution.GitForWindows32v1, AllVersionCmdPath },
-                { KnownGitDistribution.GitForWindows32v2, AllVersionCmdPath },
-                { KnownGitDistribution.GitForWindows64v2, AllVersionCmdPath },
+                { KnownDistribution.GitForWindows32v1, AllVersionCmdPath },
+                { KnownDistribution.GitForWindows32v2, AllVersionCmdPath },
+                { KnownDistribution.GitForWindows64v2, AllVersionCmdPath },
            };
 
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Security", "CA2104:DoNotDeclareReadOnlyMutableReferenceTypes")]
-        public static readonly IReadOnlyDictionary<KnownGitDistribution, string> CommonConfigPaths
-            = new Dictionary<KnownGitDistribution, string>
+        public static readonly IReadOnlyDictionary<KnownDistribution, string> CommonConfigPaths
+            = new Dictionary<KnownDistribution, string>
             {
-                { KnownGitDistribution.GitForWindows32v1, Version1Config32Path },
-                { KnownGitDistribution.GitForWindows32v2, Version2Config32Path },
-                { KnownGitDistribution.GitForWindows64v2, Version2Config64Path },
+                { KnownDistribution.GitForWindows32v1, Version1Config32Path },
+                { KnownDistribution.GitForWindows32v2, Version2Config32Path },
+                { KnownDistribution.GitForWindows64v2, Version2Config64Path },
             };
 
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Security", "CA2104:DoNotDeclareReadOnlyMutableReferenceTypes")]
-        public static readonly IReadOnlyDictionary<KnownGitDistribution, string> CommonGitPaths
-            = new Dictionary<KnownGitDistribution, string>
+        public static readonly IReadOnlyDictionary<KnownDistribution, string> CommonGitPaths
+            = new Dictionary<KnownDistribution, string>
             {
-                { KnownGitDistribution.GitForWindows32v1, AllVersionGitPath },
-                { KnownGitDistribution.GitForWindows32v2, AllVersionGitPath },
-                { KnownGitDistribution.GitForWindows64v2, AllVersionGitPath },
+                { KnownDistribution.GitForWindows32v1, AllVersionGitPath },
+                { KnownDistribution.GitForWindows32v2, AllVersionGitPath },
+                { KnownDistribution.GitForWindows64v2, AllVersionGitPath },
             };
 
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Security", "CA2104:DoNotDeclareReadOnlyMutableReferenceTypes")]
-        public static readonly IReadOnlyDictionary<KnownGitDistribution, string> CommonLibexecPaths
-            = new Dictionary<KnownGitDistribution, string>
+        public static readonly IReadOnlyDictionary<KnownDistribution, string> CommonLibexecPaths
+            = new Dictionary<KnownDistribution, string>
             {
-                { KnownGitDistribution.GitForWindows32v1, Version1Libexec32Path },
-                { KnownGitDistribution.GitForWindows32v2, Version2Libexec32Path },
-                { KnownGitDistribution.GitForWindows64v2, Version2Libexec64Path },
+                { KnownDistribution.GitForWindows32v1, Version1Libexec32Path },
+                { KnownDistribution.GitForWindows32v2, Version2Libexec32Path },
+                { KnownDistribution.GitForWindows64v2, Version2Libexec64Path },
             };
 
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Security", "CA2104:DoNotDeclareReadOnlyMutableReferenceTypes")]
-        public static readonly IReadOnlyDictionary<KnownGitDistribution, string> CommonShPaths
-            = new Dictionary<KnownGitDistribution, string>
+        public static readonly IReadOnlyDictionary<KnownDistribution, string> CommonShPaths
+            = new Dictionary<KnownDistribution, string>
             {
-                { KnownGitDistribution.GitForWindows32v1, AllVersionShPath },
-                { KnownGitDistribution.GitForWindows32v2, AllVersionShPath },
-                { KnownGitDistribution.GitForWindows64v2, AllVersionShPath },
+                { KnownDistribution.GitForWindows32v1, AllVersionShPath },
+                { KnownDistribution.GitForWindows32v2, AllVersionShPath },
+                { KnownDistribution.GitForWindows64v2, AllVersionShPath },
             };
 
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Security", "CA2104:DoNotDeclareReadOnlyMutableReferenceTypes")]
-        public static readonly IReadOnlyDictionary<KnownGitDistribution, string> CommonDocPaths
-            = new Dictionary<KnownGitDistribution, string>
+        public static readonly IReadOnlyDictionary<KnownDistribution, string> CommonDocPaths
+            = new Dictionary<KnownDistribution, string>
             {
-                { KnownGitDistribution.GitForWindows32v1, Version1Doc32Path },
-                { KnownGitDistribution.GitForWindows32v2, Version2Doc32Path },
-                { KnownGitDistribution.GitForWindows64v2, Version2Doc64Path },
+                { KnownDistribution.GitForWindows32v1, Version1Doc32Path },
+                { KnownDistribution.GitForWindows32v2, Version2Doc32Path },
+                { KnownDistribution.GitForWindows64v2, Version2Doc64Path },
             };
 
-        internal GitInstallation(string path, KnownGitDistribution version)
+        internal GitInstallation(string path, KnownDistribution version)
         {
             if (string.IsNullOrWhiteSpace(path))
                 throw new ArgumentNullException(nameof(path));
@@ -162,7 +162,7 @@ namespace Microsoft.Alm.Authentication.Git
         private string _libexec;
         private string _sh;
         private readonly string _path;
-        private readonly KnownGitDistribution _distribution;
+        private readonly KnownDistribution _distribution;
 
         /// <summary>
         /// Gets the path to the installation's gitconfig file (aka system config).
@@ -265,7 +265,7 @@ namespace Microsoft.Alm.Authentication.Git
         /// <summary>
         /// Gets the installation's distribution.
         /// </summary>
-        public KnownGitDistribution Version
+        public KnownDistribution Version
         {
             get { return _distribution; }
         }

@@ -231,9 +231,9 @@ namespace Microsoft.Alm.Cli
 
                     // if the custom path points to a git location then treat it properly
                     GitInstallation installation;
-                    if (Where.FindGitInstallation(_customPath, KnownGitDistribution.GitForWindows64v2, out installation)
-                        || Where.FindGitInstallation(_customPath, KnownGitDistribution.GitForWindows32v2, out installation)
-                        || Where.FindGitInstallation(_customPath, KnownGitDistribution.GitForWindows32v1, out installation))
+                    if (Where.FindGitInstallation(_customPath, KnownDistribution.GitForWindows64v2, out installation)
+                        || Where.FindGitInstallation(_customPath, KnownDistribution.GitForWindows32v2, out installation)
+                        || Where.FindGitInstallation(_customPath, KnownDistribution.GitForWindows32v1, out installation))
                     {
                         Git.Trace.WriteLine($"   Git found: '{installation.Path}'.");
 
@@ -496,9 +496,9 @@ namespace Microsoft.Alm.Cli
 
                     // if the custom path points to a git location then treat it properly
                     GitInstallation installation;
-                    if (Where.FindGitInstallation(_customPath, KnownGitDistribution.GitForWindows64v2, out installation)
-                        || Where.FindGitInstallation(_customPath, KnownGitDistribution.GitForWindows32v2, out installation)
-                        || Where.FindGitInstallation(_customPath, KnownGitDistribution.GitForWindows32v1, out installation))
+                    if (Where.FindGitInstallation(_customPath, KnownDistribution.GitForWindows64v2, out installation)
+                        || Where.FindGitInstallation(_customPath, KnownDistribution.GitForWindows32v2, out installation)
+                        || Where.FindGitInstallation(_customPath, KnownDistribution.GitForWindows32v1, out installation))
                     {
                         Git.Trace.WriteLine($"Git found: '{installation.Path}'.");
 

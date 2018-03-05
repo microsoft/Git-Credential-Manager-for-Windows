@@ -25,7 +25,7 @@
 
 namespace Microsoft.Alm.Authentication.Git
 {
-    public enum KnownGitDistribution
+    public enum KnownDistribution
     {
         /// <summary>
         /// 32-bit Git for Windows v1.*
