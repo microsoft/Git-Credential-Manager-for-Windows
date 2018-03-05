@@ -72,7 +72,7 @@ namespace Microsoft.Alm.Authentication
         {
             if (ReferenceEquals(left, right))
                 return true;
-            if (ReferenceEquals(left, null) || ReferenceEquals(null, right))
+            if (left is null || right is null)
                 return false;
 
             ScopeSet set = new ScopeSet();
@@ -93,9 +93,9 @@ namespace Microsoft.Alm.Authentication
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         protected static ScopeSet ExceptWith(TokenScope left, TokenScope right)
         {
-            if (ReferenceEquals(left, null))
+            if (left is null)
                 throw new ArgumentNullException(nameof(left));
-            if (ReferenceEquals(right, null))
+            if (right is null)
                 throw new ArgumentNullException(nameof(right));
 
             ScopeSet set = new ScopeSet();
@@ -108,7 +108,7 @@ namespace Microsoft.Alm.Authentication
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         protected static int GetHashCode(TokenScope value)
         {
-            if (ReferenceEquals(value, null))
+            if (value is null)
                 return 0;
 
             // largest 31-bit prime (https://msdn.microsoft.com/en-us/library/Ee621251.aspx)
@@ -131,9 +131,9 @@ namespace Microsoft.Alm.Authentication
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         protected static ScopeSet IntersectWith(TokenScope left, TokenScope right)
         {
-            if (ReferenceEquals(left, null))
+            if (left is null)
                 throw new ArgumentNullException(nameof(left));
-            if (ReferenceEquals(right, null))
+            if (right is null)
                 throw new ArgumentNullException(nameof(right));
 
             ScopeSet set = new ScopeSet();
@@ -146,9 +146,9 @@ namespace Microsoft.Alm.Authentication
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         protected static ScopeSet SymmetricExceptWith(TokenScope left, TokenScope right)
         {
-            if (ReferenceEquals(left, null))
+            if (left is null)
                 throw new ArgumentNullException(nameof(left));
-            if (ReferenceEquals(right, null))
+            if (right is null)
                 throw new ArgumentNullException(nameof(right));
 
             ScopeSet set = new ScopeSet();
@@ -166,9 +166,9 @@ namespace Microsoft.Alm.Authentication
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         protected static ScopeSet UnionWith(TokenScope left, TokenScope right)
         {
-            if (ReferenceEquals(left, null))
+            if (left is null)
                 throw new ArgumentNullException(nameof(left));
-            if (ReferenceEquals(right, null))
+            if (right is null)
                 throw new ArgumentNullException(nameof(right));
 
             ScopeSet set = new ScopeSet();

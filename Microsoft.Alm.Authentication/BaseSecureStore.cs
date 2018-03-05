@@ -206,9 +206,9 @@ namespace Microsoft.Alm.Authentication
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Design", "CA1031:DoNotCatchGeneralExceptionTypes")]
         protected bool WriteCredential(string targetName, Credential credentials)
         {
-            if (ReferenceEquals(targetName, null))
+            if (targetName is null)
                 throw new ArgumentNullException(nameof(targetName));
-            if (ReferenceEquals(credentials, null))
+            if (credentials is null)
                 throw new ArgumentNullException(nameof(credentials));
 
             NativeMethods.Credential credential = new NativeMethods.Credential()
@@ -253,9 +253,9 @@ namespace Microsoft.Alm.Authentication
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Design", "CA1031:DoNotCatchGeneralExceptionTypes")]
         protected bool WriteToken(string targetName, Token token)
         {
-            if (ReferenceEquals(targetName, null))
+            if (targetName is null)
                 throw new ArgumentNullException(nameof(targetName));
-            if (ReferenceEquals(token, null))
+            if (token is null)
                 throw new ArgumentNullException(nameof(token));
 
             byte[] bytes = null;

@@ -254,7 +254,7 @@ namespace Microsoft.Alm.Gui
 
         protected override void OnKeyUp(KeyEventArgs e)
         {
-            if (ReferenceEquals(e, null))
+            if (e is null)
                 return;
 
             switch (e.Key)

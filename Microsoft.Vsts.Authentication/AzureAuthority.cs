@@ -78,13 +78,13 @@ namespace Microsoft.Alm.Authentication
         /// <param name="queryParameters">optional value, appended as-is to the query string in the HTTP authentication request to the authority.</param>
         public async Task<Token> InteractiveAcquireToken(TargetUri targetUri, string clientId, string resource, Uri redirectUri, string queryParameters = null)
         {
-            if (ReferenceEquals(targetUri, null))
+            if (targetUri is null)
                 throw new ArgumentNullException(nameof(targetUri));
             if (string.IsNullOrWhiteSpace(clientId))
                 throw new ArgumentNullException(nameof(clientId));
             if (string.IsNullOrWhiteSpace(resource))
                 throw new ArgumentNullException(nameof(resource));
-            if (ReferenceEquals(redirectUri, null))
+            if (redirectUri is null)
                 throw new ArgumentNullException(nameof(redirectUri));
             if (!redirectUri.IsAbsoluteUri)
                 throw new ArgumentException(nameof(redirectUri));
@@ -128,13 +128,13 @@ namespace Microsoft.Alm.Authentication
         /// <param name="redirectUri">Address to return to upon receiving a response from the authority.</param>
         public async Task<Token> NoninteractiveAcquireToken(TargetUri targetUri, string clientId, string resource, Uri redirectUri)
         {
-            if (ReferenceEquals(targetUri, null))
+            if (targetUri is null)
                 throw new ArgumentNullException(nameof(targetUri));
             if (string.IsNullOrWhiteSpace(clientId))
                 throw new ArgumentNullException(nameof(clientId));
             if (string.IsNullOrWhiteSpace(resource))
                 throw new ArgumentNullException(nameof(resource));
-            if (ReferenceEquals(redirectUri, null))
+            if (redirectUri is null)
                 throw new ArgumentNullException(nameof(redirectUri));
             if (!redirectUri.IsAbsoluteUri)
                 throw new ArgumentException(nameof(redirectUri));

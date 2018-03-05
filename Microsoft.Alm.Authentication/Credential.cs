@@ -108,7 +108,7 @@ namespace Microsoft.Alm.Authentication
         {
             if (ReferenceEquals(credential1, credential2))
                 return true;
-            if (ReferenceEquals(credential1, null) || ReferenceEquals(null, credential2))
+            if (credential1 is null || credential2 is null)
                 return false;
 
             return string.Equals(credential1.Username, credential2.Username, StringComparison.Ordinal)
