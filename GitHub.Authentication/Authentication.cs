@@ -85,16 +85,20 @@ namespace GitHub.Authentication
         /// Deletes a `<see cref="Credential"/>` from the storage used by the authentication object.
         /// </summary>
         /// <param name="targetUri">The uniform resource indicator used to uniquely identify the credentials.</param>
-        public override void DeleteCredentials(TargetUri targetUri)
+        public override async Task<bool> DeleteCredentials(TargetUri targetUri)
         {
             BaseSecureStore.ValidateTargetUri(targetUri);
 
+            bool result = false;
+
             var normalizedTargetUri = NormalizeUri(targetUri);
-            if (PersonalAccessTokenStore.ReadCredentials(normalizedTargetUri) != null)
+            if (await PersonalAccessTokenStore.ReadCredentials(normalizedTargetUri) != null)
             {
-                PersonalAccessTokenStore.DeleteCredentials(normalizedTargetUri);
+                result = await PersonalAccessTokenStore.DeleteCredentials(normalizedTargetUri);
                 Git.Trace.WriteLine($"credentials for '{normalizedTargetUri}' deleted");
             }
+
+            return result;
         }
 
         /// <summary>
@@ -144,14 +148,14 @@ namespace GitHub.Authentication
         /// Returns a `<see cref="Credential"/>` if successful; otherwise `<see langword="null"/>`.
         /// </summary>
         /// <param name="targetUri">The uniform resource indicator used to uniquely identify the credentials.</param>
-        public override Credential GetCredentials(TargetUri targetUri)
+        public override async Task<Credential> GetCredentials(TargetUri targetUri)
         {
             BaseSecureStore.ValidateTargetUri(targetUri);
 
             Credential credentials = null;
 
             var normalizedTargetUri = NormalizeUri(targetUri);
-            if ((credentials = PersonalAccessTokenStore.ReadCredentials(normalizedTargetUri)) != null)
+            if ((credentials = await PersonalAccessTokenStore.ReadCredentials(normalizedTargetUri)) != null)
             {
                 Git.Trace.WriteLine($"credentials for '{normalizedTargetUri}' found.");
             }
@@ -184,7 +188,7 @@ namespace GitHub.Authentication
                     Git.Trace.WriteLine($"token acquisition for '{normalizedTargetUri}' succeeded");
 
                     credentials = (Credential)result.Token;
-                    PersonalAccessTokenStore.WriteCredentials(normalizedTargetUri, credentials);
+                    await PersonalAccessTokenStore.WriteCredentials(normalizedTargetUri, credentials);
 
                     // if a result callback was registered, call it
                     AuthenticationResultCallback?.Invoke(normalizedTargetUri, result);
@@ -202,7 +206,7 @@ namespace GitHub.Authentication
                             Git.Trace.WriteLine($"token acquisition for '{normalizedTargetUri}' succeeded.");
 
                             credentials = (Credential)result.Token;
-                            PersonalAccessTokenStore.WriteCredentials(normalizedTargetUri, credentials);
+                            await PersonalAccessTokenStore.WriteCredentials(normalizedTargetUri, credentials);
 
                             // if a result callback was registered, call it
                             AuthenticationResultCallback?.Invoke(normalizedTargetUri, result);
@@ -248,7 +252,7 @@ namespace GitHub.Authentication
                 Git.Trace.WriteLine($"token acquisition for '{normalizedTargetUri}' succeeded.");
 
                 credentials = (Credential)result.Token;
-                PersonalAccessTokenStore.WriteCredentials(normalizedTargetUri, credentials);
+                await PersonalAccessTokenStore.WriteCredentials(normalizedTargetUri, credentials);
 
                 return credentials;
             }
@@ -267,12 +271,12 @@ namespace GitHub.Authentication
         /// The uniform resource indicator used to uniquely identify the credentials.
         /// </param>
         /// <param name="credentials">The value to be stored.</param>
-        public override void SetCredentials(TargetUri targetUri, Credential credentials)
+        public override Task<bool> SetCredentials(TargetUri targetUri, Credential credentials)
         {
             BaseSecureStore.ValidateTargetUri(targetUri);
             BaseSecureStore.ValidateCredential(credentials);
 
-            PersonalAccessTokenStore.WriteCredentials(NormalizeUri(targetUri), credentials);
+            return PersonalAccessTokenStore.WriteCredentials(NormalizeUri(targetUri), credentials);
         }
 
         /// <summary>

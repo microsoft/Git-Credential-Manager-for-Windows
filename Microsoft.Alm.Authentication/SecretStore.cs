@@ -24,6 +24,7 @@
 **/
 
 using System;
+using System.Threading.Tasks;
 
 namespace Microsoft.Alm.Authentication
 {
@@ -42,6 +43,9 @@ namespace Microsoft.Alm.Authentication
         /// </param>
         /// <param name="tokenCache">
         /// Write-through, read-first cache. Default cache is used if a custom cache is not provided.
+        /// </param>
+        /// <param name="getTargetName">
+        /// Delegate used to transform a `<see cref="TargetUri"/>` into a store lookup key.
         /// </param>
         public SecretStore(string @namespace, ICredentialStore credentialCache, ITokenStore tokenCache, Secret.UriNameConversion getTargetName)
         {
@@ -91,28 +95,28 @@ namespace Microsoft.Alm.Authentication
         /// Deletes credentials for target URI from the credential store
         /// </summary>
         /// <param name="targetUri">The URI of the target for which credentials are being deleted</param>
-        public bool DeleteCredentials(TargetUri targetUri)
+        public async Task<bool> DeleteCredentials(TargetUri targetUri)
         {
             ValidateTargetUri(targetUri);
 
             string targetName = GetTargetName(targetUri);
 
             return Delete(targetName)
-                && _credentialCache.DeleteCredentials(targetUri);
+                && await _credentialCache.DeleteCredentials(targetUri);
         }
 
         /// <summary>
         /// Deletes the token for target URI from the token store
         /// </summary>
         /// <param name="targetUri">The URI of the target for which the token is being deleted</param>
-        public bool DeleteToken(TargetUri targetUri)
+        public async Task<bool> DeleteToken(TargetUri targetUri)
         {
             ValidateTargetUri(targetUri);
 
             string targetName = GetTargetName(targetUri);
 
             return Delete(targetName)
-                && _tokenCache.DeleteToken(targetUri);
+                && await _tokenCache.DeleteToken(targetUri);
         }
 
         /// <summary>
@@ -129,13 +133,13 @@ namespace Microsoft.Alm.Authentication
         /// <param name="targetUri">The URI of the target for which credentials are being read</param>
         /// <param name="credentials"></param>
         /// <returns>A <see cref="Credential"/> from the store is successful; otherwise <see langword="null"/>.</returns>
-        public Credential ReadCredentials(TargetUri targetUri)
+        public async Task<Credential> ReadCredentials(TargetUri targetUri)
         {
             ValidateTargetUri(targetUri);
 
             string targetName = GetTargetName(targetUri);
 
-            return _credentialCache.ReadCredentials(targetUri)
+            return await _credentialCache.ReadCredentials(targetUri)
                 ?? ReadCredentials(targetName);
         }
 
@@ -144,13 +148,13 @@ namespace Microsoft.Alm.Authentication
         /// </summary>
         /// <param name="targetUri">The URI of the target for which a token is being read</param>
         /// <returns>A <see cref="Token"/> from the store is successful; otherwise <see langword="null"/>.</returns>
-        public Token ReadToken(TargetUri targetUri)
+        public async Task<Token> ReadToken(TargetUri targetUri)
         {
             ValidateTargetUri(targetUri);
 
             string targetName = GetTargetName(targetUri);
 
-            return _tokenCache.ReadToken(targetUri)
+            return await _tokenCache.ReadToken(targetUri)
                 ?? ReadToken(targetName);
         }
 
@@ -159,7 +163,7 @@ namespace Microsoft.Alm.Authentication
         /// </summary>
         /// <param name="targetUri">The URI of the target for which credentials are being stored</param>
         /// <param name="credentials">The credentials to be stored</param>
-        public bool WriteCredentials(TargetUri targetUri, Credential credentials)
+        public async Task<bool> WriteCredentials(TargetUri targetUri, Credential credentials)
         {
             ValidateTargetUri(targetUri);
             BaseSecureStore.ValidateCredential(credentials);
@@ -167,7 +171,7 @@ namespace Microsoft.Alm.Authentication
             string targetName = GetTargetName(targetUri);
 
             return WriteCredential(targetName, credentials)
-                && _credentialCache.WriteCredentials(targetUri, credentials);
+                && await _credentialCache.WriteCredentials(targetUri, credentials);
         }
 
         /// <summary>
@@ -175,7 +179,7 @@ namespace Microsoft.Alm.Authentication
         /// </summary>
         /// <param name="targetUri">The URI of the target for which a token is being stored</param>
         /// <param name="token">The token to be stored</param>
-        public bool WriteToken(TargetUri targetUri, Token token)
+        public async Task<bool> WriteToken(TargetUri targetUri, Token token)
         {
             ValidateTargetUri(targetUri);
             Token.Validate(token);
@@ -183,7 +187,7 @@ namespace Microsoft.Alm.Authentication
             string targetName = GetTargetName(targetUri);
 
             return WriteToken(targetName, token)
-                && _tokenCache.WriteToken(targetUri, token);
+                && await _tokenCache.WriteToken(targetUri, token);
         }
 
         /// <summary>

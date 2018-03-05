@@ -23,6 +23,8 @@
  * WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE."
 **/
 
+using System.Threading.Tasks;
+
 namespace Microsoft.Alm.Authentication
 {
     public interface ICredentialStore
@@ -32,10 +34,10 @@ namespace Microsoft.Alm.Authentication
 
         Secret.UriNameConversion UriNameConversion { get; set; }
 
-        bool DeleteCredentials(TargetUri targetUri);
+        Task<bool> DeleteCredentials(TargetUri targetUri);
 
-        Credential ReadCredentials(TargetUri targetUri);
+        Task<Credential> ReadCredentials(TargetUri targetUri);
 
-        bool WriteCredentials(TargetUri targetUri, Credential credentials);
+        Task<bool> WriteCredentials(TargetUri targetUri, Credential credentials);
     }
 }

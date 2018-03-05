@@ -25,6 +25,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.Threading.Tasks;
 
 namespace Microsoft.Alm.Authentication
 {
@@ -87,36 +88,42 @@ namespace Microsoft.Alm.Authentication
         /// Deletes a credential from the cache.
         /// </summary>
         /// <param name="targetUri">The URI of the target for which credentials are being deleted</param>
-        public bool DeleteCredentials(TargetUri targetUri)
+        public Task<bool> DeleteCredentials(TargetUri targetUri)
         {
             BaseSecureStore.ValidateTargetUri(targetUri);
 
             string targetName = GetTargetName(targetUri);
+            bool result = false;
 
             lock (_cache)
             {
-                return _cache.ContainsKey(targetName)
+                result = _cache.ContainsKey(targetName)
                     && _cache[targetName] is Credential
                     && _cache.Remove(targetName);
             }
+
+            return Task.FromResult(result);
         }
 
         /// <summary>
         /// Deletes a token from the cache.
         /// </summary>
         /// <param name="targetUri">The key which to find and delete the token with.</param>
-        public bool DeleteToken(TargetUri targetUri)
+        public Task<bool> DeleteToken(TargetUri targetUri)
         {
             BaseSecureStore.ValidateTargetUri(targetUri);
 
             string targetName = GetTargetName(targetUri);
+            bool result = false;
 
             lock (_cache)
             {
-                return _cache.ContainsKey(targetName)
+                result = _cache.ContainsKey(targetName)
                     && _cache[targetName] is Token
                     && _cache.Remove(targetName);
             }
+
+            return Task.FromResult(result);
         }
 
         public IEnumerable<KeyValuePair<string, Secret>> EnumerateSecrets()
@@ -136,7 +143,7 @@ namespace Microsoft.Alm.Authentication
         /// </summary>
         /// <param name="targetUri">The URI of the target for which credentials are being read</param>
         /// <returns>A <see cref="Credential"/> from the store; <see langword="null"/> if failure.</returns>
-        public Credential ReadCredentials(TargetUri targetUri)
+        public Task<Credential> ReadCredentials(TargetUri targetUri)
         {
             BaseSecureStore.ValidateTargetUri(targetUri);
 
@@ -155,7 +162,7 @@ namespace Microsoft.Alm.Authentication
                 }
             }
 
-            return credentials;
+            return Task.FromResult(credentials);
         }
 
         /// <summary>
@@ -163,7 +170,7 @@ namespace Microsoft.Alm.Authentication
         /// </summary>
         /// <param name="targetUri">The key which to find the token.</param>
         /// <returns>A <see cref="Token"/> if successful; otherwise <see langword="null"/>.</returns>
-        public Token ReadToken(TargetUri targetUri)
+        public Task<Token> ReadToken(TargetUri targetUri)
         {
             BaseSecureStore.ValidateTargetUri(targetUri);
 
@@ -182,7 +189,7 @@ namespace Microsoft.Alm.Authentication
                 }
             }
 
-            return token;
+            return Task.FromResult(token);
         }
 
         /// <summary>
@@ -190,7 +197,7 @@ namespace Microsoft.Alm.Authentication
         /// </summary>
         /// <param name="targetUri">The URI of the target for which credentials are being stored</param>
         /// <param name="credentials">The credentials to be stored</param>
-        public bool WriteCredentials(TargetUri targetUri, Credential credentials)
+        public Task<bool> WriteCredentials(TargetUri targetUri, Credential credentials)
         {
             BaseSecureStore.ValidateTargetUri(targetUri);
             BaseSecureStore.ValidateCredential(credentials);
@@ -209,7 +216,7 @@ namespace Microsoft.Alm.Authentication
                 }
             }
 
-            return true;
+            return Task.FromResult(true);
         }
 
         /// <summary>
@@ -217,7 +224,7 @@ namespace Microsoft.Alm.Authentication
         /// </summary>
         /// <param name="targetUri">The key which to index the token by.</param>
         /// <param name="token">The token to write to the cache.</param>
-        public bool WriteToken(TargetUri targetUri, Token token)
+        public Task<bool> WriteToken(TargetUri targetUri, Token token)
         {
             BaseSecureStore.ValidateTargetUri(targetUri);
             Token.Validate(token);
@@ -236,7 +243,7 @@ namespace Microsoft.Alm.Authentication
                 }
             }
 
-            return true;
+            return Task.FromResult(true);
         }
 
         /// <summary>

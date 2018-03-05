@@ -1,4 +1,5 @@
 ﻿using System.Diagnostics;
+using System.Threading.Tasks;
 using Microsoft.Alm.Authentication;
 using Xunit;
 
@@ -12,23 +13,23 @@ namespace Atlassian.Bitbucket.Authentication.Test
         }
 
         [Fact]
-        public void BitbucketAuthDeleteCredentialsTest()
+        public async Task BitbucketAuthDeleteCredentialsTest()
         {
             var targetUri = new TargetUri("http://localhost");
             var bitbucketAuth = GetBitbucketAuthentication("Bitbucket-delete");
 
-            bitbucketAuth.PersonalAccessTokenStore.WriteCredentials(targetUri, new Credential("username", "password"));
+            await bitbucketAuth.PersonalAccessTokenStore.WriteCredentials(targetUri, new Credential("username", "password"));
 
             Credential credentials;
 
-            bitbucketAuth.DeleteCredentials(targetUri);
+            await bitbucketAuth.DeleteCredentials(targetUri);
 
             // "User credentials were not deleted as expected"
-            Assert.Null(credentials = bitbucketAuth.PersonalAccessTokenStore.ReadCredentials(targetUri));
+            Assert.Null(credentials = await bitbucketAuth.PersonalAccessTokenStore.ReadCredentials(targetUri));
         }
 
         [Fact]
-        public void BitbucketAuthGetCredentialsTest()
+        public async Task BitbucketAuthGetCredentialsTest()
         {
             var targetUri = new TargetUri("http://localhost");
             var bitbucketAuth = GetBitbucketAuthentication("Bitbucket-get");
@@ -36,18 +37,18 @@ namespace Atlassian.Bitbucket.Authentication.Test
             Credential credentials = null;
 
             // "User credentials were unexpectedly retrieved."
-            Assert.Null(credentials = bitbucketAuth.GetCredentials(targetUri));
+            Assert.Null(credentials = await bitbucketAuth.GetCredentials(targetUri));
 
             credentials = new Credential("username", "password");
 
-            bitbucketAuth.PersonalAccessTokenStore.WriteCredentials(targetUri, credentials);
+            await bitbucketAuth.PersonalAccessTokenStore.WriteCredentials(targetUri, credentials);
 
             // "User credentials were unexpectedly not retrieved."
-            Assert.NotNull(credentials = bitbucketAuth.GetCredentials(targetUri));
+            Assert.NotNull(credentials = await bitbucketAuth.GetCredentials(targetUri));
         }
 
         [Fact]
-        public void BitbucketAuthSetCredentialsTest()
+        public async Task BitbucketAuthSetCredentialsTest()
         {
             var targetUri = new TargetUri("http://localhost");
             var bitbucketAuth = GetBitbucketAuthentication("Bitbucket-set");
@@ -55,19 +56,27 @@ namespace Atlassian.Bitbucket.Authentication.Test
             Credential credentials = null;
 
             // "User credentials were unexpectedly retrieved."
-            Assert.Null(credentials = bitbucketAuth.GetCredentials(targetUri));
+            Assert.Null(credentials = await bitbucketAuth.GetCredentials(targetUri));
 
             Assert.Throws<System.ArgumentNullException>(() =>
             {
-                bitbucketAuth.SetCredentials(targetUri, credentials);
+                try
+                {
+                    Task.Run(async () => { await bitbucketAuth.SetCredentials(targetUri, credentials); }).Wait();
+                }
+                catch (System.AggregateException exception)
+                {
+                    exception = exception.Flatten();
+                    throw exception.InnerException;
+                }
             });
 
             credentials = new Credential("username", "password");
 
-            bitbucketAuth.SetCredentials(targetUri, credentials);
+            await bitbucketAuth.SetCredentials(targetUri, credentials);
 
             // "User credentials were unexpectedly not retrieved."
-            Assert.NotNull(credentials = bitbucketAuth.GetCredentials(targetUri));
+            Assert.NotNull(credentials = await bitbucketAuth.GetCredentials(targetUri));
         }
 
         private Authentication GetBitbucketAuthentication(string @namespace)

@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Net;
+using System.Threading.Tasks;
 using Microsoft.Alm.Authentication;
 using Xunit;
 
@@ -28,23 +29,31 @@ namespace Atlassian.Bitbucket.Authentication.Test
         }
 
         [Fact]
-        public void VerifySetCredentialStoresValidCredentials()
+        public async Task VerifySetCredentialStoresValidCredentials()
         {
             var targetUri = new TargetUri("https://example.com");
             var credentialStore = new MockCredentialStore();
             var credentials = new Credential("a", "b");
             var bbAuth = new Authentication(credentialStore, null, null);
 
-            bbAuth.SetCredentials(targetUri, credentials);
+            try
+            {
+                await bbAuth.SetCredentials(targetUri, credentials);
 
-            var writeCalls = credentialStore.MethodCalls
-                .Where(mc => mc.Key.Equals("WriteCredentials"))
-                    .SelectMany(mc => mc.Value)
-                        .Where(wc => wc.Key.Contains(targetUri.ToString())
-                            && wc.Key.Contains(credentials.Username)
-                            && wc.Key.Contains(credentials.Password));
+                var writeCalls = credentialStore.MethodCalls
+                    .Where(mc => mc.Key.Equals("WriteCredentials"))
+                        .SelectMany(mc => mc.Value)
+                            .Where(wc => wc.Key.Contains(targetUri.ToString())
+                                && wc.Key.Contains(credentials.Username)
+                                && wc.Key.Contains(credentials.Password));
 
-            Assert.Single(writeCalls);
+                Assert.Single(writeCalls);
+            }
+            catch (System.AggregateException exception)
+            {
+                exception = exception.Flatten();
+                throw exception.InnerException;
+            }
         }
 
         [Fact]
@@ -52,11 +61,22 @@ namespace Atlassian.Bitbucket.Authentication.Test
         {
             Assert.Throws<ArgumentNullException>(() =>
             {
-                var credentialStore = new MockCredentialStore();
-                var credentials = new Credential("a", "b");
-                var bbAuth = new Authentication(credentialStore, null, null);
+                try
+                {
+                    Task.Run(async () =>
+                    {
+                        var credentialStore = new MockCredentialStore();
+                        var credentials = new Credential("a", "b");
+                        var bbAuth = new Authentication(credentialStore, null, null);
 
-                bbAuth.SetCredentials(null, credentials);
+                        await bbAuth.SetCredentials(null, credentials);
+                    }).Wait();
+                }
+                catch (System.AggregateException exception)
+                {
+                    exception = exception.Flatten();
+                    throw exception.InnerException;
+                }
             });
         }
 
@@ -65,11 +85,22 @@ namespace Atlassian.Bitbucket.Authentication.Test
         {
             Assert.Throws<ArgumentNullException>(() =>
             {
-                var targetUri = new TargetUri("https://example.com");
-                var credentialStore = new MockCredentialStore();
-                var bbAuth = new Authentication(credentialStore, null, null);
+                try
+                {
+                    Task.Run(async () =>
+                    {
+                        var targetUri = new TargetUri("https://example.com");
+                        var credentialStore = new MockCredentialStore();
+                        var bbAuth = new Authentication(credentialStore, null, null);
 
-                bbAuth.SetCredentials(targetUri, null);
+                        await bbAuth.SetCredentials(targetUri, null);
+                    }).Wait();
+                }
+                catch (System.AggregateException exception)
+                {
+                    exception = exception.Flatten();
+                    throw exception.InnerException;
+                }
             });
         }
 
@@ -78,12 +109,23 @@ namespace Atlassian.Bitbucket.Authentication.Test
         {
             Assert.Throws<ArgumentOutOfRangeException>(() =>
             {
-                var targetUri = new TargetUri("https://example.com");
-                var credentialStore = new MockCredentialStore();
-                var credentials = new Credential("a", new string('x', 2047 + 1));
-                var bbAuth = new Authentication(credentialStore, null, null);
+                try
+                {
+                    Task.Run(async () =>
+                    {
+                        var targetUri = new TargetUri("https://example.com");
+                        var credentialStore = new MockCredentialStore();
+                        var credentials = new Credential("a", new string('x', 2047 + 1));
+                        var bbAuth = new Authentication(credentialStore, null, null);
 
-                bbAuth.SetCredentials(targetUri, credentials);
+                        await bbAuth.SetCredentials(targetUri, credentials);
+                    }).Wait();
+                }
+                catch (System.AggregateException exception)
+                {
+                    exception = exception.Flatten();
+                    throw exception.InnerException;
+                }
             });
         }
 
@@ -92,12 +134,23 @@ namespace Atlassian.Bitbucket.Authentication.Test
         {
             Assert.Throws<ArgumentOutOfRangeException>(() =>
             {
-                var targetUri = new TargetUri("https://example.com");
-                var credentialStore = new MockCredentialStore();
-                var credentials = new Credential(new string('x', 2047 + 1), "b");
-                var bbAuth = new Authentication(credentialStore, null, null);
+                try
+                {
+                    Task.Run(async () =>
+                    {
+                        var targetUri = new TargetUri("https://example.com");
+                        var credentialStore = new MockCredentialStore();
+                        var credentials = new Credential(new string('x', 2047 + 1), "b");
+                        var bbAuth = new Authentication(credentialStore, null, null);
 
-                bbAuth.SetCredentials(targetUri, credentials);
+                        await bbAuth.SetCredentials(targetUri, credentials);
+                    }).Wait();
+                }
+                catch (System.AggregateException exception)
+                {
+                    exception = exception.Flatten();
+                    throw exception.InnerException;
+                }
             });
         }
 
@@ -106,16 +159,27 @@ namespace Atlassian.Bitbucket.Authentication.Test
         {
             Assert.Throws<ArgumentNullException>(() =>
             {
-                var credentialStore = new MockCredentialStore();
-                var bbAuth = new Authentication(credentialStore, null, null);
+                try
+                {
+                    Task.Run(async () =>
+                    {
+                        var credentialStore = new MockCredentialStore();
+                        var bbAuth = new Authentication(credentialStore, null, null);
 
-                bbAuth.DeleteCredentials(null);
+                        await bbAuth.DeleteCredentials(null);
 
-                var deleteCalls = credentialStore.MethodCalls
-                    .Where(mc => mc.Key.Equals("DeleteCredentials"))
-                        .SelectMany(mc => mc.Value);
+                        var deleteCalls = credentialStore.MethodCalls
+                            .Where(mc => mc.Key.Equals("DeleteCredentials"))
+                                .SelectMany(mc => mc.Value);
 
-                Assert.Empty(deleteCalls);
+                        Assert.Empty(deleteCalls);
+                    }).Wait();
+                }
+                catch (System.AggregateException exception)
+                {
+                    exception = exception.Flatten();
+                    throw exception.InnerException;
+                }
             });
         }
 
@@ -360,25 +424,29 @@ namespace Atlassian.Bitbucket.Authentication.Test
             set { throw new NotImplementedException(); }
         }
 
-        public bool DeleteCredentials(TargetUri targetUri)
+        public Task<bool> DeleteCredentials(TargetUri targetUri)
         {
             // do nothing
             RecordMethodCall("DeleteCredentials", new List<string>() { targetUri.QueryUri.AbsoluteUri });
-            return true;
+            return Task.FromResult(true);
         }
 
-        public Credential ReadCredentials(TargetUri targetUri)
+        public Task<Credential> ReadCredentials(TargetUri targetUri)
         {
             // do nothing
             RecordMethodCall("ReadCredentials", new List<string>() { targetUri.QueryUri.AbsoluteUri });
-            return Credentials != null && Credentials.Keys.Contains(targetUri.QueryUri.AbsoluteUri) ? Credentials[targetUri.QueryUri.AbsoluteUri] : null;
+            var credentials = (Credentials != null && Credentials.Keys.Contains(targetUri.QueryUri.AbsoluteUri))
+                ? Credentials[targetUri.QueryUri.AbsoluteUri]
+                : null;
+
+            return Task.FromResult(credentials);
         }
 
-        public bool WriteCredentials(TargetUri targetUri, Credential credentials)
+        public Task<bool> WriteCredentials(TargetUri targetUri, Credential credentials)
         {
             // do nothing
             RecordMethodCall("WriteCredentials", new List<string>() { targetUri.QueryUri.AbsoluteUri, credentials.Username, credentials.Password });
-            return true;
+            return Task.FromResult(true);
         }
 
         private void RecordMethodCall(string methodName, List<string> args)

@@ -667,7 +667,7 @@ namespace Microsoft.Alm.Cli
                         {
                             // Attempt to get cached credentials or acquire credentials if interactivity is allowed.
                             if ((operationArguments.Interactivity != Interactivity.Always
-                                    && (credentials = authentication.GetCredentials(operationArguments.TargetUri)) != null)
+                                    && (credentials = await authentication.GetCredentials(operationArguments.TargetUri)) != null)
                                 || (operationArguments.Interactivity != Interactivity.Never
                                     && (credentials = await basicAuth.AcquireCredentials(operationArguments.TargetUri)) != null))
                             {
@@ -699,7 +699,7 @@ namespace Microsoft.Alm.Cli
                             // Attempt to get cached credentials -> non-interactive logon -> interactive
                             // logon note that AAD "credentials" are always scoped access tokens.
                             if (((operationArguments.Interactivity != Interactivity.Always
-                                    && ((credentials = aadAuth.GetCredentials(operationArguments.TargetUri)) != null)
+                                    && ((credentials = await aadAuth.GetCredentials(operationArguments.TargetUri)) != null)
                                     && (!operationArguments.ValidateCredentials
                                         || await aadAuth.ValidateCredentials(operationArguments.TargetUri, credentials))))
                                 || (operationArguments.Interactivity != Interactivity.Always
@@ -738,7 +738,7 @@ namespace Microsoft.Alm.Cli
                             // Attempt to get cached credentials -> interactive logon note that MSA
                             // "credentials" are always scoped access tokens.
                             if (((operationArguments.Interactivity != Interactivity.Always
-                                    && ((credentials = msaAuth.GetCredentials(operationArguments.TargetUri)) != null)
+                                    && ((credentials = await msaAuth.GetCredentials(operationArguments.TargetUri)) != null)
                                     && (!operationArguments.ValidateCredentials
                                         || await msaAuth.ValidateCredentials(operationArguments.TargetUri, credentials))))
                                 || (operationArguments.Interactivity != Interactivity.Never
@@ -765,7 +765,7 @@ namespace Microsoft.Alm.Cli
                         Task.Run(async () =>
                         {
                             if ((operationArguments.Interactivity != Interactivity.Always
-                                    && ((credentials = ghAuth.GetCredentials(operationArguments.TargetUri)) != null)
+                                    && ((credentials = await ghAuth.GetCredentials(operationArguments.TargetUri)) != null)
                                     && (!operationArguments.ValidateCredentials
                                         || await ghAuth.ValidateCredentials(operationArguments.TargetUri, credentials)))
                                 || (operationArguments.Interactivity != Interactivity.Never
@@ -792,7 +792,7 @@ namespace Microsoft.Alm.Cli
                         Task.Run(async () =>
                         {
                             if (((operationArguments.Interactivity != Interactivity.Always)
-                                 && ((credentials = bbcAuth.GetCredentials(operationArguments.TargetUri, operationArguments.Username)) != null)
+                                 && ((credentials = await bbcAuth.GetCredentials(operationArguments.TargetUri, operationArguments.Username)) != null)
                                  && (!operationArguments.ValidateCredentials
                                      || ((credentials = await bbcAuth.ValidateCredentials(operationArguments.TargetUri, operationArguments.Username, credentials)) != null)))
                                      || ((operationArguments.Interactivity != Interactivity.Never)
