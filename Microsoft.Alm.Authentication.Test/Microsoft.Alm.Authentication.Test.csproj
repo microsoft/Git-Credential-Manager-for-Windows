@@ -41,7 +41,7 @@
     <Compile Include="CredentialTests.cs" />
     <Compile Include="GlobalSuppressions.cs" />
     <Compile Include="Git\ConfigurationTests.cs" />
-    <Compile Include="Git\GitInstallationTests.cs" />
+    <Compile Include="Git\InstallationTests.cs" />
     <Compile Include="Git\GlobalSuppressions.cs" />
     <Compile Include="Git\WhereTests.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

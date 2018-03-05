@@ -30,7 +30,7 @@ using System.IO;
 
 namespace Microsoft.Alm.Authentication.Git
 {
-    public struct GitInstallation : IEquatable<GitInstallation>
+    public struct Installation : IEquatable<Installation>
     {
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Security", "CA2104:DoNotDeclareReadOnlyMutableReferenceTypes")]
         public static readonly StringComparer PathComparer = StringComparer.InvariantCultureIgnoreCase;
@@ -104,7 +104,7 @@ namespace Microsoft.Alm.Authentication.Git
                 { KnownDistribution.GitForWindows64v2, Version2Doc64Path },
             };
 
-        internal GitInstallation(string path, KnownDistribution version)
+        internal Installation(string path, KnownDistribution version)
         {
             if (string.IsNullOrWhiteSpace(path))
                 throw new ArgumentNullException(nameof(path));
@@ -272,13 +272,13 @@ namespace Microsoft.Alm.Authentication.Git
 
         public override bool Equals(object obj)
         {
-            if (obj is GitInstallation)
-                return this == (GitInstallation)obj;
+            if (obj is Installation)
+                return this == (Installation)obj;
 
             return false;
         }
 
-        public bool Equals(GitInstallation other)
+        public bool Equals(Installation other)
         {
             return this == other;
         }
@@ -293,20 +293,20 @@ namespace Microsoft.Alm.Authentication.Git
             return _path;
         }
 
-        internal static bool IsValid(GitInstallation value)
+        internal static bool IsValid(Installation value)
         {
             return Directory.Exists(value._path)
                 && Directory.Exists(value.Libexec)
                 && File.Exists(value.Git);
         }
 
-        public static bool operator ==(GitInstallation install1, GitInstallation install2)
+        public static bool operator ==(Installation install1, Installation install2)
         {
             return install1._distribution == install2._distribution
                 && PathComparer.Equals(install1._path, install2._path);
         }
 
-        public static bool operator !=(GitInstallation install1, GitInstallation install2)
+        public static bool operator !=(Installation install1, Installation install2)
         {
             return !(install1 == install2);
         }

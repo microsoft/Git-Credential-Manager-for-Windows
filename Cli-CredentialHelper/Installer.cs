@@ -210,7 +210,7 @@ namespace Microsoft.Alm.Cli
                     return;
                 }
 
-                List<GitInstallation> installations = null;
+                List<Installation> installations = null;
 
                 // use the custom installation path if supplied
                 if (!string.IsNullOrEmpty(_customPath))
@@ -230,7 +230,7 @@ namespace Microsoft.Alm.Cli
                     Program.Out.WriteLine($"Deploying to custom path: '{_customPath}'.");
 
                     // if the custom path points to a git location then treat it properly
-                    GitInstallation installation;
+                    Installation installation;
                     if (Where.FindGitInstallation(_customPath, KnownDistribution.GitForWindows64v2, out installation)
                         || Where.FindGitInstallation(_customPath, KnownDistribution.GitForWindows32v2, out installation)
                         || Where.FindGitInstallation(_customPath, KnownDistribution.GitForWindows32v1, out installation))
@@ -238,7 +238,7 @@ namespace Microsoft.Alm.Cli
                         Git.Trace.WriteLine($"   Git found: '{installation.Path}'.");
 
                         // track known Git installations
-                        installations = new List<GitInstallation>();
+                        installations = new List<Installation>();
                         installations.Add(installation);
                     }
 
@@ -476,7 +476,7 @@ namespace Microsoft.Alm.Cli
                     return;
                 }
 
-                List<GitInstallation> installations = null;
+                List<Installation> installations = null;
 
                 // use the custom installation path if supplied
                 if (!string.IsNullOrEmpty(_customPath))
@@ -495,7 +495,7 @@ namespace Microsoft.Alm.Cli
                     Program.Out.WriteLine($"Removing from custom path: '{_customPath}'.");
 
                     // if the custom path points to a git location then treat it properly
-                    GitInstallation installation;
+                    Installation installation;
                     if (Where.FindGitInstallation(_customPath, KnownDistribution.GitForWindows64v2, out installation)
                         || Where.FindGitInstallation(_customPath, KnownDistribution.GitForWindows32v2, out installation)
                         || Where.FindGitInstallation(_customPath, KnownDistribution.GitForWindows32v1, out installation))
@@ -503,7 +503,7 @@ namespace Microsoft.Alm.Cli
                         Git.Trace.WriteLine($"Git found: '{installation.Path}'.");
 
                         // track known Git installations
-                        installations = new List<GitInstallation>();
+                        installations = new List<Installation>();
                         installations.Add(installation);
                     }
                 }
@@ -697,7 +697,7 @@ namespace Microsoft.Alm.Cli
             }
         }
 
-        public bool SetGitConfig(List<GitInstallation> installations, GitConfigAction action, ConfigurationLevel type, out ConfigurationLevel updated)
+        public bool SetGitConfig(List<Installation> installations, GitConfigAction action, ConfigurationLevel type, out ConfigurationLevel updated)
         {
             Git.Trace.WriteLine($"action = '{action}'.");
 

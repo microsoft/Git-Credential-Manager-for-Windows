@@ -84,10 +84,10 @@ namespace Microsoft.Alm.Authentication.Git
             return false;
         }
 
-        public static bool FindGitInstallation(string path, KnownDistribution distro, out GitInstallation installation)
+        public static bool FindGitInstallation(string path, KnownDistribution distro, out Installation installation)
         {
-            installation = new GitInstallation(path, distro);
-            return GitInstallation.IsValid(installation);
+            installation = new Installation(path, distro);
+            return Installation.IsValid(installation);
         }
 
         /// <summary>
@@ -96,7 +96,7 @@ namespace Microsoft.Alm.Authentication.Git
         /// Returns `<see langword="true"/>` if successful; otherwise `<see langword="false"/>`.
         /// </summary>
         /// <param name="installations">The list of found Git installation if successful; otherwise `<see langword="null"/>`.</param>
-        public static bool FindGitInstallations(out List<GitInstallation> installations)
+        public static bool FindGitInstallations(out List<Installation> installations)
         {
             const string GitAppName = @"Git";
             const string GitSubkeyName = @"SOFTWARE\Microsoft\Windows\CurrentVersion\Uninstall\Git_is1";
@@ -161,71 +161,71 @@ namespace Microsoft.Alm.Authentication.Git
                 programDataPath = Path.Combine(programDataPath, GitAppName);
             }
 
-            List<GitInstallation> candidates = new List<GitInstallation>();
+            List<Installation> candidates = new List<Installation>();
             // Add candidate locations in order of preference.
             if (Where.FindApp(GitAppName, out shellPathValue))
             {
                 // `Where.App` returns the path to the executable, truncate to the installation root
-                if (shellPathValue.EndsWith(GitInstallation.AllVersionCmdPath, StringComparison.OrdinalIgnoreCase))
+                if (shellPathValue.EndsWith(Installation.AllVersionCmdPath, StringComparison.OrdinalIgnoreCase))
                 {
-                    shellPathValue = shellPathValue.Substring(0, shellPathValue.Length - GitInstallation.AllVersionCmdPath.Length);
+                    shellPathValue = shellPathValue.Substring(0, shellPathValue.Length - Installation.AllVersionCmdPath.Length);
                 }
 
-                candidates.Add(new GitInstallation(shellPathValue, KnownDistribution.GitForWindows64v2));
-                candidates.Add(new GitInstallation(shellPathValue, KnownDistribution.GitForWindows32v2));
-                candidates.Add(new GitInstallation(shellPathValue, KnownDistribution.GitForWindows32v1));
+                candidates.Add(new Installation(shellPathValue, KnownDistribution.GitForWindows64v2));
+                candidates.Add(new Installation(shellPathValue, KnownDistribution.GitForWindows32v2));
+                candidates.Add(new Installation(shellPathValue, KnownDistribution.GitForWindows32v1));
             }
 
             if (!string.IsNullOrEmpty(reg64HklmPath))
             {
-                candidates.Add(new GitInstallation(reg64HklmPath, KnownDistribution.GitForWindows64v2));
+                candidates.Add(new Installation(reg64HklmPath, KnownDistribution.GitForWindows64v2));
             }
             if (!string.IsNullOrEmpty(programFiles32Path))
             {
-                candidates.Add(new GitInstallation(programFiles64Path, KnownDistribution.GitForWindows64v2));
+                candidates.Add(new Installation(programFiles64Path, KnownDistribution.GitForWindows64v2));
             }
             if (!string.IsNullOrEmpty(reg64HkcuPath))
             {
-                candidates.Add(new GitInstallation(reg64HkcuPath, KnownDistribution.GitForWindows64v2));
+                candidates.Add(new Installation(reg64HkcuPath, KnownDistribution.GitForWindows64v2));
             }
             if (!string.IsNullOrEmpty(reg32HklmPath))
             {
-                candidates.Add(new GitInstallation(reg32HklmPath, KnownDistribution.GitForWindows32v2));
-                candidates.Add(new GitInstallation(reg32HklmPath, KnownDistribution.GitForWindows32v1));
+                candidates.Add(new Installation(reg32HklmPath, KnownDistribution.GitForWindows32v2));
+                candidates.Add(new Installation(reg32HklmPath, KnownDistribution.GitForWindows32v1));
             }
             if (!string.IsNullOrEmpty(programFiles32Path))
             {
-                candidates.Add(new GitInstallation(programFiles32Path, KnownDistribution.GitForWindows32v2));
-                candidates.Add(new GitInstallation(programFiles32Path, KnownDistribution.GitForWindows32v1));
+                candidates.Add(new Installation(programFiles32Path, KnownDistribution.GitForWindows32v2));
+                candidates.Add(new Installation(programFiles32Path, KnownDistribution.GitForWindows32v1));
             }
             if (!string.IsNullOrEmpty(reg32HkcuPath))
             {
-                candidates.Add(new GitInstallation(reg32HkcuPath, KnownDistribution.GitForWindows32v2));
-                candidates.Add(new GitInstallation(reg32HkcuPath, KnownDistribution.GitForWindows32v1));
+                candidates.Add(new Installation(reg32HkcuPath, KnownDistribution.GitForWindows32v2));
+                candidates.Add(new Installation(reg32HkcuPath, KnownDistribution.GitForWindows32v1));
             }
             if (!string.IsNullOrEmpty(programDataPath))
             {
-                candidates.Add(new GitInstallation(programDataPath, KnownDistribution.GitForWindows64v2));
-                candidates.Add(new GitInstallation(programDataPath, KnownDistribution.GitForWindows32v2));
-                candidates.Add(new GitInstallation(programDataPath, KnownDistribution.GitForWindows32v1));
+                candidates.Add(new Installation(programDataPath, KnownDistribution.GitForWindows64v2));
+                candidates.Add(new Installation(programDataPath, KnownDistribution.GitForWindows32v2));
+                candidates.Add(new Installation(programDataPath, KnownDistribution.GitForWindows32v1));
             }
             if (!string.IsNullOrEmpty(appDataLocalPath))
             {
-                candidates.Add(new GitInstallation(appDataLocalPath, KnownDistribution.GitForWindows64v2));
-                candidates.Add(new GitInstallation(appDataLocalPath, KnownDistribution.GitForWindows32v2));
-                candidates.Add(new GitInstallation(appDataLocalPath, KnownDistribution.GitForWindows32v1));
+                candidates.Add(new Installation(appDataLocalPath, KnownDistribution.GitForWindows64v2));
+                candidates.Add(new Installation(appDataLocalPath, KnownDistribution.GitForWindows32v2));
+                candidates.Add(new Installation(appDataLocalPath, KnownDistribution.GitForWindows32v1));
             }
             if (!string.IsNullOrEmpty(appDataRoamingPath))
             {
-                candidates.Add(new GitInstallation(appDataRoamingPath, KnownDistribution.GitForWindows64v2));
-                candidates.Add(new GitInstallation(appDataRoamingPath, KnownDistribution.GitForWindows32v2));
-                candidates.Add(new GitInstallation(appDataRoamingPath, KnownDistribution.GitForWindows32v1));
+                candidates.Add(new Installation(appDataRoamingPath, KnownDistribution.GitForWindows64v2));
+                candidates.Add(new Installation(appDataRoamingPath, KnownDistribution.GitForWindows32v2));
+                candidates.Add(new Installation(appDataRoamingPath, KnownDistribution.GitForWindows32v1));
             }
 
-            HashSet<GitInstallation> pathSet = new HashSet<GitInstallation>();
+            HashSet<Installation> pathSet = new HashSet<Installation>();
             foreach (var candidate in candidates)
             {
-                if (GitInstallation.IsValid(candidate))
+                if (Installation.IsValid(candidate))
                 {
                     pathSet.Add(candidate);
                 }
@@ -453,7 +453,7 @@ namespace Microsoft.Alm.Authentication.Git
         /// Returns `<see langword="true"/>` if successful; otherwise `<see langword="false"/>`.
         /// </summary>
         /// <param name="path">Path to Git's system configuration if successful; otherwise `<see langword="null"/>`.</param>
-        public static bool GitSystemConfig(GitInstallation? installation, out string path)
+        public static bool GitSystemConfig(Installation? installation, out string path)
         {
             if (installation.HasValue && File.Exists(installation.Value.Config))
             {
@@ -463,7 +463,7 @@ namespace Microsoft.Alm.Authentication.Git
             // find Git on the local disk - the system config is stored relative to it
             else
             {
-                List<GitInstallation> installations;
+                List<Installation> installations;
 
                 if (FindGitInstallations(out installations)
                     && File.Exists(installations[0].Config))
