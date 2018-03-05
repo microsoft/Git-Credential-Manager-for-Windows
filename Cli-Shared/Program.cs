@@ -408,7 +408,7 @@ namespace Microsoft.Alm.Cli
                                  [CallerMemberName] string name = "")
             => _exit(this, exitcode, message, path, line, name);
 
-        internal void LoadOperationArguments(OperationArguments operationArguments)
+        internal Task LoadOperationArguments(OperationArguments operationArguments)
             => _loadOperationArguments(this, operationArguments);
 
         internal void LogEvent(string message, EventLogEntryType eventType)

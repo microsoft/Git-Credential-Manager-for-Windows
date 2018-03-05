@@ -63,7 +63,7 @@ namespace Microsoft.Alm.Cli
 
         internal delegate bool GitHubCredentialPromptDelegate(Program program, TargetUri targetUri, out string username, out string password);
 
-        internal delegate void LoadOperationArgumentsDelegate(Program program, OperationArguments operationArguments);
+        internal delegate Task LoadOperationArgumentsDelegate(Program program, OperationArguments operationArguments);
 
         internal delegate void LogEventDelegate(Program program, string message, EventLogEntryType eventType);
 

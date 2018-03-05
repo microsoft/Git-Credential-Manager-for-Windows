@@ -116,7 +116,7 @@ namespace Microsoft.Alm.Cli
 
                 OperationArguments operationArguments = new OperationArguments(uri);
 
-                LoadOperationArguments(operationArguments);
+                Task.Run(async () => { await LoadOperationArguments(operationArguments); }).Wait();
                 EnableTraceLogging(operationArguments);
 
                 if (operationArguments.PreserveCredentials && !forced)
@@ -163,7 +163,7 @@ namespace Microsoft.Alm.Cli
             // Create operation arguments, and load configuration data.
             OperationArguments operationArguments = new OperationArguments(targetUri);
 
-            LoadOperationArguments(operationArguments);
+            Task.Run(async () => { await LoadOperationArguments(operationArguments); }).Wait();
             EnableTraceLogging(operationArguments);
 
             // Create a set of irrelevant environment variable entries.
@@ -240,7 +240,7 @@ namespace Microsoft.Alm.Cli
                     QueryUri = uri
                 };
 
-                LoadOperationArguments(operationArguments);
+                Task.Run(async () => { await LoadOperationArguments(operationArguments); }).Wait();
 
                 var task = Task.Run(async () => { return await CreateAuthentication(operationArguments); });
                 BaseAuthentication authentication = task.Result;
@@ -301,7 +301,7 @@ namespace Microsoft.Alm.Cli
                 Debug.Assert(operationArguments != null, "The operationArguments is null");
                 Debug.Assert(operationArguments.TargetUri != null, "The operationArgument.TargetUri is null");
 
-                LoadOperationArguments(operationArguments);
+                Task.Run(async () => { await LoadOperationArguments(operationArguments); }).Wait();
                 EnableTraceLogging(operationArguments);
 
                 if (operationArguments.PreserveCredentials)
@@ -323,7 +323,7 @@ namespace Microsoft.Alm.Cli
             {
                 OperationArguments operationArguments = new OperationArguments(stdin);
 
-                LoadOperationArguments(operationArguments);
+                Task.Run(async () => { await LoadOperationArguments(operationArguments); }).Wait();
                 EnableTraceLogging(operationArguments);
 
                 Credential credentials;
@@ -395,7 +395,7 @@ namespace Microsoft.Alm.Cli
                 Debug.Assert(operationArguments.Username != null, "The operaionArgument.Username is null");
                 Debug.Assert(operationArguments.TargetUri != null, "The operationArgument.TargetUri is null");
 
-                LoadOperationArguments(operationArguments);
+                Task.Run(async () => { await LoadOperationArguments(operationArguments); }).Wait();
                 EnableTraceLogging(operationArguments);
 
                 var credentials = operationArguments.Credentials;

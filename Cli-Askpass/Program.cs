@@ -29,6 +29,7 @@ using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Text.RegularExpressions;
+using System.Threading.Tasks;
 using Microsoft.Alm.Authentication;
 
 using Git = Microsoft.Alm.Authentication.Git;
@@ -212,8 +213,8 @@ namespace Microsoft.Alm.Cli
                         OperationArguments operationArguments = new OperationArguments(targetUri);
                         operationArguments.SetCredentials(username ?? string.Empty, password ?? string.Empty);
 
-                        // load up the operation arguments, enable tracing, and query for credentials
-                        LoadOperationArguments(operationArguments);
+                        // Load up the operation arguments, enable tracing, and query for credentials.
+                        Task.Run(async () => { await LoadOperationArguments(operationArguments); }).Wait();
                         EnableTraceLogging(operationArguments);
 
                         Credential credentials;

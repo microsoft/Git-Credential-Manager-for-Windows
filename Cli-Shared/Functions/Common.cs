@@ -342,7 +342,7 @@ namespace Microsoft.Alm.Cli
         }
 
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Maintainability", "CA1502:AvoidExcessiveComplexity", Scope = "member", Target = "Microsoft.Alm.Cli.CommonFunctions.#LoadOperationArguments(Microsoft.Alm.Cli.Program,Microsoft.Alm.Cli.OperationArguments)")]
-        public static void LoadOperationArguments(Program program, OperationArguments operationArguments)
+        public static async Task LoadOperationArguments(Program program, OperationArguments operationArguments)
         {
             if (program is null)
                 throw new ArgumentNullException(nameof(program));
@@ -372,7 +372,7 @@ namespace Microsoft.Alm.Cli
             }
 
             // Load/re-load the Git configuration after setting the use local/system config values.
-            operationArguments.LoadConfiguration();
+            await operationArguments.LoadConfiguration();
 
             // If a user-agent has been specified in the environment, set it globally.
             if (program.TryReadString(operationArguments, KeyType.HttpUserAgent, out value))
