@@ -74,8 +74,13 @@ namespace Microsoft.Alm.Cli
             CommandVersion
         };
 
-        internal Program()
+        internal Program(RuntimeContext context)
         {
+            if (context is null)
+                throw new ArgumentNullException(nameof(context));
+
+            _context = context;
+
             Title = AssemblyTitle;
         }
 
@@ -443,7 +448,7 @@ namespace Microsoft.Alm.Cli
         [STAThread]
         private static void Main(string[] args)
         {
-            var program = new Program();
+            var program = new Program(RuntimeContext.Default);
 
             program.Run(args);
         }

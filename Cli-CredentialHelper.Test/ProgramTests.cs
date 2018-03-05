@@ -26,6 +26,7 @@
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
+using Microsoft.Alm.Authentication;
 using Moq;
 using Xunit;
 
@@ -38,7 +39,7 @@ namespace Microsoft.Alm.Cli.Test
         [Fact]
         public async Task LoadOperationArgumentsTest()
         {
-            var program = new Program
+            var program = new Program(RuntimeContext.Default)
             {
                 _dieException = (Program caller, Exception e, string path, int line, string name) => Assert.False(true, $"Error: {e.ToString()}"),
                 _dieMessage = (Program caller, string m, string path, int line, string name) => Assert.False(true, $"Error: {m}"),
@@ -160,7 +161,7 @@ namespace Microsoft.Alm.Cli.Test
             bool? yesno;
             KeyType key = (KeyType)keyValue;
 
-            var program = new Program
+            var program = new Program(RuntimeContext.Default)
             {
                 _dieException = (Program caller, Exception e, string path, int line, string name) => Assert.False(true, $"Error: {e.ToString()}"),
                 _dieMessage = (Program caller, string m, string path, int line, string name) => Assert.False(true, $"Error: {m}"),
@@ -254,7 +255,7 @@ namespace Microsoft.Alm.Cli.Test
         {
             KeyType key = (KeyType)keyValue;
 
-            var program = new Program
+            var program = new Program(RuntimeContext.Default)
             {
                 _dieException = (Program caller, Exception e, string path, int line, string name) => Assert.False(true, $"Error: {e.ToString()}"),
                 _dieMessage = (Program caller, string m, string path, int line, string name) => Assert.False(true, $"Error: {m}"),

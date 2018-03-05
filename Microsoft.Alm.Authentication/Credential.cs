@@ -71,7 +71,7 @@ namespace Microsoft.Alm.Authentication
         /// </summary>
         /// <param name="obj">The object to compare.</param>
         /// <returns><see langword="true"/> if equal; <see langword="false"/> otherwise.</returns>
-        public override bool Equals(Object obj)
+        public override bool Equals(object obj)
         {
             return this == obj as Credential;
         }
@@ -90,7 +90,7 @@ namespace Microsoft.Alm.Authentication
         /// Gets a hash code based on the contents of the <see cref="Credential"/>.
         /// </summary>
         /// <returns>32-bit hash code.</returns>
-        public override Int32 GetHashCode()
+        public override int GetHashCode()
         {
             unchecked
             {

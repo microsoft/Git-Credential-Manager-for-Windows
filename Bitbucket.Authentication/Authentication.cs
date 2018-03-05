@@ -39,6 +39,7 @@ namespace Atlassian.Bitbucket.Authentication
     public class Authentication : BaseAuthentication, IAuthentication
     {
         public const string BitbucketBaseUrlHost = "bitbucket.org";
+        private const string RefreshTokenSuffix = "/refresh_token";
 
         /// <summary>
         /// Default constructor
@@ -50,7 +51,12 @@ namespace Atlassian.Bitbucket.Authentication
         /// <param name="acquireAuthenticationOAuthCallback">
         /// what to call to prompt the user to run the OAuth process
         /// </param>
-        public Authentication(ICredentialStore personalAccessTokenStore, AcquireCredentialsDelegate acquireCredentialsCallback, AcquireAuthenticationOAuthDelegate acquireAuthenticationOAuthCallback)
+        public Authentication(
+            RuntimeContext context,
+            ICredentialStore personalAccessTokenStore,
+            AcquireCredentialsDelegate acquireCredentialsCallback,
+            AcquireAuthenticationOAuthDelegate acquireAuthenticationOAuthCallback)
+            : base(context)
         {
             if (personalAccessTokenStore == null)
                 throw new ArgumentNullException(nameof(personalAccessTokenStore), $"The parameter `{nameof(personalAccessTokenStore)}` is null or invalid.");
@@ -76,8 +82,6 @@ namespace Atlassian.Bitbucket.Authentication
         internal AcquireAuthenticationOAuthDelegate AcquireAuthenticationOAuthCallback { get; set; }
 
         internal AuthenticationResultDelegate AuthenticationResultCallback { get; set; }
-
-        private const string refreshTokenSuffix = "/refresh_token";
 
         /// <summary>
         /// Deletes a `<see cref="Credential"/>` from the storage used by the authentication object.
@@ -139,7 +143,7 @@ namespace Atlassian.Bitbucket.Authentication
         /// <returns></returns>
         private static TargetUri GetRefreshTokenTargetUri(TargetUri targetUri)
         {
-            var uri = new Uri(targetUri.QueryUri, refreshTokenSuffix);
+            var uri = new Uri(targetUri.QueryUri, RefreshTokenSuffix);
             return new TargetUri(uri);
         }
 
@@ -280,7 +284,12 @@ namespace Atlassian.Bitbucket.Authentication
         /// Returns a `<see cref="BaseAuthentication"/>` instance if the `<paramref name="targetUri"/>` represents Bitbucket; otherwise `<see langword=""="null"/>`.
         /// </summary>
         /// <param name="targetUri"></param>
-        public static BaseAuthentication GetAuthentication(TargetUri targetUri, ICredentialStore personalAccessTokenStore, AcquireCredentialsDelegate acquireCredentialsCallback, AcquireAuthenticationOAuthDelegate acquireAuthenticationOAuthCallback)
+        public static BaseAuthentication GetAuthentication(
+            RuntimeContext context,
+            TargetUri targetUri, 
+            ICredentialStore personalAccessTokenStore,
+            AcquireCredentialsDelegate acquireCredentialsCallback,
+            AcquireAuthenticationOAuthDelegate acquireAuthenticationOAuthCallback)
         {
             BaseAuthentication authentication = null;
 
@@ -291,7 +300,7 @@ namespace Atlassian.Bitbucket.Authentication
 
             if (targetUri.QueryUri.DnsSafeHost.EndsWith(BitbucketBaseUrlHost, StringComparison.OrdinalIgnoreCase))
             {
-                authentication = new Authentication(personalAccessTokenStore, acquireCredentialsCallback, acquireAuthenticationOAuthCallback);
+                authentication = new Authentication(context, personalAccessTokenStore, acquireCredentialsCallback, acquireAuthenticationOAuthCallback);
                 Trace.WriteLine("authentication for Bitbucket created");
             }
             else

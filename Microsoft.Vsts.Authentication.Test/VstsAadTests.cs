@@ -13,7 +13,7 @@ namespace Microsoft.Alm.Authentication.Test
         public async Task VstsAadDeleteCredentialsTest()
         {
             TargetUri targetUri = DefaultTargetUri;
-            VstsAadAuthentication aadAuthentication = GetVstsAadAuthentication("aad-delete");
+            VstsAadAuthentication aadAuthentication = GetVstsAadAuthentication(RuntimeContext.Default, "aad-delete");
 
             if (aadAuthentication.VstsAuthority is AuthorityFake fake)
             {
@@ -33,7 +33,7 @@ namespace Microsoft.Alm.Authentication.Test
         public async Task VstsAadGetCredentialsTest()
         {
             TargetUri targetUri = DefaultTargetUri;
-            VstsAadAuthentication aadAuthentication = GetVstsAadAuthentication("aad-get");
+            VstsAadAuthentication aadAuthentication = GetVstsAadAuthentication(RuntimeContext.Default, "aad-get");
 
             Assert.Null(await aadAuthentication.GetCredentials(targetUri));
 
@@ -46,7 +46,7 @@ namespace Microsoft.Alm.Authentication.Test
         public async Task VstsAadInteractiveLogonTest()
         {
             TargetUri targetUri = DefaultTargetUri;
-            VstsAadAuthentication aadAuthentication = GetVstsAadAuthentication("aad-logon");
+            VstsAadAuthentication aadAuthentication = GetVstsAadAuthentication(RuntimeContext.Default, "aad-logon");
 
             Assert.Null(await aadAuthentication.PersonalAccessTokenStore.ReadCredentials(targetUri));
 
@@ -59,7 +59,7 @@ namespace Microsoft.Alm.Authentication.Test
         public async Task VstsAadNoninteractiveLogonTest()
         {
             TargetUri targetUri = DefaultTargetUri;
-            VstsAadAuthentication aadAuthentication = GetVstsAadAuthentication("aad-noninteractive");
+            VstsAadAuthentication aadAuthentication = GetVstsAadAuthentication(RuntimeContext.Default, "aad-noninteractive");
 
             Assert.NotNull(await aadAuthentication.NoninteractiveLogon(targetUri, new PersonalAccessTokenOptions { RequireCompactToken = false }));
 
@@ -70,7 +70,7 @@ namespace Microsoft.Alm.Authentication.Test
         public async Task VstsAadSetCredentialsTest()
         {
             TargetUri targetUri = DefaultTargetUri;
-            VstsAadAuthentication aadAuthentication = GetVstsAadAuthentication("aad-set");
+            VstsAadAuthentication aadAuthentication = GetVstsAadAuthentication(RuntimeContext.Default, "aad-set");
             Credential credentials = DefaultCredentials;
 
             await aadAuthentication.SetCredentials(targetUri, credentials);
@@ -82,7 +82,7 @@ namespace Microsoft.Alm.Authentication.Test
         [Fact]
         public async Task VstsAadValidateCredentialsTest()
         {
-            VstsAadAuthentication aadAuthentication = GetVstsAadAuthentication("aad-validate");
+            VstsAadAuthentication aadAuthentication = GetVstsAadAuthentication(RuntimeContext.Default, "aad-validate");
             Credential credentials = null;
 
             Assert.False(await aadAuthentication.ValidateCredentials(DefaultTargetUri, credentials), "Credential validation unexpectedly failed.");
@@ -92,14 +92,14 @@ namespace Microsoft.Alm.Authentication.Test
             Assert.True(await aadAuthentication.ValidateCredentials(DefaultTargetUri, credentials), "Credential validation unexpectedly failed.");
         }
 
-        private static VstsAadAuthentication GetVstsAadAuthentication(string @namespace)
+        private static VstsAadAuthentication GetVstsAadAuthentication(RuntimeContext context, string @namespace)
         {
             string expectedQueryParameters = null;
 
-            ICredentialStore tokenStore1 = new SecretCache(@namespace + 1, Secret.UriToIdentityUrl);
-            ITokenStore tokenStore2 = new SecretCache(@namespace + 2, Secret.UriToIdentityUrl);
+            ICredentialStore tokenStore1 = new SecretCache(context, @namespace + 1, Secret.UriToIdentityUrl);
+            ITokenStore tokenStore2 = new SecretCache(context, @namespace + 2, Secret.UriToIdentityUrl);
             IVstsAuthority vstsAuthority = new AuthorityFake(expectedQueryParameters);
-            return new VstsAadAuthentication(tokenStore1, tokenStore2, vstsAuthority);
+            return new VstsAadAuthentication(context, tokenStore1, tokenStore2, vstsAuthority);
         }
     }
 }

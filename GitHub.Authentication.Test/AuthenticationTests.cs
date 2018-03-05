@@ -18,6 +18,7 @@ namespace GitHub.Authentication.Test
             var credentialStore = new InMemoryCredentialStore();
             
             var authentication = new Authentication(
+                RuntimeContext.Default,
                 new Uri(writeUriString),
                 TokenScope.Gist,
                 credentialStore,
@@ -37,6 +38,7 @@ namespace GitHub.Authentication.Test
             var credentialStore = new InMemoryCredentialStore();
 
             var authentication = new Authentication(
+                RuntimeContext.Default,
                 new Uri("https://github.com/"),
                 TokenScope.Gist,
                 credentialStore,

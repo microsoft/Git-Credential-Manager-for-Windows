@@ -50,12 +50,14 @@ namespace GitHub.Authentication
         /// A secure secret store for any personal access tokens acquired.
         /// </param>
         public Authentication(
+            RuntimeContext context,
             TargetUri targetUri,
             TokenScope tokenScope,
             ICredentialStore personalAccessTokenStore,
             AcquireCredentialsDelegate acquireCredentialsCallback,
             AcquireAuthenticationCodeDelegate acquireAuthenticationCodeCallback,
             AuthenticationResultDelegate authenticationResultCallback)
+            : base(context)
         {
             TokenScope = tokenScope
                 ?? throw new ArgumentNullException("tokenScope", "The parameter `tokenScope` is null or invalid.");
@@ -76,9 +78,13 @@ namespace GitHub.Authentication
         public readonly TokenScope TokenScope;
 
         internal IAuthority Authority { get; set; }
+
         internal ICredentialStore PersonalAccessTokenStore { get; set; }
+
         internal AcquireCredentialsDelegate AcquireCredentialsCallback { get; set; }
+
         internal AcquireAuthenticationCodeDelegate AcquireAuthenticationCodeCallback { get; set; }
+
         internal AuthenticationResultDelegate AuthenticationResultCallback { get; set; }
 
         /// <summary>
@@ -114,6 +120,7 @@ namespace GitHub.Authentication
         /// <param name="authentication">(out) The authentication object if successful.</param>
         /// <returns>True if success; otherwise false.</returns>
         public static BaseAuthentication GetAuthentication(
+            RuntimeContext context,
             TargetUri targetUri,
             TokenScope tokenScope,
             ICredentialStore personalAccessTokenStore,
@@ -130,7 +137,13 @@ namespace GitHub.Authentication
             if (targetUri.DnsSafeHost.EndsWith(GitHubBaseUrlHost, StringComparison.OrdinalIgnoreCase))
             {
                 var normalizedTargetUri = NormalizeUri(targetUri);
-                authentication = new Authentication(normalizedTargetUri, tokenScope, personalAccessTokenStore, acquireCredentialsCallback, acquireAuthenticationCodeCallback, authenticationResultCallback);
+                authentication = new Authentication(context,
+                                                    normalizedTargetUri,
+                                                    tokenScope,
+                                                    personalAccessTokenStore,
+                                                    acquireCredentialsCallback,
+                                                    acquireAuthenticationCodeCallback,
+                                                    authenticationResultCallback);
                 Git.Trace.WriteLine($"created GitHub authentication for '{normalizedTargetUri}'.");
             }
             else

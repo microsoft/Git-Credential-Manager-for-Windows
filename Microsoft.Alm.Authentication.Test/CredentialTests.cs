@@ -47,8 +47,8 @@ namespace Microsoft.Alm.Authentication.Test
                 var uri = new TargetUri(url);
                 var writeCreds = new Credential(username, password);
                 var credentialStore = useCache
-                ? new SecretCache("test", Secret.UriToName) as ICredentialStore
-                : new SecretStore("test", null, null, Secret.UriToName) as ICredentialStore;
+                    ? new SecretCache(RuntimeContext.Default, "test", Secret.UriToName) as ICredentialStore
+                    : new SecretStore(RuntimeContext.Default, "test", null, null, Secret.UriToName) as ICredentialStore;
                 Credential readCreds = null;
 
                 await credentialStore.WriteCredentials(uri, writeCreds);

@@ -37,8 +37,8 @@ namespace Microsoft.Alm.CredentialHelper.Test
         {
             const string Namespace = "test";
 
-            var credentialCache = new SecretCache(Namespace);
-            var basicAuthentication = new BasicAuthentication(credentialCache);
+            var credentialCache = new SecretCache(RuntimeContext.Default, Namespace);
+            var basicAuthentication = new BasicAuthentication(RuntimeContext.Default, credentialCache);
             var targetUri = new Uri("https://username@domain.not");
 
             var credentials = new Credential("real", "pass");

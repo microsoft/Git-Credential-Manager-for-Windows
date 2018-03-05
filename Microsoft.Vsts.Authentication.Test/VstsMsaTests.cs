@@ -13,7 +13,7 @@ namespace Microsoft.Alm.Authentication.Test
         public async Task VstsMsaDeleteCredentialsTest()
         {
             TargetUri targetUri = DefaultTargetUri;
-            VstsMsaAuthentication msaAuthority = GetVstsMsaAuthentication("msa-delete");
+            VstsMsaAuthentication msaAuthority = GetVstsMsaAuthentication(RuntimeContext.Default, "msa-delete");
 
             if (msaAuthority.VstsAuthority is AuthorityFake fake)
             {
@@ -33,7 +33,7 @@ namespace Microsoft.Alm.Authentication.Test
         public async Task VstsMsaGetCredentialsTest()
         {
             TargetUri targetUri = DefaultTargetUri;
-            VstsMsaAuthentication msaAuthority = GetVstsMsaAuthentication("msa-get");
+            VstsMsaAuthentication msaAuthority = GetVstsMsaAuthentication(RuntimeContext.Default, "msa-get");
 
             Assert.Null(await msaAuthority.GetCredentials(targetUri));
 
@@ -46,7 +46,7 @@ namespace Microsoft.Alm.Authentication.Test
         public async Task VstsMsaInteractiveLogonTest()
         {
             TargetUri targetUri = DefaultTargetUri;
-            VstsMsaAuthentication msaAuthority = GetVstsMsaAuthentication("msa-logon");
+            VstsMsaAuthentication msaAuthority = GetVstsMsaAuthentication(RuntimeContext.Default, "msa-logon");
 
             Assert.Null(await msaAuthority.PersonalAccessTokenStore.ReadCredentials(targetUri));
 
@@ -59,7 +59,7 @@ namespace Microsoft.Alm.Authentication.Test
         public async Task VstsMsaSetCredentialsTest()
         {
             TargetUri targetUri = DefaultTargetUri;
-            VstsMsaAuthentication msaAuthority = GetVstsMsaAuthentication("msa-set");
+            VstsMsaAuthentication msaAuthority = GetVstsMsaAuthentication(RuntimeContext.Default, "msa-set");
 
             await msaAuthority.SetCredentials(targetUri, DefaultCredentials);
 
@@ -69,7 +69,7 @@ namespace Microsoft.Alm.Authentication.Test
         [Fact]
         public async Task VstsMsaValidateCredentialsTest()
         {
-            VstsMsaAuthentication msaAuthority = GetVstsMsaAuthentication("msa-validate");
+            VstsMsaAuthentication msaAuthority = GetVstsMsaAuthentication(RuntimeContext.Default, "msa-validate");
             Credential credentials = null;
 
             Assert.False( await msaAuthority.ValidateCredentials(DefaultTargetUri, credentials), "Credential validation unexpectedly failed.");
@@ -79,12 +79,12 @@ namespace Microsoft.Alm.Authentication.Test
             Assert.True(await msaAuthority.ValidateCredentials(DefaultTargetUri, credentials), "Credential validation unexpectedly failed.");
         }
 
-        private static VstsMsaAuthentication GetVstsMsaAuthentication(string @namespace)
+        private static VstsMsaAuthentication GetVstsMsaAuthentication(RuntimeContext context, string @namespace)
         {
-            ICredentialStore tokenStore1 = new SecretCache(@namespace + 1, Secret.UriToIdentityUrl);
-            ITokenStore tokenStore2 = new SecretCache( @namespace + 2, Secret.UriToIdentityUrl);
+            ICredentialStore tokenStore1 = new SecretCache(context, @namespace + 1, Secret.UriToIdentityUrl);
+            ITokenStore tokenStore2 = new SecretCache(context, @namespace + 2, Secret.UriToIdentityUrl);
             IVstsAuthority liveAuthority = new AuthorityFake(VstsMsaAuthentication.QueryParameters);
-            return new VstsMsaAuthentication(tokenStore1, tokenStore2, liveAuthority);
+            return new VstsMsaAuthentication(context, tokenStore1, tokenStore2, liveAuthority);
         }
     }
 }

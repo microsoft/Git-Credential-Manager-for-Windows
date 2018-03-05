@@ -31,9 +31,13 @@ using System.Text;
 
 namespace Microsoft.Alm.Authentication
 {
-    public abstract class BaseSecureStore
+    public abstract class BaseSecureStore: Base
     {
         public static readonly char[] IllegalCharacters = new[] { ':', ';', '\\', '?', '@', '=', '&', '%', '$' };
+
+        protected BaseSecureStore(RuntimeContext context)
+            : base(context)
+        { }
 
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Design", "CA1031:DoNotCatchGeneralExceptionTypes")]
         protected bool Delete(string targetName)

@@ -46,10 +46,11 @@ namespace Microsoft.Alm.Authentication
         /// <param name="personalAccessTokenStore">The secure secret store for storing any personal access tokens acquired.</param>
         /// <param name="adaRefreshTokenStore">The secure secret store for storing any Azure tokens acquired.</param>
         public VstsAadAuthentication(
+            RuntimeContext context,
             Guid tenantId,
             VstsTokenScope tokenScope,
             ICredentialStore personalAccessTokenStore)
-            : base(tokenScope, personalAccessTokenStore)
+            : base(context, tokenScope, personalAccessTokenStore)
         {
             if (tenantId == Guid.Empty)
             {
@@ -67,10 +68,12 @@ namespace Microsoft.Alm.Authentication
         /// Test constructor which allows for using fake credential stores.
         /// </summary>
         internal VstsAadAuthentication(
+            RuntimeContext context,
             ICredentialStore personalAccessTokenStore,
             ITokenStore vstsIdeTokenCache,
             IVstsAuthority vstsAuthority)
-            : base(personalAccessTokenStore,
+            : base(context,
+                   personalAccessTokenStore,
                    vstsIdeTokenCache,
                    vstsAuthority)
         { }

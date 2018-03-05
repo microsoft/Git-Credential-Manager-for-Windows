@@ -45,7 +45,8 @@ namespace Microsoft.Alm.Authentication
 
         protected const string AdalRefreshPrefix = "ada";
 
-        protected BaseVstsAuthentication(VstsTokenScope tokenScope, ICredentialStore personalAccessTokenStore)
+        protected BaseVstsAuthentication(RuntimeContext context, VstsTokenScope tokenScope, ICredentialStore personalAccessTokenStore)
+            : base(context)
         {
             if (tokenScope is null)
                 throw new ArgumentNullException(nameof(tokenScope));
@@ -60,10 +61,11 @@ namespace Microsoft.Alm.Authentication
         }
 
         internal BaseVstsAuthentication(
+            RuntimeContext context,
             ICredentialStore personalAccessTokenStore,
             ITokenStore vstsIdeTokenCache,
             IVstsAuthority vstsAuthority)
-            : this(VstsTokenScope.ProfileRead, personalAccessTokenStore)
+            : this(context, VstsTokenScope.ProfileRead, personalAccessTokenStore)
         {
             if (vstsIdeTokenCache is null)
                 throw new ArgumentNullException(nameof(vstsIdeTokenCache));
@@ -255,6 +257,7 @@ namespace Microsoft.Alm.Authentication
         /// <param name="scope">The scope of the access being requested.</param>
         /// <param name="personalAccessTokenStore">Storage container for personal access token secrets.</param>
         public static async Task<BaseAuthentication> GetAuthentication(
+            RuntimeContext context,
             TargetUri targetUri,
             VstsTokenScope scope,
             ICredentialStore personalAccessTokenStore)
@@ -279,12 +282,12 @@ namespace Microsoft.Alm.Authentication
             if (tenantId == Guid.Empty)
             {
                 Git.Trace.WriteLine("MSA authority detected.");
-                authentication = new VstsMsaAuthentication(scope, personalAccessTokenStore);
+                authentication = new VstsMsaAuthentication(context, scope, personalAccessTokenStore);
             }
             else
             {
                 Git.Trace.WriteLine($"AAD authority for tenant '{tenantId}' detected.");
-                authentication = new VstsAadAuthentication(tenantId, scope, personalAccessTokenStore);
+                authentication = new VstsAadAuthentication(context, tenantId, scope, personalAccessTokenStore);
                 (authentication as VstsAadAuthentication).TenantId = tenantId;
             }
 
