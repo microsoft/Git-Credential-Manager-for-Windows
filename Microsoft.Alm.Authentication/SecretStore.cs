@@ -47,7 +47,7 @@ namespace Microsoft.Alm.Authentication
         /// <param name="getTargetName">
         /// Delegate used to transform a `<see cref="TargetUri"/>` into a store lookup key.
         /// </param>
-        public SecretStore(string @namespace, ICredentialStore credentialCache, ITokenStore tokenCache, Secret.UriNameConversion getTargetName)
+        public SecretStore(string @namespace, ICredentialStore credentialCache, ITokenStore tokenCache, Secret.UriNameConversionDelegate getTargetName)
         {
             if (string.IsNullOrWhiteSpace(@namespace))
                 throw new ArgumentNullException(nameof(@namespace));
@@ -61,7 +61,7 @@ namespace Microsoft.Alm.Authentication
             _tokenCache = tokenCache ?? new SecretCache(@namespace, _getTargetName);
         }
 
-        public SecretStore(string @namespace, Secret.UriNameConversion getTargetName)
+        public SecretStore(string @namespace, Secret.UriNameConversionDelegate getTargetName)
             : this(@namespace, null, null, getTargetName)
         { }
 
@@ -74,7 +74,7 @@ namespace Microsoft.Alm.Authentication
             get { return _namespace; }
         }
 
-        public Secret.UriNameConversion UriNameConversion
+        public Secret.UriNameConversionDelegate UriNameConversion
         {
             get { return _getTargetName; }
             set
@@ -88,7 +88,7 @@ namespace Microsoft.Alm.Authentication
 
         private string _namespace;
         private ICredentialStore _credentialCache;
-        private Secret.UriNameConversion _getTargetName;
+        private Secret.UriNameConversionDelegate _getTargetName;
         private ITokenStore _tokenCache;
 
         /// <summary>

@@ -34,7 +34,7 @@ namespace Microsoft.Alm.Authentication
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Security", "CA2104:DoNotDeclareReadOnlyMutableReferenceTypes")]
         public static readonly StringComparer KeyComparer = StringComparer.OrdinalIgnoreCase;
 
-        public SecretCache(string @namespace, Secret.UriNameConversion getTargetName)
+        public SecretCache(string @namespace, Secret.UriNameConversionDelegate getTargetName)
             : this()
         {
             if (string.IsNullOrWhiteSpace(@namespace))
@@ -65,14 +65,14 @@ namespace Microsoft.Alm.Authentication
 
         private Dictionary<string, Secret> _cache;
         private string _namespace;
-        private Secret.UriNameConversion _getTargetName;
+        private Secret.UriNameConversionDelegate _getTargetName;
 
         public string Namespace
         {
             get { return _namespace; }
         }
 
-        public Secret.UriNameConversion UriNameConversion
+        public Secret.UriNameConversionDelegate UriNameConversion
         {
             get { return _getTargetName; }
             set
