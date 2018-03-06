@@ -3,6 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.IO;
 using System.Text;
+using Microsoft.Alm.Authentication;
 using Xunit;
 
 namespace Microsoft.Alm.Cli.Test
@@ -30,7 +31,7 @@ namespace Microsoft.Alm.Cli.Test
 
                 memory.Seek(0, SeekOrigin.Begin);
 
-                cut = new OperationArguments(memory);
+                cut = new OperationArguments(RuntimeContext.Default, memory);
             }
 
             Assert.Equal(input.Protocol, cut.QueryProtocol);
@@ -68,7 +69,7 @@ namespace Microsoft.Alm.Cli.Test
 
                 memory.Seek(0, SeekOrigin.Begin);
 
-                cut = new OperationArguments(memory);
+                cut = new OperationArguments(RuntimeContext.Default, memory);
             }
 
             Assert.Equal(input.Protocol, cut.QueryProtocol, StringComparer.Ordinal);
@@ -194,7 +195,7 @@ namespace Microsoft.Alm.Cli.Test
 
                 memory.Seek(0, SeekOrigin.Begin);
 
-                var oparg = new OperationArguments(memory);
+                var oparg = new OperationArguments(RuntimeContext.Default, memory);
 
                 Assert.NotNull(oparg);
                 Assert.Equal(input.Protocol ?? string.Empty, oparg.QueryProtocol, StringComparer.Ordinal);

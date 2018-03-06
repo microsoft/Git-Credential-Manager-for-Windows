@@ -40,7 +40,7 @@ namespace Microsoft.Alm.Authentication
 
         private static readonly AuthenticationHeaderValue[] NullResult = new AuthenticationHeaderValue[0];
 
-        public static async Task<AuthenticationHeaderValue[]> GetHeaderValues(TargetUri targetUri)
+        public static async Task<AuthenticationHeaderValue[]> GetHeaderValues(RuntimeContext context, TargetUri targetUri)
         {
             BaseSecureStore.ValidateTargetUri(targetUri);
 
@@ -68,7 +68,7 @@ namespace Microsoft.Alm.Authentication
                 }
                 catch (Exception exception)
                 {
-                    Git.Trace.WriteLine("error testing targetUri for NTLM: " + exception.Message);
+                    context.Trace.WriteLine("error testing targetUri for NTLM: " + exception.Message);
                 }
             }
 

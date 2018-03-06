@@ -45,7 +45,10 @@ namespace Microsoft.Alm.Authentication
 
         protected const string AdalRefreshPrefix = "ada";
 
-        protected BaseVstsAuthentication(RuntimeContext context, VstsTokenScope tokenScope, ICredentialStore personalAccessTokenStore)
+        protected BaseVstsAuthentication(
+            RuntimeContext context,
+            VstsTokenScope tokenScope,
+            ICredentialStore personalAccessTokenStore)
             : base(context)
         {
             if (tokenScope is null)
@@ -57,7 +60,7 @@ namespace Microsoft.Alm.Authentication
             Resource = DefaultResource;
             TokenScope = tokenScope;
             PersonalAccessTokenStore = personalAccessTokenStore;
-            VstsAuthority = new VstsAzureAuthority();
+            VstsAuthority = new VstsAzureAuthority(context);
         }
 
         internal BaseVstsAuthentication(
@@ -131,12 +134,12 @@ namespace Microsoft.Alm.Authentication
 
                 // Deserialize the cache and remove any matching entry.
                 string tenantUrl = targetUri.ToString();
-                var cache = await DeserializeTenantCache();
+                var cache = await DeserializeTenantCache(Context);
 
                 // Attempt to remove the URL entry, if successful serialize the cache.
                 if (cache.Remove(tenantUrl))
                 {
-                    await SerializeTenantCache(cache);
+                    await SerializeTenantCache(Context, cache);
                 }
 
                 return true;
@@ -154,7 +157,7 @@ namespace Microsoft.Alm.Authentication
         /// <param name="tenantId">The identity of the authority tenant; `<see cref="Guid.Empty"/>` otherwise.</param>
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Design", "CA1006:DoNotNestGenericTypesInMemberSignatures")]
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Design", "CA1062:Validate arguments of public methods", MessageId = "0")]
-        public static async Task<KeyValuePair<bool, Guid>> DetectAuthority(TargetUri targetUri)
+        public static async Task<KeyValuePair<bool, Guid>> DetectAuthority(RuntimeContext context, TargetUri targetUri)
         {
             const string VstsBaseUrlHost = "visualstudio.com";
             const string VstsResourceTenantHeader = "X-VSS-ResourceTenant";
@@ -165,7 +168,7 @@ namespace Microsoft.Alm.Authentication
 
             if (targetUri.Host.EndsWith(VstsBaseUrlHost, StringComparison.OrdinalIgnoreCase))
             {
-                Git.Trace.WriteLine($"'{targetUri}' is subdomain of '{VstsBaseUrlHost}', checking AAD vs MSA.");
+                context.Trace.WriteLine($"'{targetUri}' is subdomain of '{VstsBaseUrlHost}', checking AAD vs MSA.");
 
                 string tenant = null;
                 WebResponse response;
@@ -177,7 +180,7 @@ namespace Microsoft.Alm.Authentication
                     string tenantUrl = targetUri.ToString();
 
                     // Read the cache from disk
-                    var cache = await DeserializeTenantCache();
+                    var cache = await DeserializeTenantCache(context);
 
                     // Check the cache for an existing value
                     if (cache.TryGetValue(tenantUrl, out tenantId))
@@ -195,7 +198,7 @@ namespace Microsoft.Alm.Authentication
                     }
                     catch (WebException exception)
                     {
-                        Git.Trace.WriteLine($"unable to get response from '{targetUri}' due to '{exception.Status}'.");
+                        context.Trace.WriteLine($"unable to get response from '{targetUri}' due to '{exception.Status}'.");
 
                         // Given the number proxy related failures we see, emit a message about the failure potentially
                         // being related to a proxy or gateway misconfiguration.
@@ -210,7 +213,7 @@ namespace Microsoft.Alm.Authentication
                             case WebExceptionStatus.ServerProtocolViolation:
                             case WebExceptionStatus.TrustFailure:
                                 {
-                                    Git.Trace.WriteLine($"is there a proxy or gateway incorrectly configured?");
+                                    context.Trace.WriteLine($"is there a proxy or gateway incorrectly configured?");
                                 }
                                 break;
                         }
@@ -231,7 +234,7 @@ namespace Microsoft.Alm.Authentication
                             cache[tenantUrl] = tenantId;
 
                             // Write the cache to disk.
-                            await SerializeTenantCache(cache);
+                            await SerializeTenantCache(context, cache);
 
                             // Success, notify the caller
                             return new KeyValuePair<bool, Guid>(true, tenantId);
@@ -240,7 +243,7 @@ namespace Microsoft.Alm.Authentication
                 }
                 else
                 {
-                    Git.Trace.WriteLine($"detected non-https based protocol: {targetUri.Scheme}.");
+                    context.Trace.WriteLine($"detected non-https based protocol: {targetUri.Scheme}.");
                 }
             }
 
@@ -270,7 +273,7 @@ namespace Microsoft.Alm.Authentication
 
             BaseAuthentication authentication = null;
 
-            var result = await DetectAuthority(targetUri);
+            var result = await DetectAuthority(context, targetUri);
 
             if (!result.Key)
                 return null;
@@ -281,12 +284,12 @@ namespace Microsoft.Alm.Authentication
             // empty identity is MSA, anything else is AAD
             if (tenantId == Guid.Empty)
             {
-                Git.Trace.WriteLine("MSA authority detected.");
+                context.Trace.WriteLine("MSA authority detected.");
                 authentication = new VstsMsaAuthentication(context, scope, personalAccessTokenStore);
             }
             else
             {
-                Git.Trace.WriteLine($"AAD authority for tenant '{tenantId}' detected.");
+                context.Trace.WriteLine($"AAD authority for tenant '{tenantId}' detected.");
                 authentication = new VstsAadAuthentication(context, tenantId, scope, personalAccessTokenStore);
                 (authentication as VstsAadAuthentication).TenantId = tenantId;
             }
@@ -310,14 +313,14 @@ namespace Microsoft.Alm.Authentication
             {
                 if ((credentials = await PersonalAccessTokenStore.ReadCredentials(targetUri)) != null)
                 {
-                    Git.Trace.WriteLine($"credentials for '{targetUri}' found.");
+                    Trace.WriteLine($"credentials for '{targetUri}' found.");
                 }
             }
             catch (Exception exception)
             {
                 System.Diagnostics.Debug.WriteLine(exception);
 
-                Git.Trace.WriteLine($"failed to read credentials from the secure store: {exception.GetType().Name}.");
+                Trace.WriteLine($"failed to read credentials from the secure store: {exception.GetType().Name}.");
             }
 
             return credentials;
@@ -372,7 +375,7 @@ namespace Microsoft.Alm.Authentication
             {
                 credential = (Credential)personalAccessToken;
 
-                Git.Trace.WriteLine($"personal access token created for '{targetUri}'.");
+                Trace.WriteLine($"personal access token created for '{targetUri}'.");
 
                 try
                 {
@@ -382,7 +385,7 @@ namespace Microsoft.Alm.Authentication
                 {
                     System.Diagnostics.Debug.WriteLine(exception);
 
-                    Git.Trace.WriteLine($"failed to write credentials to the secure store: {exception.GetType().Name}.");
+                    Trace.WriteLine($"failed to write credentials to the secure store: {exception.GetType().Name}.");
                 }
             }
 
@@ -414,7 +417,7 @@ namespace Microsoft.Alm.Authentication
             {
                 credential = (Credential)personalAccessToken;
 
-                Git.Trace.WriteLine($"personal access token created for '{targetUri}'.");
+                Trace.WriteLine($"personal access token created for '{targetUri}'.");
 
                 try
                 {
@@ -424,7 +427,7 @@ namespace Microsoft.Alm.Authentication
                 {
                     System.Diagnostics.Debug.WriteLine(exception);
 
-                    Git.Trace.WriteLine($"failed to write credentials to the secure store: {exception.GetType().Name}.");
+                    Trace.WriteLine($"failed to write credentials to the secure store: {exception.GetType().Name}.");
                 }
             }
 
@@ -436,7 +439,7 @@ namespace Microsoft.Alm.Authentication
         private const string CachePathDirectory = "GitCredentialManager";
         private const string CachePathFileName = "tenant.cache";
 
-        private static async Task<Dictionary<string, Guid>> DeserializeTenantCache()
+        private static async Task<Dictionary<string, Guid>> DeserializeTenantCache(RuntimeContext context)
         {
             var encoding = new UTF8Encoding(false);
             var path = GetCachePath();
@@ -475,7 +478,7 @@ namespace Microsoft.Alm.Authentication
             {
                 System.Diagnostics.Debug.WriteLine(exception);
 
-                Git.Trace.WriteLine($"failed to deserialize tenant cache: {exception.GetType().Name}.");
+                context.Trace.WriteLine($"failed to deserialize tenant cache: {exception.GetType().Name}.");
 
                 return cache;
             }
@@ -525,8 +528,10 @@ namespace Microsoft.Alm.Authentication
             return path;
         }
 
-        private static async Task SerializeTenantCache(Dictionary<string, Guid> cache)
+        private static async Task SerializeTenantCache(RuntimeContext context, Dictionary<string, Guid> cache)
         {
+            if (context is null)
+                throw new ArgumentNullException(nameof(context));
             if (cache is null)
                 throw new ArgumentNullException(nameof(cache));
 
@@ -577,7 +582,7 @@ namespace Microsoft.Alm.Authentication
             {
                 System.Diagnostics.Debug.WriteLine(exception);
 
-                Git.Trace.WriteLine($"failed to serialize tenant cache: {exception.GetType().Name}.");
+                context.Trace.WriteLine($"failed to serialize tenant cache: {exception.GetType().Name}.");
             }
         }
     }

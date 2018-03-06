@@ -43,7 +43,12 @@ namespace Microsoft.Alm.Cli
             // ReadConsole 32768 fail, 32767 OK @linquize [https://github.com/Microsoft/Git-Credential-Manager-for-Windows/commit/a62b9a19f430d038dcd85a610d97e5f763980f85]
             const int BufferReadSize = 16 * 1024;
 
-            Debug.Assert(targetUri != null);
+            if (program is null)
+                throw new ArgumentNullException(nameof(program));
+            if (targetUri is null)
+                throw new ArgumentNullException(nameof(targetUri));
+
+            var trace = program.Context.Trace;
 
             titleMessage = titleMessage ?? "Please enter your credentials for ";
 
@@ -64,7 +69,7 @@ namespace Microsoft.Alm.Cli
                 // Read the current console mode.
                 if (stdin.IsInvalid || stdout.IsInvalid)
                 {
-                    Git.Trace.WriteLine("not a tty detected, abandoning prompt.");
+                    trace.WriteLine("not a tty detected, abandoning prompt.");
                     return null;
                 }
                 else if (!NativeMethods.GetConsoleMode(stdin, out consoleMode))
@@ -73,7 +78,7 @@ namespace Microsoft.Alm.Cli
                     throw new Win32Exception(error, "Unable to determine console mode (" + NativeMethods.Win32Error.GetText(error) + ").");
                 }
 
-                Git.Trace.WriteLine($"console mode = '{consoleMode}'.");
+                trace.WriteLine($"console mode = '{consoleMode}'.");
 
                 string username = null;
                 string password = null;
@@ -127,7 +132,7 @@ namespace Microsoft.Alm.Cli
                         throw new Win32Exception(error, "Unable to set console mode (" + NativeMethods.Win32Error.GetText(error) + ").");
                     }
 
-                    Git.Trace.WriteLine($"console mode = '{consoleMode2}'.");
+                    trace.WriteLine($"console mode = '{consoleMode2}'.");
 
                     // Prompt the user for password.
                     buffer.Append("password: ");
@@ -156,7 +161,7 @@ namespace Microsoft.Alm.Cli
                     // Restore the console mode to its original value.
                     NativeMethods.SetConsoleMode(stdin, consoleMode);
 
-                    Git.Trace.WriteLine($"console mode = '{consoleMode}'.");
+                    trace.WriteLine($"console mode = '{consoleMode}'.");
                 }
 
                 if (username != null && password != null)
@@ -168,13 +173,18 @@ namespace Microsoft.Alm.Cli
 
         public static void Exit(Program program, int exitcode, string message, string path, int line, string name)
         {
+            if (program is null)
+                throw new ArgumentNullException(nameof(program));
+
+            var trace = program.Context.Trace;
+
             if (!string.IsNullOrWhiteSpace(message))
             {
-                Git.Trace.WriteLine(message, path, line, name);
+                trace.WriteLine(message, path, line, name);
                 program.WriteLine(message);
             }
 
-            Git.Trace.Flush();
+            trace.Flush();
 
             Environment.Exit(exitcode);
         }

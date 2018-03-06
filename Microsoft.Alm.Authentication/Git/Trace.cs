@@ -30,7 +30,7 @@ using System.Text;
 
 namespace Microsoft.Alm.Authentication.Git
 {
-    internal interface ITrace
+    public interface ITrace
     {
         void AddListener(TextWriter listener);
 

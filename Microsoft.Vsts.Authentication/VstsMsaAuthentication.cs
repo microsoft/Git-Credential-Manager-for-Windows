@@ -35,10 +35,13 @@ namespace Microsoft.Alm.Authentication
         public const string DefaultAuthorityHost = AzureAuthority.AuthorityHostUrlBase + "/live.com";
         internal const string QueryParameters = "domain_hint=live.com&display=popup&site_id=501454&nux=1";
 
-        public VstsMsaAuthentication(RuntimeContext context, VstsTokenScope tokenScope, ICredentialStore personalAccessTokenStore)
+        public VstsMsaAuthentication(
+            RuntimeContext context,
+            VstsTokenScope tokenScope,
+            ICredentialStore personalAccessTokenStore)
             : base(context, tokenScope, personalAccessTokenStore)
         {
-            VstsAuthority = new VstsAzureAuthority(DefaultAuthorityHost);
+            VstsAuthority = new VstsAzureAuthority(context, DefaultAuthorityHost);
         }
 
         /// <summary>
@@ -79,7 +82,7 @@ namespace Microsoft.Alm.Authentication
                 Token token;
                 if ((token = await VstsAuthority.InteractiveAcquireToken(targetUri, ClientId, Resource, new Uri(RedirectUrl), QueryParameters)) != null)
                 {
-                    Git.Trace.WriteLine($"token '{targetUri}' successfully acquired.");
+                    Trace.WriteLine($"token '{targetUri}' successfully acquired.");
 
                     return await GeneratePersonalAccessToken(targetUri, token, options);
                 }
@@ -89,7 +92,7 @@ namespace Microsoft.Alm.Authentication
                 Debug.Write(exception);
             }
 
-            Git.Trace.WriteLine($"failed to acquire token for '{targetUri}'.");
+            Trace.WriteLine($"failed to acquire token for '{targetUri}'.");
             return null;
         }
 
@@ -109,7 +112,7 @@ namespace Microsoft.Alm.Authentication
                 Token token;
                 if ((token = await VstsAuthority.InteractiveAcquireToken(targetUri, ClientId, Resource, new Uri(RedirectUrl), QueryParameters)) != null)
                 {
-                    Git.Trace.WriteLine($"token '{targetUri}' successfully acquired.");
+                    Trace.WriteLine($"token '{targetUri}' successfully acquired.");
 
                     return await GeneratePersonalAccessToken(targetUri, token, requestCompactToken);
                 }
@@ -119,7 +122,7 @@ namespace Microsoft.Alm.Authentication
                 Debug.Write(exception);
             }
 
-            Git.Trace.WriteLine($"failed to acquire token for '{targetUri}'.");
+            Trace.WriteLine($"failed to acquire token for '{targetUri}'.");
             return null;
         }
 

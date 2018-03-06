@@ -101,7 +101,7 @@ namespace GitHub.Authentication
             if (await PersonalAccessTokenStore.ReadCredentials(normalizedTargetUri) != null)
             {
                 result = await PersonalAccessTokenStore.DeleteCredentials(normalizedTargetUri);
-                Git.Trace.WriteLine($"credentials for '{normalizedTargetUri}' deleted");
+                Trace.WriteLine($"credentials for '{normalizedTargetUri}' deleted");
             }
 
             return result;
@@ -144,12 +144,12 @@ namespace GitHub.Authentication
                                                     acquireCredentialsCallback,
                                                     acquireAuthenticationCodeCallback,
                                                     authenticationResultCallback);
-                Git.Trace.WriteLine($"created GitHub authentication for '{normalizedTargetUri}'.");
+                context.Trace.WriteLine($"created GitHub authentication for '{normalizedTargetUri}'.");
             }
             else
             {
                 authentication = null;
-                Git.Trace.WriteLine($"not github.com, authentication creation aborted.");
+                context.Trace.WriteLine($"not github.com, authentication creation aborted.");
             }
 
             return authentication;
@@ -170,7 +170,7 @@ namespace GitHub.Authentication
             var normalizedTargetUri = NormalizeUri(targetUri);
             if ((credentials = await PersonalAccessTokenStore.ReadCredentials(normalizedTargetUri)) != null)
             {
-                Git.Trace.WriteLine($"credentials for '{normalizedTargetUri}' found.");
+                Trace.WriteLine($"credentials for '{normalizedTargetUri}' found.");
             }
 
             return credentials;
@@ -198,7 +198,7 @@ namespace GitHub.Authentication
 
                 if (result = await Authority.AcquireToken(normalizedTargetUri, username, password, null, TokenScope))
                 {
-                    Git.Trace.WriteLine($"token acquisition for '{normalizedTargetUri}' succeeded");
+                    Trace.WriteLine($"token acquisition for '{normalizedTargetUri}' succeeded");
 
                     credentials = (Credential)result.Token;
                     await PersonalAccessTokenStore.WriteCredentials(normalizedTargetUri, credentials);
@@ -216,7 +216,7 @@ namespace GitHub.Authentication
                     {
                         if (result = await Authority.AcquireToken(normalizedTargetUri, username, password, authenticationCode, TokenScope))
                         {
-                            Git.Trace.WriteLine($"token acquisition for '{normalizedTargetUri}' succeeded.");
+                            Trace.WriteLine($"token acquisition for '{normalizedTargetUri}' succeeded.");
 
                             credentials = (Credential)result.Token;
                             await PersonalAccessTokenStore.WriteCredentials(normalizedTargetUri, credentials);
@@ -232,7 +232,7 @@ namespace GitHub.Authentication
                 AuthenticationResultCallback?.Invoke(normalizedTargetUri, result);
             }
 
-            Git.Trace.WriteLine($"interactive logon for '{normalizedTargetUri}' failed.");
+            Trace.WriteLine($"interactive logon for '{normalizedTargetUri}' failed.");
             return credentials;
         }
 
@@ -262,7 +262,7 @@ namespace GitHub.Authentication
             AuthenticationResult result;
             if (result = await Authority.AcquireToken(normalizedTargetUri, username, password, authenticationCode, TokenScope))
             {
-                Git.Trace.WriteLine($"token acquisition for '{normalizedTargetUri}' succeeded.");
+                Trace.WriteLine($"token acquisition for '{normalizedTargetUri}' succeeded.");
 
                 credentials = (Credential)result.Token;
                 await PersonalAccessTokenStore.WriteCredentials(normalizedTargetUri, credentials);
@@ -270,7 +270,7 @@ namespace GitHub.Authentication
                 return credentials;
             }
 
-            Git.Trace.WriteLine($"non-interactive logon for '{normalizedTargetUri}' failed.");
+            Trace.WriteLine($"non-interactive logon for '{normalizedTargetUri}' failed.");
             return credentials;
         }
 

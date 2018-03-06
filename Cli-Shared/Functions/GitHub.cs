@@ -42,7 +42,12 @@ namespace Microsoft.Alm.Cli
             // ReadConsole 32768 fail, 32767 ok @linquize [https://github.com/Microsoft/Git-Credential-Manager-for-Windows/commit/a62b9a19f430d038dcd85a610d97e5f763980f85]
             const int BufferReadSize = 16 * 1024;
 
-            Debug.Assert(targetUri != null);
+            if (program is null)
+                throw new ArgumentNullException(nameof(program));
+            if (targetUri is null)
+                throw new ArgumentNullException(nameof(targetUri));
+
+            var trace = program.Context.Trace;
 
             StringBuilder buffer = new StringBuilder(BufferReadSize);
             uint read = 0;
@@ -62,7 +67,7 @@ namespace Microsoft.Alm.Cli
                     ? "app"
                     : "sms";
 
-                Git.Trace.WriteLine($"2fa type = '{type}'.");
+                trace.WriteLine($"2fa type = '{type}'.");
 
                 buffer.AppendLine()
                       .Append("authcode (")

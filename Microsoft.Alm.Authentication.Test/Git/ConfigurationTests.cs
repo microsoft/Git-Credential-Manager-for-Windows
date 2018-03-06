@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Threading.Tasks;
 using Xunit;
 
 namespace Microsoft.Alm.Authentication.Git.Test
@@ -24,9 +25,9 @@ namespace Microsoft.Alm.Authentication.Git.Test
 
         [Theory]
         [MemberData(nameof(ParseData), DisableDiscoveryEnumeration = true)]
-        public void GitConfif_Parse(string input, string expectedName, string expected, bool ignoreCase)
+        public async Task GitConfif_Parse(string input, string expectedName, string expected, bool ignoreCase)
         {
-            var values = TestParseGitConfig(input);
+            var values = await TestParseGitConfig(input);
             Assert.NotNull(values);
 
             Assert.Equal(expected, values[expectedName], ignoreCase ? StringComparer.OrdinalIgnoreCase : StringComparer.Ordinal);
@@ -34,7 +35,7 @@ namespace Microsoft.Alm.Authentication.Git.Test
 
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2202:Do not dispose objects multiple times")]
         [Fact]
-        public void GitConfig_ParseSampleFile()
+        public async Task GitConfig_ParseSampleFile()
         {
             var values = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
             var type = GetType();
@@ -43,7 +44,7 @@ namespace Microsoft.Alm.Authentication.Git.Test
             using (var rs = assembly.GetManifestResourceStream("Microsoft.Alm.Authentication.Test.Git.sample.gitconfig"))
             using (var sr = new StreamReader(rs))
             {
-                Configuration.ParseGitConfig(sr, values);
+                await Configuration.ParseGitConfig(RuntimeContext.Default, sr, values);
             }
 
             Assert.Equal(36, values.Count);
@@ -52,7 +53,7 @@ namespace Microsoft.Alm.Authentication.Git.Test
         }
 
         [Fact]
-        public void GitConfig_ReadThrough()
+        public async Task GitConfig_ReadThrough()
         {
             const string input = "\n" +
                     "[core]\n" +
@@ -71,7 +72,7 @@ namespace Microsoft.Alm.Authentication.Git.Test
             using (var reader = new StringReader(input))
             {
                 var dict = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
-                Configuration.ParseGitConfig(reader, dict);
+                await Configuration.ParseGitConfig(RuntimeContext.Default, reader, dict);
 
                 var values = new Dictionary<ConfigurationLevel, Dictionary<string, string>>();
 
@@ -80,7 +81,7 @@ namespace Microsoft.Alm.Authentication.Git.Test
                     values[level] = dict;
                 }
 
-                cut = new Configuration(values);
+                cut = new Configuration(RuntimeContext.Default, values);
             }
 
             Assert.True(cut.ContainsKey("CoRe.AuToCrLf"));
@@ -100,13 +101,13 @@ namespace Microsoft.Alm.Authentication.Git.Test
             Assert.Equal("NTLM", entry.Value, StringComparer.OrdinalIgnoreCase);
         }
 
-        private static Dictionary<string, string> TestParseGitConfig(string input)
+        private static async Task<Dictionary<string, string>> TestParseGitConfig(string input)
         {
             var values = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
 
             using (var sr = new StringReader(input))
             {
-                Configuration.ParseGitConfig(sr, values);
+                await Configuration.ParseGitConfig(RuntimeContext.Default, sr, values);
             }
             return values;
         }

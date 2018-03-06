@@ -188,8 +188,14 @@ namespace Microsoft.Alm.Authentication
                 throw new ArgumentOutOfRangeException(nameof(token));
         }
 
-        internal static unsafe bool Deserialize(byte[] bytes, TokenType type, out Token token)
+        internal static unsafe bool Deserialize(
+            RuntimeContext context,
+            byte[] bytes,
+            TokenType type,
+            out Token token)
         {
+            if (context is null)
+                throw new ArgumentNullException(nameof(context));
             if (bytes is null)
                 throw new ArgumentNullException(nameof(bytes));
             if (bytes.Length == 0)
@@ -221,8 +227,10 @@ namespace Microsoft.Alm.Authentication
 
                         if (!string.IsNullOrWhiteSpace(value))
                         {
-                            token = new Token(value, type);
-                            token._targetIdentity = targetIdentity;
+                            token = new Token(value, type)
+                            {
+                                _targetIdentity = targetIdentity
+                            };
                         }
                     }
                 }
@@ -240,13 +248,16 @@ namespace Microsoft.Alm.Authentication
             }
             catch
             {
-                Git.Trace.WriteLine("! token deserialization error.");
+                context.Trace.WriteLine("! token deserialization error.");
             }
 
             return token != null;
         }
 
-        internal static unsafe bool Serialize(Token token, out byte[] bytes)
+        internal static unsafe bool Serialize(
+            RuntimeContext context,
+            Token token,
+            out byte[] bytes)
         {
             if (token is null)
                 throw new ArgumentNullException(nameof(token));
@@ -271,7 +282,7 @@ namespace Microsoft.Alm.Authentication
             }
             catch
             {
-                Git.Trace.WriteLine("! token serialization error.");
+                context.Trace.WriteLine("! token serialization error.");
             }
 
             return bytes != null;

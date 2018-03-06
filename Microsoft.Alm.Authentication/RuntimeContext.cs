@@ -23,6 +23,7 @@
  * WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE."
 **/
 
+using System;
 using System.Threading;
 
 namespace Microsoft.Alm.Authentication
@@ -30,6 +31,15 @@ namespace Microsoft.Alm.Authentication
     public class RuntimeContext
     {
         public static readonly RuntimeContext Default;
+
+        public RuntimeContext(Git.ITrace trace)
+            : this()
+        {
+            if (trace is null)
+                throw new ArgumentNullException(nameof(trace));
+
+            _trace = trace;
+        }
 
         private RuntimeContext()
         {
@@ -42,15 +52,22 @@ namespace Microsoft.Alm.Authentication
             Volatile.Write(ref _count, 0);
 
             Default = new RuntimeContext();
+            Default._trace = new Git.Trace(Default);
         }
 
         private static int _count;
         private readonly int _id;
         private readonly object _syncpoint;
+        private Git.ITrace _trace;
 
         public int Id
         {
             get { return _id; }
+        }
+
+        public Git.ITrace Trace
+        {
+            get { return _trace; }
         }
     }
 }

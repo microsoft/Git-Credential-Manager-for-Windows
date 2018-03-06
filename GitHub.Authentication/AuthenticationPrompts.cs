@@ -47,7 +47,7 @@ namespace GitHub.Authentication
         {
             var credentialViewModel = new CredentialsViewModel();
 
-            Git.Trace.WriteLine($"prompting user for credentials for '{targetUri}'.");
+            Trace.WriteLine($"prompting user for credentials for '{targetUri}'.");
 
             bool credentialValid = ShowViewModel(credentialViewModel, () => new CredentialsWindow());
 
@@ -61,7 +61,7 @@ namespace GitHub.Authentication
         {
             var twoFactorViewModel = new TwoFactorViewModel(resultType == GitHubAuthenticationResultType.TwoFactorSms);
 
-            Git.Trace.WriteLine($"prompting user for authentication code for '{targetUri}'.");
+            Trace.WriteLine($"prompting user for authentication code for '{targetUri}'.");
 
             bool authenticationCodeValid = ShowViewModel(twoFactorViewModel, () => new TwoFactorWindow());
 

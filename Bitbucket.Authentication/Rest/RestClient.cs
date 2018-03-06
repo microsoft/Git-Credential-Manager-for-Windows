@@ -72,7 +72,7 @@ namespace Atlassian.Bitbucket.Authentication.Rest
             }
         }
 
-        private static string FindUsername(string responseText)
+        private string FindUsername(string responseText)
         {
             Match usernameMatch;
             if ((usernameMatch = UsernameRegex.Match(responseText)).Success
