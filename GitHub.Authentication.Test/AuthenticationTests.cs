@@ -16,14 +16,15 @@ namespace GitHub.Authentication.Test
         {
             var retrieveUri = new Uri(retrieveUriString);
             var credentialStore = new InMemoryCredentialStore();
+            var prompts = new AuthenticationPrompts(RuntimeContext.Default);
             
             var authentication = new Authentication(
                 RuntimeContext.Default,
                 new Uri(writeUriString),
                 TokenScope.Gist,
                 credentialStore,
-                new Authentication.AcquireCredentialsDelegate(AuthenticationPrompts.CredentialModalPrompt),
-                new Authentication.AcquireAuthenticationCodeDelegate(AuthenticationPrompts.AuthenticationCodeModalPrompt),
+                new Authentication.AcquireCredentialsDelegate(prompts.CredentialModalPrompt),
+                new Authentication.AcquireAuthenticationCodeDelegate(prompts.AuthenticationCodeModalPrompt),
                 null);
 
             await authentication.SetCredentials(new Uri(writeUriString), new Credential("haacked"));
@@ -36,14 +37,15 @@ namespace GitHub.Authentication.Test
         {
             var retrieveUri = new Uri("https://example.com/");
             var credentialStore = new InMemoryCredentialStore();
+            var prompts = new AuthenticationPrompts(RuntimeContext.Default);
 
             var authentication = new Authentication(
                 RuntimeContext.Default,
                 new Uri("https://github.com/"),
                 TokenScope.Gist,
                 credentialStore,
-                new Authentication.AcquireCredentialsDelegate(AuthenticationPrompts.CredentialModalPrompt),
-                new Authentication.AcquireAuthenticationCodeDelegate(AuthenticationPrompts.AuthenticationCodeModalPrompt),
+                new Authentication.AcquireCredentialsDelegate(prompts.CredentialModalPrompt),
+                new Authentication.AcquireAuthenticationCodeDelegate(prompts.AuthenticationCodeModalPrompt),
                 null);
 
             await authentication.SetCredentials(new Uri("https://github.com/"), new Credential("haacked"));

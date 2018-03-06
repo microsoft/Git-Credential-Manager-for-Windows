@@ -68,7 +68,7 @@ namespace GitHub.Authentication
             AcquireAuthenticationCodeCallback = acquireAuthenticationCodeCallback
                 ?? throw new ArgumentNullException("acquireAuthenticationCodeCallback", "The parameter `acquireAuthenticationCodeCallback` is null or invalid.");
 
-            Authority = new Authority(NormalizeUri(targetUri));
+            Authority = new Authority(context, NormalizeUri(targetUri));
             AuthenticationResultCallback = authenticationResultCallback;
         }
 

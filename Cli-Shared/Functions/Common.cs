@@ -66,12 +66,14 @@ namespace Microsoft.Alm.Cli
                     ? bitbucketPrompts.AuthenticationOAuthModalPrompt
                     : new Bitbucket.Authentication.AcquireAuthenticationOAuthDelegate(program.BitbucketOAuthPrompt);
 
+            var githubPrompts = new Github.AuthenticationPrompts(program.Context);
+
             var githubCredentialCallback = (operationArguments.UseModalUi)
-                    ? new Github.Authentication.AcquireCredentialsDelegate(Github.AuthenticationPrompts.CredentialModalPrompt)
+                    ? new Github.Authentication.AcquireCredentialsDelegate(githubPrompts.CredentialModalPrompt)
                     : new Github.Authentication.AcquireCredentialsDelegate(program.GitHubCredentialPrompt);
 
             var githubAuthcodeCallback = (operationArguments.UseModalUi)
-                    ? new Github.Authentication.AcquireAuthenticationCodeDelegate(Github.AuthenticationPrompts.AuthenticationCodeModalPrompt)
+                    ? new Github.Authentication.AcquireAuthenticationCodeDelegate(githubPrompts.AuthenticationCodeModalPrompt)
                     : new Github.Authentication.AcquireAuthenticationCodeDelegate(program.GitHubAuthCodePrompt);
 
             NtlmSupport basicNtlmSupport = NtlmSupport.Auto;
