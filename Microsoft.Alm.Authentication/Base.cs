@@ -44,6 +44,9 @@ namespace Microsoft.Alm.Authentication
             get { return _context; }
         }
 
+        protected IFileSystem FileSystem
+            => _context.FileSystem;
+
         protected Git.ITrace Trace
             => _context.Trace;
 

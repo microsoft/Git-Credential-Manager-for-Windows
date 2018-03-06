@@ -29,6 +29,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Base.cs" />
+    <Compile Include="FileSystem.cs" />
     <Compile Include="Git\Configuration.cs" />
     <Compile Include="Git\ConfigurationLevel.cs" />
     <Compile Include="Git\Installation.cs" />
