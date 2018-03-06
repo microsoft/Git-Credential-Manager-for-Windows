@@ -36,15 +36,19 @@ namespace Microsoft.Alm.Authentication.Git
 
         void Flush();
 
-        void WriteLine(string message, string filePath, int lineNumber, string memberName);
+        void WriteLine(
+            string message,
+            [System.Runtime.CompilerServices.CallerFilePath] string filePath = "",
+            [System.Runtime.CompilerServices.CallerLineNumber] int lineNumber = 0,
+            [System.Runtime.CompilerServices.CallerMemberName] string memberName = "");
     }
 
-    public sealed class Trace : ITrace, IDisposable
+    internal class Trace : Base, ITrace, IDisposable
     {
         public const string EnvironmentVariableKey = "GCM_TRACE";
 
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Design", "CA1031:DoNotCatchGeneralExceptionTypes")]
-        private Trace()
+        public Trace(RuntimeContext context)
+            : base(context)
         {
             _writers = new List<TextWriter>();
 
@@ -76,32 +80,25 @@ namespace Microsoft.Alm.Authentication.Git
             Dispose(true);
         }
 
-        private static ITrace _instance;
-        private static readonly object _syncpoint = new object();
-        private readonly List<TextWriter> _writers;
+        private readonly object _syncpoint = new object();
+        private List<TextWriter> _writers;
 
-        internal static ITrace Instance
-        {
-            get
-            {
-                lock (_syncpoint)
-                {
-                    if (_instance == null)
-                    {
-                        _instance = new Trace();
-                    }
-                    return _instance;
-                }
-            }
-            set { _instance = value; }
-        }
 
         /// <summary>
         /// Add a listener to the trace writer.
         /// </summary>
         /// <param name="listener">The listener to add.</param>
-        public static void AddListener(TextWriter listener)
-            => Instance.AddListener(listener);
+        public void AddListener(TextWriter listener)
+        {
+            lock (_syncpoint)
+            {
+                // Try not to add the same listener more than once
+                if (_writers.Contains(listener))
+                    return;
+
+                _writers.Add(listener);
+            }
+        }
 
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Design", "CA1031:DoNotCatchGeneralExceptionTypes")]
         public void Dispose()
@@ -114,8 +111,21 @@ namespace Microsoft.Alm.Authentication.Git
         /// <summary>
         /// Forces any pending trace messages to be written to any listeners.
         /// </summary>
-        public static void Flush()
-            => Instance.Flush();
+        public void Flush()
+        {
+            lock (_syncpoint)
+            {
+                foreach (var writer in _writers)
+                {
+                    try
+                    {
+                        writer?.Flush();
+                    }
+                    catch
+                    { /* squelch */ }
+                }
+            }
+        }
 
         /// <summary>
         /// Writes a message to the trace writer followed by a line terminator.
@@ -125,11 +135,31 @@ namespace Microsoft.Alm.Authentication.Git
         /// <param name="lineNumber">Line number of file this method is called from.</param>
         /// <param name="memberName">Name of the member in which this method is called.</param>
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Design", "CA1026:DefaultParametersShouldNotBeUsed")]
-        public static void WriteLine(string message,
+        public void WriteLine(
+            string message,
             [System.Runtime.CompilerServices.CallerFilePath] string filePath = "",
             [System.Runtime.CompilerServices.CallerLineNumber] int lineNumber = 0,
             [System.Runtime.CompilerServices.CallerMemberName] string memberName = "")
-            => Instance.WriteLine(message, filePath, lineNumber, memberName);
+        {
+            lock (_syncpoint)
+            {
+                if (_writers.Count == 0)
+                    return;
+
+                string text = FormatText(message, filePath, lineNumber, memberName);
+
+                foreach (var writer in _writers)
+                {
+                    try
+                    {
+                        writer?.Write(text);
+                        writer?.Write('\n');
+                        writer?.Flush();
+                    }
+                    catch { /* squelch */ }
+                }
+            }
+        }
 
         private void Dispose(bool finalizing)
         {
@@ -193,56 +223,6 @@ namespace Microsoft.Alm.Authentication.Git
             string text = string.Format(System.Globalization.CultureInfo.InvariantCulture, "{0:HH:mm:ss.ffffff} {1,-23} trace: [{2}] {3}", DateTime.Now, source, memberName, message);
 
             return text;
-        }
-
-        void ITrace.AddListener(TextWriter listener)
-        {
-            lock (_syncpoint)
-            {
-                // Try not to add the same listener more than once
-                if (_writers.Contains(listener))
-                    return;
-
-                _writers.Add(listener);
-            }
-        }
-
-        void ITrace.Flush()
-        {
-            lock (_syncpoint)
-            {
-                foreach (var writer in _writers)
-                {
-                    try
-                    {
-                        writer?.Flush();
-                    }
-                    catch
-                    { /* squelch */ }
-                }
-            }
-        }
-
-        void ITrace.WriteLine(string message, string filePath, int lineNumber, string memberName)
-        {
-            lock (_syncpoint)
-            {
-                if (_writers.Count == 0)
-                    return;
-
-                string text = FormatText(message, filePath, lineNumber, memberName);
-
-                foreach (var writer in _writers)
-                {
-                    try
-                    {
-                        writer?.Write(text);
-                        writer?.Write('\n');
-                        writer?.Flush();
-                    }
-                    catch { /* squelch */ }
-                }
-            }
         }
     }
 }
