@@ -32,13 +32,18 @@ namespace Microsoft.Alm.Authentication
     {
         public static readonly RuntimeContext Default;
 
-        public RuntimeContext(Git.ITrace trace)
+        public RuntimeContext(
+            Git.ITrace trace,
+            Git.IWhere where)
             : this()
         {
             if (trace is null)
                 throw new ArgumentNullException(nameof(trace));
+            if (where is null)
+                throw new ArgumentNullException(nameof(where));
 
             _trace = trace;
+            _where = where;
         }
 
         private RuntimeContext()
@@ -53,12 +58,14 @@ namespace Microsoft.Alm.Authentication
 
             Default = new RuntimeContext();
             Default._trace = new Git.Trace(Default);
+            Default._where = new Git.Where(Default);
         }
 
         private static int _count;
         private readonly int _id;
         private readonly object _syncpoint;
         private Git.ITrace _trace;
+        private Git.IWhere _where;
 
         public int Id
         {
@@ -68,6 +75,11 @@ namespace Microsoft.Alm.Authentication
         public Git.ITrace Trace
         {
             get { return _trace; }
+        }
+
+        public Git.IWhere Where
+        {
+            get { return _where; }
         }
     }
 }

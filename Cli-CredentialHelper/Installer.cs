@@ -231,9 +231,9 @@ namespace Microsoft.Alm.Cli
 
                     // if the custom path points to a git location then treat it properly
                     Installation installation;
-                    if (Where.FindGitInstallation(_customPath, KnownDistribution.GitForWindows64v2, out installation)
-                        || Where.FindGitInstallation(_customPath, KnownDistribution.GitForWindows32v2, out installation)
-                        || Where.FindGitInstallation(_customPath, KnownDistribution.GitForWindows32v1, out installation))
+                    if (Program.Context.Where.FindGitInstallation(_customPath, KnownDistribution.GitForWindows64v2, out installation)
+                        || Program.Context.Where.FindGitInstallation(_customPath, KnownDistribution.GitForWindows32v2, out installation)
+                        || Program.Context.Where.FindGitInstallation(_customPath, KnownDistribution.GitForWindows32v1, out installation))
                     {
                         Program.Context.Trace.WriteLine($"   Git found: '{installation.Path}'.");
 
@@ -252,7 +252,7 @@ namespace Microsoft.Alm.Cli
                     Program.Out.WriteLine();
                     Program.Out.WriteLine("Looking for Git installation(s)...");
 
-                    if (Where.FindGitInstallations(out installations))
+                    if (Program.Context.Where.FindGitInstallations(out installations))
                     {
                         foreach (var installation in installations)
                         {
@@ -498,9 +498,9 @@ namespace Microsoft.Alm.Cli
 
                     // if the custom path points to a git location then treat it properly
                     Installation installation;
-                    if (Where.FindGitInstallation(_customPath, KnownDistribution.GitForWindows64v2, out installation)
-                        || Where.FindGitInstallation(_customPath, KnownDistribution.GitForWindows32v2, out installation)
-                        || Where.FindGitInstallation(_customPath, KnownDistribution.GitForWindows32v1, out installation))
+                    if (Program.Context.Where.FindGitInstallation(_customPath, KnownDistribution.GitForWindows64v2, out installation)
+                        || Program.Context.Where.FindGitInstallation(_customPath, KnownDistribution.GitForWindows32v2, out installation)
+                        || Program.Context.Where.FindGitInstallation(_customPath, KnownDistribution.GitForWindows32v1, out installation))
                     {
                         Program.Context.Trace.WriteLine($"Git found: '{installation.Path}'.");
 
@@ -517,7 +517,7 @@ namespace Microsoft.Alm.Cli
                     Program.Out.WriteLine();
                     Program.Out.WriteLine("Looking for Git installation(s)...");
 
-                    if (Where.FindGitInstallations(out installations))
+                    if (Program.Context.Where.FindGitInstallations(out installations))
                     {
                         foreach (var installation in installations)
                         {
@@ -707,7 +707,7 @@ namespace Microsoft.Alm.Cli
 
             updated = ConfigurationLevel.None;
 
-            if ((installations == null || installations.Count == 0) && !Where.FindGitInstallations(out installations))
+            if ((installations == null || installations.Count == 0) && !Program.Context.Where.FindGitInstallations(out installations))
             {
                 Program.Context.Trace.WriteLine("No Git installations detected to update.");
                 return false;
