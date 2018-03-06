@@ -30,6 +30,7 @@ using System.Runtime.InteropServices;
 using System.Text;
 using Microsoft.Alm.Authentication;
 using Microsoft.Win32.SafeHandles;
+using Git = Microsoft.Alm.Authentication.Git;
 using Github = GitHub.Authentication;
 
 namespace Microsoft.Alm.Cli

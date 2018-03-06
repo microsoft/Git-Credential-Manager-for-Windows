@@ -28,6 +28,8 @@ using System.Collections.Generic;
 using Moq;
 using Xunit;
 
+using Git = Microsoft.Alm.Authentication.Git;
+
 namespace Microsoft.Alm.Cli.Test
 {
     public class ProgramTests

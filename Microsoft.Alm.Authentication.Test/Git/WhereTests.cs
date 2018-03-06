@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using Xunit;
 
-namespace Microsoft.Alm.Git.Test
+namespace Microsoft.Alm.Authentication.Git.Test
 {
     public class WhereTests
     {
@@ -46,12 +46,12 @@ namespace Microsoft.Alm.Git.Test
             if (!Where.FindApp("git", out gitPath))
                 throw new Exception("Git not found on system");
 
-            List<GitInstallation> installations;
+            List<Installation> installations;
             Assert.True(Where.FindGitInstallations(out installations));
             Assert.True(installations.Count > 0);
             Assert.True(PathComparer.Equals(installations[0].Git, gitPath));
 
-            GitInstallation installation;
+            Installation installation;
             Assert.True(Where.FindGitInstallation(installations[0].Path, installations[0].Version, out installation));
             Assert.True(installations[0] == installation);
         }

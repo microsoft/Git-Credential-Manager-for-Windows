@@ -28,9 +28,9 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 
-namespace Microsoft.Alm.Git
+namespace Microsoft.Alm.Authentication.Git
 {
-    public struct GitInstallation : IEquatable<GitInstallation>
+    public struct Installation : IEquatable<Installation>
     {
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Security", "CA2104:DoNotDeclareReadOnlyMutableReferenceTypes")]
         public static readonly StringComparer PathComparer = StringComparer.InvariantCultureIgnoreCase;
@@ -51,60 +51,60 @@ namespace Microsoft.Alm.Git
         internal const string Version2Libexec64Path = @"mingw64\libexec\git-core";
 
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Security", "CA2104:DoNotDeclareReadOnlyMutableReferenceTypes")]
-        public static readonly IReadOnlyDictionary<KnownGitDistribution, string> CommonCmdPaths
-           = new Dictionary<KnownGitDistribution, string>
+        public static readonly IReadOnlyDictionary<KnownDistribution, string> CommonCmdPaths
+           = new Dictionary<KnownDistribution, string>
            {
-                { KnownGitDistribution.GitForWindows32v1, AllVersionCmdPath },
-                { KnownGitDistribution.GitForWindows32v2, AllVersionCmdPath },
-                { KnownGitDistribution.GitForWindows64v2, AllVersionCmdPath },
+                { KnownDistribution.GitForWindows32v1, AllVersionCmdPath },
+                { KnownDistribution.GitForWindows32v2, AllVersionCmdPath },
+                { KnownDistribution.GitForWindows64v2, AllVersionCmdPath },
            };
 
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Security", "CA2104:DoNotDeclareReadOnlyMutableReferenceTypes")]
-        public static readonly IReadOnlyDictionary<KnownGitDistribution, string> CommonConfigPaths
-            = new Dictionary<KnownGitDistribution, string>
+        public static readonly IReadOnlyDictionary<KnownDistribution, string> CommonConfigPaths
+            = new Dictionary<KnownDistribution, string>
             {
-                { KnownGitDistribution.GitForWindows32v1, Version1Config32Path },
-                { KnownGitDistribution.GitForWindows32v2, Version2Config32Path },
-                { KnownGitDistribution.GitForWindows64v2, Version2Config64Path },
+                { KnownDistribution.GitForWindows32v1, Version1Config32Path },
+                { KnownDistribution.GitForWindows32v2, Version2Config32Path },
+                { KnownDistribution.GitForWindows64v2, Version2Config64Path },
             };
 
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Security", "CA2104:DoNotDeclareReadOnlyMutableReferenceTypes")]
-        public static readonly IReadOnlyDictionary<KnownGitDistribution, string> CommonGitPaths
-            = new Dictionary<KnownGitDistribution, string>
+        public static readonly IReadOnlyDictionary<KnownDistribution, string> CommonGitPaths
+            = new Dictionary<KnownDistribution, string>
             {
-                { KnownGitDistribution.GitForWindows32v1, AllVersionGitPath },
-                { KnownGitDistribution.GitForWindows32v2, AllVersionGitPath },
-                { KnownGitDistribution.GitForWindows64v2, AllVersionGitPath },
+                { KnownDistribution.GitForWindows32v1, AllVersionGitPath },
+                { KnownDistribution.GitForWindows32v2, AllVersionGitPath },
+                { KnownDistribution.GitForWindows64v2, AllVersionGitPath },
             };
 
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Security", "CA2104:DoNotDeclareReadOnlyMutableReferenceTypes")]
-        public static readonly IReadOnlyDictionary<KnownGitDistribution, string> CommonLibexecPaths
-            = new Dictionary<KnownGitDistribution, string>
+        public static readonly IReadOnlyDictionary<KnownDistribution, string> CommonLibexecPaths
+            = new Dictionary<KnownDistribution, string>
             {
-                { KnownGitDistribution.GitForWindows32v1, Version1Libexec32Path },
-                { KnownGitDistribution.GitForWindows32v2, Version2Libexec32Path },
-                { KnownGitDistribution.GitForWindows64v2, Version2Libexec64Path },
+                { KnownDistribution.GitForWindows32v1, Version1Libexec32Path },
+                { KnownDistribution.GitForWindows32v2, Version2Libexec32Path },
+                { KnownDistribution.GitForWindows64v2, Version2Libexec64Path },
             };
 
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Security", "CA2104:DoNotDeclareReadOnlyMutableReferenceTypes")]
-        public static readonly IReadOnlyDictionary<KnownGitDistribution, string> CommonShPaths
-            = new Dictionary<KnownGitDistribution, string>
+        public static readonly IReadOnlyDictionary<KnownDistribution, string> CommonShPaths
+            = new Dictionary<KnownDistribution, string>
             {
-                { KnownGitDistribution.GitForWindows32v1, AllVersionShPath },
-                { KnownGitDistribution.GitForWindows32v2, AllVersionShPath },
-                { KnownGitDistribution.GitForWindows64v2, AllVersionShPath },
+                { KnownDistribution.GitForWindows32v1, AllVersionShPath },
+                { KnownDistribution.GitForWindows32v2, AllVersionShPath },
+                { KnownDistribution.GitForWindows64v2, AllVersionShPath },
             };
 
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Security", "CA2104:DoNotDeclareReadOnlyMutableReferenceTypes")]
-        public static readonly IReadOnlyDictionary<KnownGitDistribution, string> CommonDocPaths
-            = new Dictionary<KnownGitDistribution, string>
+        public static readonly IReadOnlyDictionary<KnownDistribution, string> CommonDocPaths
+            = new Dictionary<KnownDistribution, string>
             {
-                { KnownGitDistribution.GitForWindows32v1, Version1Doc32Path },
-                { KnownGitDistribution.GitForWindows32v2, Version2Doc32Path },
-                { KnownGitDistribution.GitForWindows64v2, Version2Doc64Path },
+                { KnownDistribution.GitForWindows32v1, Version1Doc32Path },
+                { KnownDistribution.GitForWindows32v2, Version2Doc32Path },
+                { KnownDistribution.GitForWindows64v2, Version2Doc64Path },
             };
 
-        internal GitInstallation(string path, KnownGitDistribution version)
+        internal Installation(string path, KnownDistribution version)
         {
             if (string.IsNullOrWhiteSpace(path))
                 throw new ArgumentNullException(nameof(path));
@@ -162,7 +162,7 @@ namespace Microsoft.Alm.Git
         private string _libexec;
         private string _sh;
         private readonly string _path;
-        private readonly KnownGitDistribution _distribution;
+        private readonly KnownDistribution _distribution;
 
         /// <summary>
         /// Gets the path to the installation's gitconfig file (aka system config).
@@ -265,20 +265,20 @@ namespace Microsoft.Alm.Git
         /// <summary>
         /// Gets the installation's distribution.
         /// </summary>
-        public KnownGitDistribution Version
+        public KnownDistribution Version
         {
             get { return _distribution; }
         }
 
         public override bool Equals(object obj)
         {
-            if (obj is GitInstallation)
-                return this == (GitInstallation)obj;
+            if (obj is Installation)
+                return this == (Installation)obj;
 
             return false;
         }
 
-        public bool Equals(GitInstallation other)
+        public bool Equals(Installation other)
         {
             return this == other;
         }
@@ -293,20 +293,20 @@ namespace Microsoft.Alm.Git
             return _path;
         }
 
-        internal static bool IsValid(GitInstallation value)
+        internal static bool IsValid(Installation value)
         {
             return Directory.Exists(value._path)
                 && Directory.Exists(value.Libexec)
                 && File.Exists(value.Git);
         }
 
-        public static bool operator ==(GitInstallation install1, GitInstallation install2)
+        public static bool operator ==(Installation install1, Installation install2)
         {
             return install1._distribution == install2._distribution
                 && PathComparer.Equals(install1._path, install2._path);
         }
 
-        public static bool operator !=(GitInstallation install1, GitInstallation install2)
+        public static bool operator !=(Installation install1, Installation install2)
         {
             return !(install1 == install2);
         }

@@ -30,7 +30,7 @@ using System.Threading.Tasks;
 using Atlassian.Bitbucket.Authentication.BasicAuth;
 using Atlassian.Bitbucket.Authentication.Rest;
 using Microsoft.Alm.Authentication;
-using Trace = Microsoft.Alm.Git.Trace;
+using Trace = Microsoft.Alm.Authentication.Git.Trace;
 
 namespace Atlassian.Bitbucket.Authentication
 {

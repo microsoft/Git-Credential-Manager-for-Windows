@@ -31,6 +31,8 @@ using System.Linq;
 using System.Text.RegularExpressions;
 using Microsoft.Alm.Authentication;
 
+using Git = Microsoft.Alm.Authentication.Git;
+
 namespace Microsoft.Alm.Cli
 {
     internal partial class Program
@@ -286,7 +288,7 @@ namespace Microsoft.Alm.Cli
 
             Out.WriteLine("usage: git askpass '<user_prompt_text>'");
 
-            List<Git.GitInstallation> installations;
+            List<Git.Installation> installations;
             if (Git.Where.FindGitInstallations(out installations))
             {
                 foreach (var installation in installations)
