@@ -63,7 +63,7 @@ namespace Atlassian.Bitbucket.Authentication
 
             PersonalAccessTokenStore = personalAccessTokenStore;
 
-            BitbucketAuthority = new Authority();
+            BitbucketAuthority = new Authority(context);
             TokenScope = TokenScope.SnippetWrite | TokenScope.RepositoryWrite;
 
             AcquireCredentialsCallback = acquireCredentialsCallback;

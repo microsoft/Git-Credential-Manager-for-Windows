@@ -42,8 +42,12 @@ namespace Atlassian.Bitbucket.Authentication
     /// <summary>
     /// Defines how to call the UI elements to request authentication details from the user.
     /// </summary>
-    public static class AuthenticationPrompts
+    public class AuthenticationPrompts : Base
     {
+        public AuthenticationPrompts(RuntimeContext context)
+            : base(context)
+        { }
+
         /// <summary>
         /// Utility method used to extract a username from a URL of the form http(s)://username@domain/
         /// </summary>
@@ -77,7 +81,7 @@ namespace Atlassian.Bitbucket.Authentication
         /// returns true if the user provides credentials which are then successfully validated,
         /// false otherwise
         /// </returns>
-        public static bool CredentialModalPrompt(string title, TargetUri targetUri, out string username, out string password)
+        public bool CredentialModalPrompt(string title, TargetUri targetUri, out string username, out string password)
         {
             // if there is a user in the remote URL then prepopulate the UI with it.
             var credentialViewModel = new CredentialsViewModel(GetUserFromTargetUri(targetUri));
@@ -103,7 +107,7 @@ namespace Atlassian.Bitbucket.Authentication
         /// returns true if the user successfully completes the OAuth dance and the returned
         /// access_token is validated, false otherwise
         /// </returns>
-        public static bool AuthenticationOAuthModalPrompt(string title, TargetUri targetUri, AuthenticationResultType resultType, string username)
+        public bool AuthenticationOAuthModalPrompt(string title, TargetUri targetUri, AuthenticationResultType resultType, string username)
         {
             var oauthViewModel = new OAuthViewModel(resultType == AuthenticationResultType.TwoFactor);
 

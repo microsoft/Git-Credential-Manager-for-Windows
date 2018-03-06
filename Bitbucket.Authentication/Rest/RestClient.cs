@@ -8,16 +8,20 @@ using Microsoft.Alm.Authentication.Git;
 
 namespace Atlassian.Bitbucket.Authentication.Rest
 {
-    public class RestClient
+    public class RestClient : Base
     {
-        private static Regex UsernameRegex = new Regex(@"\s*""username""\s*:\s*""([^""]+)""\s*", RegexOptions.Compiled | RegexOptions.CultureInvariant | RegexOptions.IgnoreCase);
+        internal static readonly Regex UsernameRegex = new Regex(@"\s*""username""\s*:\s*""([^""]+)""\s*", RegexOptions.CultureInvariant | RegexOptions.IgnoreCase);
+
+        public RestClient(RuntimeContext context)
+            : base(context)
+        { }
 
         public static string UserUrl
         {
             get { return "/2.0/user"; }
         }
 
-        public static async Task<AuthenticationResult> TryGetUser(TargetUri targetUri, int requestTimeout, Uri restRootUrl, string authHeader)
+        public async Task<AuthenticationResult> TryGetUser(TargetUri targetUri, int requestTimeout, Uri restRootUrl, string authHeader)
         {
             using (HttpClientHandler handler = targetUri.HttpClientHandler)
             {

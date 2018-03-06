@@ -56,12 +56,14 @@ namespace Microsoft.Alm.Cli
                     ? new AcquireCredentialsDelegate(program.ModalPromptForCredentials)
                     : new AcquireCredentialsDelegate(program.BasicCredentialPrompt);
 
+            var bitbucketPrompts = new Bitbucket.AuthenticationPrompts(program.Context);
+
             var bitbucketCredentialCallback = (operationArguments.UseModalUi)
-                    ? Bitbucket.AuthenticationPrompts.CredentialModalPrompt
+                    ? bitbucketPrompts.CredentialModalPrompt
                     : new Bitbucket.Authentication.AcquireCredentialsDelegate(program.BitbucketCredentialPrompt);
 
             var bitbucketOauthCallback = (operationArguments.UseModalUi)
-                    ? Bitbucket.AuthenticationPrompts.AuthenticationOAuthModalPrompt
+                    ? bitbucketPrompts.AuthenticationOAuthModalPrompt
                     : new Bitbucket.Authentication.AcquireAuthenticationOAuthDelegate(program.BitbucketOAuthPrompt);
 
             var githubCredentialCallback = (operationArguments.UseModalUi)
