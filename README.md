@@ -50,13 +50,21 @@ To use the GCM, you can download the [latest installer](https://github.com/Micro
 
 When prompted to select your terminal emulator for Git Bash you should choose the Windows' default console window, or make sure GCM is [configured to use modal dialogs](Docs/Configuration.md#modalprompt). GCM cannot prompt you for credentials, at the console, in a MinTTY setup.
 
-## How to use
-
-You don't. It [magically](https://github.com/Microsoft/Git-Credential-Manager-for-Windows/issues/31) works when credentials are needed. For example, when pushing to [Visual Studio Team Services](https://www.visualstudio.com), it automatically opens a window and initializes an oauth2 flow to get your token.
-
 ### Manual Installation
 
 Note for users with special installation needs, you can still extract the `gcm-<version>.zip` file and run install.cmd from an administrator command prompt. This allows specification of the installation options explained below.
+
+### Installation in an MSYS2 Environment
+
+To use the GCM along with git installed with `pacman` in an MSYS2 environment, simply [download a release zip](https://github.com/Microsoft/Git-Credential-Manager-for-Windows/releases) and extract the contents directly into `C:\msys64\usr\lib\git-core` (assuming your MSYS2 environment is installed in `C:\msys64`). Then run:
+
+```
+git config --global credential.helper manager
+```
+
+## How to use
+
+You don't. It [magically](https://github.com/Microsoft/Git-Credential-Manager-for-Windows/issues/31) works when credentials are needed. For example, when pushing to [Visual Studio Team Services](https://www.visualstudio.com), it automatically opens a window and initializes an oauth2 flow to get your token.
 
 ### Build and Install from Sources
 
