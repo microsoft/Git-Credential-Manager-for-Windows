@@ -24,8 +24,6 @@
 **/
 
 using System;
-using System.Net;
-using System.Net.Http;
 using System.Text;
 
 namespace Microsoft.Alm.Authentication
@@ -108,34 +106,6 @@ namespace Microsoft.Alm.Authentication
         }
 
         /// <summary>
-        /// Gets the client header enabled to work with proxies as necessary.
-        /// </summary>
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Reliability", "CA2000:Dispose objects before losing scope")]
-        public HttpClientHandler HttpClientHandler
-        {
-            get
-            {
-                bool useProxy = ProxyUri != null;
-
-                var client = new HttpClientHandler()
-                {
-                    AllowAutoRedirect = true,
-                    UseCookies = true,
-                    UseProxy = useProxy,
-                    MaxAutomaticRedirections = Global.MaxAutomaticRedirections,
-                    UseDefaultCredentials = true,
-                };
-
-                if (useProxy)
-                {
-                    client.Proxy = WebProxy;
-                }
-
-                return client;
-            }
-        }
-
-        /// <summary>
         /// Gets whether the `<see cref="QueryUri"/>` is absolute.
         /// </summary>
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Performance", "CA1822:MarkMembersAsStatic")]
@@ -183,47 +153,6 @@ namespace Microsoft.Alm.Authentication
         /// </summary>
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Design", "CA1056:UriPropertiesShouldNotBeStrings")]
         public string TargetUriUsername { get { return QueryUri.UserInfo; } }
-
-        /// <summary>
-        /// Gets the web proxy abstraction for working with proxies as necessary.
-        /// </summary>
-        public WebProxy WebProxy
-        {
-            get
-            {
-                if (ProxyUri != null)
-                {
-                    WebProxy proxy = new WebProxy(ProxyUri) { UseDefaultCredentials = true };
-
-                    // check if the user has specified authentications (comes as UserInfo)
-                    if (!string.IsNullOrWhiteSpace(ProxyUri.UserInfo) && ProxyUri.UserInfo.Length > 1)
-                    {
-                        int tokenIndex = ProxyUri.UserInfo.IndexOf(':');
-                        bool hasUserNameAndPassword = tokenIndex != -1;
-
-                        if (hasUserNameAndPassword)
-                        {
-                            string userName = ProxyUri.UserInfo.Substring(0, tokenIndex);
-                            string password = ProxyUri.UserInfo.Substring(tokenIndex + 1);
-
-                            NetworkCredential proxyCreds = new NetworkCredential(
-                                userName,
-                                password
-                            );
-
-                            proxy.UseDefaultCredentials = false;
-                            proxy.Credentials = proxyCreds;
-                        }
-                    }
-
-                    return proxy;
-                }
-                else
-                {
-                    return new WebProxy();
-                }
-            }
-        }
 
         /// <summary>
         /// Returns a version of this `<see cref="TargetUri"/>` that contains the specified username.

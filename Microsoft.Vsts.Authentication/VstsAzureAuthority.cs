@@ -138,9 +138,9 @@ namespace Microsoft.Alm.Authentication
                     }
                 }
             }
-            catch (WebException webException)
+            catch (HttpRequestException exception)
             {
-                Trace.WriteLine($"server returned '{webException.Status}'.");
+                Trace.WriteLine($"server returned '{exception.Message}'.");
             }
 
             if (Guid.TryParse(resultId, out Guid instanceId))
