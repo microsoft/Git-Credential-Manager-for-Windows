@@ -52,7 +52,7 @@ namespace Atlassian.Bitbucket.Authentication.OAuth
             : base(context)
         { }
 
-        public string AuthorizeUri { get { return "/site/oauth2/authorize"; } }
+        public string AuthorizeUrlPath { get { return "/site/oauth2/authorize"; } }
 
         public string CallbackUri { get { return "http://localhost:34106/"; } }
 
@@ -97,10 +97,10 @@ namespace Atlassian.Bitbucket.Authentication.OAuth
         /// <returns></returns>
         private async Task<string> Authorize(TargetUri targetUri, TokenScope scope, CancellationToken cancellationToken)
         {
-            string url = GetAuthorizationUrl(scope);
+            var authorizationUri = GetAuthorizationUri(scope);
 
-            //Open the browser to prompt the user to authorize the token request
-            Process.Start(url);
+            // Open the browser to prompt the user to authorize the token request
+            Process.Start(authorizationUri.AbsoluteUri);
 
             string rawUrlData;
             try
@@ -166,15 +166,45 @@ namespace Atlassian.Bitbucket.Authentication.OAuth
         /// <returns></returns>
         private async Task<AuthenticationResult> GetAccessToken(TargetUri targetUri, string authCode)
         {
-            using (HttpClientHandler handler = targetUri.HttpClientHandler)
+            if (targetUri is null)
+                throw new ArgumentNullException(nameof(targetUri));
+            if (authCode is null)
+                throw new ArgumentNullException(nameof(authCode));
+
+            var options = new NetworkRequestOptions(true)
             {
-                using (HttpClient httpClient = new HttpClient(handler) { Timeout = TimeSpan.FromMilliseconds(RequestTimeout) })
+                Timeout = TimeSpan.FromMilliseconds(RequestTimeout),
+            };
+            var grantUri = GetGrantUrl(targetUri, authCode);
+            var requestUri = new TargetUri(grantUri, targetUri.ProxyUri);
+            var content = GetGrantRequestContent(authCode);
+
+            using (var response = await Network.HttpPostAsync(requestUri, content, options))
+            {
+                Trace.WriteLine($"server responded with {response.StatusCode}.");
+
+                switch (response.StatusCode)
                 {
-                    // create the token request
-                    string url = GetGrantUrl(targetUri, authCode);
-                    MultipartFormDataContent content = GetGrantRequestContent(authCode);
-                    // make the request
-                    return await MakeOAuthAdminRequest(httpClient, url, content);
+                    case HttpStatusCode.OK:
+                    case HttpStatusCode.Created:
+                        {
+                            // the request was successful, look for the tokens in the response
+                            string responseText = await response.Content.ReadAsStringAsync();
+                            var token = FindAccessToken(responseText);
+                            var refreshToken = FindRefreshToken(responseText);
+                            return GetAuthenticationResult(token, refreshToken);
+                        }
+
+                    case HttpStatusCode.Unauthorized:
+                        {
+                            // do something
+                            return new AuthenticationResult(AuthenticationResultType.Failure);
+                        }
+
+                    default:
+                        Trace.WriteLine("authentication failed");
+                        var error = response.Content.ReadAsStringAsync();
+                        return new AuthenticationResult(AuthenticationResultType.Failure);
                 }
             }
         }
@@ -187,33 +217,72 @@ namespace Atlassian.Bitbucket.Authentication.OAuth
         /// <returns></returns>
         private async Task<AuthenticationResult> RefreshAccessToken(TargetUri targetUri, string currentRefreshToken)
         {
-            using (HttpClientHandler handler = targetUri.HttpClientHandler)
+            if (targetUri is null)
+                throw new ArgumentNullException(nameof(targetUri));
+            if (currentRefreshToken is null)
+                throw new ArgumentNullException(nameof(currentRefreshToken));
+
+            var refreshUri = GetRefreshUri();
+            var requestUri = new TargetUri(refreshUri, targetUri.ProxyUri);
+            var options = new NetworkRequestOptions(true)
             {
-                using (HttpClient httpClient = new HttpClient(handler) { Timeout = TimeSpan.FromMilliseconds(RequestTimeout) })
+                Timeout = TimeSpan.FromMilliseconds(RequestTimeout),
+            };
+            var content = GetRefreshRequestContent(currentRefreshToken);
+
+            using (var response = await Network.HttpPostAsync(requestUri, content, options))
+            {
+                Trace.WriteLine($"server responded with {response.StatusCode}.");
+
+                switch (response.StatusCode)
                 {
-                    string url = GetRefreshUrl();
-                    MultipartFormDataContent content = GetRefreshRequestContent(currentRefreshToken);
-                    // make the request
-                    return await MakeOAuthAdminRequest(httpClient, url, content);
+                    case HttpStatusCode.OK:
+                    case HttpStatusCode.Created:
+                        {
+                            // the request was successful, look for the tokens in the response
+                            string responseText = await response.Content.ReadAsStringAsync();
+                            var token = FindAccessToken(responseText);
+                            var refreshToken = FindRefreshToken(responseText);
+                            return GetAuthenticationResult(token, refreshToken);
+                        }
+
+                    case HttpStatusCode.Unauthorized:
+                        {
+                            // do something
+                            return new AuthenticationResult(AuthenticationResultType.Failure);
+                        }
+
+                    default:
+                        Trace.WriteLine("authentication failed");
+                        var error = response.Content.ReadAsStringAsync();
+                        return new AuthenticationResult(AuthenticationResultType.Failure);
                 }
             }
         }
 
-        private string GetAuthorizationUrl(TokenScope scope)
+        private Uri GetAuthorizationUri(TokenScope scope)
         {
-            var authorityUrl = $"{AuthorizeUri}?response_type=code&client_id={ConsumerKey}&state=authenticated&scope={scope.ToString()}&redirect_uri={CallbackUri}";
-            return new Uri(new Uri("https://bitbucket.org"), authorityUrl).AbsoluteUri;
+            const string AuthorizationUrl = "{0}?response_type=code&client_id={1}&state=authenticated&scope={2}&redirect_uri={3}";
+
+            var authorityUrl = string.Format(System.Globalization.CultureInfo.InvariantCulture,
+                                             AuthorizationUrl,
+                                             AuthorizeUrlPath,
+                                             ConsumerKey,
+                                             scope.ToString(),
+                                             CallbackUri);
+
+            return new Uri(new Uri("https://bitbucket.org"), authorityUrl);
         }
 
-        private string GetRefreshUrl()
+        private Uri GetRefreshUri()
         {
-            return new Uri(new Uri("https://bitbucket.org"), TokenUri).AbsoluteUri;
+            return new Uri(new Uri("https://bitbucket.org"), TokenUri);
         }
 
-        private string GetGrantUrl(TargetUri targetUri, string authCode)
+        private Uri GetGrantUrl(TargetUri targetUri, string authCode)
         {
             var tokenUrl = $"{TokenUri}?grant_type=authorization_code&code={authCode}&client_id={ConsumerKey}&client_secret={ConsumerSecret}&state=authenticated";
-            return new Uri(new Uri(targetUri.ToString()), tokenUrl).AbsoluteUri;
+            return new Uri(new Uri(targetUri.ToString()), tokenUrl);
         }
 
         private MultipartFormDataContent GetGrantRequestContent(string authCode)
@@ -245,38 +314,6 @@ namespace Atlassian.Bitbucket.Authentication.OAuth
                 { new StringContent(ConsumerSecret), "client_secret" }
             };
             return content;
-        }
-
-        private async Task<AuthenticationResult> MakeOAuthAdminRequest(HttpClient httpClient, string url, MultipartFormDataContent content)
-        {
-            using (HttpResponseMessage response = await httpClient.PostAsync(url, content))
-            {
-                Trace.WriteLine($"server responded with {response.StatusCode}.");
-
-                switch (response.StatusCode)
-                {
-                    case HttpStatusCode.OK:
-                    case HttpStatusCode.Created:
-                        {
-                            // the request was successful, look for the tokens in the response
-                            string responseText = await response.Content.ReadAsStringAsync();
-                            var token = FindAccessToken(responseText);
-                            var refreshToken = FindRefreshToken(responseText);
-                            return GetAuthenticationResult(token, refreshToken);
-                        }
-
-                    case HttpStatusCode.Unauthorized:
-                        {
-                            // do something
-                            return new AuthenticationResult(AuthenticationResultType.Failure);
-                        }
-
-                    default:
-                        Trace.WriteLine("authentication failed");
-                        var error = response.Content.ReadAsStringAsync();
-                        return new AuthenticationResult(AuthenticationResultType.Failure);
-                }
-            }
         }
 
         private Token FindAccessToken(string responseText)

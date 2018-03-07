@@ -27,11 +27,11 @@ using System;
 using System.Linq;
 using System.Net;
 using System.Net.Http;
+using System.Net.Http.Headers;
 using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using Microsoft.Alm.Authentication;
-using Git = Microsoft.Alm.Authentication.Git;
 
 namespace GitHub.Authentication
 {
@@ -65,7 +65,8 @@ namespace GitHub.Authentication
             }
         }
 
-        private readonly string _validationUrl, _authorityUrl;
+        private readonly string _authorityUrl;
+        private readonly string _validationUrl;
 
         public async Task<AuthenticationResult> AcquireToken(
             TargetUri targetUri,
@@ -78,163 +79,155 @@ namespace GitHub.Authentication
 
             Token token = null;
 
-            using (HttpClientHandler handler = targetUri.HttpClientHandler)
-            using (HttpClient httpClient = new HttpClient(handler)
+            var options = new NetworkRequestOptions(true)
             {
-                Timeout = TimeSpan.FromMilliseconds(RequestTimeout)
-            })
+                Authorization = new Credential(username, password),
+                Timeout = TimeSpan.FromMilliseconds(RequestTimeout),
+            };
+
+            options.Headers.Accept.Add(new MediaTypeWithQualityHeaderValue(GitHubApiAcceptsHeaderValue));
+            options.Headers.Add(GitHubOptHeader, authenticationCode);
+
+            using (HttpContent content = GetTokenJsonContent(targetUri, scope))
+            using (var response = await Network.HttpPostAsync(targetUri, content, options))
             {
-                httpClient.DefaultRequestHeaders.Add("User-Agent", Global.UserAgent);
-                httpClient.DefaultRequestHeaders.Add("Accept", GitHubApiAcceptsHeaderValue);
+                Trace.WriteLine($"server responded with {response.StatusCode}.");
 
-                string basicAuthValue = string.Format("{0}:{1}", username, password);
-                byte[] authBytes = Encoding.UTF8.GetBytes(basicAuthValue);
-                basicAuthValue = Convert.ToBase64String(authBytes);
-
-                httpClient.DefaultRequestHeaders.Add("Authorization", "Basic " + basicAuthValue);
-
-                if (!string.IsNullOrWhiteSpace(authenticationCode))
+                switch (response.StatusCode)
                 {
-                    httpClient.DefaultRequestHeaders.Add(GitHubOptHeader, authenticationCode);
-                }
+                    case HttpStatusCode.OK:
+                    case HttpStatusCode.Created:
+                        {
+                            string responseText = await response.Content.ReadAsStringAsync();
 
-                const string HttpJsonContentType = "application/x-www-form-urlencoded";
-                const string JsonContentFormat = @"{{ ""scopes"": {0}, ""note"": ""git: {1} on {2} at {3:dd-MMM-yyyy HH:mm}"" }}";
-
-                StringBuilder scopesBuilder = new StringBuilder();
-                scopesBuilder.Append('[');
-
-                foreach (var item in scope.ToString().Split(' '))
-                {
-                    scopesBuilder.Append("\"")
-                                 .Append(item)
-                                 .Append("\"")
-                                 .Append(", ");
-                }
-
-                // remove trailing ", "
-                if (scopesBuilder.Length > 0)
-                {
-                    scopesBuilder.Remove(scopesBuilder.Length - 2, 2);
-                }
-
-                scopesBuilder.Append(']');
-
-                string jsonContent = string.Format(JsonContentFormat, scopesBuilder, targetUri, Environment.MachineName, DateTime.Now);
-
-                using (StringContent content = new StringContent(jsonContent, Encoding.UTF8, HttpJsonContentType))
-                using (HttpResponseMessage response = await httpClient.PostAsync(_authorityUrl, content))
-                {
-                    Trace.WriteLine($"server responded with {response.StatusCode}.");
-
-                    switch (response.StatusCode)
-                    {
-                        case HttpStatusCode.OK:
-                        case HttpStatusCode.Created:
+                            Match tokenMatch;
+                            if ((tokenMatch = Regex.Match(responseText, @"\s*""token""\s*:\s*""([^""]+)""\s*", RegexOptions.CultureInvariant | RegexOptions.IgnoreCase)).Success
+                                && tokenMatch.Groups.Count > 1)
                             {
-                                string responseText = await response.Content.ReadAsStringAsync();
+                                string tokenText = tokenMatch.Groups[1].Value;
+                                token = new Token(tokenText, TokenType.Personal);
+                            }
 
-                                Match tokenMatch;
-                                if ((tokenMatch = Regex.Match(responseText, @"\s*""token""\s*:\s*""([^""]+)""\s*", RegexOptions.Compiled | RegexOptions.CultureInvariant | RegexOptions.IgnoreCase)).Success
-                                    && tokenMatch.Groups.Count > 1)
-                                {
-                                    string tokenText = tokenMatch.Groups[1].Value;
-                                    token = new Token(tokenText, TokenType.Personal);
-                                }
+                            if (token == null)
+                            {
+                                Trace.WriteLine($"authentication for '{targetUri}' failed.");
+                                return new AuthenticationResult(GitHubAuthenticationResultType.Failure);
+                            }
+                            else
+                            {
+                                Trace.WriteLine($"authentication success: new personal access token for '{targetUri}' created.");
+                                return new AuthenticationResult(GitHubAuthenticationResultType.Success, token);
+                            }
+                        }
 
-                                if (token == null)
+                    case HttpStatusCode.Unauthorized:
+                        {
+                            if (string.IsNullOrWhiteSpace(authenticationCode)
+                                && response.Headers.Any(x => string.Equals(GitHubOptHeader, x.Key, StringComparison.OrdinalIgnoreCase)))
+                            {
+                                var mfakvp = response.Headers.First(x => string.Equals(GitHubOptHeader, x.Key, StringComparison.OrdinalIgnoreCase) && x.Value != null && x.Value.Count() > 0);
+
+                                if (mfakvp.Value.First().Contains("app"))
                                 {
-                                    Trace.WriteLine($"authentication for '{targetUri}' failed.");
-                                    return new AuthenticationResult(GitHubAuthenticationResultType.Failure);
+                                    Trace.WriteLine($"two-factor app authentication code required for '{targetUri}'.");
+                                    return new AuthenticationResult(GitHubAuthenticationResultType.TwoFactorApp);
                                 }
                                 else
                                 {
-                                    Trace.WriteLine($"authentication success: new personal access token for '{targetUri}' created.");
-                                    return new AuthenticationResult(GitHubAuthenticationResultType.Success, token);
+                                    Trace.WriteLine($"two-factor sms authentication code required for '{targetUri}'.");
+                                    return new AuthenticationResult(GitHubAuthenticationResultType.TwoFactorSms);
                                 }
                             }
-
-                        case HttpStatusCode.Unauthorized:
+                            else
                             {
-                                if (string.IsNullOrWhiteSpace(authenticationCode)
-                                    && response.Headers.Any(x => string.Equals(GitHubOptHeader, x.Key, StringComparison.OrdinalIgnoreCase)))
-                                {
-                                    var mfakvp = response.Headers.First(x => string.Equals(GitHubOptHeader, x.Key, StringComparison.OrdinalIgnoreCase) && x.Value != null && x.Value.Count() > 0);
-
-                                    if (mfakvp.Value.First().Contains("app"))
-                                    {
-                                        Trace.WriteLine($"two-factor app authentication code required for '{targetUri}'.");
-                                        return new AuthenticationResult(GitHubAuthenticationResultType.TwoFactorApp);
-                                    }
-                                    else
-                                    {
-                                        Trace.WriteLine($"two-factor sms authentication code required for '{targetUri}'.");
-                                        return new AuthenticationResult(GitHubAuthenticationResultType.TwoFactorSms);
-                                    }
-                                }
-                                else
-                                {
-                                    Trace.WriteLine($"authentication failed for '{targetUri}'.");
-                                    return new AuthenticationResult(GitHubAuthenticationResultType.Failure);
-                                }
+                                Trace.WriteLine($"authentication failed for '{targetUri}'.");
+                                return new AuthenticationResult(GitHubAuthenticationResultType.Failure);
                             }
-                        case HttpStatusCode.Forbidden:
-                            // This API only supports Basic authentication. If a valid OAuth token is supplied
-                            // as the password, then a Forbidden response is returned instead of an Unauthorized.
-                            // In that case, the supplied password is an OAuth token and is valid and we don't need
-                            // to create a new personal access token.
-                            var contentBody = await response.Content.ReadAsStringAsync();
-                            if (contentBody.Contains("This API can only be accessed with username and password Basic Auth"))
-                            {
-                                Trace.WriteLine($"authentication success: user supplied personal access token for '{targetUri}'.");
+                        }
+                    case HttpStatusCode.Forbidden:
+                        // This API only supports Basic authentication. If a valid OAuth token is supplied
+                        // as the password, then a Forbidden response is returned instead of an Unauthorized.
+                        // In that case, the supplied password is an OAuth token and is valid and we don't need
+                        // to create a new personal access token.
+                        var contentBody = await response.Content.ReadAsStringAsync();
+                        if (contentBody.Contains("This API can only be accessed with username and password Basic Auth"))
+                        {
+                            Trace.WriteLine($"authentication success: user supplied personal access token for '{targetUri}'.");
 
-                                return new AuthenticationResult(GitHubAuthenticationResultType.Success, new Token(password, TokenType.Personal));
-                            }
-                            Trace.WriteLine($"authentication failed for '{targetUri}'.");
-                            return new AuthenticationResult(GitHubAuthenticationResultType.Failure);
+                            return new AuthenticationResult(GitHubAuthenticationResultType.Success, new Token(password, TokenType.Personal));
+                        }
+                        Trace.WriteLine($"authentication failed for '{targetUri}'.");
+                        return new AuthenticationResult(GitHubAuthenticationResultType.Failure);
 
-                        default:
-                            Trace.WriteLine($"authentication failed for '{targetUri}'.");
-                            return new AuthenticationResult(GitHubAuthenticationResultType.Failure);
-                    }
+                    default:
+                        Trace.WriteLine($"authentication failed for '{targetUri}'.");
+                        return new AuthenticationResult(GitHubAuthenticationResultType.Failure);
                 }
             }
         }
 
         public async Task<bool> ValidateCredentials(TargetUri targetUri, Credential credentials)
         {
-            BaseSecureStore.ValidateTargetUri(targetUri);
-            BaseSecureStore.ValidateCredential(credentials);
+            if (targetUri is null)
+                throw new ArgumentNullException(nameof(targetUri));
+            if (credentials is null)
+                throw new ArgumentNullException(nameof(credentials));
 
-            string authString = string.Format("{0}:{1}", credentials.Username, credentials.Password);
-            byte[] authBytes = Encoding.UTF8.GetBytes(authString);
-            string authEncode = Convert.ToBase64String(authBytes);
-
-            // craft the request header for the GitHub v3 API w/ credentials
-            using (HttpClientHandler handler = targetUri.HttpClientHandler)
-            using (HttpClient httpClient = new HttpClient(handler)
+            // Allocate a network options object.
+            var options = new NetworkRequestOptions(true)
             {
-                Timeout = TimeSpan.FromMilliseconds(RequestTimeout)
-            })
-            {
-                httpClient.DefaultRequestHeaders.Add("User-Agent", Global.UserAgent);
-                httpClient.DefaultRequestHeaders.Add("Accept", GitHubApiAcceptsHeaderValue);
-                httpClient.DefaultRequestHeaders.Add("Authorization", "Basic " + authEncode);
+                Authorization = credentials,
+                Timeout = TimeSpan.FromDays(RequestTimeout),
+            };
 
-                using (HttpResponseMessage response = await httpClient.GetAsync(_validationUrl))
+            // Create the validation Uri.
+            var requestUri = new TargetUri(_validationUrl, targetUri.ProxyUri?.ToString());
+
+            // Add Custom GitHub headers.
+            options.Headers.Accept.Add(new MediaTypeWithQualityHeaderValue(GitHubApiAcceptsHeaderValue));
+
+            using (var response = await Network.HttpGetAsync(requestUri, options))
+            {
+                if (response.IsSuccessStatusCode)
                 {
-                    if (response.IsSuccessStatusCode)
-                    {
-                        Trace.WriteLine($"credential validation for '{targetUri}' succeeded.");
-                        return true;
-                    }
-                    else
-                    {
-                        Trace.WriteLine($"credential validation for '{targetUri}' failed.");
-                        return false;
-                    }
+                    Trace.WriteLine($"credential validation for '{targetUri}' succeeded.");
+                    return true;
+                }
+                else
+                {
+                    Trace.WriteLine($"credential validation for '{targetUri}' failed.");
+                    return false;
                 }
             }
+        }
+
+        private static HttpContent GetTokenJsonContent(TargetUri targetUri, TokenScope scope)
+        {
+            const string HttpJsonContentType = "application/x-www-form-urlencoded";
+            const string JsonContentFormat = @"{{ ""scopes"": {0}, ""note"": ""git: {1} on {2} at {3:dd-MMM-yyyy HH:mm}"" }}";
+
+            StringBuilder scopesBuilder = new StringBuilder();
+            scopesBuilder.Append('[');
+
+            foreach (var item in scope.ToString().Split(' '))
+            {
+                scopesBuilder.Append("\"")
+                             .Append(item)
+                             .Append("\"")
+                             .Append(", ");
+            }
+
+            // remove trailing ", "
+            if (scopesBuilder.Length > 0)
+            {
+                scopesBuilder.Remove(scopesBuilder.Length - 2, 2);
+            }
+
+            scopesBuilder.Append(']');
+
+            string jsonContent = string.Format(JsonContentFormat, scopesBuilder, targetUri, Environment.MachineName, DateTime.Now);
+
+            return new StringContent(jsonContent, Encoding.UTF8, HttpJsonContentType);
         }
     }
 }

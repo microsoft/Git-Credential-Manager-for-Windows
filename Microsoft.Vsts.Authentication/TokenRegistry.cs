@@ -91,7 +91,7 @@ namespace Microsoft.Alm.Authentication
                             TokenType tokenType;
                             if (string.Equals(type, "Federated", StringComparison.OrdinalIgnoreCase))
                             {
-                                tokenType = TokenType.Federated;
+                                tokenType = TokenType.AzureFederated;
                             }
                             else
                             {

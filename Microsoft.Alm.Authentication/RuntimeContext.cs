@@ -34,18 +34,22 @@ namespace Microsoft.Alm.Authentication
 
         public RuntimeContext(
             IFileSystem fileSystem,
+            INetwork network,
             Git.ITrace trace,
             Git.IWhere where)
             : this()
         {
             if (fileSystem is null)
                 throw new ArgumentNullException(nameof(fileSystem));
+            if (network is null)
+                throw new ArgumentNullException(nameof(network));
             if (trace is null)
                 throw new ArgumentNullException(nameof(trace));
             if (where is null)
                 throw new ArgumentNullException(nameof(where));
 
             _fileSystem = fileSystem;
+            _network = network;
             _trace = trace;
             _where = where;
         }
@@ -62,6 +66,7 @@ namespace Microsoft.Alm.Authentication
 
             Default = new RuntimeContext();
             Default._fileSystem = new FileSystem(Default);
+            Default._network = new Network(Default);
             Default._trace = new Git.Trace(Default);
             Default._where = new Git.Where(Default);
         }
@@ -69,6 +74,7 @@ namespace Microsoft.Alm.Authentication
         private static int _count;
         private IFileSystem _fileSystem;
         private readonly int _id;
+        private INetwork _network;
         private readonly object _syncpoint;
         private Git.ITrace _trace;
         private Git.IWhere _where;
@@ -81,6 +87,11 @@ namespace Microsoft.Alm.Authentication
         public int Id
         {
             get { return _id; }
+        }
+
+        public INetwork Network
+        {
+            get { return _network; }
         }
 
         public Git.ITrace Trace

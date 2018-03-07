@@ -63,11 +63,20 @@ namespace Atlassian.Bitbucket.Authentication
         private readonly string _restRootUrl;
 
         /// <inheritdoc/>
-        public async Task<AuthenticationResult> AcquireToken(TargetUri targetUri, string username, string password, AuthenticationResultType resultType, TokenScope scope)
+        public async Task<AuthenticationResult> AcquireToken(TargetUri targetUri, Credential credentials, AuthenticationResultType resultType, TokenScope scope)
         {
+            if (targetUri is null)
+                throw new ArgumentNullException(nameof(targetUri));
+            if (credentials is null)
+                throw new ArgumentNullException(nameof(credentials));
+            if (resultType != AuthenticationResultType.Failure && resultType != AuthenticationResultType.Success && resultType != AuthenticationResultType.TwoFactor)
+                throw new ArgumentOutOfRangeException(nameof(resultType));
+            if (scope is null)
+                throw new ArgumentNullException(nameof(scope));
+
             if (resultType == AuthenticationResultType.TwoFactor)
             {
-                // a previous attempt to aquire a token failed in a way that suggests the user has
+                // A previous attempt to acquire a token failed in a way that suggests the user has
                 // Bitbucket 2FA turned on. so attempt to run the OAuth dance...
                 OAuth.OAuthAuthenticator oauth = new OAuth.OAuthAuthenticator(Context);
                 try
@@ -80,10 +89,9 @@ namespace Atlassian.Bitbucket.Authentication
                         return new AuthenticationResult(AuthenticationResultType.Failure);
                     }
 
-                    // we got a toke but lets check to see the usernames match
+                    // We got a toke but lets check to see the usernames match.
                     var restRootUri = new Uri(_restRootUrl);
-                    var authHeader = GetBearerHeaderAuthHeader(result.Token.Value);
-                    var userResult = await (new RestClient(Context)).TryGetUser(targetUri, RequestTimeout, restRootUri, authHeader);
+                    var userResult = await (new RestClient(Context)).TryGetUser(targetUri, RequestTimeout, restRootUri, result.Token);
 
                     if (!userResult.IsSuccess)
                     {
@@ -91,14 +99,14 @@ namespace Atlassian.Bitbucket.Authentication
                         return new AuthenticationResult(AuthenticationResultType.Failure);
                     }
 
-                    if (!string.IsNullOrWhiteSpace(userResult.RemoteUsername) && !username.Equals(userResult.RemoteUsername))
+                    if (!string.IsNullOrWhiteSpace(userResult.RemoteUsername) && !credentials.Username.Equals(userResult.RemoteUsername))
                     {
-                        Trace.WriteLine($"Remote username [{userResult.RemoteUsername}] != [{username}] supplied username");
-                        // make sure the 'real' username is returned
+                        Trace.WriteLine($"Remote username [{userResult.RemoteUsername}] != [{credentials.Username}] supplied username");
+                        // Make sure the 'real' username is returned.
                         return new AuthenticationResult(AuthenticationResultType.Success, result.Token, result.RefreshToken, userResult.RemoteUsername);
                     }
 
-                    // everything is hunky dory
+                    // Everything is hunky dory.
                     return result;
                 }
                 catch (Exception ex)
@@ -113,11 +121,11 @@ namespace Atlassian.Bitbucket.Authentication
                 try
                 {
                     var restRootUri = new Uri(_restRootUrl);
-                    return await basicauth.GetAuthAsync(targetUri, scope, RequestTimeout, restRootUri, username, password);
+                    return await basicauth.GetAuthAsync(targetUri, scope, RequestTimeout, restRootUri, credentials);
                 }
                 catch (Exception ex)
                 {
-                    Trace.WriteLine($"basic auth authentication failed [{ex.Message}]");
+                    Trace.WriteLine($"basic authentication failed [{ex.Message}]");
                     return new AuthenticationResult(AuthenticationResultType.Failure);
                 }
             }
@@ -148,30 +156,20 @@ namespace Atlassian.Bitbucket.Authentication
             // We don't know when the credentials arrive here if they are using OAuth or Basic Auth,
             // so we try both.
 
-            // Try the simplest Basic Auth first
+            // Try the simplest basic authentication first
             var authEncode = GetEncodedCredentials(username, credentials);
-            if (await ValidateCredentials(targetUri, GetBasicAuthHeader(authEncode)))
+            if (await ValidateCredentials(targetUri, credentials))
             {
                 return true;
             }
 
-            // if the Basic Auth test failed then try again as OAuth
-            if (await ValidateCredentials(targetUri, GetBearerHeaderAuthHeader(credentials.Password)))
+            // If the basic authentication test failed then try again as OAuth
+            if (await ValidateCredentials(targetUri, new Token(credentials.Password, TokenType.BitbucketPassword)))
             {
                 return true;
             }
 
             return false;
-        }
-
-        private static string GetBasicAuthHeader(string secret)
-        {
-            return "Basic " + secret;
-        }
-
-        private static string GetBearerHeaderAuthHeader(string secret)
-        {
-            return "Bearer " + secret;
         }
 
         /// <summary>
@@ -203,18 +201,18 @@ namespace Atlassian.Bitbucket.Authentication
         /// <param name="targetUri">
         /// Contains the <see cref="HttpClientHandler"/> used when making the REST API request
         /// </param>
-        /// <param name="authHeader">
-        /// the HTTP auth header containing the password/access_token to validate
+        /// <param name="authorization">
+        /// The HTTP authentication header containing the password/access_token to validate
         /// </param>
         /// <returns>true if the credentials are valid, false otherwise.</returns>
-        private async Task<bool> ValidateCredentials(TargetUri targetUri, string authHeader)
+        private async Task<bool> ValidateCredentials(TargetUri targetUri, Secret authorization)
         {
             BaseSecureStore.ValidateTargetUri(targetUri);
 
-            Trace.WriteLine($"Auth Type = {authHeader.Substring(0, 5)}");
+            Trace.WriteLine($"authentication type = '{authorization.GetType().Name}'.");
 
             var restRootUrl = new Uri(_restRootUrl);
-            var result = await (new RestClient(Context)).TryGetUser(targetUri, RequestTimeout, restRootUrl, authHeader);
+            var result = await (new RestClient(Context)).TryGetUser(targetUri, RequestTimeout, restRootUrl, authorization);
 
             if (result.Type.Equals(AuthenticationResultType.Success))
             {

@@ -64,7 +64,7 @@ namespace Microsoft.Alm.Authentication
         {
             if (value is null)
                 throw new ArgumentNullException(nameof(value));
-            if ((type & ~(TokenType.Access | TokenType.Federated | TokenType.Personal | TokenType.Test)) != 0)
+            if (type != TokenType.AzureAccess && type != TokenType.AzureFederated && type != TokenType.Personal && type != TokenType.Test)
                 throw new ArgumentOutOfRangeException(nameof(type));
 
             _targetIdentity = tenantId;
@@ -79,12 +79,18 @@ namespace Microsoft.Alm.Authentication
         /// <summary>
         /// The type of the security token.
         /// </summary>
-        public TokenType Type { get { return _type; } }
+        public TokenType Type
+        {
+            get { return _type; }
+        }
 
         /// <summary>
         /// The raw contents of the token.
         /// </summary>
-        public string Value { get { return _value; } }
+        public string Value
+        {
+            get { return _value; }
+        }
 
         /// <summary>
         /// The `<see cref="Guid"/>` form Identity of the target

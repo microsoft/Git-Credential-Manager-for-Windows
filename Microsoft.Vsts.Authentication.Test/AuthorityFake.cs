@@ -50,7 +50,7 @@ namespace Microsoft.Alm.Authentication.Test
         {
             Assert.Equal(ExpectedQueryParameters, queryParameters);
 
-            return await Task.FromResult(new Token("token-access", TokenType.Access));
+            return await Task.FromResult(new Token("token-access", TokenType.AzureAccess));
         }
 
         /// <summary>
@@ -64,7 +64,7 @@ namespace Microsoft.Alm.Authentication.Test
         /// <param name="redirectUri">Address to return to upon receiving a response from the authority.</param>
         public async Task<Token> NoninteractiveAcquireToken(TargetUri targetUri, string clientId, string resource, Uri redirectUri)
         {
-            return await Task.FromResult(new Token("token-access", TokenType.Access));
+            return await Task.FromResult(new Token("token-access", TokenType.AzureAccess));
         }
 
         /// <summary>

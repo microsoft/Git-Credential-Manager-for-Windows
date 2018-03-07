@@ -332,12 +332,13 @@ namespace Atlassian.Bitbucket.Authentication
             string username;
             string password;
 
-            // Ask the user for Basic Auth credentials
+            // Ask the user for basic authentication credentials
             if (AcquireCredentialsCallback("Please enter your Bitbucket credentials for ", targetUri, out username, out password))
             {
                 AuthenticationResult result;
+                credentials = new Credential(username, password);
 
-                if (result = await BitbucketAuthority.AcquireToken(targetUri, username, password, AuthenticationResultType.None, TokenScope))
+                if (result = await BitbucketAuthority.AcquireToken(targetUri, credentials, AuthenticationResultType.None, TokenScope))
                 {
                     Trace.WriteLine("token acquisition succeeded");
 
@@ -354,11 +355,11 @@ namespace Atlassian.Bitbucket.Authentication
                 }
                 else if (result == AuthenticationResultType.TwoFactor)
                 {
-                    // Basic Auth attempt returned a result indicating the user has 2FA on so prompt
+                    // Basic authentication attempt returned a result indicating the user has 2FA on so prompt
                     // the user to run the OAuth dance.
                     if (AcquireAuthenticationOAuthCallback("", targetUri, result, username))
                     {
-                        if (result = await BitbucketAuthority.AcquireToken(targetUri, username, password, AuthenticationResultType.TwoFactor, TokenScope))
+                        if (result = await BitbucketAuthority.AcquireToken(targetUri, credentials, AuthenticationResultType.TwoFactor, TokenScope))
                         {
                             Trace.WriteLine("token acquisition succeeded");
 
@@ -403,7 +404,7 @@ namespace Atlassian.Bitbucket.Authentication
 
             if (!targetUri.TargetUriContainsUsername)
             {
-                // no user info in uri so personalize the credentials
+                // No user info in Uri so personalize the credentials.
                 credentials = new Credential(realUsername, credentials.Password);
             }
 
