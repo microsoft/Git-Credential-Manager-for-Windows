@@ -38,6 +38,7 @@
     <Compile Include="Git\Where.cs" />
     <Compile Include="Global.cs" />
     <Compile Include="GlobalSuppressions.cs" />
+    <Compile Include="Network.cs" />
     <Compile Include="NtlmSupport.cs" />
     <Compile Include="RuntimeContext.cs" />
     <Compile Include="SecretCache.cs" />
