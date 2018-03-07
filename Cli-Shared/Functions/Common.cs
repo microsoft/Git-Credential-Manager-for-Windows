@@ -289,7 +289,7 @@ namespace Microsoft.Alm.Cli
 
                     string gitDirPath = Path.GetDirectoryName(gitConfigPath);
 
-                    if (Directory.Exists(gitDirPath))
+                    if (program.FileSystem.DirectoryExists(gitDirPath))
                     {
                         program.EnableTraceLogging(operationArguments, gitDirPath);
                     }
@@ -300,7 +300,7 @@ namespace Microsoft.Alm.Cli
 
                     string homeDirPath = Path.GetDirectoryName(gitConfigPath);
 
-                    if (Directory.Exists(homeDirPath))
+                    if (program.FileSystem.DirectoryExists(homeDirPath))
                     {
                         program.EnableTraceLogging(operationArguments, homeDirPath);
                     }
@@ -322,6 +322,7 @@ namespace Microsoft.Alm.Cli
             if (logFilePath is null)
                 throw new ArgumentNullException(nameof(logFilePath));
 
+            var fs = program.FileSystem;
             var trace = program.Context.Trace;
             string logFileName = Path.Combine(logFilePath, Path.ChangeExtension(Program.ConfigPrefix, ".log"));
 
@@ -333,7 +334,7 @@ namespace Microsoft.Alm.Cli
                     string moveName = string.Format("{0}{1:000}.log", Program.ConfigPrefix, i);
                     string movePath = Path.Combine(logFilePath, moveName);
 
-                    if (!File.Exists(movePath))
+                    if (!fs.FileExists(movePath))
                     {
                         logFileInfo.MoveTo(movePath);
                         break;
@@ -343,7 +344,7 @@ namespace Microsoft.Alm.Cli
 
             trace.WriteLine($"trace log destination is '{logFilePath}'.");
 
-            using (var fileStream = File.Open(logFileName, FileMode.Append, FileAccess.Write, FileShare.ReadWrite))
+            using (var fileStream = fs.FileOpen(logFileName, FileMode.Append, FileAccess.Write, FileShare.ReadWrite))
             {
                 var listener = new StreamWriter(fileStream, Encoding.UTF8);
                 trace.AddListener(listener);

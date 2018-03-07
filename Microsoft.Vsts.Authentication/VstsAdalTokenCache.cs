@@ -60,7 +60,7 @@ namespace Microsoft.Alm.Authentication
                 string directoryPath = Path.Combine(localAppDataPath, AdalCachePaths[i][0]);
                 string filePath = Path.Combine(directoryPath, AdalCachePaths[i][1]);
 
-                if (File.Exists(filePath))
+                if (context.FileSystem.FileExists(filePath))
                 {
                     _cacheFilePath = filePath;
                     break;
@@ -78,7 +78,7 @@ namespace Microsoft.Alm.Authentication
         {
             lock (_syncpoint)
             {
-                if (File.Exists(_cacheFilePath) && HasStateChanged)
+                if (_context.FileSystem.FileExists(_cacheFilePath) && HasStateChanged)
                 {
                     try
                     {
@@ -86,7 +86,7 @@ namespace Microsoft.Alm.Authentication
 
                         byte[] data = ProtectedData.Protect(state, null, DataProtectionScope.CurrentUser);
 
-                        File.WriteAllBytes(_cacheFilePath, data);
+                        _context.FileSystem.FileWriteAllBytes(_cacheFilePath, data);
 
                         HasStateChanged = false;
                     }
@@ -102,11 +102,11 @@ namespace Microsoft.Alm.Authentication
         {
             lock (_syncpoint)
             {
-                if (File.Exists(_cacheFilePath))
+                if (_context.FileSystem.FileExists(_cacheFilePath))
                 {
                     try
                     {
-                        byte[] data = File.ReadAllBytes(_cacheFilePath);
+                        byte[] data = _context.FileSystem.FileReadAllBytes(_cacheFilePath);
 
                         byte[] state = ProtectedData.Unprotect(data, null, DataProtectionScope.CurrentUser);
 

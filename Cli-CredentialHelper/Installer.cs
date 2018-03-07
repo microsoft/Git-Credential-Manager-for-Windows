@@ -127,7 +127,7 @@ namespace Microsoft.Alm.Cli
                     {
                         string path = Path.Combine(drive.RootDirectory.FullName, Cygwin64GitPath);
 
-                        if (Directory.Exists(path))
+                        if (Program.FileSystem.DirectoryExists(path))
                         {
                             Program.Context.Trace.WriteLine($"cygwin directory found at '{path}'.");
 
@@ -137,7 +137,7 @@ namespace Microsoft.Alm.Cli
 
                         path = Path.Combine(drive.RootDirectory.FullName, Cygwin32GitPath);
 
-                        if (Directory.Exists(path))
+                        if (Program.FileSystem.DirectoryExists(path))
                         {
                             Program.Context.Trace.WriteLine($"cygwin directory found at '{path}'.");
 
@@ -169,13 +169,13 @@ namespace Microsoft.Alm.Cli
 
                     // Git for Windows checks %HOME% first
                     if ((val1 = vars["HOME"] as string) != null
-                        && Directory.Exists(val1))
+                        && Program.FileSystem.DirectoryExists(val1))
                     {
                         _userBinPath = val1;
                     }
                     // Git for Windows checks %HOMEDRIVE%%HOMEPATH% second
                     else if ((val1 = vars["HOMEDRIVE"] as string) != null && (val2 = vars["HOMEPATH"] as string) != null
-                        && Directory.Exists(val3 = val1 + val2))
+                        && Program.FileSystem.DirectoryExists(val3 = val1 + val2))
                     {
                         _userBinPath = val3;
                     }
@@ -215,7 +215,7 @@ namespace Microsoft.Alm.Cli
                 // use the custom installation path if supplied
                 if (!string.IsNullOrEmpty(_customPath))
                 {
-                    if (!Directory.Exists(_customPath))
+                    if (!Program.FileSystem.DirectoryExists(_customPath))
                     {
                         Program.LogEvent("No Git installation found, unable to continue deployment.", EventLogEntryType.Error);
                         Program.Out.WriteLine();
@@ -288,7 +288,7 @@ namespace Microsoft.Alm.Cli
                         }
 
                         // copy help documents
-                        if (Directory.Exists(installation.Doc)
+                        if (Program.FileSystem.DirectoryExists(installation.Doc)
                             && CopyFiles(Program.Location, installation.Doc, DocsList, out copiedFiles))
                         {
                             copiedCount += copiedFiles.Count;
@@ -321,9 +321,9 @@ namespace Microsoft.Alm.Cli
                 Program.Out.WriteLine();
                 Program.Out.WriteLine($"Deploying from '{Program.Location}' to '{UserBinPath}'.");
 
-                if (!Directory.Exists(UserBinPath))
+                if (!Program.FileSystem.DirectoryExists(UserBinPath))
                 {
-                    Directory.CreateDirectory(UserBinPath);
+                    Program.FileSystem.CreateDirectory(UserBinPath);
                 }
 
                 if (CopyFiles(Program.Location, UserBinPath, FileList, out copiedFiles))
@@ -363,7 +363,7 @@ namespace Microsoft.Alm.Cli
                     return;
                 }
 
-                if (CygwinPath != null && Directory.Exists(CygwinPath))
+                if (CygwinPath != null && Program.FileSystem.DirectoryExists(CygwinPath))
                 {
                     if (CopyFiles(Program.Location, CygwinPath, FileList, out copiedFiles))
                     {
@@ -483,7 +483,7 @@ namespace Microsoft.Alm.Cli
                 // use the custom installation path if supplied
                 if (!string.IsNullOrEmpty(_customPath))
                 {
-                    if (!Directory.Exists(_customPath))
+                    if (!Program.FileSystem.DirectoryExists(_customPath))
                     {
                         Program.Out.WriteLine();
                         Program.WriteLine($"fatal: custom path does not exist: '{_customPath}'. U_U");
@@ -594,7 +594,7 @@ namespace Microsoft.Alm.Cli
                         }
 
                         // clean help documents
-                        if (Directory.Exists(installation.Doc)
+                        if (Program.FileSystem.DirectoryExists(installation.Doc)
                             && CleanFiles(installation.Doc, DocsList, out cleanedFiles))
                         {
                             cleanedCount += cleanedFiles.Count;
@@ -621,7 +621,7 @@ namespace Microsoft.Alm.Cli
                     }
                 }
 
-                if (Directory.Exists(UserBinPath))
+                if (Program.FileSystem.DirectoryExists(UserBinPath))
                 {
                     Program.Out.WriteLine();
                     Program.Out.WriteLine($"Removing from '{UserBinPath}'.");
@@ -661,7 +661,7 @@ namespace Microsoft.Alm.Cli
                     }
                 }
 
-                if (CygwinPath != null && Directory.Exists(CygwinPath))
+                if (CygwinPath != null && Program.FileSystem.DirectoryExists(CygwinPath))
                 {
                     if (CleanFiles(CygwinPath, FileList, out cleanedFiles))
                     {
@@ -777,7 +777,7 @@ namespace Microsoft.Alm.Cli
         {
             cleanedFiles = new List<string>();
 
-            if (!Directory.Exists(path))
+            if (!Program.FileSystem.DirectoryExists(path))
             {
                 Program.Context.Trace.WriteLine($"path '{path}' does not exist.");
                 return false;
@@ -791,7 +791,7 @@ namespace Microsoft.Alm.Cli
 
                     Program.Context.Trace.WriteLine($"clean '{target}'.");
 
-                    File.Delete(target);
+                    Program.FileSystem.FileDelete(target);
 
                     cleanedFiles.Add(file);
                 }
@@ -809,13 +809,13 @@ namespace Microsoft.Alm.Cli
         {
             copiedFiles = new List<string>();
 
-            if (!Directory.Exists(srcPath))
+            if (!Program.FileSystem.DirectoryExists(srcPath))
             {
                 Program.Context.Trace.WriteLine($"source '{srcPath}' does not exist.");
                 return false;
             }
 
-            if (Directory.Exists(dstPath))
+            if (Program.FileSystem.DirectoryExists(dstPath))
             {
                 try
                 {
@@ -826,7 +826,7 @@ namespace Microsoft.Alm.Cli
                         string src = Path.Combine(srcPath, file);
                         string dst = Path.Combine(dstPath, file);
 
-                        File.Copy(src, dst, true);
+                        Program.FileSystem.FileCopy(src, dst, true);
 
                         copiedFiles.Add(file);
                     }
@@ -918,7 +918,7 @@ namespace Microsoft.Alm.Cli
             if (string.IsNullOrEmpty(gitCmdPath) || string.IsNullOrEmpty(command))
                 return false;
 
-            if (!File.Exists(gitCmdPath))
+            if (!Program.FileSystem.FileExists(gitCmdPath))
                 return false;
 
             var options = new ProcessStartInfo()

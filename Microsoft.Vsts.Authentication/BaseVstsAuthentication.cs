@@ -176,19 +176,19 @@ namespace Microsoft.Alm.Authentication
                 if (StringComparer.OrdinalIgnoreCase.Equals(targetUri.Scheme, "http")
                     || StringComparer.OrdinalIgnoreCase.Equals(targetUri.Scheme, "https"))
                 {
-                    // Query the cache first
+                    // Query the cache first.
                     string tenantUrl = targetUri.ToString();
 
-                    // Read the cache from disk
+                    // Read the cache from disk.
                     var cache = await DeserializeTenantCache(context);
 
-                    // Check the cache for an existing value
+                    // Check the cache for an existing value.
                     if (cache.TryGetValue(tenantUrl, out tenantId))
                         return new KeyValuePair<bool, Guid>(true, tenantId);
 
                     try
                     {
-                        // Build a request that we expect to fail, do not allow redirect to sign in url
+                        // Build a request that we expect to fail, do not allow redirect to sign in Url.
                         var request = WebRequest.CreateHttp(targetUri);
                         request.UserAgent = Global.UserAgent;
                         request.Method = "HEAD";
@@ -442,7 +442,7 @@ namespace Microsoft.Alm.Authentication
         private static async Task<Dictionary<string, Guid>> DeserializeTenantCache(RuntimeContext context)
         {
             var encoding = new UTF8Encoding(false);
-            var path = GetCachePath();
+            var path = GetCachePath(context);
 
             string data = null;
             Dictionary<string, Guid> cache = new Dictionary<string, Guid>(StringComparer.OrdinalIgnoreCase);
@@ -455,7 +455,7 @@ namespace Microsoft.Alm.Authentication
                 {
                     // Just open the file from disk, the tenant identities are not secret and
                     // therefore safely left as unencrypted plain text.
-                    using (var stream = File.Open(path, FileMode.OpenOrCreate, FileAccess.Read, FileShare.Read))
+                    using (var stream = context.FileSystem.FileOpen(path, FileMode.OpenOrCreate, FileAccess.Read, FileShare.Read))
                     using (var inflate = new GZipStream(stream, CompressionMode.Decompress))
                     using (var reader = new StreamReader(inflate, encoding))
                     {
@@ -497,8 +497,7 @@ namespace Microsoft.Alm.Authentication
                         string key = data.Substring(last, idx - last);
                         string val = data.Substring(idx + 1, next - idx - 1);
 
-                        Guid id;
-                        if (Guid.TryParse(val, out id))
+                        if (Guid.TryParse(val, out Guid id))
                         {
                             cache[key] = id;
                         }
@@ -511,15 +510,18 @@ namespace Microsoft.Alm.Authentication
             return cache;
         }
 
-        private static string GetCachePath()
+        private static string GetCachePath(RuntimeContext context)
         {
+            if (context is null)
+                throw new ArgumentNullException(nameof(context));
+
             string path = Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData);
             path = Path.Combine(path, CachePathDirectory);
 
             // Create the directory if necessary
-            if (!Directory.Exists(path))
+            if (!context.FileSystem.DirectoryExists(path))
             {
-                Directory.CreateDirectory(path);
+                context.FileSystem.CreateDirectory(path);
             }
 
             // Append the file name to the path
@@ -536,7 +538,7 @@ namespace Microsoft.Alm.Authentication
                 throw new ArgumentNullException(nameof(cache));
 
             var encoding = new UTF8Encoding(false);
-            string path = GetCachePath();
+            string path = GetCachePath(context);
 
             StringBuilder builder = new StringBuilder();
             Exception exception = null;
@@ -559,7 +561,7 @@ namespace Microsoft.Alm.Authentication
                 {
                     // Just open the file from disk, the tenant identities are not secret and
                     // therefore safely left as unencrypted plain text.
-                    using (var stream = File.Open(path, FileMode.OpenOrCreate, FileAccess.ReadWrite, FileShare.None))
+                    using (var stream = context.FileSystem.FileOpen(path, FileMode.OpenOrCreate, FileAccess.ReadWrite, FileShare.None))
                     using (var deflate = new GZipStream(stream, CompressionMode.Compress))
                     using (var writer = new StreamWriter(deflate, encoding))
                     {

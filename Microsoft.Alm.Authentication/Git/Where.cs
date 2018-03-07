@@ -53,7 +53,7 @@ namespace Microsoft.Alm.Authentication.Git
         /// Returns `<see langword="true"/>` if successful; otherwise `<see langword="false"/>`.
         /// </summary>
         /// <param name="path">
-        /// The local respository path if any.
+        /// The local repository path if any.
         /// <para/>
         /// Used to find local Git configuration files.
         /// </param>
@@ -130,7 +130,7 @@ namespace Microsoft.Alm.Authentication.Git
         /// <param name="path">
         /// Path to Git's system configuration if successful; otherwise `<see langword="null"/>`.
         /// </param>
-        bool GitSystemConfig(Installation? installation, out string path);
+        bool GitSystemConfig(Installation installation, out string path);
 
         /// <summary>
         /// Gets the path to Git's XDG configuration file.
@@ -183,7 +183,7 @@ namespace Microsoft.Alm.Authentication.Git
                             continue;
 
                         string value = string.Format("{0}\\{1}{2}", paths[i], name, exts[j]);
-                        if (File.Exists(value))
+                        if (FileSystem.FileExists(value))
                         {
                             value = value.Replace("\\\\", "\\");
                             path = value;
@@ -199,8 +199,8 @@ namespace Microsoft.Alm.Authentication.Git
 
         public bool FindGitInstallation(string path, KnownDistribution distro, out Installation installation)
         {
-            installation = new Installation(path, distro);
-            return Installation.IsValid(installation);
+            installation = new Installation(Context, path, distro);
+            return installation.IsValid();
         }
 
         public bool FindGitInstallations(out List<Installation> installations)
@@ -278,61 +278,61 @@ namespace Microsoft.Alm.Authentication.Git
                     shellPathValue = shellPathValue.Substring(0, shellPathValue.Length - Installation.AllVersionCmdPath.Length);
                 }
 
-                candidates.Add(new Installation(shellPathValue, KnownDistribution.GitForWindows64v2));
-                candidates.Add(new Installation(shellPathValue, KnownDistribution.GitForWindows32v2));
-                candidates.Add(new Installation(shellPathValue, KnownDistribution.GitForWindows32v1));
+                candidates.Add(new Installation(Context, shellPathValue, KnownDistribution.GitForWindows64v2));
+                candidates.Add(new Installation(Context, shellPathValue, KnownDistribution.GitForWindows32v2));
+                candidates.Add(new Installation(Context, shellPathValue, KnownDistribution.GitForWindows32v1));
             }
 
             if (!string.IsNullOrEmpty(reg64HklmPath))
             {
-                candidates.Add(new Installation(reg64HklmPath, KnownDistribution.GitForWindows64v2));
+                candidates.Add(new Installation(Context, reg64HklmPath, KnownDistribution.GitForWindows64v2));
             }
             if (!string.IsNullOrEmpty(programFiles32Path))
             {
-                candidates.Add(new Installation(programFiles64Path, KnownDistribution.GitForWindows64v2));
+                candidates.Add(new Installation(Context, programFiles64Path, KnownDistribution.GitForWindows64v2));
             }
             if (!string.IsNullOrEmpty(reg64HkcuPath))
             {
-                candidates.Add(new Installation(reg64HkcuPath, KnownDistribution.GitForWindows64v2));
+                candidates.Add(new Installation(Context, reg64HkcuPath, KnownDistribution.GitForWindows64v2));
             }
             if (!string.IsNullOrEmpty(reg32HklmPath))
             {
-                candidates.Add(new Installation(reg32HklmPath, KnownDistribution.GitForWindows32v2));
-                candidates.Add(new Installation(reg32HklmPath, KnownDistribution.GitForWindows32v1));
+                candidates.Add(new Installation(Context, reg32HklmPath, KnownDistribution.GitForWindows32v2));
+                candidates.Add(new Installation(Context, reg32HklmPath, KnownDistribution.GitForWindows32v1));
             }
             if (!string.IsNullOrEmpty(programFiles32Path))
             {
-                candidates.Add(new Installation(programFiles32Path, KnownDistribution.GitForWindows32v2));
-                candidates.Add(new Installation(programFiles32Path, KnownDistribution.GitForWindows32v1));
+                candidates.Add(new Installation(Context, programFiles32Path, KnownDistribution.GitForWindows32v2));
+                candidates.Add(new Installation(Context, programFiles32Path, KnownDistribution.GitForWindows32v1));
             }
             if (!string.IsNullOrEmpty(reg32HkcuPath))
             {
-                candidates.Add(new Installation(reg32HkcuPath, KnownDistribution.GitForWindows32v2));
-                candidates.Add(new Installation(reg32HkcuPath, KnownDistribution.GitForWindows32v1));
+                candidates.Add(new Installation(Context, reg32HkcuPath, KnownDistribution.GitForWindows32v2));
+                candidates.Add(new Installation(Context, reg32HkcuPath, KnownDistribution.GitForWindows32v1));
             }
             if (!string.IsNullOrEmpty(programDataPath))
             {
-                candidates.Add(new Installation(programDataPath, KnownDistribution.GitForWindows64v2));
-                candidates.Add(new Installation(programDataPath, KnownDistribution.GitForWindows32v2));
-                candidates.Add(new Installation(programDataPath, KnownDistribution.GitForWindows32v1));
+                candidates.Add(new Installation(Context, programDataPath, KnownDistribution.GitForWindows64v2));
+                candidates.Add(new Installation(Context, programDataPath, KnownDistribution.GitForWindows32v2));
+                candidates.Add(new Installation(Context, programDataPath, KnownDistribution.GitForWindows32v1));
             }
             if (!string.IsNullOrEmpty(appDataLocalPath))
             {
-                candidates.Add(new Installation(appDataLocalPath, KnownDistribution.GitForWindows64v2));
-                candidates.Add(new Installation(appDataLocalPath, KnownDistribution.GitForWindows32v2));
-                candidates.Add(new Installation(appDataLocalPath, KnownDistribution.GitForWindows32v1));
+                candidates.Add(new Installation(Context, appDataLocalPath, KnownDistribution.GitForWindows64v2));
+                candidates.Add(new Installation(Context, appDataLocalPath, KnownDistribution.GitForWindows32v2));
+                candidates.Add(new Installation(Context, appDataLocalPath, KnownDistribution.GitForWindows32v1));
             }
             if (!string.IsNullOrEmpty(appDataRoamingPath))
             {
-                candidates.Add(new Installation(appDataRoamingPath, KnownDistribution.GitForWindows64v2));
-                candidates.Add(new Installation(appDataRoamingPath, KnownDistribution.GitForWindows32v2));
-                candidates.Add(new Installation(appDataRoamingPath, KnownDistribution.GitForWindows32v1));
+                candidates.Add(new Installation(Context, appDataRoamingPath, KnownDistribution.GitForWindows64v2));
+                candidates.Add(new Installation(Context, appDataRoamingPath, KnownDistribution.GitForWindows32v2));
+                candidates.Add(new Installation(Context, appDataRoamingPath, KnownDistribution.GitForWindows32v1));
             }
 
             HashSet<Installation> pathSet = new HashSet<Installation>();
             foreach (var candidate in candidates)
             {
-                if (Installation.IsValid(candidate))
+                if (candidate.IsValid())
                 {
                     pathSet.Add(candidate);
                 }
@@ -356,7 +356,7 @@ namespace Microsoft.Alm.Authentication.Git
                 path = Environment.ExpandEnvironmentVariables(path);
 
                 // If the path is good, return it.
-                if (Directory.Exists(path))
+                if (FileSystem.DirectoryExists(path))
                     return path;
             }
 
@@ -369,7 +369,7 @@ namespace Microsoft.Alm.Authentication.Git
             {
                 path = homeDrive + homePath;
 
-                if (Directory.Exists(path))
+                if (FileSystem.DirectoryExists(path))
                     return path;
             }
 
@@ -387,7 +387,7 @@ namespace Microsoft.Alm.Authentication.Git
             var globalPath = Path.Combine(home, GlobalConfigFileName);
 
             // If the path is valid, return it to the user.
-            if (File.Exists(globalPath))
+            if (FileSystem.FileExists(globalPath))
             {
                 path = globalPath;
                 return true;
@@ -441,7 +441,7 @@ namespace Microsoft.Alm.Authentication.Git
                         if (result is DirectoryInfo)
                         {
                             var localPath = Path.Combine(result.FullName, LocalConfigFileName);
-                            if (File.Exists(localPath))
+                            if (FileSystem.FileExists(localPath))
                             {
                                 path = localPath;
                                 return true;
@@ -482,10 +482,10 @@ namespace Microsoft.Alm.Authentication.Git
                                     localPath = Path.Combine(localPath, content);
                                 }
 
-                                if (Directory.Exists(localPath))
+                                if (FileSystem.DirectoryExists(localPath))
                                 {
                                     localPath = Path.Combine(localPath, LocalConfigFileName);
-                                    if (File.Exists(localPath))
+                                    if (FileSystem.FileExists(localPath))
                                     {
                                         path = localPath;
                                         return true;
@@ -515,7 +515,7 @@ namespace Microsoft.Alm.Authentication.Git
 
             var portableConfigPath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.CommonApplicationData), PortableConfigFolder, PortableConfigFileName);
 
-            if (File.Exists(portableConfigPath))
+            if (FileSystem.FileExists(portableConfigPath))
             {
                 path = portableConfigPath;
             }
@@ -523,11 +523,11 @@ namespace Microsoft.Alm.Authentication.Git
             return path != null;
         }
 
-        public bool GitSystemConfig(Installation? installation, out string path)
+        public bool GitSystemConfig(Installation installation, out string path)
         {
-            if (installation.HasValue && File.Exists(installation.Value.Config))
+            if (installation != null && FileSystem.FileExists(installation.Config))
             {
-                path = installation.Value.Path;
+                path = installation.Path;
                 return true;
             }
             // find Git on the local disk - the system config is stored relative to it
@@ -536,7 +536,7 @@ namespace Microsoft.Alm.Authentication.Git
                 List<Installation> installations;
 
                 if (FindGitInstallations(out installations)
-                    && File.Exists(installations[0].Config))
+                    && FileSystem.FileExists(installations[0].Config))
                 {
                     path = installations[0].Config;
                     return true;
@@ -558,11 +558,11 @@ namespace Microsoft.Alm.Authentication.Git
             // The XDG config home is defined by an environment variable.
             xdgConfigHome = Environment.GetEnvironmentVariable("XDG_CONFIG_HOME");
 
-            if (Directory.Exists(xdgConfigHome))
+            if (FileSystem.DirectoryExists(xdgConfigHome))
             {
                 xdgConfigPath = Path.Combine(xdgConfigHome, XdgConfigFolder, XdgConfigFileName);
 
-                if (File.Exists(xdgConfigPath))
+                if (FileSystem.FileExists(xdgConfigPath))
                 {
                     path = xdgConfigPath;
                     return true;
@@ -574,7 +574,7 @@ namespace Microsoft.Alm.Authentication.Git
 
             xdgConfigPath = Path.Combine(xdgConfigHome, XdgConfigFolder, XdgConfigFileName);
 
-            if (File.Exists(xdgConfigPath))
+            if (FileSystem.FileExists(xdgConfigPath))
             {
                 path = xdgConfigPath;
                 return true;
