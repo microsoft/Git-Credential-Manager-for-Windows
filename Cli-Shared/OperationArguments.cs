@@ -34,10 +34,10 @@ using Git = Microsoft.Alm.Authentication.Git;
 
 namespace Microsoft.Alm.Cli
 {
-    internal class OperationArguments
+    internal class OperationArguments : Base
     {
-        public OperationArguments(Stream readableStream)
-                : this()
+        public OperationArguments(RuntimeContext context, Stream readableStream)
+                : this(context)
         {
             if (readableStream is null)
                 throw new ArgumentNullException(nameof(readableStream));
@@ -141,8 +141,8 @@ namespace Microsoft.Alm.Cli
             CreateTargetUri();
         }
 
-        public OperationArguments(Uri targetUri)
-            : this()
+        public OperationArguments(RuntimeContext context, Uri targetUri)
+            : this(context)
         {
             if (targetUri is null)
                 throw new ArgumentNullException("targetUri");
@@ -156,7 +156,8 @@ namespace Microsoft.Alm.Cli
             CreateTargetUri();
         }
 
-        public OperationArguments()
+        public OperationArguments(RuntimeContext context)
+            : base(context)
         {
             _authorityType = AuthorityType.Auto;
             _interactivity = Interactivity.Auto;
@@ -166,6 +167,11 @@ namespace Microsoft.Alm.Cli
             _validateCredentials = true;
             _vstsTokenScope = Program.VstsCredentialScope;
         }
+
+        // Test-only constructor
+        internal OperationArguments()
+            : this(RuntimeContext.Default)
+        { }
 
         private AuthorityType _authorityType;
         private Git.Configuration _configuration;
@@ -403,7 +409,7 @@ namespace Microsoft.Alm.Cli
 
         public virtual async Task LoadConfiguration()
         {
-            _configuration = await Git.Configuration.ReadConfiuration(Environment.CurrentDirectory, UseConfigLocal, UseConfigSystem);
+            _configuration = await Git.Configuration.ReadConfiuration(Context, Environment.CurrentDirectory, UseConfigLocal, UseConfigSystem);
         }
 
         public virtual void SetCredentials(string username, string password)
@@ -417,16 +423,16 @@ namespace Microsoft.Alm.Cli
 
             if (Uri.TryCreate(url, UriKind.Absolute, out tmp))
             {
-                Git.Trace.WriteLine($"successfully set proxy to '{tmp.AbsoluteUri}'.");
+                Trace.WriteLine($"successfully set proxy to '{tmp.AbsoluteUri}'.");
             }
             else
             {
                 if (!string.IsNullOrWhiteSpace(url))
                 {
-                    Git.Trace.WriteLine($"failed to parse '{url}'.");
+                    Trace.WriteLine($"failed to parse '{url}'.");
                 }
 
-                Git.Trace.WriteLine("proxy cleared.");
+                Trace.WriteLine("proxy cleared.");
             }
 
             ProxyUri = tmp;

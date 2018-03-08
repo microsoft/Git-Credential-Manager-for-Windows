@@ -125,7 +125,7 @@ namespace GitHub.Authentication
                 using (StringContent content = new StringContent(jsonContent, Encoding.UTF8, HttpJsonContentType))
                 using (HttpResponseMessage response = await httpClient.PostAsync(_authorityUrl, content))
                 {
-                    Git.Trace.WriteLine($"server responded with {response.StatusCode}.");
+                    Trace.WriteLine($"server responded with {response.StatusCode}.");
 
                     switch (response.StatusCode)
                     {
@@ -144,12 +144,12 @@ namespace GitHub.Authentication
 
                                 if (token == null)
                                 {
-                                    Git.Trace.WriteLine($"authentication for '{targetUri}' failed.");
+                                    Trace.WriteLine($"authentication for '{targetUri}' failed.");
                                     return new AuthenticationResult(GitHubAuthenticationResultType.Failure);
                                 }
                                 else
                                 {
-                                    Git.Trace.WriteLine($"authentication success: new personal access token for '{targetUri}' created.");
+                                    Trace.WriteLine($"authentication success: new personal access token for '{targetUri}' created.");
                                     return new AuthenticationResult(GitHubAuthenticationResultType.Success, token);
                                 }
                             }
@@ -163,18 +163,18 @@ namespace GitHub.Authentication
 
                                     if (mfakvp.Value.First().Contains("app"))
                                     {
-                                        Git.Trace.WriteLine($"two-factor app authentication code required for '{targetUri}'.");
+                                        Trace.WriteLine($"two-factor app authentication code required for '{targetUri}'.");
                                         return new AuthenticationResult(GitHubAuthenticationResultType.TwoFactorApp);
                                     }
                                     else
                                     {
-                                        Git.Trace.WriteLine($"two-factor sms authentication code required for '{targetUri}'.");
+                                        Trace.WriteLine($"two-factor sms authentication code required for '{targetUri}'.");
                                         return new AuthenticationResult(GitHubAuthenticationResultType.TwoFactorSms);
                                     }
                                 }
                                 else
                                 {
-                                    Git.Trace.WriteLine($"authentication failed for '{targetUri}'.");
+                                    Trace.WriteLine($"authentication failed for '{targetUri}'.");
                                     return new AuthenticationResult(GitHubAuthenticationResultType.Failure);
                                 }
                             }
@@ -186,15 +186,15 @@ namespace GitHub.Authentication
                             var contentBody = await response.Content.ReadAsStringAsync();
                             if (contentBody.Contains("This API can only be accessed with username and password Basic Auth"))
                             {
-                                Git.Trace.WriteLine($"authentication success: user supplied personal access token for '{targetUri}'.");
+                                Trace.WriteLine($"authentication success: user supplied personal access token for '{targetUri}'.");
 
                                 return new AuthenticationResult(GitHubAuthenticationResultType.Success, new Token(password, TokenType.Personal));
                             }
-                            Git.Trace.WriteLine($"authentication failed for '{targetUri}'.");
+                            Trace.WriteLine($"authentication failed for '{targetUri}'.");
                             return new AuthenticationResult(GitHubAuthenticationResultType.Failure);
 
                         default:
-                            Git.Trace.WriteLine($"authentication failed for '{targetUri}'.");
+                            Trace.WriteLine($"authentication failed for '{targetUri}'.");
                             return new AuthenticationResult(GitHubAuthenticationResultType.Failure);
                     }
                 }
@@ -225,12 +225,12 @@ namespace GitHub.Authentication
                 {
                     if (response.IsSuccessStatusCode)
                     {
-                        Git.Trace.WriteLine($"credential validation for '{targetUri}' succeeded.");
+                        Trace.WriteLine($"credential validation for '{targetUri}' succeeded.");
                         return true;
                     }
                     else
                     {
-                        Git.Trace.WriteLine($"credential validation for '{targetUri}' failed.");
+                        Trace.WriteLine($"credential validation for '{targetUri}' failed.");
                         return false;
                     }
                 }

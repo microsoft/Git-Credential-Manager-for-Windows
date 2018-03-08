@@ -27,8 +27,6 @@ using System;
 using System.Threading.Tasks;
 using Microsoft.Alm.Authentication;
 
-using Trace = Microsoft.Alm.Authentication.Git.Trace;
-
 namespace Atlassian.Bitbucket.Authentication
 {
     /// <summary>
@@ -301,7 +299,7 @@ namespace Atlassian.Bitbucket.Authentication
             if (targetUri.QueryUri.DnsSafeHost.EndsWith(BitbucketBaseUrlHost, StringComparison.OrdinalIgnoreCase))
             {
                 authentication = new Authentication(context, personalAccessTokenStore, acquireCredentialsCallback, acquireAuthenticationOAuthCallback);
-                Trace.WriteLine("authentication for Bitbucket created");
+                context.Trace.WriteLine("authentication for Bitbucket created");
             }
             else
             {

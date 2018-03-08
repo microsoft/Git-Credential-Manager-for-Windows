@@ -66,7 +66,7 @@ namespace Microsoft.Alm.Cli
         internal static readonly StringComparer ConfigValueComparer = StringComparer.OrdinalIgnoreCase;
 
         internal const string EnvironConfigDebugKey = "GCM_DEBUG";
-        internal const string EnvironConfigTraceKey = Git.Trace.EnvironmentVariableKey;
+        internal const string EnvironConfigTraceKey = "GCM_TRACE";
 
         internal static readonly StringComparer EnvironKeyComparer = StringComparer.OrdinalIgnoreCase;
 
@@ -150,8 +150,6 @@ namespace Microsoft.Alm.Cli
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Performance", "CA1810:InitializeReferenceTypeStaticFieldsInline")]
         static Program()
         {
-            DebuggerLaunch();
-
             ServicePointManager.SecurityProtocol = ServicePointManager.SecurityProtocol | SecurityProtocolType.Tls12;
         }
 
@@ -376,8 +374,11 @@ namespace Microsoft.Alm.Cli
             }
         }
 
-        internal static void DebuggerLaunch()
+        internal static void DebuggerLaunch(Program program)
         {
+            if (program is null)
+                throw new ArgumentNullException(nameof(program));
+
             if (Debugger.IsAttached)
                 return;
 
@@ -387,7 +388,7 @@ namespace Microsoft.Alm.Cli
                     || StringComparer.OrdinalIgnoreCase.Equals(debug, "1")
                     || StringComparer.OrdinalIgnoreCase.Equals(debug, "debug")))
             {
-                Git.Trace.WriteLine($"'{EnvironConfigDebugKey}': '{debug}', launching debugger...");
+                program.Context.Trace.WriteLine($"'{EnvironConfigDebugKey}': '{debug}', launching debugger...");
 
                 Debugger.Launch();
             }
@@ -453,7 +454,7 @@ namespace Microsoft.Alm.Cli
         {
             // use the stderr stream for the trace as stdout is used in the cross-process
             // communications protocol
-            Git.Trace.AddListener(Error);
+            _context.Trace.AddListener(Error);
         }
 
         internal void EnableTraceLogging(OperationArguments operationArguments)
@@ -475,7 +476,7 @@ namespace Microsoft.Alm.Cli
             if (!_configurationKeys.TryGetValue(type, out value)
                 && !_environmentKeys.TryGetValue(type, out value))
             {
-                Git.Trace.WriteLine($"BUG: unknown {nameof(KeyType)}: '{type}' encountered.");
+                _context.Trace.WriteLine($"BUG: unknown {nameof(KeyType)}: '{type}' encountered.");
             }
 
             return value;

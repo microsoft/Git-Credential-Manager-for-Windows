@@ -33,7 +33,7 @@ namespace Microsoft.Alm.Authentication
 {
     internal class VstsAdalTokenCache : IdentityModel.Clients.ActiveDirectory.TokenCache
     {
-        private readonly IReadOnlyList<IReadOnlyList<string>> AdalCachePaths = new string[][]
+        private static readonly IReadOnlyList<IReadOnlyList<string>> AdalCachePaths = new string[][]
         {
             new [] { @".IdentityService", @"IdentityServiceAdalCache.cache", },          // VS2017 ADAL v3 cache
             new [] { @"Microsoft\VSCommon\VSAccountManagement", @"AdalCache.cache", },   // VS2015 ADAL v2 cache
@@ -43,8 +43,13 @@ namespace Microsoft.Alm.Authentication
         /// <summary>
         /// Default constructor.
         /// </summary>
-        public VstsAdalTokenCache()
+        public VstsAdalTokenCache(RuntimeContext context)
         {
+            if (context is null)
+                throw new ArgumentNullException(nameof(context));
+
+            _context = context;
+
             string localAppDataPath = Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData);
 
             AfterAccess = AfterAccessNotification;
@@ -66,6 +71,7 @@ namespace Microsoft.Alm.Authentication
         }
 
         private readonly string _cacheFilePath;
+        private readonly RuntimeContext _context;
         private readonly object _syncpoint = new object();
 
         private void AfterAccessNotification(TokenCacheNotificationArgs args)
@@ -86,7 +92,7 @@ namespace Microsoft.Alm.Authentication
                     }
                     catch (Exception exception)
                     {
-                        Git.Trace.WriteLine($"error: {nameof(VstsAdalTokenCache)} \"{_cacheFilePath}\": {exception.Message}");
+                        _context.Trace.WriteLine($"error: {nameof(VstsAdalTokenCache)} \"{_cacheFilePath}\": {exception.Message}");
                     }
                 }
             }
@@ -108,7 +114,7 @@ namespace Microsoft.Alm.Authentication
                     }
                     catch (Exception exception)
                     {
-                        Git.Trace.WriteLine($"error: {nameof(VstsAdalTokenCache)} \"{_cacheFilePath}\": {exception.Message}");
+                        _context.Trace.WriteLine($"error: {nameof(VstsAdalTokenCache)} \"{_cacheFilePath}\": {exception.Message}");
                     }
                 }
             }

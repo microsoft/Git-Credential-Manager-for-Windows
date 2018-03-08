@@ -233,7 +233,7 @@ namespace Microsoft.Alm.Authentication.Git
 
             installations = pathSet.ToList();
 
-            Git.Trace.WriteLine($"found {installations.Count} Git installation(s).");
+            // Git.Trace.WriteLine($"found {installations.Count} Git installation(s).");
 
             return installations.Count > 0;
         }

@@ -82,7 +82,7 @@ namespace Microsoft.Alm.Cli.Test
             {
                 { "HOME", Environment.GetFolderPath(Environment.SpecialFolder.UserProfile) },
             };
-            var gitconfig = new Git.Configuration(configs);
+            var gitconfig = new Git.Configuration(RuntimeContext.Default, configs);
             var targetUri = new Authentication.TargetUri("https://example.visualstudio.com/");
 
             var opargsMock = new Mock<OperationArguments>();
@@ -200,7 +200,7 @@ namespace Microsoft.Alm.Cli.Test
             if (!setupComplete)
                 return;
 
-            var gitconfig = new Git.Configuration(configs);
+            var gitconfig = new Git.Configuration(RuntimeContext.Default, configs);
             var targetUri = new Authentication.TargetUri("https://example.visualstudio.com/");
 
             var opargsMock = new Mock<OperationArguments>();
@@ -294,7 +294,7 @@ namespace Microsoft.Alm.Cli.Test
             if (!setupComplete)
                 return;
 
-            var gitconfig = new Git.Configuration(configs);
+            var gitconfig = new Git.Configuration(RuntimeContext.Default, configs);
             var targetUri = new Authentication.TargetUri("https://example.visualstudio.com/");
 
             var opargsMock = new Mock<OperationArguments>();

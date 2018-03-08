@@ -34,8 +34,6 @@ using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Alm.Authentication;
 
-using Trace = Microsoft.Alm.Authentication.Git.Trace;
-
 namespace Atlassian.Bitbucket.Authentication.OAuth
 {
     /// <summary>

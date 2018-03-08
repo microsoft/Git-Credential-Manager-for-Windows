@@ -94,12 +94,12 @@ namespace Microsoft.Alm.Cli
             {
                 if (!StandardInputIsTty)
                 {
-                    Git.Trace.WriteLine("standard input is not TTY, abandoning prompt.");
+                    _context.Trace.WriteLine("standard input is not TTY, abandoning prompt.");
 
                     return;
                 }
 
-                Git.Trace.WriteLine("prompting user for url.");
+                _context.Trace.WriteLine("prompting user for url.");
 
                 WriteLine(" Target Url:");
                 url = In.ReadLine();
@@ -117,9 +117,9 @@ namespace Microsoft.Alm.Cli
             Uri uri;
             if (Uri.TryCreate(url, UriKind.Absolute, out uri))
             {
-                Git.Trace.WriteLine($"converted '{url}' to '{uri.AbsoluteUri}'.");
+                _context.Trace.WriteLine($"converted '{url}' to '{uri.AbsoluteUri}'.");
 
-                OperationArguments operationArguments = new OperationArguments(uri);
+                OperationArguments operationArguments = new OperationArguments(_context, uri);
 
                 Task.Run(async () =>
                 {
@@ -128,11 +128,11 @@ namespace Microsoft.Alm.Cli
 
                     if (operationArguments.PreserveCredentials && !forced)
                     {
-                        Git.Trace.WriteLine("attempting to delete preserved credentials without force, prompting user for interactivity.");
+                        _context.Trace.WriteLine("attempting to delete preserved credentials without force, prompting user for interactivity.");
 
                         if (!StandardInputIsTty || !StandardErrorIsTty)
                         {
-                            Git.Trace.WriteLine("standard input is not TTY, abandoning prompt.");
+                            _context.Trace.WriteLine("standard input is not TTY, abandoning prompt.");
                             return;
                         }
 
@@ -154,7 +154,7 @@ namespace Microsoft.Alm.Cli
             }
             else
             {
-                Git.Trace.WriteLine($"unable to parse input '{url}'.");
+                _context.Trace.WriteLine($"unable to parse input '{url}'.");
             }
         }
 
@@ -169,7 +169,7 @@ namespace Microsoft.Alm.Cli
             }
 
             // Create operation arguments, and load configuration data.
-            OperationArguments operationArguments = new OperationArguments(targetUri);
+            OperationArguments operationArguments = new OperationArguments(_context, targetUri);
 
             Task.Run(async () => { await LoadOperationArguments(operationArguments); }).Wait();
             EnableTraceLogging(operationArguments);
@@ -243,42 +243,44 @@ namespace Microsoft.Alm.Cli
 
             using (var stdin = InStream)
             {
-                OperationArguments operationArguments = new OperationArguments(stdin)
+                OperationArguments operationArguments = new OperationArguments(_context, stdin)
                 {
                     QueryUri = uri
                 };
 
-                Task.Run(async () => { await LoadOperationArguments(operationArguments); }).Wait();
-
-                var task = Task.Run(async () => { return await CreateAuthentication(operationArguments); });
-                BaseAuthentication authentication = task.Result;
-
-                switch (operationArguments.Authority)
+                Task.Run(async () =>
                 {
-                    default:
-                    case AuthorityType.Basic:
-                        Git.Trace.WriteLine($"deleting basic credentials for '{operationArguments.TargetUri}'.");
-                        break;
+                    await LoadOperationArguments(operationArguments);
 
-                    case AuthorityType.AzureDirectory:
-                    case AuthorityType.MicrosoftAccount:
-                        Git.Trace.WriteLine($"deleting VSTS credentials for '{operationArguments.TargetUri}'.");
-                        break;
+                    BaseAuthentication authentication = await CreateAuthentication(operationArguments);
 
-                    case AuthorityType.GitHub:
-                        Git.Trace.WriteLine($"deleting GitHub credentials for '{operationArguments.TargetUri}'.");
-                        break;
+                    switch (operationArguments.Authority)
+                    {
+                        default:
+                        case AuthorityType.Basic:
+                            _context.Trace.WriteLine($"deleting basic credentials for '{operationArguments.TargetUri}'.");
+                            break;
 
-                    case AuthorityType.Ntlm:
-                        Git.Trace.WriteLine($"deleting NTLM credentials for '{operationArguments.TargetUri}'.");
-                        break;
+                        case AuthorityType.AzureDirectory:
+                        case AuthorityType.MicrosoftAccount:
+                            _context.Trace.WriteLine($"deleting VSTS credentials for '{operationArguments.TargetUri}'.");
+                            break;
 
-                    case AuthorityType.Bitbucket:
-                        Git.Trace.WriteLine($"deleting Bitbucket credentials for '{operationArguments.Username}@{operationArguments.TargetUri}'.");
-                        break;
-                }
+                        case AuthorityType.GitHub:
+                            _context.Trace.WriteLine($"deleting GitHub credentials for '{operationArguments.TargetUri}'.");
+                            break;
 
-                authentication.DeleteCredentials(operationArguments.TargetUri, operationArguments.Username);
+                        case AuthorityType.Ntlm:
+                            _context.Trace.WriteLine($"deleting NTLM credentials for '{operationArguments.TargetUri}'.");
+                            break;
+
+                        case AuthorityType.Bitbucket:
+                            _context.Trace.WriteLine($"deleting Bitbucket credentials for '{operationArguments.Username}@{operationArguments.TargetUri}'.");
+                            break;
+                    }
+
+                    await authentication.DeleteCredentials(operationArguments.TargetUri, operationArguments.Username);
+                }).Wait();
             }
 
             return;
@@ -292,7 +294,7 @@ namespace Microsoft.Alm.Cli
             var installer = new Installer(this);
             installer.DeployConsole();
 
-            Git.Trace.WriteLine($"Installer result = '{installer.Result}', exit code = {installer.ExitCode}.");
+            Trace.WriteLine($"Installer result = '{installer.Result}', exit code = {installer.ExitCode}.");
 
             Exit(installer.ExitCode);
         }
@@ -304,7 +306,7 @@ namespace Microsoft.Alm.Cli
             // see: https://www.kernel.org/pub/software/scm/git/docs/git-credential.html
             using (var stdin = InStream)
             {
-                OperationArguments operationArguments = new OperationArguments(stdin);
+                OperationArguments operationArguments = new OperationArguments(_context, stdin);
 
                 Debug.Assert(operationArguments != null, "The operationArguments is null");
                 Debug.Assert(operationArguments.TargetUri != null, "The operationArgument.TargetUri is null");
@@ -316,7 +318,7 @@ namespace Microsoft.Alm.Cli
 
                     if (operationArguments.PreserveCredentials)
                     {
-                        Git.Trace.WriteLine($"{KeyTypeName(KeyType.PreserveCredentials)} = true, canceling erase request.");
+                        _context.Trace.WriteLine($"{KeyTypeName(KeyType.PreserveCredentials)} = true, canceling erase request.");
                         return;
                     }
 
@@ -332,7 +334,7 @@ namespace Microsoft.Alm.Cli
             // see: https://www.kernel.org/pub/software/scm/git/docs/git-credential.html
             using (var stdin = InStream)
             {
-                OperationArguments operationArguments = new OperationArguments(stdin);
+                OperationArguments operationArguments = new OperationArguments(_context, stdin);
 
                 Task.Run(async () =>
                 {
@@ -373,7 +375,7 @@ namespace Microsoft.Alm.Cli
                         // if the help file exists, send it to the operating system to display to the user
                         if (File.Exists(doc))
                         {
-                            Git.Trace.WriteLine($"opening help documentation '{doc}'.");
+                            Context.Trace.WriteLine($"opening help documentation '{doc}'.");
 
                             Process.Start(doc);
 
@@ -391,7 +393,7 @@ namespace Microsoft.Alm.Cli
             var installer = new Installer(this);
             installer.RemoveConsole();
 
-            Git.Trace.WriteLine($"Installer result = {installer.Result}, exit code = {installer.ExitCode}.");
+            Context.Trace.WriteLine($"Installer result = {installer.Result}, exit code = {installer.ExitCode}.");
 
             Exit(installer.ExitCode);
         }
@@ -403,7 +405,7 @@ namespace Microsoft.Alm.Cli
             // see: https://www.kernel.org/pub/software/scm/git/docs/git-credential.html
             using (var stdin = InStream)
             {
-                OperationArguments operationArguments = new OperationArguments(stdin);
+                OperationArguments operationArguments = new OperationArguments(_context, stdin);
 
                 Debug.Assert(operationArguments != null, "The operationArguments is null");
                 Debug.Assert(operationArguments.Username != null, "The operaionArgument.Username is null");
@@ -420,24 +422,24 @@ namespace Microsoft.Alm.Cli
                 {
                     default:
                     case AuthorityType.Basic:
-                        Git.Trace.WriteLine($"storing basic credentials for '{operationArguments.TargetUri}'.");
+                        Context.Trace.WriteLine($"storing basic credentials for '{operationArguments.TargetUri}'.");
                         break;
 
                     case AuthorityType.Bitbucket:
-                        Git.Trace.WriteLine($"storing Bitbucket credentials for '{operationArguments.TargetUri}'.");
+                        Context.Trace.WriteLine($"storing Bitbucket credentials for '{operationArguments.TargetUri}'.");
                         break;
 
                     case AuthorityType.AzureDirectory:
                     case AuthorityType.MicrosoftAccount:
-                        Git.Trace.WriteLine($"storing VSTS credentials for '{operationArguments.TargetUri}'.");
+                        Context.Trace.WriteLine($"storing VSTS credentials for '{operationArguments.TargetUri}'.");
                         break;
 
                     case AuthorityType.GitHub:
-                        Git.Trace.WriteLine($"storing GitHub credentials for '{operationArguments.TargetUri}'.");
+                        Context.Trace.WriteLine($"storing GitHub credentials for '{operationArguments.TargetUri}'.");
                         break;
 
                     case AuthorityType.Ntlm:
-                        Git.Trace.WriteLine($"storing NTLM credentials for '{operationArguments.TargetUri}'.");
+                        Context.Trace.WriteLine($"storing NTLM credentials for '{operationArguments.TargetUri}'.");
                         break;
                 }
 

@@ -43,5 +43,8 @@ namespace Microsoft.Alm.Authentication
         {
             get { return _context; }
         }
+
+        protected Git.ITrace Trace
+            => _context.Trace;
     }
 }
