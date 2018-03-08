@@ -156,6 +156,7 @@ namespace Microsoft.Alm.Cli
         }
 
         private string _executablePath;
+        private readonly RuntimeContext _context;
         private string _location;
         private string _name;
         private Stream _stdErrStream;
@@ -275,6 +276,9 @@ namespace Microsoft.Alm.Cli
                 return _version;
             }
         }
+
+        internal RuntimeContext Context
+            => _context;
 
         internal TextWriter Error
         {

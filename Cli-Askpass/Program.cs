@@ -47,8 +47,13 @@ namespace Microsoft.Alm.Cli
         private static readonly Regex AskPasswordRegex = new Regex(@"(\S+)'s\s+password:\s*", RegexOptions.Compiled | RegexOptions.CultureInvariant | RegexOptions.IgnoreCase);
         private static readonly Regex AskAuthenticityRegex = new Regex(@"^\s*The authenticity of host '([^']+)' can't be established.\s+RSA key fingerprint is ([^\s:]+:[^\.]+).", RegexOptions.Compiled | RegexOptions.CultureInvariant | RegexOptions.IgnoreCase);
 
-        internal Program()
+        internal Program(Microsoft.Alm.Authentication.RuntimeContext context)
         {
+            if (context is null)
+                throw new ArgumentNullException(nameof(context));
+
+            _context = context;
+
             Title = AssemblyTitle;
         }
 
@@ -320,7 +325,7 @@ namespace Microsoft.Alm.Cli
         [STAThread]
         private static void Main(string[] args)
         {
-            Program program = new Program();
+            Program program = new Program(RuntimeContext.Default);
 
             program.Run(args);
         }

@@ -35,7 +35,7 @@ using Git = Microsoft.Alm.Authentication.Git;
 
 namespace GitHub.Authentication
 {
-    internal class Authority : IAuthority
+    internal class Authority : Base, IAuthority
     {
         /// <summary>
         /// The GitHub required HTTP accepts header value
@@ -47,7 +47,8 @@ namespace GitHub.Authentication
         /// </summary>
         public const int RequestTimeout = 15 * 1000; // 15 second limit
 
-        public Authority(TargetUri targetUri)
+        public Authority(RuntimeContext context, TargetUri targetUri)
+            : base(context)
         {
             // The GitHub proper API endpoints
             if (targetUri.DnsSafeHost.Equals("github.com", StringComparison.OrdinalIgnoreCase))

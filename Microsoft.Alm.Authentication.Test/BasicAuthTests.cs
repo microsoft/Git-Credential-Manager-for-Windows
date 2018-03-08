@@ -15,7 +15,7 @@ namespace Microsoft.Alm.Authentication.Test
         public async Task BasicAuthDeleteCredentialsTest()
         {
             TargetUri targetUri = new TargetUri("http://localhost");
-            BasicAuthentication basicAuth = GetBasicAuthentication("basic-delete");
+            BasicAuthentication basicAuth = GetBasicAuthentication(RuntimeContext.Default, "basic-delete");
 
             await basicAuth.CredentialStore.WriteCredentials(targetUri, new Credential("username", "password"));
 
@@ -28,7 +28,7 @@ namespace Microsoft.Alm.Authentication.Test
         public async Task BasicAuthGetCredentialsTest()
         {
             TargetUri targetUri = new TargetUri("http://localhost");
-            BasicAuthentication basicAuth = GetBasicAuthentication("basic-get");
+            BasicAuthentication basicAuth = GetBasicAuthentication(RuntimeContext.Default, "basic-get");
 
             Credential credentials = null;
 
@@ -45,7 +45,7 @@ namespace Microsoft.Alm.Authentication.Test
         public async Task BasicAuthSetCredentialsTest()
         {
             TargetUri targetUri = new TargetUri("http://localhost");
-            BasicAuthentication basicAuth = GetBasicAuthentication("basic-set");
+            BasicAuthentication basicAuth = GetBasicAuthentication(RuntimeContext.Default, "basic-set");
 
             Credential credentials = null;
 
@@ -70,11 +70,11 @@ namespace Microsoft.Alm.Authentication.Test
             Assert.NotNull(credentials = await basicAuth.GetCredentials(targetUri));
         }
 
-        private BasicAuthentication GetBasicAuthentication(string @namespace)
+        private BasicAuthentication GetBasicAuthentication(RuntimeContext context, string @namespace)
         {
-            ICredentialStore credentialStore = new SecretCache(@namespace);
+            ICredentialStore credentialStore = new SecretCache(context, @namespace);
 
-            return new BasicAuthentication(credentialStore, NtlmSupport.Auto, null, null);
+            return new BasicAuthentication(context, credentialStore, NtlmSupport.Auto, null, null);
         }
     }
 }

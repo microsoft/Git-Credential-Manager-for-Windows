@@ -33,30 +33,35 @@ using System.Text.RegularExpressions;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Alm.Authentication;
+
 using Trace = Microsoft.Alm.Authentication.Git.Trace;
 
 namespace Atlassian.Bitbucket.Authentication.OAuth
 {
     /// <summary>
     /// </summary>
-    public class OAuthAuthenticator
+    public class OAuthAuthenticator : Base
     {
         /// <summary>
         /// The maximum wait time for a network request before timing out
         /// </summary>
         public const int RequestTimeout = 15 * 1000; // 15 second limit
 
-        private static Regex RefreshTokenRegex = new Regex(@"\s*""refresh_token""\s*:\s*""([^""]+)""\s*", RegexOptions.Compiled | RegexOptions.CultureInvariant | RegexOptions.IgnoreCase);
-        private static Regex AccessTokenTokenRegex = new Regex(@"\s*""access_token""\s*:\s*""([^""]+)""\s*", RegexOptions.Compiled | RegexOptions.CultureInvariant | RegexOptions.IgnoreCase);
+        internal static readonly Regex RefreshTokenRegex = new Regex(@"\s*""refresh_token""\s*:\s*""([^""]+)""\s*", RegexOptions.CultureInvariant | RegexOptions.IgnoreCase);
+        internal static readonly Regex AccessTokenTokenRegex = new Regex(@"\s*""access_token""\s*:\s*""([^""]+)""\s*", RegexOptions.CultureInvariant | RegexOptions.IgnoreCase);
 
-        public OAuthAuthenticator()
-        {
-        }
+        public OAuthAuthenticator(RuntimeContext context)
+            : base(context)
+        { }
 
         public string AuthorizeUri { get { return "/site/oauth2/authorize"; } }
+
         public string CallbackUri { get { return "http://localhost:34106/"; } }
+
         public string ConsumerKey { get { return "HJdmKXV87DsmC9zSWB"; } }
+
         public string ConsumerSecret { get { return "wwWw47VB9ZHwMsD4Q4rAveHkbxNrMp3n"; } }
+
         public string TokenUri { get { return "/site/oauth2/access_token"; } }
 
         /// <summary>
@@ -215,13 +220,15 @@ namespace Atlassian.Bitbucket.Authentication.OAuth
 
         private MultipartFormDataContent GetGrantRequestContent(string authCode)
         {
-            var content = new MultipartFormDataContent();
-            content.Add(new StringContent("authorization_code"), "grant_type");
-            content.Add(new StringContent(authCode), "code");
-            content.Add(new StringContent(ConsumerKey), "client_id");
-            content.Add(new StringContent(ConsumerSecret), "client_secret");
-            content.Add(new StringContent("authenticated"), "state");
-            content.Add(new StringContent(CallbackUri), "redirect_uri");
+            var content = new MultipartFormDataContent
+            {
+                { new StringContent("authorization_code"), "grant_type" },
+                { new StringContent(authCode), "code" },
+                { new StringContent(ConsumerKey), "client_id" },
+                { new StringContent(ConsumerSecret), "client_secret" },
+                { new StringContent("authenticated"), "state" },
+                { new StringContent(CallbackUri), "redirect_uri" }
+            };
             return content;
         }
 
@@ -232,11 +239,13 @@ namespace Atlassian.Bitbucket.Authentication.OAuth
 
         private MultipartFormDataContent GetRefreshRequestContent(string currentRefreshToken)
         {
-            var content = new MultipartFormDataContent();
-            content.Add(new StringContent("refresh_token"), "grant_type");
-            content.Add(new StringContent(currentRefreshToken), "refresh_token");
-            content.Add(new StringContent(ConsumerKey), "client_id");
-            content.Add(new StringContent(ConsumerSecret), "client_secret");
+            var content = new MultipartFormDataContent
+            {
+                { new StringContent("refresh_token"), "grant_type" },
+                { new StringContent(currentRefreshToken), "refresh_token" },
+                { new StringContent(ConsumerKey), "client_id" },
+                { new StringContent(ConsumerSecret), "client_secret" }
+            };
             return content;
         }
 

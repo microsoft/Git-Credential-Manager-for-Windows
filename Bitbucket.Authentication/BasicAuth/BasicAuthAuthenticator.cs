@@ -7,8 +7,12 @@ using Microsoft.Alm.Authentication.Git;
 
 namespace Atlassian.Bitbucket.Authentication.BasicAuth
 {
-    internal class BasicAuthAuthenticator
+    internal class BasicAuthAuthenticator : Base
     {
+        public BasicAuthAuthenticator(RuntimeContext context)
+            : base(context)
+        { }
+
         public async Task<AuthenticationResult> GetAuthAsync(TargetUri targetUri, TokenScope scope, int requestTimeout, Uri restRootUrl, string username, string password)
         {
             // use the provided username and password and attempt a Basic Auth request to a known
@@ -19,7 +23,7 @@ namespace Atlassian.Bitbucket.Authentication.BasicAuth
             basicAuthValue = Convert.ToBase64String(authBytes);
             var authHeader = "Basic " + basicAuthValue;
 
-            var result = await RestClient.TryGetUser(targetUri, requestTimeout, restRootUrl, authHeader);
+            var result = await ( new RestClient(Context)).TryGetUser(targetUri, requestTimeout, restRootUrl, authHeader);
 
             if (result.Type.Equals(AuthenticationResultType.Success))
             {

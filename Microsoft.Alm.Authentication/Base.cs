@@ -24,30 +24,24 @@
 **/
 
 using System;
-using System.Threading.Tasks;
-using Microsoft.Alm.Authentication;
-using Xunit;
 
-namespace Microsoft.Alm.CredentialHelper.Test
+namespace Microsoft.Alm.Authentication
 {
-    public class BasicAuthenticationTests
+    public abstract class Base
     {
-        [Fact]
-        public async Task UserinfoAndUsername()
+        protected Base(RuntimeContext context)
         {
-            const string Namespace = "test";
+            if (context is null)
+                throw new ArgumentNullException(nameof(context));
 
-            var credentialCache = new SecretCache(RuntimeContext.Default, Namespace);
-            var basicAuthentication = new BasicAuthentication(RuntimeContext.Default, credentialCache);
-            var targetUri = new Uri("https://username@domain.not");
+            _context = context;
+        }
 
-            var credentials = new Credential("real", "pass");
-            await basicAuthentication.SetCredentials(targetUri, credentials);
+        private readonly RuntimeContext _context;
 
-            var expected = Secret.UriToName(targetUri, Namespace);
-
-            Assert.Contains(credentialCache.EnumerateSecrets(), 
-                            k => k.Name.Equals(expected, StringComparison.OrdinalIgnoreCase));
+        protected RuntimeContext Context
+        {
+            get { return _context; }
         }
     }
 }

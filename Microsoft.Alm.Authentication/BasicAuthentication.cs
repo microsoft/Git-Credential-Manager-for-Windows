@@ -49,10 +49,12 @@ namespace Microsoft.Alm.Authentication
         /// <param name="acquireCredentialsCallback">(optional) delegate for acquiring credentials.</param>
         /// <param name="acquireResultCallback">Optional delegate for notification of acquisition results.</param>
         public BasicAuthentication(
+            RuntimeContext context,
             ICredentialStore credentialStore,
             NtlmSupport ntlmSupport,
             AcquireCredentialsDelegate acquireCredentialsCallback,
             AcquireResultDelegate acquireResultCallback)
+            : base(context)
         {
             if (credentialStore == null)
                 throw new ArgumentNullException(nameof(credentialStore));
@@ -63,9 +65,15 @@ namespace Microsoft.Alm.Authentication
             _ntlmSupport = ntlmSupport;
         }
 
-        public BasicAuthentication(ICredentialStore credentialStore)
-            : this(credentialStore, NtlmSupport.Auto, null, null)
+        public BasicAuthentication(RuntimeContext context, ICredentialStore credentialStore)
+            : this(context, credentialStore, NtlmSupport.Auto, null, null)
         { }
+
+        private readonly AcquireCredentialsDelegate _acquireCredentials;
+        private readonly AcquireResultDelegate _acquireResult;
+        private readonly ICredentialStore _credentialStore;
+        private AuthenticationHeaderValue[] _httpAuthenticateOptions;
+        private NtlmSupport _ntlmSupport;
 
         /// <summary>
         /// Gets the underlying credential store for this instance of `<see cref="BasicAuthentication"/>`.
@@ -82,12 +90,6 @@ namespace Microsoft.Alm.Authentication
         {
             get { return _ntlmSupport; }
         }
-
-        private readonly AcquireCredentialsDelegate _acquireCredentials;
-        private readonly AcquireResultDelegate _acquireResult;
-        private readonly ICredentialStore _credentialStore;
-        private AuthenticationHeaderValue[] _httpAuthenticateOptions;
-        private NtlmSupport _ntlmSupport;
 
         /// <summary>
         /// Acquires credentials via the registered callbacks.

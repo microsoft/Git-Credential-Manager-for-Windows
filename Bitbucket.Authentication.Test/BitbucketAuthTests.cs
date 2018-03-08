@@ -16,7 +16,7 @@ namespace Atlassian.Bitbucket.Authentication.Test
         public async Task BitbucketAuthDeleteCredentialsTest()
         {
             var targetUri = new TargetUri("http://localhost");
-            var bitbucketAuth = GetBitbucketAuthentication("Bitbucket-delete");
+            var bitbucketAuth = GetBitbucketAuthentication(RuntimeContext.Default, "Bitbucket-delete");
 
             await bitbucketAuth.PersonalAccessTokenStore.WriteCredentials(targetUri, new Credential("username", "password"));
 
@@ -32,7 +32,7 @@ namespace Atlassian.Bitbucket.Authentication.Test
         public async Task BitbucketAuthGetCredentialsTest()
         {
             var targetUri = new TargetUri("http://localhost");
-            var bitbucketAuth = GetBitbucketAuthentication("Bitbucket-get");
+            var bitbucketAuth = GetBitbucketAuthentication(RuntimeContext.Default, "Bitbucket-get");
 
             Credential credentials = null;
 
@@ -51,7 +51,7 @@ namespace Atlassian.Bitbucket.Authentication.Test
         public async Task BitbucketAuthSetCredentialsTest()
         {
             var targetUri = new TargetUri("http://localhost");
-            var bitbucketAuth = GetBitbucketAuthentication("Bitbucket-set");
+            var bitbucketAuth = GetBitbucketAuthentication(RuntimeContext.Default, "Bitbucket-set");
 
             Credential credentials = null;
 
@@ -79,11 +79,11 @@ namespace Atlassian.Bitbucket.Authentication.Test
             Assert.NotNull(credentials = await bitbucketAuth.GetCredentials(targetUri));
         }
 
-        private Authentication GetBitbucketAuthentication(string @namespace)
+        private Authentication GetBitbucketAuthentication(RuntimeContext context, string @namespace)
         {
-            ICredentialStore credentialStore = new SecretCache(@namespace);
+            ICredentialStore credentialStore = new SecretCache(context, @namespace);
 
-            return new Authentication(credentialStore, null, null);
+            return new Authentication(context, credentialStore, null, null);
         }
     }
 }

@@ -29,7 +29,6 @@ using System.IO;
 using System.Text;
 using System.Threading.Tasks;
 using Microsoft.Alm.Authentication;
-using Microsoft.Alm.Authentication.Git;
 using Bitbucket = Atlassian.Bitbucket.Authentication;
 using Git = Microsoft.Alm.Authentication.Git;
 using Github = GitHub.Authentication;
@@ -57,20 +56,24 @@ namespace Microsoft.Alm.Cli
                     ? new AcquireCredentialsDelegate(program.ModalPromptForCredentials)
                     : new AcquireCredentialsDelegate(program.BasicCredentialPrompt);
 
+            var bitbucketPrompts = new Bitbucket.AuthenticationPrompts(program.Context);
+
             var bitbucketCredentialCallback = (operationArguments.UseModalUi)
-                    ? Bitbucket.AuthenticationPrompts.CredentialModalPrompt
+                    ? bitbucketPrompts.CredentialModalPrompt
                     : new Bitbucket.Authentication.AcquireCredentialsDelegate(program.BitbucketCredentialPrompt);
 
             var bitbucketOauthCallback = (operationArguments.UseModalUi)
-                    ? Bitbucket.AuthenticationPrompts.AuthenticationOAuthModalPrompt
+                    ? bitbucketPrompts.AuthenticationOAuthModalPrompt
                     : new Bitbucket.Authentication.AcquireAuthenticationOAuthDelegate(program.BitbucketOAuthPrompt);
 
+            var githubPrompts = new Github.AuthenticationPrompts(program.Context);
+
             var githubCredentialCallback = (operationArguments.UseModalUi)
-                    ? new Github.Authentication.AcquireCredentialsDelegate(Github.AuthenticationPrompts.CredentialModalPrompt)
+                    ? new Github.Authentication.AcquireCredentialsDelegate(githubPrompts.CredentialModalPrompt)
                     : new Github.Authentication.AcquireCredentialsDelegate(program.GitHubCredentialPrompt);
 
             var githubAuthcodeCallback = (operationArguments.UseModalUi)
-                    ? new Github.Authentication.AcquireAuthenticationCodeDelegate(Github.AuthenticationPrompts.AuthenticationCodeModalPrompt)
+                    ? new Github.Authentication.AcquireAuthenticationCodeDelegate(githubPrompts.AuthenticationCodeModalPrompt)
                     : new Github.Authentication.AcquireAuthenticationCodeDelegate(program.GitHubAuthCodePrompt);
 
             NtlmSupport basicNtlmSupport = NtlmSupport.Auto;
@@ -81,17 +84,20 @@ namespace Microsoft.Alm.Cli
                     Git.Trace.WriteLine($"detecting authority type for '{operationArguments.TargetUri}'.");
 
                     // Detect the authority.
-                    authority = await BaseVstsAuthentication.GetAuthentication(operationArguments.TargetUri,
+                    authority = await BaseVstsAuthentication.GetAuthentication(program.Context,
+                                                                               operationArguments.TargetUri,
                                                                                Program.VstsCredentialScope,
-                                                                               new SecretStore(secretsNamespace, BaseVstsAuthentication.UriNameConversion))
-                             ?? Github.Authentication.GetAuthentication(operationArguments.TargetUri,
+                                                                               new SecretStore(program.Context, secretsNamespace, BaseVstsAuthentication.UriNameConversion))
+                             ?? Github.Authentication.GetAuthentication(program.Context, 
+                                                                        operationArguments.TargetUri,
                                                                         Program.GitHubCredentialScope,
-                                                                        new SecretStore(secretsNamespace, Secret.UriToName),
+                                                                        new SecretStore(program.Context, secretsNamespace, Secret.UriToName),
                                                                         githubCredentialCallback,
                                                                         githubAuthcodeCallback,
                                                                         null)
-                            ?? Bitbucket.Authentication.GetAuthentication(operationArguments.TargetUri,
-                                                                          new SecretStore(secretsNamespace, Secret.UriToIdentityUrl),
+                            ?? Bitbucket.Authentication.GetAuthentication(program.Context,
+                                                                          operationArguments.TargetUri,
+                                                                          new SecretStore(program.Context, secretsNamespace, Secret.UriToIdentityUrl),
                                                                           bitbucketCredentialCallback,
                                                                           bitbucketOauthCallback);
 
@@ -135,9 +141,10 @@ namespace Microsoft.Alm.Cli
                     }
 
                     // Return the allocated authority or a generic AAD backed VSTS authentication object.
-                    return authority ?? new VstsAadAuthentication(tenantId,
+                    return authority ?? new VstsAadAuthentication(program.Context,
+                                                                  tenantId,
                                                                   operationArguments.VstsTokenScope,
-                                                                  new SecretStore(secretsNamespace, VstsAadAuthentication.UriNameConversion));
+                                                                  new SecretStore(program.Context, secretsNamespace, VstsAadAuthentication.UriNameConversion));
 
                 case AuthorityType.Basic:
                     // Enforce basic authentication only.
@@ -148,9 +155,10 @@ namespace Microsoft.Alm.Cli
                     Git.Trace.WriteLine($"authority for '{operationArguments.TargetUri}' is GitHub.");
 
                     // Return a GitHub authentication object.
-                    return authority ?? new Github.Authentication(operationArguments.TargetUri,
+                    return authority ?? new Github.Authentication(program.Context,
+                                                                  operationArguments.TargetUri,
                                                                   Program.GitHubCredentialScope,
-                                                                  new SecretStore(secretsNamespace, Secret.UriToName),
+                                                                  new SecretStore(program.Context, secretsNamespace, Secret.UriToName),
                                                                   githubCredentialCallback,
                                                                   githubAuthcodeCallback,
                                                                   null);
@@ -159,7 +167,8 @@ namespace Microsoft.Alm.Cli
                     Git.Trace.WriteLine($"authority for '{operationArguments.TargetUri}'  is Bitbucket");
 
                     // Return a Bitbucket authentication object.
-                    return authority ?? new Bitbucket.Authentication(new SecretStore(secretsNamespace, Secret.UriToIdentityUrl),
+                    return authority ?? new Bitbucket.Authentication(program.Context,
+                                                                     new SecretStore(program.Context, secretsNamespace, Secret.UriToIdentityUrl),
                                                                      bitbucketCredentialCallback,
                                                                      bitbucketOauthCallback);
 
@@ -167,8 +176,9 @@ namespace Microsoft.Alm.Cli
                     Git.Trace.WriteLine($"authority for '{operationArguments.TargetUri}' is Microsoft Live.");
 
                     // Return the allocated authority or a generic MSA backed VSTS authentication object.
-                    return authority ?? new VstsMsaAuthentication(operationArguments.VstsTokenScope,
-                                                                  new SecretStore(secretsNamespace, VstsMsaAuthentication.UriNameConversion));
+                    return authority ?? new VstsMsaAuthentication(program.Context,
+                                                                  operationArguments.VstsTokenScope,
+                                                                  new SecretStore(program.Context, secretsNamespace, VstsMsaAuthentication.UriNameConversion));
 
                 case AuthorityType.Ntlm:
                     // Enforce NTLM authentication only.
@@ -179,7 +189,8 @@ namespace Microsoft.Alm.Cli
                     Git.Trace.WriteLine($"authority for '{operationArguments.TargetUri}' is basic with NTLM={basicNtlmSupport}.");
 
                     // Return a generic username + password authentication object.
-                    return authority ?? new BasicAuthentication(new SecretStore(secretsNamespace, Secret.UriToIdentityUrl),
+                    return authority ?? new BasicAuthentication(program.Context, 
+                                                                new SecretStore(program.Context, secretsNamespace, Secret.UriToIdentityUrl),
                                                                 basicNtlmSupport,
                                                                 basicCredentialCallback,
                                                                 null);
@@ -267,7 +278,7 @@ namespace Microsoft.Alm.Cli
                 Git.Trace.WriteLine("trace logging enabled.");
 
                 string gitConfigPath;
-                if (Where.GitLocalConfig(out gitConfigPath))
+                if (Git.Where.GitLocalConfig(out gitConfigPath))
                 {
                     Git.Trace.WriteLine($"git local config found at '{gitConfigPath}'.");
 
@@ -278,7 +289,7 @@ namespace Microsoft.Alm.Cli
                         program.EnableTraceLogging(operationArguments, gitDirPath);
                     }
                 }
-                else if (Where.GitGlobalConfig(out gitConfigPath))
+                else if (Git.Where.GitGlobalConfig(out gitConfigPath))
                 {
                     Git.Trace.WriteLine($"git global config found at '{gitConfigPath}'.");
 
@@ -522,7 +533,7 @@ namespace Microsoft.Alm.Cli
             // Check the git-config http.proxy setting just-in-case.
             else
             {
-                Configuration.Entry entry;
+                Git.Configuration.Entry entry;
                 if (operationArguments.GitConfiguration.TryGetEntry("http", operationArguments.QueryUri, "proxy", out entry)
                     && !string.IsNullOrWhiteSpace(entry.Value))
                 {
@@ -834,7 +845,7 @@ namespace Microsoft.Alm.Cli
                 var config = operationArguments.GitConfiguration;
 
                 // Look for an entry in the git config.
-                Configuration.Entry entry;
+                Git.Configuration.Entry entry;
                 if (!string.IsNullOrWhiteSpace(configKey)
                     && config.TryGetEntry(Program.ConfigPrefix, operationArguments.QueryUri, configKey, out entry))
                 {
@@ -897,10 +908,10 @@ namespace Microsoft.Alm.Cli
                     return true;
                 }
 
-                Configuration config = operationArguments.GitConfiguration;
+                Git.Configuration config = operationArguments.GitConfiguration;
 
                 // Look for an entry in the git config.
-                Configuration.Entry entry;
+                Git.Configuration.Entry entry;
                 if (!string.IsNullOrWhiteSpace(configKey)
                     && config.TryGetEntry(Program.ConfigPrefix, operationArguments.QueryUri, configKey, out entry)
                     && !string.IsNullOrWhiteSpace(entry.Value))

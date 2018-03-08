@@ -37,9 +37,13 @@ using Git = Microsoft.Alm.Authentication.Git;
 
 namespace GitHub.Authentication
 {
-    public static class AuthenticationPrompts
+    public class AuthenticationPrompts : Base
     {
-        public static bool CredentialModalPrompt(TargetUri targetUri, out string username, out string password)
+        public AuthenticationPrompts(RuntimeContext context)
+            : base(context)
+        { }
+
+        public bool CredentialModalPrompt(TargetUri targetUri, out string username, out string password)
         {
             var credentialViewModel = new CredentialsViewModel();
 
@@ -53,7 +57,7 @@ namespace GitHub.Authentication
             return credentialValid;
         }
 
-        public static bool AuthenticationCodeModalPrompt(TargetUri targetUri, GitHubAuthenticationResultType resultType, string username, out string authenticationCode)
+        public bool AuthenticationCodeModalPrompt(TargetUri targetUri, GitHubAuthenticationResultType resultType, string username, out string authenticationCode)
         {
             var twoFactorViewModel = new TwoFactorViewModel(resultType == GitHubAuthenticationResultType.TwoFactorSms);
 

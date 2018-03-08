@@ -23,31 +23,34 @@
  * WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE."
 **/
 
-using System;
-using System.Threading.Tasks;
-using Microsoft.Alm.Authentication;
-using Xunit;
+using System.Threading;
 
-namespace Microsoft.Alm.CredentialHelper.Test
+namespace Microsoft.Alm.Authentication
 {
-    public class BasicAuthenticationTests
+    public class RuntimeContext
     {
-        [Fact]
-        public async Task UserinfoAndUsername()
+        public static readonly RuntimeContext Default;
+
+        private RuntimeContext()
         {
-            const string Namespace = "test";
+            _id = Interlocked.Increment(ref _count);
+            _syncpoint = new object();
+        }
 
-            var credentialCache = new SecretCache(RuntimeContext.Default, Namespace);
-            var basicAuthentication = new BasicAuthentication(RuntimeContext.Default, credentialCache);
-            var targetUri = new Uri("https://username@domain.not");
+        static RuntimeContext()
+        {
+            Volatile.Write(ref _count, 0);
 
-            var credentials = new Credential("real", "pass");
-            await basicAuthentication.SetCredentials(targetUri, credentials);
+            Default = new RuntimeContext();
+        }
 
-            var expected = Secret.UriToName(targetUri, Namespace);
+        private static int _count;
+        private readonly int _id;
+        private readonly object _syncpoint;
 
-            Assert.Contains(credentialCache.EnumerateSecrets(), 
-                            k => k.Name.Equals(expected, StringComparison.OrdinalIgnoreCase));
+        public int Id
+        {
+            get { return _id; }
         }
     }
 }

@@ -35,8 +35,8 @@ namespace Microsoft.Alm.Authentication
         public const string DefaultAuthorityHost = AzureAuthority.AuthorityHostUrlBase + "/live.com";
         internal const string QueryParameters = "domain_hint=live.com&display=popup&site_id=501454&nux=1";
 
-        public VstsMsaAuthentication(VstsTokenScope tokenScope, ICredentialStore personalAccessTokenStore)
-            : base(tokenScope, personalAccessTokenStore)
+        public VstsMsaAuthentication(RuntimeContext context, VstsTokenScope tokenScope, ICredentialStore personalAccessTokenStore)
+            : base(context, tokenScope, personalAccessTokenStore)
         {
             VstsAuthority = new VstsAzureAuthority(DefaultAuthorityHost);
         }
@@ -49,10 +49,12 @@ namespace Microsoft.Alm.Authentication
         /// <param name="vstsIdeTokenCache"></param>
         /// <param name="liveAuthority"></param>
         internal VstsMsaAuthentication(
+            RuntimeContext context,
             ICredentialStore personalAccessTokenStore,
             ITokenStore vstsIdeTokenCache,
             IVstsAuthority liveAuthority)
-            : base(personalAccessTokenStore,
+            : base(context,
+                   personalAccessTokenStore,
                    vstsIdeTokenCache,
                    liveAuthority)
         { }
