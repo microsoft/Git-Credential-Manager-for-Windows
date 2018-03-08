@@ -241,7 +241,7 @@ namespace Microsoft.Alm.Authentication.Git
                 throw new ArgumentNullException(nameof(context));
             if (directory is null)
                 throw new ArgumentNullException(nameof(directory));
-            if (!Directory.Exists(directory))
+            if (!context.FileSystem.DirectoryExists(directory))
             {
                 var inner = new DirectoryNotFoundException(directory);
                 throw new ArgumentException(inner.Message, nameof(directory), inner);
@@ -423,7 +423,7 @@ namespace Microsoft.Alm.Authentication.Git
 
                                 includePath = Path.GetFullPath(includePath);
 
-                                using (FileStream includeFile = File.Open(includePath, FileMode.Open, FileAccess.Read, FileShare.Read))
+                                using (FileStream includeFile = context.FileSystem.FileOpen(includePath, FileMode.Open, FileAccess.Read, FileShare.Read))
                                 using (var includeReader = new StreamReader(includeFile))
                                 {
                                     await ParseGitConfig(context, includeReader, destination);
@@ -461,7 +461,7 @@ namespace Microsoft.Alm.Authentication.Git
             if ((level & ~ConfigurationLevel.All) != 0)
                 throw new ArgumentOutOfRangeException(nameof(level));
 
-            if (!File.Exists(configPath))
+            if (!FileSystem.FileExists(configPath))
             {
                 var inner = new FileNotFoundException(configPath);
                 throw new ArgumentException(inner.Message, nameof(configPath), inner);
@@ -469,10 +469,10 @@ namespace Microsoft.Alm.Authentication.Git
 
             if (!_values.ContainsKey(level))
                 return;
-            if (!File.Exists(configPath))
+            if (!FileSystem.FileExists(configPath))
                 return;
 
-            using (FileStream stream = File.OpenRead(configPath))
+            using (FileStream stream = FileSystem.FileOpen(configPath, FileMode.Open, FileAccess.Read, FileShare.ReadWrite))
             using (var reader = new StreamReader(stream))
             {
                 await ParseGitConfig(Context, reader, _values[level]);

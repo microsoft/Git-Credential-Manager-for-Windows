@@ -33,15 +33,19 @@ namespace Microsoft.Alm.Authentication
         public static readonly RuntimeContext Default;
 
         public RuntimeContext(
+            IFileSystem fileSystem,
             Git.ITrace trace,
             Git.IWhere where)
             : this()
         {
+            if (fileSystem is null)
+                throw new ArgumentNullException(nameof(fileSystem));
             if (trace is null)
                 throw new ArgumentNullException(nameof(trace));
             if (where is null)
                 throw new ArgumentNullException(nameof(where));
 
+            _fileSystem = fileSystem;
             _trace = trace;
             _where = where;
         }
@@ -57,15 +61,22 @@ namespace Microsoft.Alm.Authentication
             Volatile.Write(ref _count, 0);
 
             Default = new RuntimeContext();
+            Default._fileSystem = new FileSystem(Default);
             Default._trace = new Git.Trace(Default);
             Default._where = new Git.Where(Default);
         }
 
         private static int _count;
+        private IFileSystem _fileSystem;
         private readonly int _id;
         private readonly object _syncpoint;
         private Git.ITrace _trace;
         private Git.IWhere _where;
+
+        public IFileSystem FileSystem
+        {
+            get { return _fileSystem; }
+        }
 
         public int Id
         {

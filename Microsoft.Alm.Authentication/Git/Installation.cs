@@ -30,7 +30,7 @@ using System.IO;
 
 namespace Microsoft.Alm.Authentication.Git
 {
-    public struct Installation : IEquatable<Installation>
+    public class Installation : Base, IEquatable<Installation>
     {
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Security", "CA2104:DoNotDeclareReadOnlyMutableReferenceTypes")]
         public static readonly StringComparer PathComparer = StringComparer.InvariantCultureIgnoreCase;
@@ -104,7 +104,8 @@ namespace Microsoft.Alm.Authentication.Git
                 { KnownDistribution.GitForWindows64v2, Version2Doc64Path },
             };
 
-        internal Installation(string path, KnownDistribution version)
+        internal Installation(RuntimeContext context, string path, KnownDistribution version)
+            : base(context)
         {
             if (string.IsNullOrWhiteSpace(path))
                 throw new ArgumentNullException(nameof(path));
@@ -150,8 +151,8 @@ namespace Microsoft.Alm.Authentication.Git
             _cmd = null;
             _config = null;
             _doc = null;
-            _git = null;
-            _libexec = null;
+            _git = System.IO.Path.Combine(_path, CommonGitPaths[_distribution]);
+            _libexec = System.IO.Path.Combine(_path, CommonLibexecPaths[_distribution]);
             _sh = null;
         }
 
@@ -214,14 +215,7 @@ namespace Microsoft.Alm.Authentication.Git
         /// </summary>
         public string Git
         {
-            get
-            {
-                if (_git == null)
-                {
-                    _git = System.IO.Path.Combine(_path, CommonGitPaths[_distribution]);
-                }
-                return _git;
-            }
+            get { return _git; }
         }
 
         /// <summary>
@@ -229,14 +223,7 @@ namespace Microsoft.Alm.Authentication.Git
         /// </summary>
         public string Libexec
         {
-            get
-            {
-                if (_libexec == null)
-                {
-                    _libexec = System.IO.Path.Combine(_path, CommonLibexecPaths[_distribution]);
-                }
-                return _libexec;
-            }
+            get { return _libexec; }
         }
 
         /// <summary>
@@ -293,11 +280,11 @@ namespace Microsoft.Alm.Authentication.Git
             return _path;
         }
 
-        internal static bool IsValid(Installation value)
+        internal bool IsValid()
         {
-            return Directory.Exists(value._path)
-                && Directory.Exists(value.Libexec)
-                && File.Exists(value.Git);
+            return FileSystem.DirectoryExists(_path)
+                && FileSystem.DirectoryExists(_libexec)
+                && FileSystem.FileExists(_git);
         }
 
         public static bool operator ==(Installation install1, Installation install2)

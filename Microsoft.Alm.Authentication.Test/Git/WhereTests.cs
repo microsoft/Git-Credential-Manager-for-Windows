@@ -42,12 +42,10 @@ namespace Microsoft.Alm.Authentication.Git.Test
         [Fact]
         public void Where_FindGit()
         {
-            string gitPath;
-            if (!RuntimeContext.Default.Where.FindApp("git", out gitPath))
+            if (!RuntimeContext.Default.Where.FindApp("git", out string gitPath))
                 throw new Exception("Git not found on system");
 
-            List<Installation> installations;
-            Assert.True(RuntimeContext.Default.Where.FindGitInstallations(out installations));
+            Assert.True(RuntimeContext.Default.Where.FindGitInstallations(out List<Installation> installations));
             Assert.True(installations.Count > 0);
             Assert.True(PathComparer.Equals(installations[0].Git, gitPath));
 
