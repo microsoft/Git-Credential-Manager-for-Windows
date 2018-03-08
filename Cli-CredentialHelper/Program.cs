@@ -364,7 +364,7 @@ namespace Microsoft.Alm.Cli
             WriteLine("usage: " + Name + ".exe [" + string.Join("|", CommandList) + "] [<args>]");
 
             List<Git.Installation> installations;
-            if (Git.Where.FindGitInstallations(out installations))
+            if (_context.Where.FindGitInstallations(out installations))
             {
                 foreach (var installation in installations)
                 {

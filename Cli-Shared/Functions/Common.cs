@@ -276,13 +276,14 @@ namespace Microsoft.Alm.Cli
                 throw new ArgumentNullException(nameof(operationArguments));
 
             var trace = program.Context.Trace;
+            var where = program.Context.Where;
 
             if (operationArguments.WriteLog)
             {
                 trace.WriteLine("trace logging enabled.");
 
                 string gitConfigPath;
-                if (Git.Where.GitLocalConfig(out gitConfigPath))
+                if (where.GitLocalConfig(out gitConfigPath))
                 {
                     trace.WriteLine($"git local config found at '{gitConfigPath}'.");
 
@@ -293,7 +294,7 @@ namespace Microsoft.Alm.Cli
                         program.EnableTraceLogging(operationArguments, gitDirPath);
                     }
                 }
-                else if (Git.Where.GitGlobalConfig(out gitConfigPath))
+                else if (where.GitGlobalConfig(out gitConfigPath))
                 {
                     trace.WriteLine($"git global config found at '{gitConfigPath}'.");
 

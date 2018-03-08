@@ -7,7 +7,7 @@ namespace Microsoft.Alm.Authentication.Git.Test
 {
     public class WhereTests
     {
-        private static StringComparer PathComparer = StringComparer.InvariantCultureIgnoreCase;
+        private static readonly StringComparer PathComparer = StringComparer.InvariantCultureIgnoreCase;
 
         public static object[][] FindAppData
         {
@@ -34,7 +34,7 @@ namespace Microsoft.Alm.Authentication.Git.Test
             Assert.True(CmdWhere(app, out path1));
 
             string path2;
-            Assert.True(Where.FindApp(app, out path2));
+            Assert.True(RuntimeContext.Default.Where.FindApp(app, out path2));
 
             Assert.True(PathComparer.Equals(path1, path2));
         }
@@ -43,16 +43,16 @@ namespace Microsoft.Alm.Authentication.Git.Test
         public void Where_FindGit()
         {
             string gitPath;
-            if (!Where.FindApp("git", out gitPath))
+            if (!RuntimeContext.Default.Where.FindApp("git", out gitPath))
                 throw new Exception("Git not found on system");
 
             List<Installation> installations;
-            Assert.True(Where.FindGitInstallations(out installations));
+            Assert.True(RuntimeContext.Default.Where.FindGitInstallations(out installations));
             Assert.True(installations.Count > 0);
             Assert.True(PathComparer.Equals(installations[0].Git, gitPath));
 
             Installation installation;
-            Assert.True(Where.FindGitInstallation(installations[0].Path, installations[0].Version, out installation));
+            Assert.True(RuntimeContext.Default.Where.FindGitInstallation(installations[0].Path, installations[0].Version, out installation));
             Assert.True(installations[0] == installation);
         }
 

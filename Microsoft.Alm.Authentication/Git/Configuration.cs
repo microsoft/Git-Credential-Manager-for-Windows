@@ -418,7 +418,7 @@ namespace Microsoft.Alm.Authentication.Git
                             {
                                 // This is an include directive, import the configuration values from the included file
                                 string includePath = (val.StartsWith("~/", StringComparison.OrdinalIgnoreCase))
-                                    ? Where.Home() + val.Substring(1, val.Length - 1)
+                                    ? context.Where.Home() + val.Substring(1, val.Length - 1)
                                     : val;
 
                                 includePath = Path.GetFullPath(includePath);

@@ -46,5 +46,8 @@ namespace Microsoft.Alm.Authentication
 
         protected Git.ITrace Trace
             => _context.Trace;
+
+        protected Git.IWhere Where
+            => _context.Where;
     }
 }

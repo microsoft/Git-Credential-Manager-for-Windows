@@ -300,7 +300,7 @@ namespace Microsoft.Alm.Cli
             Out.WriteLine("usage: git askpass '<user_prompt_text>'");
 
             List<Git.Installation> installations;
-            if (Git.Where.FindGitInstallations(out installations))
+            if (Context.Where.FindGitInstallations(out installations))
             {
                 foreach (var installation in installations)
                 {
