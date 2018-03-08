@@ -352,7 +352,6 @@ namespace Atlassian.Bitbucket.Authentication.Test
             Assert.Null(resultUri.ProxyUri);
             Assert.Equal("https://johnsquire@example.com/", resultUri.QueryUri.AbsoluteUri);
             Assert.Equal("https", resultUri.Scheme);
-            Assert.Equal(new WebProxy().Address, resultUri.WebProxy.Address);
             Assert.Equal("https://example.com/", resultUri.ToString(false, true, true));
         }
 
@@ -377,7 +376,6 @@ namespace Atlassian.Bitbucket.Authentication.Test
             Assert.Null(resultUri.ProxyUri);
             Assert.Equal("https://johnsquire%40stoneroses.com@example.com/", resultUri.QueryUri.AbsoluteUri);
             Assert.Equal("https", resultUri.Scheme);
-            Assert.Equal(new WebProxy().Address, resultUri.WebProxy.Address);
             Assert.Equal("https://example.com/", resultUri.ToString(false, true, true));
         }
         [Fact]
@@ -401,7 +399,6 @@ namespace Atlassian.Bitbucket.Authentication.Test
             Assert.Null(resultUri.ProxyUri);
             Assert.Equal("https://johnsquire@example.com/", resultUri.QueryUri.AbsoluteUri);
             Assert.Equal("https", resultUri.Scheme);
-            Assert.Equal(new WebProxy().Address, resultUri.WebProxy.Address);
             Assert.Equal("https://example.com/", resultUri.ToString(false, true, true));
         }
     }

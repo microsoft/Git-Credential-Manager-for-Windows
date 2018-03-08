@@ -105,7 +105,7 @@ namespace Microsoft.Alm.Authentication
                 Guid tenantId;
                 if (Guid.TryParse(authResult.TenantId, out tenantId))
                 {
-                    token = new Token(authResult.AccessToken, tenantId, TokenType.Access);
+                    token = new Token(authResult.AccessToken, tenantId, TokenType.AzureAccess);
                 }
 
                 Trace.WriteLine($"authority host URL = '{AuthorityHostUrl}', token acquisition succeeded.");
@@ -138,7 +138,10 @@ namespace Microsoft.Alm.Authentication
             if (redirectUri is null)
                 throw new ArgumentNullException(nameof(redirectUri));
             if (!redirectUri.IsAbsoluteUri)
-                throw new ArgumentException(nameof(redirectUri));
+            {
+                var inner = new UriFormatException("Uri is not absolute when an absolute Uri is required.");
+                throw new ArgumentException(inner.Message, nameof(redirectUri), inner);
+            }
 
             Token token = null;
 
@@ -152,7 +155,7 @@ namespace Microsoft.Alm.Authentication
                 Guid tentantId;
                 if (Guid.TryParse(authResult.TenantId, out tentantId))
                 {
-                    token = new Token(authResult.AccessToken, tentantId, TokenType.Access);
+                    token = new Token(authResult.AccessToken, tentantId, TokenType.AzureAccess);
 
                     Trace.WriteLine($"token acquisition for authority host URL = '{AuthorityHostUrl}' succeeded.");
                 }

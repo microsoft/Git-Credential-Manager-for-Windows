@@ -136,7 +136,7 @@ namespace Microsoft.Alm.Cli
                     // Get the identity of the tenant.
                     var result = await BaseVstsAuthentication.DetectAuthority(program.Context, operationArguments.TargetUri);
 
-                    if (result.Key)
+                    if (result.HasValue)
                     {
                         tenantId = result.Value;
                     }

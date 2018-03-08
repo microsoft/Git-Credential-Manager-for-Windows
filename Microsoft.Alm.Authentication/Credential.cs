@@ -44,8 +44,8 @@ namespace Microsoft.Alm.Authentication
             if (username is null)
                 throw new ArgumentNullException(nameof(username));
 
-            Username = username;
-            Password = password ?? string.Empty;
+            _password = password ?? string.Empty;
+            _username = username;
         }
 
         /// <summary>
@@ -56,15 +56,24 @@ namespace Microsoft.Alm.Authentication
             : this(username, string.Empty)
         { }
 
+        private string _password;
+        private string _username;
+
         /// <summary>
         /// Secret related to the username.
         /// </summary>
-        public readonly string Password;
+        public  string Password
+        {
+            get { return _password; }
+        }
 
         /// <summary>
         /// Unique identifier of the user.
         /// </summary>
-        public readonly string Username;
+        public string Username
+        {
+            get { return _username; }
+        }
 
         /// <summary>
         /// Compares an object to this <see cref="Credential"/> for equality.
@@ -96,6 +105,13 @@ namespace Microsoft.Alm.Authentication
             {
                 return Username.GetHashCode() + 7 * Password.GetHashCode();
             }
+        }
+
+        public string ToBase64String()
+        {
+            string basicAuthValue = string.Format("{0}:{1}", _username, _password);
+            byte[] authBytes = System.Text.Encoding.UTF8.GetBytes(basicAuthValue);
+            return Convert.ToBase64String(authBytes);
         }
 
         /// <summary>

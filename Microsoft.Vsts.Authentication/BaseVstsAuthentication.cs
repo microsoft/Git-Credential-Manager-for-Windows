@@ -28,6 +28,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.IO.Compression;
 using System.Net;
+using System.Net.Http;
 using System.Text;
 using System.Threading.Tasks;
 using Microsoft.IdentityModel.Clients.ActiveDirectory;
@@ -44,6 +45,11 @@ namespace Microsoft.Alm.Authentication
         public const string RedirectUrl = "urn:ietf:wg:oauth:2.0:oob";
 
         protected const string AdalRefreshPrefix = "ada";
+
+        private const char CachePairSeperator = '=';
+        private const char CachePairTerminator = '\0';
+        private const string CachePathDirectory = "GitCredentialManager";
+        private const string CachePathFileName = "tenant.cache";
 
         protected BaseVstsAuthentication(
             RuntimeContext context,
@@ -105,7 +111,7 @@ namespace Microsoft.Alm.Authentication
 
         internal TokenCache VstsAdalTokenCache { get; private set; }
 
-        internal ITokenStore VstsIdeTokenCache{ get; private set; }
+        internal ITokenStore VstsIdeTokenCache { get; private set; }
 
         internal ICredentialStore PersonalAccessTokenStore { get; set; }
 
@@ -157,7 +163,7 @@ namespace Microsoft.Alm.Authentication
         /// <param name="tenantId">The identity of the authority tenant; `<see cref="Guid.Empty"/>` otherwise.</param>
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Design", "CA1006:DoNotNestGenericTypesInMemberSignatures")]
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Design", "CA1062:Validate arguments of public methods", MessageId = "0")]
-        public static async Task<KeyValuePair<bool, Guid>> DetectAuthority(RuntimeContext context, TargetUri targetUri)
+        public static async Task<Guid?> DetectAuthority(RuntimeContext context, TargetUri targetUri)
         {
             const string VstsBaseUrlHost = "visualstudio.com";
             const string VstsResourceTenantHeader = "X-VSS-ResourceTenant";
@@ -171,10 +177,9 @@ namespace Microsoft.Alm.Authentication
                 context.Trace.WriteLine($"'{targetUri}' is subdomain of '{VstsBaseUrlHost}', checking AAD vs MSA.");
 
                 string tenant = null;
-                WebResponse response;
 
-                if (StringComparer.OrdinalIgnoreCase.Equals(targetUri.Scheme, "http")
-                    || StringComparer.OrdinalIgnoreCase.Equals(targetUri.Scheme, "https"))
+                if (StringComparer.OrdinalIgnoreCase.Equals(targetUri.Scheme, Uri.UriSchemeHttp)
+                    || StringComparer.OrdinalIgnoreCase.Equals(targetUri.Scheme, Uri.UriSchemeHttps))
                 {
                     // Query the cache first.
                     string tenantUrl = targetUri.ToString();
@@ -184,71 +189,57 @@ namespace Microsoft.Alm.Authentication
 
                     // Check the cache for an existing value.
                     if (cache.TryGetValue(tenantUrl, out tenantId))
-                        return new KeyValuePair<bool, Guid>(true, tenantId);
+                        return tenantId;
+
+                    var options = new NetworkRequestOptions(false)
+                    {
+                        Flags = NetworkRequestOptionFlags.UseProxy,
+                        Timeout = TimeSpan.FromMilliseconds(Global.RequestTimeout),
+                    };
 
                     try
                     {
-                        // Build a request that we expect to fail, do not allow redirect to sign in Url.
-                        var request = WebRequest.CreateHttp(targetUri);
-                        request.UserAgent = Global.UserAgent;
-                        request.Method = "HEAD";
-                        request.AllowAutoRedirect = false;
-                        // Get the response from the server
-                        response = await request.GetResponseAsync();
-                    }
-                    catch (WebException exception)
-                    {
-                        context.Trace.WriteLine($"unable to get response from '{targetUri}' due to '{exception.Status}'.");
-
-                        // Given the number proxy related failures we see, emit a message about the failure potentially
-                        // being related to a proxy or gateway misconfiguration.
-                        switch (exception.Status)
+                        using (var response = await context.Network.HttpGetAsync(targetUri, options))
                         {
-                            case WebExceptionStatus.ConnectFailure:
-                            case WebExceptionStatus.PipelineFailure:
-                            case WebExceptionStatus.ProtocolError:
-                            case WebExceptionStatus.ReceiveFailure:
-                            case WebExceptionStatus.SecureChannelFailure:
-                            case WebExceptionStatus.SendFailure:
-                            case WebExceptionStatus.ServerProtocolViolation:
-                            case WebExceptionStatus.TrustFailure:
+                            if (response.IsSuccessStatusCode)
+                            {
+                                if (response.Headers.TryGetValues(VstsResourceTenantHeader, out IEnumerable<string> values))
                                 {
-                                    context.Trace.WriteLine($"is there a proxy or gateway incorrectly configured?");
+                                    tenant = System.Linq.Enumerable.First(values);
+
+                                    if (!string.IsNullOrWhiteSpace(tenant)
+                                        && Guid.TryParse(tenant, out tenantId))
+                                    {
+                                        // Update the cache.
+                                        cache[tenantUrl] = tenantId;
+
+                                        // Write the cache to disk.
+                                        await SerializeTenantCache(context, cache);
+
+                                        // Success, notify the caller
+                                        return tenantId;
+                                    }
                                 }
-                                break;
+                            }
+                            else
+                            {
+                                context.Trace.WriteLine($"unable to get response from '{targetUri}', server responded with '{(int)response.StatusCode} {response.StatusCode}'.");
+                            }
                         }
-
-                        response = exception.Response;
                     }
-
-                    // If the response exists and we have headers, parse them
-                    if (response != null && response.SupportsHeaders)
+                    catch (HttpRequestException exception)
                     {
-                        // Find the VSTS resource tenant entry
-                        tenant = response.Headers[VstsResourceTenantHeader];
-
-                        if (!string.IsNullOrWhiteSpace(tenant)
-                            && Guid.TryParse(tenant, out tenantId))
-                        {
-                            // Update the cache.
-                            cache[tenantUrl] = tenantId;
-
-                            // Write the cache to disk.
-                            await SerializeTenantCache(context, cache);
-
-                            // Success, notify the caller
-                            return new KeyValuePair<bool, Guid>(true, tenantId);
-                        }
+                        context.Trace.WriteLine($"unable to get response from '{targetUri}' due to '{exception.Message}'.");
                     }
                 }
                 else
                 {
-                    context.Trace.WriteLine($"detected non-https based protocol: {targetUri.Scheme}.");
+                    context.Trace.WriteLine($"detected non-https based protocol: '{targetUri.Scheme}'.");
                 }
             }
 
-            // if all else fails, fallback to basic authentication
-            return new KeyValuePair<bool, Guid>(false, tenantId);
+            // Fallback to basic authentication.
+            return null;
         }
 
         /// <summary>
@@ -275,7 +266,7 @@ namespace Microsoft.Alm.Authentication
 
             var result = await DetectAuthority(context, targetUri);
 
-            if (!result.Key)
+            if (!result.HasValue)
                 return null;
 
             // Query for the tenant's identity
@@ -433,11 +424,6 @@ namespace Microsoft.Alm.Authentication
 
             return credential;
         }
-
-        private const char CachePairSeperator = '=';
-        private const char CachePairTerminator = '\0';
-        private const string CachePathDirectory = "GitCredentialManager";
-        private const string CachePathFileName = "tenant.cache";
 
         private static async Task<Dictionary<string, Guid>> DeserializeTenantCache(RuntimeContext context)
         {

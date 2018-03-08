@@ -24,6 +24,7 @@
 **/
 
 using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Net.Http.Headers;
 using System.Threading.Tasks;
@@ -56,7 +57,7 @@ namespace Microsoft.Alm.Authentication
             AcquireResultDelegate acquireResultCallback)
             : base(context)
         {
-            if (credentialStore == null)
+            if (credentialStore is null)
                 throw new ArgumentNullException(nameof(credentialStore));
 
             _acquireCredentials = acquireCredentialsCallback;
@@ -72,16 +73,8 @@ namespace Microsoft.Alm.Authentication
         private readonly AcquireCredentialsDelegate _acquireCredentials;
         private readonly AcquireResultDelegate _acquireResult;
         private readonly ICredentialStore _credentialStore;
-        private AuthenticationHeaderValue[] _httpAuthenticateOptions;
+        private IReadOnlyList<AuthenticationHeaderValue> _httpAuthenticateOptions;
         private NtlmSupport _ntlmSupport;
-
-        /// <summary>
-        /// Gets the underlying credential store for this instance of `<see cref="BasicAuthentication"/>`.
-        /// </summary>
-        internal ICredentialStore CredentialStore
-        {
-            get { return _credentialStore; }
-        }
 
         /// <summary>
         /// Gets the level of NTLM support for this instance of `<see cref="BasicAuthentication"/>`.
@@ -89,6 +82,14 @@ namespace Microsoft.Alm.Authentication
         public NtlmSupport NtlmSupport
         {
             get { return _ntlmSupport; }
+        }
+
+        /// <summary>
+        /// Gets the underlying credential store for this instance of `<see cref="BasicAuthentication"/>`.
+        /// </summary>
+        internal ICredentialStore CredentialStore
+        {
+            get { return _credentialStore; }
         }
 
         /// <summary>
