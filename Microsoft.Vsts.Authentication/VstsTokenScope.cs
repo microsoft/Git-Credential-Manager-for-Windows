@@ -104,23 +104,26 @@ namespace Microsoft.Alm.Authentication
         /// other top-level organizational artifacts.
         /// </summary>
         public static readonly VstsTokenScope ProfileRead = new VstsTokenScope("vso.profile");
-        
+
         /// <summary>
         /// Grants the ability to read release artifacts, including releases, release definitions
         /// and release environment.
         /// </summary>
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Security", "CA2104:DoNotDeclareReadOnlyMutableReferenceTypes")]
         public static readonly VstsTokenScope ReleaseAccess = new VstsTokenScope("vso.release");
 
         /// <summary>
         /// Grants the ability to read and update release artifacts, including releases, release
         /// definitions and release envrionment, and the ability to queue a new release.
         /// </summary>
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Security", "CA2104:DoNotDeclareReadOnlyMutableReferenceTypes")]
         public static readonly VstsTokenScope ReleaseExecute = new VstsTokenScope("vso.release_execute");
-        
+
         /// <summary>
         /// Grants the ability to read, update and delete release artifacts, including releases,
         /// release definitions and release envrionment, and the ability to queue and approve a new release.
         /// </summary>
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Security", "CA2104:DoNotDeclareReadOnlyMutableReferenceTypes")]
         public static readonly VstsTokenScope ReleaseManage = new VstsTokenScope("vso.release_manage");
 
         /// <summary>

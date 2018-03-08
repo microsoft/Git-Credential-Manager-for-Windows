@@ -58,6 +58,6 @@ namespace Microsoft.Alm.Authentication
             return targetName;
         }
 
-        public delegate string UriNameConversion(TargetUri targetUri, string @namespace);
+        public delegate string UriNameConversionDelegate(TargetUri targetUri, string @namespace);
     }
 }

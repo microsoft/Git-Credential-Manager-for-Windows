@@ -26,6 +26,7 @@
 using System;
 using System.Collections.Generic;
 using System.Runtime.CompilerServices;
+
 using ScopeSet = System.Collections.Generic.HashSet<string>;
 
 namespace Microsoft.Alm.Authentication
@@ -63,16 +64,19 @@ namespace Microsoft.Alm.Authentication
             _scopes = result;
         }
 
-        public string Value { get { return string.Join(" ", _scopes); } }
-
         protected readonly IReadOnlyList<string> _scopes;
+
+        /// <summary>
+        /// Gets the scopes as a single string with values seperated by whitespace.
+        /// </summary>
+        public string Value { get { return string.Join(" ", _scopes); } }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         protected static bool Equals(TokenScope left, TokenScope right)
         {
             if (ReferenceEquals(left, right))
                 return true;
-            if (ReferenceEquals(left, null) || ReferenceEquals(null, right))
+            if (left is null || right is null)
                 return false;
 
             ScopeSet set = new ScopeSet();
@@ -93,9 +97,9 @@ namespace Microsoft.Alm.Authentication
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         protected static ScopeSet ExceptWith(TokenScope left, TokenScope right)
         {
-            if (ReferenceEquals(left, null))
+            if (left is null)
                 throw new ArgumentNullException(nameof(left));
-            if (ReferenceEquals(right, null))
+            if (right is null)
                 throw new ArgumentNullException(nameof(right));
 
             ScopeSet set = new ScopeSet();
@@ -108,7 +112,7 @@ namespace Microsoft.Alm.Authentication
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         protected static int GetHashCode(TokenScope value)
         {
-            if (ReferenceEquals(value, null))
+            if (value is null)
                 return 0;
 
             // largest 31-bit prime (https://msdn.microsoft.com/en-us/library/Ee621251.aspx)
@@ -131,9 +135,9 @@ namespace Microsoft.Alm.Authentication
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         protected static ScopeSet IntersectWith(TokenScope left, TokenScope right)
         {
-            if (ReferenceEquals(left, null))
+            if (left is null)
                 throw new ArgumentNullException(nameof(left));
-            if (ReferenceEquals(right, null))
+            if (right is null)
                 throw new ArgumentNullException(nameof(right));
 
             ScopeSet set = new ScopeSet();
@@ -146,9 +150,9 @@ namespace Microsoft.Alm.Authentication
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         protected static ScopeSet SymmetricExceptWith(TokenScope left, TokenScope right)
         {
-            if (ReferenceEquals(left, null))
+            if (left is null)
                 throw new ArgumentNullException(nameof(left));
-            if (ReferenceEquals(right, null))
+            if (right is null)
                 throw new ArgumentNullException(nameof(right));
 
             ScopeSet set = new ScopeSet();
@@ -166,9 +170,9 @@ namespace Microsoft.Alm.Authentication
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         protected static ScopeSet UnionWith(TokenScope left, TokenScope right)
         {
-            if (ReferenceEquals(left, null))
+            if (left is null)
                 throw new ArgumentNullException(nameof(left));
-            if (ReferenceEquals(right, null))
+            if (right is null)
                 throw new ArgumentNullException(nameof(right));
 
             ScopeSet set = new ScopeSet();

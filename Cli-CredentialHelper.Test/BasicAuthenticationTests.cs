@@ -47,7 +47,7 @@ namespace Microsoft.Alm.CredentialHelper.Test
             var expected = Secret.UriToName(targetUri, Namespace);
 
             Assert.Contains(credentialCache.EnumerateSecrets(), 
-                            k => k.Key.Equals(expected, StringComparison.OrdinalIgnoreCase));
+                            k => k.Name.Equals(expected, StringComparison.OrdinalIgnoreCase));
         }
     }
 }

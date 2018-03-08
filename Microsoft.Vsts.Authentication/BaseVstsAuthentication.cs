@@ -93,7 +93,7 @@ namespace Microsoft.Alm.Authentication
         /// <summary>
         /// Gets the expected URI name conversion delegate for this authentication type.
         /// </summary>
-        public static Secret.UriNameConversion UriNameConversion
+        public static Secret.UriNameConversionDelegate UriNameConversion
         {
             get { return Secret.UriToIdentityUrl; }
         }
