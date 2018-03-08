@@ -25,6 +25,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.Threading.Tasks;
 using Moq;
 using Xunit;
 
@@ -35,7 +36,7 @@ namespace Microsoft.Alm.Cli.Test
     public class ProgramTests
     {
         [Fact]
-        public void LoadOperationArgumentsTest()
+        public async Task LoadOperationArgumentsTest()
         {
             var program = new Program
             {
@@ -98,7 +99,7 @@ namespace Microsoft.Alm.Cli.Test
 
             var opargs = opargsMock.Object;
 
-            program.LoadOperationArguments(opargs);
+            await program.LoadOperationArguments(opargs);
 
             Assert.NotNull(opargs);
             Assert.True(opargs.ValidateCredentials, "credential.validate");

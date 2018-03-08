@@ -127,10 +127,12 @@ namespace Microsoft.Alm.Authentication
         /// <remarks>Not supported.</remarks>
         /// <param name="targetUri">The uniform resource indicator of the resource access tokens are being set for.</param>
         /// <param name="credentials">The credentials being set.</param>
-        public override void SetCredentials(TargetUri targetUri, Credential credentials)
+        public override Task<bool> SetCredentials(TargetUri targetUri, Credential credentials)
         {
             BaseSecureStore.ValidateTargetUri(targetUri);
             BaseSecureStore.ValidateCredential(credentials);
+
+            return Task.FromResult(false);
         }
     }
 }

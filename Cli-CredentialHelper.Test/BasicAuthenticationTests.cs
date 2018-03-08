@@ -24,6 +24,7 @@
 **/
 
 using System;
+using System.Threading.Tasks;
 using Microsoft.Alm.Authentication;
 using Xunit;
 
@@ -32,7 +33,7 @@ namespace Microsoft.Alm.CredentialHelper.Test
     public class BasicAuthenticationTests
     {
         [Fact]
-        public void UserinfoAndUsername()
+        public async Task UserinfoAndUsername()
         {
             const string Namespace = "test";
 
@@ -41,7 +42,7 @@ namespace Microsoft.Alm.CredentialHelper.Test
             var targetUri = new Uri("https://username@domain.not");
 
             var credentials = new Credential("real", "pass");
-            basicAuthentication.SetCredentials(targetUri, credentials);
+            await basicAuthentication.SetCredentials(targetUri, credentials);
 
             var expected = Secret.UriToName(targetUri, Namespace);
 

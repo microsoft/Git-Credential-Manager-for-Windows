@@ -23,6 +23,8 @@
  * WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE."
 **/
 
+using System.Threading.Tasks;
+
 namespace Microsoft.Alm.Authentication
 {
     public interface IAuthentication
@@ -33,7 +35,7 @@ namespace Microsoft.Alm.Authentication
         /// <param name="targetUri">
         /// The uniform resource indicator used to uniquely identify the credentials.
         /// </param>
-        void DeleteCredentials(TargetUri targetUri);
+        Task<bool> DeleteCredentials(TargetUri targetUri);
 
         /// <summary>
         /// Gets a <see cref="Credential"/> from the storage used by the authentication object.
@@ -45,7 +47,7 @@ namespace Microsoft.Alm.Authentication
         /// If successful a <see cref="Credential"/> object from the authentication object, authority
         /// or storage; otherwise <see langword="null"/>.
         /// </returns>
-        Credential GetCredentials(TargetUri targetUri);
+        Task<Credential> GetCredentials(TargetUri targetUri);
 
         /// <summary>
         /// Sets a <see cref="Credential"/> in the storage used by the authentication object.
@@ -54,6 +56,6 @@ namespace Microsoft.Alm.Authentication
         /// The uniform resource indicator used to uniquely identify the credentials.
         /// </param>
         /// <param name="credentials">The value to be stored.</param>
-        void SetCredentials(TargetUri targetUri, Credential credentials);
+        Task<bool> SetCredentials(TargetUri targetUri, Credential credentials);
     }
 }

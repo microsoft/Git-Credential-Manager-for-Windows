@@ -27,6 +27,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Text;
+using System.Threading.Tasks;
 using Microsoft.Alm.Authentication;
 
 using Git = Microsoft.Alm.Authentication.Git;
@@ -232,14 +233,7 @@ namespace Microsoft.Alm.Cli
         /// </summary>
         public virtual Git.Configuration GitConfiguration
         {
-            get
-            {
-                if (_configuration == null)
-                {
-                    LoadConfiguration();
-                }
-                return _configuration;
-            }
+            get { return _configuration; }
         }
 
         public virtual Interactivity Interactivity
@@ -407,9 +401,9 @@ namespace Microsoft.Alm.Cli
             set { _writeLog = true; }
         }
 
-        public virtual void LoadConfiguration()
+        public virtual async Task LoadConfiguration()
         {
-            _configuration = Git.Configuration.ReadConfiuration(Environment.CurrentDirectory, UseConfigLocal, UseConfigSystem);
+            _configuration = await Git.Configuration.ReadConfiuration(Environment.CurrentDirectory, UseConfigLocal, UseConfigSystem);
         }
 
         public virtual void SetCredentials(string username, string password)

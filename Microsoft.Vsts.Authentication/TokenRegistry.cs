@@ -27,6 +27,7 @@ using System;
 using System.Collections.Generic;
 using System.Security.Cryptography;
 using System.Text;
+using System.Threading.Tasks;
 using Microsoft.Win32;
 
 namespace Microsoft.Alm.Authentication
@@ -49,7 +50,7 @@ namespace Microsoft.Alm.Authentication
         /// Not supported
         /// </summary>
         /// <exception cref="NotSupportedException">When used.</exception>
-        public bool DeleteToken(TargetUri targetUri)
+        public Task<bool> DeleteToken(TargetUri targetUri)
         {
             // We've decided to not support registry deletes until the rules are established.
             throw new NotSupportedException("Deletes from the registry are not supported by this library.");
@@ -61,7 +62,7 @@ namespace Microsoft.Alm.Authentication
         /// Returns a `<see cref="Token"/>` if successful; otherwise `<see langword="null"/>`.
         /// </summary>
         /// <param name="targetUri">Key used to select the token.</param>
-        public Token ReadToken(TargetUri targetUri)
+        public Task<Token> ReadToken(TargetUri targetUri)
         {
             BaseSecureStore.ValidateTargetUri(targetUri);
 
@@ -100,7 +101,7 @@ namespace Microsoft.Alm.Authentication
 
                             Git.Trace.WriteLine($"token for '{targetUri}' read from registry.");
 
-                            return token;
+                            return Task.FromResult(token);
                         }
                     }
                     catch
@@ -110,14 +111,14 @@ namespace Microsoft.Alm.Authentication
                 }
             }
 
-            return token;
+            return Task.FromResult(token);
         }
 
         /// <summary>
         /// Not supported
         /// </summary>
         /// <exception cref="NotSupportedException">When used.</exception>
-        public bool WriteToken(TargetUri targetUri, Token token)
+        public Task<bool> WriteToken(TargetUri targetUri, Token token)
         {
             // We've decided to not support registry writes until the format is standardized.
             throw new NotSupportedException("Writes to the registry are not supported by this library.");

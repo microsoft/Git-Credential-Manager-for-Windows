@@ -23,6 +23,8 @@
  * WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE."
 **/
 
+using System.Threading.Tasks;
+
 namespace Microsoft.Alm.Authentication
 {
     public interface ITokenStore
@@ -31,14 +33,14 @@ namespace Microsoft.Alm.Authentication
         /// Deletes a <see cref="Token"/> from the underlying storage.
         /// </summary>
         /// <param name="targetUri">The key identifying which token is being deleted.</param>
-        bool DeleteToken(TargetUri targetUri);
+        Task<bool> DeleteToken(TargetUri targetUri);
 
         /// <summary>
         /// Reads a <see cref="Token"/> from the underlying storage.
         /// </summary>
         /// <param name="targetUri">The key identifying which token to read.</param>
         /// <returns>A <see cref="Token"/> from the store is successful; otherwise <see langword="null"/>.</returns>
-        Token ReadToken(TargetUri targetUri);
+        Task<Token> ReadToken(TargetUri targetUri);
 
         /// <summary>
         /// Writes a <see cref="Token"/> to the underlying storage.
@@ -47,6 +49,6 @@ namespace Microsoft.Alm.Authentication
         /// Unique identifier for the token, used when reading back from storage.
         /// </param>
         /// <param name="token">The <see cref="Token"/> to be written.</param>
-        bool WriteToken(TargetUri targetUri, Token token);
+        Task<bool> WriteToken(TargetUri targetUri, Token token);
     }
 }

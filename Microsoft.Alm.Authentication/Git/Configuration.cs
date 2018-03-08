@@ -29,6 +29,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Text.RegularExpressions;
+using System.Threading.Tasks;
 
 namespace Microsoft.Alm.Authentication.Git
 {
@@ -170,7 +171,7 @@ namespace Microsoft.Alm.Authentication.Git
                     || StringComparer.OrdinalIgnoreCase.Equals(value, "on"));
         }
 
-        public virtual void LoadGitConfiguration(string directory, ConfigurationLevel types)
+        public virtual async Task LoadGitConfiguration(string directory, ConfigurationLevel types)
         {
             string portableConfig = null;
             string systemConfig = null;
@@ -184,35 +185,35 @@ namespace Microsoft.Alm.Authentication.Git
             if ((types & ConfigurationLevel.Portable) != 0
                 && Where.GitPortableConfig(out portableConfig))
             {
-                ParseGitConfig(ConfigurationLevel.Portable, portableConfig);
+                await ParseGitConfig(ConfigurationLevel.Portable, portableConfig);
             }
 
             // Find and parse Git's system configuration file.
             if ((types & ConfigurationLevel.System) != 0
                 && Where.GitSystemConfig(null, out systemConfig))
             {
-                ParseGitConfig(ConfigurationLevel.System, systemConfig);
+                await ParseGitConfig(ConfigurationLevel.System, systemConfig);
             }
 
             // Find and parse Git's XDG configuration file.
             if ((types & ConfigurationLevel.Xdg) != 0
                 && Where.GitXdgConfig(out xdgConfig))
             {
-                ParseGitConfig(ConfigurationLevel.Xdg, xdgConfig);
+                await ParseGitConfig(ConfigurationLevel.Xdg, xdgConfig);
             }
 
             // Find and parse Git's global configuration file.
             if ((types & ConfigurationLevel.Global) != 0
                 && Where.GitGlobalConfig(out globalConfig))
             {
-                ParseGitConfig(ConfigurationLevel.Global, globalConfig);
+                await ParseGitConfig(ConfigurationLevel.Global, globalConfig);
             }
 
             // Find and parse Git's local configuration file.
             if ((types & ConfigurationLevel.Local) != 0
                 && Where.GitLocalConfig(directory, out localConfig))
             {
-                ParseGitConfig(ConfigurationLevel.Local, localConfig);
+                await ParseGitConfig(ConfigurationLevel.Local, localConfig);
             }
 
             Git.Trace.WriteLine($"git {types} config read, {Count} entries.");
@@ -226,7 +227,7 @@ namespace Microsoft.Alm.Authentication.Git
         /// <param name="directory">Optional working directory of a repository from which to read its Git local configuration.</param>
         /// <param name="loadLocal">Read, parse, and include Git local configuration values if `<see langword="true"/>`; otherwise do not.</param>
         /// <param name="loadSystem">Read, parse, and include Git system configuration values if `<see langword="true"/>`; otherwise do not.</param>
-        public static Configuration ReadConfiuration(string directory, bool loadLocal, bool loadSystem)
+        public static async Task<Configuration> ReadConfiuration(string directory, bool loadLocal, bool loadSystem)
         {
             if (string.IsNullOrWhiteSpace(directory))
                 throw new ArgumentNullException("directory");
@@ -246,7 +247,7 @@ namespace Microsoft.Alm.Authentication.Git
             }
 
             var config = new Configuration();
-            config.LoadGitConfiguration(directory, types);
+            await config.LoadGitConfiguration(directory, types);
 
             return config;
         }
@@ -319,17 +320,19 @@ namespace Microsoft.Alm.Authentication.Git
 
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Design", "CA1031:DoNotCatchGeneralExceptionTypes")]
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Maintainability", "CA1502:AvoidExcessiveComplexity")]
-        internal static void ParseGitConfig(TextReader reader, IDictionary<string, string> destination)
+        internal static async Task ParseGitConfig(TextReader reader, IDictionary<string, string> destination)
         {
-            Debug.Assert(reader != null, $"The `{nameof(reader)}` parameter is null.");
-            Debug.Assert(destination != null, $"The `{nameof(destination)}` parameter is null.");
+            if (reader is null)
+                throw new ArgumentNullException(nameof(reader));
+            if (destination is null)
+                throw new ArgumentNullException(nameof(destination));
 
             Match match = null;
             string section = null;
 
             // Parse each line in the config independently - Git's configuration do not accept multi-line values.
             string line;
-            while ((line = reader.ReadLine()) != null)
+            while ((line = await reader.ReadLineAsync()) != null)
             {
                 // Skip empty and commented lines
                 if (string.IsNullOrWhiteSpace(line))
@@ -405,7 +408,7 @@ namespace Microsoft.Alm.Authentication.Git
                                 using (FileStream includeFile = File.Open(includePath, FileMode.Open, FileAccess.Read, FileShare.Read))
                                 using (var includeReader = new StreamReader(includeFile))
                                 {
-                                    ParseGitConfig(includeReader, destination);
+                                    await ParseGitConfig(includeReader, destination);
                                 }
                             }
                             catch (Exception exception)
@@ -433,11 +436,18 @@ namespace Microsoft.Alm.Authentication.Git
         IEnumerator IEnumerable.GetEnumerator()
             => GetEnumerator();
 
-        private void ParseGitConfig(ConfigurationLevel level, string configPath)
+        private async Task ParseGitConfig(ConfigurationLevel level, string configPath)
         {
-            Debug.Assert(Enum.IsDefined(typeof(ConfigurationLevel), level), $"The `{nameof(level)}` parameter is not defined.");
-            Debug.Assert(!string.IsNullOrWhiteSpace(configPath), $"The `{nameof(configPath)}` parameter is null or invalid.");
-            Debug.Assert(File.Exists(configPath), $"The `{nameof(configPath)}` parameter references a non-existent file.");
+            if (configPath is null)
+                throw new ArgumentNullException(nameof(configPath));
+            if ((level & ~ConfigurationLevel.All) != 0)
+                throw new ArgumentOutOfRangeException(nameof(level));
+
+            if (!File.Exists(configPath))
+            {
+                var inner = new FileNotFoundException(configPath);
+                throw new ArgumentException(inner.Message, nameof(configPath), inner);
+            }
 
             if (!_values.ContainsKey(level))
                 return;
@@ -447,7 +457,7 @@ namespace Microsoft.Alm.Authentication.Git
             using (FileStream stream = File.OpenRead(configPath))
             using (var reader = new StreamReader(stream))
             {
-                ParseGitConfig(reader, _values[level]);
+                await ParseGitConfig(reader, _values[level]);
             }
         }
 
