@@ -45,8 +45,6 @@ namespace Microsoft.Alm.Authentication.Git
 
     internal class Trace : Base, ITrace, IDisposable
     {
-        public const string EnvironmentVariableKey = "GCM_TRACE";
-
         public Trace(RuntimeContext context)
             : base(context)
         {
@@ -136,31 +134,6 @@ namespace Microsoft.Alm.Authentication.Git
                     catch { /* squelch */ }
                 }
             }
-        }
-
-        internal void EnableDefaultWriter()
-        {
-            try
-            {
-                string traceValue = Environment.GetEnvironmentVariable(EnvironmentVariableKey);
-
-                // If the value is true or a number greater than zero, then trace to standard error.
-                if (Configuration.PaserBoolean(traceValue))
-                {
-                    _writers.Add(Console.Error);
-                }
-                // If the value is a rooted path, then trace to that file and not to the console.
-                else if (Path.IsPathRooted(traceValue))
-                {
-                    // Open or create the log file.
-                    var stream = FileSystem.FileOpen(traceValue, FileMode.Append, FileAccess.Write, FileShare.ReadWrite);
-
-                    // Create the writer and add it to the list.
-                    var writer = new StreamWriter(stream, Encoding.UTF8, 4096, true);
-                    _writers.Add(writer);
-                }
-            }
-            catch { /* squelch */ }
         }
 
         private void Dispose(bool finalizing)
