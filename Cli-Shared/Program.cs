@@ -397,6 +397,37 @@ namespace Microsoft.Alm.Cli
             }
         }
 
+        internal void DetectTraceEnvironmentKey(string environmentKey)
+        {
+            if (environmentKey is null)
+                throw new ArgumentNullException(nameof(environmentKey));
+
+            try
+            {
+                string traceValue = Environment.GetEnvironmentVariable(environmentKey);
+
+                if (traceValue is null)
+                    return;
+
+                // If the value is true or a number greater than zero, then trace to standard error.
+                if (Git.Configuration.PaserBoolean(traceValue))
+                {
+                    Context.Trace.AddListener(Console.Error);
+                }
+                // If the value is a rooted path, then trace to that file and not to the console.
+                else if (Path.IsPathRooted(traceValue))
+                {
+                    // Open or create the log file.
+                    var stream = Context.FileSystem.FileOpen(traceValue, FileMode.Append, FileAccess.Write, FileShare.ReadWrite);
+
+                    // Create the writer and add it to the list.
+                    var writer = new StreamWriter(stream, System.Text.Encoding.UTF8, 4096, true);
+                    Context.Trace.AddListener(writer);
+                }
+            }
+            catch { /* squelch */ }
+        }
+
         internal void Die(Exception exception,
                                 [CallerFilePath] string path = "",
                                 [CallerLineNumber] int line = 0,
@@ -455,7 +486,7 @@ namespace Microsoft.Alm.Cli
         [Conditional("DEBUG")]
         internal void EnableDebugTrace()
         {
-            // use the stderr stream for the trace as stdout is used in the cross-process
+            // Use the stderr stream for the trace as stdout is used in the cross-process
             // communications protocol
             _context.Trace.AddListener(Error);
         }
