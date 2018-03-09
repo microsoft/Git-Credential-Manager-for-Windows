@@ -109,6 +109,16 @@ namespace Microsoft.Alm
             /// character in the row is overwritten with any subsequent characters.
             /// </summary>
             WrapAtEolOutput = 0x0002,
+
+            AllFlags = ProcessedInput
+                     | LineInput
+                     | EchoInput
+                     | WindowInput
+                     | MouseInput
+                     | InsertMode
+                     | QuickEdit
+                     | ProcessedOuput
+                     | WrapAtEolOutput,
         }
 
         [Flags]

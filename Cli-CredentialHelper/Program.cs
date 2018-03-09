@@ -375,7 +375,7 @@ namespace Microsoft.Alm.Cli
                         // if the help file exists, send it to the operating system to display to the user
                         if (FileSystem.FileExists(doc))
                         {
-                            Context.Trace.WriteLine($"opening help documentation '{doc}'.");
+                            Trace.WriteLine($"opening help documentation '{doc}'.");
 
                             Process.Start(doc);
 
@@ -393,7 +393,7 @@ namespace Microsoft.Alm.Cli
             var installer = new Installer(this);
             installer.RemoveConsole();
 
-            Context.Trace.WriteLine($"Installer result = {installer.Result}, exit code = {installer.ExitCode}.");
+            Trace.WriteLine($"Installer result = {installer.Result}, exit code = {installer.ExitCode}.");
 
             Exit(installer.ExitCode);
         }
@@ -422,24 +422,24 @@ namespace Microsoft.Alm.Cli
                 {
                     default:
                     case AuthorityType.Basic:
-                        Context.Trace.WriteLine($"storing basic credentials for '{operationArguments.TargetUri}'.");
+                        Trace.WriteLine($"storing basic credentials for '{operationArguments.TargetUri}'.");
                         break;
 
                     case AuthorityType.Bitbucket:
-                        Context.Trace.WriteLine($"storing Bitbucket credentials for '{operationArguments.TargetUri}'.");
+                        Trace.WriteLine($"storing Bitbucket credentials for '{operationArguments.TargetUri}'.");
                         break;
 
                     case AuthorityType.AzureDirectory:
                     case AuthorityType.MicrosoftAccount:
-                        Context.Trace.WriteLine($"storing VSTS credentials for '{operationArguments.TargetUri}'.");
+                        Trace.WriteLine($"storing VSTS credentials for '{operationArguments.TargetUri}'.");
                         break;
 
                     case AuthorityType.GitHub:
-                        Context.Trace.WriteLine($"storing GitHub credentials for '{operationArguments.TargetUri}'.");
+                        Trace.WriteLine($"storing GitHub credentials for '{operationArguments.TargetUri}'.");
                         break;
 
                     case AuthorityType.Ntlm:
-                        Context.Trace.WriteLine($"storing NTLM credentials for '{operationArguments.TargetUri}'.");
+                        Trace.WriteLine($"storing NTLM credentials for '{operationArguments.TargetUri}'.");
                         break;
                 }
 

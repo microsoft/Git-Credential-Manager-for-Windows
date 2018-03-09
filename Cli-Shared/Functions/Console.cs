@@ -48,8 +48,6 @@ namespace Microsoft.Alm.Cli
             if (targetUri is null)
                 throw new ArgumentNullException(nameof(targetUri));
 
-            var trace = program.Context.Trace;
-
             titleMessage = titleMessage ?? "Please enter your credentials for ";
 
             StringBuilder buffer = new StringBuilder(BufferReadSize);
@@ -69,7 +67,7 @@ namespace Microsoft.Alm.Cli
                 // Read the current console mode.
                 if (stdin.IsInvalid || stdout.IsInvalid)
                 {
-                    trace.WriteLine("not a tty detected, abandoning prompt.");
+                    program.Trace.WriteLine("not a tty detected, abandoning prompt.");
                     return null;
                 }
                 else if (!NativeMethods.GetConsoleMode(stdin, out consoleMode))
@@ -78,7 +76,7 @@ namespace Microsoft.Alm.Cli
                     throw new Win32Exception(error, "Unable to determine console mode (" + NativeMethods.Win32Error.GetText(error) + ").");
                 }
 
-                trace.WriteLine($"console mode = '{consoleMode}'.");
+                program.Trace.WriteLine($"console mode = '{consoleMode}'.");
 
                 string username = null;
                 string password = null;
@@ -132,7 +130,7 @@ namespace Microsoft.Alm.Cli
                         throw new Win32Exception(error, "Unable to set console mode (" + NativeMethods.Win32Error.GetText(error) + ").");
                     }
 
-                    trace.WriteLine($"console mode = '{consoleMode2}'.");
+                    program.Trace.WriteLine($"console mode = '{(consoleMode2 & NativeMethods.ConsoleMode.AllFlags)}'.");
 
                     // Prompt the user for password.
                     buffer.Append("password: ");
@@ -161,7 +159,7 @@ namespace Microsoft.Alm.Cli
                     // Restore the console mode to its original value.
                     NativeMethods.SetConsoleMode(stdin, consoleMode);
 
-                    trace.WriteLine($"console mode = '{consoleMode}'.");
+                    program.Trace.WriteLine($"console mode = '{consoleMode}'.");
                 }
 
                 if (username != null && password != null)
@@ -176,15 +174,13 @@ namespace Microsoft.Alm.Cli
             if (program is null)
                 throw new ArgumentNullException(nameof(program));
 
-            var trace = program.Context.Trace;
-
             if (!string.IsNullOrWhiteSpace(message))
             {
-                trace.WriteLine(message, path, line, name);
+                program.Trace.WriteLine(message, path, line, name);
                 program.WriteLine(message);
             }
 
-            trace.Flush();
+            program.Trace.Flush();
 
             Environment.Exit(exitcode);
         }
