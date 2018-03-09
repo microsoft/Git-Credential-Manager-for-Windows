@@ -42,12 +42,14 @@ namespace Microsoft.Alm.Cli
         public const string AssemblyDesciption = "Secure askpass utility for Windows, by Microsoft";
         public const string DefinitionUrlPassphrase = "https://www.visualstudio.com/docs/git/gcm-ssh-passphrase";
 
+        private const string EnvironConfigGitTraceKey = "GIT_TRACE";
+
         private static readonly Regex AskCredentialRegex = new Regex(@"(\S+)\s+for\s+['""]([^'""]+)['""]:\s*", RegexOptions.Compiled | RegexOptions.CultureInvariant | RegexOptions.IgnoreCase);
         private static readonly Regex AskPassphraseRegex = new Regex(@"Enter\s+passphrase\s*for\s*key\s*['""]([^'""]+)['""]\:\s*", RegexOptions.Compiled | RegexOptions.CultureInvariant | RegexOptions.IgnoreCase);
         private static readonly Regex AskPasswordRegex = new Regex(@"(\S+)'s\s+password:\s*", RegexOptions.Compiled | RegexOptions.CultureInvariant | RegexOptions.IgnoreCase);
         private static readonly Regex AskAuthenticityRegex = new Regex(@"^\s*The authenticity of host '([^']+)' can't be established.\s+RSA key fingerprint is ([^\s:]+:[^\.]+).", RegexOptions.Compiled | RegexOptions.CultureInvariant | RegexOptions.IgnoreCase);
 
-        internal Program(Microsoft.Alm.Authentication.RuntimeContext context)
+        internal Program(Authentication.RuntimeContext context)
         {
             if (context is null)
                 throw new ArgumentNullException(nameof(context));
@@ -344,6 +346,9 @@ namespace Microsoft.Alm.Cli
                 PrintHelpMessage();
                 return;
             }
+
+            // Enable tracing if "GIT_TRACE" has been enabled in the environment.
+            DetectTraceEnvironmentKey(EnvironConfigGitTraceKey);
 
             PrintArgs(args);
 

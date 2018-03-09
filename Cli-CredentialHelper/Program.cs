@@ -470,6 +470,9 @@ namespace Microsoft.Alm.Cli
                     return;
                 }
 
+                // Enable tracing if "GCM_TRACE" has been enabled in the environment.
+                DetectTraceEnvironmentKey(EnvironConfigTraceKey);
+
                 PrintArgs(args);
 
                 // List of `arg` => method associations (case-insensitive).
