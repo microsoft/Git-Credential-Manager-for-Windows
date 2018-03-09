@@ -345,6 +345,9 @@ namespace Microsoft.Alm.Cli
             }
         }
 
+        internal INetwork Network
+            => _context.Network;
+
         internal TextWriter Out
         {
             get
@@ -376,6 +379,12 @@ namespace Microsoft.Alm.Cli
                 }
             }
         }
+
+        internal Git.ITrace Trace
+            => _context.Trace;
+
+        internal Git.IWhere Where
+            => _context.Where;
 
         internal static void DebuggerLaunch(Program program)
         {
