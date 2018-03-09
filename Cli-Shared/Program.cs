@@ -400,7 +400,7 @@ namespace Microsoft.Alm.Cli
                     || StringComparer.OrdinalIgnoreCase.Equals(debug, "1")
                     || StringComparer.OrdinalIgnoreCase.Equals(debug, "debug")))
             {
-                program.Context.Trace.WriteLine($"'{EnvironConfigDebugKey}': '{debug}', launching debugger...");
+                program.Trace.WriteLine($"'{EnvironConfigDebugKey}': '{debug}', launching debugger...");
 
                 Debugger.Launch();
             }
@@ -421,17 +421,17 @@ namespace Microsoft.Alm.Cli
                 // If the value is true or a number greater than zero, then trace to standard error.
                 if (Git.Configuration.PaserBoolean(traceValue))
                 {
-                    Context.Trace.AddListener(Console.Error);
+                    Trace.AddListener(Console.Error);
                 }
                 // If the value is a rooted path, then trace to that file and not to the console.
                 else if (Path.IsPathRooted(traceValue))
                 {
                     // Open or create the log file.
-                    var stream = Context.FileSystem.FileOpen(traceValue, FileMode.Append, FileAccess.Write, FileShare.ReadWrite);
+                    var stream = FileSystem.FileOpen(traceValue, FileMode.Append, FileAccess.Write, FileShare.ReadWrite);
 
                     // Create the writer and add it to the list.
                     var writer = new StreamWriter(stream, System.Text.Encoding.UTF8, 4096, true);
-                    Context.Trace.AddListener(writer);
+                    Trace.AddListener(writer);
                 }
             }
             catch { /* squelch */ }

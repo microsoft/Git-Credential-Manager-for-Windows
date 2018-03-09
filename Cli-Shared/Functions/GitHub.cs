@@ -47,7 +47,7 @@ namespace Microsoft.Alm.Cli
             if (targetUri is null)
                 throw new ArgumentNullException(nameof(targetUri));
 
-            var trace = program.Context.Trace;
+            var trace = program.Trace;
 
             StringBuilder buffer = new StringBuilder(BufferReadSize);
             uint read = 0;

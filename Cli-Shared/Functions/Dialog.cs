@@ -49,8 +49,6 @@ namespace Microsoft.Alm.Cli
             if (program is null)
                 throw new ArgumentNullException(nameof(program));
 
-            var trace = program.Context.Trace;
-
             int error;
 
             try
@@ -66,7 +64,7 @@ namespace Microsoft.Alm.Cli
                                                                              saveCredentials: ref saveCredentials,
                                                                              flags: flags)) != NativeMethods.Win32Error.Success)
                 {
-                    trace.WriteLine($"credential prompt failed ('{NativeMethods.Win32Error.GetText(error)}').");
+                    program.Trace.WriteLine($"credential prompt failed ('{NativeMethods.Win32Error.GetText(error)}').");
 
                     username = null;
                     password = null;
@@ -97,12 +95,12 @@ namespace Microsoft.Alm.Cli
                     password = null;
 
                     error = Marshal.GetLastWin32Error();
-                    trace.WriteLine($"failed to unpack buffer ('{NativeMethods.Win32Error.GetText(error)}').");
+                    program.Trace.WriteLine($"failed to unpack buffer ('{NativeMethods.Win32Error.GetText(error)}').");
 
                     return false;
                 }
 
-                trace.WriteLine("successfully acquired credentials from user.");
+                program.Trace.WriteLine("successfully acquired credentials from user.");
 
                 username = usernameBuffer.ToString();
                 password = passwordBuffer.ToString();
@@ -190,8 +188,6 @@ namespace Microsoft.Alm.Cli
             int inBufferSize = 0;
             string password = null;
 
-            var trace = program.Context.Trace;
-
             try
             {
                 int error;
@@ -206,7 +202,7 @@ namespace Microsoft.Alm.Cli
                 if (inBufferSize <= 0)
                 {
                     error = Marshal.GetLastWin32Error();
-                    trace.WriteLine($"unable to determine credential buffer size ('{NativeMethods.Win32Error.GetText(error)}').");
+                    program.Trace.WriteLine($"unable to determine credential buffer size ('{NativeMethods.Win32Error.GetText(error)}').");
 
                     return null;
                 }
@@ -220,7 +216,7 @@ namespace Microsoft.Alm.Cli
                                                                 packedCredentialsSize: ref inBufferSize))
                 {
                     error = Marshal.GetLastWin32Error();
-                    trace.WriteLine($"unable to write to credential buffer ('{NativeMethods.Win32Error.GetText(error)}').");
+                    program.Trace.WriteLine($"unable to write to credential buffer ('{NativeMethods.Win32Error.GetText(error)}').");
 
                     return null;
                 }
