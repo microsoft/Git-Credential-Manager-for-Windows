@@ -33,6 +33,7 @@
     <Compile Include="Git\Configuration.cs" />
     <Compile Include="Git\ConfigurationLevel.cs" />
     <Compile Include="Git\Installation.cs" />
+    <Compile Include="Git\InstallationComparer.cs" />
     <Compile Include="Git\KnownDistribution.cs" />
     <Compile Include="Git\Trace.cs" />
     <Compile Include="Git\Where.cs" />
