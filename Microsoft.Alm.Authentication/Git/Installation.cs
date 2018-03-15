@@ -25,15 +25,13 @@
 
 using System;
 using System.Collections.Generic;
-using System.Diagnostics;
-using System.IO;
 
 namespace Microsoft.Alm.Authentication.Git
 {
     public class Installation : Base, IEquatable<Installation>
     {
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Security", "CA2104:DoNotDeclareReadOnlyMutableReferenceTypes")]
-        public static readonly StringComparer PathComparer = StringComparer.InvariantCultureIgnoreCase;
+        public static readonly IEqualityComparer<Installation> Comparer = new InstallationComparer();
 
         internal const string GitExeName = @"git.exe";
         internal const string AllVersionCmdPath = @"cmd";
@@ -259,21 +257,16 @@ namespace Microsoft.Alm.Authentication.Git
 
         public override bool Equals(object obj)
         {
-            if (obj is Installation)
-                return this == (Installation)obj;
-
-            return false;
+            return (obj is Installation other
+                    && Equals(other))
+                || base.Equals(obj);
         }
 
         public bool Equals(Installation other)
-        {
-            return this == other;
-        }
+            => Comparer.Equals(this, other);
 
         public override int GetHashCode()
-        {
-            return StringComparer.OrdinalIgnoreCase.GetHashCode(_path);
-        }
+            => Comparer.GetHashCode(this);
 
         public override string ToString()
         {
@@ -287,15 +280,10 @@ namespace Microsoft.Alm.Authentication.Git
                 && FileSystem.FileExists(_git);
         }
 
-        public static bool operator ==(Installation install1, Installation install2)
-        {
-            return install1._distribution == install2._distribution
-                && PathComparer.Equals(install1._path, install2._path);
-        }
+        public static bool operator ==(Installation lhs, Installation rhs)
+            => Comparer.Equals(lhs, rhs);
 
-        public static bool operator !=(Installation install1, Installation install2)
-        {
-            return !(install1 == install2);
-        }
+        public static bool operator !=(Installation lhs, Installation rhs)
+            => !Comparer.Equals(lhs, rhs);
     }
 }

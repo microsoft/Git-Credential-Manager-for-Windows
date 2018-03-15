@@ -52,11 +52,11 @@ namespace Microsoft.Alm.Authentication.Git.Test
                 KnownDistribution kgd = (KnownDistribution)v;
 
                 var a = list.Where(x => x.Version == kgd);
-                Assert.True(a.All(x => x != a.First() || Installation.PathComparer.Equals(x.Cmd, a.First().Cmd)));
-                Assert.True(a.All(x => x != a.First() || Installation.PathComparer.Equals(x.Config, a.First().Config)));
-                Assert.True(a.All(x => x != a.First() || Installation.PathComparer.Equals(x.Git, a.First().Git)));
-                Assert.True(a.All(x => x != a.First() || Installation.PathComparer.Equals(x.Libexec, a.First().Libexec)));
-                Assert.True(a.All(x => x != a.First() || Installation.PathComparer.Equals(x.Sh, a.First().Sh)));
+                Assert.True(a.All(x => x != a.First() || InstallationComparer.PathComparer.Equals(x.Cmd, a.First().Cmd)));
+                Assert.True(a.All(x => x != a.First() || InstallationComparer.PathComparer.Equals(x.Config, a.First().Config)));
+                Assert.True(a.All(x => x != a.First() || InstallationComparer.PathComparer.Equals(x.Git, a.First().Git)));
+                Assert.True(a.All(x => x != a.First() || InstallationComparer.PathComparer.Equals(x.Libexec, a.First().Libexec)));
+                Assert.True(a.All(x => x != a.First() || InstallationComparer.PathComparer.Equals(x.Sh, a.First().Sh)));
             }
         }
     }

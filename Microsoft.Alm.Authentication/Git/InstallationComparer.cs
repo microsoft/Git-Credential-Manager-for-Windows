@@ -33,6 +33,8 @@ namespace Microsoft.Alm.Authentication.Git
     /// </summary>
     public class InstallationComparer : IEqualityComparer<Installation>
     {
+        public static readonly StringComparer PathComparer = StringComparer.OrdinalIgnoreCase;
+
         /// <summary>
         /// Determines whether the specified objects are equal.
         /// <para/>
