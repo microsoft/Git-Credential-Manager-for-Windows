@@ -310,9 +310,6 @@ namespace Microsoft.Alm.Cli
             }
         }
 
-        internal IStorage FileSystem
-            => _context.Storage;
-
         internal TextReader In
         {
             get
@@ -380,6 +377,9 @@ namespace Microsoft.Alm.Cli
             }
         }
 
+        internal IStorage Storage
+            => _context.Storage;
+
         internal Git.ITrace Trace
             => _context.Trace;
 
@@ -427,7 +427,7 @@ namespace Microsoft.Alm.Cli
                 else if (Path.IsPathRooted(traceValue))
                 {
                     // Open or create the log file.
-                    var stream = FileSystem.FileOpen(traceValue, FileMode.Append, FileAccess.Write, FileShare.ReadWrite);
+                    var stream = Storage.FileOpen(traceValue, FileMode.Append, FileAccess.Write, FileShare.ReadWrite);
 
                     // Create the writer and add it to the list.
                     var writer = new StreamWriter(stream, System.Text.Encoding.UTF8, 4096, true);

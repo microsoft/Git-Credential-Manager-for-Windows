@@ -306,12 +306,12 @@ namespace Microsoft.Alm.Cli
             {
                 foreach (var installation in installations)
                 {
-                    if (FileSystem.DirectoryExists(installation.Doc))
+                    if (Storage.DirectoryExists(installation.Doc))
                     {
                         string docPath = Path.Combine(installation.Doc, HelpFileName);
 
                         // if the help file exists, send it to the operating system to display to the user
-                        if (FileSystem.FileExists(docPath))
+                        if (Storage.FileExists(docPath))
                         {
                             _context.Trace.WriteLine($"opening help documentation '{docPath}'.");
 
