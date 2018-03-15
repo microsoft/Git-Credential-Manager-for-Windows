@@ -275,9 +275,9 @@ namespace Microsoft.Alm.Authentication.Git
 
         internal bool IsValid()
         {
-            return FileSystem.DirectoryExists(_path)
-                && FileSystem.DirectoryExists(_libexec)
-                && FileSystem.FileExists(_git);
+            return Storage.DirectoryExists(_path)
+                && Storage.DirectoryExists(_libexec)
+                && Storage.FileExists(_git);
         }
 
         public static bool operator ==(Installation lhs, Installation rhs)

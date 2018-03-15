@@ -461,7 +461,7 @@ namespace Microsoft.Alm.Authentication.Git
             if ((level & ~ConfigurationLevel.All) != 0)
                 throw new ArgumentOutOfRangeException(nameof(level));
 
-            if (!FileSystem.FileExists(configPath))
+            if (!Storage.FileExists(configPath))
             {
                 var inner = new FileNotFoundException(configPath);
                 throw new ArgumentException(inner.Message, nameof(configPath), inner);
@@ -469,10 +469,10 @@ namespace Microsoft.Alm.Authentication.Git
 
             if (!_values.ContainsKey(level))
                 return;
-            if (!FileSystem.FileExists(configPath))
+            if (!Storage.FileExists(configPath))
                 return;
 
-            using (FileStream stream = FileSystem.FileOpen(configPath, FileMode.Open, FileAccess.Read, FileShare.ReadWrite))
+            using (FileStream stream = Storage.FileOpen(configPath, FileMode.Open, FileAccess.Read, FileShare.ReadWrite))
             using (var reader = new StreamReader(stream))
             {
                 await ParseGitConfig(Context, reader, _values[level]);

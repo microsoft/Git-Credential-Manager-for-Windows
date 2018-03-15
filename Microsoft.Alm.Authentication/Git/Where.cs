@@ -183,7 +183,7 @@ namespace Microsoft.Alm.Authentication.Git
                             continue;
 
                         string value = string.Format("{0}\\{1}{2}", paths[i], name, exts[j]);
-                        if (FileSystem.FileExists(value))
+                        if (Storage.FileExists(value))
                         {
                             value = value.Replace("\\\\", "\\");
                             path = value;
@@ -356,7 +356,7 @@ namespace Microsoft.Alm.Authentication.Git
                 path = Environment.ExpandEnvironmentVariables(path);
 
                 // If the path is good, return it.
-                if (FileSystem.DirectoryExists(path))
+                if (Storage.DirectoryExists(path))
                     return path;
             }
 
@@ -369,7 +369,7 @@ namespace Microsoft.Alm.Authentication.Git
             {
                 path = homeDrive + homePath;
 
-                if (FileSystem.DirectoryExists(path))
+                if (Storage.DirectoryExists(path))
                     return path;
             }
 
@@ -387,7 +387,7 @@ namespace Microsoft.Alm.Authentication.Git
             var globalPath = Path.Combine(home, GlobalConfigFileName);
 
             // If the path is valid, return it to the user.
-            if (FileSystem.FileExists(globalPath))
+            if (Storage.FileExists(globalPath))
             {
                 path = globalPath;
                 return true;
@@ -441,7 +441,7 @@ namespace Microsoft.Alm.Authentication.Git
                         if (result is DirectoryInfo)
                         {
                             var localPath = Path.Combine(result.FullName, LocalConfigFileName);
-                            if (FileSystem.FileExists(localPath))
+                            if (Storage.FileExists(localPath))
                             {
                                 path = localPath;
                                 return true;
@@ -482,10 +482,10 @@ namespace Microsoft.Alm.Authentication.Git
                                     localPath = Path.Combine(localPath, content);
                                 }
 
-                                if (FileSystem.DirectoryExists(localPath))
+                                if (Storage.DirectoryExists(localPath))
                                 {
                                     localPath = Path.Combine(localPath, LocalConfigFileName);
-                                    if (FileSystem.FileExists(localPath))
+                                    if (Storage.FileExists(localPath))
                                     {
                                         path = localPath;
                                         return true;
@@ -515,7 +515,7 @@ namespace Microsoft.Alm.Authentication.Git
 
             var portableConfigPath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.CommonApplicationData), PortableConfigFolder, PortableConfigFileName);
 
-            if (FileSystem.FileExists(portableConfigPath))
+            if (Storage.FileExists(portableConfigPath))
             {
                 path = portableConfigPath;
             }
@@ -525,7 +525,7 @@ namespace Microsoft.Alm.Authentication.Git
 
         public bool GitSystemConfig(Installation installation, out string path)
         {
-            if (installation != null && FileSystem.FileExists(installation.Config))
+            if (installation != null && Storage.FileExists(installation.Config))
             {
                 path = installation.Path;
                 return true;
@@ -536,7 +536,7 @@ namespace Microsoft.Alm.Authentication.Git
                 List<Installation> installations;
 
                 if (FindGitInstallations(out installations)
-                    && FileSystem.FileExists(installations[0].Config))
+                    && Storage.FileExists(installations[0].Config))
                 {
                     path = installations[0].Config;
                     return true;
@@ -558,11 +558,11 @@ namespace Microsoft.Alm.Authentication.Git
             // The XDG config home is defined by an environment variable.
             xdgConfigHome = Environment.GetEnvironmentVariable("XDG_CONFIG_HOME");
 
-            if (FileSystem.DirectoryExists(xdgConfigHome))
+            if (Storage.DirectoryExists(xdgConfigHome))
             {
                 xdgConfigPath = Path.Combine(xdgConfigHome, XdgConfigFolder, XdgConfigFileName);
 
-                if (FileSystem.FileExists(xdgConfigPath))
+                if (Storage.FileExists(xdgConfigPath))
                 {
                     path = xdgConfigPath;
                     return true;
@@ -574,7 +574,7 @@ namespace Microsoft.Alm.Authentication.Git
 
             xdgConfigPath = Path.Combine(xdgConfigHome, XdgConfigFolder, XdgConfigFileName);
 
-            if (FileSystem.FileExists(xdgConfigPath))
+            if (Storage.FileExists(xdgConfigPath))
             {
                 path = xdgConfigPath;
                 return true;
