@@ -289,8 +289,8 @@ namespace Microsoft.Alm.Authentication.Git
 
         public static bool operator ==(Installation install1, Installation install2)
         {
-            return install1._distribution == install2._distribution
-                && PathComparer.Equals(install1._path, install2._path);
+            return install1?._distribution == install2?._distribution
+                && PathComparer.Equals(install1?._path, install2?._path);
         }
 
         public static bool operator !=(Installation install1, Installation install2)
