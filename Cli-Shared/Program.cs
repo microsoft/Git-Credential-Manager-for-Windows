@@ -310,7 +310,7 @@ namespace Microsoft.Alm.Cli
             }
         }
 
-        internal IFileSystem FileSystem
+        internal IStorage FileSystem
             => _context.FileSystem;
 
         internal TextReader In

@@ -44,7 +44,7 @@ namespace Microsoft.Alm.Authentication
             get { return _context; }
         }
 
-        protected IFileSystem FileSystem
+        protected IStorage FileSystem
             => _context.FileSystem;
 
         protected INetwork Network

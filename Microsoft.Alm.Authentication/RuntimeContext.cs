@@ -33,7 +33,7 @@ namespace Microsoft.Alm.Authentication
         public static readonly RuntimeContext Default;
 
         public RuntimeContext(
-            IFileSystem fileSystem,
+            IStorage fileSystem,
             INetwork network,
             Git.ITrace trace,
             Git.IWhere where)
@@ -65,21 +65,21 @@ namespace Microsoft.Alm.Authentication
             Volatile.Write(ref _count, 0);
 
             Default = new RuntimeContext();
-            Default._fileSystem = new FileSystem(Default);
+            Default._fileSystem = new Storage(Default);
             Default._network = new Network(Default);
             Default._trace = new Git.Trace(Default);
             Default._where = new Git.Where(Default);
         }
 
         private static int _count;
-        private IFileSystem _fileSystem;
+        private IStorage _fileSystem;
         private readonly int _id;
         private INetwork _network;
         private readonly object _syncpoint;
         private Git.ITrace _trace;
         private Git.IWhere _where;
 
-        public IFileSystem FileSystem
+        public IStorage FileSystem
         {
             get { return _fileSystem; }
         }
