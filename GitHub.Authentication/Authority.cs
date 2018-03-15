@@ -177,7 +177,7 @@ namespace GitHub.Authentication
             var options = new NetworkRequestOptions(true)
             {
                 Authorization = credentials,
-                Timeout = TimeSpan.FromDays(RequestTimeout),
+                Timeout = TimeSpan.FromMilliseconds(RequestTimeout),
             };
 
             // Create the validation Uri.
