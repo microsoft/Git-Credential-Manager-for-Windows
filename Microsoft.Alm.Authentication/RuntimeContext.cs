@@ -33,14 +33,14 @@ namespace Microsoft.Alm.Authentication
         public static readonly RuntimeContext Default;
 
         public RuntimeContext(
-            IStorage fileSystem,
+            IStorage storage,
             INetwork network,
             Git.ITrace trace,
             Git.IWhere where)
             : this()
         {
-            if (fileSystem is null)
-                throw new ArgumentNullException(nameof(fileSystem));
+            if (storage is null)
+                throw new ArgumentNullException(nameof(storage));
             if (network is null)
                 throw new ArgumentNullException(nameof(network));
             if (trace is null)
@@ -48,8 +48,8 @@ namespace Microsoft.Alm.Authentication
             if (where is null)
                 throw new ArgumentNullException(nameof(where));
 
-            _fileSystem = fileSystem;
             _network = network;
+            _storage = storage;
             _trace = trace;
             _where = where;
         }
@@ -65,24 +65,19 @@ namespace Microsoft.Alm.Authentication
             Volatile.Write(ref _count, 0);
 
             Default = new RuntimeContext();
-            Default._fileSystem = new Storage(Default);
             Default._network = new Network(Default);
+            Default._storage = new Storage(Default);
             Default._trace = new Git.Trace(Default);
             Default._where = new Git.Where(Default);
         }
 
         private static int _count;
-        private IStorage _fileSystem;
         private readonly int _id;
         private INetwork _network;
+        private IStorage _storage;
         private readonly object _syncpoint;
         private Git.ITrace _trace;
         private Git.IWhere _where;
-
-        public IStorage FileSystem
-        {
-            get { return _fileSystem; }
-        }
 
         public int Id
         {
@@ -92,6 +87,11 @@ namespace Microsoft.Alm.Authentication
         public INetwork Network
         {
             get { return _network; }
+        }
+
+        public IStorage Storage
+        {
+            get { return _storage; }
         }
 
         public Git.ITrace Trace

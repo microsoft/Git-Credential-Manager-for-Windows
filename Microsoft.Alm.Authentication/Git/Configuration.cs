@@ -241,7 +241,7 @@ namespace Microsoft.Alm.Authentication.Git
                 throw new ArgumentNullException(nameof(context));
             if (directory is null)
                 throw new ArgumentNullException(nameof(directory));
-            if (!context.FileSystem.DirectoryExists(directory))
+            if (!context.Storage.DirectoryExists(directory))
             {
                 var inner = new DirectoryNotFoundException(directory);
                 throw new ArgumentException(inner.Message, nameof(directory), inner);
@@ -423,7 +423,7 @@ namespace Microsoft.Alm.Authentication.Git
 
                                 includePath = Path.GetFullPath(includePath);
 
-                                using (FileStream includeFile = context.FileSystem.FileOpen(includePath, FileMode.Open, FileAccess.Read, FileShare.Read))
+                                using (FileStream includeFile = context.Storage.FileOpen(includePath, FileMode.Open, FileAccess.Read, FileShare.Read))
                                 using (var includeReader = new StreamReader(includeFile))
                                 {
                                     await ParseGitConfig(context, includeReader, destination);

@@ -311,7 +311,7 @@ namespace Microsoft.Alm.Cli
         }
 
         internal IStorage FileSystem
-            => _context.FileSystem;
+            => _context.Storage;
 
         internal TextReader In
         {

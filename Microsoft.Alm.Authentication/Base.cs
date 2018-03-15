@@ -45,7 +45,7 @@ namespace Microsoft.Alm.Authentication
         }
 
         protected IStorage FileSystem
-            => _context.FileSystem;
+            => _context.Storage;
 
         protected INetwork Network
             => _context.Network;
