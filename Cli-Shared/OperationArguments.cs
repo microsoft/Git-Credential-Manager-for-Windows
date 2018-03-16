@@ -513,7 +513,10 @@ namespace Microsoft.Alm.Cli
             // Username.
             if (!string.IsNullOrWhiteSpace(_username))
             {
-                buffer.Append(_username)
+                // Only URI reserved character that can appear in a git username is the @ sign
+                // when the username is an email address, so just manually escaping it
+                var escapedUsername = _username.Replace("@", "%40"); 
+                buffer.Append(escapedUsername)
                       .Append('@');
             }
 
