@@ -86,6 +86,43 @@ namespace Microsoft.Alm.Cli.Test
         }
 
         [Fact]
+        public void EmailAsUserName()
+        {
+            var input = new InputArg
+            {
+                Host = "example.visualstudio.com",
+                Password = "ḭncorrect",
+                Path = "path",
+                Protocol = Uri.UriSchemeHttps,
+                Username = "userName@domain.com"
+            };
+
+            OperationArguments cut;
+            using (var memory = new MemoryStream())
+            using (var writer = new StreamWriter(memory))
+            {
+                writer.Write(input.ToString());
+                writer.Flush();
+
+                memory.Seek(0, SeekOrigin.Begin);
+
+                cut = new OperationArguments(RuntimeContext.Default, memory);
+            }
+
+            Assert.Equal(input.Protocol, cut.QueryProtocol, StringComparer.Ordinal);
+            Assert.Equal(input.Host, cut.QueryHost, StringComparer.Ordinal);
+            Assert.Equal(input.Path, cut.QueryPath, StringComparer.Ordinal);
+            Assert.Equal(input.Username, cut.Username, StringComparer.Ordinal);
+            Assert.Equal(input.Password, cut.Password, StringComparer.Ordinal);
+
+            Assert.Equal("https://userName@domain.com@example.visualstudio.com/path", cut.TargetUri.ToString(), StringComparer.Ordinal);
+
+            var expected = input.ToString();
+            var actual = cut.ToString();
+            Assert.Equal(expected, actual, StringComparer.Ordinal);
+        }
+
+        [Fact]
         public void CreateTargetUriGitHubSimple()
         {
             var input = new InputArg()
