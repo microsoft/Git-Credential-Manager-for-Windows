@@ -88,8 +88,11 @@ namespace GitHub.Authentication
             options.Headers.Accept.Add(new MediaTypeWithQualityHeaderValue(GitHubApiAcceptsHeaderValue));
             options.Headers.Add(GitHubOptHeader, authenticationCode);
 
+            // Create the authority Uri.
+            var requestUri = new TargetUri(_authorityUrl, targetUri.ProxyUri?.ToString());
+
             using (HttpContent content = GetTokenJsonContent(targetUri, scope))
-            using (var response = await Network.HttpPostAsync(targetUri, content, options))
+            using (var response = await Network.HttpPostAsync(requestUri, content, options))
             {
                 Trace.WriteLine($"server responded with {response.StatusCode}.");
 
