@@ -441,7 +441,7 @@ namespace Microsoft.Alm.Authentication
                 {
                     // Just open the file from disk, the tenant identities are not secret and
                     // therefore safely left as unencrypted plain text.
-                    using (var stream = context.FileSystem.FileOpen(path, FileMode.OpenOrCreate, FileAccess.Read, FileShare.Read))
+                    using (var stream = context.Storage.FileOpen(path, FileMode.OpenOrCreate, FileAccess.Read, FileShare.Read))
                     using (var inflate = new GZipStream(stream, CompressionMode.Decompress))
                     using (var reader = new StreamReader(inflate, encoding))
                     {
@@ -505,9 +505,9 @@ namespace Microsoft.Alm.Authentication
             path = Path.Combine(path, CachePathDirectory);
 
             // Create the directory if necessary
-            if (!context.FileSystem.DirectoryExists(path))
+            if (!context.Storage.DirectoryExists(path))
             {
-                context.FileSystem.CreateDirectory(path);
+                context.Storage.CreateDirectory(path);
             }
 
             // Append the file name to the path
@@ -547,7 +547,7 @@ namespace Microsoft.Alm.Authentication
                 {
                     // Just open the file from disk, the tenant identities are not secret and
                     // therefore safely left as unencrypted plain text.
-                    using (var stream = context.FileSystem.FileOpen(path, FileMode.OpenOrCreate, FileAccess.ReadWrite, FileShare.None))
+                    using (var stream = context.Storage.FileOpen(path, FileMode.OpenOrCreate, FileAccess.ReadWrite, FileShare.None))
                     using (var deflate = new GZipStream(stream, CompressionMode.Compress))
                     using (var writer = new StreamWriter(deflate, encoding))
                     {

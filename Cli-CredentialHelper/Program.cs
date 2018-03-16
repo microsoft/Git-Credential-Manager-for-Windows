@@ -368,12 +368,12 @@ namespace Microsoft.Alm.Cli
             {
                 foreach (var installation in installations)
                 {
-                    if (FileSystem.DirectoryExists(installation.Doc))
+                    if (Storage.DirectoryExists(installation.Doc))
                     {
                         string doc = Path.Combine(installation.Doc, HelpFileName);
 
                         // if the help file exists, send it to the operating system to display to the user
-                        if (FileSystem.FileExists(doc))
+                        if (Storage.FileExists(doc))
                         {
                             Trace.WriteLine($"opening help documentation '{doc}'.");
 

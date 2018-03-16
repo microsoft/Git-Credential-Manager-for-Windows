@@ -284,7 +284,7 @@ namespace Microsoft.Alm.Cli
 
                     string gitDirPath = Path.GetDirectoryName(gitConfigPath);
 
-                    if (program.FileSystem.DirectoryExists(gitDirPath))
+                    if (program.Storage.DirectoryExists(gitDirPath))
                     {
                         program.EnableTraceLogging(operationArguments, gitDirPath);
                     }
@@ -295,7 +295,7 @@ namespace Microsoft.Alm.Cli
 
                     string homeDirPath = Path.GetDirectoryName(gitConfigPath);
 
-                    if (program.FileSystem.DirectoryExists(homeDirPath))
+                    if (program.Storage.DirectoryExists(homeDirPath))
                     {
                         program.EnableTraceLogging(operationArguments, homeDirPath);
                     }
@@ -327,7 +327,7 @@ namespace Microsoft.Alm.Cli
                     string moveName = string.Format("{0}{1:000}.log", Program.ConfigPrefix, i);
                     string movePath = Path.Combine(logFilePath, moveName);
 
-                    if (!program.FileSystem.FileExists(movePath))
+                    if (!program.Storage.FileExists(movePath))
                     {
                         logFileInfo.MoveTo(movePath);
                         break;
@@ -337,7 +337,7 @@ namespace Microsoft.Alm.Cli
 
             program.Trace.WriteLine($"trace log destination is '{logFilePath}'.");
 
-            using (var fileStream = program.FileSystem.FileOpen(logFileName, FileMode.Append, FileAccess.Write, FileShare.ReadWrite))
+            using (var fileStream = program.Storage.FileOpen(logFileName, FileMode.Append, FileAccess.Write, FileShare.ReadWrite))
             {
                 var listener = new StreamWriter(fileStream, Encoding.UTF8);
                 program.Trace.AddListener(listener);

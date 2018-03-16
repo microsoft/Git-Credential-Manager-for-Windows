@@ -44,11 +44,11 @@ namespace Microsoft.Alm.Authentication
             get { return _context; }
         }
 
-        protected IFileSystem FileSystem
-            => _context.FileSystem;
-
         protected INetwork Network
             => _context.Network;
+
+        protected IStorage Storage
+            => _context.Storage;
 
         protected Git.ITrace Trace
             => _context.Trace;

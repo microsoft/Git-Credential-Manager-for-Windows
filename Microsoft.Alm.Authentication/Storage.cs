@@ -28,7 +28,7 @@ using System.IO;
 
 namespace Microsoft.Alm.Authentication
 {
-    public interface IFileSystem
+    public interface IStorage
     {
         /// <summary>
         /// Creates all directories and subdirectories in the specified path.
@@ -180,9 +180,9 @@ namespace Microsoft.Alm.Authentication
         string GetParent(string path);
     }
 
-    internal class FileSystem : Base, IFileSystem
+    internal class Storage : Base, IStorage
     {
-        public FileSystem(RuntimeContext context)
+        public Storage(RuntimeContext context)
             : base(context)
         { }
 
