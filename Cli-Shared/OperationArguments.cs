@@ -511,7 +511,11 @@ namespace Microsoft.Alm.Cli
             // Username.
             if (!string.IsNullOrWhiteSpace(_username))
             {
-                buffer.Append(_username)
+                var username = NeedsToBeEscaped(_username)
+                    ? Uri.EscapeDataString(_username)
+                    : _username;
+
+                buffer.Append(username)
                       .Append('@');
             }
 
@@ -529,6 +533,36 @@ namespace Microsoft.Alm.Cli
 
             // Create the target URI object.
             _targetUri = new TargetUri(queryUrl, proxyUrl);
+        }
+
+        private static bool NeedsToBeEscaped(string value)
+        {
+            for (int i = 0; i < value.Length; i += 1)
+            {
+                switch (value[i])
+                {
+                    case ':':
+                    case '/':
+                    case '?':
+                    case '#':
+                    case '[':
+                    case ']':
+                    case '@':
+                    case '!':
+                    case '$':
+                    case '&':
+                    case '\'':
+                    case '(':
+                    case ')':
+                    case '*':
+                    case '+':
+                    case ',':
+                    case ';':
+                    case '=':
+                        return true;
+                }
+            }
+            return false;
         }
     }
 }
