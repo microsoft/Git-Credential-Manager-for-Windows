@@ -64,7 +64,7 @@
         </Setter>
         <Style.Triggers>
             <Trigger Property="IsMouseOver" Value="True">
-                <Setter Property="Background" Value="{DynamicResource CoogeeBrush}"/>
+                <Setter Property="Background" Value="{DynamicResource SodiumExplosionBrush}"/>
             </Trigger>
             <Trigger Property="IsPressed" Value="True">
                 <Setter Property="Background" Value="{DynamicResource ChoreCoatBrush}" />

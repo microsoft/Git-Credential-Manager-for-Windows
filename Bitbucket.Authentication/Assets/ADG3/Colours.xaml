@@ -285,16 +285,16 @@
     <SolidColorBrush x:Key="BBBlueLinkButtonTextBrush" Color="{DynamicResource PacificBridge}"
                      PresentationOptions:Freeze="true" />
 
-    <SolidColorBrush x:Key="BBBlueLinkButtonDisabledTextBrush" Color="{DynamicResource Schwag}"
+    <SolidColorBrush x:Key="BBBlueLinkButtonDisabledTextBrush" Color="{DynamicResource ChoreCoat}"
                      PresentationOptions:Freeze="true" />
 
-    <SolidColorBrush x:Key="BBBlueLinkButtonIconBrush" Color="{DynamicResource Schwag}"
+    <SolidColorBrush x:Key="BBBlueLinkButtonIconBrush" Color="{DynamicResource ChoreCoat}"
                      PresentationOptions:Freeze="true" />
 
-    <SolidColorBrush x:Key="BBBlueLinkButtonHoverBrush" Color="{DynamicResource Coogee}"
+    <SolidColorBrush x:Key="BBBlueLinkButtonHoverBrush" Color="{DynamicResource SodiumExplosion}"
                      PresentationOptions:Freeze="true" />
 
-    <SolidColorBrush x:Key="BBBlueLinkButtonHoverIconBrush" Color="{DynamicResource Coogee}"
+    <SolidColorBrush x:Key="BBBlueLinkButtonHoverIconBrush" Color="{DynamicResource SodiumExplosion}"
                      PresentationOptions:Freeze="true" />
 
     <SolidColorBrush x:Key="BBBlueLinkButtonPressedBrush" Color="{DynamicResource ChoreCoat}"
