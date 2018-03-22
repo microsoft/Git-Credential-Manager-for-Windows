@@ -19,7 +19,7 @@ namespace Atlassian.Bitbucket.Authentication.Properties {
     // class via a tool like ResGen or Visual Studio.
     // To add or remove a member, edit your .ResX file then rerun ResGen
     // with the /str option, or rebuild your VS project.
-    [global::System.CodeDom.Compiler.GeneratedCodeAttribute("System.Resources.Tools.StronglyTypedResourceBuilder", "4.0.0.0")]
+    [global::System.CodeDom.Compiler.GeneratedCodeAttribute("System.Resources.Tools.StronglyTypedResourceBuilder", "15.0.0.0")]
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
     [global::System.Runtime.CompilerServices.CompilerGeneratedAttribute()]
     public class Resources {
@@ -61,11 +61,29 @@ namespace Atlassian.Bitbucket.Authentication.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Authorize.
+        /// </summary>
+        public static string AuthorizeLabel {
+            get {
+                return ResourceManager.GetString("AuthorizeLabel", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Cancel.
         /// </summary>
         public static string CancelText {
             get {
                 return ResourceManager.GetString("CancelText", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Continue.
+        /// </summary>
+        public static string ContinueLabel {
+            get {
+                return ResourceManager.GetString("ContinueLabel", resourceCulture);
             }
         }
         
@@ -79,7 +97,7 @@ namespace Atlassian.Bitbucket.Authentication.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Forgot your password?.
+        ///   Looks up a localized string similar to Can&apos;t log in?.
         /// </summary>
         public static string ForgotPasswordText {
             get {
@@ -97,7 +115,7 @@ namespace Atlassian.Bitbucket.Authentication.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Log in.
+        ///   Looks up a localized string similar to Continue.
         /// </summary>
         public static string LoginLabel {
             get {
@@ -151,7 +169,7 @@ namespace Atlassian.Bitbucket.Authentication.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Sign up..
+        ///   Looks up a localized string similar to Sign up for an account.
         /// </summary>
         public static string SignUpLinkText {
             get {

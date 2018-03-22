@@ -24,13 +24,34 @@
  * WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE."
 **/
 -->
-<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation">
-    <ResourceDictionary.MergedDictionaries>
-        <ResourceDictionary Source="Assets/ADG3/Colours.xaml" />
-        <ResourceDictionary Source="Assets/ADG3/Typography.xaml" />
-        <ResourceDictionary Source="Assets/ADG3/Images.xaml" />
-        <ResourceDictionary Source="Assets/ADG3/Controls.xaml" />
-        <ResourceDictionary Source="Assets/ADG3/TextBlocks.xaml" />
-        <ResourceDictionary Source="Assets/ADG3/ValidationMessage.xaml" />
-    </ResourceDictionary.MergedDictionaries>
+<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+
+    <!--
+    Images
+    -->
+    <Style x:Key="ImageX" TargetType="{x:Type Image}">
+        <Setter Property="Stretch" Value="None" />
+        <Setter Property="SnapsToDevicePixels" Value="True" />
+    </Style>
+    
+    <!--
+    Logos
+
+    https://atlassian.design/guidelines/brand/logos
+    -->
+
+    <Style x:Key="AtlassianLogo" TargetType="{x:Type Image}" BasedOn="{StaticResource ImageX}">
+        <Setter Property="Source" Value="/Bitbucket.Authentication;Component/Assets/ADG3/Images/Atlassian-horizontal-white@2x-rgb.png" />
+        <Setter Property="Width" Value="285" />
+        <Setter Property="Height" Value="48" />
+        <Setter Property="Stretch" Value="Uniform" />
+    </Style>
+
+    <Style x:Key="ErrorIcon" TargetType="{x:Type Image}" BasedOn="{StaticResource ImageX}">
+        <Setter Property="Source" Value="/Bitbucket.Authentication;Component/Assets/ADG3/Images/error.png" />
+        <Setter Property="Width" Value="16" />
+        <Setter Property="Height" Value="16" />
+        <Setter Property="Stretch" Value="Uniform" />
+    </Style>
 </ResourceDictionary>

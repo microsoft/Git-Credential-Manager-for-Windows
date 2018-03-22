@@ -55,9 +55,6 @@
     <Compile Include="Controls\CredentialsControl.xaml.cs">
       <DependentUpon>CredentialsControl.xaml</DependentUpon>
     </Compile>
-    <Compile Include="Controls\HorizontalShadowDivider.xaml.cs">
-      <DependentUpon>HorizontalShadowDivider.xaml</DependentUpon>
-    </Compile>
     <Compile Include="Controls\Text\ValidationMessage.cs" />
     <Compile Include="Rest\RestClient.cs" />
     <Compile Include="TokenScope.cs" />
@@ -105,31 +102,31 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </Page>
-    <Page Include="Assets\ADG3Colours.xaml">
+    <Page Include="Assets\ADG3\Controls.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </Page>
-    <Page Include="Assets\ADG.xaml">
-      <SubType>Designer</SubType>
-      <Generator>MSBuild:Compile</Generator>
-    </Page>
-    <Page Include="Assets\Styles.xaml">
+    <Page Include="Assets\ADG3\Typography.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </Page>
-    <Page Include="Assets\TextBlocks.xaml">
+    <Page Include="Assets\ADG3\Images.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </Page>
-    <Page Include="Assets\ValidationMessage.xaml">
+    <Page Include="Assets\ADG3\Colours.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Include="Assets\ADG3\TextBlocks.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Include="Assets\ADG3\ValidationMessage.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </Page>
     <Page Include="Controls\CredentialsControl.xaml">
-      <Generator>MSBuild:Compile</Generator>
-      <SubType>Designer</SubType>
-    </Page>
-    <Page Include="Controls\HorizontalShadowDivider.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </Page>
@@ -154,18 +151,22 @@
     </EmbeddedResource>
   </ItemGroup>
   <ItemGroup>
-    <Resource Include="Assets\atlassian-rgb-navy-medium.png" />
-    <Resource Include="Assets\bitbucket_rgb_blue.png" />
-    <Resource Include="Assets\sourcetree_rgb_blue.png" />
-  </ItemGroup>
-  <ItemGroup>
     <Resource Include="Assets\auth.html" />
   </ItemGroup>
   <ItemGroup>
-    <Resource Include="Assets\SourceTree.ico" />
+    <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="packages.config" />
+    <Resource Include="Assets\ADG3\atlassian.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="Assets\ADG3\Images\Atlassian-horizontal-white%402x-rgb.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="Assets\ADG3\Images\Bitbucket-16x16.ico" />
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="Assets\ADG3\Images\error.png" />
   </ItemGroup>
   <Import Project="..\Gui-Shared\Gui-Shared.projitems" Label="Shared" />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

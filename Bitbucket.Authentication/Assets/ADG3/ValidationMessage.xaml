@@ -44,6 +44,7 @@
                         <Viewbox Width="16" Height="16" Grid.Column="0"
                                  Visibility="{TemplateBinding ShowError, Converter={sharedConverters:BooleanToVisibilityConverter}}">
                             <!--<controls:OcticonPath x:Name="icon" Icon="{TemplateBinding Icon}" Height="16" Fill="{TemplateBinding Fill}" />-->
+                            <Image Style="{DynamicResource ErrorIcon}"/>
                         </Viewbox>
 
                         <ContentPresenter x:Name="massageContentPresenter" ContentSource="Content"
@@ -54,7 +55,7 @@
                                    Text="{TemplateBinding Text}"
                                    Margin="3,0,0,2"
                                    Grid.Column="1"
-                                   Foreground="{DynamicResource BitbucketTextSecondaryBrush}"
+                                   Foreground="{DynamicResource PrimaryHighlight}"
                                    VerticalAlignment="Center" />
                         <Grid.RenderTransform>
                             <ScaleTransform x:Name="HeightScaleTransform" ScaleY="0" />

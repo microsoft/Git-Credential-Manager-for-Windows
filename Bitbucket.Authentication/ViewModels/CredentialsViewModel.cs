@@ -55,7 +55,7 @@ namespace Atlassian.Bitbucket.Authentication.ViewModels
             ModelValidator = new ModelValidator(LoginValidator, PasswordValidator);
             ModelValidator.PropertyChanged += (s, e) =>
                                               {
-                                                  if (e.PropertyName == nameof(ModelValidator.IsValid))
+                                                 if (e.PropertyName == nameof(ModelValidator.IsValid))
                                                   {
                                                       IsValid = ModelValidator.IsValid;
                                                   }
@@ -130,5 +130,10 @@ namespace Atlassian.Bitbucket.Authentication.ViewModels
         /// Hyperlink to the Bitbucket forgotten password process.
         /// </summary>
         public ICommand ForgotPasswordCommand { get; } = new HyperLinkCommand();
+
+        /// <summary>
+        /// Hyperlink to the Bitbucket sign up process.
+        /// </summary>
+        public ICommand SignUpCommand { get; } = new HyperLinkCommand();
     }
 }
