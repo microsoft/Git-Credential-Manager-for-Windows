@@ -22,30 +22,9 @@ namespace Microsoft.Alm.Cli.Test
                 Username = "userName",
             };
 
-            OperationArguments cut;
-            using (var memory = new MemoryStream())
-            using (var writer = new StreamWriter(memory))
-            {
-                writer.Write(input.ToString());
-                writer.Flush();
-
-                memory.Seek(0, SeekOrigin.Begin);
-
-                cut = new OperationArguments(RuntimeContext.Default, memory);
-            }
-
-            Assert.Equal(input.Protocol, cut.QueryProtocol);
-            Assert.Equal(input.Host, cut.QueryHost);
-            Assert.Equal(input.Path, cut.QueryPath);
-            Assert.Equal(input.Username, cut.Username);
-            Assert.Equal(input.Password, cut.Password);
-
+            var cut = CreateTargetUriTestDefault(input);
             Assert.Equal("https://userName@example.visualstudio.com/path", cut.TargetUri.ToString());
-
-            var expected = ReadLines(input.ToString());
-            var actual = ReadLines(cut.ToString());
-
-            Assert.Equal(expected, actual);
+            Assert.Equal(input.ToString(), cut.ToString(), StringComparer.Ordinal);
         }
 
         [Fact]
@@ -60,29 +39,9 @@ namespace Microsoft.Alm.Cli.Test
                 Username = "userNamể"
             };
 
-            OperationArguments cut;
-            using (var memory = new MemoryStream())
-            using (var writer = new StreamWriter(memory))
-            {
-                writer.Write(input.ToString());
-                writer.Flush();
-
-                memory.Seek(0, SeekOrigin.Begin);
-
-                cut = new OperationArguments(RuntimeContext.Default, memory);
-            }
-
-            Assert.Equal(input.Protocol, cut.QueryProtocol, StringComparer.Ordinal);
-            Assert.Equal(input.Host, cut.QueryHost, StringComparer.Ordinal);
-            Assert.Equal(input.Path, cut.QueryPath, StringComparer.Ordinal);
-            Assert.Equal(input.Username, cut.Username, StringComparer.Ordinal);
-            Assert.Equal(input.Password, cut.Password, StringComparer.Ordinal);
-
+            var cut = CreateTargetUriTestDefault(input);
             Assert.Equal("https://userNamể@example.visualstudio.com/path", cut.TargetUri.ToString(), StringComparer.Ordinal);
-
-            var expected = input.ToString();
-            var actual = cut.ToString();
-            Assert.Equal(expected, actual, StringComparer.Ordinal);
+            Assert.Equal(input.ToString(), cut.ToString(), StringComparer.Ordinal);
         }
 
         [Fact]
@@ -97,29 +56,9 @@ namespace Microsoft.Alm.Cli.Test
                 Username = "userName@domain.com"
             };
 
-            OperationArguments cut;
-            using (var memory = new MemoryStream())
-            using (var writer = new StreamWriter(memory))
-            {
-                writer.Write(input.ToString());
-                writer.Flush();
-
-                memory.Seek(0, SeekOrigin.Begin);
-
-                cut = new OperationArguments(RuntimeContext.Default, memory);
-            }
-
-            Assert.Equal(input.Protocol, cut.QueryProtocol, StringComparer.Ordinal);
-            Assert.Equal(input.Host, cut.QueryHost, StringComparer.Ordinal);
-            Assert.Equal(input.Path, cut.QueryPath, StringComparer.Ordinal);
-            Assert.Equal(input.Username, cut.Username, StringComparer.Ordinal);
-            Assert.Equal(input.Password, cut.Password, StringComparer.Ordinal);
-
+            var cut = CreateTargetUriTestDefault(input);
             Assert.Equal("https://userName@domain.com@example.visualstudio.com/path", cut.TargetUri.ToString(), StringComparer.Ordinal);
-
-            var expected = input.ToString();
-            var actual = cut.ToString();
-            Assert.Equal(expected, actual, StringComparer.Ordinal);
+            Assert.Equal(input.ToString(), cut.ToString(), StringComparer.Ordinal);
         }
 
         [Fact]
@@ -222,7 +161,7 @@ namespace Microsoft.Alm.Cli.Test
             CreateTargetUriTestDefault(input);
         }
 
-        private void CreateTargetUriTestDefault(InputArg input)
+        private OperationArguments CreateTargetUriTestDefault(InputArg input)
         {
             using (var memory = new MemoryStream())
             using (var writer = new StreamWriter(memory))
@@ -240,6 +179,7 @@ namespace Microsoft.Alm.Cli.Test
                 Assert.Equal(input.Path, oparg.QueryPath, StringComparer.Ordinal);
                 Assert.Equal(input.Username, oparg.Username, StringComparer.Ordinal);
                 Assert.Equal(input.Password, oparg.Password, StringComparer.Ordinal);
+                return oparg;
             }
         }
 
