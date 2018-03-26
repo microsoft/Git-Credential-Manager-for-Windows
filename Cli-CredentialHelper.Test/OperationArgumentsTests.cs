@@ -62,6 +62,23 @@ namespace Microsoft.Alm.Cli.Test
         }
 
         [Fact]
+        public void UsernameWithDomain()
+        {
+            var input = new InputArg
+            {
+                Host = "example.visualstudio.com",
+                Password = "incorrect",
+                Path = "path",
+                Protocol = Uri.UriSchemeHttps,
+                Username = @"DOMAIN\username"
+            };
+
+            var cut = CreateTargetUriTestDefault(input);
+            Assert.Equal(@"https://DOMAIN\username@example.visualstudio.com/path", cut.TargetUri.ToString(), StringComparer.Ordinal);
+            Assert.Equal(input.ToString(), cut.ToString(), StringComparer.Ordinal);
+        }
+
+        [Fact]
         public void CreateTargetUriGitHubSimple()
         {
             var input = new InputArg()
