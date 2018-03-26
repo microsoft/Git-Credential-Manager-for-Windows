@@ -90,7 +90,7 @@ namespace Microsoft.Alm.Cli.Test
             var input = new InputArg
             {
                 Host = "example.visualstudio.com",
-                Password = "ḭncorrect",
+                Password = "incorrect",
                 Path = "path",
                 Protocol = Uri.UriSchemeHttps,
                 Username = "userName@domain.com"
