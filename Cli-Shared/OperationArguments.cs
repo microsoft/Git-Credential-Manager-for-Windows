@@ -543,6 +543,7 @@ namespace Microsoft.Alm.Cli
                 {
                     case ':':
                     case '/':
+                    case '\\':
                     case '?':
                     case '#':
                     case '[':

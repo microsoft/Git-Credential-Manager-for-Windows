@@ -122,6 +122,34 @@ namespace Microsoft.Alm.Cli.Test
         }
 
         [Fact]
+        public void UsernameWithDomain()
+        {
+            var input = new InputArg
+            {
+                Host = "example.visualstudio.com",
+                Password = "incorrect",
+                Path = "path",
+                Protocol = Uri.UriSchemeHttps,
+                Username = @"DOMAIN\username"
+            };
+
+            OperationArguments cut;
+            using (var memory = new MemoryStream())
+            using (var writer = new StreamWriter(memory))
+            {
+                writer.Write(input.ToString());
+                writer.Flush();
+
+                memory.Seek(0, SeekOrigin.Begin);
+
+                cut = new OperationArguments(memory);
+            }
+
+            Assert.Equal(@"https://DOMAIN\username@example.visualstudio.com/path", cut.TargetUri.ToString(), StringComparer.Ordinal);
+            Assert.Equal(input.ToString(), cut.ToString(), StringComparer.Ordinal);
+        }
+
+        [Fact]
         public void CreateTargetUriGitHubSimple()
         {
             var input = new InputArg()
