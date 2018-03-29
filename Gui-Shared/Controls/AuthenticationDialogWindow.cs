@@ -25,13 +25,15 @@
 
 using System.ComponentModel;
 using System.Windows;
+using System.Windows.Interop;
 using GitHub.Shared.ViewModels;
+using Microsoft.Alm.Authentication;
 
 namespace GitHub.Shared.Controls
 {
     public abstract class AuthenticationDialogWindow : Window
     {
-        protected AuthenticationDialogWindow()
+        protected AuthenticationDialogWindow(RuntimeContext context)
         {
             DataContextChanged += (s, e) =>
             {
@@ -46,6 +48,8 @@ namespace GitHub.Shared.Controls
                     ((ViewModel)DataContext).PropertyChanged += HandleDialogResult;
                 }
             };
+
+            new WindowInteropHelper(this).Owner = context.OwnerHwnd;
         }
 
         private void HandleDialogResult(object sender, PropertyChangedEventArgs e)

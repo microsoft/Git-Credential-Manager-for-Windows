@@ -25,6 +25,7 @@
 
 using GitHub.Authentication.ViewModels;
 using GitHub.Shared.Controls;
+using Microsoft.Alm.Authentication;
 
 namespace GitHub.Authentication
 {
@@ -33,7 +34,7 @@ namespace GitHub.Authentication
     /// </summary>
     public partial class CredentialsWindow : AuthenticationDialogWindow
     {
-        public CredentialsWindow()
+        public CredentialsWindow(RuntimeContext context) : base(context)
         {
             InitializeComponent();
         }

@@ -29,6 +29,7 @@ using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Windows;
+using System.Windows.Interop;
 using GitHub.Authentication.ViewModels;
 using GitHub.Shared.Controls;
 using GitHub.Shared.ViewModels;
@@ -49,7 +50,7 @@ namespace GitHub.Authentication
 
             Trace.WriteLine($"prompting user for credentials for '{targetUri}'.");
 
-            bool credentialValid = ShowViewModel(credentialViewModel, () => new CredentialsWindow());
+            bool credentialValid = ShowViewModel(credentialViewModel, () => new CredentialsWindow(Context));
 
             username = credentialViewModel.Login;
             password = credentialViewModel.Password;
@@ -63,7 +64,7 @@ namespace GitHub.Authentication
 
             Trace.WriteLine($"prompting user for authentication code for '{targetUri}'.");
 
-            bool authenticationCodeValid = ShowViewModel(twoFactorViewModel, () => new TwoFactorWindow());
+            bool authenticationCodeValid = ShowViewModel(twoFactorViewModel, () => new TwoFactorWindow(Context));
 
             authenticationCode = authenticationCodeValid
                 ? twoFactorViewModel.AuthenticationCode

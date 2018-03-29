@@ -26,6 +26,7 @@
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
@@ -329,6 +330,38 @@ namespace Microsoft.Alm.Cli
 
         internal void Get()
         {
+            // parse args
+            const string paramOwnerHwndKey = "--ownerHwnd";
+
+            string[] args = Environment.GetCommandLineArgs();
+            for (int i = 2; i <args.Length; i++)
+            {
+                if (string.Equals(args[i], paramOwnerHwndKey, StringComparison.OrdinalIgnoreCase))
+                {
+                    if (args.Length > i + 1)
+                    {
+                        i += 1;
+                        string hwndArg = args[i];
+
+                        Trace.WriteLine($"{paramOwnerHwndKey} = '{hwndArg}'");
+
+                        // parse hex or decimal string to IntPtr
+                        int ownerHwnd = 0;
+                        if ((hwndArg.StartsWith("0x", StringComparison.OrdinalIgnoreCase) &&
+                            Int32.TryParse(hwndArg.Substring(2), NumberStyles.HexNumber, CultureInfo.InstalledUICulture, out ownerHwnd)) ||
+                            Int32.TryParse(hwndArg, out ownerHwnd))
+                        {
+                            Trace.WriteLine($"Parsed {paramOwnerHwndKey}: '{ownerHwnd}'.");
+                            Context.OwnerHwnd = new IntPtr(ownerHwnd);
+                        }
+                        else
+                        {
+                            Trace.WriteLine($"Failed to parse {paramOwnerHwndKey}.");
+                        }
+                    }
+                }
+            }
+
             // parse the operations arguments from stdin (this is how git sends commands)
             // see: https://www.kernel.org/pub/software/scm/git/docs/technical/api-credentials.html
             // see: https://www.kernel.org/pub/software/scm/git/docs/git-credential.html

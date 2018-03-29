@@ -23,9 +23,10 @@
  * WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE."
 **/
 
+using System.Windows.Input;
 using Atlassian.Bitbucket.Authentication.ViewModels;
 using GitHub.Shared.Controls;
-using System.Windows.Input;
+using Microsoft.Alm.Authentication;
 
 namespace Atlassian.Bitbucket.Authentication.Views
 {
@@ -45,7 +46,7 @@ namespace Atlassian.Bitbucket.Authentication.Views
     /// </summary>
     partial class CredentialsWindow : AuthenticationDialogWindow
     {
-        public CredentialsWindow()
+        public CredentialsWindow(RuntimeContext context) : base(context)
         {
             InitializeComponent();
 

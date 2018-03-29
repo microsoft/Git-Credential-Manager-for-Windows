@@ -25,12 +25,13 @@
 
 using GitHub.Authentication.ViewModels;
 using GitHub.Shared.Controls;
+using Microsoft.Alm.Authentication;
 
 namespace GitHub.Authentication
 {
     public partial class TwoFactorWindow : AuthenticationDialogWindow
     {
-        public TwoFactorWindow()
+        public TwoFactorWindow(RuntimeContext context) : base(context)
         {
             InitializeComponent();
         }

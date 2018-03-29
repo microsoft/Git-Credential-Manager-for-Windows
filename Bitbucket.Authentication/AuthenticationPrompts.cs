@@ -87,7 +87,7 @@ namespace Atlassian.Bitbucket.Authentication
 
             Trace.WriteLine("prompting user for credentials.");
 
-            bool credentialValid = ShowViewModel(credentialViewModel, () => new CredentialsWindow());
+            bool credentialValid = ShowViewModel(credentialViewModel, () => new CredentialsWindow(Context));
 
             username = credentialViewModel.Login;
             password = credentialViewModel.Password;
@@ -112,7 +112,7 @@ namespace Atlassian.Bitbucket.Authentication
 
             Trace.WriteLine("prompting user for authentication code.");
 
-            bool useOAuth = ShowViewModel(oauthViewModel, () => new OAuthWindow());
+            bool useOAuth = ShowViewModel(oauthViewModel, () => new OAuthWindow(Context));
 
             return useOAuth;
         }

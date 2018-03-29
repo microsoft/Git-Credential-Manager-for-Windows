@@ -103,5 +103,11 @@ namespace Microsoft.Alm.Authentication
         {
             get { return _where; }
         }
+
+        public IntPtr OwnerHwnd
+        {
+            get;
+            set;
+        } = IntPtr.Zero;
     }
 }
