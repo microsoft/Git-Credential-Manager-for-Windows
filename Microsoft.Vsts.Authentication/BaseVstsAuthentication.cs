@@ -125,7 +125,8 @@ namespace Microsoft.Alm.Authentication
         /// <param name="targetUri">The uniform resource indicator used to uniquely identify the credentials.</param>
         public override async Task<bool> DeleteCredentials(TargetUri targetUri)
         {
-            BaseSecureStore.ValidateTargetUri(targetUri);
+            if (targetUri is null)
+                throw new ArgumentNullException(nameof(targetUri));
 
             Credential credentials = await PersonalAccessTokenStore.ReadCredentials(targetUri);
 
@@ -168,7 +169,10 @@ namespace Microsoft.Alm.Authentication
             const string VstsBaseUrlHost = "visualstudio.com";
             const string VstsResourceTenantHeader = "X-VSS-ResourceTenant";
 
-            BaseSecureStore.ValidateTargetUri(targetUri);
+            if (context is null)
+                throw new ArgumentNullException(nameof(context));
+            if (targetUri is null)
+                throw new ArgumentNullException(nameof(targetUri));
 
             var tenantId = Guid.Empty;
 
@@ -236,7 +240,10 @@ namespace Microsoft.Alm.Authentication
                 {
                     context.Trace.WriteLine($"detected non-https based protocol: '{targetUri.Scheme}'.");
                 }
-            }
+            }            
+
+            if (StringComparer.OrdinalIgnoreCase.Equals(VstsBaseUrlHost, targetUri.Host))
+                return Guid.Empty;
 
             // Fallback to basic authentication.
             return null;

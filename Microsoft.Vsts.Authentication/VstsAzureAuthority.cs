@@ -63,15 +63,14 @@ namespace Microsoft.Alm.Authentication
 
             try
             {
+                var requestUri = await CreatePersonalAccessTokenRequestUri(targetUri, accessToken, requireCompactToken);
                 var options = new NetworkRequestOptions(true)
                 {
                     Authorization = accessToken,
                 };
 
-                var requestUri = await CreatePersonalAccessTokenRequestUri(targetUri, requireCompactToken);
-
-                using (StringContent content = GetAccessTokenRequestBody(targetUri, accessToken, tokenScope, tokenDuration))
-                using (var response = await Network.HttpPostAsync(targetUri, content, options))
+                using (StringContent content = GetAccessTokenRequestBody(targetUri, tokenScope, tokenDuration))
+                using (var response = await Network.HttpPostAsync(requestUri, content, options))
                 {
                     if (response.IsSuccessStatusCode)
                     {
@@ -180,19 +179,16 @@ namespace Microsoft.Alm.Authentication
                 // Send the request and wait for the response.
                 using (var response = await Network.HttpGetAsync(requestUri, options))
                 {
-                    if (!response.IsSuccessStatusCode)
-                    {
-                        // Even if the service responded, if the issue isn't a 400 class response then
-                        // the credentials were likely not rejected.
-                        if ((int)response.StatusCode >= 400 && (int)response.StatusCode < 500)
-                            return false;
-
-                        Trace.WriteLine($"unable to validate credentials due to '{response.StatusCode}'.");
+                    if (response.IsSuccessStatusCode)
                         return true;
-                    }
+
+                    // Even if the service responded, if the issue isn't a 400 class response then
+                    // the credentials were likely not rejected.
+                    if ((int)response.StatusCode >= 400 && (int)response.StatusCode < 500)
+                        return true;
                 }
             }
-            catch(Exception exception)
+            catch (Exception exception)
             {
                 Trace.WriteLine($"! error: '{exception.Message}'.");
             }
@@ -248,40 +244,58 @@ namespace Microsoft.Alm.Authentication
                 Trace.WriteLine($"! error: '{exception.Message}'.");
             };
 
-            
+
             Trace.WriteLine($"token validation for '{targetUri}' failed.");
             return false;
         }
 
         internal static TargetUri GetConnectionDataUri(TargetUri targetUri)
         {
-            const string VstsValidationUrlFormat = "{0}://{1}/_apis/connectiondata";
+            const string VstsValidationUrlPath = "_apis/connectiondata";
 
             if (targetUri is null)
                 throw new ArgumentNullException(nameof(targetUri));
 
+            string requestUrl = targetUri.ToString(false, true, false);
+
+            if (targetUri.TargetUriContainsUsername)
+            {
+                string escapedUserInfo = Uri.EscapeUriString(targetUri.TargetUriUsername);
+
+                requestUrl = requestUrl + escapedUserInfo + "/";
+            }
+
             // Create a URL to the connection data end-point, it's deployment level and "always on".
-            string validationUrl = string.Format(System.Globalization.CultureInfo.InvariantCulture, 
-                                                 VstsValidationUrlFormat,
-                                                 targetUri.Scheme,
-                                                 targetUri.DnsSafeHost);
+            string validationUrl = requestUrl + VstsValidationUrlPath;
 
             return new TargetUri(validationUrl, targetUri.ProxyUri?.ToString());
         }
 
-        internal async Task<TargetUri> GetIdentityServiceUri(TargetUri targetUri)
+        internal async Task<TargetUri> GetIdentityServiceUri(TargetUri targetUri, Secret authorization)
         {
-            const string LocationServiceUrlFormat = "https://{0}/_apis/ServiceDefinitions/LocationService2/951917AC-A960-4999-8464-E3F0AA25B381?api-version=1.0";
+            const string LocationServiceUrlPathAndQuery = "_apis/ServiceDefinitions/LocationService2/951917AC-A960-4999-8464-E3F0AA25B381?api-version=1.0";
 
             if (targetUri is null)
                 throw new ArgumentNullException(nameof(targetUri));
 
-            var locationServiceUrl = string.Format(System.Globalization.CultureInfo.InvariantCulture, LocationServiceUrlFormat, targetUri.Host);
+            string tenantUrl = targetUri.ToString(false, true, false);
+
+            if (targetUri.TargetUriContainsUsername)
+            {
+                string escapedUserInfo = Uri.EscapeUriString(targetUri.TargetUriUsername);
+                tenantUrl = tenantUrl + escapedUserInfo + "/";
+            }
+
+            var locationServiceUrl = tenantUrl + LocationServiceUrlPathAndQuery;
             var requestUri = new TargetUri(locationServiceUrl, targetUri.ProxyUri?.ToString());
+            var options = new NetworkRequestOptions(true)
+            {
+                Authorization = authorization,
+            };
 
             try
             {
-                using (var response = await Network.HttpGetAsync(targetUri))
+                using (var response = await Network.HttpGetAsync(requestUri, options))
                 {
                     if (response.IsSuccessStatusCode)
                     {
@@ -310,28 +324,34 @@ namespace Microsoft.Alm.Authentication
             return null;
         }
 
-        private StringContent GetAccessTokenRequestBody(TargetUri targetUri, Token accessToken, VstsTokenScope tokenScope, TimeSpan? duration = null)
+        private StringContent GetAccessTokenRequestBody(TargetUri targetUri, VstsTokenScope tokenScope, TimeSpan? duration = null)
         {
-            const string ContentBasicJsonFormat = "{{ \"scope\" : \"{0}\", \"targetAccounts\" : [\"{1}\"], \"displayName\" : \"Git: {2} on {3}\" }}";
-            const string ContentTimedJsonFormat = "{{ \"scope\" : \"{0}\", \"targetAccounts\" : [\"{1}\"], \"displayName\" : \"Git: {2} on {3}\", \"validTo\": \"{4:u}\" }}";
+            const string ContentBasicJsonFormat = "{{ \"scope\" : \"{0}\", \"displayName\" : \"Git: {1} on {2}\" }}";
+            const string ContentTimedJsonFormat = "{{ \"scope\" : \"{0}\", \"displayName\" : \"Git: {1} on {2}\", \"validTo\": \"{3:u}\" }}";
             const string HttpJsonContentType = "application/json";
 
-            if (accessToken is null)
-                throw new ArgumentNullException(nameof(accessToken));
             if (tokenScope is null)
                 throw new ArgumentNullException(nameof(tokenScope));
 
-            Trace.WriteLine($"creating access token scoped to '{tokenScope}' for '{accessToken.TargetIdentity}'");
+            string tokenUrl = targetUri.ToString(false, true, false);
+
+            if (targetUri.TargetUriContainsUsername)
+            {
+                string escapedUserInfo = Uri.EscapeUriString(targetUri.TargetUriUsername);
+                tokenUrl = tokenUrl + escapedUserInfo + "/";
+            }
+
+            Trace.WriteLine($"creating access token scoped to '{tokenScope}' for '{targetUri}'");
 
             string jsonContent = (duration.HasValue && duration.Value > TimeSpan.FromHours(1))
-                ? string.Format(ContentTimedJsonFormat, tokenScope, accessToken.TargetIdentity, targetUri, Environment.MachineName, DateTime.UtcNow + duration.Value)
-                : string.Format(ContentBasicJsonFormat, tokenScope, accessToken.TargetIdentity, targetUri, Environment.MachineName);
+                ? string.Format(ContentTimedJsonFormat, tokenScope, tokenUrl, Environment.MachineName, DateTime.UtcNow + duration.Value)
+                : string.Format(ContentBasicJsonFormat, tokenScope, tokenUrl, Environment.MachineName);
             StringContent content = new StringContent(jsonContent, Encoding.UTF8, HttpJsonContentType);
 
             return content;
         }
 
-        private async Task<TargetUri> CreatePersonalAccessTokenRequestUri(TargetUri targetUri, bool requireCompactToken)
+        private async Task<TargetUri> CreatePersonalAccessTokenRequestUri(TargetUri targetUri, Secret authorization, bool requireCompactToken)
         {
             const string SessionTokenUrl = "_apis/token/sessiontokens?api-version=1.0";
             const string CompactTokenUrl = SessionTokenUrl + "&tokentype=compact";
@@ -339,7 +359,7 @@ namespace Microsoft.Alm.Authentication
             if (targetUri is null)
                 throw new ArgumentNullException(nameof(targetUri));
 
-            var idenityServiceUri = await GetIdentityServiceUri(targetUri);
+            var idenityServiceUri = await GetIdentityServiceUri(targetUri, authorization);
 
             if (idenityServiceUri is null)
                 throw new VstsLocationServiceException($"Failed to find Identity Service for `{targetUri}`.");
