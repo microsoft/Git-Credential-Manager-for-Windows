@@ -82,6 +82,8 @@ namespace Microsoft.Alm.Cli
             _context = context;
 
             Title = AssemblyTitle;
+
+            DebuggerLaunch(this);
         }
 
         internal void Clear()
