@@ -25,6 +25,7 @@
 
 using Atlassian.Bitbucket.Authentication.ViewModels;
 using GitHub.Shared.Controls;
+using System.Windows.Input;
 
 namespace Atlassian.Bitbucket.Authentication.Views
 {
@@ -47,6 +48,14 @@ namespace Atlassian.Bitbucket.Authentication.Views
         public CredentialsWindow()
         {
             InitializeComponent();
+
+            this.PreviewKeyDown += new KeyEventHandler(HandleEsc);
+        }
+
+        private void HandleEsc(object sender, KeyEventArgs e)
+        {
+            if (e.Key == Key.Escape)
+                Close();
         }
 
         internal CredentialsViewModel ViewModel

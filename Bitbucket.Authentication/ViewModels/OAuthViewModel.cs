@@ -57,6 +57,16 @@ namespace Atlassian.Bitbucket.Authentication.ViewModels
         public ICommand LearnMoreCommand { get; } = new HyperLinkCommand();
 
         /// <summary>
+        /// Hyperlink to the Bitbucket forgotten password process.
+        /// </summary>
+        public ICommand ForgotPasswordCommand { get; } = new HyperLinkCommand();
+
+        /// <summary>
+        /// Hyperlink to the Bitbucket sign up process.
+        /// </summary>
+        public ICommand SignUpCommand { get; } = new HyperLinkCommand();
+
+        /// <summary>
         /// Run the OAuth dance.
         /// </summary>
         public ICommand OkCommand { get; }

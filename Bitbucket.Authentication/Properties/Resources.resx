@@ -117,20 +117,26 @@
   <resheader name="writer">
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
+  <data name="AuthorizeLabel" xml:space="preserve">
+    <value>Authorize</value>
+  </data>
   <data name="CancelText" xml:space="preserve">
     <value>Cancel</value>
+  </data>
+  <data name="ContinueLabel" xml:space="preserve">
+    <value>Continue</value>
   </data>
   <data name="DoNotHaveAccountText" xml:space="preserve">
     <value>Need an account?</value>
   </data>
   <data name="ForgotPasswordText" xml:space="preserve">
-    <value>Forgot your password?</value>
+    <value>Can't log in?</value>
   </data>
   <data name="LearnMoreLink" xml:space="preserve">
     <value>Learn more about 2-Factor Authentication</value>
   </data>
   <data name="LoginLabel" xml:space="preserve">
-    <value>Log in</value>
+    <value>Continue</value>
   </data>
   <data name="LoginPromptText" xml:space="preserve">
     <value>Email or username</value>
@@ -148,7 +154,7 @@
     <value>A password is required</value>
   </data>
   <data name="SignUpLinkText" xml:space="preserve">
-    <value>Sign up.</value>
+    <value>Sign up for an account</value>
   </data>
   <data name="VerifyText" xml:space="preserve">
     <value>Authorize</value>

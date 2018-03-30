@@ -24,26 +24,26 @@
  * WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE."
 **/
 -->
-<UserControl
-    x:Class="Atlassian.Bitbucket.Authentication.Controls.HorizontalShadowDivider"
-    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
-    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
-    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-    mc:Ignorable="d"
-    d:DesignHeight="2"
-    d:DesignWidth="200"
-    Width="200"
-    Opacity=".6"
-    Height="2"
-    Margin="0,0,0,25"
-    IsHitTestVisible="False"
-    VerticalAlignment="Top">
-    <Grid IsHitTestVisible="False">
-        <Rectangle
-            Height="1"
-            Fill="{StaticResource HorizontalDividerBorderBrush}"
-            VerticalAlignment="Top"
-            IsHitTestVisible="False" />
-    </Grid>
-</UserControl>
+<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                    xmlns:markup="http://schemas.kent.boogaart.com/converters">
+
+    <!--
+    Typography
+
+    https://atlassian.design/guidelines/brand/typography
+    -->
+
+    <!--
+    Base styles set basic font attributes
+    Need multiple ones as not all controls derive from the same base classes
+    -->
+
+    <!-- Primary fonts -->
+    <FontFamily x:Key="BitbucketFontFamilyNormal">Segoe UI</FontFamily>
+    <FontFamily x:Key="BitbucketFontFamilyLiBBt">Segoe UI LiBBt, Segoe UI, Global User Interface</FontFamily>
+    
+    <Style TargetType="{x:Type Window}">
+        <Setter Property="FontFamily" Value="{StaticResource BitbucketFontFamilyNormal}" />
+    </Style>
+</ResourceDictionary>

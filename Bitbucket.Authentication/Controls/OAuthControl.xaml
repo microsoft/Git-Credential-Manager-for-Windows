@@ -38,65 +38,90 @@
     d:DesignWidth="414"
     d:DesignHeight="440"
     Style="{DynamicResource DialogUserControl}">
+    <DockPanel Style="{DynamicResource DialogContainerDockPanel}">
+        <DockPanel.Resources>
+            <Style TargetType="{x:Type DockPanel}">
+                <Setter Property="Margin" Value="0,0,0,0" />
+                <Setter Property="LastChildFill" Value="True" />
+            </Style>
+            <Style x:Key="FormFieldStackPanel" TargetType="{x:Type StackPanel}">
+                <Setter Property="Margin" Value="0,0,0,0" />
+                <Setter Property="MaxWidth" Value="400" />
+                <Setter Property="Height" Value="300"/>
+                <Setter Property="Background" Value="{StaticResource PrimaryForeground}" />
+            </Style>
+            <Style x:Key="ExtraInformationStackPanel" TargetType="{x:Type StackPanel}">
+                <Setter Property="Margin" Value="0,0,0,0" />
+                <Setter Property="MaxWidth" Value="400" />
+                <Setter Property="Background" Value="{StaticResource PrimaryBackground}" />
+            </Style>
+        </DockPanel.Resources>
 
-    <StackPanel
-        Style="{DynamicResource DialogContainerStackPanel}"
-        sharedHelpers:AccessKeysManagerScoping.IsEnabled="True">
+        <StackPanel DockPanel.Dock="Bottom" Margin="0">
+
+            <StackPanel  Style="{StaticResource ExtraInformationStackPanel}">
+                <TextBlock
+
+                    HorizontalAlignment="Center" Margin="0,0,0,0">
+                <Hyperlink
+                    Style="{StaticResource LightHyperlink}"
+                    ToolTip="https://bitbucket.org/account/password/reset/"
+                    Command="{Binding ForgotPasswordCommand}"
+                    CommandParameter="{Binding RelativeSource={RelativeSource Self}, Path=ToolTip}">
+                    <TextBlock Text="{x:Static properties:Resources.ForgotPasswordText}" />
+                </Hyperlink>
+            </TextBlock>
+                <TextBlock TextWrapping="Wrap" HorizontalAlignment="Center"  Margin="0,11,0,0">
+                    <Hyperlink
+                        Style="{StaticResource LightHyperlink}"
+                    ToolTip="https://bitbucket.org/account/signup/"
+                    Command="{Binding SignUpCommand}"
+                    CommandParameter="{Binding RelativeSource={RelativeSource Self}, Path=ToolTip}">
+                    <TextBlock Text="{x:Static properties:Resources.SignUpLinkText}" />
+                </Hyperlink>
+                </TextBlock>
+            </StackPanel>
+        </StackPanel>
         <StackPanel DockPanel.Dock="Top">
-            <Image Style="{StaticResource AtlassianLogo}" />
-            <controls:HorizontalShadowDivider />
-            <Image Style="{StaticResource BitbucketLogo}" />
-            <Image Style="{StaticResource SourceTreeLogo}" />
+            <Image Style="{StaticResource AtlassianLogo}"
+                   HorizontalAlignment="Center" />
+            <TextBlock Style="{StaticResource LightLogoStrapline}"
+                       HorizontalAlignment="Center"
+                       Text="{x:Static properties:Resources.OAuthAuthText}"/>
         </StackPanel>
-        <WrapPanel Orientation="Vertical" HorizontalAlignment="Center" Margin="0,0,0,12">
-            <TextBlock
-                Text="{x:Static properties:Resources.OAuthAuthText}"
-                Padding="0"
-                Margin="0,0,12,0"
-                Style="{DynamicResource BitbucketH1TextBlock}"
-                Foreground="{DynamicResource BitbucketTextBrush}" />
-        </WrapPanel>
 
-        <controls:HorizontalShadowDivider />
-
-        <TextBlock
-            Margin="30,0,30,16"
-            TextAlignment="Center"
-            HorizontalAlignment="Center"
-            TextWrapping="Wrap"
-            Style="{StaticResource BitbucketDescriptionTextBlock}">
-            <Run x:Name="description"
-                 Text="{Binding Description, Mode=OneWay}" />
-            <Hyperlink
-                Command="{Binding LearnMoreCommand}"
-                CommandParameter="{Binding
-                    RelativeSource={RelativeSource Self},
-                    Path=ToolTip}"
-                ToolTip="https://confluence.atlassian.com/bitbucket/two-step-verification-777023203.html">
-                <TextBlock Text="{x:Static properties:Resources.LearnMoreLink}" />
-            </Hyperlink>
-        </TextBlock>
-        <!--<ui:TwoFactorInput
-            x:Name="authenticationCode"
-            Text="{Binding AuthenticationCode, Mode=OneWayToSource}"
-            TabIndex="1" />-->
-        <StackPanel
-            Orientation="Horizontal"
-            HorizontalAlignment="Center"
-            Margin="0,38,0,60">
-            <Button
-                TabIndex="2"
-                IsDefault="True"
-                Command="{Binding OkCommand}"
-                IsEnabled="{Binding IsValid, Mode=OneWay}"
-                Content="{x:Static properties:Resources.VerifyText}"
-                Style="{StaticResource PrimaryButton}" />
-            <Button
-                TabIndex="3"
-                IsCancel="True"
-                Command="{Binding CancelCommand}"
-                Content="{x:Static properties:Resources.CancelText}"
-                Style="{StaticResource SecondaryButton}" />
-        </StackPanel>
-    </StackPanel>
+        <Border Style="{StaticResource ForegroundStackPanelBorder}"
+                Margin="0,10,0,0">
+            <StackPanel Style="{StaticResource FormFieldStackPanel}">
+                <TextBlock
+                    Margin="0,44,0,11"
+                    TextAlignment="Center"
+                    HorizontalAlignment="Center"
+                    TextWrapping="Wrap"
+                    Style="{StaticResource BitbucketDescriptionTextBlock}"
+                    VerticalAlignment="Center">
+                    <Hyperlink
+                        Style="{StaticResource BlueHyperlink}"
+                        Command="{Binding LearnMoreCommand}"
+                        CommandParameter="{Binding
+                        RelativeSource={RelativeSource Self},
+                        Path=ToolTip}"
+                        ToolTip="https://confluence.atlassian.com/bitbucket/two-step-verification-777023203.html">
+                        <TextBlock 
+                            Text="{x:Static properties:Resources.LearnMoreLink}" />
+                        
+                    </Hyperlink>    
+                </TextBlock>
+                <Button
+                            TabIndex="2"
+                            IsDefault="True"
+                            Command="{Binding OkCommand}"
+                            IsEnabled="{Binding IsValid, Mode=OneWay}"
+                            Content="{x:Static properties:Resources.AuthorizeLabel}"
+                            Style="{StaticResource PrimaryButton}"
+                            Width="280"
+                            Margin="0,22,0,0"/>
+            </StackPanel>
+        </Border>
+    </DockPanel>
 </sharedControls:DialogUserControl>

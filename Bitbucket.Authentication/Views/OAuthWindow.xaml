@@ -34,14 +34,14 @@
     xmlns:viewmodels="clr-namespace:Atlassian.Bitbucket.Authentication.ViewModels"
     xmlns:sharedControls="clr-namespace:GitHub.Shared.Controls"
     mc:Ignorable="d"
-    Background="White"
+    Background="{StaticResource PrimaryBackground}"
     ResizeMode="NoResize"
     SnapsToDevicePixels="True"
     UseLayoutRounding="True"
     Title="Bitbucket OAuth Authentication"
     Height="420"
     Width="420"
-    Icon="pack://application:,,,/Bitbucket.Authentication;component/Assets/SourceTree.ico">
+    Icon="pack://application:,,,/Bitbucket.Authentication;component/Assets/ADG3/Images/Bitbucket-16x16.ico">
     <Window.DataContext>
         <viewmodels:OAuthViewModel />
     </Window.DataContext>

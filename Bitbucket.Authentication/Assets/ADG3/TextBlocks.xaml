@@ -190,19 +190,30 @@
         <Setter Property="ToolTipService.ShowDuration" Value="30000" />
     </Style>
     <Style x:Key="BitbucketH1TextBlock" TargetType="{x:Type TextBlock}" BasedOn="{StaticResource BitbucketTextBlock}">
-        <Setter Property="FontSize" Value="30" />
+        <Setter Property="FontSize" Value="20" />
         <Setter Property="FontWeight" Value="Light" />
-        <Setter Property="Margin" Value="24,10,0,6" />
+        <Setter Property="Margin" Value="12,0,0,0" />
         <Setter Property="TextOptions.TextFormattingMode" Value="Ideal" />
     </Style>
+    <Style x:Key="BitbucketLightH1TextBlock" TargetType="{x:Type TextBlock}" BasedOn="{StaticResource BitbucketH1TextBlock}">
+        <Setter Property="Foreground" Value="{DynamicResource BitbucketLightTextBrush}" />
+    </Style>
     <Style x:Key="BitbucketH2TextBlock" TargetType="{x:Type TextBlock}" BasedOn="{StaticResource BitbucketH1TextBlock}">
-        <Setter Property="FontSize" Value="20" />
+        <Setter Property="FontSize" Value="16" />
+    </Style>
+    <Style x:Key="BitbucketLightH2TextBlock" TargetType="{x:Type TextBlock}" BasedOn="{StaticResource BitbucketH2TextBlock}">
+        <Setter Property="Foreground" Value="{DynamicResource BitbucketLightTextBrush}" />
     </Style>
     <Style x:Key="BitbucketDescriptionTextBlock" TargetType="{x:Type TextBlock}" BasedOn="{StaticResource BitbucketTextBlock}">
         <Setter Property="Margin" Value="24,0" />
         <Setter Property="HorizontalAlignment" Value="Left" />
         <Setter Property="TextWrapping" Value="Wrap" />
         <Setter Property="Foreground" Value="{DynamicResource BitbucketTextSecondaryBrush}" />
+    </Style>
+
+    <Style x:Key="LightLogoStrapline" TargetType="{x:Type TextBlock}">
+        <Setter Property="Foreground" Value="{DynamicResource DoctorBrush}" />
+        <Setter Property="FontSize" Value="20" />
     </Style>
     <!-- End Textblock -->
 
@@ -266,15 +277,33 @@
             </Setter.Value>
         </Setter>
     </Style>
-    <Style x:Key="{x:Type Hyperlink}" TargetType="{x:Type Hyperlink}">
-        <Setter Property="Foreground" Value="{DynamicResource GHBlueLinkButtonTextBrush}" />
+    <Style x:Key="BlueHyperlink" TargetType="{x:Type Hyperlink}">
+        <Setter Property="Foreground" Value="{DynamicResource BBBlueLinkButtonTextBrush}" />
         <Setter Property="TextDecorations" Value="None" />
         <Style.Triggers>
             <Trigger Property="IsMouseOver" Value="true">
-                <Setter Property="Foreground" Value="{DynamicResource GHBlueLinkButtonHoverBrush}" />
+                <Setter Property="Foreground" Value="{DynamicResource BBBlueLinkButtonHoverBrush}" />
             </Trigger>
             <Trigger Property="IsEnabled" Value="false">
-                <Setter Property="Foreground"  Value="{DynamicResource GHBlueLinkButtonDisabledTextBrush}" />
+                <Setter Property="Foreground"  Value="{DynamicResource BBBlueLinkButtonDisabledTextBrush}" />
+            </Trigger>
+        </Style.Triggers>
+    </Style>
+
+    <Style x:Key="LightHyperlink" TargetType="{x:Type Hyperlink}">
+        <!-- 
+            There is an odd 'the calling thread cannot access this object because a different thread owns it.' errors if I use BBLinkButtonTextBrush here on the OAuth control 
+            It is where it is used after the BlueHyperlink style. I suspect it might be something to do with the brushes being freezable ?
+            For now use non-freezable brushes directly
+        -->
+        <Setter Property="Foreground" Value="{DynamicResource DoctorBrush}" />
+        <Setter Property="TextDecorations" Value="None" />
+        <Style.Triggers>
+            <Trigger Property="IsMouseOver" Value="true">
+                <Setter Property="Foreground" Value="{DynamicResource NortheastSnowBrush}" />
+            </Trigger>
+            <Trigger Property="IsEnabled" Value="false">
+                <Setter Property="Foreground"  Value="{DynamicResource JollyFunTimeBrush}" />
             </Trigger>
         </Style.Triggers>
     </Style>
@@ -304,5 +333,11 @@
         <Setter Property="VerticalAlignment" Value="Center" />
         <Setter Property="Margin" Value="10,0,2,0" />
         <Setter Property="Width" Value="16" />
+    </Style>
+
+    <Style x:Key="EditableTextBoxBorder" TargetType="{x:Type Border}">
+        <Setter Property="Background" Value="{DynamicResource GramsHairBrush}" />
+        <Setter Property="CornerRadius" Value="5,5,5,5" />
+        <Setter Property="BorderThickness" Value="8,8,8,8" />
     </Style>
 </ResourceDictionary>
