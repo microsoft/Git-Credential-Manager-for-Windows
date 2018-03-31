@@ -287,7 +287,7 @@ namespace Microsoft.Alm.Authentication.Git
             {
                 candidates.Add(new Installation(Context, reg64HklmPath, KnownDistribution.GitForWindows64v2));
             }
-            if (!string.IsNullOrEmpty(programFiles32Path))
+            if (!string.IsNullOrEmpty(programFiles64Path))
             {
                 candidates.Add(new Installation(Context, programFiles64Path, KnownDistribution.GitForWindows64v2));
             }
