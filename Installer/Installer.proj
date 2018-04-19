@@ -92,9 +92,6 @@
     <ZipContents Include="$(IntermediateOutputPath)\Microsoft.IdentityModel.Clients.ActiveDirectory.dll">
       <InProject>false</InProject>
     </ZipContents>
-    <ZipContents Include="$(IntermediateOutputPath)\Microsoft.IdentityModel.Clients.ActiveDirectory.Platform.dll">
-      <InProject>false</InProject>
-    </ZipContents>
     <ZipContents Include="$(IntermediateOutputPath)\Microsoft.Vsts.Authentication.dll">
       <InProject>false</InProject>
     </ZipContents>
