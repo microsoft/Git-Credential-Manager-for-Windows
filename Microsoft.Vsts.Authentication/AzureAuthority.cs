@@ -99,7 +99,7 @@ namespace Microsoft.Alm.Authentication
                 AuthenticationResult authResult = await authCtx.AcquireTokenAsync(resource,
                                                                                   clientId,
                                                                                   redirectUri,
-                                                                                  new PlatformParameters(PromptBehavior.Always),
+                                                                                  new PlatformParameters(PromptBehavior.SelectAccount),
                                                                                   UserIdentifier.AnyUser,
                                                                                   queryParameters);
                 Guid tenantId;
