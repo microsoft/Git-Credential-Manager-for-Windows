@@ -54,6 +54,7 @@ namespace Microsoft.Alm.Cli
         Username,
         Validate,
         VstsScope,
+        ParentHwnd,
         Writelog,
     }
 
@@ -144,6 +145,7 @@ namespace Microsoft.Alm.Cli
             { KeyType.TokenDuration, "GCM_TOKEN_DURATION" },
             { KeyType.Validate, "GCM_VALIDATE" },
             { KeyType.VstsScope, "GCM_VSTS_SCOPE" },
+            { KeyType.ParentHwnd, "GCM_MODAL_PARENTHWND" },
             { KeyType.Writelog, "GCM_WRITELOG" },
         };
 
@@ -157,6 +159,7 @@ namespace Microsoft.Alm.Cli
         private readonly RuntimeContext _context;
         private string _location;
         private string _name;
+        private IntPtr _parentHwnd;
         private Stream _stdErrStream;
         private TextWriter _stdErrWriter;
         private Stream _stdInStream;
@@ -375,6 +378,12 @@ namespace Microsoft.Alm.Cli
                     return _stdOutStream;
                 }
             }
+        }
+
+        internal IntPtr ParentHwnd
+        {
+            get { lock(_syncpoint) return _parentHwnd; }
+            set { lock (_syncpoint) _parentHwnd = value; }
         }
 
         internal IStorage Storage

@@ -129,8 +129,8 @@ namespace Microsoft.Alm.Cli
             {
                 BannerArt = IntPtr.Zero,
                 CaptionText = program.Title,
+                Parent = program.ParentHwnd,
                 MessageText = message,
-                Parent = program.Context.OwnerHwnd,
                 Size = Marshal.SizeOf(typeof(NativeMethods.CredentialUiInfo))
             };
             var flags = NativeMethods.CredentialUiWindowsFlags.Generic;
@@ -176,7 +176,7 @@ namespace Microsoft.Alm.Cli
                 BannerArt = IntPtr.Zero,
                 CaptionText = program.Title,
                 MessageText = message,
-                Parent = program.Context.OwnerHwnd,
+                Parent = program.ParentHwnd,
                 Size = Marshal.SizeOf(typeof(NativeMethods.CredentialUiInfo))
             };
             var flags = NativeMethods.CredentialUiWindowsFlags.Generic;

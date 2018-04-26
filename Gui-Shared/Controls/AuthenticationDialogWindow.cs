@@ -23,6 +23,7 @@
  * WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE."
 **/
 
+using System;
 using System.ComponentModel;
 using System.Windows;
 using System.Windows.Interop;
@@ -33,7 +34,7 @@ namespace GitHub.Shared.Controls
 {
     public abstract class AuthenticationDialogWindow : Window
     {
-        protected AuthenticationDialogWindow(RuntimeContext context)
+        protected AuthenticationDialogWindow(RuntimeContext context, IntPtr parentHwnd)
         {
             DataContextChanged += (s, e) =>
             {
@@ -49,8 +50,12 @@ namespace GitHub.Shared.Controls
                 }
             };
 
-            new WindowInteropHelper(this).Owner = context.OwnerHwnd;
+            new WindowInteropHelper(this).Owner = parentHwnd;
         }
+
+        protected AuthenticationDialogWindow(RuntimeContext context)
+            : this(context, IntPtr.Zero)
+        { }
 
         private void HandleDialogResult(object sender, PropertyChangedEventArgs e)
         {

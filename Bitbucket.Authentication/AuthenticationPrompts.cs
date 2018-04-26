@@ -43,9 +43,17 @@ namespace Atlassian.Bitbucket.Authentication
     /// </summary>
     public class AuthenticationPrompts : Base
     {
-        public AuthenticationPrompts(RuntimeContext context)
+        public AuthenticationPrompts(RuntimeContext context, IntPtr parentHwnd)
             : base(context)
+        {
+            _parentHwnd = parentHwnd;
+        }
+
+        public AuthenticationPrompts(RuntimeContext context)
+            : this(context, IntPtr.Zero)
         { }
+
+        private IntPtr _parentHwnd;
 
         /// <summary>
         /// Utility method used to extract a username from a URL of the form http(s)://username@domain/
@@ -87,7 +95,7 @@ namespace Atlassian.Bitbucket.Authentication
 
             Trace.WriteLine("prompting user for credentials.");
 
-            bool credentialValid = ShowViewModel(credentialViewModel, () => new CredentialsWindow(Context));
+            bool credentialValid = ShowViewModel(credentialViewModel, () => new CredentialsWindow(Context, _parentHwnd));
 
             username = credentialViewModel.Login;
             password = credentialViewModel.Password;
@@ -112,7 +120,7 @@ namespace Atlassian.Bitbucket.Authentication
 
             Trace.WriteLine("prompting user for authentication code.");
 
-            bool useOAuth = ShowViewModel(oauthViewModel, () => new OAuthWindow(Context));
+            bool useOAuth = ShowViewModel(oauthViewModel, () => new OAuthWindow(Context, _parentHwnd));
 
             return useOAuth;
         }

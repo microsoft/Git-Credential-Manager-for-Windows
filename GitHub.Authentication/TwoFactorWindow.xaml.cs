@@ -23,6 +23,7 @@
  * WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE."
 **/
 
+using System;
 using GitHub.Authentication.ViewModels;
 using GitHub.Shared.Controls;
 using Microsoft.Alm.Authentication;
@@ -31,10 +32,15 @@ namespace GitHub.Authentication
 {
     public partial class TwoFactorWindow : AuthenticationDialogWindow
     {
-        public TwoFactorWindow(RuntimeContext context) : base(context)
+        public TwoFactorWindow(RuntimeContext context, IntPtr parentHwnd)
+            : base(context, parentHwnd)
         {
             InitializeComponent();
         }
+
+        public TwoFactorWindow(RuntimeContext context)
+            : this(context, IntPtr.Zero)
+        { }
 
         public TwoFactorViewModel ViewModel
         {

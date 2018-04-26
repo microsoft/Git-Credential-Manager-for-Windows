@@ -23,6 +23,7 @@
  * WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE."
 **/
 
+using System;
 using System.Windows.Input;
 using Atlassian.Bitbucket.Authentication.ViewModels;
 using GitHub.Shared.Controls;
@@ -46,12 +47,17 @@ namespace Atlassian.Bitbucket.Authentication.Views
     /// </summary>
     partial class CredentialsWindow : AuthenticationDialogWindow
     {
-        public CredentialsWindow(RuntimeContext context) : base(context)
+        public CredentialsWindow(RuntimeContext context, IntPtr parentHwnd) 
+            : base(context, parentHwnd)
         {
             InitializeComponent();
 
             this.PreviewKeyDown += new KeyEventHandler(HandleEsc);
         }
+
+        public CredentialsWindow(RuntimeContext context)
+            : this(context, IntPtr.Zero)
+        { }
 
         private void HandleEsc(object sender, KeyEventArgs e)
         {

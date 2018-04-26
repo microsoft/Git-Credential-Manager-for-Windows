@@ -26,6 +26,7 @@
 using System;
 using System.Windows;
 using System.Windows.Input;
+using System.Windows.Interop;
 
 namespace Microsoft.Alm.Gui
 {
@@ -47,7 +48,8 @@ namespace Microsoft.Alm.Gui
         private readonly Size DefaultSize = new Size(WindowDefaultWidth, WindowDefaultHeight);
         private readonly Size LargerSize = new Size(WindowLargerWidth, WindowLargerHeight);
 
-        internal UserPromptDialog(UserPromptKind kind, string resource)
+        internal UserPromptDialog(UserPromptKind kind, string resource, IntPtr parentHwnd)
+            : this(parentHwnd)
         {
             if ((kind & ~(UserPromptKind.AuthenticateHost | UserPromptKind.CredentialsPassword | UserPromptKind.CredentialsUsername | UserPromptKind.SshPassphrase)) != 0)
                 throw new ArgumentOutOfRangeException(nameof(kind));
@@ -107,7 +109,8 @@ namespace Microsoft.Alm.Gui
             DataContext = this;
         }
 
-        internal UserPromptDialog(string hostName, string fingerprint)
+        internal UserPromptDialog(string hostName, string fingerprint, IntPtr parentHwnd)
+            : this(parentHwnd)
         {
             if (string.IsNullOrWhiteSpace(hostName))
                 throw new ArgumentNullException(nameof(hostName));
@@ -127,6 +130,11 @@ namespace Microsoft.Alm.Gui
             Loaded += OnLoaded;
 
             DataContext = this;
+        }
+
+        private UserPromptDialog(IntPtr parentHwnd)
+        {
+            new WindowInteropHelper(this).Owner = parentHwnd;
         }
 
         private readonly string _additionInfoText;

@@ -253,6 +253,9 @@ namespace Microsoft.Alm.Cli
                 {
                     await LoadOperationArguments(operationArguments);
 
+                    // Set the parent window handle.
+                    ParentHwnd = operationArguments.ParentHwnd;
+
                     BaseAuthentication authentication = await CreateAuthentication(operationArguments);
 
                     switch (operationArguments.Authority)
@@ -309,6 +312,9 @@ namespace Microsoft.Alm.Cli
             {
                 OperationArguments operationArguments = new OperationArguments(_context, stdin);
 
+                // Set the parent window handle.
+                ParentHwnd = operationArguments.ParentHwnd;
+
                 Debug.Assert(operationArguments != null, "The operationArguments is null");
                 Debug.Assert(operationArguments.TargetUri != null, "The operationArgument.TargetUri is null");
 
@@ -330,39 +336,7 @@ namespace Microsoft.Alm.Cli
 
         internal void Get()
         {
-            // parse args
-            const string paramOwnerHwndKey = "--ownerHwnd";
-
-            string[] args = Environment.GetCommandLineArgs();
-            for (int i = 2; i <args.Length; i++)
-            {
-                if (string.Equals(args[i], paramOwnerHwndKey, StringComparison.OrdinalIgnoreCase))
-                {
-                    if (args.Length > i + 1)
-                    {
-                        i += 1;
-                        string hwndArg = args[i];
-
-                        Trace.WriteLine($"{paramOwnerHwndKey} = '{hwndArg}'");
-
-                        // parse hex or decimal string to IntPtr
-                        int ownerHwnd = 0;
-                        if ((hwndArg.StartsWith("0x", StringComparison.OrdinalIgnoreCase) &&
-                            Int32.TryParse(hwndArg.Substring(2), NumberStyles.HexNumber, CultureInfo.InstalledUICulture, out ownerHwnd)) ||
-                            Int32.TryParse(hwndArg, out ownerHwnd))
-                        {
-                            Trace.WriteLine($"Parsed {paramOwnerHwndKey}: '{ownerHwnd}'.");
-                            Context.OwnerHwnd = new IntPtr(ownerHwnd);
-                        }
-                        else
-                        {
-                            Trace.WriteLine($"Failed to parse {paramOwnerHwndKey}.");
-                        }
-                    }
-                }
-            }
-
-            // parse the operations arguments from stdin (this is how git sends commands)
+            // Parse the operations arguments from stdin (this is how git sends commands)
             // see: https://www.kernel.org/pub/software/scm/git/docs/technical/api-credentials.html
             // see: https://www.kernel.org/pub/software/scm/git/docs/git-credential.html
             using (var stdin = InStream)
@@ -373,6 +347,9 @@ namespace Microsoft.Alm.Cli
                 {
                     await LoadOperationArguments(operationArguments);
                     EnableTraceLogging(operationArguments);
+
+                    // Set the parent window handle.
+                    ParentHwnd = operationArguments.ParentHwnd;
 
                     Credential credentials;
                     if ((credentials = await QueryCredentials(operationArguments)) == null)
@@ -439,6 +416,9 @@ namespace Microsoft.Alm.Cli
             using (var stdin = InStream)
             {
                 OperationArguments operationArguments = new OperationArguments(_context, stdin);
+
+                // Set the parent window handle.
+                ParentHwnd = operationArguments.ParentHwnd;
 
                 Debug.Assert(operationArguments != null, "The operationArguments is null");
                 Debug.Assert(operationArguments.Username != null, "The operaionArgument.Username is null");

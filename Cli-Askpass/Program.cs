@@ -136,8 +136,15 @@ namespace Microsoft.Alm.Cli
 
                 _context.Trace.WriteLine($"open dialog for '{resource}'.");
 
+                // Load operation arguments.
+                OperationArguments operationArguments = new OperationArguments(_context);
+                Task.Run(async () => await operationArguments.LoadConfiguration()).Wait();
+
+                // Set the parent window handle.
+                ParentHwnd = operationArguments.ParentHwnd;
+
                 System.Windows.Application application = new System.Windows.Application();
-                Gui.UserPromptDialog prompt = new Gui.UserPromptDialog(promptKind, resource);
+                Gui.UserPromptDialog prompt = new Gui.UserPromptDialog(promptKind, resource, operationArguments.ParentHwnd);
                 application.Run(prompt);
 
                 if (!prompt.Failed && !string.IsNullOrEmpty(prompt.Response))
@@ -274,8 +281,15 @@ namespace Microsoft.Alm.Cli
 
                 _context.Trace.WriteLine($"requesting authorization to add {host} ({fingerprint}) to known hosts.");
 
+                // Load operation arguments.
+                OperationArguments operationArguments = new OperationArguments(_context);
+                Task.Run(async () => await operationArguments.LoadConfiguration()).Wait();
+
+                // Set the parent window handle.
+                ParentHwnd = operationArguments.ParentHwnd;
+
                 System.Windows.Application application = new System.Windows.Application();
-                Gui.UserPromptDialog prompt = new Gui.UserPromptDialog(host, fingerprint);
+                Gui.UserPromptDialog prompt = new Gui.UserPromptDialog(host, fingerprint, operationArguments.ParentHwnd);
                 application.Run(prompt);
 
                 if (prompt.Failed)

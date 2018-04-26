@@ -56,7 +56,7 @@ namespace Microsoft.Alm.Cli
                     ? new AcquireCredentialsDelegate(program.ModalPromptForCredentials)
                     : new AcquireCredentialsDelegate(program.BasicCredentialPrompt);
 
-            var bitbucketPrompts = new Bitbucket.AuthenticationPrompts(program.Context);
+            var bitbucketPrompts = new Bitbucket.AuthenticationPrompts(program.Context, operationArguments.ParentHwnd);
 
             var bitbucketCredentialCallback = (operationArguments.UseModalUi)
                     ? bitbucketPrompts.CredentialModalPrompt
@@ -66,7 +66,7 @@ namespace Microsoft.Alm.Cli
                     ? bitbucketPrompts.AuthenticationOAuthModalPrompt
                     : new Bitbucket.Authentication.AcquireAuthenticationOAuthDelegate(program.BitbucketOAuthPrompt);
 
-            var githubPrompts = new Github.AuthenticationPrompts(program.Context);
+            var githubPrompts = new Github.AuthenticationPrompts(program.Context, operationArguments.ParentHwnd);
 
             var githubCredentialCallback = (operationArguments.UseModalUi)
                     ? new Github.Authentication.AcquireCredentialsDelegate(githubPrompts.CredentialModalPrompt)
@@ -88,7 +88,7 @@ namespace Microsoft.Alm.Cli
                                                                                operationArguments.TargetUri,
                                                                                Program.VstsCredentialScope,
                                                                                new SecretStore(program.Context, secretsNamespace, BaseVstsAuthentication.UriNameConversion))
-                             ?? Github.Authentication.GetAuthentication(program.Context, 
+                             ?? Github.Authentication.GetAuthentication(program.Context,
                                                                         operationArguments.TargetUri,
                                                                         Program.GitHubCredentialScope,
                                                                         new SecretStore(program.Context, secretsNamespace, Secret.UriToName),
@@ -189,7 +189,7 @@ namespace Microsoft.Alm.Cli
                     program.Trace.WriteLine($"authority for '{operationArguments.TargetUri}' is basic with NTLM={basicNtlmSupport}.");
 
                     // Return a generic username + password authentication object.
-                    return authority ?? new BasicAuthentication(program.Context, 
+                    return authority ?? new BasicAuthentication(program.Context,
                                                                 new SecretStore(program.Context, secretsNamespace, Secret.UriToIdentityUrl),
                                                                 basicNtlmSupport,
                                                                 basicCredentialCallback,
@@ -595,6 +595,21 @@ namespace Microsoft.Alm.Cli
 
                 operationArguments.Username = value;
             }
+
+            // Check for parent window handles in the environment.
+            if (operationArguments.EnvironmentVariables.TryGetValue(string.Empty, out value))
+            {
+                Trace.WriteLine($"{program.KeyTypeName(KeyType.ParentHwnd)} = '{value}'");
+
+                if (TryParse(value, out int ownerHwnd))
+                {
+                    operationArguments.ParentHwnd = new IntPtr(ownerHwnd);
+                }
+                else
+                {
+                    Trace.WriteLine($"Failed to parse {program.KeyTypeName(KeyType.ParentHwnd)}.");
+                }
+            }
         }
 
         public static void LogEvent(Program program, string message, EventLogEntryType eventType)
@@ -822,6 +837,20 @@ namespace Microsoft.Alm.Cli
             }
 
             return credentials;
+        }
+
+        public static bool TryParse(string text, out int result)
+        {
+            return (text.StartsWith("0x", StringComparison.OrdinalIgnoreCase)
+                    && int.TryParse(text.Substring(2), System.Globalization.NumberStyles.HexNumber, System.Globalization.CultureInfo.InvariantCulture, out result))
+                || int.TryParse(text, System.Globalization.NumberStyles.Integer, System.Globalization.CultureInfo.InvariantCulture, out result);
+        }
+
+        public static bool TryParse(string text, out uint result)
+        {
+            return (text.StartsWith("0x", StringComparison.OrdinalIgnoreCase)
+                    && uint.TryParse(text.Substring(2), System.Globalization.NumberStyles.HexNumber, System.Globalization.CultureInfo.InvariantCulture, out result))
+                || uint.TryParse(text, System.Globalization.NumberStyles.Integer, System.Globalization.CultureInfo.InvariantCulture, out result);
         }
 
         public static bool TryReadBoolean(Program program, OperationArguments operationArguments, KeyType key, out bool? value)
