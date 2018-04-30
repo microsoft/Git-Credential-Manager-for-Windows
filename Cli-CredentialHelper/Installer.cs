@@ -43,8 +43,17 @@ namespace Microsoft.Alm.Cli
         internal const string FailFace = "U_U";
         internal const string TadaFace = "^_^";
 
-        //private static readonly Version NetFxMinVersion = new Version(4, 5, 1);
-        private static readonly IReadOnlyList<string> FileList = new string[]
+        private static readonly IReadOnlyList<string> CopyList = new string[]
+        {
+            "Microsoft.Vsts.Authentication.dll",
+            "Microsoft.Alm.Authentication.dll",
+            "Microsoft.IdentityModel.Clients.ActiveDirectory.dll",
+            "Bitbucket.Authentication.dll",
+            "GitHub.Authentication.exe",
+            "git-credential-manager.exe",
+            "git-askpass.exe",
+        };
+        private static readonly IReadOnlyList<string> CleanList = new string[]
         {
             "Microsoft.Vsts.Authentication.dll",
             "Microsoft.Alm.Authentication.dll",
@@ -55,7 +64,6 @@ namespace Microsoft.Alm.Cli
             "git-credential-manager.exe",
             "git-askpass.exe",
         };
-
         private static readonly IReadOnlyList<string> DocsList = new string[]
         {
             "git-askpass.html",
@@ -277,7 +285,8 @@ namespace Microsoft.Alm.Cli
                     Program.Out.WriteLine();
                     Program.Out.WriteLine($"Deploying from '{Program.Location}' to '{installation.Path}'.");
 
-                    if (CopyFiles(Program.Location, installation.Libexec, FileList, out copiedFiles))
+                    if (CleanFiles(installation.Libexec, CleanList, out _)
+                        && CopyFiles(Program.Location, installation.Libexec, CopyList, out copiedFiles))
                     {
                         int copiedCount = copiedFiles.Count;
 
@@ -325,7 +334,8 @@ namespace Microsoft.Alm.Cli
                     Program.Storage.CreateDirectory(UserBinPath);
                 }
 
-                if (CopyFiles(Program.Location, UserBinPath, FileList, out copiedFiles))
+                if (CleanFiles(UserBinPath, CleanList, out _)
+                    && CopyFiles(Program.Location, UserBinPath, CopyList, out copiedFiles))
                 {
                     int copiedCount = copiedFiles.Count;
 
@@ -364,7 +374,8 @@ namespace Microsoft.Alm.Cli
 
                 if (CygwinPath != null && Program.Storage.DirectoryExists(CygwinPath))
                 {
-                    if (CopyFiles(Program.Location, CygwinPath, FileList, out copiedFiles))
+                    if (CleanFiles(CygwinPath, CleanList, out _)
+                        && CopyFiles(Program.Location, CygwinPath, CopyList, out copiedFiles))
                     {
                         int copiedCount = copiedFiles.Count;
 
@@ -583,7 +594,7 @@ namespace Microsoft.Alm.Cli
                     Program.Out.WriteLine();
                     Program.Out.WriteLine($"Removing from '{installation.Path}'.");
 
-                    if (CleanFiles(installation.Libexec, FileList, out cleanedFiles))
+                    if (CleanFiles(installation.Libexec, CopyList, out cleanedFiles))
                     {
                         int cleanedCount = cleanedFiles.Count;
 
@@ -625,7 +636,7 @@ namespace Microsoft.Alm.Cli
                     Program.Out.WriteLine();
                     Program.Out.WriteLine($"Removing from '{UserBinPath}'.");
 
-                    if (CleanFiles(UserBinPath, FileList, out cleanedFiles))
+                    if (CleanFiles(UserBinPath, CopyList, out cleanedFiles))
                     {
                         int cleanedCount = cleanedFiles.Count;
 
@@ -662,7 +673,7 @@ namespace Microsoft.Alm.Cli
 
                 if (CygwinPath != null && Program.Storage.DirectoryExists(CygwinPath))
                 {
-                    if (CleanFiles(CygwinPath, FileList, out cleanedFiles))
+                    if (CleanFiles(CygwinPath, CopyList, out cleanedFiles))
                     {
                         int cleanedCount = cleanedFiles.Count;
 
@@ -790,7 +801,10 @@ namespace Microsoft.Alm.Cli
 
                     Program.Trace.WriteLine($"clean '{target}'.");
 
-                    Program.Storage.FileDelete(target);
+                    if (Program.Storage.FileExists(target))
+                    {
+                        Program.Storage.FileDelete(target);
+                    }
 
                     cleanedFiles.Add(file);
                 }
