@@ -49,7 +49,7 @@ namespace Microsoft.Alm.Authentication
         /// </summary>
         /// <param name="authorityHostUrl">A non-default authority host URL; otherwise defaults to `<see cref="DefaultAuthorityHostUrl"/>`.</param>
         public AzureAuthority(RuntimeContext context, string authorityHostUrl = DefaultAuthorityHostUrl)
-            : base (context)
+            : base(context)
         {
             if (string.IsNullOrEmpty(authorityHostUrl))
                 throw new ArgumentNullException(nameof(authorityHostUrl));
@@ -108,7 +108,7 @@ namespace Microsoft.Alm.Authentication
                     token = new Token(authResult.AccessToken, tenantId, TokenType.AzureAccess);
                 }
 
-                Trace.WriteLine($"authority host URL = '{AuthorityHostUrl}', token acquisition succeeded.");
+                Trace.WriteLine($"authority host URL = '{AuthorityHostUrl}', token acquisition for tenant [{tenantId.ToString("N")}] succeeded.");
             }
             catch (AdalException)
             {
