@@ -63,16 +63,14 @@ namespace Microsoft.Alm.Authentication
         { }
 
         /// <summary>
-        /// Opens an interactive logon prompt to acquire an authentication token from the
-        /// Microsoft Live authentication and identity service.
+        /// Opens an interactive logon prompt to acquire an authentication token from the Microsoft Live authentication and identity service.
+        /// <para/>
+        /// Returns a `<see cref="Credential"/>` for packing into a basic authentication header; otherwise `<see langword="null"/>`.
         /// </summary>
         /// <param name="targetUri">
         /// The uniform resource indicator of the resource access tokens are being requested for.
         /// </param>
         /// <param name="options"></param>
-        /// <returns>
-        /// A <see cref="Credential"/> for packing into a basic authentication header; otherwise <see langword="null"/>.
-        /// </returns>
         public async Task<Credential> InteractiveLogon(TargetUri targetUri, PersonalAccessTokenOptions options)
         {
             BaseSecureStore.ValidateTargetUri(targetUri);

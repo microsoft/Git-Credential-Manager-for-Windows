@@ -48,7 +48,6 @@ namespace Microsoft.Alm.Cli
         {
             "Microsoft.Vsts.Authentication.dll",
             "Microsoft.Alm.Authentication.dll",
-            "Microsoft.Alm.Authentication.Git.dll",
             "Microsoft.IdentityModel.Clients.ActiveDirectory.dll",
             "Microsoft.IdentityModel.Clients.ActiveDirectory.Platform.dll",
             "Bitbucket.Authentication.dll",
