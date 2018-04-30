@@ -1,4 +1,6 @@
-﻿using System.Windows;
+﻿using Microsoft.Alm.Authentication;
+using System;
+using System.Windows;
 
 namespace GitHub.Authentication
 {
@@ -14,12 +16,12 @@ namespace GitHub.Authentication
 
         private void ShowCredentials(object sender, RoutedEventArgs e)
         {
-            new CredentialsWindow().ShowDialog();
+            new CredentialsWindow(RuntimeContext.Default, IntPtr.Zero).ShowDialog();
         }
 
         private void ShowAuthenticationCode(object sender, RoutedEventArgs e)
         {
-            new TwoFactorWindow().ShowDialog();
+            new TwoFactorWindow(RuntimeContext.Default, IntPtr.Zero).ShowDialog();
         }
     }
 }

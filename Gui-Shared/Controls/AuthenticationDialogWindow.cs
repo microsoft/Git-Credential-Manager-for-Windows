@@ -23,15 +23,18 @@
  * WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE."
 **/
 
+using System;
 using System.ComponentModel;
 using System.Windows;
+using System.Windows.Interop;
 using GitHub.Shared.ViewModels;
+using Microsoft.Alm.Authentication;
 
 namespace GitHub.Shared.Controls
 {
     public abstract class AuthenticationDialogWindow : Window
     {
-        protected AuthenticationDialogWindow()
+        protected AuthenticationDialogWindow(RuntimeContext context, IntPtr parentHwnd)
         {
             DataContextChanged += (s, e) =>
             {
@@ -46,7 +49,13 @@ namespace GitHub.Shared.Controls
                     ((ViewModel)DataContext).PropertyChanged += HandleDialogResult;
                 }
             };
+
+            new WindowInteropHelper(this).Owner = parentHwnd;
         }
+
+        protected AuthenticationDialogWindow(RuntimeContext context)
+            : this(context, IntPtr.Zero)
+        { }
 
         private void HandleDialogResult(object sender, PropertyChangedEventArgs e)
         {

@@ -23,8 +23,10 @@
  * WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE."
 **/
 
+using System;
 using GitHub.Authentication.ViewModels;
 using GitHub.Shared.Controls;
+using Microsoft.Alm.Authentication;
 
 namespace GitHub.Authentication
 {
@@ -33,10 +35,15 @@ namespace GitHub.Authentication
     /// </summary>
     public partial class CredentialsWindow : AuthenticationDialogWindow
     {
-        public CredentialsWindow()
+        public CredentialsWindow(RuntimeContext context, IntPtr parentHwnd)
+            : base(context, parentHwnd)
         {
             InitializeComponent();
         }
+
+        public CredentialsWindow(RuntimeContext context)
+            : this(context, IntPtr.Zero)
+        { }
 
         public CredentialsViewModel ViewModel
         {

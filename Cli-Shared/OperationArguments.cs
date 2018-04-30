@@ -179,6 +179,7 @@ namespace Microsoft.Alm.Cli
         private string _customNamespace;
         private Dictionary<string, string> _environmentVariables;
         private Interactivity _interactivity;
+        private IntPtr _parentHwnd;
         private bool _preserveCredentials;
         private Uri _proxyUri;
         private string _queryHost;
@@ -246,6 +247,19 @@ namespace Microsoft.Alm.Cli
         {
             get { return _interactivity; }
             set { _interactivity = value; }
+        }
+
+        /// <summary>
+        /// Gets or sets the handle of the parent UX window.
+        /// <para/>
+        /// Primarily used by IDE which have primary window handles, and a need for any UX presented by the GCM to appear relative to their UX.
+        /// <para/>
+        /// Returns the parent window's handle; otherwise `<seealso cref="IntPtr.Zero"/>`.
+        /// </summary>
+        public virtual IntPtr ParentHwnd
+        {
+            get { return _parentHwnd; }
+            set { _parentHwnd = value; }
         }
 
         public virtual string Password

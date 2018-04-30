@@ -1,0 +1,46 @@
+﻿<Window x:Class="GcmParentWindowTest.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:GcmParentWindowTest"
+        mc:Ignorable="d"
+        Title="MainWindow" Height="450" Width="800">
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="Auto"/>
+        </Grid.RowDefinitions>
+        <Grid>
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="*"/>
+            </Grid.ColumnDefinitions>
+            <Border BorderBrush="Black" BorderThickness="2">
+                <ScrollViewer HorizontalScrollBarVisibility="Auto" VerticalScrollBarVisibility="Auto">
+                    <TextBlock x:Name="StdOutTextBlock" Text="stdout"/>
+                </ScrollViewer>
+            </Border>
+            <Border BorderBrush="Black" BorderThickness="2" Grid.Column="1">
+                <ScrollViewer HorizontalScrollBarVisibility="Auto" VerticalScrollBarVisibility="Auto">
+                    <TextBlock x:Name="StdErrTextBlock" Text="stderr"/>
+                </ScrollViewer>
+            </Border>
+        </Grid>
+        <StackPanel Grid.Row="1">
+            <ProgressBar IsIndeterminate="True" Width="400" Margin="12"/>
+            <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" Margin="0,0,0,12">
+                <StackPanel.Resources>
+                    <Style TargetType="Button">
+                        <Setter Property="Margin" Value="4,0"/>
+                    </Style>
+                </StackPanel.Resources>
+                <Button Content="GitHub" Tag="https://github.com" Click="Button_Click"/>
+                <Button Content="BitBucket" Tag="https://bitbucket.org" Click="Button_Click"/>
+                <Button Content="VSTS" Tag="https://devdiv.visualstudio.com" Click="Button_Click"/>
+                <Button Content="Basic" Tag="https://mywebsite.com" Click="Button_Click"/>
+                <Button Content="Bogus hwnd" Click="BogusHwnd_Click"/>
+            </StackPanel>
+        </StackPanel>
+    </Grid>
+</Window>

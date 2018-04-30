@@ -16,7 +16,7 @@ namespace GitHub.Authentication.Test
         {
             var retrieveUri = new Uri(retrieveUriString);
             var credentialStore = new InMemoryCredentialStore();
-            var prompts = new AuthenticationPrompts(RuntimeContext.Default);
+            var prompts = new AuthenticationPrompts(RuntimeContext.Default, IntPtr.Zero);
             
             var authentication = new Authentication(
                 RuntimeContext.Default,
@@ -37,7 +37,7 @@ namespace GitHub.Authentication.Test
         {
             var retrieveUri = new Uri("https://example.com/");
             var credentialStore = new InMemoryCredentialStore();
-            var prompts = new AuthenticationPrompts(RuntimeContext.Default);
+            var prompts = new AuthenticationPrompts(RuntimeContext.Default, IntPtr.Zero);
 
             var authentication = new Authentication(
                 RuntimeContext.Default,

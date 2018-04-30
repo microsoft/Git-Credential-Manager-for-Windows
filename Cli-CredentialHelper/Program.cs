@@ -26,6 +26,7 @@
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
@@ -254,6 +255,9 @@ namespace Microsoft.Alm.Cli
                 {
                     await LoadOperationArguments(operationArguments);
 
+                    // Set the parent window handle.
+                    ParentHwnd = operationArguments.ParentHwnd;
+
                     BaseAuthentication authentication = await CreateAuthentication(operationArguments);
 
                     switch (operationArguments.Authority)
@@ -310,6 +314,9 @@ namespace Microsoft.Alm.Cli
             {
                 OperationArguments operationArguments = new OperationArguments(_context, stdin);
 
+                // Set the parent window handle.
+                ParentHwnd = operationArguments.ParentHwnd;
+
                 Debug.Assert(operationArguments != null, "The operationArguments is null");
                 Debug.Assert(operationArguments.TargetUri != null, "The operationArgument.TargetUri is null");
 
@@ -331,7 +338,7 @@ namespace Microsoft.Alm.Cli
 
         internal void Get()
         {
-            // parse the operations arguments from stdin (this is how git sends commands)
+            // Parse the operations arguments from stdin (this is how git sends commands)
             // see: https://www.kernel.org/pub/software/scm/git/docs/technical/api-credentials.html
             // see: https://www.kernel.org/pub/software/scm/git/docs/git-credential.html
             using (var stdin = InStream)
@@ -342,6 +349,9 @@ namespace Microsoft.Alm.Cli
                 {
                     await LoadOperationArguments(operationArguments);
                     EnableTraceLogging(operationArguments);
+
+                    // Set the parent window handle.
+                    ParentHwnd = operationArguments.ParentHwnd;
 
                     Credential credentials;
                     if ((credentials = await QueryCredentials(operationArguments)) == null)
@@ -408,6 +418,9 @@ namespace Microsoft.Alm.Cli
             using (var stdin = InStream)
             {
                 OperationArguments operationArguments = new OperationArguments(_context, stdin);
+
+                // Set the parent window handle.
+                ParentHwnd = operationArguments.ParentHwnd;
 
                 Debug.Assert(operationArguments != null, "The operationArguments is null");
                 Debug.Assert(operationArguments.Username != null, "The operaionArgument.Username is null");
