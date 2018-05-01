@@ -78,6 +78,8 @@ namespace Microsoft.Alm.Authentication
                             }
                         }
                     }
+
+                    Trace.WriteLine($"failed to acquire personal access token for '{targetUri}' [{(int)response.StatusCode} {response.ReasonPhrase}].");
                 }
             }
             catch (Exception e)
@@ -111,16 +113,19 @@ namespace Microsoft.Alm.Authentication
                 // Send the request and wait for the response.
                 using (var response = await Network.HttpGetAsync(requestUri, options))
                 {
-                    if (response.IsSuccessStatusCode)
+                    if (!response.IsSuccessStatusCode)
                     {
-                        string content = await response.Content.ReadAsStringAsync();
-                        Match match;
+                        Trace.WriteLine($"failed to acquire the token's target identity for `{targetUri}` [{(int)response.StatusCode} {response.ReasonPhrase}].");
+                        return false;
+                    }
 
-                        if ((match = Regex.Match(content, @"""instanceId""\s*\:\s*""([^""]+)""", RegexOptions.CultureInvariant | RegexOptions.IgnoreCase)).Success
-                            && match.Groups.Count == 2)
-                        {
-                            resultId = match.Groups[1].Value;
-                        }
+                    string content = await response.Content.ReadAsStringAsync();
+                    Match match;
+
+                    if ((match = Regex.Match(content, @"""instanceId""\s*\:\s*""([^""]+)""", RegexOptions.CultureInvariant | RegexOptions.IgnoreCase)).Success
+                        && match.Groups.Count == 2)
+                    {
+                        resultId = match.Groups[1].Value;
                     }
                 }
             }
@@ -162,6 +167,8 @@ namespace Microsoft.Alm.Authentication
                     if (response.IsSuccessStatusCode)
                         return true;
 
+                    Trace.WriteLine($"credential validation for '{targetUri}' failed [{(int)response.StatusCode} {response.ReasonPhrase}].");
+
                     // Even if the service responded, if the issue isn't a 400 class response then
                     // the credentials were likely not rejected.
                     if ((int)response.StatusCode >= 400 && (int)response.StatusCode < 500)
@@ -202,12 +209,13 @@ namespace Microsoft.Alm.Authentication
                 {
                     if (!response.IsSuccessStatusCode)
                     {
+                        Trace.WriteLine($"credential validation for '{targetUri}' failed [{(int)response.StatusCode} {response.ReasonPhrase}].");
+
                         // Even if the service responded, if the issue isn't a 400 class response then
                         // the credentials were likely not rejected.
                         if ((int)response.StatusCode >= 400 && (int)response.StatusCode < 500)
                             return false;
 
-                        Trace.WriteLine($"unable to validate credentials due to '{response.StatusCode}'.");
                         return true;
                     }
                 }
@@ -288,6 +296,8 @@ namespace Microsoft.Alm.Authentication
                             }
                         }
                     }
+
+                    Trace.WriteLine($"failed to find Identity Service for '{targetUri}' [{(int)response.StatusCode} {response.ReasonPhrase}].");
                 }
             }
             catch (Exception exception)

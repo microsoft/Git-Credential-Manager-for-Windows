@@ -228,7 +228,7 @@ namespace Microsoft.Alm.Authentication
                             }
                             else
                             {
-                                context.Trace.WriteLine($"unable to get response from '{targetUri}', server responded with '{(int)response.StatusCode} {response.StatusCode}'.");
+                                context.Trace.WriteLine($"unable to get response from '{targetUri}' [{(int)response.StatusCode} {response.StatusCode}].");
                             }
                         }
                     }
