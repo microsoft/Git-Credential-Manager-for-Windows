@@ -34,6 +34,11 @@ namespace Microsoft.Alm.Authentication
 {
     public abstract class BaseSecureStore : Base
     {
+        public const int AttributeMaxLengh = NativeMethods.Credential.AttributeMaxLengh;
+        public const int PasswordMaxLength = NativeMethods.Credential.PasswordMaxLength;
+        public const int StringMaxLength = NativeMethods.Credential.StringMaxLength;
+        public const int UsernameMaxLength = NativeMethods.Credential.UsernameMaxLength;
+
         public static readonly char[] IllegalCharacters = new[] { ':', ';', '\\', '?', '@', '=', '&', '%', '$' };
 
         protected BaseSecureStore(RuntimeContext context)

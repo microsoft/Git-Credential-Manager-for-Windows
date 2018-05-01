@@ -259,8 +259,15 @@ namespace Atlassian.Bitbucket.Authentication
             if (!targetUri.TargetUriContainsUsername && (!string.IsNullOrWhiteSpace(username)
                 || !string.IsNullOrWhiteSpace(credentials.Username)))
             {
+
                 var realUsername = GetRealUsername(credentials, username);
                 Credential tempCredentials = new Credential(realUsername, credentials.Password);
+
+                if (tempCredentials.Username.Length > BaseSecureStore.UsernameMaxLength)
+                    throw new ArgumentOutOfRangeException(nameof(tempCredentials.Username));
+                if (tempCredentials.Password.Length > BaseSecureStore.PasswordMaxLength)
+                    throw new ArgumentOutOfRangeException(nameof(tempCredentials.Password));
+
                 await SetCredentials(targetUri.GetPerUserTargetUri(realUsername), tempCredentials, null);
             }
 
