@@ -32,13 +32,14 @@ namespace Microsoft.Alm.Authentication
     /// </summary>
     public sealed class Credential : Secret, IEquatable<Credential>
     {
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Security", "CA2104:DoNotDeclareReadOnlyMutableReferenceTypes")]
         public static readonly Credential Empty = new Credential(string.Empty, string.Empty);
 
         /// <summary>
         /// Creates a credential object with a username and password pair.
         /// </summary>
-        /// <param name="username">The username value of the <see cref="Credential"/>.</param>
-        /// <param name="password">The password value of the <see cref="Credential"/>.</param>
+        /// <param name="username">The username value of the `<see cref="Credential"/>`.</param>
+        /// <param name="password">The password value of the `<see cref="Credential"/>`.</param>
         public Credential(string username, string password)
         {
             if (username is null)
@@ -51,16 +52,16 @@ namespace Microsoft.Alm.Authentication
         /// <summary>
         /// Creates a credential object with only a username.
         /// </summary>
-        /// <param name="username">The username value of the <see cref="Credential"/>.</param>
+        /// <param name="username">The username value of the `<see cref="Credential"/>`.</param>
         public Credential(string username)
             : this(username, string.Empty)
         { }
 
-        private string _password;
-        private string _username;
+        private readonly string _password;
+        private readonly string _username;
 
         /// <summary>
-        /// Secret related to the username.
+        /// Secret related to username.
         /// </summary>
         public  string Password
         {
@@ -76,37 +77,48 @@ namespace Microsoft.Alm.Authentication
         }
 
         /// <summary>
-        /// Compares an object to this <see cref="Credential"/> for equality.
+        /// Compares an object to this instance for equality.
+        /// <para/>
+        /// Returns `<see langword="true"/>` if equal; otherwise `<see langword="false"/>`.
         /// </summary>
         /// <param name="obj">The object to compare.</param>
-        /// <returns><see langword="true"/> if equal; <see langword="false"/> otherwise.</returns>
         public override bool Equals(object obj)
         {
             return this == obj as Credential;
         }
 
         /// <summary>
-        /// Compares a <see cref="Credential"/> to this <see cref="Credential"/> for equality.
+        /// Compares a `<see cref="Credential"/>` to this instance for equality.
+        /// <para/>
+        /// Returns `<see langword="true"/>` if equal; otherwise `<see langword="false"/>`.
         /// </summary>
         /// <param name="other">Credential to be compared.</param>
-        /// <returns><see langword="true"/> if equal; <see langword="false"/> otherwise.</returns>
         public bool Equals(Credential other)
         {
             return this == other;
         }
 
         /// <summary>
-        /// Gets a hash code based on the contents of the <see cref="Credential"/>.
+        /// Returns the hash code based on the contents of this `<see cref="Credential"/>`.
         /// </summary>
-        /// <returns>32-bit hash code.</returns>
         public override int GetHashCode()
         {
             unchecked
             {
-                return Username.GetHashCode() + 7 * Password.GetHashCode();
+                // User the upper-16 bits of the username hash code combined
+                // with the lower 16-bits of the password has code to compose
+                // the credentials hash code.
+                unchecked
+                {
+                    return (int)(StringComparer.Ordinal.GetHashCode(_username) & 0xFFFF0000)
+                         | (int)(StringComparer.Ordinal.GetHashCode(_password) & 0x0000FFFF);
+                }
             }
         }
 
+        /// <summary>
+        /// Returns the base-64 encoded, {username}:{password} formatted string of this `<see cref="Credential"/>.
+        /// </summary>
         public string ToBase64String()
         {
             string basicAuthValue = string.Format("{0}:{1}", _username, _password);
@@ -116,30 +128,32 @@ namespace Microsoft.Alm.Authentication
 
         /// <summary>
         /// Compares two credentials for equality.
+        /// <para/>
+        /// Returns `<see langword="true"/>` if equal; otherwise `<see langword="false"/>`.
         /// </summary>
-        /// <param name="credential1">Credential to compare.</param>
-        /// <param name="credential2">Credential to compare.</param>
-        /// <returns><see langword="true"/> if equal; <see langword="false"/> otherwise.</returns>
-        public static bool operator ==(Credential credential1, Credential credential2)
+        /// <param name="lhs">Credential to compare.</param>
+        /// <param name="rhs">Credential to compare.</param>
+        public static bool operator ==(Credential lhs, Credential rhs)
         {
-            if (ReferenceEquals(credential1, credential2))
+            if (ReferenceEquals(lhs, rhs))
                 return true;
-            if (credential1 is null || credential2 is null)
+            if (lhs is null || rhs is null)
                 return false;
 
-            return string.Equals(credential1.Username, credential2.Username, StringComparison.Ordinal)
-                && string.Equals(credential1.Password, credential2.Password, StringComparison.Ordinal);
+            return string.Equals(lhs.Username, rhs.Username, StringComparison.Ordinal)
+                && string.Equals(lhs.Password, rhs.Password, StringComparison.Ordinal);
         }
 
         /// <summary>
         /// Compares two credentials for inequality.
+        /// <para/>
+        /// Returns `<see langword="false"/>` if equal; otherwise `<see langword="true"/>`.
         /// </summary>
-        /// <param name="credential1">Credential to compare.</param>
-        /// <param name="credential2">Credential to compare.</param>
-        /// <returns><see langword="false"/> if equal; <see langword="true"/> otherwise.</returns>
-        public static bool operator !=(Credential credential1, Credential credential2)
+        /// <param name="lhs">Credential to compare.</param>
+        /// <param name="rhs">Credential to compare.</param>
+        public static bool operator !=(Credential lhs, Credential rhs)
         {
-            return !(credential1 == credential2);
+            return !(lhs == rhs);
         }
     }
 }

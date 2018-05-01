@@ -28,25 +28,15 @@ using System.Threading.Tasks;
 
 namespace Microsoft.Alm.Authentication
 {
-    /// <summary>
-    /// Interface to secure secrets storage which indexes values by target and utilizes the operating
-    /// system keychain / secrets vault.
-    /// </summary>
     public sealed class SecretStore : BaseSecureStore, ICredentialStore, ITokenStore
     {
         /// <summary>
         /// Creates a new <see cref="SecretStore"/> backed by the operating system keychain / secrets vault.
         /// </summary>
         /// <param name="namespace">The namespace of the secrets written and read by this store.</param>
-        /// <param name="credentialCache">
-        /// Write-through, read-first cache. Default cache is used if a custom cache is not provided.
-        /// </param>
-        /// <param name="tokenCache">
-        /// Write-through, read-first cache. Default cache is used if a custom cache is not provided.
-        /// </param>
-        /// <param name="getTargetName">
-        /// Delegate used to transform a `<see cref="TargetUri"/>` into a store lookup key.
-        /// </param>
+        /// <param name="credentialCache">Write-through, read-first cache. Default cache is used if a custom cache is not provided.</param>
+        /// <param name="tokenCache">Write-through, read-first cache. Default cache is used if a custom cache is not provided.</param>
+        /// <param name="getTargetName">Delegate used to transform a `<see cref="TargetUri"/>` into a store lookup key.</param>
         public SecretStore(
             RuntimeContext context,
             string @namespace,
@@ -55,10 +45,13 @@ namespace Microsoft.Alm.Authentication
             Secret.UriNameConversionDelegate getTargetName)
             : base(context)
         {
-            if (string.IsNullOrWhiteSpace(@namespace))
+            if (@namespace is null)
                 throw new ArgumentNullException(nameof(@namespace));
             if (@namespace.IndexOfAny(IllegalCharacters) != -1)
-                throw new ArgumentException("Namespace contains illegal characters.", nameof(@namespace));
+            {
+                var inner = new FormatException("Namespace contains illegal characters.");
+                throw new ArgumentException(inner.Message, nameof(@namespace), inner);
+            }
 
             _getTargetName = getTargetName ?? Secret.UriToName;
 
@@ -75,12 +68,16 @@ namespace Microsoft.Alm.Authentication
             : this(context, @namespace, null, null, null)
         { }
 
+        private readonly string _namespace;
+        private ICredentialStore _credentialCache;
+        private Secret.UriNameConversionDelegate _getTargetName;
+        private ITokenStore _tokenCache;
+
         public string Namespace
         {
             get { return _namespace; }
         }
 
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2208:InstantiateArgumentExceptionsCorrectly")]
         public Secret.UriNameConversionDelegate UriNameConversion
         {
             get { return _getTargetName; }
@@ -93,18 +90,10 @@ namespace Microsoft.Alm.Authentication
             }
         }
 
-        private string _namespace;
-        private ICredentialStore _credentialCache;
-        private Secret.UriNameConversionDelegate _getTargetName;
-        private ITokenStore _tokenCache;
-
-        /// <summary>
-        /// Deletes credentials for target URI from the credential store
-        /// </summary>
-        /// <param name="targetUri">The URI of the target for which credentials are being deleted</param>
         public async Task<bool> DeleteCredentials(TargetUri targetUri)
         {
-            ValidateTargetUri(targetUri);
+            if (targetUri is null)
+                throw new ArgumentNullException(nameof(targetUri));
 
             string targetName = GetTargetName(targetUri);
 
@@ -112,13 +101,10 @@ namespace Microsoft.Alm.Authentication
                 && await _credentialCache.DeleteCredentials(targetUri);
         }
 
-        /// <summary>
-        /// Deletes the token for target URI from the token store
-        /// </summary>
-        /// <param name="targetUri">The URI of the target for which the token is being deleted</param>
         public async Task<bool> DeleteToken(TargetUri targetUri)
         {
-            ValidateTargetUri(targetUri);
+            if (targetUri is null)
+                throw new ArgumentNullException(nameof(targetUri));
 
             string targetName = GetTargetName(targetUri);
 
@@ -126,23 +112,17 @@ namespace Microsoft.Alm.Authentication
                 && await _tokenCache.DeleteToken(targetUri);
         }
 
-        /// <summary>
-        /// Purges all credentials from the store.
-        /// </summary>
-        public void PurgeCredentials()
+        public Task PurgeCredentials()
         {
             PurgeCredentials(_namespace);
+
+            return Task.FromResult(true);
         }
 
-        /// <summary>
-        /// Reads credentials for a target URI from the credential store
-        /// </summary>
-        /// <param name="targetUri">The URI of the target for which credentials are being read</param>
-        /// <param name="credentials"></param>
-        /// <returns>A <see cref="Credential"/> from the store is successful; otherwise <see langword="null"/>.</returns>
         public async Task<Credential> ReadCredentials(TargetUri targetUri)
         {
-            ValidateTargetUri(targetUri);
+            if (targetUri is null)
+                throw new ArgumentNullException(nameof(targetUri));
 
             string targetName = GetTargetName(targetUri);
 
@@ -150,14 +130,10 @@ namespace Microsoft.Alm.Authentication
                 ?? ReadCredentials(targetName);
         }
 
-        /// <summary>
-        /// Reads a token for a target URI from the token store
-        /// </summary>
-        /// <param name="targetUri">The URI of the target for which a token is being read</param>
-        /// <returns>A <see cref="Token"/> from the store is successful; otherwise <see langword="null"/>.</returns>
         public async Task<Token> ReadToken(TargetUri targetUri)
         {
-            ValidateTargetUri(targetUri);
+            if (targetUri is null)
+                throw new ArgumentNullException(nameof(targetUri));
 
             string targetName = GetTargetName(targetUri);
 
@@ -165,15 +141,12 @@ namespace Microsoft.Alm.Authentication
                 ?? ReadToken(targetName);
         }
 
-        /// <summary>
-        /// Writes credentials for a target URI to the credential store
-        /// </summary>
-        /// <param name="targetUri">The URI of the target for which credentials are being stored</param>
-        /// <param name="credentials">The credentials to be stored</param>
         public async Task<bool> WriteCredentials(TargetUri targetUri, Credential credentials)
         {
-            ValidateTargetUri(targetUri);
-            BaseSecureStore.ValidateCredential(credentials);
+            if (targetUri is null)
+                throw new ArgumentNullException(nameof(targetUri));
+            if (credentials is null)
+                throw new ArgumentNullException(nameof(credentials));
 
             string targetName = GetTargetName(targetUri);
 
@@ -181,15 +154,12 @@ namespace Microsoft.Alm.Authentication
                 && await _credentialCache.WriteCredentials(targetUri, credentials);
         }
 
-        /// <summary>
-        /// Writes a token for a target URI to the token store
-        /// </summary>
-        /// <param name="targetUri">The URI of the target for which a token is being stored</param>
-        /// <param name="token">The token to be stored</param>
         public async Task<bool> WriteToken(TargetUri targetUri, Token token)
         {
-            ValidateTargetUri(targetUri);
-            Token.Validate(token);
+            if (targetUri is null)
+                throw new ArgumentNullException(nameof(targetUri));
+            if (token is null)
+                throw new ArgumentNullException(nameof(token));
 
             string targetName = GetTargetName(targetUri);
 
@@ -197,14 +167,10 @@ namespace Microsoft.Alm.Authentication
                 && await _tokenCache.WriteToken(targetUri, token);
         }
 
-        /// <summary>
-        /// Formats a TargetName string based on the TargetUri base on the format started by git-credential-winstore
-        /// </summary>
-        /// <param name="targetUri">Uri of the target</param>
-        /// <returns>Properly formatted TargetName string</returns>
         protected override string GetTargetName(TargetUri targetUri)
         {
-            BaseSecureStore.ValidateTargetUri(targetUri);
+            if (targetUri is null)
+                throw new ArgumentNullException(nameof(targetUri));
 
             return _getTargetName(targetUri, _namespace);
         }

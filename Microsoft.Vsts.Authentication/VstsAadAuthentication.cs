@@ -225,8 +225,10 @@ namespace Microsoft.Alm.Authentication
         /// <param name="credentials">The credentials being set.</param>
         public override Task<bool> SetCredentials(TargetUri targetUri, Credential credentials)
         {
-            BaseSecureStore.ValidateTargetUri(targetUri);
-            BaseSecureStore.ValidateCredential(credentials);
+            if (targetUri is null)
+                throw new ArgumentNullException(nameof(targetUri));
+            if (credentials is null)
+                throw new ArgumentNullException(nameof(credentials));
 
             return Task.FromResult(false);
         }

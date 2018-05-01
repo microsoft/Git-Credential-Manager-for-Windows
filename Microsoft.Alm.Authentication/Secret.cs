@@ -29,7 +29,6 @@ namespace Microsoft.Alm.Authentication
 {
     public abstract class Secret
     {
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Design", "CA1055:UriReturnValuesShouldNotBeStrings")]
         public static string UriToName(TargetUri targetUri, string @namespace)
         {
             BaseSecureStore.ValidateTargetUri(targetUri);
@@ -43,12 +42,12 @@ namespace Microsoft.Alm.Authentication
         }
 
         /// <summary>
-        /// Generate a key based on the ActualUri. This may include username, port, etc
+        /// Generate a key based on the `<paramref name="targetUri"/>`, may include username, port, etc.
         /// </summary>
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Design", "CA1055:UriReturnValuesShouldNotBeStrings")]
         public static string UriToIdentityUrl(TargetUri targetUri, string @namespace)
         {
-            BaseSecureStore.ValidateTargetUri(targetUri);
+            if (targetUri is null)
+                throw new ArgumentNullException(nameof(targetUri));
             if (string.IsNullOrWhiteSpace(@namespace))
                 throw new ArgumentNullException(@namespace);
 

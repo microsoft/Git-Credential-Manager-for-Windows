@@ -36,6 +36,7 @@ namespace Microsoft.Alm.Authentication.Git
 
         void Flush();
 
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Design", "CA1026:DefaultParametersShouldNotBeUsed")]
         void WriteLine(
             string message,
             [System.Runtime.CompilerServices.CallerFilePath] string filePath = "",
@@ -75,7 +76,6 @@ namespace Microsoft.Alm.Authentication.Git
             }
         }
 
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Design", "CA1031:DoNotCatchGeneralExceptionTypes")]
         public void Dispose()
         {
             Dispose(false);

@@ -33,6 +33,7 @@ namespace Microsoft.Alm.Authentication.Git
     /// </summary>
     public class InstallationComparer : IEqualityComparer<Installation>
     {
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Security", "CA2104:DoNotDeclareReadOnlyMutableReferenceTypes")]
         public static readonly StringComparer PathComparer = StringComparer.OrdinalIgnoreCase;
 
         /// <summary>
@@ -42,6 +43,8 @@ namespace Microsoft.Alm.Authentication.Git
         /// </summary>
         /// <param name="lhs">The first `<see cref="Installation"/>` to compare.</param>
         /// <param name="rhs">The second `<see cref="Installation"/>` to compare.</param>
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1725:ParameterNamesShouldMatchBaseDeclaration", MessageId = "0#")]
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1725:ParameterNamesShouldMatchBaseDeclaration", MessageId = "1#")]
         public bool Equals(Installation lhs, Installation rhs)
         {
             if (lhs is null && rhs is null)
@@ -57,6 +60,7 @@ namespace Microsoft.Alm.Authentication.Git
         /// Returns a hash code for the specified object.
         /// </summary>
         /// <param name="value">The `<see cref="Installation"/>` for which a hash code is to be returned.</param>
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1725:ParameterNamesShouldMatchBaseDeclaration", MessageId = "0#")]
         public int GetHashCode(Installation value)
         {
             if (value is null)

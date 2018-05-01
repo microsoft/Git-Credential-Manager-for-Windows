@@ -80,7 +80,9 @@ namespace Microsoft.Alm.Authentication.Test
             {
                 try
                 {
-                    BaseSecureStore.ValidateCredential(credentials);
+                    if (credentials is null)
+                        throw new ArgumentNullException(nameof(credentials));
+
                     return CredentialsAreValid;
                 }
                 catch { }
@@ -101,7 +103,9 @@ namespace Microsoft.Alm.Authentication.Test
             {
                 try
                 {
-                    Token.Validate(token);
+                    if (token is null)
+                        throw new ArgumentNullException(nameof(token));
+
                     return true;
                 }
                 catch { }

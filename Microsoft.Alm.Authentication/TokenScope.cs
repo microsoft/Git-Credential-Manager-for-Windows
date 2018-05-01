@@ -55,7 +55,7 @@ namespace Microsoft.Alm.Authentication
 
         protected TokenScope(ScopeSet set)
         {
-            if (ReferenceEquals(set, null))
+            if (set is null)
                 throw new ArgumentNullException(nameof(set));
 
             string[] result = new string[set.Count];
@@ -72,20 +72,20 @@ namespace Microsoft.Alm.Authentication
         public string Value { get { return string.Join(" ", _scopes); } }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        protected static bool Equals(TokenScope left, TokenScope right)
+        protected static bool Equals(TokenScope lhs, TokenScope rhs)
         {
-            if (ReferenceEquals(left, right))
+            if (ReferenceEquals(lhs, rhs))
                 return true;
-            if (left is null || right is null)
+            if (lhs is null || rhs is null)
                 return false;
 
             ScopeSet set = new ScopeSet();
-            set.UnionWith(left._scopes);
-            return set.SetEquals(right._scopes);
+            set.UnionWith(lhs._scopes);
+            return set.SetEquals(rhs._scopes);
         }
 
-        protected static bool Equals(TokenScope left, object right)
-            => Equals(left, right as TokenScope);
+        protected static bool Equals(TokenScope lhs, object rhs)
+            => Equals(lhs, rhs as TokenScope);
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public bool Equals(TokenScope other)
@@ -95,16 +95,16 @@ namespace Microsoft.Alm.Authentication
             => TokenScope.Equals(this, obj as TokenScope);
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        protected static ScopeSet ExceptWith(TokenScope left, TokenScope right)
+        protected static ScopeSet ExceptWith(TokenScope lhs, TokenScope rhs)
         {
-            if (left is null)
-                throw new ArgumentNullException(nameof(left));
-            if (right is null)
-                throw new ArgumentNullException(nameof(right));
+            if (lhs is null)
+                throw new ArgumentNullException(nameof(lhs));
+            if (rhs is null)
+                throw new ArgumentNullException(nameof(rhs));
 
             ScopeSet set = new ScopeSet();
-            set.UnionWith(left._scopes);
-            set.ExceptWith(right._scopes);
+            set.UnionWith(lhs._scopes);
+            set.ExceptWith(rhs._scopes);
 
             return set;
         }
@@ -133,31 +133,31 @@ namespace Microsoft.Alm.Authentication
             => GetHashCode(this);
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        protected static ScopeSet IntersectWith(TokenScope left, TokenScope right)
+        protected static ScopeSet IntersectWith(TokenScope lhs, TokenScope rhs)
         {
-            if (left is null)
-                throw new ArgumentNullException(nameof(left));
-            if (right is null)
-                throw new ArgumentNullException(nameof(right));
+            if (lhs is null)
+                throw new ArgumentNullException(nameof(lhs));
+            if (rhs is null)
+                throw new ArgumentNullException(nameof(rhs));
 
             ScopeSet set = new ScopeSet();
-            set.UnionWith(left._scopes);
-            set.IntersectWith(right._scopes);
+            set.UnionWith(lhs._scopes);
+            set.IntersectWith(rhs._scopes);
 
             return set;
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        protected static ScopeSet SymmetricExceptWith(TokenScope left, TokenScope right)
+        protected static ScopeSet SymmetricExceptWith(TokenScope lhs, TokenScope rhs)
         {
-            if (left is null)
-                throw new ArgumentNullException(nameof(left));
-            if (right is null)
-                throw new ArgumentNullException(nameof(right));
+            if (lhs is null)
+                throw new ArgumentNullException(nameof(lhs));
+            if (rhs is null)
+                throw new ArgumentNullException(nameof(rhs));
 
             ScopeSet set = new ScopeSet();
-            set.UnionWith(left._scopes);
-            set.SymmetricExceptWith(right._scopes);
+            set.UnionWith(lhs._scopes);
+            set.SymmetricExceptWith(rhs._scopes);
 
             return set;
         }
@@ -168,26 +168,26 @@ namespace Microsoft.Alm.Authentication
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        protected static ScopeSet UnionWith(TokenScope left, TokenScope right)
+        protected static ScopeSet UnionWith(TokenScope lhs, TokenScope rhs)
         {
-            if (left is null)
-                throw new ArgumentNullException(nameof(left));
-            if (right is null)
-                throw new ArgumentNullException(nameof(right));
+            if (lhs is null)
+                throw new ArgumentNullException(nameof(lhs));
+            if (rhs is null)
+                throw new ArgumentNullException(nameof(rhs));
 
             ScopeSet set = new ScopeSet();
-            set.UnionWith(left._scopes);
-            set.UnionWith(right._scopes);
+            set.UnionWith(lhs._scopes);
+            set.UnionWith(rhs._scopes);
 
             return set;
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static bool operator ==(TokenScope left, TokenScope right)
-            => TokenScope.Equals(left, right);
+        public static bool operator ==(TokenScope lhs, TokenScope rhs)
+            => TokenScope.Equals(lhs, rhs);
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static bool operator !=(TokenScope left, TokenScope right)
-            => !TokenScope.Equals(left, right);
+        public static bool operator !=(TokenScope lhs, TokenScope rhs)
+            => !TokenScope.Equals(lhs, rhs);
     }
 }

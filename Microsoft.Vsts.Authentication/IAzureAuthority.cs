@@ -31,9 +31,9 @@ namespace Microsoft.Alm.Authentication
     internal interface IAzureAuthority
     {
         /// <summary>
-        /// Acquires a <see cref="Token"/> from the authority via an interactive user logon prompt.
+        /// Acquires a `<seealso cref="Token"/>` from the authority via an interactive user logon prompt.
         /// <para/>
-        /// Returns a `<see cref="Token"/>` is successful; otherwise <see langword="null"/>.
+        /// Returns the acquired `<seealso cref="Token"/>` is successful; otherwise `<see langword="null"/>`.
         /// </summary>
         /// <param name="targetUri">Uniform resource indicator of the resource access tokens are being requested for.</param>
         /// <param name="clientId">Identifier of the client requesting the token.</param>
@@ -45,7 +45,7 @@ namespace Microsoft.Alm.Authentication
         /// <summary>
         /// Acquires a `<see cref="Token"/>` from the authority via an non-interactive user logon.
         /// <para/>
-        /// Returns the acquired `<see cref="Token"/>` if successful; otherwise `<see langword="null"/>`.
+        /// Returns the acquired `<seealso cref="Token"/>` if successful; otherwise `<see langword="null"/>`.
         /// </summary>
         /// <param name="targetUri">Uniform resource indicator of the resource access tokens are being requested for.</param>
         /// <param name="clientId">Identifier of the client requesting the token.</param>

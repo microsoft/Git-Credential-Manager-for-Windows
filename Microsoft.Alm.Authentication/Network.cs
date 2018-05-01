@@ -274,6 +274,7 @@ namespace Microsoft.Alm.Authentication
     internal class Network : Base, INetwork
     {
         private const string BearerPrefix = "Bearer ";
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Performance", "CA1823:AvoidUnusedPrivateFields")]
         private static readonly AuthenticationHeaderValue[] NullResult = new AuthenticationHeaderValue[0];
 
         public Network(RuntimeContext context)
@@ -336,6 +337,7 @@ namespace Microsoft.Alm.Authentication
         public Task<HttpResponseMessage> HttpPostAsync(TargetUri targetUri, StringContent content)
             => HttpPostAsync(targetUri, content, NetworkRequestOptions.Default);
 
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Reliability", "CA2000:Dispose objects before losing scope")]
         private static HttpMessageHandler GetHttpMessageHandler(TargetUri targetUri, NetworkRequestOptions options)
         {
             if (targetUri is null)
@@ -405,6 +407,8 @@ namespace Microsoft.Alm.Authentication
             return handler;
         }
 
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Reliability", "CA2000:Dispose objects before losing scope")]
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA1801:ReviewUnusedParameters", MessageId = "targetUri")]
         private HttpClient GetHttpClient(TargetUri targetUri, HttpMessageHandler handler, NetworkRequestOptions options)
         {
             var httpClient = new HttpClient(handler);

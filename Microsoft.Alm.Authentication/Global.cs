@@ -39,9 +39,15 @@ namespace Microsoft.Alm.Authentication
         /// </summary>
         public const int RequestTimeout = 15 * 1000; // 15 second limit
 
+        private static readonly object _syncpoint = new object();
+        private static string _useragent = BuildDefaultUserAgent();
+
         /// <summary>
-        /// <para>Gets or sets the user-agent string sent as part of the header in any HTTP operations.</para>
-        /// <para>Defaults to a value contrived based on the executing assembly.</para>
+        /// Gets or sets the user-agent string sent as part of the header in any HTTP operations.
+        /// <para/>
+        /// Defaults to a value contrived based on the executing assembly.
+        /// <para/>
+        /// Set the value to `<see langword="null"/>` to reset the value to default value.
         /// </summary>
         public static string UserAgent
         {
@@ -49,45 +55,33 @@ namespace Microsoft.Alm.Authentication
             {
                 lock (_syncpoint)
                 {
-                    if (_useragent == null)
+                    if (_useragent is null)
                     {
-                        _useragent = DefaultUserAgent;
+                        _useragent = BuildDefaultUserAgent();
                     }
+
                     return _useragent;
                 }
             }
-            set
-            {
-                lock (_syncpoint) _useragent = value;
-            }
+            set { lock (_syncpoint) _useragent = value; }
+
         }
 
-        private static string _useragent = null;
-
-        private static readonly object _syncpoint = new object();
-
-        /// <summary>
-        /// Creates the correct user-agent string for HTTP calls.
-        /// </summary>
-        /// <returns>The `user-agent` string for "git-tools".</returns>
-        private static string DefaultUserAgent
+        private static string BuildDefaultUserAgent()
         {
-            get
-            {
-                var assembly = System.Reflection.Assembly.GetEntryAssembly() ?? typeof(Global).Assembly;
-                var assemblyName = assembly.GetName();
-                var name = assemblyName.Name;
-                var version = assemblyName.Version;
-                var useragent = string.Format("{0} ({1}; {2}; {3}) CLR/{4} git-tools/{5}",
-                                              name,
-                                              Environment.OSVersion.VersionString,
-                                              Environment.OSVersion.Platform,
-                                              Environment.Is64BitOperatingSystem ? "x64" : "x86",
-                                              Environment.Version.ToString(3),
-                                              version.ToString(3));
+            var assembly = System.Reflection.Assembly.GetEntryAssembly() ?? typeof(Global).Assembly;
+            var assemblyName = assembly.GetName();
+            var name = assemblyName.Name;
+            var version = assemblyName.Version;
+            var useragent = string.Format("{0} ({1}; {2}; {3}) CLR/{4} git-tools/{5}",
+                                          name,
+                                          Environment.OSVersion.VersionString,
+                                          Environment.OSVersion.Platform,
+                                          Environment.Is64BitOperatingSystem ? "x64" : "x86",
+                                          Environment.Version.ToString(3),
+                                          version.ToString(3));
 
-                return useragent;
-            }
+            return useragent;
         }
     }
 }

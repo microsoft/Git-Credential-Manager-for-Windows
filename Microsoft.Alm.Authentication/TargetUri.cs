@@ -56,6 +56,8 @@ namespace Microsoft.Alm.Authentication
             : this(target, null)
         { }
 
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Design", "CA1054:UriParametersShouldNotBeStrings", MessageId = "1#")]
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Design", "CA1054:UriParametersShouldNotBeStrings", MessageId = "0#")]
         public TargetUri(string queryUrl, string proxyUrl)
         {
             if (queryUrl is null)
@@ -74,6 +76,7 @@ namespace Microsoft.Alm.Authentication
             _queryUri = queryUri;
         }
 
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Design", "CA1057:StringUriOverloadsCallSystemUriOverloads")]
         public TargetUri(string targetUrl)
             : this(targetUrl,  null)
         { }

@@ -33,7 +33,7 @@ namespace Microsoft.Alm.Authentication
         /// <summary>
         /// Generates a personal access token for use with Visual Studio Team Services.
         /// <para/>
-        /// Returns the acquired token if successful; otherwise <see langword="null"/>;
+        /// Returns the acquired `<seealso cref="Token"/>` if successful; otherwise `<see langword="null"/>`;
         /// </summary>
         /// <param name="targetUri">The uniform resource indicator of the resource access tokens are being requested for.</param>
         /// <param name="accessToken">Access token granted by the identity authority (Azure).</param>

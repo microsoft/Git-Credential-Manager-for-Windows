@@ -36,33 +36,13 @@ namespace Microsoft.Alm.Authentication
             : base(context)
         { }
 
-        /// <summary>
-        /// Deletes a `<see cref="Credential"/>` from the storage used by the authentication object.
-        /// </summary>
-        /// <param name="targetUri">The uniform resource indicator used to uniquely identify the credentials.</param>
         public abstract Task<bool> DeleteCredentials(TargetUri targetUri);
 
-        /// <summary>
-        /// Deletes a `<see cref="Credential"/>` from the storage used by the authentication object.
-        /// </summary>
-        /// <param name="targetUri">The uniform resource indicator used to uniquely identify the credentials.</param>
-        /// <param name="username">The username of the credentials to be deleted.</param>
         public virtual Task<bool> DeleteCredentials(TargetUri targetUri, string username)
             => DeleteCredentials(targetUri, null);
 
-        /// <summary>
-        /// Gets a <see cref="Credential"/> from the storage used by the authentication object.
-        /// <para/>
-        /// Returns a `<see cref="Credential"/>` if successful; otherwise `<see langword="null"/>`.
-        /// </summary>
-        /// <param name="targetUri">The uniform resource indicator used to uniquely identify the credentials.</param>
         public abstract Task<Credential> GetCredentials(TargetUri targetUri);
 
-        /// <summary>
-        /// Sets a <see cref="Credential"/> in the storage used by the authentication object.
-        /// </summary>
-        /// <param name="targetUri">The uniform resource indicator used to uniquely identify the credentials.</param>
-        /// <param name="credentials">The value to be stored.</param>
         public abstract Task<bool> SetCredentials(TargetUri targetUri, Credential credentials);
     }
 
@@ -87,7 +67,7 @@ namespace Microsoft.Alm.Authentication
     /// <summary>
     /// Delegate for interactively acquiring credentials.
     /// <para/>
-    /// Returns a <see cref="Credential"/> object from the authentication object, authority or storage if successful; otherwise <see langword="null"/>.
+    /// Returns the `<see cref="Credential"/>`, associated with `<paramref name="targetUri"/>`, from the authentication object, authority or storage if successful; otherwise `<see langword="null"/>`.
     /// </summary>
     /// <param name="targetUri">The uniform resource indicator used to uniquely identify the credentials.</param>
     public delegate Credential AcquireCredentialsDelegate(TargetUri targetUri);

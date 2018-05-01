@@ -410,7 +410,7 @@ namespace Microsoft.Alm.Authentication.Git
 
                 if (dir.Exists)
                 {
-                    Func<DirectoryInfo, FileSystemInfo> hasOdb = (DirectoryInfo info) =>
+                    FileSystemInfo hasOdb(DirectoryInfo info)
                     {
                         if (info == null || !info.Exists)
                             return null;
@@ -425,7 +425,7 @@ namespace Microsoft.Alm.Authentication.Git
                         }
 
                         return null;
-                    };
+                    }
 
                     FileSystemInfo result = null;
                     while (dir != null && dir.Exists && dir.Parent != null && dir.Parent.Exists)
