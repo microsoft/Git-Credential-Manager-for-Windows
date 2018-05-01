@@ -48,14 +48,21 @@ namespace Microsoft.Alm.Authentication
         { }
 
         /// <summary>
-        /// Not supported
+        /// Not supported.
         /// </summary>
-        /// <exception cref="NotSupportedException">When used.</exception>
-        public Task<bool> DeleteToken(TargetUri targetUri)
+        /// <exception cref="NotSupportedException"/>
+        Secret.UriNameConversionDelegate ISecretStore.UriNameConversion
         {
-            // We've decided to not support registry deletes until the rules are established.
-            throw new NotSupportedException("Deletes from the registry are not supported by this library.");
+            get => throw new NotSupportedException();
+            set => throw new NotSupportedException();
         }
+
+        /// <summary>
+        /// Not supported.
+        /// </summary>
+        /// <exception cref="NotSupportedException"/>
+        string ISecretStore.Namespace
+            => throw new NotSupportedException();
 
         /// <summary>
         /// Reads a token from the current user's Visual Studio hive in the Windows Registry.
@@ -116,14 +123,35 @@ namespace Microsoft.Alm.Authentication
         }
 
         /// <summary>
-        /// Not supported
+        /// Not supported.
         /// </summary>
-        /// <exception cref="NotSupportedException">When used.</exception>
+        /// <exception cref="NotSupportedException"/>
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Performance", "CA1822:MarkMembersAsStatic")]
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA1801:ReviewUnusedParameters", MessageId = "targetUri")]
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA1801:ReviewUnusedParameters", MessageId = "token")]
         public Task<bool> WriteToken(TargetUri targetUri, Token token)
-        {
-            // We've decided to not support registry writes until the format is standardized.
-            throw new NotSupportedException("Writes to the registry are not supported by this library.");
-        }
+            => throw new NotSupportedException("Writes to the registry are not supported by this library.");
+
+        /// <summary>
+        /// Not supported.
+        /// </summary>
+        /// <exception cref="NotSupportedException"/>
+        Task<bool> ITokenStore.DeleteToken(TargetUri targetUri)
+            => throw new NotImplementedException();
+
+        /// <summary>
+        /// Not supported.
+        /// </summary>
+        /// <exception cref="NotSupportedException"/>
+        Task<Token> ITokenStore.ReadToken(TargetUri targetUri)
+            => throw new NotImplementedException();
+
+        /// <summary>
+        /// Not supported.
+        /// </summary>
+        /// <exception cref="NotSupportedException"/>
+        Task<bool> ITokenStore.WriteToken(TargetUri targetUri, Token token)
+            => throw new NotImplementedException();
 
         private static IEnumerable<RegistryKey> EnumerateKeys(RuntimeContext context, bool writeable)
         {
@@ -157,6 +185,7 @@ namespace Microsoft.Alm.Authentication
             yield break;
         }
 
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2201:DoNotRaiseReservedExceptionTypes")]
         private static bool KeyIsValid(RegistryKey registryKey, out string url, out string type, out string value)
         {
             if (registryKey is null)

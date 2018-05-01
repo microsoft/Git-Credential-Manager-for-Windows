@@ -24,7 +24,6 @@
 **/
 
 using System;
-using System.Net;
 using System.Net.Http;
 using System.Text;
 using System.Text.RegularExpressions;
@@ -40,24 +39,12 @@ namespace Microsoft.Alm.Authentication
             AuthorityHostUrl = authorityHostUrl ?? AuthorityHostUrl;
         }
 
-        /// <summary>
-        /// Generates a personal access token for use with Visual Studio Team Services.
-        /// <para/>
-        /// Returns the acquired token if successful; otherwise <see langword="null"/>;
-        /// </summary>
-        /// <param name="targetUri">The uniform resource indicator of the resource access tokens are being requested for.</param>
-        /// <param name="accessToken">Access token granted by the identity authority (Azure).</param>
-        /// <param name="tokenScope">The requested access scopes to be granted to the token.</param>
-        /// <param name="requireCompactToken">`<see langword="true"/>` if requesting a compact format token; otherwise `<see langword="false"/>`.</param>
-        /// <param name="tokenDuration">
-        /// The requested lifetime of the requested token.
-        /// <para/>
-        /// The authority granting the token decides the actual lifetime of any token granted, regardless of the duration requested.
-        /// </param>
         public async Task<Token> GeneratePersonalAccessToken(TargetUri targetUri, Token accessToken, VstsTokenScope tokenScope, bool requireCompactToken, TimeSpan? tokenDuration = null)
         {
-            BaseSecureStore.ValidateTargetUri(targetUri);
-            BaseSecureStore.ValidateToken(accessToken);
+            if (targetUri is null)
+                throw new ArgumentNullException(nameof(targetUri));
+            if (accessToken is null)
+                throw new ArgumentNullException(nameof(accessToken));
             if (tokenScope is null)
                 throw new ArgumentNullException(nameof(tokenScope));
 
@@ -153,13 +140,6 @@ namespace Microsoft.Alm.Authentication
             return false;
         }
 
-        /// <summary>
-        /// Validates that a `<see cref="Credential"/>` is valid to grant access to the VSTS resource referenced by `<paramref name="targetUri"/>`.
-        /// <para/>
-        /// Returns `<see langword="true"/>` if successful; otherwise `<see langword="false"/>`.
-        /// </summary>
-        /// <param name="targetUri">URI of the VSTS resource.</param>
-        /// <param name="credentials">`<see cref="Credential"/>` expected to grant access to the VSTS service.</param>
         public async Task<bool> ValidateCredentials(TargetUri targetUri, Credential credentials)
         {
             if (targetUri is null)
@@ -197,13 +177,6 @@ namespace Microsoft.Alm.Authentication
             return false;
         }
 
-        /// <summary>
-        /// Validates that a `<see cref="Token"/>` is valid to grant access to the VSTS resource referenced by `<paramref name="targetUri"/>`.
-        /// <para/>
-        /// Returns `<see langword="true"/>` if successful; otherwise `<see langword="false"/>`.
-        /// </summary>
-        /// <param name="targetUri">URI of the VSTS resource.</param>
-        /// <param name="token">`<see cref="Token"/>` expected to grant access to the VSTS resource.</param>
         public async Task<bool> ValidateToken(TargetUri targetUri, Token token)
         {
             if (targetUri is null)
@@ -277,6 +250,8 @@ namespace Microsoft.Alm.Authentication
 
             if (targetUri is null)
                 throw new ArgumentNullException(nameof(targetUri));
+            if (authorization is null)
+                throw new ArgumentNullException(nameof(authorization));
 
             string tenantUrl = targetUri.ToString(false, true, false);
 
@@ -330,6 +305,8 @@ namespace Microsoft.Alm.Authentication
             const string ContentTimedJsonFormat = "{{ \"scope\" : \"{0}\", \"displayName\" : \"Git: {1} on {2}\", \"validTo\": \"{3:u}\" }}";
             const string HttpJsonContentType = "application/json";
 
+            if (targetUri is null)
+                throw new ArgumentNullException(nameof(targetUri));
             if (tokenScope is null)
                 throw new ArgumentNullException(nameof(tokenScope));
 
@@ -358,6 +335,8 @@ namespace Microsoft.Alm.Authentication
 
             if (targetUri is null)
                 throw new ArgumentNullException(nameof(targetUri));
+            if (authorization is null)
+                throw new ArgumentNullException(nameof(authorization));
 
             var idenityServiceUri = await GetIdentityServiceUri(targetUri, authorization);
 

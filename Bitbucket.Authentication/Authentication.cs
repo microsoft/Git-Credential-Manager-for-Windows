@@ -91,7 +91,8 @@ namespace Atlassian.Bitbucket.Authentication
         /// <inheritdoc/>
         public override async Task<bool> DeleteCredentials(TargetUri targetUri, string username)
         {
-            BaseSecureStore.ValidateTargetUri(targetUri);
+            if (targetUri is null)
+                throw new ArgumentNullException(nameof(targetUri));
 
             Trace.WriteLine($"Deleting Bitbucket Credentials for {targetUri.QueryUri}");
 
@@ -148,6 +149,9 @@ namespace Atlassian.Bitbucket.Authentication
         /// <inheritdoc/>
         public async Task<Credential> GetCredentials(TargetUri targetUri, string username)
         {
+            if (targetUri is null)
+                throw new ArgumentNullException(nameof(targetUri));
+
             if (string.IsNullOrWhiteSpace(username) || targetUri.TargetUriContainsUsername)
             {
                 return await GetCredentials(targetUri);
@@ -164,7 +168,9 @@ namespace Atlassian.Bitbucket.Authentication
         /// <param name="targetUri">The uniform resource indicator used to uniquely identify the credentials.</param>
         public override async Task<Credential> GetCredentials(TargetUri targetUri)
         {
-            BaseSecureStore.ValidateTargetUri(targetUri);
+            if (targetUri is null)
+                throw new ArgumentNullException(nameof(targetUri));
+
             Credential credentials = null;
 
             if ((credentials = await PersonalAccessTokenStore.ReadCredentials(targetUri)) != null)
@@ -242,8 +248,10 @@ namespace Atlassian.Bitbucket.Authentication
         /// <inheritdoc/>
         public async Task<bool> SetCredentials(TargetUri targetUri, Credential credentials, string username)
         {
-            BaseSecureStore.ValidateTargetUri(targetUri);
-            BaseSecureStore.ValidateCredential(credentials);
+            if (targetUri is null)
+                throw new ArgumentNullException(nameof(targetUri));
+            if (credentials is null)
+                throw new ArgumentNullException(nameof(credentials));
 
             Trace.WriteLine($"{credentials.Username} at {targetUri.QueryUri.AbsoluteUri}");
 
@@ -346,10 +354,7 @@ namespace Atlassian.Bitbucket.Authentication
                     await SetCredentials(targetUri, credentials, username);
 
                     // if a result callback was registered, call it
-                    if (AuthenticationResultCallback != null)
-                    {
-                        AuthenticationResultCallback(targetUri, result);
-                    }
+                    AuthenticationResultCallback?.Invoke(targetUri, result);
 
                     return credentials;
                 }
@@ -368,10 +373,7 @@ namespace Atlassian.Bitbucket.Authentication
                             await SetCredentials(GetRefreshTokenTargetUri(targetUri), new Credential(result.RefreshToken.Type.ToString(), result.RefreshToken.Value), username);
 
                             // if a result callback was registered, call it
-                            if (AuthenticationResultCallback != null)
-                            {
-                                AuthenticationResultCallback(targetUri, result);
-                            }
+                            AuthenticationResultCallback?.Invoke(targetUri, result);
 
                             return credentials;
                         }
@@ -446,8 +448,10 @@ namespace Atlassian.Bitbucket.Authentication
         /// <inheritdoc/>
         public async Task<Credential> ValidateCredentials(TargetUri targetUri, string username, Credential credentials)
         {
-            BaseSecureStore.ValidateTargetUri(targetUri);
-            BaseSecureStore.ValidateCredential(credentials);
+            if (targetUri is null)
+                throw new ArgumentNullException(nameof(targetUri));
+            if (credentials is null)
+                throw new ArgumentNullException(nameof(credentials));
 
             TargetUri userSpecificTargetUri;
             if (targetUri.TargetUriContainsUsername)

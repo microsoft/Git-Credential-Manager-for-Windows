@@ -150,8 +150,10 @@ namespace Atlassian.Bitbucket.Authentication
         /// <inheritdoc/>
         public async Task<bool> ValidateCredentials(TargetUri targetUri, string username, Credential credentials)
         {
-            BaseSecureStore.ValidateTargetUri(targetUri);
-            BaseSecureStore.ValidateCredential(credentials);
+            if (targetUri is null)
+                throw new ArgumentNullException(nameof(targetUri));
+            if (credentials is null)
+                throw new ArgumentNullException(nameof(credentials));
 
             // We don't know when the credentials arrive here if they are using OAuth or Basic Auth,
             // so we try both.

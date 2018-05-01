@@ -27,28 +27,29 @@ using System.Threading.Tasks;
 
 namespace Microsoft.Alm.Authentication
 {
-    public interface ITokenStore
+    public interface ITokenStore : ISecretStore
     {
         /// <summary>
-        /// Deletes a <see cref="Token"/> from the underlying storage.
+        /// Deletes a `<seealso cref="Token"/>` from the underlying storage.
+        /// <para/>
+        /// Returns `<see langword="true"/>` if successful; otherwise `<see langword="false"/>`.
         /// </summary>
-        /// <param name="targetUri">The key identifying which token is being deleted.</param>
+        /// <param name="targetUri">Unique identifier used as the key for the `<seealso cref="Token"/>`.</param>
         Task<bool> DeleteToken(TargetUri targetUri);
 
         /// <summary>
-        /// Reads a <see cref="Token"/> from the underlying storage.
+        /// Returns a `<seealso cref="Token"/>` from the underlying storage if successful; otherwise `<see langword="null"/>`.
         /// </summary>
-        /// <param name="targetUri">The key identifying which token to read.</param>
-        /// <returns>A <see cref="Token"/> from the store is successful; otherwise <see langword="null"/>.</returns>
+        /// <param name="targetUri">Unique identifier used as the key for the `<seealso cref="Token"/>`.</param>
         Task<Token> ReadToken(TargetUri targetUri);
 
         /// <summary>
-        /// Writes a <see cref="Token"/> to the underlying storage.
+        /// Writes a `<seealso cref="Token"/>` to the underlying storage.
+        /// <para/>
+        /// Returns `<see langword="true"/>` if successful; otherwise `<see langword="false"/>`.
         /// </summary>
-        /// <param name="targetUri">
-        /// Unique identifier for the token, used when reading back from storage.
-        /// </param>
-        /// <param name="token">The <see cref="Token"/> to be written.</param>
+        /// <param name="targetUri">Unique identifier used as the key for the `<seealso cref="Token"/>`.</param>
+        /// <param name="token">The `<see cref="Token"/>` to be written.</param>
         Task<bool> WriteToken(TargetUri targetUri, Token token);
     }
 }

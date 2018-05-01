@@ -35,57 +35,6 @@ namespace Microsoft.Alm.Authentication
         private const string Kernel32 = "kernel32.dll";
 
         /// <summary>
-        /// <para>
-        /// The CredWrite function creates a new credential or modifies an existing credential in the
-        /// user's credential set.
-        /// </para>
-        /// <para>The new credential is associated with the logon session of the current token.</para>
-        /// <para>The token must not have the user's security identifier (SID) disabled.</para>
-        /// </summary>
-        /// <param name="credential">
-        /// A pointer to the ` <see cref="Credential)"/>` structure to be written.
-        /// </param>
-        /// <param name="flags">Flags that control the function's operation. Must be set to 0.</param>
-        /// <returns>True if success; false otherwise.</returns>
-        [DllImport(Advapi32, CharSet = CharSet.Unicode, EntryPoint = "CredWriteW", SetLastError = true)]
-        [return: MarshalAs(UnmanagedType.Bool)]
-        internal static extern bool CredWrite(
-            [In] ref Credential credential,
-            [In] uint flags);
-
-        /// <summary>
-        /// <para>Reads a credential from the user's credential set.</para>
-        /// <para>
-        /// The credential set used is the one associated with the logon session of the current token.
-        /// </para>
-        /// <para>The token must not have the user's SID disabled.</para>
-        /// </summary>
-        /// <param name="targetName">
-        /// Pointer to a null-terminated string that contains the name of the credential to read.
-        /// </param>
-        /// <param name="type">
-        /// Type of the credential to read. Type must be one of the ` <see cref="CredentialType"/>`
-        /// defined types.
-        /// </param>
-        /// <param name="flags">Currently reserved and must be zero.</param>
-        /// <param name="credential">
-        /// <para>Pointer to a single allocated block buffer to return the credential.</para>
-        /// <para>
-        /// Any pointers contained within the buffer are pointers to locations within this single
-        /// allocated block.
-        /// </para>
-        /// <para>The single returned buffer must be freed by calling ` <see cref="CredFree(IntPtr)"/>`.</para>
-        /// </param>
-        /// <returns>True if success; false otherwise.</returns>
-        [DllImport(Advapi32, CharSet = CharSet.Unicode, EntryPoint = "CredReadW", SetLastError = true)]
-        [return: MarshalAs(UnmanagedType.Bool)]
-        internal static extern bool CredRead(
-            [In][MarshalAs(UnmanagedType.LPWStr)] string targetName,
-            [In][MarshalAs(UnmanagedType.U4)] CredentialType type,
-            [In] uint flags,
-            [Out] out IntPtr credential);
-
-        /// <summary>
         /// <para>The CredDelete function deletes a credential from the user's credential set.</para>
         /// <para>
         /// The credential set used is the one associated with the logon session of the current token.
@@ -122,6 +71,57 @@ namespace Microsoft.Alm.Authentication
         [DllImport(Advapi32, CharSet = CharSet.Unicode, EntryPoint = "CredFree", SetLastError = true)]
         internal static extern void CredFree(
             [In] IntPtr credential);
+
+        /// <summary>
+        /// <para>Reads a credential from the user's credential set.</para>
+        /// <para>
+        /// The credential set used is the one associated with the logon session of the current token.
+        /// </para>
+        /// <para>The token must not have the user's SID disabled.</para>
+        /// </summary>
+        /// <param name="targetName">
+        /// Pointer to a null-terminated string that contains the name of the credential to read.
+        /// </param>
+        /// <param name="type">
+        /// Type of the credential to read. Type must be one of the ` <see cref="CredentialType"/>`
+        /// defined types.
+        /// </param>
+        /// <param name="flags">Currently reserved and must be zero.</param>
+        /// <param name="credential">
+        /// <para>Pointer to a single allocated block buffer to return the credential.</para>
+        /// <para>
+        /// Any pointers contained within the buffer are pointers to locations within this single
+        /// allocated block.
+        /// </para>
+        /// <para>The single returned buffer must be freed by calling ` <see cref="CredFree(IntPtr)"/>`.</para>
+        /// </param>
+        /// <returns>True if success; false otherwise.</returns>
+        [DllImport(Advapi32, CharSet = CharSet.Unicode, EntryPoint = "CredReadW", SetLastError = true)]
+        [return: MarshalAs(UnmanagedType.Bool)]
+        internal static extern bool CredRead(
+            [In][MarshalAs(UnmanagedType.LPWStr)] string targetName,
+            [In][MarshalAs(UnmanagedType.U4)] CredentialType type,
+            [In] uint flags,
+            [Out] out IntPtr credential);
+
+        /// <summary>
+        /// <para>
+        /// The CredWrite function creates a new credential or modifies an existing credential in the
+        /// user's credential set.
+        /// </para>
+        /// <para>The new credential is associated with the logon session of the current token.</para>
+        /// <para>The token must not have the user's security identifier (SID) disabled.</para>
+        /// </summary>
+        /// <param name="credential">
+        /// A pointer to the ` <see cref="Credential)"/>` structure to be written.
+        /// </param>
+        /// <param name="flags">Flags that control the function's operation. Must be set to 0.</param>
+        /// <returns>True if success; false otherwise.</returns>
+        [DllImport(Advapi32, CharSet = CharSet.Unicode, EntryPoint = "CredWriteW", SetLastError = true)]
+        [return: MarshalAs(UnmanagedType.Bool)]
+        internal static extern bool CredWrite(
+            [In] ref Credential credential,
+            [In] uint flags);
 
         /// <summary>
         /// Enumerates the credentials from the user's credential set. The credential set used is the

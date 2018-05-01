@@ -99,6 +99,7 @@ namespace Microsoft.Alm.Authentication
         /// <summary>
         /// The desired scope of the authentication token to be requested.
         /// </summary>
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Security", "CA2104:DoNotDeclareReadOnlyMutableReferenceTypes")]
         public readonly VstsTokenScope TokenScope;
 
         /// <summary>

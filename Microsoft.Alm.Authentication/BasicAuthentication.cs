@@ -74,7 +74,7 @@ namespace Microsoft.Alm.Authentication
         private readonly AcquireResultDelegate _acquireResult;
         private readonly ICredentialStore _credentialStore;
         private IReadOnlyList<AuthenticationHeaderValue> _httpAuthenticateOptions;
-        private NtlmSupport _ntlmSupport;
+        private readonly NtlmSupport _ntlmSupport;
 
         /// <summary>
         /// Gets the level of NTLM support for this instance of `<see cref="BasicAuthentication"/>`.
@@ -102,7 +102,8 @@ namespace Microsoft.Alm.Authentication
         /// </param>
         public async Task<Credential> AcquireCredentials(TargetUri targetUri)
         {
-            BaseSecureStore.ValidateTargetUri(targetUri);
+            if (targetUri is null)
+                throw new ArgumentNullException(nameof(targetUri));
 
             if (_ntlmSupport != NtlmSupport.Never)
             {
@@ -148,41 +149,28 @@ namespace Microsoft.Alm.Authentication
             return credentials;
         }
 
-        /// <summary>
-        /// Deletes `<see cref="Credential"/>` from the storage used by the authentication object.
-        /// </summary>
-        /// <param name="targetUri">The uniform resource indicator used to uniquely identify the credentials.</param>
         public override async Task<bool> DeleteCredentials(TargetUri targetUri)
         {
-            BaseSecureStore.ValidateTargetUri(targetUri);
+            if (targetUri is null)
+                throw new ArgumentNullException(nameof(targetUri));
 
             return await _credentialStore.DeleteCredentials(targetUri);
         }
 
-        /// <summary>
-        /// Gets `<see cref="Credential"/>` from the storage used by the authentication object.
-        /// <para/>
-        /// Returns a `<see cref="Credential"/>` if successful; otherwise `<see langword="null"/>`.
-        /// </summary>
-        /// <param name="targetUri">The uniform resource indicator used to uniquely identify the credentials.</param>
         public override async Task<Credential> GetCredentials(TargetUri targetUri)
         {
-            BaseSecureStore.ValidateTargetUri(targetUri);
+            if (targetUri is null)
+                throw new ArgumentNullException(nameof(targetUri));
 
             return await _credentialStore.ReadCredentials(targetUri);
         }
 
-        /// <summary>
-        /// Sets a <see cref="Credential"/> in the storage used by the authentication object.
-        /// </summary>
-        /// <param name="targetUri">
-        /// The uniform resource indicator used to uniquely identify the credentials.
-        /// </param>
-        /// <param name="credentials">The value to be stored.</param>
         public override async Task<bool> SetCredentials(TargetUri targetUri, Credential credentials)
         {
-            BaseSecureStore.ValidateTargetUri(targetUri);
-            BaseSecureStore.ValidateCredential(credentials);
+            if (targetUri is null)
+                throw new ArgumentNullException(nameof(targetUri));
+            if (credentials is null)
+                throw new ArgumentNullException(nameof(credentials));
 
             // Credentials are stored during a GET operation when `AcquireCredentials` is called,
             // and because there is more information available during a GET operation the outcome is

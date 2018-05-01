@@ -29,6 +29,7 @@ using System.Diagnostics;
 using System.IO;
 using System.Net;
 using System.Runtime.CompilerServices;
+using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Alm.Authentication;
 using Bitbucket = Atlassian.Bitbucket.Authentication;
@@ -183,11 +184,14 @@ namespace Microsoft.Alm.Cli
         {
             get
             {
-                if (_executablePath == null)
+                lock (_syncpoint)
                 {
-                    LoadAssemblyInformation();
+                    if (_executablePath is null)
+                    {
+                        LoadAssemblyInformation();
+                    }
+                    return _executablePath;
                 }
-                return _executablePath;
             }
         }
 
@@ -198,11 +202,14 @@ namespace Microsoft.Alm.Cli
         {
             get
             {
-                if (_location == null)
+                lock (_syncpoint)
                 {
-                    LoadAssemblyInformation();
+                    if (_location is null)
+                    {
+                        LoadAssemblyInformation();
+                    }
+                    return _location;
                 }
-                return _location;
             }
         }
 
@@ -213,11 +220,14 @@ namespace Microsoft.Alm.Cli
         {
             get
             {
-                if (_name == null)
+                lock (_syncpoint)
                 {
-                    LoadAssemblyInformation();
+                    if (_name is null)
+                    {
+                        LoadAssemblyInformation();
+                    }
+                    return _name;
                 }
-                return _name;
             }
         }
 
@@ -257,10 +267,19 @@ namespace Microsoft.Alm.Cli
             get { return StandardHandleIsTty(NativeMethods.StandardHandleType.Output); }
         }
 
+        /// <summary>
+        /// Gets the titles of the application.
+        /// </summary>
         public string Title
         {
             get { return _title; }
-            private set { _title = value; }
+            private set
+            {
+                if (value is null)
+                    throw new ArgumentNullException(nameof(Title));
+
+                _title = value;
+            }
         }
 
         /// <summary>
@@ -270,11 +289,14 @@ namespace Microsoft.Alm.Cli
         {
             get
             {
-                if (_version == null)
+                lock (_syncpoint)
                 {
-                    LoadAssemblyInformation();
+                    if (_version is null)
+                    {
+                        LoadAssemblyInformation();
+                    }
+                    return _version;
                 }
-                return _version;
             }
         }
 
@@ -382,7 +404,7 @@ namespace Microsoft.Alm.Cli
 
         internal IntPtr ParentHwnd
         {
-            get { lock(_syncpoint) return _parentHwnd; }
+            get { lock (_syncpoint) return _parentHwnd; }
             set { lock (_syncpoint) _parentHwnd = value; }
         }
 
@@ -542,6 +564,8 @@ namespace Microsoft.Alm.Cli
 
         private void LoadAssemblyInformation()
         {
+            Debug.Assert(Monitor.IsEntered(_syncpoint), "Expected lock not held.");
+
             var assembly = System.Reflection.Assembly.GetEntryAssembly();
             var asseName = assembly.GetName();
 

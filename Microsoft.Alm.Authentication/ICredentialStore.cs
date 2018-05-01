@@ -27,17 +27,29 @@ using System.Threading.Tasks;
 
 namespace Microsoft.Alm.Authentication
 {
-    public interface ICredentialStore
+    public interface ICredentialStore : ISecretStore
     {
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1716:IdentifiersShouldNotMatchKeywords", MessageId = "Namespace")]
-        string Namespace { get; }
-
-        Secret.UriNameConversionDelegate UriNameConversion { get; set; }
-
+        /// <summary>
+        /// Deletes a `<seealso cref="Credential"/>` from the underlying storage.
+        /// <para/>
+        /// Returns `<see langword="true"/>` if successful; otherwise `<see langword="false"/>`.
+        /// </summary>
+        /// <param name="targetUri">Unique identifier used as the key for the `<seealso cref="Credential"/>`.</param>
         Task<bool> DeleteCredentials(TargetUri targetUri);
 
+        /// <summary>
+        /// Returns a `<seealso cref="Credential"/>` from the underlying storage if successful; otherwise `<see langword="null"/>`.
+        /// </summary>
+        /// <param name="targetUri">Unique identifier used as the key for the `<seealso cref="Credential"/>`.</param>
         Task<Credential> ReadCredentials(TargetUri targetUri);
 
+        /// <summary>
+        /// Writes a `<seealso cref="Credential"/>` to the underlying storage.
+        /// <para/>
+        /// Returns `<see langword="true"/>` if successful; otherwise `<see langword="false"/>`.
+        /// </summary>
+        /// <param name="targetUri">Unique identifier used as the key for the `<seealso cref="Credential"/>`.</param>
+        /// <param name="credentials">The `<see cref="Credential"/>` to be written.</param>
         Task<bool> WriteCredentials(TargetUri targetUri, Credential credentials);
     }
 }

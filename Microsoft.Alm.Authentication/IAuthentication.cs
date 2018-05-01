@@ -30,31 +30,25 @@ namespace Microsoft.Alm.Authentication
     public interface IAuthentication
     {
         /// <summary>
-        /// Deletes a <see cref="Credential"/> from the storage used by the authentication object.
+        /// Deletes the `<see cref="Credential"/>`, associated with `<paramref name="targetUri"/>`, from the storage used by the authentication object.
+        /// <para/>
+        /// Returns `<see langword="true"/>` if successful; otherwise `<see langword="false"/>`;
         /// </summary>
-        /// <param name="targetUri">
-        /// The uniform resource indicator used to uniquely identify the credentials.
-        /// </param>
+        /// <param name="targetUri">The uniform resource indicator used to uniquely identify the credentials.</param>
         Task<bool> DeleteCredentials(TargetUri targetUri);
 
         /// <summary>
-        /// Gets a <see cref="Credential"/> from the storage used by the authentication object.
+        /// Returns the `<see cref="Credential"/>`, associated with `<paramref name="targetUri"/>`, from the authentication object, authority or storage if successful; otherwise `<see langword="null"/>`.
         /// </summary>
-        /// <param name="targetUri">
-        /// The uniform resource indicator used to uniquely identify the credentials.
-        /// </param>
-        /// <returns>
-        /// If successful a <see cref="Credential"/> object from the authentication object, authority
-        /// or storage; otherwise <see langword="null"/>.
-        /// </returns>
+        /// <param name="targetUri">he uniform resource indicator used to uniquely identify the credentials.</param>
         Task<Credential> GetCredentials(TargetUri targetUri);
 
         /// <summary>
-        /// Sets a <see cref="Credential"/> in the storage used by the authentication object.
+        /// Sets the `<see cref="Credential"/>`, associated with `<paramref name="targetUri"/>`, in the storage used by the authentication object.
+        /// <para/>
+        /// Returns `<see langword="true"/>` if successful; otherwise `<see langword="false"/>`;
         /// </summary>
-        /// <param name="targetUri">
-        /// The uniform resource indicator used to uniquely identify the credentials.
-        /// </param>
+        /// <param name="targetUri">he uniform resource indicator used to uniquely identify the credentials.</param>
         /// <param name="credentials">The value to be stored.</param>
         Task<bool> SetCredentials(TargetUri targetUri, Credential credentials);
     }

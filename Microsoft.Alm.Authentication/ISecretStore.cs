@@ -23,35 +23,18 @@
  * WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE."
 **/
 
-using System;
-
 namespace Microsoft.Alm.Authentication
 {
-    public abstract class Base
+    public interface ISecretStore
     {
-        protected Base(RuntimeContext context)
-        {
-            if (context is null)
-                throw new ArgumentNullException(nameof(context));
+        /// <summary>
+        /// Gets the namespace used by the store to segment stored values.
+        /// </summary>
+        string Namespace { get; }
 
-            _context = context;
-        }
-
-        private readonly RuntimeContext _context;
-
-        protected RuntimeContext Context
-            => _context;
-
-        protected INetwork Network
-            => _context.Network;
-
-        protected IStorage Storage
-            => _context.Storage;
-
-        protected Git.ITrace Trace
-            => _context.Trace;
-
-        protected Git.IWhere Where
-            => _context.Where;
+        /// <summary>
+        /// Gets or sets the method used to convert a Uri into a storage key.
+        /// </summary>
+        Secret.UriNameConversionDelegate UriNameConversion { get; set; }
     }
 }

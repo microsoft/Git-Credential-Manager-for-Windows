@@ -31,9 +31,13 @@ namespace Microsoft.Alm.Authentication
 {
     public sealed class SecretCache : Base, ICredentialStore, ITokenStore
     {
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Security", "CA2104:DoNotDeclareReadOnlyMutableReferenceTypes")]
         public static readonly StringComparer KeyComparer = StringComparer.OrdinalIgnoreCase;
 
+        /// <summary>
+        /// Creates a new instance of `<see cref="SecretCache"/>`.
+        /// </summary>
+        /// <param name="namespace">The namespace used to when reading, writing, or deleting secrets from the cache.</param>
+        /// <param name="getTargetName">Delegate used to generate key names when reading, writing, or deleting secrets.</param>
         public SecretCache(RuntimeContext context, string @namespace, Secret.UriNameConversionDelegate getTargetName)
             : this(context)
         {
@@ -44,6 +48,10 @@ namespace Microsoft.Alm.Authentication
             _getTargetName = getTargetName ?? Secret.UriToName;
         }
 
+        /// <summary>
+        /// Creates a new instance of `<see cref="SecretCache"/>`, using the default key name generation scheme.
+        /// </summary>
+        /// <param name="namespace">The namespace used to when reading, writing, or deleting secrets from the cache.</param>
         public SecretCache(RuntimeContext context, string @namespace)
             : this(context, @namespace, null)
         { }
@@ -51,7 +59,7 @@ namespace Microsoft.Alm.Authentication
         internal SecretCache(RuntimeContext context, ICredentialStore credentialStore)
             : this(context)
         {
-            if (credentialStore == null)
+            if (credentialStore is null)
                 throw new ArgumentNullException(nameof(credentialStore));
 
             _namespace = credentialStore.Namespace;
@@ -65,15 +73,14 @@ namespace Microsoft.Alm.Authentication
         }
 
         private Dictionary<string, Secret> _cache;
-        private string _namespace;
         private Secret.UriNameConversionDelegate _getTargetName;
+        private readonly string _namespace;
 
         public string Namespace
         {
             get { return _namespace; }
         }
 
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2208:InstantiateArgumentExceptionsCorrectly")]
         public Secret.UriNameConversionDelegate UriNameConversion
         {
             get { return _getTargetName; }
@@ -86,13 +93,10 @@ namespace Microsoft.Alm.Authentication
             }
         }
 
-        /// <summary>
-        /// Deletes a credential from the cache.
-        /// </summary>
-        /// <param name="targetUri">The URI of the target for which credentials are being deleted</param>
         public Task<bool> DeleteCredentials(TargetUri targetUri)
         {
-            BaseSecureStore.ValidateTargetUri(targetUri);
+            if (targetUri is null)
+                throw new ArgumentNullException(nameof(targetUri));
 
             string targetName = GetTargetName(targetUri);
             bool result = false;
@@ -107,13 +111,10 @@ namespace Microsoft.Alm.Authentication
             return Task.FromResult(result);
         }
 
-        /// <summary>
-        /// Deletes a token from the cache.
-        /// </summary>
-        /// <param name="targetUri">The key which to find and delete the token with.</param>
         public Task<bool> DeleteToken(TargetUri targetUri)
         {
-            BaseSecureStore.ValidateTargetUri(targetUri);
+            if (targetUri is null)
+                throw new ArgumentNullException(nameof(targetUri));
 
             string targetName = GetTargetName(targetUri);
             bool result = false;
@@ -148,14 +149,10 @@ namespace Microsoft.Alm.Authentication
             return array;
         }
 
-        /// <summary>
-        /// Reads credentials for a target URI from the credential store
-        /// </summary>
-        /// <param name="targetUri">The URI of the target for which credentials are being read</param>
-        /// <returns>A <see cref="Credential"/> from the store; <see langword="null"/> if failure.</returns>
         public Task<Credential> ReadCredentials(TargetUri targetUri)
         {
-            BaseSecureStore.ValidateTargetUri(targetUri);
+            if (targetUri is null)
+                throw new ArgumentNullException(nameof(targetUri));
 
             Credential credentials = null;
             string targetName = GetTargetName(targetUri);
@@ -175,14 +172,10 @@ namespace Microsoft.Alm.Authentication
             return Task.FromResult(credentials);
         }
 
-        /// <summary>
-        /// Gets a token from the cache.
-        /// </summary>
-        /// <param name="targetUri">The key which to find the token.</param>
-        /// <returns>A <see cref="Token"/> if successful; otherwise <see langword="null"/>.</returns>
         public Task<Token> ReadToken(TargetUri targetUri)
         {
-            BaseSecureStore.ValidateTargetUri(targetUri);
+            if (targetUri is null)
+                throw new ArgumentNullException(nameof(targetUri));
 
             Token token = null;
             string targetName = GetTargetName(targetUri);
@@ -202,15 +195,12 @@ namespace Microsoft.Alm.Authentication
             return Task.FromResult(token);
         }
 
-        /// <summary>
-        /// Writes credentials for a target URI to the credential store
-        /// </summary>
-        /// <param name="targetUri">The URI of the target for which credentials are being stored</param>
-        /// <param name="credentials">The credentials to be stored</param>
         public Task<bool> WriteCredentials(TargetUri targetUri, Credential credentials)
         {
-            BaseSecureStore.ValidateTargetUri(targetUri);
-            BaseSecureStore.ValidateCredential(credentials);
+            if (targetUri is null)
+                throw new ArgumentNullException(nameof(targetUri));
+            if (credentials is null)
+                throw new ArgumentNullException(nameof(credentials));
 
             string targetName = GetTargetName(targetUri);
 
@@ -229,15 +219,12 @@ namespace Microsoft.Alm.Authentication
             return Task.FromResult(true);
         }
 
-        /// <summary>
-        /// Writes a token to the cache.
-        /// </summary>
-        /// <param name="targetUri">The key which to index the token by.</param>
-        /// <param name="token">The token to write to the cache.</param>
         public Task<bool> WriteToken(TargetUri targetUri, Token token)
         {
-            BaseSecureStore.ValidateTargetUri(targetUri);
-            Token.Validate(token);
+            if (targetUri is null)
+                throw new ArgumentNullException(nameof(targetUri));
+            if (token is null)
+                throw new ArgumentNullException(nameof(token));
 
             string targetName = GetTargetName(targetUri);
 
@@ -256,14 +243,10 @@ namespace Microsoft.Alm.Authentication
             return Task.FromResult(true);
         }
 
-        /// <summary>
-        /// Formats a TargetName string based on the TargetUri base on the format started by git-credential-winstore
-        /// </summary>
-        /// <param name="targetUri">Uri of the target</param>
-        /// <returns>Properly formatted TargetName string</returns>
         private string GetTargetName(TargetUri targetUri)
         {
-            BaseSecureStore.ValidateTargetUri(targetUri);
+            if (targetUri is null)
+                throw new ArgumentNullException(nameof(targetUri));
 
             return _getTargetName(targetUri, _namespace);
         }
@@ -288,6 +271,36 @@ namespace Microsoft.Alm.Authentication
             {
                 get { return _secret; }
             }
+
+            public override bool Equals(object obj)
+            {
+                return (obj is NamedSecret other
+                        && StringComparer.OrdinalIgnoreCase.Equals(_name, other._name)
+                        && ((_secret is Token token
+                                && other._secret is Token otherToken
+                                && token.Equals(otherToken))
+                            || (_secret is Credential credential
+                                && other._secret is Credential otherCredential
+                                && credential.Equals(otherCredential))))
+                    || base.Equals(obj);
+            }
+
+            public override int GetHashCode()
+            {
+                if (_secret is Credential credential)
+                    return credential.GetHashCode();
+
+                if (_secret is Token token)
+                    return token.GetHashCode();
+
+                return base.GetHashCode();
+            }
+
+            public static bool operator ==(NamedSecret lhs, NamedSecret rhs)
+                => lhs.Equals(rhs);
+
+            public static bool operator !=(NamedSecret lhs, NamedSecret rhs)
+                => !lhs.Equals(rhs);
         }
     }
 }

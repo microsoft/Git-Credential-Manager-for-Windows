@@ -79,6 +79,7 @@ namespace Microsoft.Alm.Authentication
         /// <summary>
         /// The type of the security token.
         /// </summary>
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1721:PropertyNamesShouldNotMatchGetMethods")]
         public TokenType Type
         {
             get { return _type; }
@@ -102,20 +103,22 @@ namespace Microsoft.Alm.Authentication
         }
 
         /// <summary>
-        /// Compares an object to this <see cref="Token"/> for equality.
+        /// Compares an object to this instance for equality.
+        /// <para/>
+        /// Returns `<see langword="true"/>` if equal; otherwise `<see langword="false"/>`.
         /// </summary>
         /// <param name="obj">The object to compare.</param>
-        /// <returns>True is equal; false otherwise.</returns>
         public override bool Equals(object obj)
         {
             return Equals(obj as Token);
         }
 
         /// <summary>
-        /// Compares a <see cref="Token"/> to this Token for equality.
+        /// Compares a `<see cref="Token"/>` to this instance for equality.
+        /// <para/>
+        /// Returns `<see langword="true"/>` if equal; otherwise `<see langword="false"/>`.
         /// </summary>
-        /// <param name="other">The token to compare.</param>
-        /// <returns>True if equal; false otherwise.</returns>
+        /// <param name="other">Token to be compared.</param>
         public bool Equals(Token other)
         {
             return this == other;
@@ -160,14 +163,16 @@ namespace Microsoft.Alm.Authentication
         }
 
         /// <summary>
-        /// Gets a hash code based on the contents of the token.
+        /// Returns the hash code based on the contents of this `<see cref="Token"/>`.
         /// </summary>
-        /// <returns>32-bit hash code.</returns>
         public override int GetHashCode()
         {
             unchecked
             {
-                return ((int)_type) * Value.GetHashCode();
+                // Use the upper 4-bits as the type and the lower 28 of the value hash code
+                // to compose the unique hash code value.
+                return ((((int)_type) & 0x0000000F) << 28)
+                     | (Value.GetHashCode() & 0x0FFFFFFF);
             }
         }
 
@@ -182,16 +187,6 @@ namespace Microsoft.Alm.Authentication
                 return value;
             else
                 return base.ToString();
-        }
-
-        public static void Validate(Token token)
-        {
-            if (token is null)
-                throw new ArgumentNullException(nameof(token));
-            if (string.IsNullOrWhiteSpace(token._value))
-                throw new ArgumentException("Value property returned null or empty.", nameof(token));
-            if (token._value.Length > NativeMethods.Credential.PasswordMaxLength)
-                throw new ArgumentOutOfRangeException(nameof(token));
         }
 
         internal static unsafe bool Deserialize(
@@ -252,8 +247,10 @@ namespace Microsoft.Alm.Authentication
                     }
                 }
             }
-            catch
+            catch (Exception exception)
             {
+                Debug.WriteLine(exception.Message);
+
                 context.Trace.WriteLine("! token deserialization error.");
             }
 
@@ -286,8 +283,10 @@ namespace Microsoft.Alm.Authentication
 
                 Array.Copy(utf8bytes, 0, bytes, sizeof(TokenType) + sizeof(Guid), utf8bytes.Length);
             }
-            catch
+            catch (Exception exception)
             {
+                Debug.WriteLine(exception.Message);
+
                 context.Trace.WriteLine("! token serialization error.");
             }
 
@@ -299,7 +298,7 @@ namespace Microsoft.Alm.Authentication
         /// </summary>
         /// <param name="token">The token to be cast as a `<see cref="Credential"/>`.</param>
         /// <exception cref="InvalidCastException">
-        /// <paramref name="token">Throws if `<see cref="Token.Type"/>` is not `<see cref="TokenType.Personal"/>`.</paramref>
+        /// When `<paramref name="token"/>.<see cref="Token.Type"/>` is not `<see cref="TokenType.Personal"/>`.
         /// </exception>
         public static explicit operator Credential(Token token)
         {
@@ -307,37 +306,39 @@ namespace Microsoft.Alm.Authentication
                 return null;
 
             if (token.Type != TokenType.Personal)
-                throw new InvalidCastException($"`{nameof(Token)}` -> `{nameof(Credential)}`");
+                throw new InvalidCastException($"Cannot cast `{nameof(Token)}` of type '{token.Type}' to `{nameof(Credential)}`");
 
             return new Credential(token.ToString(), token._value);
         }
 
         /// <summary>
         /// Compares two tokens for equality.
+        /// <para/>
+        /// Returns `<see langword="true"/>` if equal; otherwise `<see langword="false"/>`.
         /// </summary>
-        /// <param name="left">Token to compare.</param>
-        /// <param name="right">Token to compare.</param>
-        /// <returns><see langword="true"/> if equal; otherwise <see langword="false"/>.</returns>
-        public static bool operator ==(Token left, Token right)
+        /// <param name="lhs">Token to compare.</param>
+        /// <param name="rhs">Token to compare.</param>
+        public static bool operator ==(Token lhs, Token rhs)
         {
-            if (ReferenceEquals(left, right))
+            if (ReferenceEquals(lhs, rhs))
                 return true;
-            if (left is null || right is null)
+            if (lhs is null || rhs is null)
                 return false;
 
-            return left.Type == right.Type
-                && TokenComparer.Equals(left._value, right._value);
+            return lhs.Type == rhs.Type
+                && TokenComparer.Equals(lhs._value, rhs._value);
         }
 
         /// <summary>
         /// Compares two tokens for inequality.
+        /// <para/>
+        /// Returns `<see langword="false"/>` if equal; otherwise `<see langword="true"/>`.
         /// </summary>
-        /// <param name="left">Token to compare.</param>
-        /// <param name="right">Token to compare.</param>
-        /// <returns><see langword="false"/> if equal; otherwise <see langword="true"/>.</returns>
-        public static bool operator !=(Token left, Token right)
+        /// <param name="lhs">Token to compare.</param>
+        /// <param name="rhs">Token to compare.</param>
+        public static bool operator !=(Token lhs, Token rhs)
         {
-            return !(left == right);
+            return !(lhs == rhs);
         }
     }
 }

@@ -30,13 +30,13 @@ namespace Microsoft.Alm.Authentication
 {
     public class RuntimeContext
     {
+        /// <summary>
+        /// The default `<see cref="RuntimeContext"/>` instance.
+        /// </summary>
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Security", "CA2104:DoNotDeclareReadOnlyMutableReferenceTypes")]
         public static readonly RuntimeContext Default;
 
-        public RuntimeContext(
-            IStorage storage,
-            INetwork network,
-            Git.ITrace trace,
-            Git.IWhere where)
+        public RuntimeContext(IStorage storage, INetwork network, Git.ITrace trace, Git.IWhere where)
             : this()
         {
             if (storage is null)
@@ -57,9 +57,10 @@ namespace Microsoft.Alm.Authentication
         private RuntimeContext()
         {
             _id = Interlocked.Increment(ref _count);
-            _syncpoint = new object();
         }
 
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Reliability", "CA2000:Dispose objects before losing scope")]
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Performance", "CA1810:InitializeReferenceTypeStaticFieldsInline")]
         static RuntimeContext()
         {
             Volatile.Write(ref _count, 0);
@@ -75,7 +76,6 @@ namespace Microsoft.Alm.Authentication
         private readonly int _id;
         private INetwork _network;
         private IStorage _storage;
-        private readonly object _syncpoint;
         private Git.ITrace _trace;
         private Git.IWhere _where;
 
