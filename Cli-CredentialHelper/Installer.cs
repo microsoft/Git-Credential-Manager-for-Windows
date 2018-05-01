@@ -45,24 +45,25 @@ namespace Microsoft.Alm.Cli
 
         private static readonly IReadOnlyList<string> CopyList = new string[]
         {
-            "Microsoft.Vsts.Authentication.dll",
+            "Bitbucket.Authentication.dll",
+            "git-askpass.exe",
+            "git-credential-manager.exe",
+            "GitHub.Authentication.exe",
             "Microsoft.Alm.Authentication.dll",
             "Microsoft.IdentityModel.Clients.ActiveDirectory.dll",
-            "Bitbucket.Authentication.dll",
-            "GitHub.Authentication.exe",
-            "git-credential-manager.exe",
-            "git-askpass.exe",
+            "Microsoft.Vsts.Authentication.dll",
         };
         private static readonly IReadOnlyList<string> CleanList = new string[]
         {
-            "Microsoft.Vsts.Authentication.dll",
+            "Bitbucket.Authentication.dll",
+            "git-askpass.exe",
+            "git-credential-manager.exe",
+            "GitHub.Authentication.exe",
             "Microsoft.Alm.Authentication.dll",
+            "Microsoft.Alm.Git.dll",
             "Microsoft.IdentityModel.Clients.ActiveDirectory.dll",
             "Microsoft.IdentityModel.Clients.ActiveDirectory.Platform.dll",
-            "Bitbucket.Authentication.dll",
-            "GitHub.Authentication.exe",
-            "git-credential-manager.exe",
-            "git-askpass.exe",
+            "Microsoft.Vsts.Authentication.dll",
         };
         private static readonly IReadOnlyList<string> DocsList = new string[]
         {
@@ -594,7 +595,7 @@ namespace Microsoft.Alm.Cli
                     Program.Out.WriteLine();
                     Program.Out.WriteLine($"Removing from '{installation.Path}'.");
 
-                    if (CleanFiles(installation.Libexec, CopyList, out cleanedFiles))
+                    if (CleanFiles(installation.Libexec, CleanList, out cleanedFiles))
                     {
                         int cleanedCount = cleanedFiles.Count;
 
@@ -636,7 +637,7 @@ namespace Microsoft.Alm.Cli
                     Program.Out.WriteLine();
                     Program.Out.WriteLine($"Removing from '{UserBinPath}'.");
 
-                    if (CleanFiles(UserBinPath, CopyList, out cleanedFiles))
+                    if (CleanFiles(UserBinPath, CleanList, out cleanedFiles))
                     {
                         int cleanedCount = cleanedFiles.Count;
 
@@ -673,7 +674,7 @@ namespace Microsoft.Alm.Cli
 
                 if (CygwinPath != null && Program.Storage.DirectoryExists(CygwinPath))
                 {
-                    if (CleanFiles(CygwinPath, CopyList, out cleanedFiles))
+                    if (CleanFiles(CygwinPath, CleanList, out cleanedFiles))
                     {
                         int cleanedCount = cleanedFiles.Count;
 
