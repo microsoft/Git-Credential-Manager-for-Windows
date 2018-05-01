@@ -88,6 +88,7 @@ Name: "Git4Win"; Description: {#Git4WinName}; ExtraDiskSpaceRequired: {#Git4WinS
 
 [Files]
 Source: "{#binDir}\git-credential-manager.exe"; DestDir: "{app}"; Flags: ignoreversion
+Source: "{#binDir}\git-askpass.exe"; DestDir: "{app}"; Flags: ignoreversion
 Source: "{#binDir}\Microsoft.Alm.Authentication.dll"; DestDir: "{app}"; Flags: ignoreversion
 Source: "{#binDir}\Microsoft.IdentityModel.Clients.ActiveDirectory.dll"; DestDir: "{app}"; Flags: ignoreversion
 Source: "{#binDir}\Microsoft.Vsts.Authentication.dll"; DestDir: "{app}"; Flags: ignoreversion

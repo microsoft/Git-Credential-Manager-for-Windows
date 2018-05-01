@@ -286,8 +286,12 @@ namespace Microsoft.Alm.Cli
                     Program.Out.WriteLine();
                     Program.Out.WriteLine($"Deploying from '{Program.Location}' to '{installation.Path}'.");
 
-                    if (CleanFiles(installation.Libexec, CleanList, out _)
-                        && CopyFiles(Program.Location, installation.Libexec, CopyList, out copiedFiles))
+                    if (CleanFiles(installation.Libexec, CleanList, out _))
+                    {
+                        Program.Trace.WriteLine($"removed previous installation from '{installation.Libexec}'.");
+                    }
+
+                    if (CopyFiles(Program.Location, installation.Libexec, CopyList, out copiedFiles))
                     {
                         int copiedCount = copiedFiles.Count;
 
@@ -335,8 +339,12 @@ namespace Microsoft.Alm.Cli
                     Program.Storage.CreateDirectory(UserBinPath);
                 }
 
-                if (CleanFiles(UserBinPath, CleanList, out _)
-                    && CopyFiles(Program.Location, UserBinPath, CopyList, out copiedFiles))
+                if (CleanFiles(UserBinPath, CleanList, out _))
+                {
+                    Program.Trace.WriteLine($"removed previous installation from '{UserBinPath}'.");
+                }
+
+                if (CopyFiles(Program.Location, UserBinPath, CopyList, out copiedFiles))
                 {
                     int copiedCount = copiedFiles.Count;
 
@@ -375,8 +383,12 @@ namespace Microsoft.Alm.Cli
 
                 if (CygwinPath != null && Program.Storage.DirectoryExists(CygwinPath))
                 {
-                    if (CleanFiles(CygwinPath, CleanList, out _)
-                        && CopyFiles(Program.Location, CygwinPath, CopyList, out copiedFiles))
+                    if (CleanFiles(CygwinPath, CleanList, out _))
+                    {
+                        Program.Trace.WriteLine($"removed previous installation from '{CygwinPath}'.");
+                    }
+
+                    if (CopyFiles(Program.Location, CygwinPath, CopyList, out copiedFiles))
                     {
                         int copiedCount = copiedFiles.Count;
 
@@ -840,7 +852,16 @@ namespace Microsoft.Alm.Cli
                         string src = Path.Combine(srcPath, file);
                         string dst = Path.Combine(dstPath, file);
 
-                        Program.Storage.FileCopy(src, dst, true);
+                        try
+                        {
+                            Program.Storage.FileCopy(src, dst, true);
+                        }
+                        catch (Exception exception)
+                        {
+                            Program.Trace.WriteLine($"! error: {exception.Message}");
+
+                            throw;
+                        }
 
                         copiedFiles.Add(file);
                     }
