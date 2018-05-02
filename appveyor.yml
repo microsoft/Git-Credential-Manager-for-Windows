@@ -3,14 +3,16 @@ version: "{build}"
 image:
   - Visual Studio 2017
 
-clone_depth: 10
-
 configuration:
   - Release
 
 platform: Any CPU
 
 before_build:
+  - ps: dir -Directory
+  - ps: Remove-Item -Path .\Cli-AskPass -Recurse
+  - git clean -xdf
+  - git reset --hard
   - nuget restore
 
 build:

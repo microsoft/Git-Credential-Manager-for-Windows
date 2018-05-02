@@ -5,35 +5,21 @@
   <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
   <PropertyGroup>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <ApplicationRevision>0</ApplicationRevision>
-    <ApplicationVersion>1.0.0.%2a</ApplicationVersion>
     <AssemblyName>git-askpass</AssemblyName>
     <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>
-    <BootstrapperEnabled>true</BootstrapperEnabled>
-    <CodeAnalysisRuleSet>..\analysisRules.ruleset</CodeAnalysisRuleSet>
-    <Install>true</Install>
-    <InstallFrom>Disk</InstallFrom>
-    <IsWebBootstrapper>false</IsWebBootstrapper>
-    <MapFileExtensions>true</MapFileExtensions>
     <NuGetPackageImportStamp>
     </NuGetPackageImportStamp>
     <OutputType>Exe</OutputType>
     <ProjectGuid>{19770407-B33A-4EBE-92B8-04C93F43CAE0}</ProjectGuid>
-    <PublishUrl>publish\</PublishUrl>
     <RootNamespace>Microsoft.Alm.Cli</RootNamespace>
     <TargetFrameworkVersion>v4.5.2</TargetFrameworkVersion>
-    <UpdateEnabled>false</UpdateEnabled>
-    <UpdateInterval>7</UpdateInterval>
-    <UpdateIntervalUnits>Days</UpdateIntervalUnits>
-    <UpdateMode>Foreground</UpdateMode>
-    <UpdatePeriodically>false</UpdatePeriodically>
-    <UpdateRequired>false</UpdateRequired>
-    <UseApplicationTrust>false</UseApplicationTrust>
   </PropertyGroup>
   <Import Project="..\build.props" />
   <PropertyGroup>
-    <ApplicationIcon>..\Assets\gcmicon.ico</ApplicationIcon>
     <StartupObject>Microsoft.Alm.Cli.Program</StartupObject>
+    <ApplicationIcon>..\Assets\gcmicon.ico</ApplicationIcon>
+    <ProjectDir>$(MSBuildThisFileDirectory)</ProjectDir>
+    <OutputPath>$(ProjectDir)$(OutputPath)</OutputPath>
     <SigningTarget>$(OutputPath)\$(AssemblyName).exe</SigningTarget>
   </PropertyGroup>
   <ItemGroup>
@@ -62,7 +48,7 @@
       <Name>GitHub.Authentication</Name>
     </ProjectReference>
     <ProjectReference Include="..\Microsoft.Alm.Authentication\Microsoft.Alm.Authentication.csproj">
-      <Project>{c1daabc1-b493-459d-bb4f-04fbefb1ba13}</Project>
+      <Project>{19770407-b493-459d-bb4f-04fbefb1ba13}</Project>
       <Name>Microsoft.Alm.Authentication</Name>
     </ProjectReference>
     <ProjectReference Include="..\Microsoft.Vsts.Authentication\Microsoft.Vsts.Authentication.csproj">
@@ -96,13 +82,6 @@
   <ItemGroup>
     <Resource Include="Assets\gcm.ico" />
     <Resource Include="Assets\gcm.png" />
-  </ItemGroup>
-  <ItemGroup>
-    <BootstrapperPackage Include="Microsoft.Net.Framework.3.5.SP1">
-      <Visible>False</Visible>
-      <ProductName>.NET Framework 3.5 SP1</ProductName>
-      <Install>false</Install>
-    </BootstrapperPackage>
   </ItemGroup>
   <ItemGroup>
     <FilesToSign Include="$(SigningTarget)">
