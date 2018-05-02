@@ -858,7 +858,7 @@ namespace Microsoft.Alm.Cli
                         }
                         catch (Exception exception)
                         {
-                            Program.Trace.WriteLine($"! error: {exception.Message}");
+                            Program.Trace.WriteException(exception);
 
                             throw;
                         }
@@ -1047,7 +1047,7 @@ namespace Microsoft.Alm.Cli
                 }
                 catch (Exception exception)
                 {
-                    Program.Trace.WriteLine($"! process failed with '{exception.Message}'.");
+                    Program.Trace.WriteException(exception);
                     Result = ResultValue.Unprivileged;
                 }
             }

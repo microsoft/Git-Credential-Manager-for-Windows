@@ -238,7 +238,7 @@ namespace Microsoft.Alm.Cli
             if (exception is null)
                 throw new ArgumentNullException(nameof(exception));
 
-            program.Trace.WriteLine(exception.ToString(), path, line, name);
+            program.Trace.WriteException(exception, path, line, name);
             program.LogEvent(exception.ToString(), EventLogEntryType.Error);
 
             string message;

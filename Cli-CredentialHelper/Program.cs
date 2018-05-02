@@ -245,10 +245,16 @@ namespace Microsoft.Alm.Cli
 
             using (var stdin = InStream)
             {
-                OperationArguments operationArguments = new OperationArguments(_context, stdin)
+                var operationArguments = new OperationArguments(_context, stdin)
                 {
                     QueryUri = uri
                 };
+
+                if (operationArguments.TargetUri is null)
+                {
+                    var inner = new NullReferenceException($"{nameof(operationArguments)}.{nameof(operationArguments.TargetUri)}");
+                    throw new InvalidOperationException(inner.Message, inner);
+                }
 
                 Task.Run(async () =>
                 {
@@ -311,13 +317,16 @@ namespace Microsoft.Alm.Cli
             // see: https://www.kernel.org/pub/software/scm/git/docs/git-credential.html
             using (var stdin = InStream)
             {
-                OperationArguments operationArguments = new OperationArguments(_context, stdin);
+                var operationArguments = new OperationArguments(_context, stdin);
+
+                if (operationArguments.TargetUri is null)
+                {
+                    var inner = new NullReferenceException($"{nameof(operationArguments)}.{nameof(operationArguments.TargetUri)}");
+                    throw new InvalidOperationException(inner.Message, inner);
+                }
 
                 // Set the parent window handle.
                 ParentHwnd = operationArguments.ParentHwnd;
-
-                Debug.Assert(operationArguments != null, "The operationArguments is null");
-                Debug.Assert(operationArguments.TargetUri != null, "The operationArgument.TargetUri is null");
 
                 Task.Run(async () =>
                 {
@@ -343,6 +352,12 @@ namespace Microsoft.Alm.Cli
             using (var stdin = InStream)
             {
                 OperationArguments operationArguments = new OperationArguments(_context, stdin);
+
+                if (operationArguments.TargetUri is null)
+                {
+                    var inner = new NullReferenceException($"{nameof(operationArguments)}.{nameof(operationArguments.TargetUri)}");
+                    throw new InvalidOperationException(inner.Message, inner);
+                }
 
                 Task.Run(async () =>
                 {
@@ -372,10 +387,9 @@ namespace Microsoft.Alm.Cli
         {
             const string HelpFileName = "git-credential-manager.html";
 
-            WriteLine("usage: " + Name + ".exe [" + string.Join("|", CommandList) + "] [<args>]");
+            WriteLine($"usage: {Name}.exe [{string.Join("|", CommandList)}] [<args>]");
 
-            List<Git.Installation> installations;
-            if (_context.Where.FindGitInstallations(out installations))
+            if (_context.Where.FindGitInstallations(out List<Git.Installation> installations))
             {
                 foreach (var installation in installations)
                 {
@@ -402,6 +416,7 @@ namespace Microsoft.Alm.Cli
         internal void Remove()
         {
             var installer = new Installer(this);
+
             installer.RemoveConsole();
 
             Trace.WriteLine($"Installer result = {installer.Result}, exit code = {installer.ExitCode}.");
@@ -418,46 +433,56 @@ namespace Microsoft.Alm.Cli
             {
                 OperationArguments operationArguments = new OperationArguments(_context, stdin);
 
+                if (operationArguments.TargetUri is null)
+                {
+                    var inner = new NullReferenceException($"{nameof(operationArguments)}.{nameof(operationArguments.TargetUri)}");
+                    throw new InvalidOperationException(inner.Message, inner);
+                }
+                if (operationArguments.Username is null)
+                {
+                    var inner = new NullReferenceException($"{nameof(operationArguments)}.{nameof(operationArguments.Username)}");
+                    throw new InvalidOperationException(inner.Message, inner);
+                }
+
                 // Set the parent window handle.
                 ParentHwnd = operationArguments.ParentHwnd;
 
-                Debug.Assert(operationArguments != null, "The operationArguments is null");
-                Debug.Assert(operationArguments.Username != null, "The operaionArgument.Username is null");
-                Debug.Assert(operationArguments.TargetUri != null, "The operationArgument.TargetUri is null");
-
-                Task.Run(async () => { await LoadOperationArguments(operationArguments); }).Wait();
-                EnableTraceLogging(operationArguments);
-
-                var credentials = operationArguments.Credentials;
-                var task = Task.Run(async () => { return await CreateAuthentication(operationArguments); });
-                BaseAuthentication authentication = task.Result;
-
-                switch (operationArguments.Authority)
+                Task.Run(async () =>
                 {
-                    default:
-                    case AuthorityType.Basic:
-                        Trace.WriteLine($"storing basic credentials for '{operationArguments.TargetUri}'.");
-                        break;
 
-                    case AuthorityType.Bitbucket:
-                        Trace.WriteLine($"storing Bitbucket credentials for '{operationArguments.TargetUri}'.");
-                        break;
+                    await LoadOperationArguments(operationArguments);
+                    EnableTraceLogging(operationArguments);
 
-                    case AuthorityType.AzureDirectory:
-                    case AuthorityType.MicrosoftAccount:
-                        Trace.WriteLine($"storing VSTS credentials for '{operationArguments.TargetUri}'.");
-                        break;
+                    var credentials = operationArguments.Credentials;                    
+                    BaseAuthentication authentication = await CreateAuthentication(operationArguments); ;
 
-                    case AuthorityType.GitHub:
-                        Trace.WriteLine($"storing GitHub credentials for '{operationArguments.TargetUri}'.");
-                        break;
+                    switch (operationArguments.Authority)
+                    {
+                        default:
+                        case AuthorityType.Basic:
+                            Trace.WriteLine($"storing basic credentials for '{operationArguments.TargetUri}'.");
+                            break;
 
-                    case AuthorityType.Ntlm:
-                        Trace.WriteLine($"storing NTLM credentials for '{operationArguments.TargetUri}'.");
-                        break;
-                }
+                        case AuthorityType.Bitbucket:
+                            Trace.WriteLine($"storing Bitbucket credentials for '{operationArguments.TargetUri}'.");
+                            break;
 
-                authentication.SetCredentials(operationArguments.TargetUri, credentials);
+                        case AuthorityType.AzureDirectory:
+                        case AuthorityType.MicrosoftAccount:
+                            Trace.WriteLine($"storing VSTS credentials for '{operationArguments.TargetUri}'.");
+                            break;
+
+                        case AuthorityType.GitHub:
+                            Trace.WriteLine($"storing GitHub credentials for '{operationArguments.TargetUri}'.");
+                            break;
+
+                        case AuthorityType.Ntlm:
+                            Trace.WriteLine($"storing NTLM credentials for '{operationArguments.TargetUri}'.");
+                            break;
+                    }
+
+                    await authentication.SetCredentials(operationArguments.TargetUri, credentials);
+                }).Wait();
             }
         }
 
