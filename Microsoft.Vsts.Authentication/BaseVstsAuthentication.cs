@@ -46,6 +46,8 @@ namespace Microsoft.Alm.Authentication
 
         protected const string AdalRefreshPrefix = "ada";
 
+        internal const string VstsBaseUrlHost = VstsAzureAuthority.VstsBaseUrlHost;
+
         private const char CachePairSeperator = '=';
         private const char CachePairTerminator = '\0';
         private const string CachePathDirectory = "GitCredentialManager";
@@ -167,7 +169,6 @@ namespace Microsoft.Alm.Authentication
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Design", "CA1062:Validate arguments of public methods", MessageId = "0")]
         public static async Task<Guid?> DetectAuthority(RuntimeContext context, TargetUri targetUri)
         {
-            const string VstsBaseUrlHost = "visualstudio.com";
             const string VstsResourceTenantHeader = "X-VSS-ResourceTenant";
 
             if (context is null)
