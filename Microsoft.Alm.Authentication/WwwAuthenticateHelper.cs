@@ -50,7 +50,7 @@ namespace Microsoft.Alm.Authentication
             {
                 try
                 {
-                    // Configure the http request to not choose an authentication strategy for us
+                    // Configure the HTTP request to not choose an authentication strategy for us
                     // because we want to deliver the complete payload to the caller.
                     var options = new NetworkRequestOptions(false)
                     {
@@ -67,7 +67,8 @@ namespace Microsoft.Alm.Authentication
                 }
                 catch (Exception exception)
                 {
-                    context.Trace.WriteLine("error testing targetUri for NTLM: " + exception.Message);
+                    context.Trace.WriteLine("error testing targetUri for NTLM.");
+                    context.Trace.WriteException(exception);
                 }
             }
 

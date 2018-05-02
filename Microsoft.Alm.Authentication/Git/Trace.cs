@@ -26,16 +26,46 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
-using System.Text;
+using static System.Globalization.CultureInfo;
 
 namespace Microsoft.Alm.Authentication.Git
 {
     public interface ITrace
     {
+        /// <summary>
+        /// Add a listener to the trace writer.
+        /// </summary>
+        /// <param name="listener">The listener to add.</param>
         void AddListener(TextWriter listener);
 
+        /// <summary>
+        /// Forces any pending trace messages to be written to any listeners.
+        /// </summary>
         void Flush();
 
+        /// <summary>
+        /// Writes an exception as a message to the trace writer.
+        /// <para/>
+        /// Expands exceptions' inner exceptions into additional trace lines.
+        /// </summary>
+        /// <param name="exception">The exception to write.</param>
+        /// <param name="filePath">Path of the file this method is called from.</param>
+        /// <param name="lineNumber">Line number of file this method is called from.</param>
+        /// <param name="memberName">Name of the member in which this method is called.</param>
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Design", "CA1026:DefaultParametersShouldNotBeUsed")]
+        void WriteException(
+            Exception exception,
+            [System.Runtime.CompilerServices.CallerFilePath] string filePath = "",
+            [System.Runtime.CompilerServices.CallerLineNumber] int lineNumber = 0,
+            [System.Runtime.CompilerServices.CallerMemberName] string memberName = "");
+
+        /// <summary>
+        /// Writes a message to the trace writer followed by a line terminator.
+        /// </summary>
+        /// <param name="message">The message to write.</param>
+        /// <param name="filePath">Path of the file this method is called from.</param>
+        /// <param name="lineNumber">Line number of file this method is called from.</param>
+        /// <param name="memberName">Name of the member in which this method is called.</param>
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Design", "CA1026:DefaultParametersShouldNotBeUsed")]
         void WriteLine(
             string message,
@@ -60,10 +90,7 @@ namespace Microsoft.Alm.Authentication.Git
         private readonly object _syncpoint = new object();
         private List<TextWriter> _writers;
 
-        /// <summary>
-        /// Add a listener to the trace writer.
-        /// </summary>
-        /// <param name="listener">The listener to add.</param>
+
         public void AddListener(TextWriter listener)
         {
             lock (_syncpoint)
@@ -83,9 +110,6 @@ namespace Microsoft.Alm.Authentication.Git
             GC.SuppressFinalize(this);
         }
 
-        /// <summary>
-        /// Forces any pending trace messages to be written to any listeners.
-        /// </summary>
         public void Flush()
         {
             lock (_syncpoint)
@@ -102,13 +126,24 @@ namespace Microsoft.Alm.Authentication.Git
             }
         }
 
-        /// <summary>
-        /// Writes a message to the trace writer followed by a line terminator.
-        /// </summary>
-        /// <param name="message">The message to write.</param>
-        /// <param name="filePath">Path of the file this method is called from.</param>
-        /// <param name="lineNumber">Line number of file this method is called from.</param>
-        /// <param name="memberName">Name of the member in which this method is called.</param>
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Design", "CA1026:DefaultParametersShouldNotBeUsed")]
+        public void WriteException(
+            Exception exception,
+            [System.Runtime.CompilerServices.CallerFilePath] string filePath = "",
+            [System.Runtime.CompilerServices.CallerLineNumber] int lineNumber = 0,
+            [System.Runtime.CompilerServices.CallerMemberName] string memberName = "")
+        {
+            if (exception is null)
+                return;
+
+            WriteLine($"! error: '{exception.Message}'.");
+
+            while ((exception = exception.InnerException) != null)
+            {
+                WriteLine($"       > '{exception.Message}'.");
+            }
+        }
+
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Design", "CA1026:DefaultParametersShouldNotBeUsed")]
         public void WriteLine(
             string message,
@@ -172,7 +207,7 @@ namespace Microsoft.Alm.Authentication.Git
                 throw new ArgumentNullException(nameof(memberName));
 
             // Source column format is file:line
-            string source = string.Format(System.Globalization.CultureInfo.InvariantCulture, "{0}:{1}", filePath, lineNumber);
+            string source = string.Format(InvariantCulture, "{0}:{1}", filePath, lineNumber);
 
             if (source.Length > SourceColumnMaxWidth)
             {
@@ -195,7 +230,7 @@ namespace Microsoft.Alm.Authentication.Git
             }
 
             // Git's trace format is "{timestamp,-15} {source,-23} trace: {details}"
-            string text = string.Format(System.Globalization.CultureInfo.InvariantCulture, "{0:HH:mm:ss.ffffff} {1,-23} trace: [{2}] {3}", DateTime.Now, source, memberName, message);
+            string text = string.Format(InvariantCulture, "{0:HH:mm:ss.ffffff} {1,-23} trace: [{2}] {3}", DateTime.Now, source, memberName, message);
 
             return text;
         }

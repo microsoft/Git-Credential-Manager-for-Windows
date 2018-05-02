@@ -430,7 +430,8 @@ namespace Microsoft.Alm.Authentication.Git
                             }
                             catch (Exception exception)
                             {
-                                context.Trace.WriteLine($"failed to parse config file: {val}. {exception.Message}");
+                                context.Trace.WriteLine($"failed to parse config file: {val}.");
+                                context.Trace.WriteException(exception);
                             }
                         }
                         else
