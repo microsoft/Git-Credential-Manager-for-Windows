@@ -1,0 +1,471 @@
+﻿<!--
+/**** Git Credential Manager for Windows ****
+ *
+ * Copyright (c) Microsoft Corporation
+ * All rights reserved.
+ *
+ * MIT License
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy
+ * of this software and associated documentation files (the """"Software""""), to deal
+ * in the Software without restriction, including without limitation the rights to
+ * use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of
+ * the Software, and to permit persons to whom the Software is furnished to do so,
+ * subject to the following conditions:
+ *
+ * The above copyright notice and this permission notice shall be included in all
+ * copies or substantial portions of the Software.
+ *
+ * THE SOFTWARE IS PROVIDED *AS IS*, WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS
+ * FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR
+ * COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN
+ * AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
+ * WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE."
+**/
+-->
+
+<Window x:Class="Microsoft.Alm.Gui.UserPromptDialog"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        mc:Ignorable="d"
+        Height="{Binding Path=DesiredHeight, Mode=OneWay}"
+        Icon="Assets/gcm.ico"
+        ResizeMode="NoResize"
+        Title="Git Credential Manager for Windows"
+        Topmost="True"
+        Width="{Binding Path=DesiredWidth, Mode=TwoWay}"
+        WindowStartupLocation="CenterScreen"
+        WindowStyle="ToolWindow">
+    <Window.Resources>
+        <ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                            xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                            xmlns:sys="clr-namespace:System;assembly=mscorlib"
+                            xmlns:PresentationOptions="http://schemas.microsoft.com/winfx/2006/xaml/presentation/options"
+                            xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+                            xmlns:ui="clr-namespace:Microsoft.Alm.Gui"
+                            mc:Ignorable="PresentationOptions">
+            <Color x:Key="ColorBackground">#FFEEEEF2</Color>
+            <Color x:Key="ColorAccent">#FFF5F5F5</Color>
+            <Color x:Key="ColorButtonBackgroundHover">#FFFFFFFF</Color>
+            <Color x:Key="ColorButtonBorderNormal">#FFCCCEDB</Color>
+            <Color x:Key="ColorButtonBorderHover">#FF007ACC</Color>
+            <Color x:Key="ColorButtonBorderFocused">#FF4EA6EA</Color>
+            <Color x:Key="ColorNormal">#1F1F1F</Color>
+            <Color x:Key="ColorFaded">#FF969696</Color>
+            <sys:Double x:Key="WidthDouble">6</sys:Double>
+            <sys:Double x:Key="WidthFine">1</sys:Double>
+            <sys:Double x:Key="WidthNormal">3</sys:Double>
+            <sys:Double x:Key="WidthThin">2</sys:Double>
+            <sys:Double x:Key="FontSizeNormal">12</sys:Double>
+            <FontFamily x:Key="FontFamilyNormal">Segoe UI</FontFamily>
+            <FontFamily x:Key="FontFamilyLight">Segoe UI Light, Segoe UI, Global User Interface</FontFamily>
+            <FontFamily x:Key="FontFamilyBold">Segoe UI Semibold</FontFamily>
+            <SolidColorBrush x:Key="BrushAccent" Color="{StaticResource ColorAccent}" />
+            <SolidColorBrush x:Key="BrushBackground" Color="{StaticResource ColorBackground}" />
+            <SolidColorBrush x:Key="BrushFaded" Color="{StaticResource ColorFaded}" />
+            <SolidColorBrush x:Key="BrushNormal" Color="{StaticResource ColorNormal}" />
+            <Thickness x:Key="ThicknessDouble"
+                       Bottom="{StaticResource WidthDouble}"
+                       Left="{StaticResource WidthDouble}"
+                       Right="{StaticResource WidthDouble}"
+                       Top="{StaticResource WidthDouble}" />
+            <Thickness x:Key="ThicknessMinimal"
+                       Bottom="{StaticResource WidthFine}"
+                       Left="{StaticResource WidthFine}"
+                       Right="{StaticResource WidthFine}"
+                       Top="{StaticResource WidthFine}" />
+            <Thickness x:Key="ThicknessNormal"
+                       Bottom="{StaticResource WidthNormal}"
+                       Left="{StaticResource WidthNormal}"
+                       Right="{StaticResource WidthNormal}"
+                       Top="{StaticResource WidthNormal}" />
+            <Thickness x:Key="PaddingDialog"
+                       Bottom="{StaticResource WidthNormal}"
+                       Left="{StaticResource WidthDouble}"
+                       Right="{StaticResource WidthDouble}"
+                       Top="{StaticResource WidthNormal}" />
+            <Style x:Key="ControlStyle" TargetType="Border">
+                <Setter Property="Background" Value="{StaticResource BrushBackground}" />
+                <Setter Property="BorderBrush" Value="{StaticResource BrushNormal}" />
+                <Setter Property="Padding" Value="{StaticResource ThicknessNormal}" />
+            </Style>
+            <Style x:Key="DialogStyle" TargetType="Border" BasedOn="{StaticResource ControlStyle}">
+                <Setter Property="Padding" Value="{StaticResource PaddingDialog}" />
+            </Style>
+            <Style x:Key="LabelStyle" TargetType="Label">
+                <Style.Resources>
+                    <Style TargetType="TextBlock">
+                        <Setter Property="Foreground" Value="{StaticResource BrushNormal}" />
+                        <Setter Property="FontFamily" Value="{StaticResource FontFamilyNormal}" />
+                        <Setter Property="FontSize" Value="{StaticResource FontSizeNormal}" />
+                    </Style>
+                </Style.Resources>
+                <Style.Setters>
+                    <Setter Property="HorizontalAlignment" Value="Stretch" />
+                    <Setter Property="HorizontalContentAlignment" Value="Center" />
+                    <Setter Property="Padding" Value="{StaticResource ThicknessNormal}" />
+                    <Setter Property="VerticalAlignment" Value="Stretch" />
+                    <Setter Property="VerticalContentAlignment" Value="Center" />
+                </Style.Setters>
+            </Style>
+            <Style x:Key="PromptLabelStyle" TargetType="Label" BasedOn="{StaticResource LabelStyle}">
+                <Style.Resources>
+                    <Thickness x:Key="Margin"
+                               Bottom="{StaticResource WidthThin}"
+                               Left="{StaticResource WidthThin}"
+                               Right="{StaticResource WidthThin}"
+                               Top="{StaticResource WidthThin}" />
+                    <Thickness x:Key="Padding"
+                               Bottom="{StaticResource WidthThin}"
+                               Left="{StaticResource WidthThin}"
+                               Right="{StaticResource WidthThin}"
+                               Top="{StaticResource WidthThin}" />
+                    <Style TargetType="TextBlock">
+                        <Setter Property="FontSize" Value="{StaticResource FontSizeNormal}" />
+                        <Setter Property="HorizontalAlignment" Value="Stretch" />
+                        <Setter Property="VerticalAlignment" Value="Stretch" />
+                    </Style>
+                </Style.Resources>
+                <Style.Setters>
+                    <Setter Property="HorizontalAlignment" Value="Stretch" />
+                    <Setter Property="HorizontalContentAlignment" Value="Left" />
+                    <Setter Property="Margin" Value="{StaticResource ThicknessNormal}" />
+                    <Setter Property="Padding" Value="{StaticResource ThicknessNormal}" />
+                    <Setter Property="VerticalAlignment" Value="Stretch" />
+                </Style.Setters>
+            </Style>
+            <Style x:Key="ResourceGridStyle" TargetType="Grid">
+                <Style.Resources>
+                    <Style TargetType="Label" BasedOn="{StaticResource LabelStyle}">
+                        <Setter Property="Margin" Value="0" />
+                        <Setter Property="Padding" Value="0" />
+                    </Style>
+                </Style.Resources>
+                <Style.Setters>
+                    <Setter Property="Margin" Value="0" />
+                </Style.Setters>
+            </Style>
+            <Style x:Key="FadedLabelStyle" TargetType="Label">
+                <Setter Property="Foreground" Value="{StaticResource BrushFaded}" />
+                <Setter Property="FontFamily" Value="{StaticResource FontFamilyLight}" />
+                <Setter Property="FontSize" Value="{StaticResource FontSizeNormal}" />
+                <Setter Property="HorizontalAlignment" Value="Stretch" />
+                <Setter Property="HorizontalContentAlignment" Value="Left" />
+                <Setter Property="Padding" Value="{StaticResource ThicknessNormal}" />
+                <Setter Property="VerticalAlignment" Value="Stretch" />
+                <Setter Property="VerticalContentAlignment" Value="Bottom" />
+            </Style>
+            <Style x:Key="PassphraseBorderStyle" TargetType="Border">
+                <Style.Resources>
+                    <Style TargetType="PasswordBox">
+                        <Setter Property="BorderBrush" Value="Transparent" />
+                        <Setter Property="BorderThickness" Value="0" />
+                        <Setter Property="Foreground" Value="{StaticResource BrushNormal}" />
+                        <Setter Property="FontFamily" Value="{StaticResource FontFamilyNormal}" />
+                        <Setter Property="FontSize" Value="{StaticResource FontSizeNormal}" />
+                        <Setter Property="HorizontalAlignment" Value="Stretch" />
+                        <Setter Property="HorizontalContentAlignment" Value="Left" />
+                        <Setter Property="Padding" Value="{StaticResource ThicknessNormal}" />
+                        <Setter Property="VerticalAlignment" Value="Center" />
+                        <Setter Property="VerticalContentAlignment" Value="Center" />
+                    </Style>
+                </Style.Resources>
+                <Style.Setters>
+                    <Setter Property="Background" Value="{StaticResource BrushBackground}" />
+                    <Setter Property="BorderBrush" Value="{StaticResource BrushFaded}" />
+                    <Setter Property="BorderThickness" Value="{StaticResource ThicknessMinimal}" />
+                    <Setter Property="HorizontalAlignment" Value="Stretch" />
+                    <Setter Property="Margin" Value="{StaticResource ThicknessNormal}" />
+                    <Setter Property="VerticalAlignment" Value="Center" />
+                </Style.Setters>
+            </Style>
+            <Style x:Key="LearnMoreLinkStyle" TargetType="Button">
+                <Style.Resources>
+                    <Color x:Key="ColorNormal">#0078D7</Color>
+                    <Color x:Key="HoverColor">#0078D7</Color>
+                    <sys:Double x:Key="FontSize">12</sys:Double>
+                    <SolidColorBrush x:Key="BrushNormal" Color="{StaticResource ColorNormal}" />
+                    <SolidColorBrush x:Key="HoverBrush" Color="{StaticResource HoverColor}" />
+                    <Style TargetType="Label" BasedOn="{StaticResource LabelStyle}">
+                        <Style.Resources>
+                            <Style TargetType="TextBlock">
+                                <Style.Triggers>
+                                    <Trigger Property="Label.IsMouseOver" Value="True">
+                                        <Setter Property="Foreground" Value="{StaticResource HoverBrush}" />
+                                        <Setter Property="TextBlock.TextDecorations" Value="Underline" />
+                                    </Trigger>
+                                    <Trigger Property="Label.IsMouseOver" Value="False">
+                                        <Setter Property="Foreground" Value="{StaticResource BrushNormal}" />
+                                        <Setter Property="TextBlock.TextDecorations" Value="None" />
+                                    </Trigger>
+                                </Style.Triggers>
+                            </Style>
+                        </Style.Resources>
+                        <Style.Setters>
+                            <Setter Property="Background" Value="Transparent" />
+                            <Setter Property="Cursor" Value="Hand" />
+                            <Setter Property="Foreground" Value="{StaticResource BrushNormal}" />
+                            <Setter Property="FontSize" Value="{StaticResource FontSize}" />
+                            <Setter Property="VerticalAlignment" Value="Center" />
+                        </Style.Setters>
+                    </Style>
+                </Style.Resources>
+                <Style.Setters>
+                    <Setter Property="Background" Value="Transparent" />
+                    <Setter Property="BorderBrush" Value="Transparent" />
+                    <Setter Property="BorderThickness" Value="0" />
+                    <Setter Property="HorizontalAlignment" Value="Left" />
+                    <Setter Property="Margin" Value="{StaticResource ThicknessNormal}" />
+                    <Setter Property="Template">
+                        <Setter.Value>
+                            <ControlTemplate TargetType="Button">
+                                <Border Background="{TemplateBinding Background}" BorderBrush="Transparent" BorderThickness="0">
+                                    <ContentPresenter HorizontalAlignment="Left" VerticalAlignment="Bottom" />
+                                </Border>
+                            </ControlTemplate>
+                        </Setter.Value>
+                    </Setter>
+                </Style.Setters>
+            </Style>
+            <Style x:Key="ActionBarStyle" TargetType="Border">
+                <Style.Resources>
+                    <Color x:Key="ColorBackground">#00000000</Color>
+                    <SolidColorBrush x:Key="BrushBackground" Color="{StaticResource ColorBackground}" />
+                    <sys:Double x:Key="ButtonHeight">23</sys:Double>
+                    <sys:Double x:Key="ButtonWidth">75</sys:Double>
+                    <Thickness x:Key="MarginButton" Bottom="0" Left="6" Right="0" Top="0" />
+                    <SolidColorBrush x:Key="BrushButtonBackgroundHover" Color="{StaticResource ColorButtonBackgroundHover}" />
+                    <SolidColorBrush x:Key="BrushButtonBorderNormal" Color="{StaticResource ColorButtonBorderNormal}" />
+                    <SolidColorBrush x:Key="ButtonBorderHoverBrush" Color="{StaticResource ColorButtonBorderHover}" />
+                    <SolidColorBrush x:Key="BrushButtonBorderFocused" Color="{StaticResource ColorButtonBorderFocused}" />
+                    <Style TargetType="Button">
+                        <Style.Resources>
+                            <Style TargetType="Label" BasedOn="{StaticResource LabelStyle}">
+                                <Style.Setters>
+                                    <Setter Property="Padding" Value="{StaticResource ThicknessMinimal}" />
+                                </Style.Setters>
+                            </Style>
+                        </Style.Resources>
+                        <Style.Setters>
+                            <Setter Property="Background" Value="{StaticResource BrushBackground}" />
+                            <Setter Property="BorderBrush" Value="{StaticResource BrushButtonBorderNormal}" />
+                            <Setter Property="BorderThickness" Value="{StaticResource ThicknessMinimal}" />
+                            <Setter Property="Cursor" Value="Hand" />
+                            <Setter Property="MinHeight" Value="{StaticResource ButtonHeight}" />
+                            <Setter Property="HorizontalAlignment" Value="Stretch" />
+                            <Setter Property="HorizontalContentAlignment" Value="Center" />
+                            <Setter Property="Padding" Value="0" />
+                            <Setter Property="Margin" Value="{StaticResource ThicknessNormal}" />
+                            <Setter Property="VerticalAlignment" Value="Stretch" />
+                            <Setter Property="VerticalContentAlignment" Value="Center" />
+                            <Setter Property="MinWidth" Value="{StaticResource ButtonWidth}" />
+                        </Style.Setters>
+                        <Style.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter Property="Background" Value="{StaticResource BrushButtonBackgroundHover}" />
+                                <Setter Property="BorderBrush" Value="{StaticResource ButtonBorderHoverBrush}" />
+                            </Trigger>
+                            <Trigger Property="IsMouseOver" Value="False">
+                                <Setter Property="Background" Value="{StaticResource BrushBackground}" />
+                                <Setter Property="BorderBrush" Value="{StaticResource BrushButtonBorderNormal}" />
+                            </Trigger>
+                            <Trigger Property="IsFocused" Value="True">
+                                <Setter Property="BorderBrush" Value="{StaticResource BrushButtonBorderFocused}" />
+                                <Setter Property="BorderThickness" Value="{StaticResource ThicknessMinimal}" />
+                                <Setter Property="Padding" Value="0" />
+                            </Trigger>
+                            <Trigger Property="IsFocused" Value="False">
+                                <Setter Property="BorderBrush" Value="{StaticResource BrushButtonBorderNormal}" />
+                                <Setter Property="BorderThickness" Value="{StaticResource ThicknessMinimal}" />
+                                <Setter Property="Padding" Value="0" />
+                            </Trigger>
+                        </Style.Triggers>
+                    </Style>
+                </Style.Resources>
+                <Style.Setters>
+                    <Setter Property="Background" Value="{StaticResource BrushBackground}" />
+                    <Setter Property="HorizontalAlignment" Value="Stretch" />
+                    <Setter Property="Padding" Value="{StaticResource ThicknessNormal}" />
+                    <Setter Property="VerticalAlignment" Value="Stretch" />
+                </Style.Setters>
+            </Style>
+            <Style x:Key="IconStyle" TargetType="Border">
+                <Style.Resources>
+                    <sys:Double x:Key="SizeHeight">64</sys:Double>
+                    <sys:Double x:Key="SizeWidth">64</sys:Double>
+                    <Style TargetType="Image">
+                        <Style.Setters>
+                            <Setter Property="Height" Value="{StaticResource SizeHeight}" />
+                            <Setter Property="Width" Value="{StaticResource SizeWidth}" />
+                            <Setter Property="Stretch" Value="UniformToFill" />
+                        </Style.Setters>
+                    </Style>
+                </Style.Resources>
+                <Style.Setters>
+                    <Setter Property="HorizontalAlignment" Value="Stretch" />
+                    <Setter Property="Margin" Value="{StaticResource ThicknessNormal}" />
+                    <Setter Property="Padding" Value="0" />
+                    <Setter Property="VerticalAlignment" Value="Stretch" />
+                </Style.Setters>
+            </Style>
+            <Style x:Key="ValidateHostStyle" TargetType="StackPanel">
+                <Style.Resources>
+                    <Thickness x:Key="ThicknessWide"
+                               Bottom="0"
+                               Left="{StaticResource WidthNormal}"
+                               Right="{StaticResource WidthNormal}"
+                               Top="0" />
+                    <Style TargetType="Label" BasedOn="{StaticResource PromptLabelStyle}">
+                        <Style.Resources>
+                            <Style TargetType="TextBlock">
+                                <Setter Property="Margin" Value="0" />
+                                <Setter Property="Padding" Value="0" />
+                            </Style>
+                        </Style.Resources>
+                        <Setter Property="Margin" Value="{StaticResource ThicknessWide}" />
+                    </Style>
+                    <Style TargetType="TextBlock">
+                        <Setter Property="Background" Value="{StaticResource BrushBackground}" />
+                        <Setter Property="Focusable" Value="True" />
+                        <Setter Property="FontFamily" Value="{StaticResource FontFamilyBold}" />
+                        <Setter Property="FontSize" Value="{StaticResource FontSizeNormal}" />
+                        <Setter Property="Padding" Value="{StaticResource ThicknessWide}" />
+                        <Setter Property="Margin" Value="{StaticResource ThicknessWide}" />
+                    </Style>
+                </Style.Resources>
+                <Style.Setters>
+                </Style.Setters>
+            </Style>
+        </ResourceDictionary>
+    </Window.Resources>
+    <Window.Content>
+        <Border Style="{StaticResource DialogStyle}">
+            <Border.Padding>
+                <Thickness Bottom="{StaticResource WidthNormal}"
+                           Left="{StaticResource WidthDouble}"
+                           Right="{StaticResource WidthDouble}"
+                           Top="{StaticResource WidthNormal}" />
+            </Border.Padding>
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="1*" />
+                    <ColumnDefinition Width="1*" />
+                    <ColumnDefinition Width="96" />
+                </Grid.ColumnDefinitions>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="1*" />
+                    <RowDefinition Height="Auto" />
+                </Grid.RowDefinitions>
+                <Grid.Children>
+                    <Border x:Name="UserPrompt"
+                            Grid.Column="0"
+                            Grid.ColumnSpan="2"
+                            Grid.Row="0">
+                        <ScrollViewer x:Name="PromptLabel"
+                                      BorderThickness="0"
+                                      HorizontalAlignment="Stretch"
+                                      HorizontalContentAlignment="Left"
+                                      HorizontalScrollBarVisibility="Hidden"
+                                      VerticalAlignment="Stretch"
+                                      VerticalContentAlignment="Center"
+                                      VerticalScrollBarVisibility="Disabled">
+                            <Grid>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="1*" />
+                                </Grid.ColumnDefinitions>
+                                <Grid.RowDefinitions>
+                                    <RowDefinition Height="1*" />
+                                    <RowDefinition Height="1*" />
+                                </Grid.RowDefinitions>
+                                <Grid.Children>
+                                    <Label Grid.Column="0"
+                                           Grid.Row="0"
+                                           Style="{StaticResource PromptLabelStyle}">
+                                        <TextBlock Text="{Binding Path=PromptText}" />
+                                    </Label>
+                                    <Border x:Name="UserInput"
+                                            Grid.Column="0"
+                                            Grid.Row="1"
+                                            Style="{StaticResource PassphraseBorderStyle}">
+                                        <PasswordBox x:Name="PassphrasePasswordBox"
+                                                     Focusable="True"
+                                                     TabIndex="0" />
+                                    </Border>
+                                    <Border x:Name="AdditionalInfoLabel"
+                                            Grid.Column="0"
+                                            Grid.Row="1"
+                                            Visibility="Collapsed">
+                                        <StackPanel Orientation="Vertical"
+                                                    Style="{StaticResource ValidateHostStyle}">
+                                            <Label>
+                                                <TextBlock Text="{Binding Path=AdditionalInfoText}" />
+                                            </Label>
+                                            <TextBlock x:Name="FingerprintTextBlock"
+                                                       Text="{Binding Path=Fingerprint}">
+                                            </TextBlock>
+                                        </StackPanel>
+                                    </Border>
+                                </Grid.Children>
+                            </Grid>
+                        </ScrollViewer>
+                    </Border>
+                    <Border x:Name="GcmIcon"
+                        Grid.Column="2"
+                        Grid.ColumnSpan="1"
+                        Grid.Row="0"
+                        Grid.RowSpan="1"
+                        Style="{StaticResource IconStyle}">
+                        <Image Source="Assets/Gcm.png" />
+                    </Border>
+                    <Border x:Name="ActionBar"
+                            Grid.Column="0"
+                            Grid.ColumnSpan="3"
+                            Grid.Row="1"
+                            Style="{StaticResource ActionBarStyle}">
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="1*" />
+                                <ColumnDefinition Width="Auto" />
+                                <ColumnDefinition Width="Auto" />
+                            </Grid.ColumnDefinitions>
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="*" />
+                            </Grid.RowDefinitions>
+                            <Grid.Children>
+                                <Button x:Name="LearnMoreLink"
+                                        Grid.Column="0"
+                                        Grid.Row="0"
+                                        Style="{StaticResource LearnMoreLinkStyle}"
+                                        Click="MoreInfoLabel_Click"
+                                        TabIndex="3">
+                                    <Label>
+                                        <TextBlock Text="Learn More" />
+                                    </Label>
+                                </Button>
+                                <Button x:Name="PositiveButton"
+                                        Click="PositiveButton_Click"
+                                        Content="_Ok"
+                                        Grid.Column="1"
+                                        Grid.Row="0"
+                                        IsDefault="True"
+                                        TabIndex="1">
+                                </Button>
+                                <Button x:Name="NegativeButton"
+                                        Click="NegativeButton_Click"
+                                        Content="_Cancel"
+                                        Grid.Column="2"
+                                        Grid.Row="0"
+                                        IsCancel="True"
+                                        TabIndex="2">
+                                </Button>
+                            </Grid.Children>
+                        </Grid>
+                    </Border>
+                </Grid.Children>
+            </Grid>
+        </Border>
+    </Window.Content>
+</Window>
