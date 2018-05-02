@@ -121,7 +121,9 @@ namespace Microsoft.Alm.Cli
             {
                 _context.Trace.WriteLine($"converted '{url}' to '{uri.AbsoluteUri}'.");
 
-                OperationArguments operationArguments = new OperationArguments(_context, uri);
+                OperationArguments operationArguments = new OperationArguments(_context);
+
+                operationArguments.SetTargetUri(uri);
 
                 Task.Run(async () =>
                 {
@@ -171,7 +173,8 @@ namespace Microsoft.Alm.Cli
             }
 
             // Create operation arguments, and load configuration data.
-            OperationArguments operationArguments = new OperationArguments(_context, targetUri);
+            var operationArguments = new OperationArguments(_context);
+            operationArguments.SetTargetUri(targetUri);
 
             Task.Run(async () => { await LoadOperationArguments(operationArguments); }).Wait();
             EnableTraceLogging(operationArguments);
@@ -245,20 +248,23 @@ namespace Microsoft.Alm.Cli
 
             using (var stdin = InStream)
             {
-                var operationArguments = new OperationArguments(_context, stdin)
+                var operationArguments = new OperationArguments(_context)
                 {
                     QueryUri = uri
                 };
 
-                if (operationArguments.TargetUri is null)
-                {
-                    var inner = new NullReferenceException($"{nameof(operationArguments)}.{nameof(operationArguments.TargetUri)}");
-                    throw new InvalidOperationException(inner.Message, inner);
-                }
-
                 Task.Run(async () =>
                 {
+                    await operationArguments.ReadInput(stdin);
+
+                    if (operationArguments.TargetUri is null)
+                    {
+                        var inner = new NullReferenceException($"{nameof(operationArguments)}.{nameof(operationArguments.TargetUri)}");
+                        throw new InvalidOperationException(inner.Message, inner);
+                    }
+
                     await LoadOperationArguments(operationArguments);
+                    EnableTraceLogging(operationArguments);
 
                     // Set the parent window handle.
                     ParentHwnd = operationArguments.ParentHwnd;
@@ -317,21 +323,23 @@ namespace Microsoft.Alm.Cli
             // see: https://www.kernel.org/pub/software/scm/git/docs/git-credential.html
             using (var stdin = InStream)
             {
-                var operationArguments = new OperationArguments(_context, stdin);
-
-                if (operationArguments.TargetUri is null)
-                {
-                    var inner = new NullReferenceException($"{nameof(operationArguments)}.{nameof(operationArguments.TargetUri)}");
-                    throw new InvalidOperationException(inner.Message, inner);
-                }
-
-                // Set the parent window handle.
-                ParentHwnd = operationArguments.ParentHwnd;
+                var operationArguments = new OperationArguments(_context);
 
                 Task.Run(async () =>
                 {
+                    await operationArguments.ReadInput(stdin);
+
+                    if (operationArguments.TargetUri is null)
+                    {
+                        var inner = new NullReferenceException($"{nameof(operationArguments)}.{nameof(operationArguments.TargetUri)}");
+                        throw new InvalidOperationException(inner.Message, inner);
+                    }
+
                     await LoadOperationArguments(operationArguments);
                     EnableTraceLogging(operationArguments);
+
+                    // Set the parent window handle.
+                    ParentHwnd = operationArguments.ParentHwnd;
 
                     if (operationArguments.PreserveCredentials)
                     {
@@ -351,16 +359,18 @@ namespace Microsoft.Alm.Cli
             // see: https://www.kernel.org/pub/software/scm/git/docs/git-credential.html
             using (var stdin = InStream)
             {
-                OperationArguments operationArguments = new OperationArguments(_context, stdin);
-
-                if (operationArguments.TargetUri is null)
-                {
-                    var inner = new NullReferenceException($"{nameof(operationArguments)}.{nameof(operationArguments.TargetUri)}");
-                    throw new InvalidOperationException(inner.Message, inner);
-                }
+                OperationArguments operationArguments = new OperationArguments(_context);
 
                 Task.Run(async () =>
                 {
+                    await operationArguments.ReadInput(stdin);
+
+                    if (operationArguments.TargetUri is null)
+                    {
+                        var inner = new NullReferenceException($"{nameof(operationArguments)}.{nameof(operationArguments.TargetUri)}");
+                        throw new InvalidOperationException(inner.Message, inner);
+                    }
+
                     await LoadOperationArguments(operationArguments);
                     EnableTraceLogging(operationArguments);
 
@@ -431,27 +441,28 @@ namespace Microsoft.Alm.Cli
             // see: https://www.kernel.org/pub/software/scm/git/docs/git-credential.html
             using (var stdin = InStream)
             {
-                OperationArguments operationArguments = new OperationArguments(_context, stdin);
-
-                if (operationArguments.TargetUri is null)
-                {
-                    var inner = new NullReferenceException($"{nameof(operationArguments)}.{nameof(operationArguments.TargetUri)}");
-                    throw new InvalidOperationException(inner.Message, inner);
-                }
-                if (operationArguments.Username is null)
-                {
-                    var inner = new NullReferenceException($"{nameof(operationArguments)}.{nameof(operationArguments.Username)}");
-                    throw new InvalidOperationException(inner.Message, inner);
-                }
-
-                // Set the parent window handle.
-                ParentHwnd = operationArguments.ParentHwnd;
+                OperationArguments operationArguments = new OperationArguments(_context);
 
                 Task.Run(async () =>
                 {
+                    await operationArguments.ReadInput(stdin);
+
+                    if (operationArguments.TargetUri is null)
+                    {
+                        var inner = new NullReferenceException($"{nameof(operationArguments)}.{nameof(operationArguments.TargetUri)}");
+                        throw new InvalidOperationException(inner.Message, inner);
+                    }
+                    if (operationArguments.Username is null)
+                    {
+                        var inner = new NullReferenceException($"{nameof(operationArguments)}.{nameof(operationArguments.Username)}");
+                        throw new InvalidOperationException(inner.Message, inner);
+                    }
 
                     await LoadOperationArguments(operationArguments);
                     EnableTraceLogging(operationArguments);
+
+                    // Set the parent window handle.
+                    ParentHwnd = operationArguments.ParentHwnd;
 
                     var credentials = operationArguments.Credentials;                    
                     BaseAuthentication authentication = await CreateAuthentication(operationArguments); ;

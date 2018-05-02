@@ -210,13 +210,13 @@ namespace Microsoft.Alm.Cli
 
                     targetUrl += targetUri.Host;
 
-                    // retain the port if specified
+                    // Retain the port if specified.
                     if (!targetUri.IsDefaultPort)
                     {
                         targetUrl += $":{targetUri.Port}";
                     }
 
-                    // retain the path if specified
+                    // Retain the path if specified.
                     if (!string.IsNullOrWhiteSpace(targetUri.LocalPath))
                     {
                         targetUrl += targetUri.LocalPath;
@@ -226,7 +226,8 @@ namespace Microsoft.Alm.Cli
                     {
                         _context.Trace.WriteLine($"success parsing URL, targetUri = '{targetUri}'.");
 
-                        OperationArguments operationArguments = new OperationArguments(_context, targetUri);
+                        var operationArguments = new OperationArguments(_context);
+                        operationArguments.SetTargetUri(targetUri);
                         operationArguments.SetCredentials(username ?? string.Empty, password ?? string.Empty);
 
                         // Load up the operation arguments, enable tracing, and query for credentials.
