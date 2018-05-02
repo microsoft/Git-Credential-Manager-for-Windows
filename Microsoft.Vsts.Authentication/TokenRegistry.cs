@@ -222,7 +222,7 @@ namespace Microsoft.Alm.Authentication
                 }
                 catch (Exception exception)
                 {
-                    context.Trace.WriteLine($"! {exception.Message}");
+                    context.Trace.WriteException(exception);
                 }
 
                 yield return result;

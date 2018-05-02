@@ -191,7 +191,7 @@ namespace Microsoft.Alm.Authentication
         /// <para/>
         /// Compact tokens are necessary for clients which have restrictions on the size of the basic authentication header which they can create (example: Git).
         /// </param>
-        [Obsolete("Please use Task<Credential> NoninteractiveLogon(TargetUri targetUri, PersonalAccessTokenOptions options) instead.", false)]
+        [Obsolete("Use Task<Credential> NoninteractiveLogon(TargetUri targetUri, PersonalAccessTokenOptions options) instead.", false)]
         public async Task<Credential> NoninteractiveLogon(TargetUri targetUri, bool requestCompactToken)
         {
             BaseSecureStore.ValidateTargetUri(targetUri);

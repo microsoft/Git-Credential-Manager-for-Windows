@@ -235,7 +235,8 @@ namespace Microsoft.Alm.Authentication
                     }
                     catch (HttpRequestException exception)
                     {
-                        context.Trace.WriteLine($"unable to get response from '{targetUri}' due to '{exception.Message}'.");
+                        context.Trace.WriteLine($"unable to get response from '{targetUri}', an error occurred before the server could respond.");
+                        context.Trace.WriteException(exception);
                     }
                 }
                 else
@@ -427,7 +428,8 @@ namespace Microsoft.Alm.Authentication
                 {
                     System.Diagnostics.Debug.WriteLine(exception);
 
-                    Trace.WriteLine($"failed to write credentials to the secure store: {exception.GetType().Name}.");
+                    Trace.WriteLine($"failed to write credentials to the secure store.");
+                    Trace.WriteException(exception);
                 }
             }
 
@@ -473,7 +475,8 @@ namespace Microsoft.Alm.Authentication
             {
                 System.Diagnostics.Debug.WriteLine(exception);
 
-                context.Trace.WriteLine($"failed to deserialize tenant cache: {exception.GetType().Name}.");
+                context.Trace.WriteLine($"failed to deserialize tenant cache.");
+                context.Trace.WriteException(exception);
 
                 return cache;
             }
@@ -579,7 +582,8 @@ namespace Microsoft.Alm.Authentication
             {
                 System.Diagnostics.Debug.WriteLine(exception);
 
-                context.Trace.WriteLine($"failed to serialize tenant cache: {exception.GetType().Name}.");
+                context.Trace.WriteLine($"failed to serialize tenant cache.");
+                context.Trace.WriteException(exception);
             }
         }
     }
