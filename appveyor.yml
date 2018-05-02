@@ -9,6 +9,10 @@ configuration:
 platform: Any CPU
 
 before_build:
+  - ps: dir -Directory
+  - ps: Remove-Item -Path .\Cli-AskPass -Recurse
+  - git clean -xdf
+  - git reset --hard
   - nuget restore
 
 build:
