@@ -93,8 +93,7 @@
     <!-- Only download a new copy of nuget.exe if we don't have a copy available -->
     <PropertyGroup>
       <NugetPath>nuget.exe</NugetPath>
-      <IsSigned>
-      </IsSigned>
+      <IsSigned></IsSigned>
       <IsSigned Condition=" '$(SignType)' == '' Or '$(SignType)' == '*Undefined*' ">-unsigned</IsSigned>
       <NugetWorkDir>$(OutputPath.TrimEnd('\'))</NugetWorkDir>
     </PropertyGroup>

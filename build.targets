@@ -15,4 +15,16 @@
     <Delete Files="$(OutputPath)\*.*;$(IntermediateOutputPath)\*.*" />
     <RemoveDir Directories="$(IntermediateOutputPath);$(OutputPath)"/>
   </Target>
+  <Target Name="CopySymbols" Condition=" '$(TestProjectType)' == '' Or '$(TestProjectType)' == '*Undefined*' " AfterTargets="CopyFilesToOutputDirectory">
+    <PropertyGroup>
+      <SymbolDir>$(SolutionDir)\Symbols</SymbolDir>
+    </PropertyGroup>
+    <ItemGroup>
+      <SymbolFiles Include="$(OutputPath)\*.pdb">
+        <InProject>false</InProject>
+      </SymbolFiles>
+    </ItemGroup>
+    <MakeDir Condition="!Exists('$(SymbolDir)')" Directories="$(SymbolDir)" /> 
+    <Copy SourceFiles="@(SymbolFiles)" DestinationFolder="$(SymbolDir)" />
+  </Target>
 </Project>
