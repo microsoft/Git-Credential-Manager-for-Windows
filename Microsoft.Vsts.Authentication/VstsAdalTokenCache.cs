@@ -92,7 +92,8 @@ namespace Microsoft.Alm.Authentication
                     }
                     catch (Exception exception)
                     {
-                        _context.Trace.WriteLine($"error: {nameof(VstsAdalTokenCache)} \"{_cacheFilePath}\": {exception.Message}");
+                        _context.Trace.WriteLine($"error: {nameof(VstsAdalTokenCache)} \"{_cacheFilePath}\".");
+                        _context.Trace.WriteException(exception);
                     }
                 }
             }
@@ -114,7 +115,8 @@ namespace Microsoft.Alm.Authentication
                     }
                     catch (Exception exception)
                     {
-                        _context.Trace.WriteLine($"error: {nameof(VstsAdalTokenCache)} \"{_cacheFilePath}\": {exception.Message}");
+                        _context.Trace.WriteLine($"error: {nameof(VstsAdalTokenCache)} \"{_cacheFilePath}\".");
+                        _context.Trace.WriteException(exception);
                     }
                 }
             }

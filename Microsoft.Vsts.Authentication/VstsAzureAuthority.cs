@@ -28,32 +28,39 @@ using System.Net.Http;
 using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
+using static System.Globalization.CultureInfo;
 
 namespace Microsoft.Alm.Authentication
 {
     internal class VstsAzureAuthority : AzureAuthority, IVstsAuthority
     {
-        public VstsAzureAuthority(RuntimeContext context, string authorityHostUrl = null)
+        public const string VstsBaseUrlHost = "visualstudio.com";
+
+        public VstsAzureAuthority(RuntimeContext context, string authorityHostUrl)
             : base(context)
         {
             AuthorityHostUrl = authorityHostUrl ?? AuthorityHostUrl;
         }
 
-        public async Task<Token> GeneratePersonalAccessToken(TargetUri targetUri, Token accessToken, VstsTokenScope tokenScope, bool requireCompactToken, TimeSpan? tokenDuration = null)
+        public VstsAzureAuthority(RuntimeContext context)
+            : this(context, null)
+        { }
+
+        public async Task<Token> GeneratePersonalAccessToken(TargetUri targetUri, Token authorization, VstsTokenScope tokenScope, bool requireCompactToken, TimeSpan? tokenDuration = null)
         {
             if (targetUri is null)
                 throw new ArgumentNullException(nameof(targetUri));
-            if (accessToken is null)
-                throw new ArgumentNullException(nameof(accessToken));
+            if (authorization is null)
+                throw new ArgumentNullException(nameof(authorization));
             if (tokenScope is null)
                 throw new ArgumentNullException(nameof(tokenScope));
 
             try
             {
-                var requestUri = await CreatePersonalAccessTokenRequestUri(targetUri, accessToken, requireCompactToken);
+                var requestUri = await CreatePersonalAccessTokenRequestUri(targetUri, authorization, requireCompactToken);
                 var options = new NetworkRequestOptions(true)
                 {
-                    Authorization = accessToken,
+                    Authorization = authorization,
                 };
 
                 using (StringContent content = GetAccessTokenRequestBody(targetUri, tokenScope, tokenDuration))
@@ -78,11 +85,13 @@ namespace Microsoft.Alm.Authentication
                             }
                         }
                     }
+
+                    Trace.WriteLine($"failed to acquire personal access token for '{targetUri}' [{(int)response.StatusCode} {response.ReasonPhrase}].");
                 }
             }
-            catch (Exception e)
+            catch (Exception exception)
             {
-                Trace.WriteLine($"! an error occurred: {e.Message}");
+                Trace.WriteException(exception);
             }
 
             Trace.WriteLine($"personal access token acquisition for '{targetUri}' failed.");
@@ -90,14 +99,12 @@ namespace Microsoft.Alm.Authentication
             return null;
         }
 
-        public async Task<bool> PopulateTokenTargetId(TargetUri targetUri, Token accessToken)
+        public async Task<bool> PopulateTokenTargetId(TargetUri targetUri, Token authorization)
         {
             if (targetUri is null)
                 throw new ArgumentNullException(nameof(targetUri));
-            if (accessToken is null)
-                throw new ArgumentNullException(nameof(accessToken));
-
-            string resultId = null;
+            if (authorization is null)
+                throw new ArgumentNullException(nameof(authorization));
 
             try
             {
@@ -105,7 +112,7 @@ namespace Microsoft.Alm.Authentication
                 var requestUri = GetConnectionDataUri(targetUri);
                 var options = new NetworkRequestOptions(true)
                 {
-                    Authorization = accessToken,
+                    Authorization = authorization,
                 };
 
                 // Send the request and wait for the response.
@@ -119,22 +126,25 @@ namespace Microsoft.Alm.Authentication
                         if ((match = Regex.Match(content, @"""instanceId""\s*\:\s*""([^""]+)""", RegexOptions.CultureInvariant | RegexOptions.IgnoreCase)).Success
                             && match.Groups.Count == 2)
                         {
-                            resultId = match.Groups[1].Value;
+                            string resultId = match.Groups[1].Value;
+
+                            if (Guid.TryParse(resultId, out Guid instanceId))
+                            {
+                                Trace.WriteLine($"target identity is '{resultId}'.");
+                                authorization.TargetIdentity = instanceId;
+
+                                return true;
+                            }
                         }
                     }
+
+                    Trace.WriteLine($"failed to acquire the token's target identity for `{targetUri}` [{(int)response.StatusCode} {response.ReasonPhrase}].");
                 }
             }
             catch (HttpRequestException exception)
             {
-                Trace.WriteLine($"server returned '{exception.Message}'.");
-            }
-
-            if (Guid.TryParse(resultId, out Guid instanceId))
-            {
-                Trace.WriteLine($"target identity is '{resultId}'.");
-                accessToken.TargetIdentity = instanceId;
-
-                return true;
+                Trace.WriteLine("failed to acquire the token's target identity for `{targetUri}`, an error happened before the server could respond.");
+                Trace.WriteException(exception);
             }
 
             return false;
@@ -162,15 +172,17 @@ namespace Microsoft.Alm.Authentication
                     if (response.IsSuccessStatusCode)
                         return true;
 
+                    Trace.WriteLine($"credential validation for '{targetUri}' failed [{(int)response.StatusCode} {response.ReasonPhrase}].");
+
                     // Even if the service responded, if the issue isn't a 400 class response then
                     // the credentials were likely not rejected.
-                    if ((int)response.StatusCode >= 400 && (int)response.StatusCode < 500)
+                    if ((int)response.StatusCode < 400 && (int)response.StatusCode >= 500)
                         return true;
                 }
             }
             catch (Exception exception)
             {
-                Trace.WriteLine($"! error: '{exception.Message}'.");
+                Trace.WriteException(exception);
             }
 
             Trace.WriteLine($"credential validation for '{targetUri}' failed.");
@@ -204,19 +216,32 @@ namespace Microsoft.Alm.Authentication
                     {
                         // Even if the service responded, if the issue isn't a 400 class response then
                         // the credentials were likely not rejected.
-                        if ((int)response.StatusCode >= 400 && (int)response.StatusCode < 500)
-                            return false;
+                        if ((int)response.StatusCode < 400 && (int)response.StatusCode >= 500)
+                        {
+                            Trace.WriteLine($"unable to validate credentials for '{targetUri}', unexpected response [{(int)response.StatusCode} {response.ReasonPhrase}].");
 
-                        Trace.WriteLine($"unable to validate credentials due to '{response.StatusCode}'.");
-                        return true;
+                            return true;
+                        }
+
+                        Trace.WriteLine($"credential validation for '{targetUri}' failed [{(int)response.StatusCode} {response.ReasonPhrase}].");
+
+                        return false;
                     }
                 }
             }
+            catch (HttpRequestException exception)
+            {
+                // Since we're unable to invalidate the credentials, return optimistic results.
+                // This avoid credential invalidation due to network instability, etc.
+                Trace.WriteLine($"unable to validate credentials for '{targetUri}', failure occurred before server could respond.");
+                Trace.WriteException(exception);
+
+                return true;
+            }
             catch (Exception exception)
             {
-                Trace.WriteLine($"! error: '{exception.Message}'.");
+                Trace.WriteException(exception);
             };
-
 
             Trace.WriteLine($"token validation for '{targetUri}' failed.");
             return false;
@@ -288,11 +313,13 @@ namespace Microsoft.Alm.Authentication
                             }
                         }
                     }
+
+                    Trace.WriteLine($"failed to find Identity Service for '{targetUri}' via location service [{(int)response.StatusCode} {response.ReasonPhrase}].");
                 }
             }
             catch (Exception exception)
             {
-                Trace.WriteLine($"! error: '{exception.Message}'.");
+                Trace.WriteException(exception);
                 throw new VstsLocationServiceException($"Failed to find Identity Service for `{targetUri}`.", exception);
             }
 
@@ -310,7 +337,9 @@ namespace Microsoft.Alm.Authentication
             if (tokenScope is null)
                 throw new ArgumentNullException(nameof(tokenScope));
 
-            string tokenUrl = targetUri.ToString(false, true, false);
+            string tokenUrl = targetUri.ToString(username: false,
+                                                 port: true,
+                                                 path: false);
 
             if (targetUri.TargetUriContainsUsername)
             {
@@ -321,8 +350,8 @@ namespace Microsoft.Alm.Authentication
             Trace.WriteLine($"creating access token scoped to '{tokenScope}' for '{targetUri}'");
 
             string jsonContent = (duration.HasValue && duration.Value > TimeSpan.FromHours(1))
-                ? string.Format(ContentTimedJsonFormat, tokenScope, tokenUrl, Environment.MachineName, DateTime.UtcNow + duration.Value)
-                : string.Format(ContentBasicJsonFormat, tokenScope, tokenUrl, Environment.MachineName);
+                ? string.Format(InvariantCulture, ContentTimedJsonFormat, tokenScope, tokenUrl, Environment.MachineName, DateTime.UtcNow + duration.Value)
+                : string.Format(InvariantCulture, ContentBasicJsonFormat, tokenScope, tokenUrl, Environment.MachineName);
             StringContent content = new StringContent(jsonContent, Encoding.UTF8, HttpJsonContentType);
 
             return content;

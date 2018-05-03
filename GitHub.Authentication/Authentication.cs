@@ -153,7 +153,6 @@ namespace GitHub.Authentication
             else
             {
                 authentication = null;
-                context.Trace.WriteLine($"not github.com, authentication creation aborted.");
             }
 
             return authentication;

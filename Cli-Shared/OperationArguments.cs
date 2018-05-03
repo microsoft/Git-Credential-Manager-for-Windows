@@ -29,6 +29,7 @@ using System.IO;
 using System.Text;
 using System.Threading.Tasks;
 using Microsoft.Alm.Authentication;
+using static System.Globalization.CultureInfo;
 
 using Git = Microsoft.Alm.Authentication.Git;
 
@@ -43,7 +44,10 @@ namespace Microsoft.Alm.Cli
                 throw new ArgumentNullException(nameof(readableStream));
 
             if (readableStream == Stream.Null || !readableStream.CanRead)
-                throw new InvalidOperationException("Unable to read input.");
+            {
+                var inner = new InvalidDataException("Stream must be readable.");
+                throw new ArgumentException(inner.Message, nameof(readableStream), inner);
+            }
 
             byte[] buffer = new byte[4096];
             int read = 0;
@@ -64,7 +68,8 @@ namespace Microsoft.Alm.Cli
 
                 if ((read > 0 && read < 3 && buffer[read - 1] == '\n'))
                 {
-                    throw new InvalidDataException("Invalid input, please see 'https://www.kernel.org/pub/software/scm/git/docs/git-credential.html'.");
+                    var inner = new InvalidDataException("Invalid input, please see 'https://www.kernel.org/pub/software/scm/git/docs/git-credential.html'.");
+                    throw new InvalidOperationException(inner.Message, inner);
                 }
 
                 // The input ends with LFLF, check for that and break the read loop unless
@@ -86,7 +91,7 @@ namespace Microsoft.Alm.Cli
             string password = null;
 
             // The `StringReader` is just useful.
-            using (StringReader reader = new StringReader(input))
+            using (var reader = new StringReader(input))
             {
                 string line;
                 while (!string.IsNullOrWhiteSpace((line = reader.ReadLine())))
@@ -95,31 +100,25 @@ namespace Microsoft.Alm.Cli
 
                     if (pair.Length == 2)
                     {
-                        switch (pair[0])
+                        if ("protocol".Equals(pair[0], StringComparison.Ordinal))
                         {
-                            case "protocol":
-                                _queryProtocol = pair[1];
-                                break;
-
-                            case "host":
-                                _queryHost = pair[1];
-                                break;
-
-                            case "path":
-                                _queryPath = pair[1];
-                                break;
-
-                            case "username":
-                                {
-                                    username = pair[1];
-                                }
-                                break;
-
-                            case "password":
-                                {
-                                    password = pair[1];
-                                }
-                                break;
+                            _queryProtocol = pair[1];
+                        }
+                        else if ("host".Equals(pair[0], StringComparison.Ordinal))
+                        {
+                            _queryHost = pair[1];
+                        }
+                        else if ("path".Equals(pair[0], StringComparison.Ordinal))
+                        {
+                            _queryPath = pair[1];
+                        }
+                        else if ("username".Equals(pair[0], StringComparison.Ordinal))
+                        {
+                            username = pair[1];
+                        }
+                        else if ("password".Equals(pair[0], StringComparison.Ordinal))
+                        {
+                            password = pair[1];
                         }
                     }
                 }
@@ -145,12 +144,12 @@ namespace Microsoft.Alm.Cli
             : this(context)
         {
             if (targetUri is null)
-                throw new ArgumentNullException("targetUri");
+                throw new ArgumentNullException(nameof(targetUri));
 
             _queryProtocol = targetUri.Scheme;
             _queryHost = (targetUri.IsDefaultPort)
                 ? targetUri.Host
-                : string.Format(System.Globalization.CultureInfo.InvariantCulture, "{0}:{1}", targetUri.Host, targetUri.Port);
+                : string.Format(InvariantCulture, "{0}:{1}", targetUri.Host, targetUri.Port);
             _queryPath = targetUri.AbsolutePath;
 
             CreateTargetUri();
@@ -496,7 +495,10 @@ namespace Microsoft.Alm.Cli
             if (writableStream is null)
                 throw new ArgumentNullException(nameof(writableStream));
             if (!writableStream.CanWrite)
-                throw new ArgumentException("CanWrite property returned false.", nameof(writableStream));
+            {
+                var inner = new InvalidDataException("Stream must be writable.");
+                throw new ArgumentException(inner.Message, nameof(writableStream), inner);
+            }
 
             // Git reads/writes UTF-8, we'll explicitly encode to Utf-8 to avoid NetFx or the
             // operating system making the wrong encoding decisions.
@@ -551,7 +553,7 @@ namespace Microsoft.Alm.Cli
             _targetUri = new TargetUri(queryUrl, proxyUrl);
         }
 
-        private static bool NeedsToBeEscaped(string value)
+        internal static bool NeedsToBeEscaped(string value)
         {
             for (int i = 0; i < value.Length; i += 1)
             {

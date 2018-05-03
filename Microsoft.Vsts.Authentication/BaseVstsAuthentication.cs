@@ -46,6 +46,8 @@ namespace Microsoft.Alm.Authentication
 
         protected const string AdalRefreshPrefix = "ada";
 
+        internal const string VstsBaseUrlHost = VstsAzureAuthority.VstsBaseUrlHost;
+
         private const char CachePairSeperator = '=';
         private const char CachePairTerminator = '\0';
         private const string CachePathDirectory = "GitCredentialManager";
@@ -167,7 +169,6 @@ namespace Microsoft.Alm.Authentication
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Design", "CA1062:Validate arguments of public methods", MessageId = "0")]
         public static async Task<Guid?> DetectAuthority(RuntimeContext context, TargetUri targetUri)
         {
-            const string VstsBaseUrlHost = "visualstudio.com";
             const string VstsResourceTenantHeader = "X-VSS-ResourceTenant";
 
             if (context is null)
@@ -228,13 +229,14 @@ namespace Microsoft.Alm.Authentication
                             }
                             else
                             {
-                                context.Trace.WriteLine($"unable to get response from '{targetUri}', server responded with '{(int)response.StatusCode} {response.StatusCode}'.");
+                                context.Trace.WriteLine($"unable to get response from '{targetUri}' [{(int)response.StatusCode} {response.StatusCode}].");
                             }
                         }
                     }
                     catch (HttpRequestException exception)
                     {
-                        context.Trace.WriteLine($"unable to get response from '{targetUri}' due to '{exception.Message}'.");
+                        context.Trace.WriteLine($"unable to get response from '{targetUri}', an error occurred before the server could respond.");
+                        context.Trace.WriteException(exception);
                     }
                 }
                 else
@@ -426,7 +428,8 @@ namespace Microsoft.Alm.Authentication
                 {
                     System.Diagnostics.Debug.WriteLine(exception);
 
-                    Trace.WriteLine($"failed to write credentials to the secure store: {exception.GetType().Name}.");
+                    Trace.WriteLine($"failed to write credentials to the secure store.");
+                    Trace.WriteException(exception);
                 }
             }
 
@@ -472,7 +475,8 @@ namespace Microsoft.Alm.Authentication
             {
                 System.Diagnostics.Debug.WriteLine(exception);
 
-                context.Trace.WriteLine($"failed to deserialize tenant cache: {exception.GetType().Name}.");
+                context.Trace.WriteLine($"failed to deserialize tenant cache.");
+                context.Trace.WriteException(exception);
 
                 return cache;
             }
@@ -578,7 +582,8 @@ namespace Microsoft.Alm.Authentication
             {
                 System.Diagnostics.Debug.WriteLine(exception);
 
-                context.Trace.WriteLine($"failed to serialize tenant cache: {exception.GetType().Name}.");
+                context.Trace.WriteLine($"failed to serialize tenant cache.");
+                context.Trace.WriteException(exception);
             }
         }
     }
