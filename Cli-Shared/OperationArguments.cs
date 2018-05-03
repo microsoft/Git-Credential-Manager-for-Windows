@@ -37,8 +37,366 @@ namespace Microsoft.Alm.Cli
 {
     internal class OperationArguments : Base
     {
-        public OperationArguments(RuntimeContext context, Stream readableStream)
-                : this(context)
+        public OperationArguments(RuntimeContext context)
+            : base(context)
+        {
+            _authorityType = AuthorityType.Auto;
+            _interactivity = Interactivity.Auto;
+            _useLocalConfig = true;
+            _useHttpPath = true;
+            _useModalUi = true;
+            _useSystemConfig = true;
+            _validateCredentials = true;
+            _vstsTokenScope = Program.VstsCredentialScope;
+        }
+
+        // Test-only constructor
+        internal OperationArguments()
+            : this(RuntimeContext.Default)
+        { }
+
+        private AuthorityType _authorityType;
+        private Git.Configuration _configuration;
+        private Credential _credentials;
+        private string _customNamespace;
+        private Dictionary<string, string> _environmentVariables;
+        private Interactivity _interactivity;
+        private IntPtr _parentHwnd;
+        private bool _preserveCredentials;
+        private Uri _proxyUri;
+        private string _queryHost;
+        private string _queryPath;
+        private string _queryProtocol;
+        private TargetUri _targetUri;
+        private TimeSpan? _tokenDuration;
+        private bool _useHttpPath;
+        private bool _useLocalConfig;
+        private bool _useModalUi;
+        private string _username;
+        private bool _useSystemConfig;
+        private bool _validateCredentials;
+        private VstsTokenScope _vstsTokenScope;
+        private bool _writeLog;
+
+        public virtual AuthorityType Authority
+        {
+            get { return _authorityType; }
+            set { _authorityType = value; }
+        }
+
+        public virtual Credential Credentials
+        {
+            get { return _credentials; }
+            set { _credentials = value; }
+        }
+
+        public virtual string CustomNamespace
+        {
+            get { return _customNamespace; }
+            set { _customNamespace = value; }
+        }
+
+        /// <summary>
+        /// Gets a map of the process's environmental variables keyed on case-insensitive names.
+        /// </summary>
+        public virtual IReadOnlyDictionary<string, string> EnvironmentVariables
+        {
+            get
+            {
+                if (_environmentVariables == null)
+                {
+                    _environmentVariables = new Dictionary<string, string>(Program.EnvironKeyComparer);
+                    var iter = Environment.GetEnvironmentVariables().GetEnumerator();
+                    while (iter.MoveNext())
+                    {
+                        _environmentVariables[iter.Key as string] = iter.Value as string;
+                    }
+                }
+                return _environmentVariables;
+            }
+        }
+
+        /// <summary>
+        /// Gets the process's Git configuration based on current working directory, user's folder,
+        /// and Git's system directory.
+        /// </summary>
+        public virtual Git.Configuration GitConfiguration
+        {
+            get { return _configuration; }
+        }
+
+        /// <summary>
+        /// Gets or sets if the GCM expected interactivity level.
+        /// </summary>
+        public virtual Interactivity Interactivity
+        {
+            get { return _interactivity; }
+            set { _interactivity = value; }
+        }
+
+        /// <summary>
+        /// Gets or sets the handle of the parent UX window.
+        /// <para/>
+        /// Primarily used by IDE which have primary window handles, and a need for any UX presented by the GCM to appear relative to their UX.
+        /// <para/>
+        /// Returns the parent window's handle; otherwise `<seealso cref="IntPtr.Zero"/>`.
+        /// </summary>
+        public virtual IntPtr ParentHwnd
+        {
+            get { return _parentHwnd; }
+            set { _parentHwnd = value; }
+        }
+
+        /// <summary>
+        /// Gets the password value of `<seealso cref="Credentials"/>` if available; otherwise `<see langword="null"/>`.
+        /// </summary>
+        public virtual string Password
+        {
+            get { return _credentials?.Password; }
+        }
+
+        /// <summary>
+        /// Gets or sets the expected credential erasure behavior expectation.
+        /// </summary>
+        public virtual bool PreserveCredentials
+        {
+            get { return _preserveCredentials; }
+            set { _preserveCredentials = value; }
+        }
+
+        /// <summary>
+        /// Gets or sets the `<seealso cref="Uri"/>` of the proxy network operation should use if available; otherwise `<see langword="null"/>`.
+        /// </summary>
+        public virtual Uri ProxyUri
+        {
+            get { return _targetUri.ProxyUri; }
+            internal set
+            {
+                _proxyUri = value;
+
+                // Re-create the target Uri.
+                CreateTargetUri();
+            }
+        }
+
+        /// <summary>
+        /// Gets or sets the host (aka domain name) portion of `<seealso cref="QueryUri"/>`.
+        /// </summary>
+        public virtual string QueryHost
+        {
+            get { return _queryHost; }
+            set
+            {
+                if (value is null)
+                    throw new ArgumentNullException(nameof(QueryHost));
+
+                _queryHost = value;
+
+                // Re-create the target Uri.
+                CreateTargetUri();
+            }
+        }
+
+        /// <summary>
+        /// Gets or sets the path portion of `<see cref="QueryUri"/>`.
+        /// </summary>
+        public virtual string QueryPath
+        {
+            get { return _queryPath; }
+            set
+            {
+                _queryPath = value;
+
+                // Re-create the target Uri.
+                CreateTargetUri();
+            }
+        }
+
+        /// <summary>
+        /// Gets or sets the protocol portion of `<seealso cref="QueryUri"/>`.
+        /// </summary>
+        public virtual string QueryProtocol
+        {
+            get { return _queryProtocol; }
+            set
+            {
+                if (value is null)
+                    throw new ArgumentNullException(nameof(QueryProtocol));
+
+                _queryProtocol = value;
+
+                // Re-create the target Uri.
+                CreateTargetUri();
+            }
+        }
+
+        /// <summary>
+        /// Gets the `<seealso cref="Uri"/>` used for all network operations. 
+        /// </summary>
+        public virtual Uri QueryUri
+        {
+            get { return _targetUri?.QueryUri; }
+            set
+            {
+                if (value is null)
+                    throw new ArgumentNullException(nameof(QueryUri));
+
+                _queryHost = value.DnsSafeHost;
+                _queryPath = value.AbsolutePath;
+                _queryProtocol = value.Scheme;
+
+                // If there's a non-default port value, retain it.
+                if (!value.IsDefaultPort)
+                {
+                    _queryHost = $"{_queryHost}:{value.Port}";
+                }
+
+                // If there's a query segment, retain it.
+                if (!string.IsNullOrWhiteSpace(value.Query))
+                {
+                    _queryHost = $"{_queryHost}?{value.Query}";
+                }
+
+                // Re-create the target Uri.
+                CreateTargetUri();
+            }
+        }
+
+        /// <summary>
+        /// Gets the `<seealso cref="Authentication.TargetUri"/>` used by the GCM for all network operations.
+        /// </summary>
+        public virtual TargetUri TargetUri
+        {
+            get { return _targetUri; }
+        }
+
+        /// <summary>
+        /// Gets or sets the option token duration.
+        /// <para/>
+        /// Used during new token generation for authorities which support limiting tokens by lifetime.
+        /// <para/>
+        /// Default value is `<see langword="null"/>`.
+        /// </summary>
+        public virtual TimeSpan? TokenDuration
+        {
+            get { return _tokenDuration; }
+            set { _tokenDuration = value; }
+        }
+
+        /// <summary>
+        /// Gets or sets `<see langword="false"/>` if `<seealso cref="LoadConfiguration"/>` ignores local Git configuration values; otherwise `<see langword="true"/>`.
+        /// <para/>
+        /// Default value is `<see langword="true"/>`.
+        /// </summary>
+        public virtual bool UseConfigLocal
+        {
+            get { return _useLocalConfig; }
+            set { _useLocalConfig = value; }
+        }
+
+        /// <summary>
+        /// Gets or sets `<see langword="false"/>` if `<seealso cref="LoadConfiguration"/>` ignores system Git configuration values; otherwise `<see langword="true"/>`.
+        /// <para/>
+        /// Default value is `<see langword="true"/>`.
+        /// </summary>
+        public virtual bool UseConfigSystem
+        {
+            get { return _useSystemConfig; }
+            set { _useSystemConfig = value; }
+        }
+
+        /// <summary>
+        /// Gets or sets `<see langword="false"/>` if GCM ignored supplied URL-path information; otherwise `<see langword="true"/>`.
+        /// <para/>
+        /// Default value is `<see langword="true"/>`.
+        /// </summary>
+        public virtual bool UseHttpPath
+        {
+            get { return _useHttpPath; }
+            set { _useHttpPath = value; }
+        }
+
+        /// <summary>
+        /// Gets or sets `<see langword="false"/>` if GCM cannot present modal UX windows; otherwise `<see langword="true"/>`.
+        /// <para/>
+        /// Default value is `<see langword="true"/>`.
+        /// </summary>
+        public virtual bool UseModalUi
+        {
+            get { return _useModalUi; }
+            set { _useModalUi = value; }
+        }
+
+        /// <summary>
+        /// Gets or sets the user information portion of `<seealso cref="QueryUri"/>`.
+        /// </summary>
+        public virtual string Username
+        {
+            get { return _username; }
+            set
+            {
+                _username = value;
+
+                // Re-create the target Uri.
+                CreateTargetUri();
+            }
+        }
+
+        /// <summary>
+        /// Sets or sets `<see langword="false"/>` if credential validation should be skipped before returning; otherwise `<see langword="true"/>`.
+        /// <para/>
+        /// Only applies to authorities which support credential validation.
+        /// <para/>
+        /// Default value is `<see langword="true"/>`.
+        /// </summary>
+        public virtual bool ValidateCredentials
+        {
+            get { return _validateCredentials; }
+            set { _validateCredentials = value; }
+        }
+
+        /// <summary>
+        /// Gets or sets the scope, or permissions, when requesting new access tokens from VSTS.
+        /// <para/>
+        /// Default value is `<seealso cref="Program.VstsCredentialScope"/>`.
+        /// </summary>
+        public virtual VstsTokenScope VstsTokenScope
+        {
+            get { return _vstsTokenScope; }
+            set { _vstsTokenScope = value; }
+        }
+
+        /// <summary>
+        /// Gets or sets `<see langword="true"/>` if the GCM should write trace events; otherwise `<see langword="false"/>`.
+        /// <para/>
+        /// Default value is `<see langword="false"/>`.
+        /// </summary>
+        public virtual bool WriteLog
+        {
+            get { return _writeLog; }
+            set { _writeLog = value; }
+        }
+
+        /// <summary>
+        /// Loads the Git configuration based on `<seealso cref="Environment.CurrentDirectory"/>`.
+        /// </summary>
+        public virtual async Task LoadConfiguration()
+        {
+            _configuration = await Git.Configuration.ReadConfiuration(Context, Environment.CurrentDirectory, UseConfigLocal, UseConfigSystem);
+        }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="readableStream">
+        /// Readable stream with credential protocol formatted information.
+        /// <para/>
+        /// Please see 'https://www.kernel.org/pub/software/scm/git/docs/git-credential.html' for information about credential protocol format.
+        /// </param>
+        /// <exception cref="ArgumentNullException">When `<paramref name="readableStream"/>` is `<see langword="null"/>`.</exception>
+        /// <exception cref="ArgumentException">When `<paramref name="readableStream"/>` is not readable.</exception>
+        /// <exception cref="InvalidOperationException">When data read from `<paramref name="readableStream"/>` is in an unexpected format.</exception>
+        public virtual async Task ReadInput(Stream readableStream)
         {
             if (readableStream is null)
                 throw new ArgumentNullException(nameof(readableStream));
@@ -53,7 +411,7 @@ namespace Microsoft.Alm.Cli
             int read = 0;
 
             int r;
-            while ((r = readableStream.Read(buffer, read, buffer.Length - read)) > 0)
+            while ((r = await readableStream.ReadAsync(buffer, read, buffer.Length - read)) > 0)
             {
                 read += r;
 
@@ -140,296 +498,22 @@ namespace Microsoft.Alm.Cli
             CreateTargetUri();
         }
 
-        public OperationArguments(RuntimeContext context, Uri targetUri)
-            : this(context)
-        {
-            if (targetUri is null)
-                throw new ArgumentNullException(nameof(targetUri));
-
-            _queryProtocol = targetUri.Scheme;
-            _queryHost = (targetUri.IsDefaultPort)
-                ? targetUri.Host
-                : string.Format(InvariantCulture, "{0}:{1}", targetUri.Host, targetUri.Port);
-            _queryPath = targetUri.AbsolutePath;
-
-            CreateTargetUri();
-        }
-
-        public OperationArguments(RuntimeContext context)
-            : base(context)
-        {
-            _authorityType = AuthorityType.Auto;
-            _interactivity = Interactivity.Auto;
-            _useLocalConfig = true;
-            _useModalUi = true;
-            _useSystemConfig = true;
-            _validateCredentials = true;
-            _vstsTokenScope = Program.VstsCredentialScope;
-        }
-
-        // Test-only constructor
-        internal OperationArguments()
-            : this(RuntimeContext.Default)
-        { }
-
-        private AuthorityType _authorityType;
-        private Git.Configuration _configuration;
-        private Credential _credentials;
-        private string _customNamespace;
-        private Dictionary<string, string> _environmentVariables;
-        private Interactivity _interactivity;
-        private IntPtr _parentHwnd;
-        private bool _preserveCredentials;
-        private Uri _proxyUri;
-        private string _queryHost;
-        private string _queryPath;
-        private string _queryProtocol;
-        private TargetUri _targetUri;
-        private TimeSpan? _tokenDuration;
-        private bool _useHttpPath;
-        private bool _useLocalConfig;
-        private bool _useModalUi;
-        private string _username;
-        private bool _useSystemConfig;
-        private bool _validateCredentials;
-        private VstsTokenScope _vstsTokenScope;
-        private bool _writeLog;
-
-        public virtual AuthorityType Authority
-        {
-            get { return _authorityType; }
-            set { _authorityType = value; }
-        }
-
-        public virtual Credential Credentials
-        {
-            get { return _credentials; }
-            set { _credentials = value; }
-        }
-
-        public virtual string CustomNamespace
-        {
-            get { return _customNamespace; }
-            set { _customNamespace = value; }
-        }
-
         /// <summary>
-        /// Gets a map of the process's environmental variables keyed on case-insensitive names.
+        /// Sets the value of `<seealso cref="Credentials"/>`.
         /// </summary>
-        public virtual IReadOnlyDictionary<string, string> EnvironmentVariables
-        {
-            get
-            {
-                if (_environmentVariables == null)
-                {
-                    _environmentVariables = new Dictionary<string, string>(Program.EnvironKeyComparer);
-                    var iter = Environment.GetEnvironmentVariables().GetEnumerator();
-                    while (iter.MoveNext())
-                    {
-                        _environmentVariables[iter.Key as string] = iter.Value as string;
-                    }
-                }
-                return _environmentVariables;
-            }
-        }
-
-        /// <summary>
-        /// Gets the process's Git configuration based on current working directory, user's folder,
-        /// and Git's system directory.
-        /// </summary>
-        public virtual Git.Configuration GitConfiguration
-        {
-            get { return _configuration; }
-        }
-
-        public virtual Interactivity Interactivity
-        {
-            get { return _interactivity; }
-            set { _interactivity = value; }
-        }
-
-        /// <summary>
-        /// Gets or sets the handle of the parent UX window.
-        /// <para/>
-        /// Primarily used by IDE which have primary window handles, and a need for any UX presented by the GCM to appear relative to their UX.
-        /// <para/>
-        /// Returns the parent window's handle; otherwise `<seealso cref="IntPtr.Zero"/>`.
-        /// </summary>
-        public virtual IntPtr ParentHwnd
-        {
-            get { return _parentHwnd; }
-            set { _parentHwnd = value; }
-        }
-
-        public virtual string Password
-        {
-            get { return _credentials?.Password; }
-        }
-
-        public virtual bool PreserveCredentials
-        {
-            get { return _preserveCredentials; }
-            set { _preserveCredentials = value; }
-        }
-
-        public virtual Uri ProxyUri
-        {
-            get { return _targetUri.ProxyUri; }
-            internal set
-            {
-                _proxyUri = value;
-
-                // Re-create the target Uri.
-                CreateTargetUri();
-            }
-        }
-
-        public virtual string QueryHost
-        {
-            get { return _queryHost; }
-            set
-            {
-                _queryHost = value;
-
-                // Re-create the target Uri.
-                CreateTargetUri();
-            }
-        }
-
-        public virtual string QueryPath
-        {
-            get { return _queryPath; }
-            set
-            {
-                _queryPath = value;
-
-                // Re-create the target Uri.
-                CreateTargetUri();
-            }
-        }
-
-        public virtual string QueryProtocol
-        {
-            get { return _queryProtocol; }
-            set
-            {
-                _queryProtocol = value;
-
-                // Re-create the target Uri.
-                CreateTargetUri();
-            }
-        }
-
-        public virtual Uri QueryUri
-        {
-            get { return _targetUri.QueryUri; }
-            set
-            {
-                if (value == null)
-                {
-                    _queryHost = null;
-                    _queryPath = null;
-                    _queryProtocol = null;
-                }
-                else
-                {
-                    _queryHost = value.DnsSafeHost;
-                    _queryPath = value.AbsolutePath;
-                    _queryProtocol = value.Scheme;
-
-                    // If there's a non-default port value, retain it.
-                    if (!value.IsDefaultPort)
-                    {
-                        _queryHost = $"{_queryHost}:{value.Port}";
-                    }
-
-                    // If there's a query segment, retain it.
-                    if (!string.IsNullOrWhiteSpace(value.Query))
-                    {
-                        _queryHost = $"{_queryHost}?{value.Query}";
-                    }
-                }
-
-                // Re-create the target Uri.
-                CreateTargetUri();
-            }
-        }
-
-        public virtual TargetUri TargetUri
-        {
-            get { return _targetUri; }
-        }
-
-        public virtual TimeSpan? TokenDuration
-        {
-            get { return _tokenDuration; }
-            set { _tokenDuration = value; }
-        }
-
-        public virtual bool UseConfigLocal
-        {
-            get { return _useLocalConfig; }
-            set { _useLocalConfig = value; }
-        }
-
-        public virtual bool UseConfigSystem
-        {
-            get { return _useSystemConfig; }
-            set { _useSystemConfig = value; }
-        }
-
-        public virtual bool UseHttpPath
-        {
-            get { return _useHttpPath; }
-            set { _useHttpPath = value; }
-        }
-
-        public virtual bool UseModalUi
-        {
-            get { return _useModalUi; }
-            set { _useModalUi = value; }
-        }
-
-        public virtual string Username
-        {
-            get { return _username; }
-            set
-            {
-                _username = value;
-
-                // Re-create the target Uri.
-                CreateTargetUri();
-            }
-        }
-
-        public virtual bool ValidateCredentials
-        {
-            get { return _validateCredentials; }
-            set { _validateCredentials = value; }
-        }
-
-        public virtual VstsTokenScope VstsTokenScope
-        {
-            get { return _vstsTokenScope; }
-            set { _vstsTokenScope = value; }
-        }
-
-        public virtual bool WriteLog
-        {
-            get { return _writeLog; }
-            set { _writeLog = true; }
-        }
-
-        public virtual async Task LoadConfiguration()
-        {
-            _configuration = await Git.Configuration.ReadConfiuration(Context, Environment.CurrentDirectory, UseConfigLocal, UseConfigSystem);
-        }
-
+        /// <param name="username">The username of the newly set credentials.</param>
+        /// <param name="password">The password of the newly set credentials.</param>
         public virtual void SetCredentials(string username, string password)
         {
-            Credentials = new Credential(username, password);
+            _credentials = new Credential(username, password);
         }
 
+        /// <summary>
+        /// Sets the URL of the proxy to be used during network operations.
+        /// <para/>
+        /// When `<paramref name="url"/>` is `<see langword="null"/>` the proxy value is cleared.
+        /// </summary>
+        /// <param name="url"></param>
         public virtual void SetProxy(string url)
         {
             Uri tmp = null;
@@ -451,6 +535,30 @@ namespace Microsoft.Alm.Cli
             ProxyUri = tmp;
         }
 
+        /// <summary>
+        /// Sets the `<seealso cref="TargetUri"/>` to be used during network operations.
+        /// </summary>
+        /// <param name="targetUri">The value to set.</param>
+        /// <exception cref="ArgumentNullException">When `<paramref name="targetUri"/>` is `<see langword="null"/>`.</exception>
+        public void SetTargetUri(Uri targetUri)
+        {
+            if (targetUri is null)
+                throw new ArgumentNullException(nameof(targetUri));
+
+            _queryProtocol = targetUri.Scheme;
+            _queryHost = (targetUri.IsDefaultPort)
+                ? targetUri.Host
+                : string.Format(InvariantCulture, "{0}:{1}", targetUri.Host, targetUri.Port);
+            _queryPath = targetUri.AbsolutePath;
+
+            CreateTargetUri();
+        }
+
+        /// <summary>
+        /// Returns the current value of this instance in credential protocol format.
+        /// <para/>
+        /// Please see 'https://www.kernel.org/pub/software/scm/git/docs/git-credential.html' for information about credential protocol format.
+        /// </summary>
         public override string ToString()
         {
             StringBuilder builder = new StringBuilder();
@@ -487,13 +595,16 @@ namespace Microsoft.Alm.Cli
         }
 
         /// <summary>
-        /// Writes the UTF-8 encoded value of `<see cref="ToString"/>` directly to a `<see cref="Stream"/>`.
+        /// Writes the UTF-8 encoded value of `<see cref="ToString"/>` directly to `<paramref name="writableStream"/>`.
         /// </summary>
-        /// <param name="writableStream">The `<see cref="Stream"/>` to write to.</param>
+        /// <param name="writableStream">A `<see cref="Stream"/>` to write to.</param>
+        /// <exception cref="ArgumentNullException">When `<paramref name="writableStream"/>` is `<see langword="null"/>`.</exception>
+        /// /// <exception cref="ArgumentException">When `<paramref name="writableStream"/>` not writable.</exception>
         public virtual void WriteToStream(Stream writableStream)
         {
             if (writableStream is null)
                 throw new ArgumentNullException(nameof(writableStream));
+
             if (!writableStream.CanWrite)
             {
                 var inner = new InvalidDataException("Stream must be writable.");

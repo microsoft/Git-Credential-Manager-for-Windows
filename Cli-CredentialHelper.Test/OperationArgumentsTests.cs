@@ -3,6 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.IO;
 using System.Text;
+using System.Threading.Tasks;
 using Microsoft.Alm.Authentication;
 using Xunit;
 
@@ -11,7 +12,7 @@ namespace Microsoft.Alm.Cli.Test
     public class OperationArgumentsTests
     {
         [Fact]
-        public void Typical()
+        public async Task Typical()
         {
             var input = new InputArg
             {
@@ -22,13 +23,13 @@ namespace Microsoft.Alm.Cli.Test
                 Username = "userName",
             };
 
-            var cut = CreateTargetUriTestDefault(input);
+            var cut = await CreateTargetUriTestDefault(input);
             Assert.Equal("https://userName@example.visualstudio.com/path", cut.TargetUri.ToString());
             Assert.Equal(input.ToString(), cut.ToString(), StringComparer.Ordinal);
         }
 
         [Fact]
-        public void SpecialCharacters()
+        public async Task SpecialCharacters()
         {
             var input = new InputArg
             {
@@ -39,13 +40,13 @@ namespace Microsoft.Alm.Cli.Test
                 Username = "userNamể"
             };
 
-            var cut = CreateTargetUriTestDefault(input);
+            var cut = await CreateTargetUriTestDefault(input);
             Assert.Equal("https://userNamể@example.visualstudio.com/path", cut.TargetUri.ToString(), StringComparer.Ordinal);
             Assert.Equal(input.ToString(), cut.ToString(), StringComparer.Ordinal);
         }
 
         [Fact]
-        public void EmailAsUserName()
+        public async Task EmailAsUserName()
         {
             var input = new InputArg
             {
@@ -56,13 +57,13 @@ namespace Microsoft.Alm.Cli.Test
                 Username = "userName@domain.com"
             };
 
-            var cut = CreateTargetUriTestDefault(input);
+            var cut = await CreateTargetUriTestDefault(input);
             Assert.Equal("https://userName@domain.com@example.visualstudio.com/path", cut.TargetUri.ToString(), StringComparer.Ordinal);
             Assert.Equal(input.ToString(), cut.ToString(), StringComparer.Ordinal);
         }
 
         [Fact]
-        public void UsernameWithDomain()
+        public async Task UsernameWithDomain()
         {
             var input = new InputArg
             {
@@ -73,13 +74,13 @@ namespace Microsoft.Alm.Cli.Test
                 Username = @"DOMAIN\username"
             };
 
-            var cut = CreateTargetUriTestDefault(input);
+            var cut = await CreateTargetUriTestDefault(input);
             Assert.Equal(@"https://DOMAIN\username@example.visualstudio.com/path", cut.TargetUri.ToString(), StringComparer.Ordinal);
             Assert.Equal(input.ToString(), cut.ToString(), StringComparer.Ordinal);
         }
 
         [Fact]
-        public void CreateTargetUriGitHubSimple()
+        public async Task CreateTargetUriGitHubSimple()
         {
             var input = new InputArg()
             {
@@ -87,11 +88,11 @@ namespace Microsoft.Alm.Cli.Test
                 Host = "github.com",
             };
 
-            CreateTargetUriTestDefault(input);
+            await CreateTargetUriTestDefault(input);
         }
 
         [Fact]
-        public void CreateTargetUri_VstsSimple()
+        public async Task CreateTargetUri_VstsSimple()
         {
             var input = new InputArg()
             {
@@ -99,11 +100,11 @@ namespace Microsoft.Alm.Cli.Test
                 Host = "team.visualstudio.com",
             };
 
-            CreateTargetUriTestDefault(input);
+            await CreateTargetUriTestDefault(input);
         }
 
         [Fact]
-        public void CreateTargetUriGitHubComplex()
+        public async Task CreateTargetUriGitHubComplex()
         {
             var input = new InputArg()
             {
@@ -112,11 +113,11 @@ namespace Microsoft.Alm.Cli.Test
                 Path = "Microsoft/Git-Credential-Manager-for-Windows.git"
             };
 
-            CreateTargetUriTestDefault(input);
+            await CreateTargetUriTestDefault(input);
         }
 
         [Fact]
-        public void CreateTargetUriWithPortNumber()
+        public async Task CreateTargetUriWithPortNumber()
         {
             var input = new InputArg()
             {
@@ -124,11 +125,11 @@ namespace Microsoft.Alm.Cli.Test
                 Host = "onpremis:8080",
             };
 
-            CreateTargetUriTestDefault(input);
+            await CreateTargetUriTestDefault(input);
         }
 
         [Fact]
-        public void CreateTargetUriComplexAndMessy()
+        public async Task CreateTargetUriComplexAndMessy()
         {
             var input = new InputArg()
             {
@@ -137,11 +138,11 @@ namespace Microsoft.Alm.Cli.Test
                 Path = "this-is/a/path%20with%20spaces",
             };
 
-            CreateTargetUriTestDefault(input);
+            await CreateTargetUriTestDefault(input);
         }
 
         [Fact]
-        public void CreateTargetUriWithCredentials()
+        public async Task CreateTargetUriWithCredentials()
         {
             var input = new InputArg()
             {
@@ -151,11 +152,11 @@ namespace Microsoft.Alm.Cli.Test
                 Password = "password",
             };
 
-            CreateTargetUriTestDefault(input);
+            await CreateTargetUriTestDefault(input);
         }
 
         [Fact]
-        public void CreateTargetUriUnc()
+        public async Task CreateTargetUriUnc()
         {
             var input = new InputArg()
             {
@@ -164,21 +165,21 @@ namespace Microsoft.Alm.Cli.Test
                 Path = "server/path",
             };
 
-            CreateTargetUriTestDefault(input);
+            await CreateTargetUriTestDefault(input);
         }
 
         [Fact]
-        public void CreateTargetUriUncColloquial()
+        public async Task CreateTargetUriUncColloquial()
         {
             var input = new InputArg()
             {
                 Host = @"\\windows\has\weird\paths",
             };
 
-            CreateTargetUriTestDefault(input);
+            await CreateTargetUriTestDefault(input);
         }
 
-        private OperationArguments CreateTargetUriTestDefault(InputArg input)
+        private async Task<OperationArguments> CreateTargetUriTestDefault(InputArg input)
         {
             using (var memory = new MemoryStream())
             using (var writer = new StreamWriter(memory))
@@ -188,7 +189,9 @@ namespace Microsoft.Alm.Cli.Test
 
                 memory.Seek(0, SeekOrigin.Begin);
 
-                var oparg = new OperationArguments(RuntimeContext.Default, memory);
+                var oparg = new OperationArguments(RuntimeContext.Default);
+
+                await oparg.ReadInput(memory);
 
                 Assert.NotNull(oparg);
                 Assert.Equal(input.Protocol ?? string.Empty, oparg.QueryProtocol, StringComparer.Ordinal);
@@ -196,6 +199,7 @@ namespace Microsoft.Alm.Cli.Test
                 Assert.Equal(input.Path, oparg.QueryPath, StringComparer.Ordinal);
                 Assert.Equal(input.Username, oparg.Username, StringComparer.Ordinal);
                 Assert.Equal(input.Password, oparg.Password, StringComparer.Ordinal);
+
                 return oparg;
             }
         }
