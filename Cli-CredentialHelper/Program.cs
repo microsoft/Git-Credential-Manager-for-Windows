@@ -125,6 +125,12 @@ namespace Microsoft.Alm.Cli
 
                 operationArguments.SetTargetUri(uri);
 
+                if (operationArguments.TargetUri is null)
+                {
+                    var inner = new ArgumentNullException(nameof(operationArguments.TargetUri));
+                    throw new ArgumentException(inner.Message, nameof(operationArguments), inner);
+                }
+
                 Task.Run(async () =>
                 {
                     await LoadOperationArguments(operationArguments);
@@ -176,52 +182,61 @@ namespace Microsoft.Alm.Cli
             var operationArguments = new OperationArguments(_context);
             operationArguments.SetTargetUri(targetUri);
 
-            Task.Run(async () => { await LoadOperationArguments(operationArguments); }).Wait();
-            EnableTraceLogging(operationArguments);
-
-            // Create a set of irrelevant environment variable entries.
-            var irrelevantEntries = new HashSet<string>(StringComparer.OrdinalIgnoreCase)
+            if (operationArguments.TargetUri is null)
             {
-                "ToastSettings"
-            };
-
-            // Write out the environment variables.
-            WriteLine("Environment Variables:");
-            foreach (var entry in operationArguments.EnvironmentVariables)
-            {
-                // Skip well-known, irrelevant entries.
-                if (irrelevantEntries.Contains(entry.Key))
-                    continue;
-
-                WriteLine($"  {entry.Key} = {entry.Value}");
+                var inner = new ArgumentNullException(nameof(operationArguments.TargetUri));
+                throw new ArgumentException(inner.Message, nameof(operationArguments), inner);
             }
-            WriteLine();
 
-            // Write out the Git configuration.
-            WriteLine("Git Configuration:");
-            foreach (var entry in operationArguments.GitConfiguration)
+            Task.Run(async () =>
             {
-                WriteLine($"  [{entry.Level}] {entry.Key} = {entry.Value}");
-            }
-            WriteLine();
+                await LoadOperationArguments(operationArguments);
+                EnableTraceLogging(operationArguments);
 
-            // Write out the effective settings for GCM.
-            WriteLine($"Effective Manager Configuration for {operationArguments.QueryUri.ToString()}:");
-            WriteLine($"  Executable = {AssemblyTitle} v{Version.ToString(4)} ({ExecutablePath})");
-            WriteLine($"  Authority = {operationArguments.Authority}");
-            WriteLine($"  CustomNamespace = {operationArguments.CustomNamespace}");
-            WriteLine($"  Interactivity = {operationArguments.Interactivity}");
-            WriteLine($"  PreserveCredentials = {operationArguments.PreserveCredentials}");
-            WriteLine($"  QueryUri = {operationArguments.QueryUri}");
-            WriteLine($"  TargetUri = {operationArguments.TargetUri}");
-            WriteLine($"  TokenDuration = {operationArguments.TokenDuration}");
-            WriteLine($"  UseConfigLocal = {operationArguments.UseConfigLocal}");
-            WriteLine($"  UseConfigSystem = {operationArguments.UseConfigSystem}");
-            WriteLine($"  UseHttpPath = {operationArguments.UseHttpPath}");
-            WriteLine($"  UseModalUi = {operationArguments.UseModalUi}");
-            WriteLine($"  ValidateCredentials = {operationArguments.ValidateCredentials}");
-            WriteLine($"  VstsTokenScope = {operationArguments.VstsTokenScope}");
-            WriteLine($"  WriteLog = {operationArguments.WriteLog}");
+                // Create a set of irrelevant environment variable entries.
+                var irrelevantEntries = new HashSet<string>(StringComparer.OrdinalIgnoreCase)
+                {
+                    "ToastSettings"
+                };
+
+                // Write out the environment variables.
+                WriteLine("Environment Variables:");
+                foreach (var entry in operationArguments.EnvironmentVariables)
+                {
+                    // Skip well-known, irrelevant entries.
+                    if (irrelevantEntries.Contains(entry.Key))
+                        continue;
+
+                    WriteLine($"  {entry.Key} = {entry.Value}");
+                }
+                WriteLine();
+
+                // Write out the Git configuration.
+                WriteLine("Git Configuration:");
+                foreach (var entry in operationArguments.GitConfiguration)
+                {
+                    WriteLine($"  [{entry.Level}] {entry.Key} = {entry.Value}");
+                }
+                WriteLine();
+
+                // Write out the effective settings for GCM.
+                WriteLine($"Effective Manager Configuration for {operationArguments.QueryUri.ToString()}:");
+                WriteLine($"  Executable = {AssemblyTitle} v{Version.ToString(4)} ({ExecutablePath})");
+                WriteLine($"  Authority = {operationArguments.Authority}");
+                WriteLine($"  CustomNamespace = {operationArguments.CustomNamespace}");
+                WriteLine($"  Interactivity = {operationArguments.Interactivity}");
+                WriteLine($"  PreserveCredentials = {operationArguments.PreserveCredentials}");
+                WriteLine($"  QueryUri = {operationArguments.QueryUri}");
+                WriteLine($"  TargetUri = {operationArguments.TargetUri}");
+                WriteLine($"  TokenDuration = {operationArguments.TokenDuration}");
+                WriteLine($"  UseConfigLocal = {operationArguments.UseConfigLocal}");
+                WriteLine($"  UseConfigSystem = {operationArguments.UseConfigSystem}");
+                WriteLine($"  UseHttpPath = {operationArguments.UseHttpPath}");
+                WriteLine($"  UseModalUi = {operationArguments.UseModalUi}");
+                WriteLine($"  ValidateCredentials = {operationArguments.ValidateCredentials}");
+                WriteLine($"  VstsTokenScope = {operationArguments.VstsTokenScope}");
+                WriteLine($"  WriteLog = {operationArguments.WriteLog}");
+            }).Wait();
         }
 
         internal void Delete()
@@ -259,8 +274,8 @@ namespace Microsoft.Alm.Cli
 
                     if (operationArguments.TargetUri is null)
                     {
-                        var inner = new NullReferenceException($"{nameof(operationArguments)}.{nameof(operationArguments.TargetUri)}");
-                        throw new InvalidOperationException(inner.Message, inner);
+                        var inner = new ArgumentNullException(nameof(operationArguments.TargetUri));
+                        throw new ArgumentException(inner.Message, nameof(operationArguments), inner);
                     }
 
                     await LoadOperationArguments(operationArguments);
@@ -331,8 +346,8 @@ namespace Microsoft.Alm.Cli
 
                     if (operationArguments.TargetUri is null)
                     {
-                        var inner = new NullReferenceException($"{nameof(operationArguments)}.{nameof(operationArguments.TargetUri)}");
-                        throw new InvalidOperationException(inner.Message, inner);
+                        var inner = new ArgumentNullException(nameof(operationArguments.TargetUri));
+                        throw new ArgumentException(inner.Message, nameof(operationArguments), inner);
                     }
 
                     await LoadOperationArguments(operationArguments);
@@ -367,8 +382,8 @@ namespace Microsoft.Alm.Cli
 
                     if (operationArguments.TargetUri is null)
                     {
-                        var inner = new NullReferenceException($"{nameof(operationArguments)}.{nameof(operationArguments.TargetUri)}");
-                        throw new InvalidOperationException(inner.Message, inner);
+                        var inner = new ArgumentNullException(nameof(operationArguments.TargetUri));
+                        throw new ArgumentException(inner.Message, nameof(operationArguments), inner);
                     }
 
                     await LoadOperationArguments(operationArguments);
@@ -449,13 +464,13 @@ namespace Microsoft.Alm.Cli
 
                     if (operationArguments.TargetUri is null)
                     {
-                        var inner = new NullReferenceException($"{nameof(operationArguments)}.{nameof(operationArguments.TargetUri)}");
-                        throw new InvalidOperationException(inner.Message, inner);
+                        var inner = new ArgumentNullException(nameof(operationArguments.TargetUri));
+                        throw new ArgumentException(inner.Message, nameof(operationArguments), inner);
                     }
                     if (operationArguments.Username is null)
                     {
-                        var inner = new NullReferenceException($"{nameof(operationArguments)}.{nameof(operationArguments.Username)}");
-                        throw new InvalidOperationException(inner.Message, inner);
+                        var inner = new ArgumentNullException(nameof(operationArguments.Username));
+                        throw new ArgumentException(inner.Message, nameof(operationArguments), inner);
                     }
 
                     await LoadOperationArguments(operationArguments);
@@ -464,7 +479,7 @@ namespace Microsoft.Alm.Cli
                     // Set the parent window handle.
                     ParentHwnd = operationArguments.ParentHwnd;
 
-                    var credentials = operationArguments.Credentials;                    
+                    var credentials = operationArguments.Credentials;
                     BaseAuthentication authentication = await CreateAuthentication(operationArguments); ;
 
                     switch (operationArguments.Authority)

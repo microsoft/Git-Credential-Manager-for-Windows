@@ -8,13 +8,9 @@
     <RootNamespace>Installer</RootNamespace>
     <ProjectDir Condition=" '$(ProjectDir)' == '' Or '$(ProjectDir)' == '*Undefined*' ">$(MSBuildProjectDirectory)</ProjectDir>
     <TargetFrameworkVersion>v4.6.2</TargetFrameworkVersion>
-    <NuGetPackageImportStamp>
-    </NuGetPackageImportStamp>
+    <NuGetPackageImportStamp/>
   </PropertyGroup>
   <PropertyGroup>
-    <Configuration Condition=" '$(Configuration)' == '' Or '$(Configuration)' == '*Undefined*' ">
-    </Configuration>
-    <Platform Condition=" '$(Platform)' == '' Or  '$(Platform)' == '*Undefined*' ">AnyCPU</Platform>
     <SolutionDir Condition=" '$(SolutionDir)' == '' Or '$(SolutionDir)' == '*Undefined*' ">$([System.IO.Directory]::GetParent($(ProjectDir)))</SolutionDir>
     <InputPath Condition=" '$(Configuration)' == 'Debug' ">bin\Debug</InputPath>
     <InputPath Condition=" '$(Configuration)' == 'Release' ">bin\Release</InputPath>
@@ -25,12 +21,15 @@
     <OutDir>$(OutputPath)</OutDir>
   </PropertyGroup>
   <PropertyGroup>
-    <In>$([System.IO.File]::ReadAllText($(SolutionDir)\Cli-CredentialHelper\Properties\AssemblyInfo.cs))</In>
+    <GcmProps>$([System.IO.File]::ReadAllText($(SolutionDir)\Cli-CredentialHelper\Properties\AssemblyInfo.cs))</GcmProps>
+    <PkgProps>$([System.IO.File]::ReadAllText($(SolutionDir)\Microsoft.Vsts.Authentication\Properties\AssemblyInfo.cs))</PkgProps>
     <Pattern>^\s*\[assembly\s*:\s*AssemblyVersion\s*\(\s*\s*"(\d+\.\d+\.\d+)\.?\d*\s*"\s*\)</Pattern>
-    <Version>$([System.Text.RegularExpressions.Regex]::Match($(In), $(Pattern), System.Text.RegularExpressions.RegexOptions.Multiline).Groups[1].Value)</Version>
+    <GcmVersion>$([System.Text.RegularExpressions.Regex]::Match($(GcmProps), $(Pattern), System.Text.RegularExpressions.RegexOptions.Multiline).Groups[1].Value)</GcmVersion>
+    <PkgVersion>$([System.Text.RegularExpressions.Regex]::Match($(PkgProps), $(Pattern), System.Text.RegularExpressions.RegexOptions.Multiline).Groups[1].Value)</PkgVersion>
   </PropertyGroup>
   <PropertyGroup>
-    <SigningTarget>$(OutputPath)\GCMW-$(Version).exe</SigningTarget>
+    <GcmExePath>$(OutputPath)\GCMW-$(GcmVersion).exe</GcmExePath>
+    <GcmPkgPath>$(OutputPath)\Microsoft.Alm.Authentication.$(PkgVersion).nupkg</GcmPkgPath>
   </PropertyGroup>
   <ItemGroup>
     <ProjectReference Include="..\Cli-Askpass\Cli-Askpass.csproj">
@@ -42,25 +41,29 @@
       <Name>Cli-CredentialHelper</Name>
     </ProjectReference>
     <ProjectReference Include="..\Bitbucket.Authentication\Bitbucket.Authentication.csproj">
-      <Project>{ee663736-5bad-4ca6-a4f8-99978925ad8a}</Project>
+      <Project>{EE663736-5BAD-4CA6-A4F8-99978925AD8A}</Project>
       <Name>Bitbucket.Authentication</Name>
     </ProjectReference>
     <ProjectReference Include="..\GitHub.Authentication\GitHub.Authentication.csproj">
-      <Project>{cf306116-bbf0-4cc7-afce-a506ac4752cb}</Project>
+      <Project>{CF306116-BBF0-4CC7-AFCE-A506AC4752CB}</Project>
       <Name>GitHub.Authentication</Name>
     </ProjectReference>
     <ProjectReference Include="..\Microsoft.Alm.Authentication\Microsoft.Alm.Authentication.csproj">
-      <Project>{19770407-b493-459d-bb4f-04fbefb1ba13}</Project>
+      <Project>{19770407-B493-459D-BB4F-04FBEFB1BA13}</Project>
       <Name>Microsoft.Alm.Authentication</Name>
     </ProjectReference>
     <ProjectReference Include="..\Microsoft.Vsts.Authentication\Microsoft.Vsts.Authentication.csproj">
-      <Project>{19770407-d7d8-4a37-914c-f552ff4b90d4}</Project>
+      <Project>{19770407-D7D8-4A37-914C-F552FF4B90D4}</Project>
       <Name>Microsoft.Vsts.Authentication</Name>
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
-    <FilesToSign Include="$(SigningTarget)">
+    <FilesToSign Include="$(GcmExePath)">
       <Authenticode>Microsoft</Authenticode>
+      <InProject>false</InProject>
+    </FilesToSign>
+    <FilesToSign Include="$(GcmPkgPath)">
+      <Authenticode>Nuget</Authenticode>
       <InProject>false</InProject>
     </FilesToSign>
   </ItemGroup>
@@ -107,8 +110,10 @@
   </ItemGroup>
   <Target Name="AfterBuild" AfterTargets="Build" />
   <Target Name="Build" BeforeTargets="AfterBuild">
+    <Error Condition=" '$(Condition)' != 'Debug' And '$(Condition)' == 'Release' " Text="The 'Condition' property must be set to 'Debug' or 'Release'." />
+    <Error Condition=" '$(Platform)' == '' Or  '$(Platform)' == '*Undefined*' " Text="The 'Platform' property cannot be empty of undefined." />
     <MSBuild Projects="@(ProjectReference)" Targets="Build" />
-    <!-- need to declare the items after dependencies have built, so that glob enumeration happens after the files are produced-->
+    <!-- need to declare the items after dependencies have built, so that glob enumeration happens after the files are produced -->
     <ItemGroup>
       <FilesToCopy Include="$(SolutionDir)\Cli-CredentialHelper\$(InputPath)\*.*">
         <InProject>false</InProject>
@@ -130,7 +135,7 @@
     <Exec Command="&quot;$(SolutionDir)\packages\Pandoc.Windows.2.1.0\tools\Pandoc\pandoc.exe&quot; --from=markdown --to=html5 --self-contained --standalone --include-in-header=&quot;$(AssetsDir)\head_css.html&quot; --title=&quot;Git Credential Manager for Windows&quot; --output=&quot;$(IntermediateOutputPath)\git-credential-manager.html&quot; &quot;$(DocsDir)\CredentialManager.md&quot; &quot;$(DocsDir)\Configuration.md&quot; &quot;$(DocsDir)\Faq.md&quot; &quot;$(DocsDir)\Automation.md&quot; &quot;$(DocsDir)\Development.md&quot;" IgnoreExitCode="false" />
     <Exec Command="&quot;$(SolutionDir)\packages\Pandoc.Windows.2.1.0\tools\Pandoc\pandoc.exe&quot; --from=markdown --to=html5 --self-contained --standalone --include-in-header=&quot;$(AssetsDir)\head_css.html&quot; --title=&quot;Git Askpass Helper for Windows&quot; --output=&quot;$(IntermediateOutputPath)\git-askpass.html&quot; &quot;$(DocsDir)\Askpass.md&quot; &quot;$(DocsDir)\Configuration.md&quot; &quot;$(DocsDir)\Faq.md&quot; &quot;$(DocsDir)\Automation.md&quot; &quot;$(DocsDir)\Development.md&quot;" IgnoreExitCode="false" />
     <Exec Command="&quot;$(SolutionDir)\packages\Tools.InnoSetup.5.5.9\tools\iscc.exe&quot; &quot;/O$(OutputPath)&quot; &quot;$(IntermediateOutputPath)\Setup.iss&quot;" IgnoreStandardErrorWarningFormat="true" WorkingDirectory="$(IntermediateOutputPath)" />
-    <Zip Files="@(ZipContents)" Flatten="True" ZipFileName="$(OutputPath)\gcmw-v$(Version).zip" WorkingDirectory="$(IntermediateOutputPath)ZipContents" ZipLevel="9" />
+    <Zip Files="@(ZipContents)" Flatten="True" ZipFileName="$(OutputPath)\gcmw-v$(GcmVersion).zip" WorkingDirectory="$(IntermediateOutputPath)ZipContents" ZipLevel="9" />
   </Target>
   <Target Name="Clean">
     <RemoveDir Directories="$(IntermediateOutputPath);$(OutputPath)" />
