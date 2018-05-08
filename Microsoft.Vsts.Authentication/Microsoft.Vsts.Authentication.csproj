@@ -6,10 +6,10 @@
   <PropertyGroup>
     <AppDesignerFolder>Properties</AppDesignerFolder>
     <AssemblyName>Microsoft.Vsts.Authentication</AssemblyName>
-    <NuGetPackageImportStamp>
-    </NuGetPackageImportStamp>
+    <NuGetPackageImportStamp/>
     <OutputType>Library</OutputType>
     <ProjectGuid>{19770407-D7D8-4A37-914C-F552FF4B90D4}</ProjectGuid>
+    <ProjectName>Microsoft.Vsts.Authentication</ProjectName>
     <RootNamespace>Microsoft.Alm.Authentication</RootNamespace>
     <TargetFrameworkVersion>v4.5.1</TargetFrameworkVersion>
   </PropertyGroup>
@@ -100,8 +100,11 @@
     <PropertyGroup Condition="!Exists($(NugetPath))">
       <NugetPath>..\packages\NuGet.CommandLine.4.6.2\tools\NuGet.exe</NugetPath>
     </PropertyGroup>
+    <ItemGroup>
+      <ExistingNupkg Include="$(NugetWorkDir)\*" />
+      <Delete Files="@(ExistingNupkg)" />
+    </ItemGroup>
     <Exec Command="&quot;$(NugetPath)&quot; pack &quot;$(ProjectDir)\Microsoft.Alm.Authentication.nuspec&quot; -BasePath &quot;$(NugetWorkDir)&quot; -IncludeReferencedProjects -Properties Configuration=&quot;$(Configuration)&quot;;Version=&quot;$(AssemblyVersion)$(IsSigned)&quot;;Id=&quot;Microsoft.Alm.Authentication&quot;;Title=&quot;$(AssemblyTitle)&quot;;Owners=&quot;$(AssemblyCompany)&quot;;Copyright=&quot;$(AssemblyCopyright)&quot;;Description=&quot;$(AssemblyDescription)&quot; -OutputDirectory &quot;$(NugetWorkDir)&quot;" />
-    <Exec Command="&quot;$(NugetPath)&quot; pack &quot;$(ProjectDir)\Microsoft.Alm.Authentication.symbols.nuspec&quot; -BasePath &quot;$(NugetWorkDir)&quot; -IncludeReferencedProjects -Properties Configuration=&quot;$(Configuration)&quot;;Version=&quot;$(AssemblyVersion)$(IsSigned)&quot;;Id=&quot;Microsoft.Alm.Authentication.symbols&quot;;Title=&quot;$(AssemblyTitle)&quot;;Owners=&quot;$(AssemblyCompany)&quot;;Copyright=&quot;$(AssemblyCopyright)&quot;;Description=&quot;$(AssemblyDescription)&quot; -OutputDirectory &quot;$(NugetWorkDir)&quot;" />
   </Target>
   <Target Name="CopyNupkgToOut" AfterTargets="BuildNupkg">
     <ItemGroup>

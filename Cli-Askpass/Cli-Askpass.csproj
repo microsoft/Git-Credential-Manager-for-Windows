@@ -11,6 +11,7 @@
     </NuGetPackageImportStamp>
     <OutputType>Exe</OutputType>
     <ProjectGuid>{19770407-B33A-4EBE-92B8-04C93F43CAE0}</ProjectGuid>
+    <ProjectName>Cli-Askpass</ProjectName>
     <RootNamespace>Microsoft.Alm.Cli</RootNamespace>
     <TargetFrameworkVersion>v4.5.2</TargetFrameworkVersion>
   </PropertyGroup>

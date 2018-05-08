@@ -6,10 +6,10 @@
   <PropertyGroup>
     <AppDesignerFolder>Properties</AppDesignerFolder>
     <AssemblyName>Microsoft.Alm.Authentication</AssemblyName>
-    <NuGetPackageImportStamp>
-    </NuGetPackageImportStamp>
+    <NuGetPackageImportStamp/>
     <OutputType>Library</OutputType>
     <ProjectGuid>{19770407-B493-459D-BB4F-04FBEFB1BA13}</ProjectGuid>
+    <ProjectName>Microsoft.Alm.Authentication</ProjectName>
     <RootNamespace>Microsoft.Alm.Authentication</RootNamespace>
     <TargetFrameworkVersion>v4.5.1</TargetFrameworkVersion>
   </PropertyGroup>
