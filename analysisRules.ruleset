@@ -9,9 +9,14 @@
     <Rule Id="CA1032" Action="None" />
     <Rule Id="CA1034" Action="None" />
     <Rule Id="CA1051" Action="None" />
+    <Rule Id="CA1054" Action="None" />
     <Rule Id="CA1055" Action="None" />
+    <Rule Id="CA1056" Action="None" />
+    <Rule Id="CA1057" Action="None" />
+    <Rule Id="CA1060" Action="None" />
     <Rule Id="CA1303" Action="None" />
     <Rule Id="CA1305" Action="None" />
+    <Rule Id="CA1404" Action="None" />
     <Rule Id="CA1702" Action="None" />
     <Rule Id="CA1703" Action="None" />
     <Rule Id="CA1704" Action="None" />
@@ -30,5 +35,6 @@
     <Rule Id="CA2208" Action="None" />
     <Rule Id="CA2210" Action="None" />
     <Rule Id="CA2225" Action="None" />
+    <Rule Id="CA2234" Action="None" />
   </Rules>
 </RuleSet>

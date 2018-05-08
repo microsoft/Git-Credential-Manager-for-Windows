@@ -89,7 +89,7 @@ namespace GitHub.Authentication
             options.Headers.Add(GitHubOptHeader, authenticationCode);
 
             // Create the authority Uri.
-            var requestUri = new TargetUri(_authorityUrl, targetUri.ProxyUri?.ToString());
+            var requestUri = targetUri.CreateWith(_authorityUrl);
 
             using (HttpContent content = GetTokenJsonContent(targetUri, scope))
             using (var response = await Network.HttpPostAsync(requestUri, content, options))

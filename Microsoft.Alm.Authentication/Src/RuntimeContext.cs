@@ -36,7 +36,7 @@ namespace Microsoft.Alm.Authentication
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Security", "CA2104:DoNotDeclareReadOnlyMutableReferenceTypes")]
         public static readonly RuntimeContext Default;
 
-        public RuntimeContext(IStorage storage, INetwork network, Git.ITrace trace, Git.IWhere where)
+        public RuntimeContext(IStorage storage, INetwork network, Git.ITrace trace, Git.IUtilities utilities, Git.IWhere where)
             : this()
         {
             if (storage is null)
@@ -45,12 +45,15 @@ namespace Microsoft.Alm.Authentication
                 throw new ArgumentNullException(nameof(network));
             if (trace is null)
                 throw new ArgumentNullException(nameof(trace));
+            if (utilities is null)
+                throw new ArgumentNullException(nameof(utilities));
             if (where is null)
                 throw new ArgumentNullException(nameof(where));
 
             _network = network;
             _storage = storage;
             _trace = trace;
+            _utilities = utilities;
             _where = where;
         }
 
@@ -69,6 +72,7 @@ namespace Microsoft.Alm.Authentication
             Default._network = new Network(Default);
             Default._storage = new Storage(Default);
             Default._trace = new Git.Trace(Default);
+            Default._utilities = new Git.Utilities(Default);
             Default._where = new Git.Where(Default);
         }
 
@@ -77,6 +81,7 @@ namespace Microsoft.Alm.Authentication
         private INetwork _network;
         private IStorage _storage;
         private Git.ITrace _trace;
+        private Git.IUtilities _utilities;
         private Git.IWhere _where;
 
         public int Id
@@ -97,6 +102,11 @@ namespace Microsoft.Alm.Authentication
         public Git.ITrace Trace
         {
             get { return _trace; }
+        }
+
+        public Git.IUtilities Utilities
+        {
+            get { return _utilities; }
         }
 
         public Git.IWhere Where

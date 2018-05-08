@@ -176,7 +176,7 @@ namespace Atlassian.Bitbucket.Authentication.OAuth
                 Timeout = TimeSpan.FromMilliseconds(RequestTimeout),
             };
             var grantUri = GetGrantUrl(targetUri, authCode);
-            var requestUri = new TargetUri(grantUri, targetUri.ProxyUri);
+            var requestUri = targetUri.CreateWith(grantUri);
             var content = GetGrantRequestContent(authCode);
 
             using (var response = await Network.HttpPostAsync(requestUri, content, options))
@@ -223,7 +223,7 @@ namespace Atlassian.Bitbucket.Authentication.OAuth
                 throw new ArgumentNullException(nameof(currentRefreshToken));
 
             var refreshUri = GetRefreshUri();
-            var requestUri = new TargetUri(refreshUri, targetUri.ProxyUri);
+            var requestUri = targetUri.CreateWith(refreshUri);
             var options = new NetworkRequestOptions(true)
             {
                 Timeout = TimeSpan.FromMilliseconds(RequestTimeout),

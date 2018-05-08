@@ -259,7 +259,7 @@ namespace Microsoft.Alm.Authentication
             string requestUrl = GetTargetUrl(targetUri);
             string validationUrl = requestUrl + VstsValidationUrlPath;
 
-            return new TargetUri(validationUrl, targetUri.ProxyUri?.ToString());
+            return targetUri.CreateWith(validationUrl);
         }
 
         internal async Task<TargetUri> GetIdentityServiceUri(TargetUri targetUri, Secret authorization)
@@ -273,7 +273,7 @@ namespace Microsoft.Alm.Authentication
 
             string tenantUrl = GetTargetUrl(targetUri);
             var locationServiceUrl = tenantUrl + LocationServiceUrlPathAndQuery;
-            var requestUri = new TargetUri(locationServiceUrl, targetUri.ProxyUri?.ToString());
+            var requestUri = targetUri.CreateWith(queryUrl: locationServiceUrl);
             var options = new NetworkRequestOptions(true)
             {
                 Authorization = authorization,
@@ -295,7 +295,7 @@ namespace Microsoft.Alm.Authentication
                                 string identityServiceUrl = match.Groups[1].Value;
                                 var idenitityServiceUri = new Uri(identityServiceUrl, UriKind.Absolute);
 
-                                return new TargetUri(idenitityServiceUri, targetUri.ProxyUri);
+                                return targetUri.CreateWith(idenitityServiceUri);
                             }
                         }
                     }
@@ -306,7 +306,7 @@ namespace Microsoft.Alm.Authentication
             catch (Exception exception)
             {
                 Trace.WriteException(exception);
-                throw new VstsLocationServiceException($"Failed to find Identity Service for `{targetUri}`.", exception);
+                throw new VstsLocationServiceException($"Helper for `{targetUri}`.", exception);
             }
 
             return null;
@@ -382,7 +382,7 @@ namespace Microsoft.Alm.Authentication
 
             var requestUri = new Uri(url, UriKind.Absolute);
 
-            return new TargetUri(requestUri, targetUri.ProxyUri);
+            return targetUri.CreateWith(requestUri);
         }
     }
 }

@@ -89,6 +89,8 @@ namespace Microsoft.Alm.Cli
 
         internal delegate Task<Credential> QueryCredentialsDelegate(Program program, OperationArguments operationArguments);
 
+        internal delegate void ReadGitRemoteDetailsDelegate(Program program, OperationArguments operationArguments);
+
         internal delegate ConsoleKeyInfo ReadKeyDelegate(Program program, bool intercept);
 
         internal delegate void SetStandardReaderDelegate(Program program, TextReader writer);

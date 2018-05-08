@@ -278,6 +278,7 @@ namespace Microsoft.Alm.Cli
                         throw new ArgumentException(inner.Message, nameof(operationArguments), inner);
                     }
 
+                    // Load operation arguments.
                     await LoadOperationArguments(operationArguments);
                     EnableTraceLogging(operationArguments);
 
@@ -350,8 +351,12 @@ namespace Microsoft.Alm.Cli
                         throw new ArgumentException(inner.Message, nameof(operationArguments), inner);
                     }
 
+                    // Load operation arguments.
                     await LoadOperationArguments(operationArguments);
                     EnableTraceLogging(operationArguments);
+
+                    // Read the details of any git-remote-http(s).exe parent process.
+                    ReadGitRemoteDetails(operationArguments);
 
                     // Set the parent window handle.
                     ParentHwnd = operationArguments.ParentHwnd;
@@ -386,8 +391,12 @@ namespace Microsoft.Alm.Cli
                         throw new ArgumentException(inner.Message, nameof(operationArguments), inner);
                     }
 
+                    // Load operation arguments.
                     await LoadOperationArguments(operationArguments);
                     EnableTraceLogging(operationArguments);
+
+                    // Read the details of any git-remote-http(s).exe parent process.
+                    ReadGitRemoteDetails(operationArguments);
 
                     // Set the parent window handle.
                     ParentHwnd = operationArguments.ParentHwnd;
@@ -473,8 +482,12 @@ namespace Microsoft.Alm.Cli
                         throw new ArgumentException(inner.Message, nameof(operationArguments), inner);
                     }
 
+                    // Load operation arguments.
                     await LoadOperationArguments(operationArguments);
                     EnableTraceLogging(operationArguments);
+
+                    // Read the details of any git-remote-http(s).exe parent process.
+                    ReadGitRemoteDetails(operationArguments);
 
                     // Set the parent window handle.
                     ParentHwnd = operationArguments.ParentHwnd;
