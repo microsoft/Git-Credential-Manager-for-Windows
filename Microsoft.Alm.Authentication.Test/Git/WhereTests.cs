@@ -16,7 +16,6 @@ namespace Microsoft.Alm.Authentication.Git.Test
                 var data = new List<object[]>()
                 {
                     new object[] { "cmd" },
-                    new object[] { "notepad" },
                     new object[] { "calc" },
                     new object[] { "powershell" },
                     new object[] { "git" },

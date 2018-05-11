@@ -78,7 +78,7 @@ namespace Microsoft.Alm.Authentication
 
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Design", "CA1057:StringUriOverloadsCallSystemUriOverloads")]
         public TargetUri(string targetUrl)
-            : this(targetUrl,  null)
+            : this(targetUrl, null)
         { }
 
         private readonly Uri _proxyUri;
@@ -90,6 +90,15 @@ namespace Microsoft.Alm.Authentication
         public string AbsolutePath
         {
             get { return QueryUri.AbsolutePath; }
+        }
+
+
+        /// <summary>
+        /// Returns `<see langword="true"/>` if `<see cref="ActualUri"/>` contains `<see cref="Uri.UserInfo"/>`; otherwise `<see langword="false"/>`.
+        /// </summary>
+        public bool ContainsUserInfo
+        {
+            get { return QueryUri.AbsoluteUri.IndexOf('@') >= 0; }
         }
 
         /// <summary>
@@ -155,7 +164,7 @@ namespace Microsoft.Alm.Authentication
         /// Gets the `<see cref="Uri.UserInfo"/>` from `<see cref="ActualUri"/>`.
         /// </summary>
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Design", "CA1056:UriPropertiesShouldNotBeStrings")]
-        public string TargetUriUsername { get { return QueryUri.UserInfo; } }
+        public string UserInfo { get { return QueryUri.UserInfo; } }
 
         /// <summary>
         /// Returns a version of this `<see cref="TargetUri"/>` that contains the specified username.
@@ -167,7 +176,7 @@ namespace Microsoft.Alm.Authentication
         public TargetUri GetPerUserTargetUri(string username)
         {
             // belt and braces, don't add a username if the URI already contains one.
-            if (string.IsNullOrWhiteSpace(username) || TargetUriContainsUsername)
+            if (string.IsNullOrWhiteSpace(username) || ContainsUserInfo)
             {
                 return this;
             }
@@ -200,11 +209,6 @@ namespace Microsoft.Alm.Authentication
 
             return QueryUri.IsBaseOf(targetUri);
         }
-
-        /// <summary>
-        /// Returns `<see langword="true"/>` if `<see cref="ActualUri"/>` contains `<see cref="Uri.UserInfo"/>`; otherwise `<see langword="false"/>`.
-        /// </summary>
-        public bool TargetUriContainsUsername { get { return QueryUri.AbsoluteUri.IndexOf('@') >= 0; } }
 
         /// <summary>
         /// Gets a canonical string representation for the `<see cref="QueryUri"/>`.
