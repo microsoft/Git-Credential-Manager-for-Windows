@@ -259,9 +259,9 @@ namespace Microsoft.Alm.Authentication
 
             // Handle the Azure userinfo -> path conversion.AzureBaseUrlHost
             if (targetUri.Host.EndsWith(AzureBaseUrlHost, StringComparison.OrdinalIgnoreCase)
-                && targetUri.TargetUriContainsUsername)
+                && targetUri.ContainsUserInfo)
             {
-                string escapedUserInfo = Uri.EscapeUriString(targetUri.TargetUriUsername);
+                string escapedUserInfo = Uri.EscapeUriString(targetUri.UserInfo);
 
                 requestUrl = requestUrl + escapedUserInfo + "/";
             }
@@ -285,9 +285,9 @@ namespace Microsoft.Alm.Authentication
 
             // Handle Azure userinfo -> path conversion.
             if (targetUri.Host.EndsWith(AzureBaseUrlHost)
-                && targetUri.TargetUriContainsUsername)
+                && targetUri.ContainsUserInfo)
             {
-                string escapedUserInfo = Uri.EscapeUriString(targetUri.TargetUriUsername);
+                string escapedUserInfo = Uri.EscapeUriString(targetUri.UserInfo);
                 tenantUrl = tenantUrl + escapedUserInfo + "/";
             }
 
@@ -346,9 +346,9 @@ namespace Microsoft.Alm.Authentication
                                                  port: true,
                                                  path: false);
 
-            if (targetUri.TargetUriContainsUsername)
+            if (targetUri.ContainsUserInfo)
             {
-                string escapedUserInfo = Uri.EscapeUriString(targetUri.TargetUriUsername);
+                string escapedUserInfo = Uri.EscapeUriString(targetUri.UserInfo);
                 tokenUrl = tokenUrl + escapedUserInfo + "/";
             }
 

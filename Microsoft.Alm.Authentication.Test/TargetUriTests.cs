@@ -44,7 +44,7 @@ namespace Microsoft.Alm.Authentication.Test
             Assert.Equal(queryUri.IsDefaultPort, targetUri.IsDefaultPort);
             Assert.Equal(queryUri.Port, targetUri.Port);
             Assert.Equal(queryUri.Scheme, targetUri.Scheme);
-            Assert.Equal(queryUri.UserInfo, targetUri.TargetUriUsername);
+            Assert.Equal(queryUri.UserInfo, targetUri.UserInfo);
 
             queryUri = queryUrl is null ? null : new Uri(queryUrl);
             proxyUri = proxyUrl is null ? null : new Uri(proxyUrl);
@@ -63,7 +63,7 @@ namespace Microsoft.Alm.Authentication.Test
             Assert.Equal(uri.Port, targetUri.Port);
             Assert.Equal(uri.Scheme, targetUri.Scheme);
 
-            Assert.Equal(uri.UserInfo, targetUri.TargetUriUsername);
+            Assert.Equal(uri.UserInfo, targetUri.UserInfo);
 
             Assert.Equal(uri, targetUri.QueryUri);
             Assert.Equal(proxyUri, targetUri.ProxyUri);
@@ -78,7 +78,7 @@ namespace Microsoft.Alm.Authentication.Test
             Assert.Equal(uri.Port, targetUri.Port);
             Assert.Equal(uri.Scheme, targetUri.Scheme);
 
-            Assert.Equal(uri.UserInfo, targetUri.TargetUriUsername);
+            Assert.Equal(uri.UserInfo, targetUri.UserInfo);
 
             Assert.Equal(queryUri, targetUri.QueryUri);
             Assert.Equal(uri, targetUri.QueryUri);
