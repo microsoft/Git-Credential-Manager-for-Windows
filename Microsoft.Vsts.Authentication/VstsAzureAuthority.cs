@@ -34,6 +34,7 @@ namespace Microsoft.Alm.Authentication
 {
     internal class VstsAzureAuthority : AzureAuthority, IVstsAuthority
     {
+        public const string AzureBaseUrlHost = "azure.com";
         public const string VstsBaseUrlHost = "visualstudio.com";
 
         public VstsAzureAuthority(RuntimeContext context, string authorityHostUrl)
@@ -256,7 +257,9 @@ namespace Microsoft.Alm.Authentication
 
             string requestUrl = targetUri.ToString(false, true, false);
 
-            if (targetUri.TargetUriContainsUsername)
+            // Handle the Azure userinfo -> path conversion.AzureBaseUrlHost
+            if (targetUri.Host.EndsWith(AzureBaseUrlHost, StringComparison.OrdinalIgnoreCase)
+                && targetUri.TargetUriContainsUsername)
             {
                 string escapedUserInfo = Uri.EscapeUriString(targetUri.TargetUriUsername);
 
@@ -280,7 +283,9 @@ namespace Microsoft.Alm.Authentication
 
             string tenantUrl = targetUri.ToString(false, true, false);
 
-            if (targetUri.TargetUriContainsUsername)
+            // Handle Azure userinfo -> path conversion.
+            if (targetUri.Host.EndsWith(AzureBaseUrlHost)
+                && targetUri.TargetUriContainsUsername)
             {
                 string escapedUserInfo = Uri.EscapeUriString(targetUri.TargetUriUsername);
                 tenantUrl = tenantUrl + escapedUserInfo + "/";
