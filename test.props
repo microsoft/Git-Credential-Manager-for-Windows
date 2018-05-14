@@ -28,7 +28,7 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <ItemGroup>
-    <None Include="..\xunit.runner.json">
+    <None Include="..\..\xunit.runner.json">
       <Link>xunit.runner.json</Link>
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>

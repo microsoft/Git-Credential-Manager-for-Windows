@@ -15,5 +15,9 @@ using System.Runtime.InteropServices;
 [assembly: AssemblyVersion("1.16.0.0")]
 [assembly: AssemblyFileVersion("1.16.0.0")]
 [assembly: NeutralResourcesLanguage("en-US")]
-[assembly: InternalsVisibleTo("Microsoft.Alm.Manager.Test")]
+
+// Only expose internals when the binary isn't signed.
+#if !SIGNED
+[assembly: InternalsVisibleTo("Microsoft.Alm.Cli.Test")]
 [assembly: InternalsVisibleTo("DynamicProxyGenAssembly2")]
+#endif

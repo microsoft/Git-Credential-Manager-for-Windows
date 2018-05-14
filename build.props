@@ -6,7 +6,7 @@
   </PropertyGroup>
   <PropertyGroup>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
-    <CodeAnalysisRuleSet>..\analysisRules.ruleset</CodeAnalysisRuleSet>
+    <CodeAnalysisRuleSet>..\..\analysisRules.ruleset</CodeAnalysisRuleSet>
     <FileAlignment>512</FileAlignment>
     <PlatformTarget>AnyCPU</PlatformTarget>
     <Prefer32Bit>false</Prefer32Bit>
