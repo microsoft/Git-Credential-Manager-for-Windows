@@ -130,21 +130,27 @@ namespace Microsoft.Alm.Cli
                 case AuthorityType.AzureDirectory:
                     program.Trace.WriteLine($"authority for '{operationArguments.TargetUri}' is Azure Directory.");
 
-                    Guid tenantId = Guid.Empty;
-
-                    // Get the identity of the tenant.
-                    var result = await BaseVstsAuthentication.DetectAuthority(program.Context, operationArguments.TargetUri);
-
-                    if (result.HasValue)
+                    if (authority is null)
                     {
-                        tenantId = result.Value;
+                        Guid tenantId = Guid.Empty;
+
+                        // Get the identity of the tenant.
+                        var result = await BaseVstsAuthentication.DetectAuthority(program.Context, operationArguments.TargetUri);
+
+                        if (result.HasValue)
+                        {
+                            tenantId = result.Value;
+                        }
+
+                        // Create the authority object.
+                        authority = new VstsAadAuthentication(program.Context,
+                                                              tenantId,
+                                                              operationArguments.VstsTokenScope,
+                                                              new SecretStore(program.Context, secretsNamespace, VstsAadAuthentication.UriNameConversion));
                     }
 
                     // Return the allocated authority or a generic AAD backed VSTS authentication object.
-                    return authority ?? new VstsAadAuthentication(program.Context,
-                                                                  tenantId,
-                                                                  operationArguments.VstsTokenScope,
-                                                                  new SecretStore(program.Context, secretsNamespace, VstsAadAuthentication.UriNameConversion));
+                    return authority;
 
                 case AuthorityType.Basic:
                     // Enforce basic authentication only.

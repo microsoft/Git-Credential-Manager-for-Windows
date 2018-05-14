@@ -273,7 +273,6 @@ namespace Microsoft.Alm.Authentication
 
     internal class Network : Base, INetwork
     {
-        private const string BearerPrefix = "Bearer ";
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Performance", "CA1823:AvoidUnusedPrivateFields")]
         private static readonly AuthenticationHeaderValue[] NullResult = new AuthenticationHeaderValue[0];
 
@@ -455,7 +454,7 @@ namespace Microsoft.Alm.Authentication
                                         break;
 
                                     default:
-                                        Trace.WriteLine("! unsupported token type, not appeding an authentication header to the request.");
+                                        Trace.WriteLine("! unsupported token type, not appending an authentication header to the request.");
                                         break;
                                 }
                             }

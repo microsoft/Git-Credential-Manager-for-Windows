@@ -46,6 +46,7 @@ namespace Microsoft.Alm.Authentication
 
         protected const string AdalRefreshPrefix = "ada";
 
+        internal const string AzureBaseUrlHost = VstsAzureAuthority.AzureBaseUrlHost;
         internal const string VstsBaseUrlHost = VstsAzureAuthority.VstsBaseUrlHost;
 
         private const char CachePairSeperator = '=';
@@ -178,18 +179,15 @@ namespace Microsoft.Alm.Authentication
 
             var tenantId = Guid.Empty;
 
-            if (targetUri.Host.EndsWith(VstsBaseUrlHost, StringComparison.OrdinalIgnoreCase))
+            if (VstsAzureAuthority.IsVstsUrl(targetUri))
             {
-                context.Trace.WriteLine($"'{targetUri}' is subdomain of '{VstsBaseUrlHost}', checking AAD vs MSA.");
+                var tenantUrl = VstsAzureAuthority.GetTargetUrl(targetUri);
 
-                string tenant = null;
+                context.Trace.WriteLine($"'{targetUri}' is a member '{tenantUrl}', checking AAD vs MSA.");
 
                 if (StringComparer.OrdinalIgnoreCase.Equals(targetUri.Scheme, Uri.UriSchemeHttp)
                     || StringComparer.OrdinalIgnoreCase.Equals(targetUri.Scheme, Uri.UriSchemeHttps))
                 {
-                    // Query the cache first.
-                    string tenantUrl = targetUri.ToString();
-
                     // Read the cache from disk.
                     var cache = await DeserializeTenantCache(context);
 
@@ -205,16 +203,18 @@ namespace Microsoft.Alm.Authentication
 
                     try
                     {
-                        using (var response = await context.Network.HttpGetAsync(targetUri, options))
-                        {
-                            if (response.IsSuccessStatusCode)
-                            {
-                                if (response.Headers.TryGetValues(VstsResourceTenantHeader, out IEnumerable<string> values))
-                                {
-                                    tenant = System.Linq.Enumerable.First(values);
+                        var tenantUri = new TargetUri(tenantUrl, targetUri.ProxyUri?.ToString());
 
-                                    if (!string.IsNullOrWhiteSpace(tenant)
-                                        && Guid.TryParse(tenant, out tenantId))
+                        using (var response = await context.Network.HttpHeadAsync(tenantUri, options))
+                        {
+                            if (response.Headers != null && response.Headers.TryGetValues(VstsResourceTenantHeader, out IEnumerable<string> values))
+                            {
+                                foreach (string value in values)
+                                {
+                                    // Try to find a non-empty value for the resource-tenant identity
+                                    if (!string.IsNullOrWhiteSpace(value)
+                                        && Guid.TryParse(value, out tenantId)
+                                        && tenantId != Guid.Empty)
                                     {
                                         // Update the cache.
                                         cache[tenantUrl] = tenantId;
@@ -226,6 +226,9 @@ namespace Microsoft.Alm.Authentication
                                         return tenantId;
                                     }
                                 }
+
+                                // Since we did not find a better identity, fallback to the default (Guid.Empty). 
+                                return tenantId;
                             }
                             else
                             {
@@ -241,9 +244,9 @@ namespace Microsoft.Alm.Authentication
                 }
                 else
                 {
-                    context.Trace.WriteLine($"detected non-https based protocol: '{targetUri.Scheme}'.");
+                    context.Trace.WriteLine($"detected non-http(s) based protocol: '{targetUri.Scheme}'.");
                 }
-            }            
+            }
 
             if (StringComparer.OrdinalIgnoreCase.Equals(VstsBaseUrlHost, targetUri.Host))
                 return Guid.Empty;
