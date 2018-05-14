@@ -255,18 +255,8 @@ namespace Microsoft.Alm.Authentication
             if (targetUri is null)
                 throw new ArgumentNullException(nameof(targetUri));
 
-            string requestUrl = targetUri.ToString(false, true, false);
-
-            // Handle the Azure userinfo -> path conversion.AzureBaseUrlHost
-            if (targetUri.Host.EndsWith(AzureBaseUrlHost, StringComparison.OrdinalIgnoreCase)
-                && targetUri.ContainsUserInfo)
-            {
-                string escapedUserInfo = Uri.EscapeUriString(targetUri.UserInfo);
-
-                requestUrl = requestUrl + escapedUserInfo + "/";
-            }
-
             // Create a URL to the connection data end-point, it's deployment level and "always on".
+            string requestUrl = GetTargetUrl(targetUri);
             string validationUrl = requestUrl + VstsValidationUrlPath;
 
             return new TargetUri(validationUrl, targetUri.ProxyUri?.ToString());
@@ -281,16 +271,7 @@ namespace Microsoft.Alm.Authentication
             if (authorization is null)
                 throw new ArgumentNullException(nameof(authorization));
 
-            string tenantUrl = targetUri.ToString(false, true, false);
-
-            // Handle Azure userinfo -> path conversion.
-            if (targetUri.Host.EndsWith(AzureBaseUrlHost)
-                && targetUri.ContainsUserInfo)
-            {
-                string escapedUserInfo = Uri.EscapeUriString(targetUri.UserInfo);
-                tenantUrl = tenantUrl + escapedUserInfo + "/";
-            }
-
+            string tenantUrl = GetTargetUrl(targetUri);
             var locationServiceUrl = tenantUrl + LocationServiceUrlPathAndQuery;
             var requestUri = new TargetUri(locationServiceUrl, targetUri.ProxyUri?.ToString());
             var options = new NetworkRequestOptions(true)
@@ -329,6 +310,28 @@ namespace Microsoft.Alm.Authentication
             }
 
             return null;
+        }
+
+        internal static string GetTargetUrl(TargetUri targetUri)
+        {
+            string requestUrl = targetUri.ToString(false, true, false);
+
+            // Handle the Azure userinfo -> path conversion.AzureBaseUrlHost
+            if (targetUri.Host.EndsWith(AzureBaseUrlHost, StringComparison.OrdinalIgnoreCase)
+                && targetUri.ContainsUserInfo)
+            {
+                string escapedUserInfo = Uri.EscapeUriString(targetUri.UserInfo);
+
+                requestUrl = requestUrl + escapedUserInfo + "/";
+            }
+
+            return requestUrl;
+        }
+
+        internal static bool IsVstsUrl(TargetUri targetUri)
+        {
+            return StringComparer.OrdinalIgnoreCase.Equals(targetUri.Scheme, Uri.UriSchemeHttp)
+                || StringComparer.OrdinalIgnoreCase.Equals(targetUri.Scheme, Uri.UriSchemeHttps);
         }
 
         private StringContent GetAccessTokenRequestBody(TargetUri targetUri, VstsTokenScope tokenScope, TimeSpan? duration = null)
