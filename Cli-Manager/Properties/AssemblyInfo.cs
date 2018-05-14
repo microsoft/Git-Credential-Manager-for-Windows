@@ -15,5 +15,5 @@ using System.Runtime.InteropServices;
 [assembly: AssemblyVersion("1.16.0.0")]
 [assembly: AssemblyFileVersion("1.16.0.0")]
 [assembly: NeutralResourcesLanguage("en-US")]
-[assembly: InternalsVisibleTo("Microsoft.Alm.CredentialHelper.Test")]
+[assembly: InternalsVisibleTo("Microsoft.Alm.Manager.Test")]
 [assembly: InternalsVisibleTo("DynamicProxyGenAssembly2")]

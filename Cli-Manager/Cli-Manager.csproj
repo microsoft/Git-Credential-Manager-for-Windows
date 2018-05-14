@@ -7,11 +7,10 @@
     <AppDesignerFolder>Properties</AppDesignerFolder>
     <AssemblyName>git-credential-manager</AssemblyName>
     <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>
-    <NuGetPackageImportStamp>
-    </NuGetPackageImportStamp>
+    <NuGetPackageImportStamp/>
     <OutputType>Exe</OutputType>
     <ProjectGuid>{19770407-63D4-40A8-A9DF-F1C4B473308A}</ProjectGuid>
-    <ProjectName>Cli-CredentialHelper</ProjectName>
+    <ProjectName>Cli-Manager</ProjectName>
     <RootNamespace>Microsoft.Alm.Cli</RootNamespace>
     <TargetFrameworkVersion>v4.5.2</TargetFrameworkVersion>
   </PropertyGroup>

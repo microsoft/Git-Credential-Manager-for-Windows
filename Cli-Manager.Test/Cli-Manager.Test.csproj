@@ -6,8 +6,8 @@
   <PropertyGroup>
     <ProjectGuid>{19781214-AE6D-4DCC-BA9F-12CB0C6581AE}</ProjectGuid>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>Microsoft.Alm.CredentialHelper.Test</RootNamespace>
-    <AssemblyName>Microsoft.Alm.CredentialHelper.Test</AssemblyName>
+    <RootNamespace>Microsoft.Alm.Manager.Test</RootNamespace>
+    <AssemblyName>Microsoft.Alm.Manager.Test</AssemblyName>
     <IsCodedUITest>False</IsCodedUITest>
     <NuGetPackageImportStamp>
     </NuGetPackageImportStamp>
