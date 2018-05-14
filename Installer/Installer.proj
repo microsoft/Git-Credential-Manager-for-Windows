@@ -4,11 +4,11 @@
   <Import Project="..\packages\MicroBuild.Core.0.3.0\build\MicroBuild.Core.props" Condition="Exists('..\packages\MicroBuild.Core.0.3.0\build\MicroBuild.Core.props')" />
   <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
   <PropertyGroup Label="Globals">
+    <NuGetPackageImportStamp />
     <ProjectGuid>{19770407-3808-4B17-9EE0-21DD3468F875}</ProjectGuid>
-    <RootNamespace>Installer</RootNamespace>
     <ProjectDir Condition=" '$(ProjectDir)' == '' Or '$(ProjectDir)' == '*Undefined*' ">$(MSBuildProjectDirectory)</ProjectDir>
+    <RootNamespace>Installer</RootNamespace>
     <TargetFrameworkVersion>v4.6.2</TargetFrameworkVersion>
-    <NuGetPackageImportStamp/>
   </PropertyGroup>
   <PropertyGroup>
     <SolutionDir Condition=" '$(SolutionDir)' == '' Or '$(SolutionDir)' == '*Undefined*' ">$([System.IO.Directory]::GetParent($(ProjectDir)))</SolutionDir>
@@ -21,8 +21,8 @@
     <OutDir>$(OutputPath)</OutDir>
   </PropertyGroup>
   <PropertyGroup>
-    <GcmProps>$([System.IO.File]::ReadAllText($(SolutionDir)\Cli-CredentialHelper\Properties\AssemblyInfo.cs))</GcmProps>
-    <PkgProps>$([System.IO.File]::ReadAllText($(SolutionDir)\Microsoft.Vsts.Authentication\Properties\AssemblyInfo.cs))</PkgProps>
+    <GcmProps>$([System.IO.File]::ReadAllText($(SolutionDir)\Cli\Manager\Properties\AssemblyInfo.cs))</GcmProps>
+    <PkgProps>$([System.IO.File]::ReadAllText($(SolutionDir)\Microsoft.Vsts.Authentication\Src\Properties\AssemblyInfo.cs))</PkgProps>
     <Pattern>^\s*\[assembly\s*:\s*AssemblyVersion\s*\(\s*\s*"(\d+\.\d+\.\d+)\.?\d*\s*"\s*\)</Pattern>
     <GcmVersion>$([System.Text.RegularExpressions.Regex]::Match($(GcmProps), $(Pattern), System.Text.RegularExpressions.RegexOptions.Multiline).Groups[1].Value)</GcmVersion>
     <PkgVersion>$([System.Text.RegularExpressions.Regex]::Match($(PkgProps), $(Pattern), System.Text.RegularExpressions.RegexOptions.Multiline).Groups[1].Value)</PkgVersion>
@@ -32,27 +32,27 @@
     <GcmPkgPath>$(OutputPath)\Microsoft.Alm.Authentication.$(PkgVersion).nupkg</GcmPkgPath>
   </PropertyGroup>
   <ItemGroup>
-    <ProjectReference Include="..\Cli-Askpass\Cli-Askpass.csproj">
+    <ProjectReference Include="..\Cli\Askpass\Cli-Askpass.csproj">
       <Project>{19770407-B33A-4EBE-92B8-04C93F43CAE0}</Project>
       <Name>Cli-Askpass</Name>
     </ProjectReference>
-    <ProjectReference Include="..\Cli-CredentialHelper\Cli-CredentialHelper.csproj">
+    <ProjectReference Include="..\Cli\Manager\Cli-Manager.csproj">
       <Project>{19770407-63D4-40A8-A9DF-F1C4B473308A}</Project>
-      <Name>Cli-CredentialHelper</Name>
+      <Name>Cli-Manager</Name>
     </ProjectReference>
-    <ProjectReference Include="..\Bitbucket.Authentication\Bitbucket.Authentication.csproj">
+    <ProjectReference Include="..\Bitbucket.Authentication\Src\Bitbucket.Authentication.csproj">
       <Project>{EE663736-5BAD-4CA6-A4F8-99978925AD8A}</Project>
       <Name>Bitbucket.Authentication</Name>
     </ProjectReference>
-    <ProjectReference Include="..\GitHub.Authentication\GitHub.Authentication.csproj">
+    <ProjectReference Include="..\GitHub.Authentication\Src\GitHub.Authentication.csproj">
       <Project>{CF306116-BBF0-4CC7-AFCE-A506AC4752CB}</Project>
       <Name>GitHub.Authentication</Name>
     </ProjectReference>
-    <ProjectReference Include="..\Microsoft.Alm.Authentication\Microsoft.Alm.Authentication.csproj">
+    <ProjectReference Include="..\Microsoft.Alm.Authentication\Src\Microsoft.Alm.Authentication.csproj">
       <Project>{19770407-B493-459D-BB4F-04FBEFB1BA13}</Project>
       <Name>Microsoft.Alm.Authentication</Name>
     </ProjectReference>
-    <ProjectReference Include="..\Microsoft.Vsts.Authentication\Microsoft.Vsts.Authentication.csproj">
+    <ProjectReference Include="..\Microsoft.Vsts.Authentication\Src\Microsoft.Vsts.Authentication.csproj">
       <Project>{19770407-D7D8-4A37-914C-F552FF4B90D4}</Project>
       <Name>Microsoft.Vsts.Authentication</Name>
     </ProjectReference>
@@ -106,7 +106,9 @@
     </ZipContents>
   </ItemGroup>
   <ItemGroup>
-    <None Include="packages.config" />
+    <None Include="packages.config">
+      <InProject>false</InProject>
+    </None>
   </ItemGroup>
   <Target Name="AfterBuild" AfterTargets="Build" />
   <Target Name="Build" BeforeTargets="AfterBuild">
@@ -115,10 +117,10 @@
     <MSBuild Projects="@(ProjectReference)" Targets="Build" />
     <!-- need to declare the items after dependencies have built, so that glob enumeration happens after the files are produced -->
     <ItemGroup>
-      <FilesToCopy Include="$(SolutionDir)\Cli-CredentialHelper\$(InputPath)\*.*">
+      <FilesToCopy Include="$(SolutionDir)\Cli\Manager\$(InputPath)\*.*">
         <InProject>false</InProject>
       </FilesToCopy>
-      <FilesToCopy Include="$(SolutionDir)\Cli-Askpass\$(InputPath)\git-askpass.exe">
+      <FilesToCopy Include="$(SolutionDir)\Cli\Askpass\$(InputPath)\git-askpass.exe">
         <InProject>false</InProject>
       </FilesToCopy>
       <FilesToCopy Include="$(SolutionDir)\LICENSE.TXT">
@@ -155,7 +157,7 @@
     <Error Condition="!Exists('..\packages\Microsoft.Net.Compilers.2.8.0\build\Microsoft.Net.Compilers.props')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\Microsoft.Net.Compilers.2.8.0\build\Microsoft.Net.Compilers.props'))" />
   </Target>
   <Target Name="EnsureResourcesExist" BeforeTargets="PrepareForBuild">
-    <Error Condition="!Exists('$(SolutionDir)\Cli-CredentialHelper\Properties\AssemblyInfo.cs)')" Text="File not found: '$(SolutionDir)\Cli-CredentialHelper\Properties\AssemblyInfo.cs)'." />
+    <Error Condition="!Exists('$(SolutionDir)\Cli\Manager\Properties\AssemblyInfo.cs)')" Text="File not found: '$(SolutionDir)\Cli\Manager\Properties\AssemblyInfo.cs)'." />
   </Target>
   <Import Project="..\packages\MSBuildTasks.1.5.0.235\build\MSBuildTasks.targets" Condition="Exists('..\packages\MSBuildTasks.1.5.0.235\build\MSBuildTasks.targets')" />
   <Import Project="..\packages\MicroBuild.Core.0.3.0\build\MicroBuild.Core.targets" Condition="Exists('..\packages\MicroBuild.Core.0.3.0\build\MicroBuild.Core.targets')" />
