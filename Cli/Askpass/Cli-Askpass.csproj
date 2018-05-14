@@ -92,7 +92,7 @@
     </FilesToSign>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
-  <Import Project="..\Shared\Cli-Shared.projitems" Label="Shared" />
+  <Import Project="..\..\Shared\Cli\Cli-Shared.projitems" Label="Shared" />
   <Import Project="..\..\build.targets" />
   <Target Name="EnsureNuGetPackageBuildImports" BeforeTargets="PrepareForBuild">
     <PropertyGroup>
