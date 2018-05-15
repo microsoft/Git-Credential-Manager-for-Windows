@@ -330,8 +330,10 @@ namespace Microsoft.Alm.Authentication
 
         internal static bool IsVstsUrl(TargetUri targetUri)
         {
-            return StringComparer.OrdinalIgnoreCase.Equals(targetUri.Scheme, Uri.UriSchemeHttp)
-                || StringComparer.OrdinalIgnoreCase.Equals(targetUri.Scheme, Uri.UriSchemeHttps);
+            return (StringComparer.OrdinalIgnoreCase.Equals(targetUri.Scheme, Uri.UriSchemeHttp)
+                    || StringComparer.OrdinalIgnoreCase.Equals(targetUri.Scheme, Uri.UriSchemeHttps))
+                && (targetUri.DnsSafeHost.EndsWith(VstsBaseUrlHost, StringComparison.OrdinalIgnoreCase)
+                    || targetUri.DnsSafeHost.EndsWith(AzureBaseUrlHost, StringComparison.OrdinalIgnoreCase));
         }
 
         private StringContent GetAccessTokenRequestBody(TargetUri targetUri, VstsTokenScope tokenScope, TimeSpan? duration = null)
@@ -345,15 +347,7 @@ namespace Microsoft.Alm.Authentication
             if (tokenScope is null)
                 throw new ArgumentNullException(nameof(tokenScope));
 
-            string tokenUrl = targetUri.ToString(username: false,
-                                                 port: true,
-                                                 path: false);
-
-            if (targetUri.ContainsUserInfo)
-            {
-                string escapedUserInfo = Uri.EscapeUriString(targetUri.UserInfo);
-                tokenUrl = tokenUrl + escapedUserInfo + "/";
-            }
+            string tokenUrl = GetTargetUrl(targetUri);
 
             Trace.WriteLine($"creating access token scoped to '{tokenScope}' for '{targetUri}'");
 
