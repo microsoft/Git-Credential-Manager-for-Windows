@@ -190,7 +190,7 @@
     <Resource Include="Assets\octocat-mark.ico" />
   </ItemGroup>
   <ItemGroup />
-  <Import Project="..\..\Gui-Shared\Gui-Shared.projitems" Label="Shared" />
+  <Import Project="..\..\Shared\Gui\Gui-Shared.projitems" Label="Shared" />
   <Target Name="EnsureNuGetPackageBuildImports" BeforeTargets="PrepareForBuild">
     <PropertyGroup>
       <ErrorText>This project references NuGet package(s) that are missing on this computer. Use NuGet Package Restore to download them.  For more information, see http://go.microsoft.com/fwlink/?LinkID=322105. The missing file is {0}.</ErrorText>
