@@ -37,6 +37,11 @@ namespace Microsoft.Alm.Cli
 {
     internal class OperationArguments : Base
     {
+        /// <summary>
+        /// Creates a new instance of `<see cref="OperationArguments"/>` with default values.
+        /// <para/>
+        /// Use `<see cref="ReadInput(Stream)"/>` to populate the instance's properties.
+        /// </summary>
         public OperationArguments(RuntimeContext context)
             : base(context)
         {
@@ -50,8 +55,12 @@ namespace Microsoft.Alm.Cli
             _vstsTokenScope = Program.VstsCredentialScope;
         }
 
-        // Test-only constructor
-        internal OperationArguments()
+        /// <summary>
+        /// Creates a new instance of `<see cref="OperationArguments"/>` using `<seealso cref="RuntimeContext.Default"/>`, and with default values.
+        /// <para/>
+        /// Use `<see cref="ReadInput(Stream)"/>` to populate the instance's properties.
+        /// </summary>
+        public OperationArguments()
             : this(RuntimeContext.Default)
         { }
 
@@ -60,6 +69,7 @@ namespace Microsoft.Alm.Cli
         private Credential _credentials;
         private string _customNamespace;
         private Dictionary<string, string> _environmentVariables;
+        private string _gitRemoteHttpCommandLine;
         private Interactivity _interactivity;
         private IntPtr _parentHwnd;
         private bool _preserveCredentials;
@@ -78,18 +88,33 @@ namespace Microsoft.Alm.Cli
         private VstsTokenScope _vstsTokenScope;
         private bool _writeLog;
 
+        /// <summary>
+        /// Gets or sets the authority to be used during the current operation.
+        /// <para/>
+        /// Default value is `<seealso cref="AuthorityType.Auto"/>`.
+        /// </summary>
         public virtual AuthorityType Authority
         {
             get { return _authorityType; }
             set { _authorityType = value; }
         }
 
+        /// <summary>
+        /// Gets or sets credentials to be used by, or returned by the current operation.
+        /// <para/>
+        /// Default value is `<see langword="null"/>`.
+        /// </summary>
         public virtual Credential Credentials
         {
             get { return _credentials; }
             set { _credentials = value; }
         }
 
+        /// <summary>
+        /// Gets or sets a custom namespace, which overrides `<seealso cref="Program.SecretsNamespace"/>`, used when generating secret-keys.
+        /// <para/>
+        /// Default value is `<see langword="null"/>`.
+        /// </summary>
         public virtual string CustomNamespace
         {
             get { return _customNamespace; }
@@ -117,8 +142,11 @@ namespace Microsoft.Alm.Cli
         }
 
         /// <summary>
-        /// Gets the process's Git configuration based on current working directory, user's folder,
-        /// and Git's system directory.
+        /// Gets the process's Git configuration based on current working directory, user's folder, and Git's system directory.
+        /// <para/>
+        /// Value is `<see langword="null"/>`, until explicitly loaded.
+        /// <para/>
+        /// Use `<seealso cref="LoadConfiguration()"/>` to populate the property.
         /// </summary>
         public virtual Git.Configuration GitConfiguration
         {
@@ -126,7 +154,27 @@ namespace Microsoft.Alm.Cli
         }
 
         /// <summary>
-        /// Gets or sets if the GCM expected interactivity level.
+        /// Gets or sets the command line used to invoke "git-remote-http(s).exe".
+        /// <para/>
+        /// Setting the value will recreate the `<seealso cref="TargetUri"/>` property value.
+        /// <para/>
+        /// The default value is `<see langword="null"/>`.
+        /// </summary>
+        public virtual string GitRemoteHttpCommandLine
+        {
+            get { return _gitRemoteHttpCommandLine; }
+            set
+            {
+                _gitRemoteHttpCommandLine = value;
+
+                CreateTargetUri();
+            }
+        }
+
+        /// <summary>
+        /// Gets or sets if the expected interactivity level of the command line interface.
+        /// <para/>
+        /// Default value is `<seealso cref="Interactivity.Auto"/>`.
         /// </summary>
         public virtual Interactivity Interactivity
         {
@@ -157,6 +205,8 @@ namespace Microsoft.Alm.Cli
 
         /// <summary>
         /// Gets or sets the expected credential erasure behavior expectation.
+        /// <para/>
+        /// Default value is `<see langword="false"/>`.
         /// </summary>
         public virtual bool PreserveCredentials
         {
@@ -182,6 +232,7 @@ namespace Microsoft.Alm.Cli
         /// <summary>
         /// Gets or sets the host (aka domain name) portion of `<seealso cref="QueryUri"/>`.
         /// </summary>
+        /// <exception cref="ArgumentNullException">When set `<see langword="null"/>`.</exception>
         public virtual string QueryHost
         {
             get { return _queryHost; }
@@ -215,6 +266,7 @@ namespace Microsoft.Alm.Cli
         /// <summary>
         /// Gets or sets the protocol portion of `<seealso cref="QueryUri"/>`.
         /// </summary>
+        /// <exception cref="ArgumentNullException">When set `<see langword="null"/>`.</exception>
         public virtual string QueryProtocol
         {
             get { return _queryProtocol; }
@@ -233,6 +285,7 @@ namespace Microsoft.Alm.Cli
         /// <summary>
         /// Gets the `<seealso cref="Uri"/>` used for all network operations. 
         /// </summary>
+        /// <exception cref="ArgumentNullException">When set `<see langword="null"/>`.</exception>
         public virtual Uri QueryUri
         {
             get { return _targetUri?.QueryUri; }
@@ -503,8 +556,12 @@ namespace Microsoft.Alm.Cli
         /// </summary>
         /// <param name="username">The username of the newly set credentials.</param>
         /// <param name="password">The password of the newly set credentials.</param>
+        /// <exception cref="ArgumentNullException">When `<paramref name="username"/>` is `<see langword="null"/>`.</exception>
         public virtual void SetCredentials(string username, string password)
         {
+            if (username is null)
+                throw new ArgumentNullException(nameof(username));
+
             _credentials = new Credential(username, password);
         }
 
@@ -513,7 +570,7 @@ namespace Microsoft.Alm.Cli
         /// <para/>
         /// When `<paramref name="url"/>` is `<see langword="null"/>` the proxy value is cleared.
         /// </summary>
-        /// <param name="url"></param>
+        /// <param name="url">The uniform-resource-locater of the proxy.</param>
         public virtual void SetProxy(string url)
         {
             Uri tmp = null;
@@ -599,7 +656,7 @@ namespace Microsoft.Alm.Cli
         /// </summary>
         /// <param name="writableStream">A `<see cref="Stream"/>` to write to.</param>
         /// <exception cref="ArgumentNullException">When `<paramref name="writableStream"/>` is `<see langword="null"/>`.</exception>
-        /// /// <exception cref="ArgumentException">When `<paramref name="writableStream"/>` not writable.</exception>
+        /// <exception cref="ArgumentException">When `<paramref name="writableStream"/>` not writable.</exception>
         public virtual void WriteToStream(Stream writableStream)
         {
             if (writableStream is null)
@@ -624,6 +681,7 @@ namespace Microsoft.Alm.Cli
         {
             string queryUrl = null;
             string proxyUrl = _proxyUri?.OriginalString;
+            string actualUrl = null;
 
             StringBuilder buffer = new StringBuilder();
 
@@ -660,8 +718,20 @@ namespace Microsoft.Alm.Cli
 
             queryUrl = buffer.ToString();
 
+            // If the git-remote-http(s) command line has been captured,
+            // try and parse it and provide the command-url .
+            if (!string.IsNullOrEmpty(_gitRemoteHttpCommandLine))
+            {
+                string[] parts = _gitRemoteHttpCommandLine.Split(' ');
+
+                if (parts.Length == 3 && Uri.TryCreate(parts[2], UriKind.Absolute, out Uri uri))
+                {
+                    actualUrl = uri.ToString();
+                }
+            }
+
             // Create the target URI object.
-            _targetUri = new TargetUri(queryUrl, proxyUrl);
+            _targetUri = new TargetUri(queryUrl, proxyUrl, actualUrl);
         }
 
         internal static bool NeedsToBeEscaped(string value)

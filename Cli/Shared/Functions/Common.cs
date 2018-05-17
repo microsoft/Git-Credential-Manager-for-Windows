@@ -170,7 +170,7 @@ namespace Microsoft.Alm.Cli
                                                                   null);
 
                 case AuthorityType.Bitbucket:
-                    program.Trace.WriteLine($"authority for '{operationArguments.TargetUri}'  is Bitbucket");
+                    program.Trace.WriteLine($"authority for '{operationArguments.TargetUri}'  is Bitbucket.");
 
                     // Return a Bitbucket authentication object.
                     return authority ?? new Bitbucket.Authentication(program.Context,
@@ -843,6 +843,19 @@ namespace Microsoft.Alm.Cli
             }
 
             return credentials;
+        }
+
+        public static void ReadGitRemoteDetails(Program program, OperationArguments operationArguments)
+        {
+            if (program is null)
+                throw new ArgumentNullException(nameof(program));
+            if (operationArguments is null)
+                throw new ArgumentNullException(nameof(operationArguments));
+
+            if (program.Context.Utilities.TryReadGitRemoteHttpDetails(out string commandLine, out _))
+            {
+                operationArguments.GitRemoteHttpCommandLine = commandLine;
+            }
         }
 
         public static bool TryParse(string text, out int result)

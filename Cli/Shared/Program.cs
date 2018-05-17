@@ -105,6 +105,7 @@ namespace Microsoft.Alm.Cli
         internal GetStandardWriterDelegate _openStandardOutputWriter = ConsoleFunctions.OpenStandardOutputWriter;
         internal PrintArgsDelegate _printArgs = CommonFunctions.PrintArgs;
         internal QueryCredentialsDelegate _queryCredentials = CommonFunctions.QueryCredentials;
+        internal ReadGitRemoteDetailsDelegate _readGitRemoteDetails = CommonFunctions.ReadGitRemoteDetails;
         internal ReadKeyDelegate _readKey = ConsoleFunctions.ReadKey;
         internal SetStandardWriterDelegate _setStandardErrorWriter = ConsoleFunctions.SetStandardErrorWriter;
         internal SetStandardReaderDelegate _setStandardInputReader = ConsoleFunctions.SetStandardInputReader;
@@ -630,6 +631,9 @@ namespace Microsoft.Alm.Cli
             WriteLine($"{Title} version {Version.ToString(3)}");
 #endif
         }
+
+        internal void ReadGitRemoteDetails(OperationArguments operationArguments)
+            => _readGitRemoteDetails(this, operationArguments);
 
         internal void SetError(TextWriter writer)
         {

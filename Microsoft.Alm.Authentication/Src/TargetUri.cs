@@ -33,7 +33,7 @@ namespace Microsoft.Alm.Authentication
     /// </summary>
     public sealed class TargetUri
     {
-        public TargetUri(Uri queryUri, Uri proxyUri)
+        public TargetUri(Uri queryUri, Uri proxyUri, Uri actualUri)
         {
             if (queryUri is null)
                 throw new ArgumentNullException(nameof(queryUri));
@@ -47,24 +47,33 @@ namespace Microsoft.Alm.Authentication
                 var inner = new UriFormatException("Uri must be absolute.");
                 throw new ArgumentException(inner.Message, nameof(proxyUri), inner);
             }
+            if (actualUri != null && !queryUri.IsAbsoluteUri)
+            {
+                var inner = new UriFormatException("Uri must be absolute.");
+                throw new ArgumentException(inner.Message, nameof(actualUri), inner);
+            }
 
             _proxyUri = proxyUri;
             _queryUri = queryUri;
+            _actualUri = actualUri;
         }
 
-        public TargetUri(Uri target)
-            : this(target, null)
+        public TargetUri(Uri queryUri, Uri proxyUri)
+            : this(queryUri, proxyUri, null)
         { }
 
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Design", "CA1054:UriParametersShouldNotBeStrings", MessageId = "1#")]
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Design", "CA1054:UriParametersShouldNotBeStrings", MessageId = "0#")]
-        public TargetUri(string queryUrl, string proxyUrl)
+        public TargetUri(Uri target)
+            : this(target, null, null)
+        { }
+
+        public TargetUri(string queryUrl, string proxyUrl, string actualUrl)
         {
             if (queryUrl is null)
                 throw new ArgumentNullException(nameof(queryUrl));
 
             Uri proxyUri = null;
             Uri queryUri = null;
+            Uri actualUri = null;
 
             if (!Uri.TryCreate(queryUrl, UriKind.Absolute, out queryUri))
                 throw new UriFormatException(nameof(queryUrl));
@@ -72,15 +81,23 @@ namespace Microsoft.Alm.Authentication
             if (proxyUrl != null && !Uri.TryCreate(proxyUrl, UriKind.Absolute, out proxyUri))
                 throw new UriFormatException(nameof(queryUrl));
 
+            if (actualUrl != null && !Uri.TryCreate(actualUrl, UriKind.Absolute, out actualUri))
+                throw new UriFormatException(nameof(actualUrl));
+
             _proxyUri = proxyUri;
             _queryUri = queryUri;
+            _actualUri = actualUri;
         }
 
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Design", "CA1057:StringUriOverloadsCallSystemUriOverloads")]
-        public TargetUri(string targetUrl)
-            : this(targetUrl, null)
+        public TargetUri(string targetUrl, string proxyUrl)
+            : this(targetUrl, proxyUrl, null)
         { }
 
+        public TargetUri(string targetUrl)
+            : this(targetUrl, null, null)
+        { }
+
+        private readonly Uri _actualUri;
         private readonly Uri _proxyUri;
         private readonly Uri _queryUri;
 
@@ -92,6 +109,19 @@ namespace Microsoft.Alm.Authentication
             get { return QueryUri.AbsolutePath; }
         }
 
+        /// <summary>
+        /// Gets or sets the actual URI credentials are being sought for.
+        /// <para/>
+        /// Informational only, and should not be used in-place of `<seealso cref="QueryUri"/>`.
+        /// <para/>
+        /// When fulfilling Git credential requests, represents the remote URL specified in the git-remote-http(s).exe invocation which initiated this GCM instance.
+        /// <para/>
+        /// Default value is `<see langword="null"/>`.
+        /// </summary>
+        public Uri ActualUri
+        {
+            get { return _actualUri; }
+        }
 
         /// <summary>
         /// Returns `<see langword="true"/>` if `<see cref="ActualUri"/>` contains `<see cref="Uri.UserInfo"/>`; otherwise `<see langword="false"/>`.
@@ -121,12 +151,18 @@ namespace Microsoft.Alm.Authentication
         /// Gets whether the `<see cref="QueryUri"/>` is absolute.
         /// </summary>
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Performance", "CA1822:MarkMembersAsStatic")]
-        public bool IsAbsoluteUri { get { return true; } }
+        public bool IsAbsoluteUri
+        {
+            get { return true; }
+        }
 
         /// <summary>
         /// Gets whether the port value of the `<see cref="QueryUri"/>` is the default for this scheme.
         /// </summary>
-        public bool IsDefaultPort { get { return QueryUri.IsDefaultPort; } }
+        public bool IsDefaultPort
+        {
+            get { return QueryUri.IsDefaultPort; }
+        }
 
         /// <summary>
         /// Gets the `<see cref="Uri.Port"/>` of the `<see cref="QueryUri"/>`.
@@ -163,8 +199,60 @@ namespace Microsoft.Alm.Authentication
         /// <summary>
         /// Gets the `<see cref="Uri.UserInfo"/>` from `<see cref="ActualUri"/>`.
         /// </summary>
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Design", "CA1056:UriPropertiesShouldNotBeStrings")]
-        public string UserInfo { get { return QueryUri.UserInfo; } }
+        public string UserInfo
+        {
+            get { return QueryUri.UserInfo; }
+        }
+
+        /// <summary>
+        /// Returns a new `<seealso cref="TargetUri"/>` based on this instance combined with `<paramref name="queryUrl"/>`, `<paramref name="proxyUrl"/>`, and/or `<paramref name="actualUrl"/>`.
+        /// </summary>
+        /// <param name="queryUrl">
+        /// The new URL used for all queries if not `<see langword="null"/>`; otherwise is unchanged from `<seealso cref="QueryUri"/>`.
+        /// </param>
+        /// <param name="proxyUrl">
+        /// The new URL used for all queries if not `<see langword="null"/>`; otherwise is unchanged from `<seealso cref="ProxyUri"/>`.
+        /// </param>
+        /// <param name="actualUrl">
+        /// The new URL used for all queries if not `<see langword="null"/>`; otherwise is unchanged from `<seealso cref="ActualUri"/>`.
+        /// </param>
+        /// <exception cref="ArgumentException">When all arguments are `<see langword="null"/>`.</exception>
+        public TargetUri CreateWith(string queryUrl = null, string proxyUrl = null, string actualUrl = null)
+        {
+            if (queryUrl is null && proxyUrl is null && actualUrl is null)
+                throw new ArgumentException("At least one argument must be not `null`.");
+
+            queryUrl = queryUrl ?? _queryUri?.ToString();
+            proxyUrl = proxyUrl ?? _proxyUri?.ToString();
+            actualUrl = actualUrl ?? _actualUri?.ToString();
+
+            return new TargetUri(queryUrl, proxyUrl, actualUrl);
+        }
+
+        /// <summary>
+        /// Returns a new `<seealso cref="TargetUri"/>` based on this instance combined with `<paramref name="queryUri"/>`, `<paramref name="proxyUri"/>`, and/or `<paramref name="commandUri"/>`.
+        /// </summary>
+        /// <param name="queryUri">
+        /// The new `<seealso cref="Uri"/>` used for all queries if not `<see langword="null"/>`; otherwise is unchanged from `<seealso cref="QueryUri"/>`.
+        /// </param>
+        /// <param name="proxyUri">
+        /// The new `<seealso cref="Uri"/>` used for all queries if not `<see langword="null"/>`; otherwise is unchanged from `<seealso cref="ProxyUri"/>`.
+        /// </param>
+        /// <param name="actualUri">
+        /// The new `<seealso cref="Uri"/>` used for all queries if not `<see langword="null"/>`; otherwise is unchanged from `<seealso cref="ActualUri"/>`.
+        /// </param>
+        /// <exception cref="ArgumentException">When all arguments are `<see langword="null"/>`.</exception>
+        public TargetUri CreateWith(Uri queryUri = null, Uri proxyUri = null, Uri actualUri = null)
+        {
+            if (queryUri is null && proxyUri is null && actualUri is null)
+                throw new ArgumentException("At least one argument must be not `null`.");
+
+            queryUri = queryUri ?? _queryUri;
+            proxyUri = proxyUri ?? _proxyUri;
+            actualUri = actualUri ?? _actualUri;
+
+            return new TargetUri(queryUri, proxyUri, actualUri);
+        }
 
         /// <summary>
         /// Returns a version of this `<see cref="TargetUri"/>` that contains the specified username.
@@ -172,7 +260,6 @@ namespace Microsoft.Alm.Authentication
         /// <remarks>
         /// If the `<see cref="TargetUri"/>` already contains a username, that one is kept NOT overwritten.
         /// </remarks>
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2234:PassSystemUriObjectsInsteadOfStrings")]
         public TargetUri GetPerUserTargetUri(string username)
         {
             // belt and braces, don't add a username if the URI already contains one.

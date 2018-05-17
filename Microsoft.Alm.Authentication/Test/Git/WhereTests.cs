@@ -29,13 +29,9 @@ namespace Microsoft.Alm.Authentication.Git.Test
         [MemberData(nameof(FindAppData), DisableDiscoveryEnumeration = true)]
         public void Where_FindApp(string app)
         {
-            string path1;
-            Assert.True(CmdWhere(app, out path1));
+            Assert.Equal(CmdWhere(app, out string path1), RuntimeContext.Default.Where.FindApp(app, out string path2));
 
-            string path2;
-            Assert.True(RuntimeContext.Default.Where.FindApp(app, out path2));
-
-            Assert.True(PathComparer.Equals(path1, path2));
+            Assert.Equal(path1, path2, PathComparer);
         }
 
         [Fact]
@@ -46,7 +42,7 @@ namespace Microsoft.Alm.Authentication.Git.Test
 
             Assert.True(RuntimeContext.Default.Where.FindGitInstallations(out List<Installation> installations));
             Assert.True(installations.Count > 0);
-            Assert.True(PathComparer.Equals(installations[0].Git, gitPath));
+            Assert.Equal(installations[0].Git, gitPath, PathComparer);
 
             Installation installation;
             Assert.True(RuntimeContext.Default.Where.FindGitInstallation(installations[0].Path, installations[0].Version, out installation));
