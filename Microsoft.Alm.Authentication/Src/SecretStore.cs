@@ -95,6 +95,8 @@ namespace Microsoft.Alm.Authentication
             if (targetUri is null)
                 throw new ArgumentNullException(nameof(targetUri));
 
+            ValidateHasAccess();
+
             string targetName = GetTargetName(targetUri);
 
             return Delete(targetName)
@@ -106,6 +108,8 @@ namespace Microsoft.Alm.Authentication
             if (targetUri is null)
                 throw new ArgumentNullException(nameof(targetUri));
 
+            ValidateHasAccess();
+
             string targetName = GetTargetName(targetUri);
 
             return Delete(targetName)
@@ -114,6 +118,8 @@ namespace Microsoft.Alm.Authentication
 
         public Task PurgeCredentials()
         {
+            ValidateHasAccess();
+
             PurgeCredentials(_namespace);
 
             return Task.FromResult(true);
@@ -123,6 +129,8 @@ namespace Microsoft.Alm.Authentication
         {
             if (targetUri is null)
                 throw new ArgumentNullException(nameof(targetUri));
+
+            ValidateHasAccess();
 
             string targetName = GetTargetName(targetUri);
 
@@ -135,10 +143,37 @@ namespace Microsoft.Alm.Authentication
             if (targetUri is null)
                 throw new ArgumentNullException(nameof(targetUri));
 
+            ValidateHasAccess();
+
             string targetName = GetTargetName(targetUri);
 
             return await _tokenCache.ReadToken(targetUri)
                 ?? ReadToken(targetName);
+        }
+
+        /// <summary>
+        /// Validates that the current user has privileges to access the operating system
+        /// secure secret storage vault.
+        /// </summary>
+        public void ValidateHasAccess()
+        {
+            var currentUser = System.Security.Principal.WindowsIdentity.GetCurrent();
+
+            if (!string.Equals(currentUser?.Owner.Value, currentUser?.User.Value, StringComparison.Ordinal))
+            {
+                Trace.WriteLine("current user lacks privileges to the secure store.");
+
+                var errorMessage = "The current Windows identity '{0}' has mismatched Owner [{1}] and User "
+                                 + "[{2}] values, preventing access to the Windows Credential Manager."
+                                 + Environment.NewLine
+                                 + Environment.NewLine
+                                 + "Identity mismatch most often occurs when authentication attempts are performed from a process being run as a user "
+                                 + "other than the user who is actively logged onto the Windows desktop, an elevated console window for example.";
+
+                errorMessage = string.Format(errorMessage, currentUser?.Name, currentUser?.Owner.Value, currentUser?.User.Value);
+
+                throw new System.Security.HostProtectionException(errorMessage);
+            }
         }
 
         public async Task<bool> WriteCredentials(TargetUri targetUri, Credential credentials)
@@ -147,6 +182,8 @@ namespace Microsoft.Alm.Authentication
                 throw new ArgumentNullException(nameof(targetUri));
             if (credentials is null)
                 throw new ArgumentNullException(nameof(credentials));
+
+            ValidateHasAccess();
 
             string targetName = GetTargetName(targetUri);
 
@@ -160,6 +197,8 @@ namespace Microsoft.Alm.Authentication
                 throw new ArgumentNullException(nameof(targetUri));
             if (token is null)
                 throw new ArgumentNullException(nameof(token));
+
+            ValidateHasAccess();
 
             string targetName = GetTargetName(targetUri);
 
