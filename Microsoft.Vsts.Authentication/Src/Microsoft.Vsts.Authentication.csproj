@@ -69,6 +69,37 @@
       <InProject>false</InProject>
     </FilesToSign>
   </ItemGroup>
+  <Target Name="BuildNupkg" AfterTargets="CopyFilesToOutputDirectory;SignFiles">
+    <!-- Read the nupkg meta data from the AssemblyInfo.cs file copied from Microsoft.Vsts.Authentication -->
+    <PropertyGroup>
+      <In>$([System.IO.File]::ReadAllText('$(ProjectDir)\Properties\AssemblyInfo.cs'))</In>
+      <Pattern>^\s*\[assembly:\s*AssemblyVersion\s*\(\s*"\s*([^"]+)\s*"\s*\)</Pattern>
+      <AssemblyVersion>$([System.Text.RegularExpressions.Regex]::Match($(In), $(Pattern), System.Text.RegularExpressions.RegexOptions.Multiline).Groups[1].Value)</AssemblyVersion>
+      <Pattern>^\s*\[assembly: AssemblyDescription\s*\(\s*"\s*([^"]+)\s*"\s*\)</Pattern>
+      <AssemblyDescription>$([System.Text.RegularExpressions.Regex]::Match($(In), $(Pattern), System.Text.RegularExpressions.RegexOptions.Multiline).Groups[1].Value)</AssemblyDescription>
+      <Pattern>^\s*\[assembly: AssemblyProduct\s*\(\s*"\s*([^"]+)\s*"\s*\)</Pattern>
+      <AssemblyProduct>$([System.Text.RegularExpressions.Regex]::Match($(In), $(Pattern), System.Text.RegularExpressions.RegexOptions.Multiline).Groups[1].Value)</AssemblyProduct>
+      <Pattern>^\s*\[assembly: AssemblyTitle\s*\(\s*"\s*([^"]+)\s*"\s*\)</Pattern>
+      <AssemblyTitle>$([System.Text.RegularExpressions.Regex]::Match($(In), $(Pattern), System.Text.RegularExpressions.RegexOptions.Multiline).Groups[1].Value)</AssemblyTitle>
+    </PropertyGroup>
+    <!-- Only download a new copy of nuget.exe if we don't have a copy available -->
+    <PropertyGroup>
+      <NugetPath>nuget.exe</NugetPath>
+      <IsSigned></IsSigned>
+      <IsSigned Condition=" '$(SignType)' == '' Or '$(SignType)' == '*Undefined*' ">-unsigned</IsSigned>
+      <NugetWorkDir>$(OutputPath.TrimEnd('\'))</NugetWorkDir>
+    </PropertyGroup>
+    <PropertyGroup Condition="!Exists($(NugetPath))">
+      <NugetPath>..\..\packages\NuGet.CommandLine.4.6.2\tools\NuGet.exe</NugetPath>
+    </PropertyGroup>
+    <Exec Command="&quot;$(NugetPath)&quot; pack &quot;$(ProjectDir)\Microsoft.Alm.Authentication.nuspec&quot; -BasePath &quot;$(NugetWorkDir)&quot; -IncludeReferencedProjects -Properties Configuration=&quot;$(Configuration)&quot;;Version=&quot;$(AssemblyVersion)$(IsSigned)&quot;;Id=&quot;Microsoft.Alm.Authentication&quot;;Title=&quot;$(AssemblyTitle)&quot;;Description=&quot;$(AssemblyDescription)&quot; -OutputDirectory &quot;$(NugetWorkDir)&quot;" />
+  </Target>
+  <Target Name="CopyNupkgToOut" AfterTargets="BuildNupkg">
+    <ItemGroup>
+      <FilesToCopy Include="$(OutputPath)\*.nupkg" />
+    </ItemGroup>
+    <Copy SourceFiles="@(FilesToCopy)" DestinationFolder="$(SolutionDir)\Deploy" />
+  </Target>
   <Target Name="EnsureNuGetPackageBuildImports" BeforeTargets="PrepareForBuild">
     <PropertyGroup>
       <ErrorText>This project references NuGet package(s) that are missing on this computer. Use NuGet Package Restore to download them.  For more information, see http://go.microsoft.com/fwlink/?LinkID=322105. The missing file is {0}.</ErrorText>
