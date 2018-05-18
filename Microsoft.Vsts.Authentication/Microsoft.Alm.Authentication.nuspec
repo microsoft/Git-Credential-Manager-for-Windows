@@ -4,13 +4,14 @@
     <id>$id$</id>
     <version>$version$</version>
     <title>$title$</title>
-    <authors>$owners$</authors>
-    <owners>$owners$</owners>
+    <authors>Microsoft</authors>
+    <owners>Microsoft</owners>
+    <iconUrl>https://avatars2.githubusercontent.com/u/6154722?v=3&amp;s=200</iconUrl>
     <licenseUrl>https://raw.githubusercontent.com/Microsoft/Git-Credential-Manager-for-Windows/master/LICENSE.txt</licenseUrl>
     <projectUrl>https://github.com/Microsoft/Git-Credential-Manager-for-Windows</projectUrl>
     <requireLicenseAcceptance>true</requireLicenseAcceptance>
     <description>$description$</description>
-    <copyright>$copyright$</copyright>
+    <copyright>© Microsoft Corporation. All rights reserved.</copyright>
     <language>en-US</language>
     <dependencies>
       <dependency id="Microsoft.IdentityModel.Clients.ActiveDirectory" version="3.19.4" />
