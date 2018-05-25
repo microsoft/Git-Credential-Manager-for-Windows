@@ -86,7 +86,11 @@ namespace GitHub.Authentication
             };
 
             options.Headers.Accept.Add(new MediaTypeWithQualityHeaderValue(GitHubApiAcceptsHeaderValue));
-            options.Headers.Add(GitHubOptHeader, authenticationCode);
+
+            if (!string.IsNullOrWhiteSpace(authenticationCode))
+            {
+                options.Headers.Add(GitHubOptHeader, authenticationCode);
+            }
 
             // Create the authority Uri.
             var requestUri = targetUri.CreateWith(_authorityUrl);
