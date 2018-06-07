@@ -69,7 +69,7 @@ namespace Atlassian.Bitbucket.Authentication
                 throw new ArgumentNullException(nameof(targetUri));
             if (credentials is null)
                 throw new ArgumentNullException(nameof(credentials));
-            if (resultType != AuthenticationResultType.Failure && resultType != AuthenticationResultType.Success && resultType != AuthenticationResultType.TwoFactor)
+            if (resultType < AuthenticationResultType.None || resultType > AuthenticationResultType.TwoFactor)
                 throw new ArgumentOutOfRangeException(nameof(resultType));
             if (scope is null)
                 throw new ArgumentNullException(nameof(scope));
@@ -78,7 +78,7 @@ namespace Atlassian.Bitbucket.Authentication
             {
                 // A previous attempt to acquire a token failed in a way that suggests the user has
                 // Bitbucket 2FA turned on. so attempt to run the OAuth dance...
-                OAuth.OAuthAuthenticator oauth = new OAuth.OAuthAuthenticator(Context);
+                var oauth = new OAuth.OAuthAuthenticator(Context);
                 try
                 {
                     var result = await oauth.GetAuthAsync(targetUri, scope, CancellationToken.None);
