@@ -29,9 +29,9 @@ using Xunit;
 
 namespace VisualStudioTeamServices.Authentication.Test
 {
-    public class VstsAadTests : AuthenticationTests
+    public class AadTests : AuthenticationTests
     {
-        public VstsAadTests()
+        public AadTests()
             : base()
         { }
 
@@ -39,7 +39,7 @@ namespace VisualStudioTeamServices.Authentication.Test
         public async Task VstsAadDeleteCredentialsTest()
         {
             TargetUri targetUri = DefaultTargetUri;
-            VstsAadAuthentication aadAuthentication = GetVstsAadAuthentication(RuntimeContext.Default, "aad-delete");
+            AadAuthentication aadAuthentication = GetVstsAadAuthentication(RuntimeContext.Default, "aad-delete");
 
             if (aadAuthentication.VstsAuthority is AuthorityFake fake)
             {
@@ -59,7 +59,7 @@ namespace VisualStudioTeamServices.Authentication.Test
         public async Task VstsAadGetCredentialsTest()
         {
             TargetUri targetUri = DefaultTargetUri;
-            VstsAadAuthentication aadAuthentication = GetVstsAadAuthentication(RuntimeContext.Default, "aad-get");
+            AadAuthentication aadAuthentication = GetVstsAadAuthentication(RuntimeContext.Default, "aad-get");
 
             Assert.Null(await aadAuthentication.GetCredentials(targetUri));
 
@@ -72,7 +72,7 @@ namespace VisualStudioTeamServices.Authentication.Test
         public async Task VstsAadInteractiveLogonTest()
         {
             TargetUri targetUri = DefaultTargetUri;
-            VstsAadAuthentication aadAuthentication = GetVstsAadAuthentication(RuntimeContext.Default, "aad-logon");
+            AadAuthentication aadAuthentication = GetVstsAadAuthentication(RuntimeContext.Default, "aad-logon");
 
             Assert.Null(await aadAuthentication.PersonalAccessTokenStore.ReadCredentials(targetUri));
 
@@ -85,7 +85,7 @@ namespace VisualStudioTeamServices.Authentication.Test
         public async Task VstsAadNoninteractiveLogonTest()
         {
             TargetUri targetUri = DefaultTargetUri;
-            VstsAadAuthentication aadAuthentication = GetVstsAadAuthentication(RuntimeContext.Default, "aad-noninteractive");
+            AadAuthentication aadAuthentication = GetVstsAadAuthentication(RuntimeContext.Default, "aad-noninteractive");
 
             Assert.NotNull(await aadAuthentication.NoninteractiveLogon(targetUri, new PersonalAccessTokenOptions { RequireCompactToken = false }));
 
@@ -96,7 +96,7 @@ namespace VisualStudioTeamServices.Authentication.Test
         public async Task VstsAadSetCredentialsTest()
         {
             TargetUri targetUri = DefaultTargetUri;
-            VstsAadAuthentication aadAuthentication = GetVstsAadAuthentication(RuntimeContext.Default, "aad-set");
+            AadAuthentication aadAuthentication = GetVstsAadAuthentication(RuntimeContext.Default, "aad-set");
             Credential credentials = DefaultCredentials;
 
             await aadAuthentication.SetCredentials(targetUri, credentials);
@@ -108,7 +108,7 @@ namespace VisualStudioTeamServices.Authentication.Test
         [Fact]
         public async Task VstsAadValidateCredentialsTest()
         {
-            VstsAadAuthentication aadAuthentication = GetVstsAadAuthentication(RuntimeContext.Default, "aad-validate");
+            AadAuthentication aadAuthentication = GetVstsAadAuthentication(RuntimeContext.Default, "aad-validate");
             Credential credentials = null;
 
             Assert.False(await aadAuthentication.ValidateCredentials(DefaultTargetUri, credentials), "Credential validation unexpectedly failed.");
@@ -118,14 +118,14 @@ namespace VisualStudioTeamServices.Authentication.Test
             Assert.True(await aadAuthentication.ValidateCredentials(DefaultTargetUri, credentials), "Credential validation unexpectedly failed.");
         }
 
-        private static VstsAadAuthentication GetVstsAadAuthentication(RuntimeContext context, string @namespace)
+        private static AadAuthentication GetVstsAadAuthentication(RuntimeContext context, string @namespace)
         {
             string expectedQueryParameters = null;
 
             ICredentialStore tokenStore1 = new SecretCache(context, @namespace + 1, Secret.UriToIdentityUrl);
             ITokenStore tokenStore2 = new SecretCache(context, @namespace + 2, Secret.UriToIdentityUrl);
-            IVstsAuthority vstsAuthority = new AuthorityFake(expectedQueryParameters);
-            return new VstsAadAuthentication(context, tokenStore1, tokenStore2, vstsAuthority);
+            IAuthority vstsAuthority = new AuthorityFake(expectedQueryParameters);
+            return new AadAuthentication(context, tokenStore1, tokenStore2, vstsAuthority);
         }
     }
 }

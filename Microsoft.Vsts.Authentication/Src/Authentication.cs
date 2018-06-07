@@ -39,7 +39,7 @@ namespace VisualStudioTeamServices.Authentication
     /// <summary>
     /// Base functionality for performing authentication operations against Visual Studio Online.
     /// </summary>
-    public abstract class BaseVstsAuthentication : BaseAuthentication
+    public abstract class Authentication : BaseAuthentication
     {
         public const string DefaultResource = "499b84ac-1321-427f-aa17-267ca6975798";
         public const string DefaultClientId = "872cd9fa-d31f-45e0-9eab-6e460a02d1f1";
@@ -55,9 +55,9 @@ namespace VisualStudioTeamServices.Authentication
         private const string CachePathDirectory = "GitCredentialManager";
         private const string CachePathFileName = "tenant.cache";
 
-        protected BaseVstsAuthentication(
+        protected Authentication(
             RuntimeContext context,
-            VstsTokenScope tokenScope,
+            TokenScope tokenScope,
             ICredentialStore personalAccessTokenStore)
             : base(context)
         {
@@ -73,12 +73,12 @@ namespace VisualStudioTeamServices.Authentication
             VstsAuthority = new VstsAzureAuthority(context);
         }
 
-        internal BaseVstsAuthentication(
+        internal Authentication(
             RuntimeContext context,
             ICredentialStore personalAccessTokenStore,
             ITokenStore vstsIdeTokenCache,
-            IVstsAuthority vstsAuthority)
-            : this(context, VstsTokenScope.ProfileRead, personalAccessTokenStore)
+            IAuthority vstsAuthority)
+            : this(context, TokenScope.ProfileRead, personalAccessTokenStore)
         {
             if (vstsIdeTokenCache is null)
                 throw new ArgumentNullException(nameof(vstsIdeTokenCache));
@@ -104,7 +104,7 @@ namespace VisualStudioTeamServices.Authentication
         /// The desired scope of the authentication token to be requested.
         /// </summary>
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Security", "CA2104:DoNotDeclareReadOnlyMutableReferenceTypes")]
-        public readonly VstsTokenScope TokenScope;
+        public readonly TokenScope TokenScope;
 
         /// <summary>
         /// Gets the expected URI name conversion delegate for this authentication type.
@@ -120,7 +120,7 @@ namespace VisualStudioTeamServices.Authentication
 
         internal ICredentialStore PersonalAccessTokenStore { get; set; }
 
-        internal IVstsAuthority VstsAuthority { get; set; }
+        internal IAuthority VstsAuthority { get; set; }
 
         internal Guid TenantId { get; set; }
 
@@ -267,7 +267,7 @@ namespace VisualStudioTeamServices.Authentication
         public static async Task<BaseAuthentication> GetAuthentication(
             RuntimeContext context,
             TargetUri targetUri,
-            VstsTokenScope scope,
+            TokenScope scope,
             ICredentialStore personalAccessTokenStore)
         {
             BaseSecureStore.ValidateTargetUri(targetUri);
@@ -290,13 +290,13 @@ namespace VisualStudioTeamServices.Authentication
             if (tenantId == Guid.Empty)
             {
                 context.Trace.WriteLine("MSA authority detected.");
-                authentication = new VstsMsaAuthentication(context, scope, personalAccessTokenStore);
+                authentication = new MsaAuthentication(context, scope, personalAccessTokenStore);
             }
             else
             {
                 context.Trace.WriteLine($"AAD authority for tenant '{tenantId}' detected.");
-                authentication = new VstsAadAuthentication(context, tenantId, scope, personalAccessTokenStore);
-                (authentication as VstsAadAuthentication).TenantId = tenantId;
+                authentication = new AadAuthentication(context, tenantId, scope, personalAccessTokenStore);
+                (authentication as AadAuthentication).TenantId = tenantId;
             }
 
             return authentication;
@@ -361,7 +361,7 @@ namespace VisualStudioTeamServices.Authentication
             if (accessToken is null)
                 throw new ArgumentNullException(nameof(accessToken));
 
-            VstsTokenScope requestedScope = TokenScope;
+            TokenScope requestedScope = TokenScope;
 
             if (options.TokenScope != null)
             {

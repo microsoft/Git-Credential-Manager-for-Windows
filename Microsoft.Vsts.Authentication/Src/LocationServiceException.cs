@@ -28,17 +28,17 @@ using System;
 namespace VisualStudioTeamServices.Authentication
 {
     [Serializable]
-    public sealed class VstsLocationServiceException : Exception, System.Runtime.Serialization.ISerializable
+    public sealed class LocationServiceException : Exception, System.Runtime.Serialization.ISerializable
     {
-        internal VstsLocationServiceException(string message)
+        internal LocationServiceException(string message)
             : base(message)
         { }
 
-        internal VstsLocationServiceException(string message, Exception innerException)
+        internal LocationServiceException(string message, Exception innerException)
             : base(message, innerException)
         { }
 
-        internal VstsLocationServiceException(System.Runtime.Serialization.SerializationInfo info, System.Runtime.Serialization.StreamingContext context)
+        internal LocationServiceException(System.Runtime.Serialization.SerializationInfo info, System.Runtime.Serialization.StreamingContext context)
             : base(info, context)
         { }
     }

@@ -49,7 +49,7 @@ namespace VisualStudioTeamServices.Authentication.Test
         protected static readonly TargetUri InvalidTargetUri = new TargetUri("https://invlaid-test.uri/git-credential");
 
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Security", "CA2104:DoNotDeclareReadOnlyMutableReferenceTypes")]
-        protected static readonly VstsTokenScope DefaultTokenScope = VstsTokenScope.CodeWrite;
+        protected static readonly TokenScope DefaultTokenScope = TokenScope.CodeWrite;
 
         protected AuthenticationTests()
         {

@@ -33,7 +33,7 @@ namespace VisualStudioTeamServices.Authentication
     {
         private bool _compact;
         private TimeSpan? _duration;
-        private VstsTokenScope _scope;
+        private TokenScope _scope;
 
         /// <summary>
         /// Requests a compact format personal access token if `<see langword="true"/>`; otherwise requests a standard format personal access token.
@@ -76,7 +76,7 @@ namespace VisualStudioTeamServices.Authentication
         /// <summary>
         /// Requests a limited scope personal access token; otherwise the default scope is requested.
         /// </summary>
-        public VstsTokenScope TokenScope
+        public TokenScope TokenScope
         {
             get { return _scope; }
             set
@@ -92,7 +92,7 @@ namespace VisualStudioTeamServices.Authentication
 
         internal string DebuggerDisplay
         {
-            get { return $"{nameof(VstsTokenScope)}: {(_compact ? "Compact" : "Normal")} {((_scope == null) ? "Default" : _scope.Value)} [{(_duration.HasValue ? _duration.Value.ToString("u") : "Default")}]"; }
+            get { return $"{nameof(VisualStudioTeamServices.Authentication.TokenScope)}: {(_compact ? "Compact" : "Normal")} {((_scope == null) ? "Default" : _scope.Value)} [{(_duration.HasValue ? _duration.Value.ToString("u") : "Default")}]"; }
         }
 
         public override bool Equals(object obj)
@@ -107,7 +107,7 @@ namespace VisualStudioTeamServices.Authentication
 
         public override string ToString()
         {
-            return nameof(VstsTokenScope);
+            return nameof(VisualStudioTeamServices.Authentication.TokenScope);
         }
 
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA1801:ReviewUnusedParameters", MessageId = "right")]

@@ -55,9 +55,9 @@
     <Compile Include="AuthenticationTests.cs" />
     <Compile Include="AuthorityFake.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="VstsAadTests.cs" />
-    <Compile Include="VstsMsaTests.cs" />
-    <Compile Include="VstsTokenScopeTests.cs" />
+    <Compile Include="AadTests.cs" />
+    <Compile Include="MsaTests.cs" />
+    <Compile Include="TokenScopeTests.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="app.config" />

@@ -58,10 +58,10 @@ namespace VisualStudioTeamServices.Authentication
                 throw new ArgumentException("Uri is not Absolute.", nameof(authorityHostUrl));
 
             AuthorityHostUrl = authorityHostUrl;
-            _adalTokenCache = new VstsAdalTokenCache(context);
+            _adalTokenCache = new AdalTokenCache(context);
         }
 
-        private readonly VstsAdalTokenCache _adalTokenCache;
+        private readonly AdalTokenCache _adalTokenCache;
 
         /// <summary>
         /// The URL used to interact with the Azure identity service.

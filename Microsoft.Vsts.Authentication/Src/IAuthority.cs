@@ -29,7 +29,7 @@ using Microsoft.Alm.Authentication;
 
 namespace VisualStudioTeamServices.Authentication
 {
-    internal interface IVstsAuthority : IAzureAuthority
+    internal interface IAuthority : IAzureAuthority
     {
         /// <summary>
         /// Generates a personal access token for use with Visual Studio Team Services.
@@ -45,7 +45,7 @@ namespace VisualStudioTeamServices.Authentication
         /// <para/>
         /// The authority granting the token decides the actual lifetime of any token granted, regardless of the duration requested.
         /// </param>
-        Task<Token> GeneratePersonalAccessToken(TargetUri targetUri, Token accessToken, VstsTokenScope tokenScope, bool requireCompactToken, TimeSpan? tokenDuration = null);
+        Task<Token> GeneratePersonalAccessToken(TargetUri targetUri, Token accessToken, TokenScope tokenScope, bool requireCompactToken, TimeSpan? tokenDuration = null);
 
         /// <summary>
         /// Validates that a `<see cref="Credential"/>` is valid to grant access to the VSTS resource referenced by `<paramref name="targetUri"/>`.

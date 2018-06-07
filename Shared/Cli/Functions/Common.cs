@@ -85,10 +85,10 @@ namespace Microsoft.Alm.Cli
                     program.Trace.WriteLine($"detecting authority type for '{operationArguments.TargetUri}'.");
 
                     // Detect the authority.
-                    authority = await Vsts.BaseVstsAuthentication.GetAuthentication(program.Context,
+                    authority = await Vsts.Authentication.GetAuthentication(program.Context,
                                                                                    operationArguments.TargetUri,
                                                                                    Program.VstsCredentialScope,
-                                                                                   new SecretStore(program.Context, secretsNamespace, Vsts.BaseVstsAuthentication.UriNameConversion))
+                                                                                   new SecretStore(program.Context, secretsNamespace, Vsts.Authentication.UriNameConversion))
                              ?? Github.Authentication.GetAuthentication(program.Context,
                                                                         operationArguments.TargetUri,
                                                                         Program.GitHubCredentialScope,
@@ -105,12 +105,12 @@ namespace Microsoft.Alm.Cli
                     if (authority != null)
                     {
                         // Set the authority type based on the returned value.
-                        if (authority is Vsts.VstsMsaAuthentication)
+                        if (authority is Vsts.MsaAuthentication)
                         {
                             operationArguments.Authority = AuthorityType.MicrosoftAccount;
                             goto case AuthorityType.MicrosoftAccount;
                         }
-                        else if (authority is Vsts.VstsAadAuthentication)
+                        else if (authority is Vsts.AadAuthentication)
                         {
                             operationArguments.Authority = AuthorityType.AzureDirectory;
                             goto case AuthorityType.AzureDirectory;
@@ -136,7 +136,7 @@ namespace Microsoft.Alm.Cli
                         Guid tenantId = Guid.Empty;
 
                         // Get the identity of the tenant.
-                        var result = await Vsts.BaseVstsAuthentication.DetectAuthority(program.Context, operationArguments.TargetUri);
+                        var result = await Vsts.Authentication.DetectAuthority(program.Context, operationArguments.TargetUri);
 
                         if (result.HasValue)
                         {
@@ -144,10 +144,10 @@ namespace Microsoft.Alm.Cli
                         }
 
                         // Create the authority object.
-                        authority = new Vsts.VstsAadAuthentication(program.Context,
+                        authority = new Vsts.AadAuthentication(program.Context,
                                                               tenantId,
                                                               operationArguments.VstsTokenScope,
-                                                              new SecretStore(program.Context, secretsNamespace, Vsts.VstsAadAuthentication.UriNameConversion));
+                                                              new SecretStore(program.Context, secretsNamespace, Vsts.AadAuthentication.UriNameConversion));
                     }
 
                     // Return the allocated authority or a generic AAD backed VSTS authentication object.
@@ -183,9 +183,9 @@ namespace Microsoft.Alm.Cli
                     program.Trace.WriteLine($"authority for '{operationArguments.TargetUri}' is Microsoft Live.");
 
                     // Return the allocated authority or a generic MSA backed VSTS authentication object.
-                    return authority ?? new Vsts.VstsMsaAuthentication(program.Context,
+                    return authority ?? new Vsts.MsaAuthentication(program.Context,
                                                                   operationArguments.VstsTokenScope,
-                                                                  new SecretStore(program.Context, secretsNamespace, Vsts.VstsMsaAuthentication.UriNameConversion));
+                                                                  new SecretStore(program.Context, secretsNamespace, Vsts.MsaAuthentication.UriNameConversion));
 
                 case AuthorityType.Ntlm:
                     // Enforce NTLM authentication only.
@@ -223,7 +223,7 @@ namespace Microsoft.Alm.Cli
                 case AuthorityType.AzureDirectory:
                 case AuthorityType.MicrosoftAccount:
                     program.Trace.WriteLine($"deleting VSTS credentials for '{operationArguments.TargetUri}'.");
-                    var vstsAuth = authentication as Vsts.BaseVstsAuthentication;
+                    var vstsAuth = authentication as Vsts.Authentication;
                     return await vstsAuth.DeleteCredentials(operationArguments.TargetUri);
 
                 case AuthorityType.GitHub:
@@ -575,14 +575,14 @@ namespace Microsoft.Alm.Cli
             {
                 program.Trace.WriteLine($"{program.KeyTypeName(KeyType.VstsScope)} = '{value}'.");
 
-                Vsts.VstsTokenScope vstsTokenScope = Vsts.VstsTokenScope.None;
+                Vsts.TokenScope vstsTokenScope = Vsts.TokenScope.None;
 
                 var scopes = value.Split(TokenScopeSeparatorCharacters.ToCharArray(), StringSplitOptions.RemoveEmptyEntries);
                 for (int i = 0; i < scopes.Length; i += 1)
                 {
                     scopes[i] = scopes[i].Trim();
 
-                    if (Vsts.VstsTokenScope.Find(scopes[i], out Vsts.VstsTokenScope scope))
+                    if (Vsts.TokenScope.Find(scopes[i], out Vsts.TokenScope scope))
                     {
                         vstsTokenScope = vstsTokenScope | scope;
                     }
@@ -711,7 +711,7 @@ namespace Microsoft.Alm.Cli
 
                 case AuthorityType.AzureDirectory:
                     {
-                        var aadAuth = authentication as Vsts.VstsAadAuthentication;
+                        var aadAuth = authentication as Vsts.AadAuthentication;
                         var patOptions = new Vsts.PersonalAccessTokenOptions()
                         {
                             RequireCompactToken = true,
@@ -747,7 +747,7 @@ namespace Microsoft.Alm.Cli
 
                 case AuthorityType.MicrosoftAccount:
                     {
-                        var msaAuth = authentication as Vsts.VstsMsaAuthentication;
+                        var msaAuth = authentication as Vsts.MsaAuthentication;
                         var patOptions = new Vsts.PersonalAccessTokenOptions()
                         {
                             RequireCompactToken = true,

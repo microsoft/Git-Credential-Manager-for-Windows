@@ -78,7 +78,7 @@ namespace Microsoft.Alm.Cli
 
         internal static readonly char[] NewLineChars = Environment.NewLine.ToCharArray();
 
-        internal static readonly Vsts.VstsTokenScope VstsCredentialScope = Vsts.VstsTokenScope.CodeWrite | Vsts.VstsTokenScope.PackagingRead;
+        internal static readonly Vsts.TokenScope VstsCredentialScope = Vsts.TokenScope.CodeWrite | Vsts.TokenScope.PackagingRead;
         internal static readonly Github.TokenScope GitHubCredentialScope = Github.TokenScope.Gist | Github.TokenScope.Repo;
 
         internal BasicCredentialPromptDelegate _basicCredentialPrompt = ConsoleFunctions.CredentialPrompt;

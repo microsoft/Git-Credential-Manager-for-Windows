@@ -86,7 +86,7 @@ namespace Microsoft.Alm.Cli
         private string _username;
         private bool _useSystemConfig;
         private bool _validateCredentials;
-        private Vsts.VstsTokenScope _vstsTokenScope;
+        private Vsts.TokenScope _vstsTokenScope;
         private bool _writeLog;
 
         /// <summary>
@@ -414,7 +414,7 @@ namespace Microsoft.Alm.Cli
         /// <para/>
         /// Default value is `<seealso cref="Program.VstsCredentialScope"/>`.
         /// </summary>
-        public virtual Vsts.VstsTokenScope VstsTokenScope
+        public virtual Vsts.TokenScope VstsTokenScope
         {
             get { return _vstsTokenScope; }
             set { _vstsTokenScope = value; }

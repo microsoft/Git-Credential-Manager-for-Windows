@@ -31,14 +31,14 @@ using Microsoft.IdentityModel.Clients.ActiveDirectory;
 
 namespace VisualStudioTeamServices.Authentication
 {
-    public sealed class VstsMsaAuthentication : BaseVstsAuthentication, IVstsMsaAuthentication
+    public sealed class MsaAuthentication : Authentication, IMsaAuthentication
     {
         public const string DefaultAuthorityHost = AzureAuthority.AuthorityHostUrlBase + "/live.com";
         internal const string QueryParameters = "domain_hint=live.com&display=popup&site_id=501454&nux=1";
 
-        public VstsMsaAuthentication(
+        public MsaAuthentication(
             RuntimeContext context,
-            VstsTokenScope tokenScope,
+            TokenScope tokenScope,
             ICredentialStore personalAccessTokenStore)
             : base(context, tokenScope, personalAccessTokenStore)
         {
@@ -52,11 +52,11 @@ namespace VisualStudioTeamServices.Authentication
         /// <param name="adaRefreshTokenStore"></param>
         /// <param name="vstsIdeTokenCache"></param>
         /// <param name="liveAuthority"></param>
-        internal VstsMsaAuthentication(
+        internal MsaAuthentication(
             RuntimeContext context,
             ICredentialStore personalAccessTokenStore,
             ITokenStore vstsIdeTokenCache,
-            IVstsAuthority liveAuthority)
+            IAuthority liveAuthority)
             : base(context,
                    personalAccessTokenStore,
                    vstsIdeTokenCache,

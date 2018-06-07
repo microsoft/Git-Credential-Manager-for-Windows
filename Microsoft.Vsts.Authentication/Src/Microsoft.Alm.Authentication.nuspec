@@ -20,9 +20,9 @@
   </metadata>
   <files>
     <file src="Microsoft.Alm.Authentication.dll" target="lib\net451\Microsoft.Alm.Authentication.dll" />
-    <file src="Microsoft.Vsts.Authentication.dll" target="lib\net451\Microsoft.Vsts.Authentication.dll" />
+    <file src="VisualStudioTeamServices.Authentication.dll" target="lib\net451\VisualStudioTeamServices.Authentication.dll" />
     <file src="Microsoft.Alm.Authentication.pdb" target="lib\net451\Microsoft.Alm.Authentication.pdb" />
-    <file src="Microsoft.Vsts.Authentication.pdb" target="lib\net451\Microsoft.Vsts.Authentication.pdb" />
+    <file src="VisualStudioTeamServices.Authentication.pdb" target="lib\net451\VisualStudioTeamServices.Authentication.pdb" />
     <file src="..\..\..\..\Microsoft.Alm.Authentication\**\*.cs" target="src\Microsoft.Alm.Authentication" exclude="**\bin\**\.cs;**\obj\**\*.cs" />
     <file src="..\..\..\..\Microsoft.Vsts.Authentication\**\*.cs" target="src\Microsoft.Vsts.Authentication" exclude="**\bin\**\.cs;**\obj\**\*.cs" />
   </files>

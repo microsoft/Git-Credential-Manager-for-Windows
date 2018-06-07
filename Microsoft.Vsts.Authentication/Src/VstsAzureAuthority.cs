@@ -33,7 +33,7 @@ using static System.Globalization.CultureInfo;
 
 namespace VisualStudioTeamServices.Authentication
 {
-    internal class VstsAzureAuthority : AzureAuthority, IVstsAuthority
+    internal class VstsAzureAuthority : AzureAuthority, IAuthority
     {
         public const string AzureBaseUrlHost = "azure.com";
         public const string VstsBaseUrlHost = "visualstudio.com";
@@ -48,7 +48,7 @@ namespace VisualStudioTeamServices.Authentication
             : this(context, null)
         { }
 
-        public async Task<Token> GeneratePersonalAccessToken(TargetUri targetUri, Token authorization, VstsTokenScope tokenScope, bool requireCompactToken, TimeSpan? tokenDuration = null)
+        public async Task<Token> GeneratePersonalAccessToken(TargetUri targetUri, Token authorization, TokenScope tokenScope, bool requireCompactToken, TimeSpan? tokenDuration = null)
         {
             if (targetUri is null)
                 throw new ArgumentNullException(nameof(targetUri));
@@ -307,7 +307,7 @@ namespace VisualStudioTeamServices.Authentication
             catch (Exception exception)
             {
                 Trace.WriteException(exception);
-                throw new VstsLocationServiceException($"Helper for `{targetUri}`.", exception);
+                throw new LocationServiceException($"Helper for `{targetUri}`.", exception);
             }
 
             return null;
@@ -337,7 +337,7 @@ namespace VisualStudioTeamServices.Authentication
                     || targetUri.DnsSafeHost.EndsWith(AzureBaseUrlHost, StringComparison.OrdinalIgnoreCase));
         }
 
-        private StringContent GetAccessTokenRequestBody(TargetUri targetUri, VstsTokenScope tokenScope, TimeSpan? duration = null)
+        private StringContent GetAccessTokenRequestBody(TargetUri targetUri, TokenScope tokenScope, TimeSpan? duration = null)
         {
             const string ContentBasicJsonFormat = "{{ \"scope\" : \"{0}\", \"displayName\" : \"Git: {1} on {2}\" }}";
             const string ContentTimedJsonFormat = "{{ \"scope\" : \"{0}\", \"displayName\" : \"Git: {1} on {2}\", \"validTo\": \"{3:u}\" }}";
@@ -373,7 +373,7 @@ namespace VisualStudioTeamServices.Authentication
             var idenityServiceUri = await GetIdentityServiceUri(targetUri, authorization);
 
             if (idenityServiceUri is null)
-                throw new VstsLocationServiceException($"Failed to find Identity Service for `{targetUri}`.");
+                throw new LocationServiceException($"Failed to find Identity Service for `{targetUri}`.");
 
             string url = idenityServiceUri.ToString();
 

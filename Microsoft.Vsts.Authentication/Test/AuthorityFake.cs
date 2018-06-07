@@ -30,7 +30,7 @@ using Xunit;
 
 namespace VisualStudioTeamServices.Authentication.Test
 {
-    internal class AuthorityFake : IVstsAuthority
+    internal class AuthorityFake : IAuthority
     {
         public AuthorityFake(string expectedQueryParameters)
         {
@@ -57,7 +57,7 @@ namespace VisualStudioTeamServices.Authentication.Test
         /// <para/>
         /// The authority granting the token decides the actual lifetime of any token granted, regardless of the duration requested.
         /// </param>
-        public async Task<Token> GeneratePersonalAccessToken(TargetUri targetUri, Token accessToken, VstsTokenScope tokenScope, bool requireCompactToken, TimeSpan? tokenDuration)
+        public async Task<Token> GeneratePersonalAccessToken(TargetUri targetUri, Token accessToken, TokenScope tokenScope, bool requireCompactToken, TimeSpan? tokenDuration)
         {
             return await Task.FromResult(new Token("personal-access-token", TokenType.Personal));
         }

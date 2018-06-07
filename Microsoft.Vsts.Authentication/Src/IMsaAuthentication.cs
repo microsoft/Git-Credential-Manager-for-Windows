@@ -28,7 +28,7 @@ using Microsoft.Alm.Authentication;
 
 namespace VisualStudioTeamServices.Authentication
 {
-    public interface IVstsMsaAuthentication
+    public interface IMsaAuthentication
     {
         /// <summary>
         /// Opens an interactive logon prompt to acquire an authentication token from the
