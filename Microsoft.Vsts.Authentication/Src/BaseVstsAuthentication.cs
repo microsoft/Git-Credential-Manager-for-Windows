@@ -31,9 +31,10 @@ using System.Net;
 using System.Net.Http;
 using System.Text;
 using System.Threading.Tasks;
+using Microsoft.Alm.Authentication;
 using Microsoft.IdentityModel.Clients.ActiveDirectory;
 
-namespace Microsoft.Alm.Authentication
+namespace VisualStudioTeamServices.Authentication
 {
     /// <summary>
     /// Base functionality for performing authentication operations against Visual Studio Online.

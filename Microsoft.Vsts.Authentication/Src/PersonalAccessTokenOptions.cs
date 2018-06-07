@@ -26,7 +26,7 @@
 using System;
 using System.Diagnostics;
 
-namespace Microsoft.Alm.Authentication
+namespace VisualStudioTeamServices.Authentication
 {
     [DebuggerDisplay("{DebuggerDisplay, nq}")]
     public struct PersonalAccessTokenOptions

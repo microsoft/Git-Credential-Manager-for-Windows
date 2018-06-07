@@ -26,9 +26,10 @@
 using System;
 using System.Diagnostics;
 using System.Threading.Tasks;
+using Microsoft.Alm.Authentication;
 using Microsoft.IdentityModel.Clients.ActiveDirectory;
 
-namespace Microsoft.Alm.Authentication
+namespace VisualStudioTeamServices.Authentication
 {
     public sealed class VstsMsaAuthentication : BaseVstsAuthentication, IVstsMsaAuthentication
     {

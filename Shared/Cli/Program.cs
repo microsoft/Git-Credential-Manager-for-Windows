@@ -35,6 +35,7 @@ using Microsoft.Alm.Authentication;
 using Bitbucket = Atlassian.Bitbucket.Authentication;
 using Git = Microsoft.Alm.Authentication.Git;
 using Github = GitHub.Authentication;
+using Vsts = VisualStudioTeamServices.Authentication;
 
 namespace Microsoft.Alm.Cli
 {
@@ -77,7 +78,7 @@ namespace Microsoft.Alm.Cli
 
         internal static readonly char[] NewLineChars = Environment.NewLine.ToCharArray();
 
-        internal static readonly VstsTokenScope VstsCredentialScope = VstsTokenScope.CodeWrite | VstsTokenScope.PackagingRead;
+        internal static readonly Vsts.VstsTokenScope VstsCredentialScope = Vsts.VstsTokenScope.CodeWrite | Vsts.VstsTokenScope.PackagingRead;
         internal static readonly Github.TokenScope GitHubCredentialScope = Github.TokenScope.Gist | Github.TokenScope.Repo;
 
         internal BasicCredentialPromptDelegate _basicCredentialPrompt = ConsoleFunctions.CredentialPrompt;

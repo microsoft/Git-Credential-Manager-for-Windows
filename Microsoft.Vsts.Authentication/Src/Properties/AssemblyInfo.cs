@@ -3,7 +3,7 @@ using System.Resources;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 
-[assembly: AssemblyTitle("Microsoft VSTS Authentication")]
+[assembly: AssemblyTitle("Visual Studio Team Services Authentication")]
 [assembly: AssemblyDescription("Microsoft Visual Studio Team Services Authentication Library for Windows")]
 [assembly: AssemblyConfiguration("")]
 [assembly: AssemblyCompany("Microsoft Corporation")]
@@ -19,5 +19,5 @@ using System.Runtime.InteropServices;
 
 // Only expose internals when the binary isn't signed.
 #if !SIGNED
-[assembly: InternalsVisibleTo("Microsoft.Vsts.Authentication.Test")]
+[assembly: InternalsVisibleTo("VisualStudioTeamServices.Authentication.Test")]
 #endif

@@ -28,9 +28,10 @@ using System.Net.Http;
 using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
+using Microsoft.Alm.Authentication;
 using static System.Globalization.CultureInfo;
 
-namespace Microsoft.Alm.Authentication
+namespace VisualStudioTeamServices.Authentication
 {
     internal class VstsAzureAuthority : AzureAuthority, IVstsAuthority
     {

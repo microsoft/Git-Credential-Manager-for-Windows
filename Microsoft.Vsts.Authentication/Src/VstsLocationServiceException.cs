@@ -25,7 +25,7 @@
 
 using System;
 
-namespace Microsoft.Alm.Authentication
+namespace VisualStudioTeamServices.Authentication
 {
     [Serializable]
     public sealed class VstsLocationServiceException : Exception, System.Runtime.Serialization.ISerializable

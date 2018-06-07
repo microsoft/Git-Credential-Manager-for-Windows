@@ -27,9 +27,10 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Runtime.CompilerServices;
+using Microsoft.Alm.Authentication;
 using ScopeSet = System.Collections.Generic.HashSet<string>;
 
-namespace Microsoft.Alm.Authentication
+namespace VisualStudioTeamServices.Authentication
 {
     public class VstsTokenScope : TokenScope
     {

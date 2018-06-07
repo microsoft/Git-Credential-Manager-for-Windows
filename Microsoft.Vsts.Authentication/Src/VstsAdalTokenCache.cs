@@ -27,11 +27,12 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Security.Cryptography;
+using Microsoft.Alm.Authentication;
 using Microsoft.IdentityModel.Clients.ActiveDirectory;
 
-namespace Microsoft.Alm.Authentication
+namespace VisualStudioTeamServices.Authentication
 {
-    internal class VstsAdalTokenCache : IdentityModel.Clients.ActiveDirectory.TokenCache
+    internal class VstsAdalTokenCache : Microsoft.IdentityModel.Clients.ActiveDirectory.TokenCache
     {
         private static readonly IReadOnlyList<IReadOnlyList<string>> AdalCachePaths = new string[][]
         {

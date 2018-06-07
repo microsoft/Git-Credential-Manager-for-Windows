@@ -25,9 +25,10 @@
 
 using System;
 using System.Threading.Tasks;
+using Microsoft.Alm.Authentication;
 using Microsoft.IdentityModel.Clients.ActiveDirectory;
 
-namespace Microsoft.Alm.Authentication
+namespace VisualStudioTeamServices.Authentication
 {
     /// <summary>
     /// Interfaces with Azure to perform authentication and identity services.

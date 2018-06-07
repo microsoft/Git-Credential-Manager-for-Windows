@@ -28,9 +28,10 @@ using System.Collections.Generic;
 using System.Security.Cryptography;
 using System.Text;
 using System.Threading.Tasks;
+using Microsoft.Alm.Authentication;
 using Microsoft.Win32;
 
-namespace Microsoft.Alm.Authentication
+namespace VisualStudioTeamServices.Authentication
 {
     /// <summary>
     /// A token storage object which interacts with the current user's Visual Studio 2015 hive in the Windows Registry.

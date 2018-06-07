@@ -5,12 +5,12 @@
   <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
   <PropertyGroup>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <AssemblyName>Microsoft.Vsts.Authentication</AssemblyName>
+    <AssemblyName>VisualStudioTeamServices.Authentication</AssemblyName>
     <NuGetPackageImportStamp />
     <OutputType>Library</OutputType>
     <ProjectGuid>{19770407-D7D8-4A37-914C-F552FF4B90D4}</ProjectGuid>
     <ProjectName>Microsoft.Vsts.Authentication</ProjectName>
-    <RootNamespace>Microsoft.Alm.Authentication</RootNamespace>
+    <RootNamespace>VisualStudioTeamServices.Authentication</RootNamespace>
     <TargetFrameworkVersion>v4.5.1</TargetFrameworkVersion>
   </PropertyGroup>
   <Import Project="..\..\build.props" />
@@ -85,7 +85,8 @@
     <!-- Only download a new copy of nuget.exe if we don't have a copy available -->
     <PropertyGroup>
       <NugetPath>nuget.exe</NugetPath>
-      <IsSigned></IsSigned>
+      <IsSigned>
+      </IsSigned>
       <IsSigned Condition=" '$(SignType)' == '' Or '$(SignType)' == '*Undefined*' ">-unsigned</IsSigned>
       <NugetWorkDir>$(OutputPath.TrimEnd('\'))</NugetWorkDir>
     </PropertyGroup>

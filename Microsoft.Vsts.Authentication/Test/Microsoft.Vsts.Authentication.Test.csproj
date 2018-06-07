@@ -4,13 +4,13 @@
   <Import Project="..\..\packages\xunit.runner.visualstudio.2.3.1\build\net20\xunit.runner.visualstudio.props" Condition="Exists('..\..\packages\xunit.runner.visualstudio.2.3.1\build\net20\xunit.runner.visualstudio.props')" />
   <Import Project="..\..\packages\xunit.core.2.3.1\build\xunit.core.props" Condition="Exists('..\..\packages\xunit.core.2.3.1\build\xunit.core.props')" />
   <PropertyGroup>
-    <AssemblyName>Microsoft.Vsts.Authentication.Test</AssemblyName>
+    <AssemblyName>VisualStudioTeamServices.Authentication.Test</AssemblyName>
     <AppDesignerFolder>Properties</AppDesignerFolder>
     <IsCodedUITest>False</IsCodedUITest>
     <NuGetPackageImportStamp>
     </NuGetPackageImportStamp>
     <ProjectGuid>{19781214-5254-464A-BC69-FAC502046564}</ProjectGuid>
-    <RootNamespace>Microsoft.Alm.Authentication.Test</RootNamespace>
+    <RootNamespace>VisualStudioTeamServices.Authentication.Test</RootNamespace>
   </PropertyGroup>
   <Import Project="..\..\test.props" />
   <ItemGroup>

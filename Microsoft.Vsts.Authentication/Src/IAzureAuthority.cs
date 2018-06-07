@@ -25,8 +25,9 @@
 
 using System;
 using System.Threading.Tasks;
+using Microsoft.Alm.Authentication;
 
-namespace Microsoft.Alm.Authentication
+namespace VisualStudioTeamServices.Authentication
 {
     internal interface IAzureAuthority
     {
