@@ -3,13 +3,27 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Net;
 using System.Threading.Tasks;
+using Atlassian.Bitbucket.Authentication.BasicAuth;
 using Microsoft.Alm.Authentication;
+using Moq;
 using Xunit;
 
 namespace Atlassian.Bitbucket.Authentication.Test
 {
     public class AuthenticationTest
     {
+        /// <summary>
+        ///  used to populate delegates;
+        /// </summary>
+        private const string _validUsername = "john";
+        private const string _validPassword = "squire";
+        private Credential _validBasicAuthCredentials = new Credential(_validUsername, _validPassword);
+
+        private const string _invalidUsername = "invalid_username";
+        private const string _invalidPassword = "invalid_password";
+        private Credential _invalidBasicAuthCredentials = new Credential(_invalidUsername, _invalidPassword);
+
+
         [Fact]
         public void VerifyBitbucketOrgIsIdentified()
         {
@@ -188,7 +202,7 @@ namespace Atlassian.Bitbucket.Authentication.Test
         {
             var credentialStore = new MockCredentialStore();
             // Add a stored basic authentication credential to delete.
-            credentialStore.Credentials.Add("https://example.com/", new Credential("john", "squire"));
+            credentialStore.Credentials.Add("https://example.com/", _validBasicAuthCredentials);
 
             var bbAuth = new Authentication(RuntimeContext.Default, credentialStore, null, null);
 
@@ -219,7 +233,7 @@ namespace Atlassian.Bitbucket.Authentication.Test
         {
             var credentialStore = new MockCredentialStore();
             // add a stored basic auth credential to delete.
-            credentialStore.Credentials.Add("https://example.com/", new Credential("john", "a1b2c3"));
+            credentialStore.Credentials.Add("https://example.com/", _validBasicAuthCredentials);
             credentialStore.Credentials.Add("https://example.com/refresh_token", new Credential("john", "d4e5f6"));
 
             var bbAuth = new Authentication(RuntimeContext.Default, credentialStore, null, null);
@@ -252,9 +266,9 @@ namespace Atlassian.Bitbucket.Authentication.Test
             var credentialStore = new MockCredentialStore();
             // add a stored basic auth credential to delete.
             // per host credentials
-            credentialStore.Credentials.Add("https://example.com/", new Credential("john", "squire"));
+            credentialStore.Credentials.Add("https://example.com/", _validBasicAuthCredentials);
             // per user credentials
-            credentialStore.Credentials.Add("https://john@example.com/", new Credential("john", "squire"));
+            credentialStore.Credentials.Add("https://john@example.com/", _validBasicAuthCredentials);
 
             var bbAuth = new Authentication(RuntimeContext.Default, credentialStore, null, null);
 
@@ -298,7 +312,7 @@ namespace Atlassian.Bitbucket.Authentication.Test
             // per host credentials
             credentialStore.Credentials.Add("https://example.com/", new Credential("ian", "brown"));
             // per user credentials
-            credentialStore.Credentials.Add("https://john@example.com/", new Credential("john", "squire"));
+            credentialStore.Credentials.Add("https://john@example.com/", _validBasicAuthCredentials);
 
             var bbAuth = new Authentication(RuntimeContext.Default, credentialStore, null, null);
 
@@ -401,9 +415,152 @@ namespace Atlassian.Bitbucket.Authentication.Test
             Assert.Equal("https", resultUri.Scheme);
             Assert.Equal("https://example.com/", resultUri.ToString(false, true, true));
         }
+
+        [Fact]
+        public async void VerifyInteractiveLoginAquiresAndStoresValidBasicAuthCredentials()
+        {
+            var bitbucketUrl = "https://bitbucket.org";
+            var credentialStore = new Mock<ICredentialStore>();
+
+            var targetUri = new TargetUri(bitbucketUrl);
+
+            // Mock the behaviour of IAuthority.AcquireToken() to basically mimic BasicAuthAuthenticator.GetAuthAsync() validating the useername/password
+            var authority = new Mock<IAuthority>();
+            authority
+                .Setup(a => a.AcquireToken(It.IsAny<TargetUri>(), It.IsAny<Credential>(), It.IsAny<AuthenticationResultType>(), It.IsAny<TokenScope>()))
+                // return 'success' with the validated credentials
+                .Returns(Task.FromResult<AuthenticationResult>(new AuthenticationResult(AuthenticationResultType.Success, new Token(_validBasicAuthCredentials.Password, TokenType.Personal))));
+
+            var bbAuth = new Authentication(RuntimeContext.Default, credentialStore.Object, MockValidBasicAuthCredentialsAquireCredentialsCallback, MockValidAquireAuthenticationOAuthCallback, authority.Object);
+
+            var credentials = await bbAuth.InteractiveLogon(targetUri);
+
+            Assert.NotNull(credentials);
+
+            // attempted to validate credentials
+            authority.Verify(a => a.AcquireToken(targetUri, _validBasicAuthCredentials, AuthenticationResultType.None, TokenScope.SnippetWrite | TokenScope.RepositoryWrite), Times.Once);
+            // valid credentials stored
+            credentialStore.Verify(c => c.WriteCredentials(targetUri, _validBasicAuthCredentials), Times.Once);
+
+        }
+
+        [Fact]
+        public async void VerifyInteractiveLoginDoesNotAquireInvalidBasicAuthCredentials()
+        {
+            var bitbucketUrl = "https://bitbucket.org";
+            var credentialStore = new Mock<ICredentialStore>();
+
+            var targetUri = new TargetUri(bitbucketUrl);
+
+            // Mock the behaviour of IAuthority.AcquireToken() to basically mimic BasicAuthAuthenticator.GetAuthAsync() validating the useername/password
+            var authority = new Mock<IAuthority>();
+            authority
+                .Setup(a => a.AcquireToken(It.IsAny<TargetUri>(), It.IsAny<Credential>(), It.IsAny<AuthenticationResultType>(), It.IsAny<TokenScope>()))
+                // return 'failure' with the validated credentials
+                .Returns(Task.FromResult<AuthenticationResult>(new AuthenticationResult(AuthenticationResultType.Failure)));
+
+            var bbAuth = new Authentication(RuntimeContext.Default, credentialStore.Object, MockInvalidBasicAuthCredentialsAquireCredentialsCallback, MockValidAquireAuthenticationOAuthCallback, authority.Object);
+
+            var credentials = await bbAuth.InteractiveLogon(targetUri);
+
+            Assert.NotNull(credentials);
+            Assert.Equal(_invalidUsername, credentials.Username);
+            Assert.Equal(_invalidPassword, credentials.Password);
+
+            // attempted to validate credentials
+            authority.Verify(a => a.AcquireToken(It.IsAny<TargetUri>(), It.IsAny<Credential>(), It.IsAny<AuthenticationResultType>(), It.IsAny<TokenScope>()), Times.Once);
+            // no attempt to store invalid credentials
+            credentialStore.Verify(c => c.WriteCredentials(It.IsAny<TargetUri>(), It.IsAny<Credential>()), Times.Never);
+        }
+
+        [Fact]
+        public async void VerifyInteractiveLoginDoesNothingIfUserDoesNotEnterCredentials()
+        {
+            var bitbucketUrl = "https://bitbucket.org";
+            var credentialStore = new Mock<ICredentialStore>();
+
+            var targetUri = new TargetUri(bitbucketUrl);
+
+            // Mock the behaviour of IAuthority.AcquireToken() to basically mimic BasicAuthAuthenticator.GetAuthAsync() validating the useername/password
+            var authority = new Mock<IAuthority>();
+            authority
+                .Setup(a => a.AcquireToken(It.IsAny<TargetUri>(), It.IsAny<Credential>(), It.IsAny<AuthenticationResultType>(), It.IsAny<TokenScope>()))
+                // return 'failure' with the validated credentials
+                .Returns(Task.FromResult<AuthenticationResult>(new AuthenticationResult(AuthenticationResultType.Failure)));
+
+            var bbAuth = new Authentication(RuntimeContext.Default, credentialStore.Object, MockNoCredentialsAquireCredentialsCallback, MockValidAquireAuthenticationOAuthCallback, authority.Object);
+
+            var credentials = await bbAuth.InteractiveLogon(targetUri);
+
+            Assert.Null(credentials);
+
+            // no attempted to validate credentials
+            authority.Verify(a => a.AcquireToken(It.IsAny<TargetUri>(), It.IsAny<Credential>(), It.IsAny<AuthenticationResultType>(), It.IsAny<TokenScope>()), Times.Never);
+            // no attempt to store invalid credentials
+            credentialStore.Verify(c => c.WriteCredentials(It.IsAny<TargetUri>(), It.IsAny<Credential>()), Times.Never);
+        }
+
+        [Fact]
+        public async void VerifyInteractiveLoginAquiresAndStoresValidOAuthCredentials()
+        {
+            var bitbucketUrl = "https://bitbucket.org";
+            var credentialStore = new Mock<ICredentialStore>();
+
+            var targetUri = new TargetUri(bitbucketUrl);
+
+            // Mock the behaviour of IAuthority.AcquireToken() to basically mimic BasicAuthAuthenticator.GetAuthAsync() validating the useername/password
+            var authority = new Mock<IAuthority>();
+            authority
+                .Setup(a => a.AcquireToken(It.IsAny<TargetUri>(), It.IsAny<Credential>(), AuthenticationResultType.None, It.IsAny<TokenScope>()))
+                // return 'twofactor' with the validated credentials to indicate 2FAOAuth
+                .Returns(Task.FromResult<AuthenticationResult>(new AuthenticationResult(AuthenticationResultType.TwoFactor)));
+            authority
+                .Setup(a => a.AcquireToken(It.IsAny<TargetUri>(), It.IsAny<Credential>(), AuthenticationResultType.TwoFactor, It.IsAny<TokenScope>()))
+                // return 'twofactor' with the validated credentials to indicate 2FA/OAuth
+                .Returns(Task.FromResult<AuthenticationResult>(new AuthenticationResult(AuthenticationResultType.Success, new Token("access_token", TokenType.Personal), new Token("refresh_token", TokenType.BitbucketRefresh))));
+
+            var bbAuth = new Authentication(RuntimeContext.Default, credentialStore.Object, MockValidBasicAuthCredentialsAquireCredentialsCallback, MockValidAquireAuthenticationOAuthCallback, authority.Object);
+
+            var credentials = await bbAuth.InteractiveLogon(targetUri);
+
+            Assert.NotNull(credentials);
+
+            // attempted to validate credentials
+            authority.Verify(a => a.AcquireToken(targetUri, _validBasicAuthCredentials, AuthenticationResultType.None, TokenScope.SnippetWrite | TokenScope.RepositoryWrite), Times.Once);
+            authority.Verify(a => a.AcquireToken(targetUri, _validBasicAuthCredentials, AuthenticationResultType.TwoFactor, TokenScope.SnippetWrite | TokenScope.RepositoryWrite), Times.Once);
+            // valid access token + refresh token stored for the per user and per host urls so 2 x 2 calls
+            credentialStore.Verify(c => c.WriteCredentials(It.IsAny<TargetUri>(), It.IsAny<Credential>()), Times.Exactly(4));
+
+        }
+
+        private bool MockValidAquireAuthenticationOAuthCallback(string title, TargetUri targetUri, AuthenticationResultType resultType, string username)
+        {
+            return true;
+        }
+
+        private bool MockValidBasicAuthCredentialsAquireCredentialsCallback(string titleMessage, TargetUri targetUri, out string username, out string password)
+        {
+            username = _validBasicAuthCredentials.Username;
+            password = _validBasicAuthCredentials.Password;
+            return true;
+        }
+
+        private bool MockInvalidBasicAuthCredentialsAquireCredentialsCallback(string titleMessage, TargetUri targetUri, out string username, out string password)
+        {
+            username = _invalidUsername;
+            password = _invalidPassword;
+            return true;
+        }
+
+        private bool MockNoCredentialsAquireCredentialsCallback(string titleMessage, TargetUri targetUri, out string username, out string password)
+        {
+            username = null;
+            password = null;
+            return false;
+        }
     }
 
-    public class MockCredentialStore : ICredentialStore
+    public class MockCredentialStore : ICredentialStore 
     {
         public Dictionary<string, Dictionary<List<string>, int>> MethodCalls =
             new Dictionary<string, Dictionary<List<string>, int>>();

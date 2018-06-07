@@ -116,9 +116,9 @@ namespace Atlassian.Bitbucket.Authentication
     /// </summary>
     public enum AuthenticationResultType
     {
+        None,
         Success,
         Failure,
         TwoFactor,
-        None,
     }
 }

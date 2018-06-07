@@ -5,7 +5,7 @@
   <PropertyGroup>
     <AppDesignerFolder>Properties</AppDesignerFolder>
     <AssemblyName>Bitbucket.Authentication</AssemblyName>
-    <NuGetPackageImportStamp/>
+    <NuGetPackageImportStamp />
     <OutputType>Library</OutputType>
     <ProjectGuid>{EE663736-5BAD-4CA6-A4F8-99978925AD8A}</ProjectGuid>
     <ProjectName>Bitbucket.Authentication</ProjectName>
