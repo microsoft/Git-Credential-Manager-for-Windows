@@ -69,8 +69,6 @@ namespace Atlassian.Bitbucket.Authentication
                 throw new ArgumentNullException(nameof(targetUri));
             if (credentials is null)
                 throw new ArgumentNullException(nameof(credentials));
-            if (resultType != AuthenticationResultType.Failure && resultType != AuthenticationResultType.Success && resultType != AuthenticationResultType.TwoFactor)
-                throw new ArgumentOutOfRangeException(nameof(resultType));
             if (scope is null)
                 throw new ArgumentNullException(nameof(scope));
 

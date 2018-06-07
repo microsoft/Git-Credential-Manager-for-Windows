@@ -14,7 +14,7 @@
     <ReferencePath>$(ProgramFiles)\Common Files\microsoft shared\VSTT\$(VisualStudioVersion)\UITestExtensionPackages</ReferencePath>
     <IsCodedUITest>False</IsCodedUITest>
     <TestProjectType>UnitTest</TestProjectType>
-    <NuGetPackageImportStamp/>
+    <NuGetPackageImportStamp />
   </PropertyGroup>
   <Import Project="..\..\test.props" />
   <PropertyGroup>
@@ -36,11 +36,16 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="AuthorityTest.cs" />
     <Compile Include="BitbucketAuthTests.cs" />
     <Compile Include="AuthenticationTest.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\..\GitHub.Authentication\Src\GitHub.Authentication.csproj">
+      <Project>{CF306116-BBF0-4CC7-AFCE-A506AC4752CB}</Project>
+      <Name>GitHub.Authentication</Name>
+    </ProjectReference>
     <ProjectReference Include="..\Src\Bitbucket.Authentication.csproj">
       <Project>{ee663736-5bad-4ca6-a4f8-99978925ad8a}</Project>
       <Name>Bitbucket.Authentication</Name>
