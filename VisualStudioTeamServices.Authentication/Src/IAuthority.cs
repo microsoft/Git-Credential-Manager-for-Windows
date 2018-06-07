@@ -29,7 +29,7 @@ using Microsoft.Alm.Authentication;
 
 namespace VisualStudioTeamServices.Authentication
 {
-    internal interface IAuthority : IAzureAuthority
+    public interface IAuthority
     {
         /// <summary>
         /// Generates a personal access token for use with Visual Studio Team Services.
@@ -46,6 +46,29 @@ namespace VisualStudioTeamServices.Authentication
         /// The authority granting the token decides the actual lifetime of any token granted, regardless of the duration requested.
         /// </param>
         Task<Token> GeneratePersonalAccessToken(TargetUri targetUri, Token accessToken, TokenScope tokenScope, bool requireCompactToken, TimeSpan? tokenDuration = null);
+
+        /// <summary>
+        /// Acquires a `<seealso cref="Token"/>` from the authority via an interactive user logon prompt.
+        /// <para/>
+        /// Returns the acquired `<seealso cref="Token"/>` is successful; otherwise `<see langword="null"/>`.
+        /// </summary>
+        /// <param name="targetUri">Uniform resource indicator of the resource access tokens are being requested for.</param>
+        /// <param name="clientId">Identifier of the client requesting the token.</param>
+        /// <param name="resource">Identifier of the target resource that is the recipient of the requested token.</param>
+        /// <param name="redirectUri">Address to return to upon receiving a response from the authority.</param>
+        /// <param name="queryParameters">optional value, appended as-is to the query string in the HTTP authentication request to the authority.</param>
+        Task<Token> InteractiveAcquireToken(TargetUri targetUri, string clientId, string resource, Uri redirectUri, string queryParameters = null);
+
+        /// <summary>
+        /// Acquires a `<see cref="Token"/>` from the authority via an non-interactive user logon.
+        /// <para/>
+        /// Returns the acquired `<seealso cref="Token"/>` if successful; otherwise `<see langword="null"/>`.
+        /// </summary>
+        /// <param name="targetUri">Uniform resource indicator of the resource access tokens are being requested for.</param>
+        /// <param name="clientId">Identifier of the client requesting the token.</param>
+        /// <param name="resource">Identifier of the target resource that is the recipient of the requested token.</param>
+        /// <param name="redirectUri">Address to return to upon receiving a response from the authority.</param>
+        Task<Token> NoninteractiveAcquireToken(TargetUri targetUri, string clientId, string resource, Uri redirectUri);
 
         /// <summary>
         /// Validates that a `<see cref="Credential"/>` is valid to grant access to the VSTS resource referenced by `<paramref name="targetUri"/>`.

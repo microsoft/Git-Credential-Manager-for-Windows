@@ -43,9 +43,8 @@
       <Link>GlobalSuppressions.cs</Link>
     </Compile>
     <Compile Include="PersonalAccessTokenOptions.cs" />
-    <Compile Include="AzureAuthority.cs" />
+    <Compile Include="Authority.cs" />
     <Compile Include="Authentication.cs" />
-    <Compile Include="IAzureAuthority.cs" />
     <Compile Include="IAadAuthentication.cs" />
     <Compile Include="IAuthority.cs" />
     <Compile Include="IMsaAuthentication.cs" />
@@ -53,7 +52,6 @@
     <Compile Include="TokenRegistry.cs" />
     <Compile Include="AadAuthentication.cs" />
     <Compile Include="AdalTokenCache.cs" />
-    <Compile Include="VstsAzureAuthority.cs" />
     <Compile Include="LocationServiceException.cs" />
     <Compile Include="MsaAuthentication.cs" />
     <Compile Include="TokenScope.cs" />

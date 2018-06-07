@@ -41,7 +41,7 @@ namespace VisualStudioTeamServices.Authentication.Test
             TargetUri targetUri = DefaultTargetUri;
             MsaAuthentication msaAuthority = GetVstsMsaAuthentication(RuntimeContext.Default, "msa-delete");
 
-            if (msaAuthority.VstsAuthority is AuthorityFake fake)
+            if (msaAuthority.Authority is AuthorityFake fake)
             {
                 fake.CredentialsAreValid = false;
             }

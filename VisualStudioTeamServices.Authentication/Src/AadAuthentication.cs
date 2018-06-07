@@ -55,13 +55,13 @@ namespace VisualStudioTeamServices.Authentication
         {
             if (tenantId == Guid.Empty)
             {
-                VstsAuthority = new VstsAzureAuthority(context, AzureAuthority.DefaultAuthorityHostUrl);
+                Authority = new Authority(context, VisualStudioTeamServices.Authentication.Authority.DefaultAuthorityHostUrl);
             }
             else
             {
                 // Create an authority host URL in the format of https://login.microsoft.com/12345678-9ABC-DEF0-1234-56789ABCDEF0.
-                string authorityHost = AzureAuthority.GetAuthorityUrl(tenantId);
-                VstsAuthority = new VstsAzureAuthority(context, authorityHost);
+                string authorityHost = VisualStudioTeamServices.Authentication.Authority.GetAuthorityUrl(tenantId);
+                Authority = new Authority(context, authorityHost);
             }
         }
 
@@ -94,7 +94,7 @@ namespace VisualStudioTeamServices.Authentication
             try
             {
                 Token token;
-                if ((token = await VstsAuthority.InteractiveAcquireToken(targetUri, ClientId, Resource, new Uri(RedirectUrl), null)) != null)
+                if ((token = await Authority.InteractiveAcquireToken(targetUri, ClientId, Resource, new Uri(RedirectUrl), null)) != null)
                 {
                     Trace.WriteLine($"token acquisition for '{targetUri}' succeeded.");
 
@@ -131,7 +131,7 @@ namespace VisualStudioTeamServices.Authentication
             try
             {
                 Token token;
-                if ((token = await VstsAuthority.InteractiveAcquireToken(targetUri, ClientId, Resource, new Uri(RedirectUrl), null)) != null)
+                if ((token = await Authority.InteractiveAcquireToken(targetUri, ClientId, Resource, new Uri(RedirectUrl), null)) != null)
                 {
                     Trace.WriteLine($"token acquisition for '{targetUri}' succeeded.");
 
@@ -163,7 +163,7 @@ namespace VisualStudioTeamServices.Authentication
             try
             {
                 Token token;
-                if ((token = await VstsAuthority.NoninteractiveAcquireToken(targetUri, ClientId, Resource, new Uri(RedirectUrl))) != null)
+                if ((token = await Authority.NoninteractiveAcquireToken(targetUri, ClientId, Resource, new Uri(RedirectUrl))) != null)
                 {
                     Trace.WriteLine($"token acquisition for '{targetUri}' succeeded");
 
@@ -200,7 +200,7 @@ namespace VisualStudioTeamServices.Authentication
             try
             {
                 Token token;
-                if ((token = await VstsAuthority.NoninteractiveAcquireToken(targetUri, ClientId, Resource, new Uri(RedirectUrl))) != null)
+                if ((token = await Authority.NoninteractiveAcquireToken(targetUri, ClientId, Resource, new Uri(RedirectUrl))) != null)
                 {
                     Trace.WriteLine($"token acquisition for '{targetUri}' succeeded");
 

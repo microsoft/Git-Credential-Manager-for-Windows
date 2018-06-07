@@ -107,7 +107,10 @@ namespace VisualStudioTeamServices.Authentication
 
         public override string ToString()
         {
-            return nameof(VisualStudioTeamServices.Authentication.TokenScope);
+            if (string.IsNullOrWhiteSpace(_scope?.Value))
+                return "<empty>";
+
+            return _scope.Value;
         }
 
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA1801:ReviewUnusedParameters", MessageId = "right")]

@@ -41,7 +41,7 @@ namespace VisualStudioTeamServices.Authentication.Test
             TargetUri targetUri = DefaultTargetUri;
             AadAuthentication aadAuthentication = GetVstsAadAuthentication(RuntimeContext.Default, "aad-delete");
 
-            if (aadAuthentication.VstsAuthority is AuthorityFake fake)
+            if (aadAuthentication.Authority is AuthorityFake fake)
             {
                 fake.CredentialsAreValid = false;
             }
