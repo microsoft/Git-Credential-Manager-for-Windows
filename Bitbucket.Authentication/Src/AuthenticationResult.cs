@@ -93,9 +93,12 @@ namespace Atlassian.Bitbucket.Authentication
         /// <summary>
         /// Flag indicating if the results is a success
         /// </summary>
-        public bool IsSuccess { get { return Type.Equals(AuthenticationResultType.Success); } }
+        public bool IsSuccess
+        {
+            get { return Type.Equals(AuthenticationResultType.Success); }
+        }
 
-        public static implicit operator Boolean(AuthenticationResult result)
+        public static implicit operator bool(AuthenticationResult result)
         {
             return result.Type == AuthenticationResultType.Success;
         }
@@ -116,9 +119,9 @@ namespace Atlassian.Bitbucket.Authentication
     /// </summary>
     public enum AuthenticationResultType
     {
+        None,
         Success,
         Failure,
         TwoFactor,
-        None,
     }
 }
