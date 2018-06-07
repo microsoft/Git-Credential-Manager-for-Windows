@@ -51,7 +51,7 @@ namespace Microsoft.Alm.Cli
             "GitHub.Authentication.exe",
             "Microsoft.Alm.Authentication.dll",
             "Microsoft.IdentityModel.Clients.ActiveDirectory.dll",
-            "Microsoft.Vsts.Authentication.dll",
+            "VisualStudioTeamServices.Authentication.dll",
         };
         private static readonly IReadOnlyList<string> CleanList = new string[]
         {
@@ -64,6 +64,7 @@ namespace Microsoft.Alm.Cli
             "Microsoft.IdentityModel.Clients.ActiveDirectory.dll",
             "Microsoft.IdentityModel.Clients.ActiveDirectory.Platform.dll",
             "Microsoft.Vsts.Authentication.dll",
+            "VisualStudioTeamServices.Authentication.dll",
         };
         private static readonly IReadOnlyList<string> DocsList = new string[]
         {

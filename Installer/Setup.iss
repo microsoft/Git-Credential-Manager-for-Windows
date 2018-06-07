@@ -91,7 +91,7 @@ Source: "{#binDir}\git-credential-manager.exe"; DestDir: "{app}"; Flags: ignorev
 Source: "{#binDir}\git-askpass.exe"; DestDir: "{app}"; Flags: ignoreversion
 Source: "{#binDir}\Microsoft.Alm.Authentication.dll"; DestDir: "{app}"; Flags: ignoreversion
 Source: "{#binDir}\Microsoft.IdentityModel.Clients.ActiveDirectory.dll"; DestDir: "{app}"; Flags: ignoreversion
-Source: "{#binDir}\Microsoft.Vsts.Authentication.dll"; DestDir: "{app}"; Flags: ignoreversion
+Source: "{#binDir}\VisualStudioTeamServices.Authentication.dll"; DestDir: "{app}"; Flags: ignoreversion
 Source: "{#binDir}\GitHub.Authentication.exe"; DestDir: "{app}"; Flags: ignoreversion
 Source: "{#binDir}\Bitbucket.Authentication.dll"; DestDir: "{app}"; Flags: ignoreversion
 Source: "{#binDir}\README.md"; DestDir: "{app}"; Flags: ignoreversion
