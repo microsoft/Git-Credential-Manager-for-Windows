@@ -25,6 +25,7 @@
 
 using System;
 using System.Threading.Tasks;
+using Atlassian.Bitbucket.Authentication.BasicAuth;
 using Microsoft.Alm.Authentication;
 
 namespace Atlassian.Bitbucket.Authentication
@@ -53,7 +54,8 @@ namespace Atlassian.Bitbucket.Authentication
             RuntimeContext context,
             ICredentialStore personalAccessTokenStore,
             AcquireCredentialsDelegate acquireCredentialsCallback,
-            AcquireAuthenticationOAuthDelegate acquireAuthenticationOAuthCallback)
+            AcquireAuthenticationOAuthDelegate acquireAuthenticationOAuthCallback,
+            IAuthority authority = null)
             : base(context)
         {
             if (personalAccessTokenStore == null)
@@ -61,7 +63,7 @@ namespace Atlassian.Bitbucket.Authentication
 
             PersonalAccessTokenStore = personalAccessTokenStore;
 
-            BitbucketAuthority = new Authority(context);
+            BitbucketAuthority = authority ??  new Authority(context);
             TokenScope = TokenScope.SnippetWrite | TokenScope.RepositoryWrite;
 
             AcquireCredentialsCallback = acquireCredentialsCallback;

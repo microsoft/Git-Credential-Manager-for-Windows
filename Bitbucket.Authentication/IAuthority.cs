@@ -31,7 +31,7 @@ namespace Atlassian.Bitbucket.Authentication
     /// <summary>
     /// Defines the interactions with the Authority capable of providing and validating Bitbucket credentials.
     /// </summary>
-    internal interface IAuthority
+    public interface IAuthority
     {
         /// <summary>
         /// Use the provided credentials, username and password, to request an access token from the Authority.
