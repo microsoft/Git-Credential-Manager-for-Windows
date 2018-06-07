@@ -7,7 +7,10 @@ using Microsoft.Alm.Authentication.Git;
 
 namespace Atlassian.Bitbucket.Authentication.BasicAuth
 {
-    internal class BasicAuthAuthenticator : Base
+    /// <summary>
+    ///     Provides the functionality for validating basic auth credentials with Bitbucket.org
+    /// </summary>
+    public class BasicAuthAuthenticator : Base
     {
         public BasicAuthAuthenticator(RuntimeContext context)
             : base(context)
