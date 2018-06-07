@@ -22,7 +22,7 @@
   </PropertyGroup>
   <PropertyGroup>
     <GcmProps>$([System.IO.File]::ReadAllText($(SolutionDir)\Cli\Manager\Properties\AssemblyInfo.cs))</GcmProps>
-    <PkgProps>$([System.IO.File]::ReadAllText($(SolutionDir)\Microsoft.Vsts.Authentication\Src\Properties\AssemblyInfo.cs))</PkgProps>
+    <PkgProps>$([System.IO.File]::ReadAllText($(SolutionDir)\VisualStudioTeamServices.Authentication\Src\Properties\AssemblyInfo.cs))</PkgProps>
     <Pattern>^\s*\[assembly\s*:\s*AssemblyVersion\s*\(\s*\s*"(\d+\.\d+\.\d+)\.?\d*\s*"\s*\)</Pattern>
     <GcmVersion>$([System.Text.RegularExpressions.Regex]::Match($(GcmProps), $(Pattern), System.Text.RegularExpressions.RegexOptions.Multiline).Groups[1].Value)</GcmVersion>
     <PkgVersion>$([System.Text.RegularExpressions.Regex]::Match($(PkgProps), $(Pattern), System.Text.RegularExpressions.RegexOptions.Multiline).Groups[1].Value)</PkgVersion>
@@ -52,9 +52,9 @@
       <Project>{19770407-B493-459D-BB4F-04FBEFB1BA13}</Project>
       <Name>Microsoft.Alm.Authentication</Name>
     </ProjectReference>
-    <ProjectReference Include="..\Microsoft.Vsts.Authentication\Src\Microsoft.Vsts.Authentication.csproj">
+    <ProjectReference Include="..\VisualStudioTeamServices.Authentication\Src\VisualStudioTeamServices.Authentication.csproj">
       <Project>{19770407-D7D8-4A37-914C-F552FF4B90D4}</Project>
-      <Name>Microsoft.Vsts.Authentication</Name>
+      <Name>VisualStudioTeamServices.Authentication</Name>
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
@@ -98,7 +98,7 @@
     <ZipContents Include="$(IntermediateOutputPath)\Microsoft.IdentityModel.Clients.ActiveDirectory.dll">
       <InProject>false</InProject>
     </ZipContents>
-    <ZipContents Include="$(IntermediateOutputPath)\Microsoft.Vsts.Authentication.dll">
+    <ZipContents Include="$(IntermediateOutputPath)\VisualStudioTeamServices.Authentication.dll">
       <InProject>false</InProject>
     </ZipContents>
     <ZipContents Include="$(SolutionDir)\README.md">

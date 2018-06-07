@@ -84,7 +84,7 @@ namespace Microsoft.Alm.Cli.Test
                 { "HOME", Environment.GetFolderPath(Environment.SpecialFolder.UserProfile) },
             };
             var gitconfig = new Git.Configuration(RuntimeContext.Default, configs);
-            var targetUri = new Authentication.TargetUri("https://example.visualstudio.com/");
+            var targetUri = new TargetUri("https://example.visualstudio.com/");
 
             var opargsMock = new Mock<OperationArguments>();
             opargsMock.Setup(o => o.EnvironmentVariables)

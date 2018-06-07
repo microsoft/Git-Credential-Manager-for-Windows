@@ -9,7 +9,7 @@
     <NuGetPackageImportStamp />
     <OutputType>Library</OutputType>
     <ProjectGuid>{19770407-D7D8-4A37-914C-F552FF4B90D4}</ProjectGuid>
-    <ProjectName>Microsoft.Vsts.Authentication</ProjectName>
+    <ProjectName>VisualStudioTeamServices.Authentication</ProjectName>
     <RootNamespace>VisualStudioTeamServices.Authentication</RootNamespace>
     <TargetFrameworkVersion>v4.5.1</TargetFrameworkVersion>
   </PropertyGroup>
@@ -70,7 +70,7 @@
     </FilesToSign>
   </ItemGroup>
   <Target Name="BuildNupkg" AfterTargets="CopyFilesToOutputDirectory;SignFiles">
-    <!-- Read the nupkg meta data from the AssemblyInfo.cs file copied from Microsoft.Vsts.Authentication -->
+    <!-- Read the nupkg meta data from the AssemblyInfo.cs file copied from VisualStudioTeamServicesAuthentication -->
     <PropertyGroup>
       <In>$([System.IO.File]::ReadAllText('$(ProjectDir)\Properties\AssemblyInfo.cs'))</In>
       <Pattern>^\s*\[assembly:\s*AssemblyVersion\s*\(\s*"\s*([^"]+)\s*"\s*\)</Pattern>
@@ -93,7 +93,7 @@
     <PropertyGroup Condition="!Exists($(NugetPath))">
       <NugetPath>..\..\packages\NuGet.CommandLine.4.6.2\tools\NuGet.exe</NugetPath>
     </PropertyGroup>
-    <Exec Command="&quot;$(NugetPath)&quot; pack &quot;$(ProjectDir)\Microsoft.Alm.Authentication.nuspec&quot; -BasePath &quot;$(NugetWorkDir)&quot; -IncludeReferencedProjects -Properties Configuration=&quot;$(Configuration)&quot;;Version=&quot;$(AssemblyVersion)$(IsSigned)&quot;;Id=&quot;Microsoft.Alm.Authentication&quot;;Title=&quot;$(AssemblyTitle)&quot;;Description=&quot;$(AssemblyDescription)&quot; -OutputDirectory &quot;$(NugetWorkDir)&quot;" />
+    <Exec Command="&quot;$(NugetPath)&quot; pack &quot;$(ProjectDir)\VisualStudioTeamServices.Authentication.nuspec&quot; -BasePath &quot;$(NugetWorkDir)&quot; -IncludeReferencedProjects -Properties Configuration=&quot;$(Configuration)&quot;;Version=&quot;$(AssemblyVersion)$(IsSigned)&quot;;Id=&quot;VisualStudioTeamServices.Authentication&quot;;Title=&quot;$(AssemblyTitle)&quot;;Description=&quot;$(AssemblyDescription)&quot; -OutputDirectory &quot;$(NugetWorkDir)&quot;" />
   </Target>
   <Target Name="CopyNupkgToOut" AfterTargets="BuildNupkg">
     <ItemGroup>
