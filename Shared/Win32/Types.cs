@@ -369,40 +369,57 @@ namespace Microsoft.Alm.Win32
         public string ExeFileName;
     }
 
-    [StructLayout(LayoutKind.Explicit, Size = 0x30)]
+    [StructLayout(LayoutKind.Sequential)]
     internal unsafe struct ProcessEnvironmentBlock
     {
-        [FieldOffset(0x02)]
-        private byte _offset_0x02;
-        [FieldOffset(0x20)]
-        private PebProcessParameters* _offset_0x20;
+        fixed byte _[256];
 
         public bool IsBeingDebugged
         {
-            get { return _offset_0x02 != 0; }
+            get { fixed (byte* p = _) { return p[2] != 0; } }
         }
         public PebProcessParameters* ProcessParameters
         {
-            get { return _offset_0x20; }
+            get
+            {
+                fixed (byte* p = _)
+                {
+                    return IntPtr.Size == 4
+                        ? *((PebProcessParameters**)(p + 0x10))
+                        : *((PebProcessParameters**)(p + 0x20));
+                }
+            }
         }
     }
 
-    [StructLayout(LayoutKind.Explicit, Size = 104)]
+    [StructLayout(LayoutKind.Sequential, Size = 128)]
     internal unsafe struct PebProcessParameters
     {
-        [FieldOffset(0x60)]
-        private UnicodeString _offset_0x60;
-        [FieldOffset(0x70)]
-        private UnicodeString _offset_0x70;
+        fixed byte _[128];
 
         public UnicodeString CommandLine
         {
-            get { return _offset_0x70; }
+            get
+            {
+                fixed (byte* p = _)
+                {
+                    return IntPtr.Size == 4
+                        ? *((UnicodeString*)(p + 0x40))
+                        : *((UnicodeString*)(p + 0x70));
+                }
+            }
         }
-
         public UnicodeString ImagePathName
         {
-            get { return _offset_0x60; }
+            get
+            {
+                fixed (byte* p = _)
+                {
+                    return IntPtr.Size == 4
+                        ? *((UnicodeString*)(p + 0x38))
+                        : *((UnicodeString*)(p + 0x60));
+                }
+            }
         }
     }
 
@@ -504,22 +521,25 @@ namespace Microsoft.Alm.Win32
     /// <summary>
     /// Represents a Unicode encoded string.
     /// </summary>
-    [StructLayout(LayoutKind.Explicit, Pack = 1)]
+    [StructLayout(LayoutKind.Sequential)]
     internal unsafe struct UnicodeString
     {
-        [FieldOffset(0x00)]
-        private ushort _field1;
-        [FieldOffset(0x02)]
-        private ushort _field2;
-        [FieldOffset(0x08)]
-        private IntPtr _field3;
+        fixed byte _[16];
 
         /// <summary>
         /// Gets the pointer to the character data buffer.
         /// </summary>
         public char* Buffer
         {
-            get { return (char*)_field3.ToPointer(); }
+            get
+            {
+                fixed (byte* p = _)
+                {
+                    return (IntPtr.Size == 4)
+                        ? *((char**)(p + 0x04))
+                        : *((char**)(p + 0x08));
+                }
+            }
         }
 
         /// <summary>
@@ -527,7 +547,7 @@ namespace Microsoft.Alm.Win32
         /// </summary>
         public int Length
         {
-            get { return _field1 / sizeof(char); }
+            get { fixed (byte* p = _) { return *((ushort*)(p + 0x00)) / sizeof(char); } }
         }
 
         /// <summary>
@@ -535,7 +555,7 @@ namespace Microsoft.Alm.Win32
         /// </summary>
         public int MaximumSize
         {
-            get { return _field2; }
+            get { fixed (byte* p = _) { return *((ushort*)(p + 0x02)); } }
         }
     }
 }
