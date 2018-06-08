@@ -49,9 +49,9 @@
       <Project>{19770407-b493-459d-bb4f-04fbefb1ba13}</Project>
       <Name>Microsoft.Alm.Authentication</Name>
     </ProjectReference>
-    <ProjectReference Include="..\..\Microsoft.Vsts.Authentication\Src\Microsoft.Vsts.Authentication.csproj">
+    <ProjectReference Include="..\..\VisualStudioTeamServices.Authentication\Src\VisualStudioTeamServices.Authentication.csproj">
       <Project>{19770407-d7d8-4a37-914c-f552ff4b90d4}</Project>
-      <Name>Microsoft.Vsts.Authentication</Name>
+      <Name>VisualStudioTeamServices.Authentication</Name>
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>

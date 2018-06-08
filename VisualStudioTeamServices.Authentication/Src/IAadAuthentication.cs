@@ -25,10 +25,11 @@
 
 using System;
 using System.Threading.Tasks;
+using Microsoft.Alm.Authentication;
 
-namespace Microsoft.Alm.Authentication
+namespace VisualStudioTeamServices.Authentication
 {
-    public interface IVstsAadAuthentication
+    public interface IAadAuthentication
     {
         /// <summary>
         /// Creates an interactive logon session, using ADAL secure browser GUI, which enables users to authenticate with the Azure tenant and acquire the necessary access tokens to exchange for a VSTS personal access token.

@@ -5,12 +5,12 @@
   <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
   <PropertyGroup>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <AssemblyName>Microsoft.Vsts.Authentication</AssemblyName>
+    <AssemblyName>VisualStudioTeamServices.Authentication</AssemblyName>
     <NuGetPackageImportStamp />
     <OutputType>Library</OutputType>
     <ProjectGuid>{19770407-D7D8-4A37-914C-F552FF4B90D4}</ProjectGuid>
-    <ProjectName>Microsoft.Vsts.Authentication</ProjectName>
-    <RootNamespace>Microsoft.Alm.Authentication</RootNamespace>
+    <ProjectName>VisualStudioTeamServices.Authentication</ProjectName>
+    <RootNamespace>VisualStudioTeamServices.Authentication</RootNamespace>
     <TargetFrameworkVersion>v4.5.1</TargetFrameworkVersion>
   </PropertyGroup>
   <Import Project="..\..\build.props" />
@@ -43,20 +43,18 @@
       <Link>GlobalSuppressions.cs</Link>
     </Compile>
     <Compile Include="PersonalAccessTokenOptions.cs" />
-    <Compile Include="AzureAuthority.cs" />
-    <Compile Include="BaseVstsAuthentication.cs" />
-    <Compile Include="IAzureAuthority.cs" />
-    <Compile Include="IVstsAadAuthentication.cs" />
-    <Compile Include="IVstsAuthority.cs" />
-    <Compile Include="IVstsMsaAuthentication.cs" />
+    <Compile Include="Authority.cs" />
+    <Compile Include="Authentication.cs" />
+    <Compile Include="IAadAuthentication.cs" />
+    <Compile Include="IAuthority.cs" />
+    <Compile Include="IMsaAuthentication.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="TokenRegistry.cs" />
-    <Compile Include="VstsAadAuthentication.cs" />
-    <Compile Include="VstsAdalTokenCache.cs" />
-    <Compile Include="VstsAzureAuthority.cs" />
-    <Compile Include="VstsLocationServiceException.cs" />
-    <Compile Include="VstsMsaAuthentication.cs" />
-    <Compile Include="VstsTokenScope.cs" />
+    <Compile Include="AadAuthentication.cs" />
+    <Compile Include="AdalTokenCache.cs" />
+    <Compile Include="LocationServiceException.cs" />
+    <Compile Include="MsaAuthentication.cs" />
+    <Compile Include="TokenScope.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config">
@@ -70,7 +68,7 @@
     </FilesToSign>
   </ItemGroup>
   <Target Name="BuildNupkg" AfterTargets="CopyFilesToOutputDirectory;SignFiles">
-    <!-- Read the nupkg meta data from the AssemblyInfo.cs file copied from Microsoft.Vsts.Authentication -->
+    <!-- Read the nupkg meta data from the AssemblyInfo.cs file copied from VisualStudioTeamServicesAuthentication -->
     <PropertyGroup>
       <In>$([System.IO.File]::ReadAllText('$(ProjectDir)\Properties\AssemblyInfo.cs'))</In>
       <Pattern>^\s*\[assembly:\s*AssemblyVersion\s*\(\s*"\s*([^"]+)\s*"\s*\)</Pattern>
@@ -85,14 +83,15 @@
     <!-- Only download a new copy of nuget.exe if we don't have a copy available -->
     <PropertyGroup>
       <NugetPath>nuget.exe</NugetPath>
-      <IsSigned></IsSigned>
+      <IsSigned>
+      </IsSigned>
       <IsSigned Condition=" '$(SignType)' == '' Or '$(SignType)' == '*Undefined*' ">-unsigned</IsSigned>
       <NugetWorkDir>$(OutputPath.TrimEnd('\'))</NugetWorkDir>
     </PropertyGroup>
     <PropertyGroup Condition="!Exists($(NugetPath))">
       <NugetPath>..\..\packages\NuGet.CommandLine.4.6.2\tools\NuGet.exe</NugetPath>
     </PropertyGroup>
-    <Exec Command="&quot;$(NugetPath)&quot; pack &quot;$(ProjectDir)\Microsoft.Alm.Authentication.nuspec&quot; -BasePath &quot;$(NugetWorkDir)&quot; -IncludeReferencedProjects -Properties Configuration=&quot;$(Configuration)&quot;;Version=&quot;$(AssemblyVersion)$(IsSigned)&quot;;Id=&quot;Microsoft.Alm.Authentication&quot;;Title=&quot;$(AssemblyTitle)&quot;;Description=&quot;$(AssemblyDescription)&quot; -OutputDirectory &quot;$(NugetWorkDir)&quot;" />
+    <Exec Command="&quot;$(NugetPath)&quot; pack &quot;$(ProjectDir)\VisualStudioTeamServices.Authentication.nuspec&quot; -BasePath &quot;$(NugetWorkDir)&quot; -IncludeReferencedProjects -Properties Configuration=&quot;$(Configuration)&quot;;Version=&quot;$(AssemblyVersion)$(IsSigned)&quot;;Id=&quot;VisualStudioTeamServices.Authentication&quot;;Title=&quot;$(AssemblyTitle)&quot;;Description=&quot;$(AssemblyDescription)&quot; -OutputDirectory &quot;$(NugetWorkDir)&quot;" />
   </Target>
   <Target Name="CopyNupkgToOut" AfterTargets="BuildNupkg">
     <ItemGroup>

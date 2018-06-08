@@ -25,53 +25,54 @@
 
 using System;
 using System.Threading.Tasks;
+using Microsoft.Alm.Authentication;
 using Microsoft.IdentityModel.Clients.ActiveDirectory;
 
-namespace Microsoft.Alm.Authentication
+namespace VisualStudioTeamServices.Authentication
 {
     /// <summary>
     /// Facilitates Azure Directory authentication.
     /// </summary>
-    public sealed class VstsAadAuthentication : BaseVstsAuthentication, IVstsAadAuthentication
+    public sealed class AadAuthentication : Authentication, IAadAuthentication
     {
         /// <summary>
-        /// Creates a new instance of `<see cref="VstsAadAuthentication"/>`.
+        /// Creates a new instance of `<see cref="AadAuthentication"/>`.
         /// </summary>
         /// <param name="tenantId">
         /// URI of the responsible Azure tenant.
         /// <para/>
-        /// Use `<see cref="BaseVstsAuthentication.GetAuthentication"/>` to detect the tenant identity and create the authentication object.
+        /// Use `<see cref="Authentication.GetAuthentication"/>` to detect the tenant identity and create the authentication object.
         /// </param>
         /// <param name="tokenScope">The scope of all access tokens acquired by the authority.</param>
         /// <param name="personalAccessTokenStore">The secure secret store for storing any personal access tokens acquired.</param>
         /// <param name="adaRefreshTokenStore">The secure secret store for storing any Azure tokens acquired.</param>
-        public VstsAadAuthentication(
+        public AadAuthentication(
             RuntimeContext context,
             Guid tenantId,
-            VstsTokenScope tokenScope,
+            TokenScope tokenScope,
             ICredentialStore personalAccessTokenStore)
             : base(context, tokenScope, personalAccessTokenStore)
         {
             if (tenantId == Guid.Empty)
             {
-                VstsAuthority = new VstsAzureAuthority(context, AzureAuthority.DefaultAuthorityHostUrl);
+                Authority = new Authority(context, VisualStudioTeamServices.Authentication.Authority.DefaultAuthorityHostUrl);
             }
             else
             {
                 // Create an authority host URL in the format of https://login.microsoft.com/12345678-9ABC-DEF0-1234-56789ABCDEF0.
-                string authorityHost = AzureAuthority.GetAuthorityUrl(tenantId);
-                VstsAuthority = new VstsAzureAuthority(context, authorityHost);
+                string authorityHost = VisualStudioTeamServices.Authentication.Authority.GetAuthorityUrl(tenantId);
+                Authority = new Authority(context, authorityHost);
             }
         }
 
         /// <summary>
         /// Test constructor which allows for using fake credential stores.
         /// </summary>
-        internal VstsAadAuthentication(
+        internal AadAuthentication(
             RuntimeContext context,
             ICredentialStore personalAccessTokenStore,
             ITokenStore vstsIdeTokenCache,
-            IVstsAuthority vstsAuthority)
+            IAuthority vstsAuthority)
             : base(context,
                    personalAccessTokenStore,
                    vstsIdeTokenCache,
@@ -93,7 +94,7 @@ namespace Microsoft.Alm.Authentication
             try
             {
                 Token token;
-                if ((token = await VstsAuthority.InteractiveAcquireToken(targetUri, ClientId, Resource, new Uri(RedirectUrl), null)) != null)
+                if ((token = await Authority.InteractiveAcquireToken(targetUri, ClientId, Resource, new Uri(RedirectUrl), null)) != null)
                 {
                     Trace.WriteLine($"token acquisition for '{targetUri}' succeeded.");
 
@@ -130,7 +131,7 @@ namespace Microsoft.Alm.Authentication
             try
             {
                 Token token;
-                if ((token = await VstsAuthority.InteractiveAcquireToken(targetUri, ClientId, Resource, new Uri(RedirectUrl), null)) != null)
+                if ((token = await Authority.InteractiveAcquireToken(targetUri, ClientId, Resource, new Uri(RedirectUrl), null)) != null)
                 {
                     Trace.WriteLine($"token acquisition for '{targetUri}' succeeded.");
 
@@ -162,7 +163,7 @@ namespace Microsoft.Alm.Authentication
             try
             {
                 Token token;
-                if ((token = await VstsAuthority.NoninteractiveAcquireToken(targetUri, ClientId, Resource, new Uri(RedirectUrl))) != null)
+                if ((token = await Authority.NoninteractiveAcquireToken(targetUri, ClientId, Resource, new Uri(RedirectUrl))) != null)
                 {
                     Trace.WriteLine($"token acquisition for '{targetUri}' succeeded");
 
@@ -199,7 +200,7 @@ namespace Microsoft.Alm.Authentication
             try
             {
                 Token token;
-                if ((token = await VstsAuthority.NoninteractiveAcquireToken(targetUri, ClientId, Resource, new Uri(RedirectUrl))) != null)
+                if ((token = await Authority.NoninteractiveAcquireToken(targetUri, ClientId, Resource, new Uri(RedirectUrl))) != null)
                 {
                     Trace.WriteLine($"token acquisition for '{targetUri}' succeeded");
 

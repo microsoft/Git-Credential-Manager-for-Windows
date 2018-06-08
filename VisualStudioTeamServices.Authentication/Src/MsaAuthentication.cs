@@ -26,22 +26,23 @@
 using System;
 using System.Diagnostics;
 using System.Threading.Tasks;
+using Microsoft.Alm.Authentication;
 using Microsoft.IdentityModel.Clients.ActiveDirectory;
 
-namespace Microsoft.Alm.Authentication
+namespace VisualStudioTeamServices.Authentication
 {
-    public sealed class VstsMsaAuthentication : BaseVstsAuthentication, IVstsMsaAuthentication
+    public sealed class MsaAuthentication : Authentication, IMsaAuthentication
     {
-        public const string DefaultAuthorityHost = AzureAuthority.AuthorityHostUrlBase + "/live.com";
+        public const string DefaultAuthorityHost = VisualStudioTeamServices.Authentication.Authority.AuthorityHostUrlBase + "/live.com";
         internal const string QueryParameters = "domain_hint=live.com&display=popup&site_id=501454&nux=1";
 
-        public VstsMsaAuthentication(
+        public MsaAuthentication(
             RuntimeContext context,
-            VstsTokenScope tokenScope,
+            TokenScope tokenScope,
             ICredentialStore personalAccessTokenStore)
             : base(context, tokenScope, personalAccessTokenStore)
         {
-            VstsAuthority = new VstsAzureAuthority(context, DefaultAuthorityHost);
+            Authority = new Authority(context, DefaultAuthorityHost);
         }
 
         /// <summary>
@@ -49,17 +50,17 @@ namespace Microsoft.Alm.Authentication
         /// </summary>
         /// <param name="personalAccessTokenStore"></param>
         /// <param name="adaRefreshTokenStore"></param>
-        /// <param name="vstsIdeTokenCache"></param>
-        /// <param name="liveAuthority"></param>
-        internal VstsMsaAuthentication(
+        /// <param name="ideTokenCache"></param>
+        /// <param name="msaAuthority"></param>
+        internal MsaAuthentication(
             RuntimeContext context,
             ICredentialStore personalAccessTokenStore,
-            ITokenStore vstsIdeTokenCache,
-            IVstsAuthority liveAuthority)
+            ITokenStore ideTokenCache,
+            IAuthority msaAuthority)
             : base(context,
                    personalAccessTokenStore,
-                   vstsIdeTokenCache,
-                   liveAuthority)
+                   ideTokenCache,
+                   msaAuthority)
         { }
 
         /// <summary>
@@ -78,7 +79,7 @@ namespace Microsoft.Alm.Authentication
             try
             {
                 Token token;
-                if ((token = await VstsAuthority.InteractiveAcquireToken(targetUri, ClientId, Resource, new Uri(RedirectUrl), QueryParameters)) != null)
+                if ((token = await Authority.InteractiveAcquireToken(targetUri, ClientId, Resource, new Uri(RedirectUrl), QueryParameters)) != null)
                 {
                     Trace.WriteLine($"token '{targetUri}' successfully acquired.");
 
@@ -108,7 +109,7 @@ namespace Microsoft.Alm.Authentication
             try
             {
                 Token token;
-                if ((token = await VstsAuthority.InteractiveAcquireToken(targetUri, ClientId, Resource, new Uri(RedirectUrl), QueryParameters)) != null)
+                if ((token = await Authority.InteractiveAcquireToken(targetUri, ClientId, Resource, new Uri(RedirectUrl), QueryParameters)) != null)
                 {
                     Trace.WriteLine($"token '{targetUri}' successfully acquired.");
 

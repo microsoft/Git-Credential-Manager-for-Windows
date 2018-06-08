@@ -28,26 +28,69 @@ using System.Net.Http;
 using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
-using static System.Globalization.CultureInfo;
+using Microsoft.Alm.Authentication;
+using Microsoft.IdentityModel.Clients.ActiveDirectory;
+using Culture = System.Globalization.CultureInfo;
+using static System.StringComparer;
 
-namespace Microsoft.Alm.Authentication
+namespace VisualStudioTeamServices.Authentication
 {
-    internal class VstsAzureAuthority : AzureAuthority, IVstsAuthority
+    /// <summary>
+    /// Interfaces with Azure to perform authentication and identity services.
+    /// </summary>
+    internal class Authority : Base, IAuthority
     {
+        /// <summary>
+        /// The base URL for logon services in Azure.
+        /// </summary>
+        public const string AuthorityHostUrlBase = "https://login.microsoftonline.com";
+
+        /// <summary>
+        /// The root domain of Azure hosted repositories.
+        /// </summary>
         public const string AzureBaseUrlHost = "azure.com";
+
+        /// <summary>
+        /// The common URL for logon services in Azure.
+        /// </summary>
+        public const string DefaultAuthorityHostUrl = AuthorityHostUrlBase + "/common";
+
+        /// <summary>
+        /// The root domain of VSTS hosted repositories.
+        /// </summary>
         public const string VstsBaseUrlHost = "visualstudio.com";
 
-        public VstsAzureAuthority(RuntimeContext context, string authorityHostUrl)
+        /// <summary>
+        /// Creates a new instance of `<see cref="Authority"/>`.
+        /// </summary>
+        /// <param name="authorityHostUrl">A non-default authority host URL; otherwise defaults to `<see cref="DefaultAuthorityHostUrl"/>`.</param>
+        public Authority(RuntimeContext context, string authorityHostUrl)
             : base(context)
         {
-            AuthorityHostUrl = authorityHostUrl ?? AuthorityHostUrl;
+            if (string.IsNullOrEmpty(authorityHostUrl))
+                throw new ArgumentNullException(nameof(authorityHostUrl));
+            if (!Uri.IsWellFormedUriString(authorityHostUrl, UriKind.Absolute))
+            {
+                var inner = new UriFormatException("Authority host URL must be absolute.");
+                throw new ArgumentException(inner.Message, nameof(authorityHostUrl), inner);
+            }
+
+            AuthorityHostUrl = authorityHostUrl;
+            _adalTokenCache = new AdalTokenCache(context);
         }
 
-        public VstsAzureAuthority(RuntimeContext context)
-            : this(context, null)
+        public Authority(RuntimeContext context)
+            : this(context, DefaultAuthorityHostUrl)
         { }
 
-        public async Task<Token> GeneratePersonalAccessToken(TargetUri targetUri, Token authorization, VstsTokenScope tokenScope, bool requireCompactToken, TimeSpan? tokenDuration = null)
+        private readonly AdalTokenCache _adalTokenCache;
+
+        /// <summary>
+        /// The URL used to interact with the Azure identity service.
+        /// </summary>
+        public string AuthorityHostUrl { get; protected set; }
+
+        public async Task<Token> GeneratePersonalAccessToken(TargetUri targetUri, Token authorization, TokenScope tokenScope, bool requireCompactToken, TimeSpan? tokenDuration = null)
         {
             if (targetUri is null)
                 throw new ArgumentNullException(nameof(targetUri));
@@ -98,6 +141,114 @@ namespace Microsoft.Alm.Authentication
             Trace.WriteLine($"personal access token acquisition for '{targetUri}' failed.");
 
             return null;
+        }
+
+        /// <summary>
+        /// Returns the properly formatted URL for the Azure authority given a tenant identity.
+        /// </summary>
+        /// <param name="tenantId">Identity of the tenant.</param>
+        public static string GetAuthorityUrl(Guid tenantId)
+        {
+            return string.Format("{0}/{1:D}", AuthorityHostUrlBase, tenantId);
+        }
+
+        /// <summary>
+        /// Acquires a <see cref="Token"/> from the authority via an interactive user logon prompt.
+        /// <para/>
+        /// Returns a `<see cref="Token"/>` is successful; otherwise <see langword="null"/>.
+        /// </summary>
+        /// <param name="targetUri">Uniform resource indicator of the resource access tokens are being requested for.</param>
+        /// <param name="clientId">Identifier of the client requesting the token.</param>
+        /// <param name="resource">Identifier of the target resource that is the recipient of the requested token.</param>
+        /// <param name="redirectUri">Address to return to upon receiving a response from the authority.</param>
+        /// <param name="queryParameters">optional value, appended as-is to the query string in the HTTP authentication request to the authority.</param>
+        public async Task<Token> InteractiveAcquireToken(TargetUri targetUri, string clientId, string resource, Uri redirectUri, string queryParameters = null)
+        {
+            if (targetUri is null)
+                throw new ArgumentNullException(nameof(targetUri));
+            if (string.IsNullOrWhiteSpace(clientId))
+                throw new ArgumentNullException(nameof(clientId));
+            if (string.IsNullOrWhiteSpace(resource))
+                throw new ArgumentNullException(nameof(resource));
+            if (redirectUri is null)
+                throw new ArgumentNullException(nameof(redirectUri));
+            if (!redirectUri.IsAbsoluteUri)
+                throw new ArgumentException(nameof(redirectUri));
+
+            Token token = null;
+            queryParameters = queryParameters ?? string.Empty;
+
+            try
+            {
+                var authCtx = new AuthenticationContext(AuthorityHostUrl, _adalTokenCache);
+                AuthenticationResult authResult = await authCtx.AcquireTokenAsync(resource,
+                                                                                  clientId,
+                                                                                  redirectUri,
+                                                                                  new PlatformParameters(PromptBehavior.SelectAccount),
+                                                                                  UserIdentifier.AnyUser,
+                                                                                  queryParameters);
+                if (Guid.TryParse(authResult.TenantId, out Guid tenantId))
+                {
+                    token = new Token(authResult.AccessToken, tenantId, TokenType.AzureAccess);
+                }
+
+                Trace.WriteLine($"authority host URL = '{AuthorityHostUrl}', token acquisition for tenant [{tenantId.ToString("N")}] succeeded.");
+            }
+            catch (AdalException)
+            {
+                Trace.WriteLine($"authority host URL = '{AuthorityHostUrl}', token acquisition failed.");
+            }
+
+            return token;
+        }
+
+        /// <summary>
+        /// Acquires a `<see cref="Token"/>` from the authority via an non-interactive user logon.
+        /// <para/>
+        /// Returns the acquired `<see cref="Token"/>` if successful; otherwise `<see langword="null"/>`.
+        /// </summary>
+        /// <param name="targetUri">Uniform resource indicator of the resource access tokens are being requested for.</param>
+        /// <param name="clientId">Identifier of the client requesting the token.</param>
+        /// <param name="resource">Identifier of the target resource that is the recipient of the requested token.</param>
+        /// <param name="redirectUri">Address to return to upon receiving a response from the authority.</param>
+        public async Task<Token> NoninteractiveAcquireToken(TargetUri targetUri, string clientId, string resource, Uri redirectUri)
+        {
+            if (targetUri is null)
+                throw new ArgumentNullException(nameof(targetUri));
+            if (string.IsNullOrWhiteSpace(clientId))
+                throw new ArgumentNullException(nameof(clientId));
+            if (string.IsNullOrWhiteSpace(resource))
+                throw new ArgumentNullException(nameof(resource));
+            if (redirectUri is null)
+                throw new ArgumentNullException(nameof(redirectUri));
+            if (!redirectUri.IsAbsoluteUri)
+            {
+                var inner = new UriFormatException("Uri is not absolute when an absolute Uri is required.");
+                throw new ArgumentException(inner.Message, nameof(redirectUri), inner);
+            }
+
+            Token token = null;
+
+            try
+            {
+                var authCtx = new AuthenticationContext(AuthorityHostUrl, _adalTokenCache);
+                AuthenticationResult authResult = await authCtx.AcquireTokenAsync(resource,
+                                                                                  clientId,
+                                                                                  new UserCredential());
+
+                if (Guid.TryParse(authResult.TenantId, out Guid tentantId))
+                {
+                    token = new Token(authResult.AccessToken, tentantId, TokenType.AzureAccess);
+
+                    Trace.WriteLine($"token acquisition for authority host URL = '{AuthorityHostUrl}' succeeded.");
+                }
+            }
+            catch (AdalException)
+            {
+                Trace.WriteLine($"token acquisition for authority host URL = '{AuthorityHostUrl}' failed.");
+            }
+
+            return token;
         }
 
         public async Task<bool> PopulateTokenTargetId(TargetUri targetUri, Token authorization)
@@ -256,7 +407,7 @@ namespace Microsoft.Alm.Authentication
                 throw new ArgumentNullException(nameof(targetUri));
 
             // Create a URL to the connection data end-point, it's deployment level and "always on".
-            string requestUrl = GetTargetUrl(targetUri);
+            string requestUrl = GetTargetUrl(targetUri, false);
             string validationUrl = requestUrl + VstsValidationUrlPath;
 
             return targetUri.CreateWith(validationUrl);
@@ -271,7 +422,7 @@ namespace Microsoft.Alm.Authentication
             if (authorization is null)
                 throw new ArgumentNullException(nameof(authorization));
 
-            string tenantUrl = GetTargetUrl(targetUri);
+            string tenantUrl = GetTargetUrl(targetUri, false);
             var locationServiceUrl = tenantUrl + LocationServiceUrlPathAndQuery;
             var requestUri = targetUri.CreateWith(queryUrl: locationServiceUrl);
             var options = new NetworkRequestOptions(true)
@@ -306,23 +457,40 @@ namespace Microsoft.Alm.Authentication
             catch (Exception exception)
             {
                 Trace.WriteException(exception);
-                throw new VstsLocationServiceException($"Helper for `{targetUri}`.", exception);
+                throw new LocationServiceException($"Helper for `{targetUri}`.", exception);
             }
 
             return null;
         }
 
-        internal static string GetTargetUrl(TargetUri targetUri)
+        /// <summary>
+        /// Returns the properly formatted URL for the Azure authority given a tenant identity.
+        /// </summary>
+        /// <param name="tenantId">Identity of the tenant.</param>
+        internal static string GetTargetUrl(TargetUri targetUri, bool keepUsername)
         {
-            string requestUrl = targetUri.ToString(false, true, false);
+            if (targetUri is null)
+                throw new ArgumentNullException(nameof(targetUri));
 
-            // Handle the Azure userinfo -> path conversion.AzureBaseUrlHost
-            if (targetUri.Host.EndsWith(AzureBaseUrlHost, StringComparison.OrdinalIgnoreCase)
-                && targetUri.ContainsUserInfo)
+            string requestUrl = targetUri.ToString(keepUsername, true, false);
+
+            if (targetUri.Host.EndsWith(AzureBaseUrlHost, StringComparison.OrdinalIgnoreCase))
             {
-                string escapedUserInfo = Uri.EscapeUriString(targetUri.UserInfo);
+                // Handle the Azure design where URL path is required to discover the authority.
+                if (targetUri.ActualUri != null
+                    && targetUri.ActualUri.IsAbsoluteUri
+                    && targetUri.ActualUri.AbsolutePath.Length > 1)
+                {
+                    // Use the first segment of the actual URL to build the URL necessary to discover the authority.
+                    requestUrl = requestUrl + targetUri.ActualUri.Segments[1];
+                }
+                // Handle the generic Azure {username}@{host} -> {host}/{username} transformation.
+                else if (targetUri.ContainsUserInfo)
+                {
+                    string escapedUserInfo = Uri.EscapeUriString(targetUri.UserInfo);
 
-                requestUrl = requestUrl + escapedUserInfo + "/";
+                    requestUrl = $"{requestUrl}{escapedUserInfo}/";
+                }
             }
 
             return requestUrl;
@@ -330,33 +498,10 @@ namespace Microsoft.Alm.Authentication
 
         internal static bool IsVstsUrl(TargetUri targetUri)
         {
-            return (StringComparer.OrdinalIgnoreCase.Equals(targetUri.Scheme, Uri.UriSchemeHttp)
-                    || StringComparer.OrdinalIgnoreCase.Equals(targetUri.Scheme, Uri.UriSchemeHttps))
+            return (OrdinalIgnoreCase.Equals(targetUri.Scheme, Uri.UriSchemeHttp)
+                    || OrdinalIgnoreCase.Equals(targetUri.Scheme, Uri.UriSchemeHttps))
                 && (targetUri.DnsSafeHost.EndsWith(VstsBaseUrlHost, StringComparison.OrdinalIgnoreCase)
                     || targetUri.DnsSafeHost.EndsWith(AzureBaseUrlHost, StringComparison.OrdinalIgnoreCase));
-        }
-
-        private StringContent GetAccessTokenRequestBody(TargetUri targetUri, VstsTokenScope tokenScope, TimeSpan? duration = null)
-        {
-            const string ContentBasicJsonFormat = "{{ \"scope\" : \"{0}\", \"displayName\" : \"Git: {1} on {2}\" }}";
-            const string ContentTimedJsonFormat = "{{ \"scope\" : \"{0}\", \"displayName\" : \"Git: {1} on {2}\", \"validTo\": \"{3:u}\" }}";
-            const string HttpJsonContentType = "application/json";
-
-            if (targetUri is null)
-                throw new ArgumentNullException(nameof(targetUri));
-            if (tokenScope is null)
-                throw new ArgumentNullException(nameof(tokenScope));
-
-            string tokenUrl = GetTargetUrl(targetUri);
-
-            Trace.WriteLine($"creating access token scoped to '{tokenScope}' for '{targetUri}'");
-
-            string jsonContent = (duration.HasValue && duration.Value > TimeSpan.FromHours(1))
-                ? string.Format(InvariantCulture, ContentTimedJsonFormat, tokenScope, tokenUrl, Environment.MachineName, DateTime.UtcNow + duration.Value)
-                : string.Format(InvariantCulture, ContentBasicJsonFormat, tokenScope, tokenUrl, Environment.MachineName);
-            StringContent content = new StringContent(jsonContent, Encoding.UTF8, HttpJsonContentType);
-
-            return content;
         }
 
         private async Task<TargetUri> CreatePersonalAccessTokenRequestUri(TargetUri targetUri, Secret authorization, bool requireCompactToken)
@@ -372,7 +517,7 @@ namespace Microsoft.Alm.Authentication
             var idenityServiceUri = await GetIdentityServiceUri(targetUri, authorization);
 
             if (idenityServiceUri is null)
-                throw new VstsLocationServiceException($"Failed to find Identity Service for `{targetUri}`.");
+                throw new LocationServiceException($"Failed to find Identity Service for `{targetUri}`.");
 
             string url = idenityServiceUri.ToString();
 
@@ -383,6 +528,29 @@ namespace Microsoft.Alm.Authentication
             var requestUri = new Uri(url, UriKind.Absolute);
 
             return targetUri.CreateWith(requestUri);
+        }
+
+        private StringContent GetAccessTokenRequestBody(TargetUri targetUri, TokenScope tokenScope, TimeSpan? duration = null)
+        {
+            const string ContentBasicJsonFormat = "{{ \"scope\" : \"{0}\", \"displayName\" : \"Git: {1} on {2}\" }}";
+            const string ContentTimedJsonFormat = "{{ \"scope\" : \"{0}\", \"displayName\" : \"Git: {1} on {2}\", \"validTo\": \"{3:u}\" }}";
+            const string HttpJsonContentType = "application/json";
+
+            if (targetUri is null)
+                throw new ArgumentNullException(nameof(targetUri));
+            if (tokenScope is null)
+                throw new ArgumentNullException(nameof(tokenScope));
+
+            string tokenUrl = GetTargetUrl(targetUri, false);
+
+            Trace.WriteLine($"creating access token scoped to '{tokenScope}' for '{targetUri}'");
+
+            string jsonContent = (duration.HasValue && duration.Value > TimeSpan.FromHours(1))
+                ? string.Format(Culture.InvariantCulture, ContentTimedJsonFormat, tokenScope, tokenUrl, Environment.MachineName, DateTime.UtcNow + duration.Value)
+                : string.Format(Culture.InvariantCulture, ContentBasicJsonFormat, tokenScope, tokenUrl, Environment.MachineName);
+            StringContent content = new StringContent(jsonContent, Encoding.UTF8, HttpJsonContentType);
+
+            return content;
         }
     }
 }

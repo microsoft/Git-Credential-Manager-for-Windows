@@ -27,11 +27,12 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Security.Cryptography;
+using Microsoft.Alm.Authentication;
 using Microsoft.IdentityModel.Clients.ActiveDirectory;
 
-namespace Microsoft.Alm.Authentication
+namespace VisualStudioTeamServices.Authentication
 {
-    internal class VstsAdalTokenCache : IdentityModel.Clients.ActiveDirectory.TokenCache
+    internal class AdalTokenCache : Microsoft.IdentityModel.Clients.ActiveDirectory.TokenCache
     {
         private static readonly IReadOnlyList<IReadOnlyList<string>> AdalCachePaths = new string[][]
         {
@@ -43,7 +44,7 @@ namespace Microsoft.Alm.Authentication
         /// <summary>
         /// Default constructor.
         /// </summary>
-        public VstsAdalTokenCache(RuntimeContext context)
+        public AdalTokenCache(RuntimeContext context)
         {
             if (context is null)
                 throw new ArgumentNullException(nameof(context));
@@ -92,7 +93,7 @@ namespace Microsoft.Alm.Authentication
                     }
                     catch (Exception exception)
                     {
-                        _context.Trace.WriteLine($"error: {nameof(VstsAdalTokenCache)} \"{_cacheFilePath}\".");
+                        _context.Trace.WriteLine($"error: {nameof(AdalTokenCache)} \"{_cacheFilePath}\".");
                         _context.Trace.WriteException(exception);
                     }
                 }
@@ -115,7 +116,7 @@ namespace Microsoft.Alm.Authentication
                     }
                     catch (Exception exception)
                     {
-                        _context.Trace.WriteLine($"error: {nameof(VstsAdalTokenCache)} \"{_cacheFilePath}\".");
+                        _context.Trace.WriteLine($"error: {nameof(AdalTokenCache)} \"{_cacheFilePath}\".");
                         _context.Trace.WriteException(exception);
                     }
                 }

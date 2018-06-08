@@ -140,6 +140,19 @@ namespace Microsoft.Alm.Authentication
         }
 
         /// <summary>
+        /// Gets `<see langword="true"/>` if `<seealso cref="QueryUri"/>` contains path information; otherwise `<see langword="false"/>`.
+        /// </summary>
+        public bool HasPath
+        {
+            get
+            {
+                return _queryUri != null
+                    && _queryUri.LocalPath != null
+                    && _queryUri.LocalPath.Length > 1;
+            }
+        }
+
+        /// <summary>
         /// Gets the `<see cref="Uri.Host"/>` of the `<see cref="QueryUri"/>`.
         /// </summary>
         public string Host

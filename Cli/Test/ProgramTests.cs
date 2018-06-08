@@ -31,6 +31,7 @@ using Moq;
 using Xunit;
 
 using Git = Microsoft.Alm.Authentication.Git;
+using Vsts = VisualStudioTeamServices.Authentication;
 
 namespace Microsoft.Alm.Cli.Test
 {
@@ -83,7 +84,7 @@ namespace Microsoft.Alm.Cli.Test
                 { "HOME", Environment.GetFolderPath(Environment.SpecialFolder.UserProfile) },
             };
             var gitconfig = new Git.Configuration(RuntimeContext.Default, configs);
-            var targetUri = new Authentication.TargetUri("https://example.visualstudio.com/");
+            var targetUri = new TargetUri("https://example.visualstudio.com/");
 
             var opargsMock = new Mock<OperationArguments>();
             opargsMock.Setup(o => o.EnvironmentVariables)
@@ -108,7 +109,7 @@ namespace Microsoft.Alm.Cli.Test
 
             Assert.NotNull(opargs.VstsTokenScope);
 
-            var expectedScope = Authentication.VstsTokenScope.BuildAccess | Authentication.VstsTokenScope.CodeWrite;
+            var expectedScope = Vsts.TokenScope.BuildAccess | Vsts.TokenScope.CodeWrite;
             Assert.Equal(expectedScope, opargs.VstsTokenScope);
         }
 

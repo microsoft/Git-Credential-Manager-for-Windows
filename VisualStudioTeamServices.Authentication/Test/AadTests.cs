@@ -1,11 +1,37 @@
-﻿using System.Threading.Tasks;
+﻿/**** Git Credential Manager for Windows ****
+ *
+ * Copyright (c) Microsoft Corporation
+ * All rights reserved.
+ *
+ * MIT License
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy
+ * of this software and associated documentation files (the """"Software""""), to deal
+ * in the Software without restriction, including without limitation the rights to
+ * use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of
+ * the Software, and to permit persons to whom the Software is furnished to do so,
+ * subject to the following conditions:
+ *
+ * The above copyright notice and this permission notice shall be included in all
+ * copies or substantial portions of the Software.
+ *
+ * THE SOFTWARE IS PROVIDED *AS IS*, WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS
+ * FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR
+ * COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN
+ * AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
+ * WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE."
+**/
+
+using System.Threading.Tasks;
+using Microsoft.Alm.Authentication;
 using Xunit;
 
-namespace Microsoft.Alm.Authentication.Test
+namespace VisualStudioTeamServices.Authentication.Test
 {
-    public class VstsAadTests : AuthenticationTests
+    public class AadTests : AuthenticationTests
     {
-        public VstsAadTests()
+        public AadTests()
             : base()
         { }
 
@@ -13,9 +39,9 @@ namespace Microsoft.Alm.Authentication.Test
         public async Task VstsAadDeleteCredentialsTest()
         {
             TargetUri targetUri = DefaultTargetUri;
-            VstsAadAuthentication aadAuthentication = GetVstsAadAuthentication(RuntimeContext.Default, "aad-delete");
+            AadAuthentication aadAuthentication = GetVstsAadAuthentication(RuntimeContext.Default, "aad-delete");
 
-            if (aadAuthentication.VstsAuthority is AuthorityFake fake)
+            if (aadAuthentication.Authority is AuthorityFake fake)
             {
                 fake.CredentialsAreValid = false;
             }
@@ -33,7 +59,7 @@ namespace Microsoft.Alm.Authentication.Test
         public async Task VstsAadGetCredentialsTest()
         {
             TargetUri targetUri = DefaultTargetUri;
-            VstsAadAuthentication aadAuthentication = GetVstsAadAuthentication(RuntimeContext.Default, "aad-get");
+            AadAuthentication aadAuthentication = GetVstsAadAuthentication(RuntimeContext.Default, "aad-get");
 
             Assert.Null(await aadAuthentication.GetCredentials(targetUri));
 
@@ -46,7 +72,7 @@ namespace Microsoft.Alm.Authentication.Test
         public async Task VstsAadInteractiveLogonTest()
         {
             TargetUri targetUri = DefaultTargetUri;
-            VstsAadAuthentication aadAuthentication = GetVstsAadAuthentication(RuntimeContext.Default, "aad-logon");
+            AadAuthentication aadAuthentication = GetVstsAadAuthentication(RuntimeContext.Default, "aad-logon");
 
             Assert.Null(await aadAuthentication.PersonalAccessTokenStore.ReadCredentials(targetUri));
 
@@ -59,7 +85,7 @@ namespace Microsoft.Alm.Authentication.Test
         public async Task VstsAadNoninteractiveLogonTest()
         {
             TargetUri targetUri = DefaultTargetUri;
-            VstsAadAuthentication aadAuthentication = GetVstsAadAuthentication(RuntimeContext.Default, "aad-noninteractive");
+            AadAuthentication aadAuthentication = GetVstsAadAuthentication(RuntimeContext.Default, "aad-noninteractive");
 
             Assert.NotNull(await aadAuthentication.NoninteractiveLogon(targetUri, new PersonalAccessTokenOptions { RequireCompactToken = false }));
 
@@ -70,7 +96,7 @@ namespace Microsoft.Alm.Authentication.Test
         public async Task VstsAadSetCredentialsTest()
         {
             TargetUri targetUri = DefaultTargetUri;
-            VstsAadAuthentication aadAuthentication = GetVstsAadAuthentication(RuntimeContext.Default, "aad-set");
+            AadAuthentication aadAuthentication = GetVstsAadAuthentication(RuntimeContext.Default, "aad-set");
             Credential credentials = DefaultCredentials;
 
             await aadAuthentication.SetCredentials(targetUri, credentials);
@@ -82,7 +108,7 @@ namespace Microsoft.Alm.Authentication.Test
         [Fact]
         public async Task VstsAadValidateCredentialsTest()
         {
-            VstsAadAuthentication aadAuthentication = GetVstsAadAuthentication(RuntimeContext.Default, "aad-validate");
+            AadAuthentication aadAuthentication = GetVstsAadAuthentication(RuntimeContext.Default, "aad-validate");
             Credential credentials = null;
 
             Assert.False(await aadAuthentication.ValidateCredentials(DefaultTargetUri, credentials), "Credential validation unexpectedly failed.");
@@ -92,14 +118,14 @@ namespace Microsoft.Alm.Authentication.Test
             Assert.True(await aadAuthentication.ValidateCredentials(DefaultTargetUri, credentials), "Credential validation unexpectedly failed.");
         }
 
-        private static VstsAadAuthentication GetVstsAadAuthentication(RuntimeContext context, string @namespace)
+        private static AadAuthentication GetVstsAadAuthentication(RuntimeContext context, string @namespace)
         {
             string expectedQueryParameters = null;
 
             ICredentialStore tokenStore1 = new SecretCache(context, @namespace + 1, Secret.UriToIdentityUrl);
             ITokenStore tokenStore2 = new SecretCache(context, @namespace + 2, Secret.UriToIdentityUrl);
-            IVstsAuthority vstsAuthority = new AuthorityFake(expectedQueryParameters);
-            return new VstsAadAuthentication(context, tokenStore1, tokenStore2, vstsAuthority);
+            IAuthority vstsAuthority = new AuthorityFake(expectedQueryParameters);
+            return new AadAuthentication(context, tokenStore1, tokenStore2, vstsAuthority);
         }
     }
 }

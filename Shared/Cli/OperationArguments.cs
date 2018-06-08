@@ -32,6 +32,7 @@ using Microsoft.Alm.Authentication;
 using static System.Globalization.CultureInfo;
 
 using Git = Microsoft.Alm.Authentication.Git;
+using Vsts = VisualStudioTeamServices.Authentication;
 
 namespace Microsoft.Alm.Cli
 {
@@ -85,7 +86,7 @@ namespace Microsoft.Alm.Cli
         private string _username;
         private bool _useSystemConfig;
         private bool _validateCredentials;
-        private VstsTokenScope _vstsTokenScope;
+        private Vsts.TokenScope _vstsTokenScope;
         private bool _writeLog;
 
         /// <summary>
@@ -413,7 +414,7 @@ namespace Microsoft.Alm.Cli
         /// <para/>
         /// Default value is `<seealso cref="Program.VstsCredentialScope"/>`.
         /// </summary>
-        public virtual VstsTokenScope VstsTokenScope
+        public virtual Vsts.TokenScope VstsTokenScope
         {
             get { return _vstsTokenScope; }
             set { _vstsTokenScope = value; }

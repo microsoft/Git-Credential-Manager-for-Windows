@@ -27,18 +27,21 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.IO.Compression;
-using System.Net;
 using System.Net.Http;
 using System.Text;
 using System.Threading.Tasks;
+using Microsoft.Alm.Authentication;
 using Microsoft.IdentityModel.Clients.ActiveDirectory;
 
-namespace Microsoft.Alm.Authentication
+using static System.StringComparer;
+using static VisualStudioTeamServices.Authentication.Authority;
+
+namespace VisualStudioTeamServices.Authentication
 {
     /// <summary>
     /// Base functionality for performing authentication operations against Visual Studio Online.
     /// </summary>
-    public abstract class BaseVstsAuthentication : BaseAuthentication
+    public abstract class Authentication : BaseAuthentication
     {
         public const string DefaultResource = "499b84ac-1321-427f-aa17-267ca6975798";
         public const string DefaultClientId = "872cd9fa-d31f-45e0-9eab-6e460a02d1f1";
@@ -46,17 +49,17 @@ namespace Microsoft.Alm.Authentication
 
         protected const string AdalRefreshPrefix = "ada";
 
-        internal const string AzureBaseUrlHost = VstsAzureAuthority.AzureBaseUrlHost;
-        internal const string VstsBaseUrlHost = VstsAzureAuthority.VstsBaseUrlHost;
+        internal const string AzureBaseUrlHost = VisualStudioTeamServices.Authentication.Authority.AzureBaseUrlHost;
+        internal const string VstsBaseUrlHost = VisualStudioTeamServices.Authentication.Authority.VstsBaseUrlHost;
 
         private const char CachePairSeperator = '=';
         private const char CachePairTerminator = '\0';
         private const string CachePathDirectory = "GitCredentialManager";
         private const string CachePathFileName = "tenant.cache";
 
-        protected BaseVstsAuthentication(
+        protected Authentication(
             RuntimeContext context,
-            VstsTokenScope tokenScope,
+            TokenScope tokenScope,
             ICredentialStore personalAccessTokenStore)
             : base(context)
         {
@@ -69,24 +72,24 @@ namespace Microsoft.Alm.Authentication
             Resource = DefaultResource;
             TokenScope = tokenScope;
             PersonalAccessTokenStore = personalAccessTokenStore;
-            VstsAuthority = new VstsAzureAuthority(context);
+            Authority = new Authority(context);
         }
 
-        internal BaseVstsAuthentication(
+        internal Authentication(
             RuntimeContext context,
             ICredentialStore personalAccessTokenStore,
-            ITokenStore vstsIdeTokenCache,
-            IVstsAuthority vstsAuthority)
-            : this(context, VstsTokenScope.ProfileRead, personalAccessTokenStore)
+            ITokenStore ideTokenCache,
+            IAuthority authority)
+            : this(context, TokenScope.ProfileRead, personalAccessTokenStore)
         {
-            if (vstsIdeTokenCache is null)
-                throw new ArgumentNullException(nameof(vstsIdeTokenCache));
-            if (vstsAuthority is null)
-                throw new ArgumentNullException(nameof(vstsAuthority));
+            if (ideTokenCache is null)
+                throw new ArgumentNullException(nameof(ideTokenCache));
+            if (authority is null)
+                throw new ArgumentNullException(nameof(authority));
 
-            VstsIdeTokenCache = vstsIdeTokenCache;
-            VstsAuthority = vstsAuthority;
-            VstsAdalTokenCache = TokenCache.DefaultShared;
+            IdeTokenCache = ideTokenCache;
+            Authority = authority;
+            AdalTokenCache = TokenCache.DefaultShared;
         }
 
         /// <summary>
@@ -103,23 +106,23 @@ namespace Microsoft.Alm.Authentication
         /// The desired scope of the authentication token to be requested.
         /// </summary>
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Security", "CA2104:DoNotDeclareReadOnlyMutableReferenceTypes")]
-        public readonly VstsTokenScope TokenScope;
+        public readonly TokenScope TokenScope;
 
         /// <summary>
         /// Gets the expected URI name conversion delegate for this authentication type.
         /// </summary>
         public static Secret.UriNameConversionDelegate UriNameConversion
         {
-            get { return Secret.UriToIdentityUrl; }
+            get { return GetSecretKey; }
         }
 
-        internal TokenCache VstsAdalTokenCache { get; private set; }
+        internal TokenCache AdalTokenCache { get; private set; }
 
-        internal ITokenStore VstsIdeTokenCache { get; private set; }
+        internal ITokenStore IdeTokenCache { get; private set; }
 
         internal ICredentialStore PersonalAccessTokenStore { get; set; }
 
-        internal IVstsAuthority VstsAuthority { get; set; }
+        internal IAuthority Authority { get; set; }
 
         internal Guid TenantId { get; set; }
 
@@ -179,14 +182,14 @@ namespace Microsoft.Alm.Authentication
 
             var tenantId = Guid.Empty;
 
-            if (VstsAzureAuthority.IsVstsUrl(targetUri))
+            if (IsVstsUrl(targetUri))
             {
-                var tenantUrl = VstsAzureAuthority.GetTargetUrl(targetUri);
+                var tenantUrl = GetTargetUrl(targetUri, false);
 
                 context.Trace.WriteLine($"'{targetUri}' is a member '{tenantUrl}', checking AAD vs MSA.");
 
-                if (StringComparer.OrdinalIgnoreCase.Equals(targetUri.Scheme, Uri.UriSchemeHttp)
-                    || StringComparer.OrdinalIgnoreCase.Equals(targetUri.Scheme, Uri.UriSchemeHttps))
+                if (OrdinalIgnoreCase.Equals(targetUri.Scheme, Uri.UriSchemeHttp)
+                    || OrdinalIgnoreCase.Equals(targetUri.Scheme, Uri.UriSchemeHttps))
                 {
                     // Read the cache from disk.
                     var cache = await DeserializeTenantCache(context);
@@ -203,7 +206,7 @@ namespace Microsoft.Alm.Authentication
 
                     try
                     {
-                        var tenantUri = new TargetUri(tenantUrl, targetUri.ProxyUri?.ToString());
+                        var tenantUri = targetUri.CreateWith(tenantUrl);
 
                         using (var response = await context.Network.HttpHeadAsync(tenantUri, options))
                         {
@@ -266,10 +269,13 @@ namespace Microsoft.Alm.Authentication
         public static async Task<BaseAuthentication> GetAuthentication(
             RuntimeContext context,
             TargetUri targetUri,
-            VstsTokenScope scope,
+            TokenScope scope,
             ICredentialStore personalAccessTokenStore)
         {
-            BaseSecureStore.ValidateTargetUri(targetUri);
+            if (context is null)
+                throw new ArgumentNullException(nameof(context));
+            if (targetUri is null)
+                throw new ArgumentNullException(nameof(targetUri));
             if (scope is null)
                 throw new ArgumentNullException(nameof(scope));
             if (personalAccessTokenStore is null)
@@ -289,13 +295,13 @@ namespace Microsoft.Alm.Authentication
             if (tenantId == Guid.Empty)
             {
                 context.Trace.WriteLine("MSA authority detected.");
-                authentication = new VstsMsaAuthentication(context, scope, personalAccessTokenStore);
+                authentication = new MsaAuthentication(context, scope, personalAccessTokenStore);
             }
             else
             {
                 context.Trace.WriteLine($"AAD authority for tenant '{tenantId}' detected.");
-                authentication = new VstsAadAuthentication(context, tenantId, scope, personalAccessTokenStore);
-                (authentication as VstsAadAuthentication).TenantId = tenantId;
+                authentication = new AadAuthentication(context, tenantId, scope, personalAccessTokenStore);
+                (authentication as AadAuthentication).TenantId = tenantId;
             }
 
             return authentication;
@@ -309,7 +315,8 @@ namespace Microsoft.Alm.Authentication
         /// <param name="targetUri">The uniform resource indicator used to uniquely identify the credentials.</param>
         public override async Task<Credential> GetCredentials(TargetUri targetUri)
         {
-            BaseSecureStore.ValidateTargetUri(targetUri);
+            if (targetUri is null)
+                throw new ArgumentNullException(nameof(targetUri));
 
             Credential credentials = null;
 
@@ -339,7 +346,7 @@ namespace Microsoft.Alm.Authentication
         /// <param name="credentials">The credentials to validate.</param>
         public async Task<bool> ValidateCredentials(TargetUri targetUri, Credential credentials)
         {
-            return await VstsAuthority.ValidateCredentials(targetUri, credentials);
+            return await Authority.ValidateCredentials(targetUri, credentials);
         }
 
         /// <summary>
@@ -355,12 +362,12 @@ namespace Microsoft.Alm.Authentication
             Token accessToken,
             PersonalAccessTokenOptions options)
         {
-            BaseSecureStore.ValidateTargetUri(targetUri);
-
+            if (targetUri is null)
+                throw new ArgumentNullException(nameof(targetUri));
             if (accessToken is null)
                 throw new ArgumentNullException(nameof(accessToken));
 
-            VstsTokenScope requestedScope = TokenScope;
+            TokenScope requestedScope = TokenScope;
 
             if (options.TokenScope != null)
             {
@@ -375,7 +382,7 @@ namespace Microsoft.Alm.Authentication
             Credential credential = null;
 
             Token personalAccessToken;
-            if ((personalAccessToken = await VstsAuthority.GeneratePersonalAccessToken(targetUri, accessToken, requestedScope, options.RequireCompactToken, options.TokenDuration)) != null)
+            if ((personalAccessToken = await Authority.GeneratePersonalAccessToken(targetUri, accessToken, requestedScope, options.RequireCompactToken, options.TokenDuration)) != null)
             {
                 credential = (Credential)personalAccessToken;
 
@@ -409,15 +416,15 @@ namespace Microsoft.Alm.Authentication
             Token accessToken,
             bool requestCompactToken)
         {
-            BaseSecureStore.ValidateTargetUri(targetUri);
-
+            if (targetUri is null)
+                throw new ArgumentNullException(nameof(targetUri));
             if (accessToken is null)
                 throw new ArgumentNullException(nameof(accessToken));
 
             Credential credential = null;
 
             Token personalAccessToken;
-            if ((personalAccessToken = await VstsAuthority.GeneratePersonalAccessToken(targetUri, accessToken, TokenScope, requestCompactToken)) != null)
+            if ((personalAccessToken = await Authority.GeneratePersonalAccessToken(targetUri, accessToken, TokenScope, requestCompactToken)) != null)
             {
                 credential = (Credential)personalAccessToken;
 
@@ -439,13 +446,34 @@ namespace Microsoft.Alm.Authentication
             return credential;
         }
 
+        internal static string GetSecretKey(TargetUri targetUri, string prefix)
+        {
+            if (targetUri is null)
+                throw new ArgumentNullException(nameof(targetUri));
+            if (string.IsNullOrWhiteSpace(prefix))
+                throw new ArgumentNullException(prefix);
+
+            // When the full path is specified, there's no reason to assume the path; otherwise attempt to
+            // detect the actual target path information.
+            string targetUrl = (IsVstsUrl(targetUri) && !targetUri.HasPath)
+                ? GetTargetUrl(targetUri, true)
+                : targetUri.ToString(true, true, true);
+
+            targetUrl = targetUrl.TrimEnd('/', '\\');
+
+            return $"{prefix}:{targetUrl}";
+        }
+
         private static async Task<Dictionary<string, Guid>> DeserializeTenantCache(RuntimeContext context)
         {
+            if (context is null)
+                throw new ArgumentNullException(nameof(context));
+
             var encoding = new UTF8Encoding(false);
             var path = GetCachePath(context);
 
             string data = null;
-            Dictionary<string, Guid> cache = new Dictionary<string, Guid>(StringComparer.OrdinalIgnoreCase);
+            var cache = new Dictionary<string, Guid>(StringComparer.OrdinalIgnoreCase);
             Exception exception = null;
 
             // Attempt up to five times to read from the cache

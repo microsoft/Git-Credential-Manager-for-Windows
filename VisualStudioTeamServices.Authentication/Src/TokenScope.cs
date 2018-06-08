@@ -29,19 +29,19 @@ using System.Linq;
 using System.Runtime.CompilerServices;
 using ScopeSet = System.Collections.Generic.HashSet<string>;
 
-namespace Microsoft.Alm.Authentication
+namespace VisualStudioTeamServices.Authentication
 {
-    public class VstsTokenScope : TokenScope
+    public class TokenScope : Microsoft.Alm.Authentication.TokenScope
     {
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Security", "CA2104:DoNotDeclareReadOnlyMutableReferenceTypes")]
-        public static readonly VstsTokenScope None = new VstsTokenScope(string.Empty);
+        public static readonly TokenScope None = new TokenScope(string.Empty);
 
         /// <summary>
         /// Grants the ability to access build artifacts, including build results, definitions, and
         /// requests, and the ability to receive notifications about build events via service hooks.
         /// </summary>
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Security", "CA2104:DoNotDeclareReadOnlyMutableReferenceTypes")]
-        public static readonly VstsTokenScope BuildAccess = new VstsTokenScope("vso.build");
+        public static readonly TokenScope BuildAccess = new TokenScope("vso.build");
 
         /// <summary>
         /// Grants the ability to access build artifacts, including build results, definitions, and
@@ -49,7 +49,7 @@ namespace Microsoft.Alm.Authentication
         /// receive notifications about build events via service hooks.
         /// </summary>
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Security", "CA2104:DoNotDeclareReadOnlyMutableReferenceTypes")]
-        public static readonly VstsTokenScope BuildExecute = new VstsTokenScope("vso.build_execute");
+        public static readonly TokenScope BuildExecute = new TokenScope("vso.build_execute");
 
         /// <summary>
         /// Grants the ability to access rooms and view, post, and update messages. Also grants the
@@ -57,14 +57,14 @@ namespace Microsoft.Alm.Authentication
         /// service hooks.
         /// </summary>
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Security", "CA2104:DoNotDeclareReadOnlyMutableReferenceTypes")]
-        public static readonly VstsTokenScope ChatManage = new VstsTokenScope("vso.chat_manage");
+        public static readonly TokenScope ChatManage = new TokenScope("vso.chat_manage");
 
         /// <summary>
         /// Grants the ability to access rooms and view, post, and update messages. Also grants the
         /// ability to receive notifications about new messages via service hooks.
         /// </summary>
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Security", "CA2104:DoNotDeclareReadOnlyMutableReferenceTypes")]
-        public static readonly VstsTokenScope ChatWrite = new VstsTokenScope("vso.chat_write");
+        public static readonly TokenScope ChatWrite = new TokenScope("vso.chat_write");
 
         /// <summary>
         /// Grants the ability to read, update, and delete source code, access metadata about
@@ -73,7 +73,7 @@ namespace Microsoft.Alm.Authentication
         /// reviews, and to receive notifications about version control events via service hooks.
         /// </summary>
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Security", "CA2104:DoNotDeclareReadOnlyMutableReferenceTypes")]
-        public static readonly VstsTokenScope CodeManage = new VstsTokenScope("vso.code_manage");
+        public static readonly TokenScope CodeManage = new TokenScope("vso.code_manage");
 
         /// <summary>
         /// Grants the ability to read source code and metadata about commits, change-sets, branches,
@@ -81,7 +81,7 @@ namespace Microsoft.Alm.Authentication
         /// version control events via service hooks.
         /// </summary>
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Security", "CA2104:DoNotDeclareReadOnlyMutableReferenceTypes")]
-        public static readonly VstsTokenScope CodeRead = new VstsTokenScope("vso.code");
+        public static readonly TokenScope CodeRead = new TokenScope("vso.code");
 
         /// <summary>
         /// Grants the ability to read, update, and delete source code, access metadata about
@@ -90,80 +90,80 @@ namespace Microsoft.Alm.Authentication
         /// about version control events via service hooks.
         /// </summary>
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Security", "CA2104:DoNotDeclareReadOnlyMutableReferenceTypes")]
-        public static readonly VstsTokenScope CodeWrite = new VstsTokenScope("vso.code_write");
+        public static readonly TokenScope CodeWrite = new TokenScope("vso.code_write");
 
         /// <summary>
         /// Grants the ability to read, write, and delete feeds and packages.
         /// </summary>
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Security", "CA2104:DoNotDeclareReadOnlyMutableReferenceTypes")]
-        public static readonly VstsTokenScope PackagingManage = new VstsTokenScope("vso.packaging_manage");
+        public static readonly TokenScope PackagingManage = new TokenScope("vso.packaging_manage");
 
         /// <summary>
         /// Grants the ability to list feeds and read packages in those feeds.
         /// </summary>
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Security", "CA2104:DoNotDeclareReadOnlyMutableReferenceTypes")]
-        public static readonly VstsTokenScope PackagingRead = new VstsTokenScope("vso.packaging");
+        public static readonly TokenScope PackagingRead = new TokenScope("vso.packaging");
 
         /// <summary>
         /// Grants the ability to list feeds and read, write, and delete packages in those feeds.
         /// </summary>
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Security", "CA2104:DoNotDeclareReadOnlyMutableReferenceTypes")]
-        public static readonly VstsTokenScope PackagingWrite = new VstsTokenScope("vso.packaging_write");
+        public static readonly TokenScope PackagingWrite = new TokenScope("vso.packaging_write");
 
         /// <summary>
         /// Grants the ability to read your profile, accounts, collections, projects, teams, and
         /// other top-level organizational artifacts.
         /// </summary>
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Security", "CA2104:DoNotDeclareReadOnlyMutableReferenceTypes")]
-        public static readonly VstsTokenScope ProfileRead = new VstsTokenScope("vso.profile");
+        public static readonly TokenScope ProfileRead = new TokenScope("vso.profile");
 
         /// <summary>
         /// Grants the ability to read release artifacts, including releases, release definitions
         /// and release environment.
         /// </summary>
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Security", "CA2104:DoNotDeclareReadOnlyMutableReferenceTypes")]
-        public static readonly VstsTokenScope ReleaseAccess = new VstsTokenScope("vso.release");
+        public static readonly TokenScope ReleaseAccess = new TokenScope("vso.release");
 
         /// <summary>
         /// Grants the ability to read and update release artifacts, including releases, release
         /// definitions and release envrionment, and the ability to queue a new release.
         /// </summary>
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Security", "CA2104:DoNotDeclareReadOnlyMutableReferenceTypes")]
-        public static readonly VstsTokenScope ReleaseExecute = new VstsTokenScope("vso.release_execute");
+        public static readonly TokenScope ReleaseExecute = new TokenScope("vso.release_execute");
 
         /// <summary>
         /// Grants the ability to read, update and delete release artifacts, including releases,
         /// release definitions and release envrionment, and the ability to queue and approve a new release.
         /// </summary>
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Security", "CA2104:DoNotDeclareReadOnlyMutableReferenceTypes")]
-        public static readonly VstsTokenScope ReleaseManage = new VstsTokenScope("vso.release_manage");
+        public static readonly TokenScope ReleaseManage = new TokenScope("vso.release_manage");
 
         /// <summary>
         /// Grants the ability to read service hook subscriptions and metadata, including supported
         /// events, consumers, and actions.
         /// </summary>
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Security", "CA2104:DoNotDeclareReadOnlyMutableReferenceTypes")]
-        public static readonly VstsTokenScope ServiceHookRead = new VstsTokenScope("vso.hooks");
+        public static readonly TokenScope ServiceHookRead = new TokenScope("vso.hooks");
 
         /// <summary>
         /// Grants the ability to create and update service hook subscriptions and read metadata,
         /// including supported events, consumers, and actions."
         /// </summary>
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Security", "CA2104:DoNotDeclareReadOnlyMutableReferenceTypes")]
-        public static readonly VstsTokenScope ServiceHookWrite = new VstsTokenScope("vso.hooks_write");
+        public static readonly TokenScope ServiceHookWrite = new TokenScope("vso.hooks_write");
 
         /// <summary>
         /// Grants the ability to read test plans, cases, results and other test management related artifacts.
         /// </summary>
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Security", "CA2104:DoNotDeclareReadOnlyMutableReferenceTypes")]
-        public static readonly VstsTokenScope TestRead = new VstsTokenScope("vso.test");
+        public static readonly TokenScope TestRead = new TokenScope("vso.test");
 
         /// <summary>
         /// Grants the ability to read, create, and update test plans, cases, results and other test
         /// management related artifacts.
         /// </summary>
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Security", "CA2104:DoNotDeclareReadOnlyMutableReferenceTypes")]
-        public static readonly VstsTokenScope TestWrite = new VstsTokenScope("vso.test_write");
+        public static readonly TokenScope TestWrite = new TokenScope("vso.test_write");
 
         /// <summary>
         /// Grants the ability to read work items, queries, boards, area and iterations paths, and
@@ -171,7 +171,7 @@ namespace Microsoft.Alm.Authentication
         /// to receive notifications about work item events via service hooks.
         /// </summary>
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Security", "CA2104:DoNotDeclareReadOnlyMutableReferenceTypes")]
-        public static readonly VstsTokenScope WorkRead = new VstsTokenScope("vso.work");
+        public static readonly TokenScope WorkRead = new TokenScope("vso.work");
 
         /// <summary>
         /// Grants the ability to read, create, and update work items and queries, update board
@@ -179,17 +179,17 @@ namespace Microsoft.Alm.Authentication
         /// execute queries, and to receive notifications about work item events via service hooks.
         /// </summary>
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Security", "CA2104:DoNotDeclareReadOnlyMutableReferenceTypes")]
-        public static readonly VstsTokenScope WorkWrite = new VstsTokenScope("vso.work_write");
+        public static readonly TokenScope WorkWrite = new TokenScope("vso.work_write");
 
-        private VstsTokenScope(string value)
+        private TokenScope(string value)
             : base(value)
         { }
 
-        private VstsTokenScope(ScopeSet set)
+        private TokenScope(ScopeSet set)
             : base(set)
         { }
 
-        public static IEnumerable<VstsTokenScope> EnumerateValues()
+        public static IEnumerable<TokenScope> EnumerateValues()
         {
             yield return BuildAccess;
             yield return BuildExecute;
@@ -211,13 +211,13 @@ namespace Microsoft.Alm.Authentication
         }
 
         public override bool Equals(object obj)
-            => TokenScope.Equals(this as TokenScope, obj);
+            => Microsoft.Alm.Authentication.TokenScope.Equals(this as Microsoft.Alm.Authentication.TokenScope, obj);
 
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Design", "CA1011:ConsiderPassingBaseTypesAsParameters")]
-        public bool Equals(VstsTokenScope other)
-            => TokenScope.Equals(this as TokenScope, other as TokenScope);
+        public bool Equals(TokenScope other)
+            => Microsoft.Alm.Authentication.TokenScope.Equals(this as Microsoft.Alm.Authentication.TokenScope, other as Microsoft.Alm.Authentication.TokenScope);
 
-        public static bool Find(string value, out VstsTokenScope vstsScope)
+        public static bool Find(string value, out TokenScope vstsScope)
         {
             vstsScope = EnumerateValues().FirstOrDefault(v => StringComparer.OrdinalIgnoreCase.Equals(v.Value, value));
 
@@ -225,49 +225,49 @@ namespace Microsoft.Alm.Authentication
         }
 
         public override int GetHashCode()
-            => TokenScope.GetHashCode(this as TokenScope);
+            => Microsoft.Alm.Authentication.TokenScope.GetHashCode(this as Microsoft.Alm.Authentication.TokenScope);
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static bool operator ==(VstsTokenScope left, VstsTokenScope right)
-            => TokenScope.Equals(left as TokenScope, right as TokenScope);
+        public static bool operator ==(TokenScope left, TokenScope right)
+            => Microsoft.Alm.Authentication.TokenScope.Equals(left as Microsoft.Alm.Authentication.TokenScope, right as Microsoft.Alm.Authentication.TokenScope);
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static bool operator !=(VstsTokenScope left, VstsTokenScope right)
-            => !TokenScope.Equals(left as TokenScope, right as TokenScope);
+        public static bool operator !=(TokenScope left, TokenScope right)
+            => !Microsoft.Alm.Authentication.TokenScope.Equals(left as Microsoft.Alm.Authentication.TokenScope, right as Microsoft.Alm.Authentication.TokenScope);
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static VstsTokenScope operator +(VstsTokenScope left, VstsTokenScope right)
+        public static TokenScope operator +(TokenScope left, TokenScope right)
         {
-            var set = TokenScope.UnionWith(left as TokenScope, right as TokenScope);
-            return new VstsTokenScope(set);
+            var set = Microsoft.Alm.Authentication.TokenScope.UnionWith(left as Microsoft.Alm.Authentication.TokenScope, right as Microsoft.Alm.Authentication.TokenScope);
+            return new TokenScope(set);
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static VstsTokenScope operator -(VstsTokenScope left, VstsTokenScope right)
+        public static TokenScope operator -(TokenScope left, TokenScope right)
         {
-            var set = TokenScope.ExceptWith(left as TokenScope, right as TokenScope);
-            return new VstsTokenScope(set);
+            var set = Microsoft.Alm.Authentication.TokenScope.ExceptWith(left as Microsoft.Alm.Authentication.TokenScope, right as Microsoft.Alm.Authentication.TokenScope);
+            return new TokenScope(set);
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static VstsTokenScope operator |(VstsTokenScope left, VstsTokenScope right)
+        public static TokenScope operator |(TokenScope left, TokenScope right)
         {
-            var set = TokenScope.UnionWith(left as TokenScope, right as TokenScope);
-            return new VstsTokenScope(set);
+            var set = Microsoft.Alm.Authentication.TokenScope.UnionWith(left as Microsoft.Alm.Authentication.TokenScope, right as Microsoft.Alm.Authentication.TokenScope);
+            return new TokenScope(set);
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static VstsTokenScope operator &(VstsTokenScope left, VstsTokenScope right)
+        public static TokenScope operator &(TokenScope left, TokenScope right)
         {
-            var set = TokenScope.IntersectWith(left as TokenScope, right as TokenScope);
-            return new VstsTokenScope(set);
+            var set = Microsoft.Alm.Authentication.TokenScope.IntersectWith(left as Microsoft.Alm.Authentication.TokenScope, right as Microsoft.Alm.Authentication.TokenScope);
+            return new TokenScope(set);
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static VstsTokenScope operator ^(VstsTokenScope left, VstsTokenScope right)
+        public static TokenScope operator ^(TokenScope left, TokenScope right)
         {
-            var set = TokenScope.SymmetricExceptWith(left as TokenScope, right as TokenScope);
-            return new VstsTokenScope(set);
+            var set = Microsoft.Alm.Authentication.TokenScope.SymmetricExceptWith(left as Microsoft.Alm.Authentication.TokenScope, right as Microsoft.Alm.Authentication.TokenScope);
+            return new TokenScope(set);
         }
     }
 }
