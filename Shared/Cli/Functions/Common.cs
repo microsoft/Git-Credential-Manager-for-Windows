@@ -853,7 +853,7 @@ namespace Microsoft.Alm.Cli
             if (operationArguments is null)
                 throw new ArgumentNullException(nameof(operationArguments));
 
-            if (program.Context.Utilities.TryReadGitRemoteHttpDetails(out string commandLine, out _))
+            if (program.Utilities.TryReadGitRemoteHttpDetails(out string commandLine, out _))
             {
                 operationArguments.GitRemoteHttpCommandLine = commandLine;
             }

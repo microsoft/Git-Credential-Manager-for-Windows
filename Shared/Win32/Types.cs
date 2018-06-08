@@ -299,16 +299,55 @@ namespace Microsoft.Alm.Win32
     internal enum Hresult : uint
     {
         Ok = 0x00000000,
+
+        /// <summary>
+        /// Not implemented.
+        /// </summary>
         NotImplemented = 0x80004001,
+
+        /// <summary>
+        /// No such interface supported.
+        /// </summary>
         NoInterface = 0x80004002,
+
+        /// <summary>
+        /// Invalid pointer.
+        /// </summary>
         InvalidPointer = 0x80004003,
+
+        /// <summary>
+        /// Operation aborted.
+        /// </summary>
         Abort = 0x80004004,
+
+        /// <summary>
+        /// Unspecified error.
+        /// </summary>
         Fail = 0x80004005,
+
+        /// <summary>
+        /// Catastrophic failure.
+        /// </summary>
         Unexpected = 0x8000FFFF,
+
+        /// <summary>
+        /// General access denied error.
+        /// </summary>
         AccessDenied = 0x80070005,
+
         InvalidHandle = 0x80070006,
+
         OutOfMemory = 0x8007000E,
+
+        /// <summary>
+        /// One or more arguments are invalid.
+        /// </summary>
         InvalidArgument = 0x80070057,
+
+        /// <summary>
+        /// There is not enough space on the disk.
+        /// </summary>
+        DiskFull = 0x80070070,
     }
 
     /// <summary>
@@ -369,56 +408,113 @@ namespace Microsoft.Alm.Win32
         public string ExeFileName;
     }
 
-    [StructLayout(LayoutKind.Explicit, Size = 0x30)]
+    [StructLayout(LayoutKind.Sequential)]
     internal unsafe struct ProcessEnvironmentBlock
     {
-        [FieldOffset(0x02)]
-        private byte _offset_0x02;
-        [FieldOffset(0x20)]
-        private PebProcessParameters* _offset_0x20;
+        fixed byte _[256];
 
+        /// <summary>
+        /// Gets `<see langword="true"/> if the process is currently being debugged; otherwise `<see langword="false"/>`.
+        /// <para/>
+        /// It is best to use the `CheckRemoteDebuggerPresent` function instead.
+        /// </summary>
         public bool IsBeingDebugged
         {
-            get { return _offset_0x02 != 0; }
+            get { fixed (byte* p = _) { return p[2] != 0; } }
         }
+
+        /// <summary>
+        /// Gets a pointer a `<seealso cref="PebProcessParameters"/>` structure.
+        /// </summary>
         public PebProcessParameters* ProcessParameters
         {
-            get { return _offset_0x20; }
+            get
+            {
+                fixed (byte* p = _)
+                {
+                    return IntPtr.Size == 4
+                        ? *((PebProcessParameters**)(p + 0x10))
+                        : *((PebProcessParameters**)(p + 0x20));
+                }
+            }
         }
     }
 
-    [StructLayout(LayoutKind.Explicit, Size = 104)]
+    [StructLayout(LayoutKind.Sequential, Size = 128)]
     internal unsafe struct PebProcessParameters
     {
-        [FieldOffset(0x60)]
-        private UnicodeString _offset_0x60;
-        [FieldOffset(0x70)]
-        private UnicodeString _offset_0x70;
+        fixed byte _[128];
 
+        /// <summary>
+        /// Gets the command-line string passed to the process.
+        /// </summary>
         public UnicodeString CommandLine
         {
-            get { return _offset_0x70; }
+            get
+            {
+                fixed (byte* p = _)
+                {
+                    return IntPtr.Size == 4
+                        ? *((UnicodeString*)(p + 0x40))
+                        : *((UnicodeString*)(p + 0x70));
+                }
+            }
         }
 
+        /// <summary>
+        /// Gets the path of the image file for the process.
+        /// </summary>
         public UnicodeString ImagePathName
         {
-            get { return _offset_0x60; }
+            get
+            {
+                fixed (byte* p = _)
+                {
+                    return IntPtr.Size == 4
+                        ? *((UnicodeString*)(p + 0x38))
+                        : *((UnicodeString*)(p + 0x60));
+                }
+            }
         }
     }
 
     [StructLayout(LayoutKind.Sequential)]
     internal unsafe struct ProcessBasicInformation
     {
-        private IntPtr _exitStatus;
-        private IntPtr _pebBaseAddress;
-        private IntPtr _affinityMask;
-        private IntPtr _basePriority;
-        private UIntPtr _uniqueProcessId;
-        private IntPtr _inheritedFromUniqueProcessId;
+        fixed byte _[32];
 
-        public byte* ProcessEnvironmentBlock
+        /// <summary>
+        /// Gets the address of the `<seealso cref="ProcessEnvironmentBlock"/>`.
+        /// </summary>
+        public void* ProcessEnvironmentBlock
         {
-            get { return (byte*)_pebBaseAddress.ToPointer(); }
+            get
+            {
+                fixed (byte* p = _)
+                {
+                    return IntPtr.Size == 4
+                        ? *((void**)(p + 0x04))
+                        : *((void**)(p + 0x08));
+                }
+            }
+        }
+
+        /// <summary>
+        /// Gets a pointer to the system's unique identifier for this process.
+        /// <para/>
+        /// Use the `<seealso cref="Kernel32.GetCurrentProcessId(IntPtr)"/>` function to retrieve this information.
+        /// </summary>
+        public uint* UniqueProcessId
+        {
+            get
+            {
+                fixed (byte* p = _)
+                {
+                    return IntPtr.Size == 4
+                        ? *((uint**)(p + 0x10))
+                        : *((uint**)(p + 0x20));
+                }
+            }
         }
     }
 
@@ -504,22 +600,26 @@ namespace Microsoft.Alm.Win32
     /// <summary>
     /// Represents a Unicode encoded string.
     /// </summary>
-    [StructLayout(LayoutKind.Explicit, Pack = 1)]
+    [StructLayout(LayoutKind.Sequential)]
+    [System.Diagnostics.DebuggerDisplay("{DebuggerDisplay, nq}")]
     internal unsafe struct UnicodeString
     {
-        [FieldOffset(0x00)]
-        private ushort _field1;
-        [FieldOffset(0x02)]
-        private ushort _field2;
-        [FieldOffset(0x08)]
-        private IntPtr _field3;
+        fixed byte _[16];
 
         /// <summary>
         /// Gets the pointer to the character data buffer.
         /// </summary>
         public char* Buffer
         {
-            get { return (char*)_field3.ToPointer(); }
+            get
+            {
+                fixed (byte* p = _)
+                {
+                    return (IntPtr.Size == 4)
+                        ? *((char**)(p + 0x04))
+                        : *((char**)(p + 0x08));
+                }
+            }
         }
 
         /// <summary>
@@ -527,7 +627,7 @@ namespace Microsoft.Alm.Win32
         /// </summary>
         public int Length
         {
-            get { return _field1 / sizeof(char); }
+            get { fixed (byte* p = _) { return *((ushort*)(p + 0x00)) / sizeof(char); } }
         }
 
         /// <summary>
@@ -535,7 +635,23 @@ namespace Microsoft.Alm.Win32
         /// </summary>
         public int MaximumSize
         {
-            get { return _field2; }
+            get { fixed (byte* p = _) { return *((ushort*)(p + 0x02)); } }
+        }
+
+        internal string DebuggerDisplay
+        {
+            get { return $"{nameof(UnicodeString)}: \"{ToString() ?? "<NULL>"}\""; }
+        }
+
+        public override string ToString()
+        {
+            if (Buffer == null)
+                return null;
+
+            if (Length == 0)
+                return string.Empty;
+
+            return new string(Buffer);
         }
     }
 }

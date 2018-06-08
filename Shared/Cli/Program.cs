@@ -416,6 +416,9 @@ namespace Microsoft.Alm.Cli
         internal Git.ITrace Trace
             => _context.Trace;
 
+        internal Git.IUtilities Utilities
+            => _context.Utilities;
+
         internal Git.IWhere Where
             => _context.Where;
 
@@ -471,22 +474,22 @@ namespace Microsoft.Alm.Cli
         }
 
         internal void Die(Exception exception,
-                                [CallerFilePath] string path = "",
-                                [CallerLineNumber] int line = 0,
-                                [CallerMemberName] string name = "")
+                          [CallerFilePath] string path = "",
+                          [CallerLineNumber] int line = 0,
+                          [CallerMemberName] string name = "")
             => _dieException(this, exception, path, line, name);
 
         internal void Die(string message,
-                                [CallerFilePath] string path = "",
-                                [CallerLineNumber] int line = 0,
-                                [CallerMemberName] string name = "")
+                          [CallerFilePath] string path = "",
+                          [CallerLineNumber] int line = 0,
+                          [CallerMemberName] string name = "")
             => _dieMessage(this, message, path, line, name);
 
         internal void Exit(int exitcode = 0,
-                                  string message = null,
-                                 [CallerFilePath] string path = "",
-                                 [CallerLineNumber] int line = 0,
-                                 [CallerMemberName] string name = "")
+                           string message = null,
+                           [CallerFilePath] string path = "",
+                           [CallerLineNumber] int line = 0,
+                           [CallerMemberName] string name = "")
             => _exit(this, exitcode, message, path, line, name);
 
         internal Task LoadOperationArguments(OperationArguments operationArguments)

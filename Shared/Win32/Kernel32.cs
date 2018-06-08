@@ -98,6 +98,32 @@ namespace Microsoft.Alm.Win32
         public static extern uint GetCurrentProcessId();
 
         /// <summary>
+        /// Returns the process identifier of the specified process.
+        /// </summary>
+        /// <param name="processHandle">
+        /// A handle to the process.
+        /// <para/>
+        /// The handle must have the `<seealso cref="DesiredAccess.QueryInformation"/>` or `<seealso cref="DesiredAccess.QueryLimitedInformation"/>` access right.
+        /// </param>
+        [DllImport(Name, BestFitMapping = false, CallingConvention = CallingConvention.StdCall, CharSet = CharSet.Unicode, EntryPoint = "GetProcessId", ExactSpelling = true, SetLastError = true, ThrowOnUnmappableChar = true)]
+        [return: MarshalAs(UnmanagedType.U4)]
+        public static extern uint GetProcessId(
+            [In] SafeProcessHandle processHandle);
+
+        /// <summary>
+        /// Returns the process identifier of the specified process.
+        /// </summary>
+        /// <param name="processHandle">
+        /// A handle to the process.
+        /// <para/>
+        /// The handle must have the `<seealso cref="DesiredAccess.QueryInformation"/>` or `<seealso cref="DesiredAccess.QueryLimitedInformation"/>` access right.
+        /// </param>
+        [DllImport(Name, BestFitMapping = false, CallingConvention = CallingConvention.StdCall, CharSet = CharSet.Unicode, EntryPoint = "GetProcessId", ExactSpelling = true, SetLastError = true, ThrowOnUnmappableChar = true)]
+        [return: MarshalAs(UnmanagedType.U4)]
+        public static extern uint GetProcessId(
+            [In] IntPtr processHandle);
+
+        /// <summary>
         /// Opens an existing local process object.
         /// <para/>
         /// Returns an open handle to the specified process if successful; otherwise `<see langword="null"/>` or an invalid/closed handle.

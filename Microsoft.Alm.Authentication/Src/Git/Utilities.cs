@@ -153,8 +153,10 @@ namespace Microsoft.Alm.Authentication.Git
             // Gloves off...
             unsafe
             {
-                var basicInfo = new Win32.ProcessBasicInformation { };
+                int bytesRead = 0;
                 long outResult = 0;
+
+                var basicInfo = new Win32.ProcessBasicInformation { };
 
                 // Ask the OS for information about the process, this will include the address of the PEB or
                 // Process Environment Block, which contains useful information (like the offset of the process' parameters).
@@ -173,7 +175,6 @@ namespace Microsoft.Alm.Authentication.Git
                     return false;
                 }
 
-                int bytesRead = 0;
                 var peb = new Win32.ProcessEnvironmentBlock { };
 
                 // Now that we know the offsets of the process' parameters, read it because
@@ -187,7 +188,7 @@ namespace Microsoft.Alm.Authentication.Git
                 {
                     var error = Win32.Kernel32.GetLastError();
 
-                    Trace.WriteLine($"failed to read process environment block [{error}].");
+                    Trace.WriteLine($"failed to read process environment block [{error}] ({bytesRead:n0} bytes read).");
 
                     return false;
                 }
@@ -201,11 +202,11 @@ namespace Microsoft.Alm.Authentication.Git
                                                              buffer: &processParameters,
                                                          bufferSize: sizeof(Win32.PebProcessParameters),
                                                           bytesRead: out bytesRead)
-                    || bytesRead != sizeof(Win32.PebProcessParameters))
+                    || bytesRead < sizeof(Win32.PebProcessParameters))
                 {
                     var error = Win32.Kernel32.GetLastError();
 
-                    Trace.WriteLine($"failed to read process parameters [{error}].");
+                    Trace.WriteLine($"failed to read process parameters [{error}] ({bytesRead:n0} bytes read).");
 
                     return false;
                 }
@@ -223,7 +224,7 @@ namespace Microsoft.Alm.Authentication.Git
                 {
                     var error = Win32.Kernel32.GetLastError();
 
-                    Trace.WriteLine($"failed to read process image path [{error}].");
+                    Trace.WriteLine($"failed to read process image path [{error}] ({bytesRead:n0} bytes read).");
                 }
                 else
                 {
@@ -241,7 +242,7 @@ namespace Microsoft.Alm.Authentication.Git
                 {
                     var error = Win32.Kernel32.GetLastError();
 
-                    Trace.WriteLine($"failed to read process command line [{error}].");
+                    Trace.WriteLine($"failed to read process command line [{error}] ({bytesRead:n0} bytes read).");
                 }
                 else
                 {

@@ -30,6 +30,14 @@ namespace VisualStudioTeamServices.Authentication.Test
 {
     public abstract class AuthenticationTests
     {
+        protected AuthenticationTests()
+        {
+            if (Trace.Listeners.Count == 0)
+            {
+                Trace.Listeners.AddRange(Debug.Listeners);
+            }
+        }
+
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Security", "CA2104:DoNotDeclareReadOnlyMutableReferenceTypes")]
         protected static readonly Credential DefaultCredentials = new Credential("username", "password");
 
@@ -50,13 +58,5 @@ namespace VisualStudioTeamServices.Authentication.Test
 
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Security", "CA2104:DoNotDeclareReadOnlyMutableReferenceTypes")]
         protected static readonly TokenScope DefaultTokenScope = TokenScope.CodeWrite;
-
-        protected AuthenticationTests()
-        {
-            if (Trace.Listeners.Count == 0)
-            {
-                Trace.Listeners.AddRange(Debug.Listeners);
-            }
-        }
     }
 }
