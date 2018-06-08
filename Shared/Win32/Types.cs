@@ -299,16 +299,55 @@ namespace Microsoft.Alm.Win32
     internal enum Hresult : uint
     {
         Ok = 0x00000000,
+
+        /// <summary>
+        /// Not implemented.
+        /// </summary>
         NotImplemented = 0x80004001,
+
+        /// <summary>
+        /// No such interface supported.
+        /// </summary>
         NoInterface = 0x80004002,
+
+        /// <summary>
+        /// Invalid pointer.
+        /// </summary>
         InvalidPointer = 0x80004003,
+
+        /// <summary>
+        /// Operation aborted.
+        /// </summary>
         Abort = 0x80004004,
+
+        /// <summary>
+        /// Unspecified error.
+        /// </summary>
         Fail = 0x80004005,
+
+        /// <summary>
+        /// Catastrophic failure.
+        /// </summary>
         Unexpected = 0x8000FFFF,
+
+        /// <summary>
+        /// General access denied error.
+        /// </summary>
         AccessDenied = 0x80070005,
+
         InvalidHandle = 0x80070006,
+
         OutOfMemory = 0x8007000E,
+
+        /// <summary>
+        /// One or more arguments are invalid.
+        /// </summary>
         InvalidArgument = 0x80070057,
+
+        /// <summary>
+        /// There is not enough space on the disk.
+        /// </summary>
+        DiskFull = 0x80070070,
     }
 
     /// <summary>
@@ -374,10 +413,19 @@ namespace Microsoft.Alm.Win32
     {
         fixed byte _[256];
 
+        /// <summary>
+        /// Gets `<see langword="true"/> if the process is currently being debugged; otherwise `<see langword="false"/>`.
+        /// <para/>
+        /// It is best to use the `CheckRemoteDebuggerPresent` function instead.
+        /// </summary>
         public bool IsBeingDebugged
         {
             get { fixed (byte* p = _) { return p[2] != 0; } }
         }
+
+        /// <summary>
+        /// Gets a pointer a `<seealso cref="PebProcessParameters"/>` structure.
+        /// </summary>
         public PebProcessParameters* ProcessParameters
         {
             get
@@ -397,6 +445,9 @@ namespace Microsoft.Alm.Win32
     {
         fixed byte _[128];
 
+        /// <summary>
+        /// Gets the command-line string passed to the process.
+        /// </summary>
         public UnicodeString CommandLine
         {
             get
@@ -409,6 +460,10 @@ namespace Microsoft.Alm.Win32
                 }
             }
         }
+
+        /// <summary>
+        /// Gets the path of the image file for the process.
+        /// </summary>
         public UnicodeString ImagePathName
         {
             get
@@ -426,16 +481,40 @@ namespace Microsoft.Alm.Win32
     [StructLayout(LayoutKind.Sequential)]
     internal unsafe struct ProcessBasicInformation
     {
-        private IntPtr _exitStatus;
-        private IntPtr _pebBaseAddress;
-        private IntPtr _affinityMask;
-        private IntPtr _basePriority;
-        private UIntPtr _uniqueProcessId;
-        private IntPtr _inheritedFromUniqueProcessId;
+        fixed byte _[32];
 
-        public byte* ProcessEnvironmentBlock
+        /// <summary>
+        /// Gets the address of the `<seealso cref="ProcessEnvironmentBlock"/>`.
+        /// </summary>
+        public void* ProcessEnvironmentBlock
         {
-            get { return (byte*)_pebBaseAddress.ToPointer(); }
+            get
+            {
+                fixed (byte* p = _)
+                {
+                    return IntPtr.Size == 4
+                        ? *((void**)(p + 0x04))
+                        : *((void**)(p + 0x08));
+                }
+            }
+        }
+
+        /// <summary>
+        /// Gets a pointer to the system's unique identifier for this process.
+        /// <para/>
+        /// Use the `<seealso cref="Kernel32.GetCurrentProcessId(IntPtr)"/>` function to retrieve this information.
+        /// </summary>
+        public uint* UniqueProcessId
+        {
+            get
+            {
+                fixed (byte* p = _)
+                {
+                    return IntPtr.Size == 4
+                        ? *((uint**)(p + 0x10))
+                        : *((uint**)(p + 0x20));
+                }
+            }
         }
     }
 
@@ -522,6 +601,7 @@ namespace Microsoft.Alm.Win32
     /// Represents a Unicode encoded string.
     /// </summary>
     [StructLayout(LayoutKind.Sequential)]
+    [System.Diagnostics.DebuggerDisplay("{DebuggerDisplay, nq}")]
     internal unsafe struct UnicodeString
     {
         fixed byte _[16];
@@ -556,6 +636,22 @@ namespace Microsoft.Alm.Win32
         public int MaximumSize
         {
             get { fixed (byte* p = _) { return *((ushort*)(p + 0x02)); } }
+        }
+
+        internal string DebuggerDisplay
+        {
+            get { return $"{nameof(UnicodeString)}: \"{ToString() ?? "<NULL>"}\""; }
+        }
+
+        public override string ToString()
+        {
+            if (Buffer == null)
+                return null;
+
+            if (Length == 0)
+                return string.Empty;
+
+            return new string(Buffer);
         }
     }
 }
