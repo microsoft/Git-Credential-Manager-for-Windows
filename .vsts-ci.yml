@@ -1,0 +1,69 @@
+resources:
+- repo: self
+queue:
+  name: Hosted VS2017
+  demands: 
+  - msbuild
+  - visualstudio
+  - vstest
+
+steps:
+- task: NuGetToolInstaller@0
+  displayName: Use NuGet 4.4.0
+  inputs:
+    versionSpec: 4.4.0
+
+- task: NuGetCommand@2
+  displayName: NuGet restore
+  inputs:
+    restoreSolution: '$(Build.Solution)'
+
+- task: VSBuild@1
+  displayName: Build Solution
+  inputs:
+    solution: '$(Build.Solution)'
+    msbuildArgs: '/verbosity:minimal /bl:GitCredentialManager.binlog'
+    platform: '$(Build.Platform)'
+    configuration: '$(Build.Configuration)'
+    maximumCpuCount: true
+    msbuildArchitecture: x64
+    createLogFile: true
+
+- task: VSTest@2
+  displayName: Execute Tests (Xunit)
+  inputs:
+    testAssemblyVer2: |
+     **\*Test.dll
+     !**\xunit.*.dll
+     !**\obj\**
+    searchFolder: '$(Build.SourcesDirectory)'
+    runInParallel: true
+    runTestsInIsolation: true
+    codeCoverageEnabled: true
+    platform: '$(Build.Platform)'
+    configuration: '$(Build.Configuration)'
+
+- task: PublishSymbols@2
+  displayName: Index Sources
+  inputs:
+    SearchPattern: '**\bin\**\*.pdb'
+    PublishSymbols: false
+  continueOnError: true
+
+- task: PublishBuildArtifacts@1
+  displayName: Publish Artifact: Git Credential Manager for Windows
+  inputs:
+    PathtoPublish: '$(Build.SourcesDirectory)\Deploy'
+    ArtifactName: 'Git Credential Manager for Windows'
+    publishLocation: Container
+  enabled: false
+
+- task: DeleteFiles@1
+  displayName: Delete Artifacts from Agent
+  inputs:
+    SourceFolder: '$(Build.SourcesDirectory)'
+    Contents: |
+     Deploy\*.*
+     **\bin\**\*.*
+     **\obj\**\*.*
+
