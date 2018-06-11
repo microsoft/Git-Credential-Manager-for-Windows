@@ -36,7 +36,7 @@ This project includes:
 * Two-factor authentication support for GitHub.
 * Two-factor authentication support for Bitbucket.
 * Personal Access Token generation and usage support for Visual Studio Team Services and GitHub.
-* Non-interactive mode support for Visual Studio Team Services backed by Azure Directory..
+* Non-interactive mode support for Visual Studio Team Services backed by Azure Directory.
 * NTLM/Kerberos authentication for Team Foundation Server ([see notes](Docs/Faq.md#q-i-thought-microsoft-was-maintaining-this-why-does-the-gcm-not-work-as-expected-with-tfs)).
 * Optional settings for [build agent optimization](Docs/Automation.md).
 
@@ -46,7 +46,7 @@ This is a community project so feel free to contribute ideas, submit bugs, fix b
 
 ## Download and Install
 
-To use the GCM, you can download the [latest installer](https://github.com/Microsoft/Git-Credential-Manager-for-Windows/releases/latest). To install, double-click Setup.exe and follow the instructions presented.
+To use the GCM, you can download the [latest installer](https://github.com/Microsoft/Git-Credential-Manager-for-Windows/releases/latest). To install, double-click `Setup.exe` and follow the instructions presented.
 
 When prompted to select your terminal emulator for Git Bash you should choose the Windows' default console window, or make sure GCM is [configured to use modal dialogs](Docs/Configuration.md#modalprompt). GCM cannot prompt you for credentials, at the console, in a MinTTY setup.
 
