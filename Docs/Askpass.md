@@ -8,7 +8,9 @@ Askpass provides multi-factor authentication support for [Visual Studio Team Ser
 After installation and configuration, Git will use the Git Askpass and you will only need to interact with any authentication dialogs asking for credentials.
 The Askpass stays invisible as much as possible, so ideally you'll forget that you're depending on Askpass at all.
 
-    `git askpass`
+```shell
+git askpass
+```
 
 For Git to use Askpass correctly, the `GIT_ASKPASS` environment variable needs contain the full path to the `git-askpass.exe` executable (example: `setx GIT_ASKPASS "C:\Program Files\Git\mingw64\libexec\git-core\git-askpass.exe"`).
 SSH can also be configured to use Askpass in the same manner using the `SSH_ASKPASS` environment variable; however, SSH currently will not use Askpass if it detects a TTY console (ala the ability to just ask on the console).
