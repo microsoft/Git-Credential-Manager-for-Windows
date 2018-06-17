@@ -16,7 +16,9 @@ For more information, read [VSTS: Use the OAuth token to access the REST API](ht
 
 Build agents cannot manage modal dialogs, therefore we recommended the following configuration.
 
-    git config --global credential.interactive never
+```shell
+git config --global credential.interactive never
+```
 
 Build agents often need to minimize the amount of network traffic they generate.
 
@@ -24,20 +26,30 @@ To avoid Microsoft Account vs. Azure Active Directory look-up against a Visual S
 
 ... for Azure Directory backed authentication:
 
-    git config --global credential.authority Azure
+```shell
+git config --global credential.authority Azure
+```
 
 ... for Microsoft Account backed authentication:
 
-    git config --global credential.authority Microsoft
+```shell
+git config --global credential.authority Microsoft
+```
 
 ... to restrict the lifetime of VSTS personal access tokens:
 
-    git config --global credential.tokenDuration 1
+```shell
+git config --global credential.tokenDuration 1
+```
 
 If your agents rely on an on premise instance of Team Foundation Server and [Windows Domain Authentication](https://msdn.microsoft.com/en-us/library/ee253152(v=bts.10).aspx), use:
 
-    git config --global credential.authority NTLM
+```shell
+git config --global credential.authority NTLM
+```
 
 To avoid unnecessary service account credential validation, when relying on Microsoft Account or Azure Active Directory use:
 
-    git config --global credential.validate false
+```shell
+git config --global credential.validate false
+```

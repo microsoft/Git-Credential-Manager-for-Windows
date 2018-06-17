@@ -6,16 +6,16 @@ Developing for GCM and/or Askpass requires Visual Studio 2017 or newer, any vers
 
 The easiest way to get started is to:
 
- 1. Install Visual Studio.
- 2. [Clone the repository](https://github.com/Microsoft/Git-Credential-Manager-for-Windows.git).
- 3. Open the solution file (GitCredentialManager.sln) using Visual Studio.
- 4. Right-click the solution node in Solution Explorer and choose 'Restore NuGet Packages'.
-    This will download and setup all of the dependencies.
- 5. Right-click the 'Cli-CredentialHelper' project in Solution Explorer and select 'Properties'.
- 6. In the 'Properties' window, select the 'Debug' tab from the left side.
- 7. In the 'Properties: Debug' window, add the word "get" to the 'Command line arguments:' text box.
- 8. Close the "Properties" window.
- 9. Hit \<F5\>, or 'Debug' \>\> 'Start Debugging' from the top menu of Visual Studio.
+1. Install Visual Studio.
+2. [Clone the repository](https://github.com/Microsoft/Git-Credential-Manager-for-Windows.git).
+3. Open the solution file (GitCredentialManager.sln) using Visual Studio.
+4. Right-click the solution node in Solution Explorer and choose 'Restore NuGet Packages'.
+   This will download and setup all of the dependencies.
+5. Right-click the 'Cli-CredentialHelper' project in Solution Explorer and select 'Properties'.
+6. In the 'Properties' window, select the 'Debug' tab from the left side.
+7. In the 'Properties: Debug' window, add the word "get" to the 'Command line arguments:' text box.
+8. Close the "Properties" window.
+9. Hit \<F5\>, or 'Debug' \>\> 'Start Debugging' from the top menu of Visual Studio.
 
 ### Debugging Code
 
@@ -79,27 +79,29 @@ The documentation is formatted using [markdown](https://daringfireball.net/proje
 
 To enable logging, use the following:
 
-    `git config --global credential.writelog true`
+```shell
+git config --global credential.writelog true
+```
 
 Log files will be written to the repository's local `.git/` folder.
 
 Additionally, the GCM outputs *GIT_TRACE* compatible logging. To use the *GIT_TRACE* mechanism you can either:
 
- 1. Open a Command Prompt.
- 2. Run `SET GCM_TRACE=1`; this will cause the GCM to log directly to the console.
- 3. If you'd like Git to interleave its traces as well run `SET GIT_TRACE=1`; now Git will log directly to the console.
+1. Open a Command Prompt.
+2. Run `SET GCM_TRACE=1`; this will cause the GCM to log directly to the console.
+3. If you'd like Git to interleave its traces as well run `SET GIT_TRACE=1`; now Git will log directly to the console.
 
- _Or_
+_Or_
 
- 1. Open a Command Prompt.
- 2. Run `setx GCM_TRACE %UserProfile%\git.log`; this will cause the GCM to log to a file located at "%UserProfile%\git.log".
- 3. Close and re-open any console windows, and restart any application which need to make use of the new environment variable.
- 4. If you'd like Git to interleave its traces as well run `setx GIT_TRACE %UserProfile%\git.log`; now Git will log to the file located at "%UserProfile%\git.log".
- 5. To remove the environment variable, run `setx GCM_TRACE ""` or `GIT_TRACE ""`.
+1. Open a Command Prompt.
+2. Run `setx GCM_TRACE %UserProfile%\git.log`; this will cause the GCM to log to a file located at "%UserProfile%\git.log".
+3. Close and re-open any console windows, and restart any application which need to make use of the new environment variable.
+4. If you'd like Git to interleave its traces as well run `setx GIT_TRACE %UserProfile%\git.log`; now Git will log to the file located at "%UserProfile%\git.log".
+5. To remove the environment variable, run `setx GCM_TRACE ""` or `GIT_TRACE ""`.
 
- __Note:__ The path for logging is arbitrary and both GCM and Git will create/append the file, however neither Git nor the GCM will create any folders; therefore it is up to the user to specify a folder that exists.
- Additionally, if the specified path contains spaces, be sure to wrap the path in double-quote characters (_example:_ "%UserProfile%\my git.log").
- Finally, inaccessible paths could cause either Git or the GCM to fail unexpectedly, therefor avoid specifying paths which the user's account does not have access to; for example paths like "%ProgramFiles%\Git\logs\trace.log" are not recommended because only elevated processes can write to "%ProgramFiles%".
+__Note:__ The path for logging is arbitrary and both GCM and Git will create/append the file, however neither Git nor the GCM will create any folders; therefore it is up to the user to specify a folder that exists.
+Additionally, if the specified path contains spaces, be sure to wrap the path in double-quote characters (_example:_ "%UserProfile%\my git.log").
+Finally, inaccessible paths could cause either Git or the GCM to fail unexpectedly, therefor avoid specifying paths which the user's account does not have access to; for example paths like "%ProgramFiles%\Git\logs\trace.log" are not recommended because only elevated processes can write to "%ProgramFiles%".
 
 Debug build of the GCM will perform extended logging to the console, which is convenient for debugging purposes bug too noisy for day-to-day usage.
 

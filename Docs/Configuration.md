@@ -39,7 +39,9 @@ Use `Integrated` or `NTLM` if the host is a Team Foundation, or other NTLM authe
 
 Defaults to `Auto`.
 
-    git config --global credential.microsoft.visualstudio.com.authority AAD
+```shell
+git config --global credential.microsoft.visualstudio.com.authority AAD
+```
 
 See [GCM_AUTHORITY](Environment.md#gcm_authority)
 
@@ -52,17 +54,21 @@ The value should the URL of the proxy server.
 
 Defaults to not using a proxy server.
 
-    git config --global credential.github.com.httpProxy https://myproxy:8080
+```shell
+git config --global credential.github.com.httpProxy https://myproxy:8080
+```
 
 See [HTTP_PROXY](Environment.md#http_proxy--https_proxy)
 
 ### interactive
 
- Specifies if user can be prompted for credentials or not.
+Specifies if user can be prompted for credentials or not.
 
- Supports `Auto`, `Always`, or `Never`. Defaults to `Auto`.
+Supports `Auto`, `Always`, or `Never`. Defaults to `Auto`.
 
-    git config --global credential.microsoft.visualstudio.com.interactive never
+```shell
+git config --global credential.microsoft.visualstudio.com.interactive never
+```
 
 See [GCM_INTERACTIVE](Environment.md#gcm_interactive)
 
@@ -72,7 +78,9 @@ Forces authentication to use a modal dialog instead of asking for credentials at
 
 Supports `true` or `false`. Defaults to `true`.
 
-    git config --global credential.modalPrompt true
+```shell
+git config --global credential.modalPrompt true
+```
 
 See [GCM_MODAL_PROMPT](Environment.md#gcm_modal_prompt)
 
@@ -84,7 +92,9 @@ By default the GCM uses the 'git' namespace for all stored credentials, setting 
 
 Supports any ASCII, alpha-numeric only value. Defaults to `git`.
 
-    git config --global credential.namespace name
+```shell
+git config --global credential.namespace name
+```
 
 See [GCM_NAMESPACE](Environment.md#gcm_namespace)
 
@@ -95,7 +105,9 @@ Can lead to lockout situations once credentials expire and until those credentia
 
 Supports `true` or `false`. Defaults to `false`.
 
-    git config --global credential.visualstudio.com.preserve true
+```shell
+git config --global credential.visualstudio.com.preserve true
+```
 
 See [GCM_PRESERVE](Environment.md#gcm_preserve)
 
@@ -108,7 +120,9 @@ The value cannot be less than a one hour (1).
 
 Defaults to the account token duration. Honored when authority is set to `AAD` or `MSA`.
 
-    git config --global credential.visualstudio.com.tokenDuration 24
+```shell
+git config --global credential.visualstudio.com.tokenDuration 24
+```
 
 See [GCM_TOKEN_DURATION](Environment.md#gcm_token_duration)
 
@@ -121,7 +135,9 @@ _Note:_ This option changes the behavior of Git.
 
 Supports `true` or `false`. Defaults to `false`.
 
-    git config --global credential.bitbucket.com.useHttpPath true
+```shell
+git config --global credential.bitbucket.com.useHttpPath true
+```
 
 ### username
 
@@ -133,7 +149,9 @@ _Note:_ This option changes the behavior of Git.
 
 Supports any URI legal user-info. Defaults to not providing user-info.
 
-    git config --global credential.microsoft.visualstudio.com.username johndoe
+```shell
+git config --global credential.microsoft.visualstudio.com.username johndoe
+```
 
 ### validate
 
@@ -143,7 +161,9 @@ Incurs minor network operation overhead.
 
 Supports `true` or `false`. Defaults to `true`. Ignored when authority is set to `Basic`.
 
-    git config --global credential.microsoft.visualstudio.com.validate false
+```shell
+git config --global credential.microsoft.visualstudio.com.validate false
+```
 
 See [GCM_VALIDATE](Environment.md#gcm_validate)
 
@@ -154,7 +174,9 @@ The supported format is one or more [scope values](https://docs.microsoft.com/en
 
 Defaults to `vso.code_write|vso.packaging`; Honored when host is 'visualstudio.com'.
 
-    git config --global credential.microsoft.visualstudio.com.vstsScope vso.code_write|vso.packaging_write|vso.test_write
+```shell
+git config --global credential.microsoft.visualstudio.com.vstsScope vso.code_write|vso.packaging_write|vso.test_write
+```
 
 See [GCM_VSTS_SCOPE](Environment.md#gcm_vsts_scope)
 
@@ -167,7 +189,9 @@ __Note:__ This setting will not override the `GCM_TRACE` environment variable.
 
 Supports `true` or `false`. Defaults to `false`.
 
-    git config --global credential.writeLog true
+```shell
+git config --global credential.writeLog true
+```
 
 See [GCM_WRITELOG](Environment.md#gcm_writelog)
 

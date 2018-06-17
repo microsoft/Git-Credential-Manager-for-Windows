@@ -10,7 +10,9 @@ The GCM stays invisible as much as possible, so ideally you’ll forget that you
 
 Assuming the GCM has been installed, using your favorite Windows console (Command Prompt, PowerShell, ConEmu, etc.), use the following command to interact directly with the GCM.
 
-    `git credential-manager [<command> [<args>]]`
+```shell
+git credential-manager [<command> [<args>]]
+```
 
 ## Commands
 
