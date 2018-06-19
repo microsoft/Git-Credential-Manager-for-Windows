@@ -1,0 +1,69 @@
+queue:
+  name: Hosted VS2017
+  demands: 
+  - msbuild
+  - visualstudio
+  - vstest
+
+steps:
+- task: NuGetToolInstaller@0
+  displayName: 'Use NuGet 4.4.0'
+  inputs:
+    versionSpec: 4.4.0
+
+- task: NuGetCommand@2
+  displayName: NuGet restore
+  inputs:
+    restoreSolution: '$(Build.Solution)'
+    verbosityRestore: '$(Build.Verbosity)'
+
+- task: MSBuild@1
+  displayName: 'Core Build'
+  inputs:
+    solution: '$(Build.Target)'
+    msbuildArguments: '/nologo /verbosity:$(Build.Verbosity) /binaryLogger:$(Build.SourcesDirectory)/gcmwci.binlog'
+    platform: '$(Build.Platform)'
+    configuration: '$(Build.Configuration)'
+    maximumCpuCount: true
+    msbuildArchitecture: '$(Build.Architecture)'
+
+- task: VSTest@2
+  displayName: 'Execute Tests (Xunit)'
+  inputs:
+    testAssemblyVer2: |
+     **\*Test.dll
+     !**\xunit.*.dll
+     !**\obj\**
+    searchFolder: '$(Build.SourcesDirectory)'
+    runInParallel: true
+    runTestsInIsolation: true
+    codeCoverageEnabled: true
+    platform: '$(Build.Platform)'
+    configuration: '$(Build.Configuration)'
+
+- task: PublishBuildArtifacts@1
+  displayName: 'Publish Artifact: Binary Log'
+  continueOnError: true
+  inputs:
+    pathtoPublish: '$(Build.SourcesDirectory)\gcmwci.binlog'
+    artifactName: 'Binary Logs'
+    publishLocation: Container
+
+- task: PublishBuildArtifacts@1
+  displayName: 'Publish Artifact: Deploy Folder'
+  continueOnError: true
+  inputs:
+    pathtoPublish: '$(Build.SourcesDirectory)\Deploy\'
+    artifactName: 'Git Credential Manager'
+    publishLocation: Container
+
+- task: DeleteFiles@1
+  displayName: 'Delete Artifacts from Agent'
+  inputs:
+    sourceFolder: '$(Build.SourcesDirectory)'
+    contents: |
+     *.binlog
+     Deploy\*.*
+     **\bin\**\*.*
+     **\obj\**\*.*
+
