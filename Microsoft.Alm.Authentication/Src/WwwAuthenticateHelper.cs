@@ -57,9 +57,19 @@ namespace Microsoft.Alm.Authentication
                         Flags = NetworkRequestOptionFlags.UseProxy,
                         Timeout = TimeSpan.FromMilliseconds(Global.RequestTimeout),
                     };
+                    var requestUri = targetUri;
+
+                    // Since we're more likely to get an accurate response from the actual-URL,
+                    // use it if available, otherwise use `targetUri` as supplied; but only if
+                    // the actual-URL differs from the query-URL.
+                    if (targetUri.ActualUri != null
+                        && targetUri.ActualUri != targetUri.QueryUri)
+                    {
+                        requestUri = targetUri.CreateWith(queryUri: targetUri.ActualUri);
+                    }
 
                     // Make the request and return the response.
-                    using (var result = await context.Network.HttpHeadAsync(targetUri, options))
+                    using (var result = await context.Network.HttpHeadAsync(requestUri, options))
                     {
                         return result.Headers?.WwwAuthenticate?.ToArray()
                             ?? NullResult;
