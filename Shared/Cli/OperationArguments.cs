@@ -532,6 +532,13 @@ namespace Microsoft.Alm.Cli
                         {
                             password = pair[1];
                         }
+                        // This is a GCM only addition to the Git-Credential specification. The intent is to
+                        // facilitate debugging without the need for running git.exe to debug git-remote-http(s)
+                        // command line values.
+                        else if ("_url".Equals(pair[0], StringComparison.Ordinal))
+                        {
+                            _gitRemoteHttpCommandLine = pair[1];
+                        }
                     }
                 }
             }
@@ -725,10 +732,26 @@ namespace Microsoft.Alm.Cli
             {
                 string[] parts = _gitRemoteHttpCommandLine.Split(' ');
 
-                if (parts.Length == 3 && Uri.TryCreate(parts[2], UriKind.Absolute, out Uri uri))
+                switch(parts.Length)
                 {
-                    actualUrl = uri.ToString();
-                }
+                    case 1:
+                        {
+                            if (Uri.TryCreate(parts[0], UriKind.Absolute, out Uri uri))
+                            {
+                                actualUrl = uri.ToString();
+                            }
+                        }
+                        break;
+
+                    case 3:
+                        {
+                            if (Uri.TryCreate(parts[2], UriKind.Absolute, out Uri uri))
+                            {
+                                actualUrl = uri.ToString();
+                            }
+                        }
+                        break;
+                }                
             }
 
             // Create the target URI object.
