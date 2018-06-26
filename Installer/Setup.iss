@@ -299,7 +299,6 @@ end;
 function UninstallManager() : Boolean;
 var
   ResultCode: Integer;
-  StatusText: String;
 begin
   Result := false;
 
