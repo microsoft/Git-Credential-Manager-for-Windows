@@ -173,6 +173,7 @@ namespace VisualStudioTeamServices.Authentication
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Design", "CA1062:Validate arguments of public methods", MessageId = "0")]
         public static async Task<Guid?> DetectAuthority(RuntimeContext context, TargetUri targetUri)
         {
+            const int GuidStringLength = 36;
             const string VstsResourceTenantHeader = "X-VSS-ResourceTenant";
 
             if (context is null)
@@ -180,78 +181,144 @@ namespace VisualStudioTeamServices.Authentication
             if (targetUri is null)
                 throw new ArgumentNullException(nameof(targetUri));
 
+            // Assume VSTS using Azure "common tenant" (empty GUID).
             var tenantId = Guid.Empty;
 
-            if (IsVstsUrl(targetUri))
+            // Compose the request Uri, by default it is the target Uri.
+            var requestUri = targetUri;
+
+            // Override the request Uri, when actual Uri exists, with actual Uri.
+            if (targetUri.ActualUri != null)
             {
-                var tenantUrl = GetTargetUrl(targetUri, false);
+                requestUri = targetUri.CreateWith(queryUri: targetUri.ActualUri);
+            }
 
-                context.Trace.WriteLine($"'{targetUri}' is a member '{tenantUrl}', checking AAD vs MSA.");
+            // If the protocol (aka scheme) being used isn't HTTP based, there's no point in
+            // queryng the server, so skip that work.
+            if (OrdinalIgnoreCase.Equals(requestUri.Scheme, Uri.UriSchemeHttp)
+                || OrdinalIgnoreCase.Equals(requestUri.Scheme, Uri.UriSchemeHttps))
+            {
+                var requestUrl = GetTargetUrl(requestUri, false);
 
-                if (OrdinalIgnoreCase.Equals(targetUri.Scheme, Uri.UriSchemeHttp)
-                    || OrdinalIgnoreCase.Equals(targetUri.Scheme, Uri.UriSchemeHttps))
+                // Read the cache from disk.
+                var cache = await DeserializeTenantCache(context);
+
+                // Check the cache for an existing value.
+                if (cache.TryGetValue(requestUrl, out tenantId))
                 {
-                    // Read the cache from disk.
-                    var cache = await DeserializeTenantCache(context);
+                    context.Trace.WriteLine($"'{requestUrl}' is VSTS, tenant resource is {{{tenantId:g}}}.");
 
-                    // Check the cache for an existing value.
-                    if (cache.TryGetValue(tenantUrl, out tenantId))
-                        return tenantId;
+                    return tenantId;
+                }
 
-                    var options = new NetworkRequestOptions(false)
+                var options = new NetworkRequestOptions(false)
+                {
+                    Flags = NetworkRequestOptionFlags.UseProxy,
+                    Timeout = TimeSpan.FromMilliseconds(Global.RequestTimeout),
+                };
+
+                try
+                {
+                    // Query the host use the response headers to determine if the host is VSTS or not.
+                    using (var response = await context.Network.HttpHeadAsync(requestUri, options))
                     {
-                        Flags = NetworkRequestOptionFlags.UseProxy,
-                        Timeout = TimeSpan.FromMilliseconds(Global.RequestTimeout),
-                    };
-
-                    try
-                    {
-                        var tenantUri = targetUri.CreateWith(tenantUrl);
-
-                        using (var response = await context.Network.HttpHeadAsync(tenantUri, options))
+                        if (response.Headers != null)
                         {
-                            if (response.Headers != null && response.Headers.TryGetValues(VstsResourceTenantHeader, out IEnumerable<string> values))
+                            // If the "X-VSS-ResourceTenant" was returned, then it is VSTS and we'll need it's value.
+                            if (response.Headers.TryGetValues(VstsResourceTenantHeader, out IEnumerable<string> values))
                             {
-                                foreach (string value in values)
+                                context.Trace.WriteLine($"detected '{requestUrl}' as VSTS from GET response.");
+
+                                // The "Www-Authenticate" is a more reliable header, because it indicates the 
+                                // authentication scheme that should be used to access the requested entity.
+                                if (response.Headers.WwwAuthenticate != null)
                                 {
-                                    // Try to find a non-empty value for the resource-tenant identity
-                                    if (!string.IsNullOrWhiteSpace(value)
-                                        && Guid.TryParse(value, out tenantId)
-                                        && tenantId != Guid.Empty)
+                                    foreach (var header in response.Headers.WwwAuthenticate)
                                     {
-                                        // Update the cache.
-                                        cache[tenantUrl] = tenantId;
+                                        const string AuthorizationUriPrefix = "authorization_uri=";
 
-                                        // Write the cache to disk.
-                                        await SerializeTenantCache(context, cache);
+                                        var value = header.Parameter;
 
-                                        // Success, notify the caller
-                                        return tenantId;
+                                        if (value.Length >= AuthorizationUriPrefix.Length + AuthorityHostUrlBase.Length + GuidStringLength)
+                                        {
+                                            // The header parameter will look something like "authorization_uri=https://login.microsoftonline.com/72f988bf-86f1-41af-91ab-2d7cd011db47"
+                                            // and all we want is the the portion after the '=' and before the last '/'.
+                                            int index1 = value.IndexOf('=', AuthorizationUriPrefix.Length - 1);
+                                            int index2 = value.LastIndexOf('/');
+
+                                            // Parse the header value if the necissary characters exist...
+                                            if (index1 > 0 && index2 > index1)
+                                            {
+                                                var authorityUrl = value.Substring(index1 + 1, index2 - index1 - 1);
+                                                var guidString = value.Substring(index2 + 1, GuidStringLength);
+
+                                                // If the authorty URL is as expected, attempt to parse the tenant resource identity.
+                                                if (OrdinalIgnoreCase.Equals(authorityUrl, AuthorityHostUrlBase)
+                                                    && Guid.TryParse(guidString, out tenantId))
+                                                {
+                                                    // Update the cache.
+                                                    cache[requestUrl] = tenantId;
+
+                                                    // Write the cache to disk.
+                                                    await SerializeTenantCache(context, cache);
+
+                                                    // Since we found a value, break the loop (likely a loop of one item anyways).
+                                                    break;
+                                                }
+                                            }
+                                        }
+                                    }
+                                }
+                                else
+                                {
+                                    // Since there wasn't a "Www-Authenticate" header returned
+                                    // iterate through the values, taking the first non-zero value.
+                                    foreach (string value in values)
+                                    {
+                                        // Try to find a value for the resource-tenant identity.
+                                        // Given that some projects will return multiple tenant idenities, 
+                                        if (!string.IsNullOrWhiteSpace(value)
+                                            && Guid.TryParse(value, out tenantId))
+                                        {
+                                            // Update the cache.
+                                            cache[requestUrl] = tenantId;
+
+                                            // Write the cache to disk.
+                                            await SerializeTenantCache(context, cache);
+
+                                            // Break the loop if a non-zero value has been detected.
+                                            if (tenantId != Guid.Empty)
+                                            {
+                                                break;
+                                            }
+                                        }
                                     }
                                 }
 
-                                // Since we did not find a better identity, fallback to the default (Guid.Empty). 
+                                context.Trace.WriteLine($"tenant resource for '{requestUrl}' is {{{tenantId:g}}}.");
+
+                                // Return the tenant identity to the caller because this is VSTS.
                                 return tenantId;
                             }
-                            else
-                            {
-                                context.Trace.WriteLine($"unable to get response from '{targetUri}' [{(int)response.StatusCode} {response.StatusCode}].");
-                            }
+                        }
+                        else
+                        {
+                            context.Trace.WriteLine($"unable to get response from '{requestUri}' [{(int)response.StatusCode} {response.StatusCode}].");
                         }
                     }
-                    catch (HttpRequestException exception)
-                    {
-                        context.Trace.WriteLine($"unable to get response from '{targetUri}', an error occurred before the server could respond.");
-                        context.Trace.WriteException(exception);
-                    }
                 }
-                else
+                catch (HttpRequestException exception)
                 {
-                    context.Trace.WriteLine($"detected non-http(s) based protocol: '{targetUri.Scheme}'.");
+                    context.Trace.WriteLine($"unable to get response from '{requestUri}', an error occurred before the server could respond.");
+                    context.Trace.WriteException(exception);
                 }
             }
+            else
+            {
+                context.Trace.WriteLine($"detected non-http(s) based protocol: '{requestUri.Scheme}'.");
+            }
 
-            if (StringComparer.OrdinalIgnoreCase.Equals(VstsBaseUrlHost, targetUri.Host))
+            if (OrdinalIgnoreCase.Equals(VstsBaseUrlHost, requestUri.Host))
                 return Guid.Empty;
 
             // Fallback to basic authentication.
@@ -473,7 +540,7 @@ namespace VisualStudioTeamServices.Authentication
             var path = GetCachePath(context);
 
             string data = null;
-            var cache = new Dictionary<string, Guid>(StringComparer.OrdinalIgnoreCase);
+            var cache = new Dictionary<string, Guid>(OrdinalIgnoreCase);
             Exception exception = null;
 
             // Attempt up to five times to read from the cache
@@ -569,7 +636,7 @@ namespace VisualStudioTeamServices.Authentication
             var encoding = new UTF8Encoding(false);
             string path = GetCachePath(context);
 
-            StringBuilder builder = new StringBuilder();
+            var builder = new StringBuilder();
             Exception exception = null;
 
             // Write each key/value pair as key=value\0
