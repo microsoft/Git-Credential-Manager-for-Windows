@@ -209,127 +209,145 @@ namespace Microsoft.Alm.Authentication.Git
             const string GitSubkeyName = @"SOFTWARE\Microsoft\Windows\CurrentVersion\Uninstall\Git_is1";
             const string GitValueName = "InstallLocation";
 
-            installations = null;
-
-            var programFiles32Path = string.Empty;
-            var programFiles64Path = string.Empty;
-            var appDataRoamingPath = string.Empty;
-            var appDataLocalPath = string.Empty;
-            var programDataPath = string.Empty;
-            var reg32HklmPath = string.Empty;
-            var reg64HklmPath = string.Empty;
-            var reg32HkcuPath = string.Empty;
-            var reg64HkcuPath = string.Empty;
-            var shellPathValue = string.Empty;
-
-            using (var reg32HklmKey = RegistryKey.OpenBaseKey(RegistryHive.LocalMachine, RegistryView.Registry32))
-            using (var reg32HkcuKey = RegistryKey.OpenBaseKey(RegistryHive.CurrentUser, RegistryView.Registry32))
-            using (var reg32HklmSubKey = reg32HklmKey?.OpenSubKey(GitSubkeyName))
-            using (var reg32HkcuSubKey = reg32HkcuKey?.OpenSubKey(GitSubkeyName))
+            void ScanApplicationData(IList<Installation> output)
             {
-                reg32HklmPath = reg32HklmSubKey?.GetValue(GitValueName, reg32HklmPath) as string;
-                reg32HkcuPath = reg32HkcuSubKey?.GetValue(GitValueName, reg32HkcuPath) as string;
-            }
+                var appDataRoamingPath = string.Empty;
 
-            if ((programFiles32Path = Environment.GetFolderPath(Environment.SpecialFolder.ProgramFilesX86)) != null)
-            {
-                programFiles32Path = Path.Combine(programFiles32Path, GitAppName);
-            }
-
-            if (Environment.Is64BitOperatingSystem)
-            {
-                using (var reg64HklmKey = RegistryKey.OpenBaseKey(RegistryHive.LocalMachine, RegistryView.Registry64))
-                using (var reg64HkcuKey = RegistryKey.OpenBaseKey(RegistryHive.CurrentUser, RegistryView.Registry64))
-                using (var reg64HklmSubKey = reg64HklmKey?.OpenSubKey(GitSubkeyName))
-                using (var reg64HkcuSubKey = reg64HkcuKey?.OpenSubKey(GitSubkeyName))
+                if ((appDataRoamingPath = Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData)) != null)
                 {
-                    reg64HklmPath = reg64HklmSubKey?.GetValue(GitValueName, reg64HklmPath) as string;
-                    reg64HkcuPath = reg64HkcuSubKey?.GetValue(GitValueName, reg64HkcuPath) as string;
+                    appDataRoamingPath = Path.Combine(appDataRoamingPath, GitAppName);
+
+                    output.Add(new Installation(Context, appDataRoamingPath, KnownDistribution.GitForWindows64v2));
+                    output.Add(new Installation(Context, appDataRoamingPath, KnownDistribution.GitForWindows32v2));
+                    output.Add(new Installation(Context, appDataRoamingPath, KnownDistribution.GitForWindows32v1));
                 }
 
-                if ((programFiles64Path = Environment.GetFolderPath(Environment.SpecialFolder.ProgramFiles)) != null)
+                var appDataLocalPath = string.Empty;
+
+                if ((appDataLocalPath = Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData)) != null)
                 {
-                    programFiles64Path = Path.Combine(programFiles64Path, GitAppName);
+                    appDataLocalPath = Path.Combine(appDataLocalPath, GitAppName);
+
+                    output.Add(new Installation(Context, appDataLocalPath, KnownDistribution.GitForWindows64v2));
+                    output.Add(new Installation(Context, appDataLocalPath, KnownDistribution.GitForWindows32v2));
+                    output.Add(new Installation(Context, appDataLocalPath, KnownDistribution.GitForWindows32v1));
+                }
+
+                var programDataPath = string.Empty;
+
+                if ((programDataPath = Environment.GetFolderPath(Environment.SpecialFolder.CommonApplicationData)) != null)
+                {
+                    programDataPath = Path.Combine(programDataPath, GitAppName);
+
+                    output.Add(new Installation(Context, programDataPath, KnownDistribution.GitForWindows64v2));
+                    output.Add(new Installation(Context, programDataPath, KnownDistribution.GitForWindows32v2));
+                    output.Add(new Installation(Context, programDataPath, KnownDistribution.GitForWindows32v1));
                 }
             }
 
-            if ((appDataRoamingPath = Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData)) != null)
+            void ScanProgramFiles(IList<Installation> output)
             {
-                appDataRoamingPath = Path.Combine(appDataRoamingPath, GitAppName);
-            }
+                var programFiles32Path = string.Empty;
 
-            if ((appDataLocalPath = Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData)) != null)
-            {
-                appDataLocalPath = Path.Combine(appDataLocalPath, GitAppName);
-            }
-
-            if ((programDataPath = Environment.GetFolderPath(Environment.SpecialFolder.CommonApplicationData)) != null)
-            {
-                programDataPath = Path.Combine(programDataPath, GitAppName);
-            }
-
-            List<Installation> candidates = new List<Installation>();
-            // Add candidate locations in order of preference.
-            if (FindApp(GitAppName, out shellPathValue))
-            {
-                // `Where.App` returns the path to the executable, truncate to the installation root
-                if (shellPathValue.EndsWith(Installation.AllVersionCmdPath, StringComparison.OrdinalIgnoreCase))
+                if ((programFiles32Path = Environment.GetFolderPath(Environment.SpecialFolder.ProgramFilesX86)) != null)
                 {
-                    shellPathValue = shellPathValue.Substring(0, shellPathValue.Length - Installation.AllVersionCmdPath.Length);
+                    programFiles32Path = Path.Combine(programFiles32Path, GitAppName);
+
+                    output.Add(new Installation(Context, programFiles32Path, KnownDistribution.GitForWindows32v2));
+                    output.Add(new Installation(Context, programFiles32Path, KnownDistribution.GitForWindows32v1));
                 }
 
-                candidates.Add(new Installation(Context, shellPathValue, KnownDistribution.GitForWindows64v2));
-                candidates.Add(new Installation(Context, shellPathValue, KnownDistribution.GitForWindows32v2));
-                candidates.Add(new Installation(Context, shellPathValue, KnownDistribution.GitForWindows32v1));
+                if (Environment.Is64BitOperatingSystem)
+                {
+                    var programFiles64Path = string.Empty;
+
+                    if ((programFiles64Path = Environment.GetFolderPath(Environment.SpecialFolder.ProgramFiles)) != null)
+                    {
+                        programFiles64Path = Path.Combine(programFiles64Path, GitAppName);
+
+                        output.Add(new Installation(Context, programFiles64Path, KnownDistribution.GitForWindows64v2));
+                    }
+                }
             }
 
-            if (!string.IsNullOrEmpty(reg64HklmPath))
+            void ScanRegistry(IList<Installation> output)
             {
-                candidates.Add(new Installation(Context, reg64HklmPath, KnownDistribution.GitForWindows64v2));
-            }
-            if (!string.IsNullOrEmpty(programFiles64Path))
-            {
-                candidates.Add(new Installation(Context, programFiles64Path, KnownDistribution.GitForWindows64v2));
-            }
-            if (!string.IsNullOrEmpty(reg64HkcuPath))
-            {
-                candidates.Add(new Installation(Context, reg64HkcuPath, KnownDistribution.GitForWindows64v2));
-            }
-            if (!string.IsNullOrEmpty(reg32HklmPath))
-            {
-                candidates.Add(new Installation(Context, reg32HklmPath, KnownDistribution.GitForWindows32v2));
-                candidates.Add(new Installation(Context, reg32HklmPath, KnownDistribution.GitForWindows32v1));
-            }
-            if (!string.IsNullOrEmpty(programFiles32Path))
-            {
-                candidates.Add(new Installation(Context, programFiles32Path, KnownDistribution.GitForWindows32v2));
-                candidates.Add(new Installation(Context, programFiles32Path, KnownDistribution.GitForWindows32v1));
-            }
-            if (!string.IsNullOrEmpty(reg32HkcuPath))
-            {
-                candidates.Add(new Installation(Context, reg32HkcuPath, KnownDistribution.GitForWindows32v2));
-                candidates.Add(new Installation(Context, reg32HkcuPath, KnownDistribution.GitForWindows32v1));
-            }
-            if (!string.IsNullOrEmpty(programDataPath))
-            {
-                candidates.Add(new Installation(Context, programDataPath, KnownDistribution.GitForWindows64v2));
-                candidates.Add(new Installation(Context, programDataPath, KnownDistribution.GitForWindows32v2));
-                candidates.Add(new Installation(Context, programDataPath, KnownDistribution.GitForWindows32v1));
-            }
-            if (!string.IsNullOrEmpty(appDataLocalPath))
-            {
-                candidates.Add(new Installation(Context, appDataLocalPath, KnownDistribution.GitForWindows64v2));
-                candidates.Add(new Installation(Context, appDataLocalPath, KnownDistribution.GitForWindows32v2));
-                candidates.Add(new Installation(Context, appDataLocalPath, KnownDistribution.GitForWindows32v1));
-            }
-            if (!string.IsNullOrEmpty(appDataRoamingPath))
-            {
-                candidates.Add(new Installation(Context, appDataRoamingPath, KnownDistribution.GitForWindows64v2));
-                candidates.Add(new Installation(Context, appDataRoamingPath, KnownDistribution.GitForWindows32v2));
-                candidates.Add(new Installation(Context, appDataRoamingPath, KnownDistribution.GitForWindows32v1));
+                var reg32HklmPath = string.Empty;
+                var reg32HkcuPath = string.Empty;
+
+                using (var reg32HklmKey = RegistryKey.OpenBaseKey(RegistryHive.LocalMachine, RegistryView.Registry32))
+                using (var reg32HkcuKey = RegistryKey.OpenBaseKey(RegistryHive.CurrentUser, RegistryView.Registry32))
+                using (var reg32HklmSubKey = reg32HklmKey?.OpenSubKey(GitSubkeyName))
+                using (var reg32HkcuSubKey = reg32HkcuKey?.OpenSubKey(GitSubkeyName))
+                {
+                    reg32HklmPath = reg32HklmSubKey?.GetValue(GitValueName, reg32HklmPath) as string;
+                    reg32HkcuPath = reg32HkcuSubKey?.GetValue(GitValueName, reg32HkcuPath) as string;
+                }
+
+                if (!string.IsNullOrEmpty(reg32HklmPath))
+                {
+                    output.Add(new Installation(Context, reg32HklmPath, KnownDistribution.GitForWindows32v2));
+                    output.Add(new Installation(Context, reg32HklmPath, KnownDistribution.GitForWindows32v1));
+                }
+
+                if (!string.IsNullOrEmpty(reg32HkcuPath))
+                {
+                    output.Add(new Installation(Context, reg32HkcuPath, KnownDistribution.GitForWindows32v2));
+                    output.Add(new Installation(Context, reg32HkcuPath, KnownDistribution.GitForWindows32v1));
+                }
+
+                if (Environment.Is64BitOperatingSystem)
+                {
+                    var reg64HklmPath = string.Empty;
+                    var reg64HkcuPath = string.Empty;
+
+                    using (var reg64HklmKey = RegistryKey.OpenBaseKey(RegistryHive.LocalMachine, RegistryView.Registry64))
+                    using (var reg64HkcuKey = RegistryKey.OpenBaseKey(RegistryHive.CurrentUser, RegistryView.Registry64))
+                    using (var reg64HklmSubKey = reg64HklmKey?.OpenSubKey(GitSubkeyName))
+                    using (var reg64HkcuSubKey = reg64HkcuKey?.OpenSubKey(GitSubkeyName))
+                    {
+                        reg64HklmPath = reg64HklmSubKey?.GetValue(GitValueName, reg64HklmPath) as string;
+                        reg64HkcuPath = reg64HkcuSubKey?.GetValue(GitValueName, reg64HkcuPath) as string;
+                    }
+
+                    if (!string.IsNullOrEmpty(reg64HklmPath))
+                    {
+                        output.Add(new Installation(Context, reg64HklmPath, KnownDistribution.GitForWindows64v2));
+                    }
+
+                    if (!string.IsNullOrEmpty(reg64HkcuPath))
+                    {
+                        output.Add(new Installation(Context, reg64HkcuPath, KnownDistribution.GitForWindows64v2));
+                    }
+                }
             }
 
-            HashSet<Installation> pathSet = new HashSet<Installation>();
+            void ScanShellPath(IList<Installation> output)
+            {
+                var shellPathValue = string.Empty;
+
+                if (FindApp(GitAppName, out shellPathValue))
+                {
+                    // `Where.App` returns the path to the executable, truncate to the installation root
+                    if (shellPathValue.EndsWith(Installation.AllVersionCmdPath, StringComparison.OrdinalIgnoreCase))
+                    {
+                        shellPathValue = shellPathValue.Substring(0, shellPathValue.Length - Installation.AllVersionCmdPath.Length);
+                    }
+
+                    output.Add(new Installation(Context, shellPathValue, KnownDistribution.GitForWindows64v2));
+                    output.Add(new Installation(Context, shellPathValue, KnownDistribution.GitForWindows32v2));
+                    output.Add(new Installation(Context, shellPathValue, KnownDistribution.GitForWindows32v1));
+                }
+            }
+
+            var candidates = new List<Installation>();
+
+            ScanShellPath(candidates);
+            ScanRegistry(candidates);
+            ScanProgramFiles(candidates);
+            ScanApplicationData(candidates);
+
+            var pathSet = new HashSet<Installation>();
             foreach (var candidate in candidates)
             {
                 if (candidate.IsValid())
