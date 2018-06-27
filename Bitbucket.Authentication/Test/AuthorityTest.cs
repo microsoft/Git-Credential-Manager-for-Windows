@@ -13,7 +13,7 @@ namespace Bitbucket.Authentication.Test
     public class AuthorityTest
     {
         [Fact]
-        public async void VerifyAcquireTokenAcceptsValidAuthenticationResultTypes()
+        public void VerifyAcquireTokenAcceptsValidAuthenticationResultTypes()
         {
             var context = RuntimeContext.Default;
             var authority = new Authority(context);
