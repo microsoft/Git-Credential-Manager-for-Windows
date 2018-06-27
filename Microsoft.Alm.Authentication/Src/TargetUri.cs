@@ -230,6 +230,7 @@ namespace Microsoft.Alm.Authentication
         /// The new URL used for all queries if not `<see langword="null"/>`; otherwise is unchanged from `<seealso cref="ActualUri"/>`.
         /// </param>
         /// <exception cref="ArgumentException">When all arguments are `<see langword="null"/>`.</exception>
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Design", "CA1026:DefaultParametersShouldNotBeUsed")]
         public TargetUri CreateWith(string queryUrl = null, string proxyUrl = null, string actualUrl = null)
         {
             if (queryUrl is null && proxyUrl is null && actualUrl is null)
@@ -255,6 +256,7 @@ namespace Microsoft.Alm.Authentication
         /// The new `<seealso cref="Uri"/>` used for all queries if not `<see langword="null"/>`; otherwise is unchanged from `<seealso cref="ActualUri"/>`.
         /// </param>
         /// <exception cref="ArgumentException">When all arguments are `<see langword="null"/>`.</exception>
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Design", "CA1026:DefaultParametersShouldNotBeUsed")]
         public TargetUri CreateWith(Uri queryUri = null, Uri proxyUri = null, Uri actualUri = null)
         {
             if (queryUri is null && proxyUri is null && actualUri is null)

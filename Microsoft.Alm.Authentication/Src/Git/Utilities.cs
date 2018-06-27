@@ -92,7 +92,7 @@ namespace Microsoft.Alm.Authentication.Git
             return false;
         }
 
-        internal IEnumerable<Win32.ProcessEntry32> EnumerateParentProcesses()
+        internal static IEnumerable<Win32.ProcessEntry32> EnumerateParentProcesses()
         {
             var processTable = new Dictionary<uint, uint>();
             var processEntries = new Dictionary<uint, Win32.ProcessEntry32>();
