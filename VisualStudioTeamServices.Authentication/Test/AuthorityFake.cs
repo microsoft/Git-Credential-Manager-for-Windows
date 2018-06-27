@@ -63,6 +63,18 @@ namespace VisualStudioTeamServices.Authentication.Test
         }
 
         /// <summary>
+        /// Generates a personal access token for use with Visual Studio Team Services.
+        /// <para/>
+        /// Returns the acquired token if successful; otherwise <see langword="null"/>;
+        /// </summary>
+        /// <param name="targetUri">The uniform resource indicator of the resource access tokens are being requested for.</param>
+        /// <param name="accessToken">Access token granted by the identity authority (Azure).</param>
+        /// <param name="tokenScope">The requested access scopes to be granted to the token.</param>
+        /// <param name="requireCompactToken">`<see langword="true"/>` if requesting a compact format token; otherwise `<see langword="false"/>`.</param>
+        public Task<Token> GeneratePersonalAccessToken(TargetUri targetUri, Token accessToken, TokenScope tokenScope, bool requireCompactToken)
+            => GeneratePersonalAccessToken(targetUri, accessToken, tokenScope, requireCompactToken, null);
+
+        /// <summary>
         /// Acquires a <see cref="Token"/> from the authority via an interactive user logon prompt.
         /// <para/>
         /// Returns a `<see cref="Token"/>` is successful; otherwise <see langword="null"/>.
@@ -72,7 +84,7 @@ namespace VisualStudioTeamServices.Authentication.Test
         /// <param name="resource">Identifier of the target resource that is the recipient of the requested token.</param>
         /// <param name="redirectUri">Address to return to upon receiving a response from the authority.</param>
         /// <param name="queryParameters">optional value, appended as-is to the query string in the HTTP authentication request to the authority.</param>
-        public async Task<Token> InteractiveAcquireToken(TargetUri targetUri, string clientId, string resource, Uri redirectUri, string queryParameters = null)
+        public async Task<Token> InteractiveAcquireToken(TargetUri targetUri, string clientId, string resource, Uri redirectUri, string queryParameters)
         {
             Assert.Equal(ExpectedQueryParameters, queryParameters);
 
