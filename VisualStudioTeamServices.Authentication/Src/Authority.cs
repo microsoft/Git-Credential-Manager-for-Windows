@@ -90,7 +90,7 @@ namespace VisualStudioTeamServices.Authentication
         /// </summary>
         public string AuthorityHostUrl { get; protected set; }
 
-        public async Task<Token> GeneratePersonalAccessToken(TargetUri targetUri, Token authorization, TokenScope tokenScope, bool requireCompactToken, TimeSpan? tokenDuration = null)
+        public async Task<Token> GeneratePersonalAccessToken(TargetUri targetUri, Token authorization, TokenScope tokenScope, bool requireCompactToken, TimeSpan? tokenDuration)
         {
             if (targetUri is null)
                 throw new ArgumentNullException(nameof(targetUri));
@@ -142,6 +142,9 @@ namespace VisualStudioTeamServices.Authentication
 
             return null;
         }
+
+        public Task<Token> GeneratePersonalAccessToken(TargetUri targetUri, Token authorization, TokenScope tokenScope, bool requireCompactToken)
+            => GeneratePersonalAccessToken(targetUri, authorization, tokenScope, requireCompactToken, null);
 
         /// <summary>
         /// Returns the properly formatted URL for the Azure authority given a tenant identity.
