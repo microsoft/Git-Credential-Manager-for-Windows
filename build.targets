@@ -3,7 +3,7 @@
   <Target Name="EnumerateProps" BeforeTargets="BeforeBuild">
     <Message Text="ProjectName = $(ProjectName)" />
     <Message Text="ProjectUrl = $(ProjectUrl)" />
-    <Message Text="ConfigurationPlatfotm = $(Configuration)|$(Platform)" />
+    <Message Text="ConfigurationPlatform = $(Configuration)|$(Platform)" />
     <Message Text="TargetFrameworkVersion = $(TargetFrameworkVersion)" />
     <Message Text="RootNamespace = $(RootNamespace)" />
     <Message Text="AutoGenerateBindingRedirects = $(AutoGenerateBindingRedirects)" />
