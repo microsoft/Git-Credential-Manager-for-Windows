@@ -29,7 +29,7 @@
   </PropertyGroup>
   <PropertyGroup>
     <GcmExePath>$(OutputPath)\GCMW-$(GcmVersion).exe</GcmExePath>
-    <GcmPkgPath>$(OutputPath)\Microsoft.Alm.Authentication.$(PkgVersion).nupkg</GcmPkgPath>
+    <GcmPkgPath>$(OutputPath)\VisualStudioTeamServices.Authentication.$(PkgVersion).nupkg</GcmPkgPath>
   </PropertyGroup>
   <ItemGroup>
     <ProjectReference Include="..\Cli\Askpass\Cli-Askpass.csproj">

@@ -16,8 +16,9 @@
   </PropertyGroup>
   <Import Project="..\..\build.props" />
   <PropertyGroup>
+    <ProjectDir>$(MSBuildThisFileDirectory)</ProjectDir>
+    <OutputPath>$(ProjectDir)$(OutputPath)</OutputPath>
     <RunCodeAnalysis>false</RunCodeAnalysis>
-    <TargetFrameworkVersion>v4.5.1</TargetFrameworkVersion>
   </PropertyGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <ItemGroup>

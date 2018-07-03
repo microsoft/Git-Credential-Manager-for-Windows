@@ -83,15 +83,14 @@
     <!-- Only download a new copy of nuget.exe if we don't have a copy available -->
     <PropertyGroup>
       <NugetPath>nuget.exe</NugetPath>
-      <IsSigned>
-      </IsSigned>
+      <IsSigned></IsSigned>
       <IsSigned Condition=" '$(SignType)' == '' Or '$(SignType)' == '*Undefined*' ">-unsigned</IsSigned>
       <NugetWorkDir>$(OutputPath.TrimEnd('\'))</NugetWorkDir>
     </PropertyGroup>
     <PropertyGroup Condition="!Exists($(NugetPath))">
       <NugetPath>..\..\packages\NuGet.CommandLine.4.6.2\tools\NuGet.exe</NugetPath>
     </PropertyGroup>
-    <Exec Command="&quot;$(NugetPath)&quot; pack &quot;$(ProjectDir)\VisualStudioTeamServices.Authentication.nuspec&quot; -BasePath &quot;$(NugetWorkDir)&quot; -IncludeReferencedProjects -Properties Configuration=&quot;$(Configuration)&quot;;Version=&quot;$(AssemblyVersion)$(IsSigned)&quot;;Id=&quot;VisualStudioTeamServices.Authentication&quot;;Title=&quot;$(AssemblyTitle)&quot;;Description=&quot;$(AssemblyDescription)&quot; -OutputDirectory &quot;$(NugetWorkDir)&quot;" />
+    <Exec Command="&quot;$(NugetPath)&quot; pack &quot;$(ProjectDir)\VisualStudioTeamServices.Authentication.nuspec&quot; -BasePath &quot;$(NugetWorkDir)&quot; -IncludeReferencedProjects -Properties Configuration=&quot;$(Configuration)&quot;;Version=&quot;$(AssemblyVersion)$(IsSigned)&quot;;Id=&quot;$(AssemblyName)&quot;;Title=&quot;$(AssemblyTitle)&quot;;Description=&quot;$(AssemblyDescription)&quot; -OutputDirectory &quot;$(NugetWorkDir)&quot;" />
   </Target>
   <Target Name="CopyNupkgToOut" AfterTargets="BuildNupkg">
     <ItemGroup>

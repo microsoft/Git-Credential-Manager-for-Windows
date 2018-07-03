@@ -1,0 +1,82 @@
+parameters:
+  QueueName: ''
+  MicrobuildSetup: []
+  MicrobuildClean: []
+
+phases:
+  - phase: Build
+    queue:
+      name: ${{ parameters.QueueName }}
+      demands: 
+      - msbuild
+      - visualstudio
+      - vstest
+    
+    steps:
+    - task: NuGetToolInstaller@0
+      displayName: 'Use NuGet 4.4.0'
+      inputs:
+        versionSpec: 4.4.0
+    
+    - task: NuGetCommand@2
+      displayName: NuGet restore
+      inputs:
+        restoreSolution: '$(Build.Solution)'
+        verbosityRestore: 'quiet'
+    
+    - ${{ parameters.MicrobuildSetup }}
+    
+    - task: MSBuild@1
+      displayName: 'Core Build'
+      inputs:
+        solution: '$(Build.Target)'
+        msbuildArguments: '/nologo /verbosity:$(Build.Verbosity) /binaryLogger:$(Build.SourcesDirectory)/gcmw-$(build.buildNumber).binlog'
+        platform: '$(Build.Platform)'
+        configuration: '$(Build.Configuration)'
+        maximumCpuCount: false
+        msbuildArchitecture: '$(Build.Architecture)'
+    
+    - task: VSTest@2
+      displayName: 'Execute Tests (Xunit)'
+      inputs:
+        testAssemblyVer2: |
+         **\*Test.dll
+         !**\xunit.*.dll
+         !**\obj\**
+        searchFolder: '$(Build.SourcesDirectory)'
+        runInParallel: true
+        runTestsInIsolation: true
+        codeCoverageEnabled: true
+        platform: '$(Build.Platform)'
+        configuration: '$(Build.Configuration)'
+    
+    - task: PublishBuildArtifacts@1
+      displayName: 'Publish Artifact: Binary Log'
+      continueOnError: true
+      condition: and(succeeded(), eq(variables['system.pullrequest.isfork'], false))
+      inputs:
+        pathtoPublish: '$(Build.SourcesDirectory)\gcmw-$(build.buildNumber).binlog'
+        artifactName: '$(build.buildNumber).binlog'
+        publishLocation: Container
+    
+    - task: PublishBuildArtifacts@1
+      displayName: 'Publish Artifact: Deploy Folder'
+      continueOnError: true
+      condition: and(succeeded(), eq(variables['system.pullrequest.isfork'], false))
+      inputs:
+        pathtoPublish: '$(Build.SourcesDirectory)\Deploy\'
+        artifactName: '$(Build.BuildNumber)-Artifacts'
+        publishLocation: Container
+    
+    - task: DeleteFiles@1
+      displayName: 'Delete Artifacts from Agent'
+      inputs:
+        sourceFolder: '$(Build.SourcesDirectory)'
+        contents: |
+         *.binlog
+         Deploy\*.*
+         **\bin\**\*.*
+         **\obj\**\*.*
+    
+    - ${{ parameters.MicrobuildClean }}
+    
