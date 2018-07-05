@@ -1,0 +1,154 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="15.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <Import Project="..\packages\MicroBuild.Core.0.3.0\build\MicroBuild.Core.props"
+          Condition="Exists('..\packages\MicroBuild.Core.0.3.0\build\MicroBuild.Core.props')" />
+  <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props"
+          Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
+  
+  <PropertyGroup Label="Globals">
+    <NuGetPackageImportStamp />
+    <ProjectGuid>{19770407-1214-0415-1230-21DD3468F875}</ProjectGuid>
+    <ProjectDir Condition=" '$(ProjectDir)' == '' Or '$(ProjectDir)' == '*Undefined*' ">$(MSBuildProjectDirectory)</ProjectDir>
+    <RootNamespace>GCMW-Components</RootNamespace>
+    <TargetFrameworkVersion>v4.6.2</TargetFrameworkVersion>
+  </PropertyGroup>
+  
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' Or '$(Configuration)' == '*Undefined*' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' Or  '$(Platform)' == '*Undefined*' " >Any CPU</Platform>
+    <SolutionDir Condition=" '$(SolutionDir)' == '' Or '$(SolutionDir)' == '*Undefined*' ">$([System.IO.Directory]::GetParent($(ProjectDir)))</SolutionDir>
+    <AssetsDir Condition=" '$(AssetsDir)' == '' Or '$(AssetDir)' == '*Undefined*' ">$(SolutionDir)\Assets</AssetsDir>
+    <DocsDir Condition=" '$(DocsDir)' == '' Or '$(DocsDir)' == '*Undefined*' ">$(SolutionDir)\Docs</DocsDir>
+  </PropertyGroup>
+  
+  <PropertyGroup>
+    <InputPath Condition=" '$(Configuration)' == 'Debug' ">bin\Debug</InputPath>
+    <InputPath Condition=" '$(Configuration)' == 'Release' ">bin\Release</InputPath>
+    <IntermediateOutputPath>$(ProjectDir)\obj</IntermediateOutputPath>
+    
+    <!-- MicroBuild signing requires `OutDir` to be defined -->
+    <OutDir>$(IntermediateOutputPath)</OutDir>
+  </PropertyGroup>
+  
+  <!-- Compile a list of dependencies -->
+  <ItemGroup>
+    <ProjectReference Include="..\Cli\Askpass\Cli-Askpass.csproj">
+      <Project>{19770407-B33A-4EBE-92B8-04C93F43CAE0}</Project>
+      <Name>Cli-Askpass</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\Cli\Manager\Cli-Manager.csproj">
+      <Project>{19770407-63D4-40A8-A9DF-F1C4B473308A}</Project>
+      <Name>Cli-Manager</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\Bitbucket.Authentication\Src\Bitbucket.Authentication.csproj">
+      <Project>{EE663736-5BAD-4CA6-A4F8-99978925AD8A}</Project>
+      <Name>Bitbucket.Authentication</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\GitHub.Authentication\Src\GitHub.Authentication.csproj">
+      <Project>{CF306116-BBF0-4CC7-AFCE-A506AC4752CB}</Project>
+      <Name>GitHub.Authentication</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\Microsoft.Alm.Authentication\Src\Microsoft.Alm.Authentication.csproj">
+      <Project>{19770407-B493-459D-BB4F-04FBEFB1BA13}</Project>
+      <Name>Microsoft.Alm.Authentication</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\VisualStudioTeamServices.Authentication\Src\VisualStudioTeamServices.Authentication.csproj">
+      <Project>{19770407-D7D8-4A37-914C-F552FF4B90D4}</Project>
+      <Name>VisualStudioTeamServices.Authentication</Name>
+    </ProjectReference>
+  </ItemGroup>
+  
+  <!-- Compile the list of files to sign with MicroBuild -->
+  <ItemGroup>
+    <FilesToSign Include="$(IntermediateOutputPath)\Microsoft.Alm.Authentication.dll">
+      <Authenticode>Microsoft</Authenticode>
+    </FilesToSign>
+    <FilesToSign Include="$(IntermediateOutputPath)\VisualStudioTeamServices.Authentication.dll">
+      <Authenticode>Microsoft</Authenticode>
+    </FilesToSign>
+    <FilesToSign Include="$(IntermediateOutputPath)\git-credential-manager.exe">
+      <Authenticode>Microsoft</Authenticode>
+    </FilesToSign>
+    <FilesToSign Include="$(IntermediateOutputPath)\git-askpass.exe">
+      <Authenticode>Microsoft</Authenticode>
+    </FilesToSign>
+  </ItemGroup>
+  
+  <ItemGroup>
+    <None Include="packages.config" />
+  </ItemGroup>
+  
+  <Target Name="AfterBuild" AfterTargets="Build" />
+  
+  <Target Name="BeforeBuild" BeforeTargets="Build" />
+  
+  <Target Name="Build">
+    <Error Condition=" '$(Configuration)' != 'Debug' And '$(Configuration)' != 'Release' "
+           Text="The 'Configuration' property must be set to 'Debug' or 'Release'." />
+    <Error Condition=" '$(Platform)' == '' Or  '$(Platform)' == '*Undefined*' "
+           Text="The 'Platform' property cannot be empty of undefined." />
+    
+    <!-- Ensure all dependencies are built -->
+    <MSBuild Projects="@(ProjectReference)" Targets="Build" />
+  </Target>
+  
+  <Target Name="GenerateDocuments" AfterTargets="Build" BeforeTargets="AfterBuild">
+    <!-- Compile the list of files to copy to the intermediate directory -->
+    <ItemGroup>
+      <FilesToCopy Include="$(SolutionDir)\Microsoft.Alm.Authentication\Src\$(InputPath)\Microsoft.Alm.Authentication.dll" />
+      <FilesToCopy Include="$(SolutionDir)\Microsoft.Alm.Authentication\Src\$(InputPath)\Microsoft.Alm.Authentication.pdb" />
+      <FilesToCopy Include="$(SolutionDir)\VisualStudioTeamServices.Authentication\Src\$(InputPath)\VisualStudioTeamServices.Authentication.dll" />
+      <FilesToCopy Include="$(SolutionDir)\VisualStudioTeamServices.Authentication\Src\$(InputPath)\VisualStudioTeamServices.Authentication.pdb" />
+      <FilesToCopy Include="$(SolutionDir)\Bitbucket.Authentication\Src\$(InputPath)\Bitbucket.Authentication.dll" />
+      <FilesToCopy Include="$(SolutionDir)\GitHub.Authentication\Src\$(InputPath)\GitHub.Authentication.exe" />
+      <FilesToCopy Include="$(SolutionDir)\Cli\Manager\$(InputPath)\git-credential-manager.exe" />
+      <FilesToCopy Include="$(SolutionDir)\Cli\Askpass\$(InputPath)\git-askpass.exe" />
+      <FilesToCopy Include="$(SolutionDir)\VisualStudioTeamServices.Authentication\Src\$(InputPath)\Microsoft.IdentityModel.Clients.ActiveDirectory.dll" />
+      <FilesToCopy Include="$(SolutionDir)\LICENSE.TXT" />
+      <FilesToCopy Include="$(SolutionDir)\README.md" />
+      <FilesToCopy Include="$(ProjectDir)\Setup.iss" />
+      <FilesToCopy Include="$(ProjectDir)\VisualStudioTeamServices.Authentication.nuspec" />
+    </ItemGroup>
+    
+    <!-- Ensure the intermediate output path exists -->
+    <MakeDir Condition="!Exists('$(IntermediateOutputPath)')"
+             Directories="$(IntermediateOutputPath)" />
+    
+    <!-- Copy all important files to the intermediate output destination -->
+    <Message Text="Copying files to '(IntermediateOutputPath)'" />
+    <Copy SourceFiles="@(FilesToCopy)" DestinationFolder="$(IntermediateOutputPath)" />
+    
+    <!-- Generate documentation -->
+    <Exec Command="&quot;$(SolutionDir)\packages\Pandoc.Windows.2.1.0\tools\Pandoc\pandoc.exe&quot; --from=markdown --to=html5 --self-contained --standalone --include-in-header=&quot;$(AssetsDir)\head_css.html&quot; --title=&quot;Git Credential Manager for Windows&quot; --output=&quot;$(IntermediateOutputPath)\git-credential-manager.html&quot; &quot;$(DocsDir)\CredentialManager.md&quot; &quot;$(DocsDir)\Configuration.md&quot; &quot;$(DocsDir)\Faq.md&quot; &quot;$(DocsDir)\Automation.md&quot; &quot;$(DocsDir)\Development.md&quot;"
+          IgnoreExitCode="false" />
+    
+    <Exec Command="&quot;$(SolutionDir)\packages\Pandoc.Windows.2.1.0\tools\Pandoc\pandoc.exe&quot; --from=markdown --to=html5 --self-contained --standalone --include-in-header=&quot;$(AssetsDir)\head_css.html&quot; --title=&quot;Git Askpass Helper for Windows&quot; --output=&quot;$(IntermediateOutputPath)\git-askpass.html&quot; &quot;$(DocsDir)\Askpass.md&quot; &quot;$(DocsDir)\Configuration.md&quot; &quot;$(DocsDir)\Faq.md&quot; &quot;$(DocsDir)\Automation.md&quot; &quot;$(DocsDir)\Development.md&quot;"
+          IgnoreExitCode="false" />
+  </Target>
+  
+  <Target Name="Clean">
+    <RemoveDir Directories="$(IntermediateOutputPath);" />
+    <RemoveDir Directories="$(SolutionDir)\TestResults" />
+  </Target>
+  
+  <Target Name="Rebuild" AfterTargets="Clean" BeforeTargets="Build" />
+  
+  <Target Name="EnsureNuGetPackageBuildImports" BeforeTargets="PrepareForBuild">
+    <PropertyGroup>
+      <ErrorText>This project references NuGet package(s) that are missing on this computer. Use NuGet Package Restore to download them.  For more information, see http://go.microsoft.com/fwlink/?LinkID=322105. The missing file is {0}.</ErrorText>
+    </PropertyGroup>
+    <Error Condition="!Exists('..\packages\MSBuildTasks.1.5.0.235\build\MSBuildTasks.targets')"
+           Text="$([System.String]::Format('$(ErrorText)', 'MSBuildTasks'))" />
+    <Error Condition="!Exists('..\packages\Pandoc.Windows.2.1.0\tools\Pandoc\pandoc.exe')"
+           Text="$([System.String]::Format('$(ErrorText)', '..\packages\Pandoc.Windows.2.1.0\tools\Pandoc\pandoc.exe'))" />
+    <Error Condition="!Exists('..\packages\MicroBuild.Core.0.3.0\build\MicroBuild.Core.props')"
+           Text="$([System.String]::Format('$(ErrorText)', '..\packages\MicroBuild.Core.0.3.0\build\MicroBuild.Core.props'))" />
+    <Error Condition="!Exists('..\packages\MicroBuild.Core.0.3.0\build\MicroBuild.Core.targets')"
+           Text="$([System.String]::Format('$(ErrorText)', '..\packages\MicroBuild.Core.0.3.0\build\MicroBuild.Core.targets'))" />
+  </Target>
+  
+  <Import Project="..\packages\MSBuildTasks.1.5.0.235\build\MSBuildTasks.targets"
+          Condition="Exists('..\packages\MSBuildTasks.1.5.0.235\build\MSBuildTasks.targets')" />
+  <Import Project="..\packages\MicroBuild.Core.0.3.0\build\MicroBuild.Core.targets"
+          Condition="Exists('..\packages\MicroBuild.Core.0.3.0\build\MicroBuild.Core.targets')" />
+</Project>

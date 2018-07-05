@@ -1,8 +1,11 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
-<Project ToolsVersion="14.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
-  <Import Project="..\packages\Microsoft.Net.Compilers.2.8.0\build\Microsoft.Net.Compilers.props" Condition="Exists('..\packages\Microsoft.Net.Compilers.2.8.0\build\Microsoft.Net.Compilers.props')" />
-  <Import Project="..\packages\MicroBuild.Core.0.3.0\build\MicroBuild.Core.props" Condition="Exists('..\packages\MicroBuild.Core.0.3.0\build\MicroBuild.Core.props')" />
-  <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
+<Project ToolsVersion="15.0" DefaultTargets="Build;Package" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+
+  <Import Project="..\packages\MicroBuild.Core.0.3.0\build\MicroBuild.Core.props"
+          Condition="Exists('..\packages\MicroBuild.Core.0.3.0\build\MicroBuild.Core.props')" />
+  <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props"
+          Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
+          
   <PropertyGroup Label="Globals">
     <NuGetPackageImportStamp />
     <ProjectGuid>{19770407-3808-4B17-9EE0-21DD3468F875}</ProjectGuid>
@@ -10,13 +13,15 @@
     <RootNamespace>Installer</RootNamespace>
     <TargetFrameworkVersion>v4.6.2</TargetFrameworkVersion>
   </PropertyGroup>
+  
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' Or '$(Configuration)' == '*Undefined*' ">Debug</Configuration>
-    <Platform Condition=" '$(Platform)' == '' Or  '$(Platform)' == '*Undefined*' " >Any CPU</Platform>
+    <Platform Condition=" '$(Platform)' == '' Or  '$(Platform)' == '*Undefined*' ">Any CPU</Platform>
     <SolutionDir Condition=" '$(SolutionDir)' == '' Or '$(SolutionDir)' == '*Undefined*' ">$([System.IO.Directory]::GetParent($(ProjectDir)))</SolutionDir>
     <AssetsDir Condition=" '$(AssetsDir)' == '' Or '$(AssetDir)' == '*Undefined*' ">$(SolutionDir)\Assets</AssetsDir>
     <DocsDir Condition=" '$(DocsDir)' == '' Or '$(DocsDir)' == '*Undefined*' ">$(SolutionDir)\Docs</DocsDir>
   </PropertyGroup>
+  
   <PropertyGroup>
     <InputPath Condition=" '$(Configuration)' == 'Debug' ">bin\Debug</InputPath>
     <InputPath Condition=" '$(Configuration)' == 'Release' ">bin\Release</InputPath>
@@ -24,154 +29,158 @@
     <OutputPath>$(SolutionDir)\Deploy</OutputPath>
     <OutDir>$(OutputPath)</OutDir>
   </PropertyGroup>
+  
   <PropertyGroup>
     <GcmProps>$([System.IO.File]::ReadAllText($(SolutionDir)\Cli\Manager\Properties\AssemblyInfo.cs))</GcmProps>
     <PkgProps>$([System.IO.File]::ReadAllText($(SolutionDir)\VisualStudioTeamServices.Authentication\Src\Properties\AssemblyInfo.cs))</PkgProps>
     <Pattern>^\s*\[assembly\s*:\s*AssemblyVersion\s*\(\s*\s*"(\d+\.\d+\.\d+)\.?\d*\s*"\s*\)</Pattern>
     <GcmVersion>$([System.Text.RegularExpressions.Regex]::Match($(GcmProps), $(Pattern), System.Text.RegularExpressions.RegexOptions.Multiline).Groups[1].Value)</GcmVersion>
     <PkgVersion>$([System.Text.RegularExpressions.Regex]::Match($(PkgProps), $(Pattern), System.Text.RegularExpressions.RegexOptions.Multiline).Groups[1].Value)</PkgVersion>
+    <PkgName>VisualStudioTeamServices.Authentication</PkgName>
+    <!-- Read the nupkg meta data from the AssemblyInfo.cs file copied from VisualStudioTeamServicesAuthentication -->
+    <Pattern>^\s*\[assembly: AssemblyDescription\s*\(\s*"\s*([^"]+)\s*"\s*\)</Pattern>
+    <PkgDescription>$([System.Text.RegularExpressions.Regex]::Match($(PkgProps), $(Pattern), System.Text.RegularExpressions.RegexOptions.Multiline).Groups[1].Value)</PkgDescription>
+    <Pattern>^\s*\[assembly: AssemblyProduct\s*\(\s*"\s*([^"]+)\s*"\s*\)</Pattern>
+    <PkgProduct>$([System.Text.RegularExpressions.Regex]::Match($(PkgProps), $(Pattern), System.Text.RegularExpressions.RegexOptions.Multiline).Groups[1].Value)</PkgProduct>
+    <Pattern>^\s*\[assembly: AssemblyTitle\s*\(\s*"\s*([^"]+)\s*"\s*\)</Pattern>
+    <PkgTitle>$([System.Text.RegularExpressions.Regex]::Match($(PkgProps), $(Pattern), System.Text.RegularExpressions.RegexOptions.Multiline).Groups[1].Value)</PkgTitle>
   </PropertyGroup>
+  
   <PropertyGroup>
     <GcmExePath>$(OutputPath)\GCMW-$(GcmVersion).exe</GcmExePath>
     <GcmPkgPath>$(OutputPath)\VisualStudioTeamServices.Authentication.$(PkgVersion).nupkg</GcmPkgPath>
+    <GcmZipPath>$(OutputPath)\gcmw-v$(GcmVersion).zip</GcmZipPath>
   </PropertyGroup>
+  
+  <!-- Compile a list of dependencies -->
   <ItemGroup>
-    <ProjectReference Include="..\Cli\Askpass\Cli-Askpass.csproj">
-      <Project>{19770407-B33A-4EBE-92B8-04C93F43CAE0}</Project>
-      <Name>Cli-Askpass</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\Cli\Manager\Cli-Manager.csproj">
-      <Project>{19770407-63D4-40A8-A9DF-F1C4B473308A}</Project>
-      <Name>Cli-Manager</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\Bitbucket.Authentication\Src\Bitbucket.Authentication.csproj">
-      <Project>{EE663736-5BAD-4CA6-A4F8-99978925AD8A}</Project>
-      <Name>Bitbucket.Authentication</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\GitHub.Authentication\Src\GitHub.Authentication.csproj">
-      <Project>{CF306116-BBF0-4CC7-AFCE-A506AC4752CB}</Project>
-      <Name>GitHub.Authentication</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\Microsoft.Alm.Authentication\Src\Microsoft.Alm.Authentication.csproj">
-      <Project>{19770407-B493-459D-BB4F-04FBEFB1BA13}</Project>
-      <Name>Microsoft.Alm.Authentication</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\VisualStudioTeamServices.Authentication\Src\VisualStudioTeamServices.Authentication.csproj">
-      <Project>{19770407-D7D8-4A37-914C-F552FF4B90D4}</Project>
-      <Name>VisualStudioTeamServices.Authentication</Name>
+    <ProjectReference Include="Components.proj">
+      <Project>{19770407-1214-0415-1230-21DD3468F875}</Project>
+      <Name>GCMW-Components</Name>
     </ProjectReference>
   </ItemGroup>
+  
+  <!-- Compile the list of files to sign with MicroBuild -->
   <ItemGroup>
-    <MicrosoftFiles Include="$(IntermediateOutputPath)\Microsoft.Alm.Authentication.dll">
-      <InProject>false</InProject>
-    </MicrosoftFiles>
-    <MicrosoftFiles Include="$(IntermediateOutputPath)\VisualStudioTeamServices.Authentication.dll">
-      <InProject>false</InProject>
-    </MicrosoftFiles>
-    <MicrosoftFiles Include="$(IntermediateOutputPath)\git-credential-manager.exe">
-      <InProject>false</InProject>
-    </MicrosoftFiles>
-    <MicrosoftFiles Include="$(IntermediateOutputPath)\git-askpass.exe">
-      <InProject>false</InProject>
-    </MicrosoftFiles>
-  </ItemGroup>
-  <ItemGroup>
-    <ZipContents Include="$(IntermediateOutputPath)\Bitbucket.Authentication.dll">
-      <InProject>false</InProject>
-    </ZipContents>
-    <ZipContents Include="$(IntermediateOutputPath)\git-askpass.html">
-      <InProject>false</InProject>
-    </ZipContents>
-    <ZipContents Include="$(IntermediateOutputPath)\git-credential-manager.html">
-      <InProject>false</InProject>
-    </ZipContents>
-    <ZipContents Include="$(IntermediateOutputPath)\GitHub.Authentication.exe">
-      <InProject>false</InProject>
-    </ZipContents>
-    <ZipContents Include="$(ProjectDir)\install.cmd">
-      <InProject>false</InProject>
-    </ZipContents>
-    <ZipContents Include="$(SolutionDir)\LICENSE.TXT">
-      <InProject>false</InProject>
-    </ZipContents>
-    <ZipContents Include="$(IntermediateOutputPath)\Microsoft.IdentityModel.Clients.ActiveDirectory.dll">
-      <InProject>false</InProject>
-    </ZipContents>
-    <ZipContents Include="$(SolutionDir)\README.md">
-      <InProject>false</InProject>
-    </ZipContents>
-    <ZipContents Include="@(MicrosoftFiles)">
-      <InProject>false</InProject>
-    </ZipContents>
-  </ItemGroup>
-  <ItemGroup>
-    <FilesToSign Include="@(MicrosoftFiles)">
-      <Authenticode>Microsoft</Authenticode>
-      <InProject>false</InProject>
-    </FilesToSign>
     <FilesToSign Include="$(GcmExePath)">
       <Authenticode>Microsoft</Authenticode>
-      <InProject>false</InProject>
     </FilesToSign>
     <FilesToSign Include="$(GcmPkgPath)">
       <Authenticode>Nuget</Authenticode>
-      <InProject>false</InProject>
     </FilesToSign>
   </ItemGroup>
+  
   <ItemGroup>
-    <None Include="packages.config">
-      <InProject>false</InProject>
-    </None>
+    <None Include="packages.config" />
   </ItemGroup>
+  
   <Target Name="AfterBuild" AfterTargets="Build" />
-  <Target Name="Build" BeforeTargets="AfterBuild">
-    <Error Condition=" '$(Condition)' != 'Debug' And '$(Condition)' == 'Release' " Text="The 'Condition' property must be set to 'Debug' or 'Release'." />
-    <Error Condition=" '$(Platform)' == '' Or  '$(Platform)' == '*Undefined*' " Text="The 'Platform' property cannot be empty of undefined." />
+  
+  <Target Name="BeforeBuild" BeforeTargets="Build" />
+  
+  <Target Name="Build">
+    <Error Condition=" '$(Configuration)' != 'Debug' And '$(Configuration)' != 'Release' "
+           Text="The 'Configuration' property must be set to 'Debug' or 'Release'." />
+    <Error Condition=" '$(Platform)' == '' Or  '$(Platform)' == '*Undefined*' "
+           Text="The 'Platform' property cannot be empty of undefined." />
+    
+    <!-- Ensure all dependencies are built -->
     <MSBuild Projects="@(ProjectReference)" Targets="Build" />
-    <!-- need to declare the items after dependencies have built, so that glob enumeration happens after the files are produced -->
+  </Target>
+  
+  <Target Name="Package" AfterTargets="Build" BeforeTargets="AfterBuild">
+    <!-- Echo current package state information -->
+    <Message Text="GcmVersion = $(GcmVersion)" />
+    <Message Text="PkgVersion = $(PkgVersion)" />
+    <Message Text="GcmExePath = $(GcmExePath)" />
+    <Message Text="GcmZipPath = $(GcmZipPath)" />
+    <Message Text="GcmPkgPath = $(GcmPkgPath)" />
+    <Message Text="PkgDescription = $(PkgDescription)" />
+    <Message Text="PkgProduct = $(PkgProduct)" />
+    <Message Text="PkgTitle = $(PkgTitle)" />
+    
+    <!-- Only download a new copy of nuget.exe if we don't have a copy available -->
+    <PropertyGroup>
+      <NugetPath>nuget.exe</NugetPath>
+      <IsSigned>
+      </IsSigned>
+      <IsSigned Condition=" '$(SignType)' == '' Or '$(SignType)' == '*Undefined*' ">-unsigned</IsSigned>
+      <NugetWorkDir>$(OutputPath.TrimEnd('\'))</NugetWorkDir>
+    </PropertyGroup>
+    
+    <PropertyGroup Condition="!Exists($(NugetPath))">
+      <NugetPath>..\packages\NuGet.CommandLine.4.6.2\tools\NuGet.exe</NugetPath>
+    </PropertyGroup>
+    
+    <!-- Need to declare the items after dependencies have built, so that glob enumeration happens after the files are produced -->
     <ItemGroup>
-      <FilesToCopy Include="$(SolutionDir)\Cli\Manager\$(InputPath)\*.*">
-        <InProject>false</InProject>
-      </FilesToCopy>
-      <FilesToCopy Include="$(SolutionDir)\Cli\Askpass\$(InputPath)\git-askpass.exe">
-        <InProject>false</InProject>
-      </FilesToCopy>
-      <FilesToCopy Include="$(SolutionDir)\LICENSE.TXT">
-        <InProject>false</InProject>
-      </FilesToCopy>
-      <FilesToCopy Include="$(SolutionDir)\README.md">
-        <InProject>false</InProject>
-      </FilesToCopy>
-      <FilesToCopy Include="$(ProjectDir)\Setup.iss" />
+      <ZipContents Include="$(IntermediateOutputPath)\Microsoft.IdentityModel.Clients.ActiveDirectory.dll" />
+      <ZipContents Include="$(IntermediateOutputPath)\VisualStudioTeamServices.Authentication.dll" />
+      <ZipContents Include="$(IntermediateOutputPath)\Microsoft.Alm.Authentication.dll" />
+      <ZipContents Include="$(IntermediateOutputPath)\Bitbucket.Authentication.dll" />
+      <ZipContents Include="$(IntermediateOutputPath)\git-credential-manager.html" />
+      <ZipContents Include="$(IntermediateOutputPath)\git-credential-manager.exe" />
+      <ZipContents Include="$(IntermediateOutputPath)\GitHub.Authentication.exe" />
+      <ZipContents Include="$(IntermediateOutputPath)\git-askpass.html" />
+      <ZipContents Include="$(IntermediateOutputPath)\git-askpass.exe" />
+      <ZipContents Include="$(SolutionDir)\LICENSE.TXT" />
+      <ZipContents Include="$(ProjectDir)\install.cmd" />
+      <ZipContents Include="$(SolutionDir)\README.md" />
     </ItemGroup>
-    <MakeDir Directories="$(IntermediateOutputPath)" />
-    <MakeDir Directories="$(OutputPath)" />
-    <Copy SourceFiles="@(FilesToCopy)" DestinationFolder="$(IntermediateOutputPath)" />
-    <Exec Command="&quot;$(SolutionDir)\packages\Pandoc.Windows.2.1.0\tools\Pandoc\pandoc.exe&quot; --from=markdown --to=html5 --self-contained --standalone --include-in-header=&quot;$(AssetsDir)\head_css.html&quot; --title=&quot;Git Credential Manager for Windows&quot; --output=&quot;$(IntermediateOutputPath)\git-credential-manager.html&quot; &quot;$(DocsDir)\CredentialManager.md&quot; &quot;$(DocsDir)\Configuration.md&quot; &quot;$(DocsDir)\Faq.md&quot; &quot;$(DocsDir)\Automation.md&quot; &quot;$(DocsDir)\Development.md&quot;" IgnoreExitCode="false" />
-    <Exec Command="&quot;$(SolutionDir)\packages\Pandoc.Windows.2.1.0\tools\Pandoc\pandoc.exe&quot; --from=markdown --to=html5 --self-contained --standalone --include-in-header=&quot;$(AssetsDir)\head_css.html&quot; --title=&quot;Git Askpass Helper for Windows&quot; --output=&quot;$(IntermediateOutputPath)\git-askpass.html&quot; &quot;$(DocsDir)\Askpass.md&quot; &quot;$(DocsDir)\Configuration.md&quot; &quot;$(DocsDir)\Faq.md&quot; &quot;$(DocsDir)\Automation.md&quot; &quot;$(DocsDir)\Development.md&quot;" IgnoreExitCode="false" />
-    <Exec Command="&quot;$(SolutionDir)\packages\Tools.InnoSetup.5.5.9\tools\iscc.exe&quot; &quot;/O$(OutputPath)&quot; &quot;$(IntermediateOutputPath)\Setup.iss&quot;" IgnoreStandardErrorWarningFormat="true" WorkingDirectory="$(IntermediateOutputPath)" />
-    <Zip Files="@(ZipContents)" Flatten="True" ZipFileName="$(OutputPath)\gcmw-v$(GcmVersion).zip" WorkingDirectory="$(IntermediateOutputPath)ZipContents" ZipLevel="9" />
+    
+    <!-- Generate 'GCMW-${version}.exe' -->
+    <Exec Command="&quot;$(SolutionDir)\packages\Tools.InnoSetup.5.5.9\tools\iscc.exe&quot; &quot;/O$(OutputPath)&quot; &quot;$(IntermediateOutputPath)\Setup.iss&quot;"
+          IgnoreStandardErrorWarningFormat="true"
+          WorkingDirectory="$(IntermediateOutputPath)" />
+    
+    <!-- Generate 'gcmw-v{version}.zip' -->
+    <Zip Files="@(ZipContents)"
+         Flatten="True"
+         ZipFileName="$(GcmZipPath)"
+         WorkingDirectory="$(IntermediateOutputPath)ZipContents"
+         ZipLevel="9" />
+    
+    <!-- Create the output path -->
+    <MakeDir Condition="!Exists('$(OutputPath)')"
+             Directories="$(OutputPath)" />
+    
+    <!-- Generate isualStudioTeamServices.Authentication-{version}.nupkg  -->
+    <Exec Command="&quot;$(NugetPath)&quot; pack &quot;$(IntermediateOutputPath)\VisualStudioTeamServices.Authentication.nuspec&quot; -BasePath &quot;$(IntermediateOutputPath)&quot; -IncludeReferencedProjects -Properties Configuration=&quot;$(Configuration)&quot;;Version=&quot;$(PkgVersion)$(IsSigned)&quot;;Id=&quot;$(PkgName)&quot;;Title=&quot;$(PkgTitle)&quot;;Description=&quot;$(PkgDescription)&quot; -OutputDirectory &quot;$(NugetWorkDir)&quot;" />
   </Target>
+  
   <Target Name="Clean">
-    <RemoveDir Directories="$(IntermediateOutputPath);$(OutputPath)" />
-    <RemoveDir Directories="$(SolutionDir)\TestResults" />
+    <RemoveDir Directories="$(IntermediateOutputPath)" />
+    <RemoveDir Directories="$(OutputPath)" />
   </Target>
+  
   <Target Name="Rebuild" AfterTargets="Clean" BeforeTargets="Build" />
+  
   <Target Name="EnsureNuGetPackageBuildImports" BeforeTargets="PrepareForBuild">
     <PropertyGroup>
       <ErrorText>This project references NuGet package(s) that are missing on this computer. Use NuGet Package Restore to download them.  For more information, see http://go.microsoft.com/fwlink/?LinkID=322105. The missing file is {0}.</ErrorText>
     </PropertyGroup>
-    <Error Condition="!Exists('..\packages\MSBuildTasks.1.5.0.235\build\MSBuildTasks.targets')" Text="$([System.String]::Format('$(ErrorText)', 'MSBuildTasks'))" />
-    <Error Condition="!Exists('..\packages\Pandoc.Windows.2.1.0\tools\Pandoc\pandoc.exe')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\Pandoc.Windows.2.1.0\tools\Pandoc\pandoc.exe'))" />
-    <Error Condition="!Exists('..\packages\Tools.InnoSetup.5.5.9\tools\iscc.exe')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\Tools.InnoSetup.5.5.9\tools\iscc.exe'))" />
-    <Error Condition="!Exists('..\packages\Tools.InnoSetup.Download.1.5.1\tools\InnoDownload\idp.iss')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\Tools.InnoSetup.Download.1.5.1\tools\InnoDownload\idp.iss'))" />
-    <Error Condition="!Exists('..\packages\MicroBuild.Core.0.3.0\build\MicroBuild.Core.props')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\MicroBuild.Core.0.3.0\build\MicroBuild.Core.props'))" />
-    <Error Condition="!Exists('..\packages\MicroBuild.Core.0.3.0\build\MicroBuild.Core.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\MicroBuild.Core.0.3.0\build\MicroBuild.Core.targets'))" />
-    <Error Condition="!Exists('..\packages\Microsoft.Net.Compilers.2.8.0\build\Microsoft.Net.Compilers.props')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\Microsoft.Net.Compilers.2.8.0\build\Microsoft.Net.Compilers.props'))" />
+    
+    <Error Condition="!Exists('..\packages\MSBuildTasks.1.5.0.235\build\MSBuildTasks.targets')"
+           Text="$([System.String]::Format('$(ErrorText)', 'MSBuildTasks'))" />
+    <Error Condition="!Exists('..\packages\Tools.InnoSetup.5.5.9\tools\iscc.exe')"
+           Text="$([System.String]::Format('$(ErrorText)', '..\packages\Tools.InnoSetup.5.5.9\tools\iscc.exe'))" />
+    <Error Condition="!Exists('..\packages\Tools.InnoSetup.Download.1.5.1\tools\InnoDownload\idp.iss')"
+           Text="$([System.String]::Format('$(ErrorText)', '..\packages\Tools.InnoSetup.Download.1.5.1\tools\InnoDownload\idp.iss'))" />
+    <Error Condition="!Exists('..\packages\MicroBuild.Core.0.3.0\build\MicroBuild.Core.props')"
+           Text="$([System.String]::Format('$(ErrorText)', '..\packages\MicroBuild.Core.0.3.0\build\MicroBuild.Core.props'))" />
+    <Error Condition="!Exists('..\packages\MicroBuild.Core.0.3.0\build\MicroBuild.Core.targets')"
+           Text="$([System.String]::Format('$(ErrorText)', '..\packages\MicroBuild.Core.0.3.0\build\MicroBuild.Core.targets'))" />
   </Target>
+  
   <Target Name="EnsureResourcesExist" BeforeTargets="PrepareForBuild">
-    <Error Condition="!Exists('$(SolutionDir)\Cli\Manager\Properties\AssemblyInfo.cs)')" Text="File not found: '$(SolutionDir)\Cli\Manager\Properties\AssemblyInfo.cs)'." />
+    <Error Condition="!Exists('$(SolutionDir)\Cli\Manager\Properties\AssemblyInfo.cs')"
+           Text="File not found: '$(SolutionDir)\Cli\Manager\Properties\AssemblyInfo.cs'." />
+    <Error Condition="!Exists('$(SolutionDir)\VisualStudioTeamServices.Authentication\Src\Properties\AssemblyInfo.cs)')"
+           Text="File not found: '$(SolutionDir)\VisualStudioTeamServices.Authentication\Src\Properties\AssemblyInfo.cs)'." />
   </Target>
-  <Import Project="..\packages\MSBuildTasks.1.5.0.235\build\MSBuildTasks.targets" Condition="Exists('..\packages\MSBuildTasks.1.5.0.235\build\MSBuildTasks.targets')" />
-  <Import Project="..\packages\MicroBuild.Core.0.3.0\build\MicroBuild.Core.targets" Condition="Exists('..\packages\MicroBuild.Core.0.3.0\build\MicroBuild.Core.targets')" />
+  
+  <Import Project="..\packages\MSBuildTasks.1.5.0.235\build\MSBuildTasks.targets"
+          Condition="Exists('..\packages\MSBuildTasks.1.5.0.235\build\MSBuildTasks.targets')" />
+  <Import Project="..\packages\MicroBuild.Core.0.3.0\build\MicroBuild.Core.targets"
+          Condition="Exists('..\packages\MicroBuild.Core.0.3.0\build\MicroBuild.Core.targets')" />
 </Project>
