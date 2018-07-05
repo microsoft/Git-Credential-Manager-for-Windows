@@ -23,7 +23,7 @@
     <file src="VisualStudioTeamServices.Authentication.dll" target="lib\net451\VisualStudioTeamServices.Authentication.dll" />
     <file src="Microsoft.Alm.Authentication.pdb" target="lib\net451\Microsoft.Alm.Authentication.pdb" />
     <file src="VisualStudioTeamServices.Authentication.pdb" target="lib\net451\VisualStudioTeamServices.Authentication.pdb" />
-    <file src="..\..\..\..\Microsoft.Alm.Authentication\**\*.cs" target="src\Microsoft.Alm.Authentication" exclude="**\bin\**\.cs;**\obj\**\*.cs" />
-    <file src="..\..\..\..\VisualStudioTeamServices.Authentication\**\*.cs" target="src\VisualStudioTeamServices.Authentication" exclude="**\bin\**\.cs;**\obj\**\*.cs" />
+    <file src="..\..\Microsoft.Alm.Authentication\**\*.cs" target="src\Microsoft.Alm.Authentication" exclude="**\bin\**\.cs;**\obj\**\*.cs" />
+    <file src="..\..\VisualStudioTeamServices.Authentication\**\*.cs" target="src\VisualStudioTeamServices.Authentication" exclude="**\bin\**\.cs;**\obj\**\*.cs" />
   </files>
 </package>

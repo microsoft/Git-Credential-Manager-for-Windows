@@ -1,14 +1,12 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="15.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <Import Project="..\..\packages\Microsoft.Net.Compilers.2.8.0\build\Microsoft.Net.Compilers.props" Condition="Exists('..\..\packages\Microsoft.Net.Compilers.2.8.0\build\Microsoft.Net.Compilers.props')" />
-  <Import Project="..\..\packages\MicroBuild.Core.0.3.0\build\MicroBuild.Core.props" Condition="Exists('..\..\packages\MicroBuild.Core.0.3.0\build\MicroBuild.Core.props')" />
   <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
   <PropertyGroup>
     <AppDesignerFolder>Properties</AppDesignerFolder>
     <AssemblyName>git-askpass</AssemblyName>
     <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>
-    <NuGetPackageImportStamp>
-    </NuGetPackageImportStamp>
+    <NuGetPackageImportStamp/>
     <OutputType>Exe</OutputType>
     <ProjectGuid>{19770407-B33A-4EBE-92B8-04C93F43CAE0}</ProjectGuid>
     <ProjectName>Cli-Askpass</ProjectName>
@@ -21,7 +19,6 @@
     <ApplicationIcon>..\..\Assets\gcmicon.ico</ApplicationIcon>
     <ProjectDir>$(MSBuildThisFileDirectory)</ProjectDir>
     <OutputPath>$(ProjectDir)$(OutputPath)</OutputPath>
-    <SigningTarget>$(OutputPath)\$(AssemblyName).exe</SigningTarget>
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="Microsoft.CSharp" />
@@ -68,12 +65,8 @@
     <Compile Include="UserPromptKind.cs" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="app.config">
-      <InProject>false</InProject>
-    </None>
-    <None Include="packages.config">
-      <InProject>false</InProject>
-    </None>
+    <None Include="app.config"/>
+    <None Include="packages.config"/>
   </ItemGroup>
   <ItemGroup>
     <Page Include="UserPromptDialog.xaml">
@@ -98,9 +91,6 @@
     <PropertyGroup>
       <ErrorText>This project references NuGet package(s) that are missing on this computer. Use NuGet Package Restore to download them.  For more information, see http://go.microsoft.com/fwlink/?LinkID=322105. The missing file is {0}.</ErrorText>
     </PropertyGroup>
-    <Error Condition="!Exists('..\..\packages\MicroBuild.Core.0.3.0\build\MicroBuild.Core.props')" Text="$([System.String]::Format('$(ErrorText)', '..\..\packages\MicroBuild.Core.0.3.0\build\MicroBuild.Core.props'))" />
-    <Error Condition="!Exists('..\..\packages\MicroBuild.Core.0.3.0\build\MicroBuild.Core.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\..\packages\MicroBuild.Core.0.3.0\build\MicroBuild.Core.targets'))" />
     <Error Condition="!Exists('..\..\packages\Microsoft.Net.Compilers.2.8.0\build\Microsoft.Net.Compilers.props')" Text="$([System.String]::Format('$(ErrorText)', '..\..\packages\Microsoft.Net.Compilers.2.8.0\build\Microsoft.Net.Compilers.props'))" />
   </Target>
-  <Import Project="..\packages\MicroBuild.Core.0.3.0\build\MicroBuild.Core.targets" Condition="Exists('..\packages\MicroBuild.Core.0.3.0\build\MicroBuild.Core.targets')" />
 </Project>
