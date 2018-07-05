@@ -206,7 +206,7 @@ namespace VisualStudioTeamServices.Authentication
                 // Check the cache for an existing value.
                 if (cache.TryGetValue(requestUrl, out tenantId))
                 {
-                    context.Trace.WriteLine($"'{requestUrl}' is VSTS, tenant resource is {{{tenantId:g}}}.");
+                    context.Trace.WriteLine($"'{requestUrl}' is VSTS, tenant resource is {{{tenantId.ToString("N")}}}.");
 
                     return tenantId;
                 }
@@ -295,7 +295,7 @@ namespace VisualStudioTeamServices.Authentication
                                     }
                                 }
 
-                                context.Trace.WriteLine($"tenant resource for '{requestUrl}' is {{{tenantId:g}}}.");
+                                context.Trace.WriteLine($"tenant resource for '{requestUrl}' is {{{tenantId.ToString("N")}}}.");
 
                                 // Return the tenant identity to the caller because this is VSTS.
                                 return tenantId;
@@ -366,7 +366,7 @@ namespace VisualStudioTeamServices.Authentication
             }
             else
             {
-                context.Trace.WriteLine($"AAD authority for tenant '{tenantId}' detected.");
+                context.Trace.WriteLine($"AAD authority for tenant '{tenantId.ToString("N")}' detected.");
                 authentication = new AadAuthentication(context, tenantId, scope, personalAccessTokenStore);
                 (authentication as AadAuthentication).TenantId = tenantId;
             }
