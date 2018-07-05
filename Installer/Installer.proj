@@ -11,13 +11,17 @@
     <TargetFrameworkVersion>v4.6.2</TargetFrameworkVersion>
   </PropertyGroup>
   <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' Or '$(Configuration)' == '*Undefined*' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' Or  '$(Platform)' == '*Undefined*' " >Any CPU</Platform>
     <SolutionDir Condition=" '$(SolutionDir)' == '' Or '$(SolutionDir)' == '*Undefined*' ">$([System.IO.Directory]::GetParent($(ProjectDir)))</SolutionDir>
+    <AssetsDir Condition=" '$(AssetsDir)' == '' Or '$(AssetDir)' == '*Undefined*' ">$(SolutionDir)\Assets</AssetsDir>
+    <DocsDir Condition=" '$(DocsDir)' == '' Or '$(DocsDir)' == '*Undefined*' ">$(SolutionDir)\Docs</DocsDir>
+  </PropertyGroup>
+  <PropertyGroup>
     <InputPath Condition=" '$(Configuration)' == 'Debug' ">bin\Debug</InputPath>
     <InputPath Condition=" '$(Configuration)' == 'Release' ">bin\Release</InputPath>
     <IntermediateOutputPath>$(ProjectDir)\obj</IntermediateOutputPath>
     <OutputPath>$(SolutionDir)\Deploy</OutputPath>
-    <AssetsDir Condition=" '$(AssetsDir)' == '' Or '$(AssetDir)' == '*Undefined*' ">$(SolutionDir)\Assets</AssetsDir>
-    <DocsDir Condition=" '$(DocsDir)' == '' Or '$(DocsDir)' == '*Undefined*' ">$(SolutionDir)\Docs</DocsDir>
     <OutDir>$(OutputPath)</OutDir>
   </PropertyGroup>
   <PropertyGroup>
@@ -58,26 +62,24 @@
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
-    <FilesToSign Include="$(GcmExePath)">
-      <Authenticode>Microsoft</Authenticode>
+    <MicrosoftFiles Include="$(IntermediateOutputPath)\Microsoft.Alm.Authentication.dll">
       <InProject>false</InProject>
-    </FilesToSign>
-    <FilesToSign Include="$(GcmPkgPath)">
-      <Authenticode>Nuget</Authenticode>
+    </MicrosoftFiles>
+    <MicrosoftFiles Include="$(IntermediateOutputPath)\VisualStudioTeamServices.Authentication.dll">
       <InProject>false</InProject>
-    </FilesToSign>
+    </MicrosoftFiles>
+    <MicrosoftFiles Include="$(IntermediateOutputPath)\git-credential-manager.exe">
+      <InProject>false</InProject>
+    </MicrosoftFiles>
+    <MicrosoftFiles Include="$(IntermediateOutputPath)\git-askpass.exe">
+      <InProject>false</InProject>
+    </MicrosoftFiles>
   </ItemGroup>
   <ItemGroup>
     <ZipContents Include="$(IntermediateOutputPath)\Bitbucket.Authentication.dll">
       <InProject>false</InProject>
     </ZipContents>
-    <ZipContents Include="$(IntermediateOutputPath)\git-askpass.exe">
-      <InProject>false</InProject>
-    </ZipContents>
     <ZipContents Include="$(IntermediateOutputPath)\git-askpass.html">
-      <InProject>false</InProject>
-    </ZipContents>
-    <ZipContents Include="$(IntermediateOutputPath)\git-credential-manager.exe">
       <InProject>false</InProject>
     </ZipContents>
     <ZipContents Include="$(IntermediateOutputPath)\git-credential-manager.html">
@@ -92,18 +94,29 @@
     <ZipContents Include="$(SolutionDir)\LICENSE.TXT">
       <InProject>false</InProject>
     </ZipContents>
-    <ZipContents Include="$(IntermediateOutputPath)\Microsoft.Alm.Authentication.dll">
-      <InProject>false</InProject>
-    </ZipContents>
     <ZipContents Include="$(IntermediateOutputPath)\Microsoft.IdentityModel.Clients.ActiveDirectory.dll">
-      <InProject>false</InProject>
-    </ZipContents>
-    <ZipContents Include="$(IntermediateOutputPath)\VisualStudioTeamServices.Authentication.dll">
       <InProject>false</InProject>
     </ZipContents>
     <ZipContents Include="$(SolutionDir)\README.md">
       <InProject>false</InProject>
     </ZipContents>
+    <ZipContents Include="@(MicrosoftFiles)">
+      <InProject>false</InProject>
+    </ZipContents>
+  </ItemGroup>
+  <ItemGroup>
+    <FilesToSign Include="@(MicrosoftFiles)">
+      <Authenticode>Microsoft</Authenticode>
+      <InProject>false</InProject>
+    </FilesToSign>
+    <FilesToSign Include="$(GcmExePath)">
+      <Authenticode>Microsoft</Authenticode>
+      <InProject>false</InProject>
+    </FilesToSign>
+    <FilesToSign Include="$(GcmPkgPath)">
+      <Authenticode>Nuget</Authenticode>
+      <InProject>false</InProject>
+    </FilesToSign>
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config">
