@@ -1,12 +1,11 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="15.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <Import Project="..\..\packages\Microsoft.Net.Compilers.2.8.0\build\Microsoft.Net.Compilers.props" Condition="Exists('..\..\packages\Microsoft.Net.Compilers.2.8.0\build\Microsoft.Net.Compilers.props')" />
-  <Import Project="..\..\packages\MicroBuild.Core.0.3.0\build\MicroBuild.Core.props" Condition="Exists('..\..\packages\MicroBuild.Core.0.3.0\build\MicroBuild.Core.props')" />
   <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
   <PropertyGroup>
     <AppDesignerFolder>Properties</AppDesignerFolder>
     <AssemblyName>VisualStudioTeamServices.Authentication</AssemblyName>
-    <NuGetPackageImportStamp />
+    <NuGetPackageImportStamp/>
     <OutputType>Library</OutputType>
     <ProjectGuid>{19770407-D7D8-4A37-914C-F552FF4B90D4}</ProjectGuid>
     <ProjectName>VisualStudioTeamServices.Authentication</ProjectName>
@@ -17,7 +16,6 @@
   <PropertyGroup>
     <ProjectDir>$(MSBuildThisFileDirectory)</ProjectDir>
     <OutputPath>$(ProjectDir)$(OutputPath)</OutputPath>
-    <SigningTarget>$(OutputPath)\$(AssemblyName).dll</SigningTarget>
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="Microsoft.IdentityModel.Clients.ActiveDirectory, Version=3.19.4.11002, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
@@ -57,57 +55,14 @@
     <Compile Include="TokenScope.cs" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="packages.config">
-      <InProject>false</InProject>
-    </None>
+    <None Include="packages.config" />
   </ItemGroup>
-  <ItemGroup>
-    <FilesToSign Include="$(SigningTarget)">
-      <Authenticode>Microsoft</Authenticode>
-      <InProject>false</InProject>
-    </FilesToSign>
-  </ItemGroup>
-  <Target Name="BuildNupkg" AfterTargets="CopyFilesToOutputDirectory;SignFiles">
-    <!-- Read the nupkg meta data from the AssemblyInfo.cs file copied from VisualStudioTeamServicesAuthentication -->
-    <PropertyGroup>
-      <In>$([System.IO.File]::ReadAllText('$(ProjectDir)\Properties\AssemblyInfo.cs'))</In>
-      <Pattern>^\s*\[assembly:\s*AssemblyVersion\s*\(\s*"\s*([^"]+)\s*"\s*\)</Pattern>
-      <AssemblyVersion>$([System.Text.RegularExpressions.Regex]::Match($(In), $(Pattern), System.Text.RegularExpressions.RegexOptions.Multiline).Groups[1].Value)</AssemblyVersion>
-      <Pattern>^\s*\[assembly: AssemblyDescription\s*\(\s*"\s*([^"]+)\s*"\s*\)</Pattern>
-      <AssemblyDescription>$([System.Text.RegularExpressions.Regex]::Match($(In), $(Pattern), System.Text.RegularExpressions.RegexOptions.Multiline).Groups[1].Value)</AssemblyDescription>
-      <Pattern>^\s*\[assembly: AssemblyProduct\s*\(\s*"\s*([^"]+)\s*"\s*\)</Pattern>
-      <AssemblyProduct>$([System.Text.RegularExpressions.Regex]::Match($(In), $(Pattern), System.Text.RegularExpressions.RegexOptions.Multiline).Groups[1].Value)</AssemblyProduct>
-      <Pattern>^\s*\[assembly: AssemblyTitle\s*\(\s*"\s*([^"]+)\s*"\s*\)</Pattern>
-      <AssemblyTitle>$([System.Text.RegularExpressions.Regex]::Match($(In), $(Pattern), System.Text.RegularExpressions.RegexOptions.Multiline).Groups[1].Value)</AssemblyTitle>
-    </PropertyGroup>
-    <!-- Only download a new copy of nuget.exe if we don't have a copy available -->
-    <PropertyGroup>
-      <NugetPath>nuget.exe</NugetPath>
-      <IsSigned></IsSigned>
-      <IsSigned Condition=" '$(SignType)' == '' Or '$(SignType)' == '*Undefined*' ">-unsigned</IsSigned>
-      <NugetWorkDir>$(OutputPath.TrimEnd('\'))</NugetWorkDir>
-    </PropertyGroup>
-    <PropertyGroup Condition="!Exists($(NugetPath))">
-      <NugetPath>..\..\packages\NuGet.CommandLine.4.6.2\tools\NuGet.exe</NugetPath>
-    </PropertyGroup>
-    <Exec Command="&quot;$(NugetPath)&quot; pack &quot;$(ProjectDir)\VisualStudioTeamServices.Authentication.nuspec&quot; -BasePath &quot;$(NugetWorkDir)&quot; -IncludeReferencedProjects -Properties Configuration=&quot;$(Configuration)&quot;;Version=&quot;$(AssemblyVersion)$(IsSigned)&quot;;Id=&quot;$(AssemblyName)&quot;;Title=&quot;$(AssemblyTitle)&quot;;Description=&quot;$(AssemblyDescription)&quot; -OutputDirectory &quot;$(NugetWorkDir)&quot;" />
-  </Target>
-  <Target Name="CopyNupkgToOut" AfterTargets="BuildNupkg">
-    <ItemGroup>
-      <FilesToCopy Include="$(OutputPath)\*.nupkg" />
-    </ItemGroup>
-    <Copy SourceFiles="@(FilesToCopy)" DestinationFolder="$(SolutionDir)\Deploy" />
-  </Target>
   <Target Name="EnsureNuGetPackageBuildImports" BeforeTargets="PrepareForBuild">
     <PropertyGroup>
       <ErrorText>This project references NuGet package(s) that are missing on this computer. Use NuGet Package Restore to download them.  For more information, see http://go.microsoft.com/fwlink/?LinkID=322105. The missing file is {0}.</ErrorText>
     </PropertyGroup>
-    <Error Condition="!Exists('..\..\packages\NuGet.CommandLine.4.6.2\tools\NuGet.exe')" Text="$([System.String]::Format('$(ErrorText)', '..\..\packages\NuGet.CommandLine.4.6.2\tools\NuGet.exe'))" />
-    <Error Condition="!Exists('..\..\packages\MicroBuild.Core.0.3.0\build\MicroBuild.Core.props')" Text="$([System.String]::Format('$(ErrorText)', '..\..\packages\MicroBuild.Core.0.3.0\build\MicroBuild.Core.props'))" />
-    <Error Condition="!Exists('..\..\packages\MicroBuild.Core.0.3.0\build\MicroBuild.Core.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\..\packages\MicroBuild.Core.0.3.0\build\MicroBuild.Core.targets'))" />
     <Error Condition="!Exists('..\..\packages\Microsoft.Net.Compilers.2.8.0\build\Microsoft.Net.Compilers.props')" Text="$([System.String]::Format('$(ErrorText)', '..\..\packages\Microsoft.Net.Compilers.2.8.0\build\Microsoft.Net.Compilers.props'))" />
   </Target>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <Import Project="..\..\build.targets" />
-  <Import Project="..\..\packages\MicroBuild.Core.0.3.0\build\MicroBuild.Core.targets" Condition="Exists('..\..\packages\MicroBuild.Core.0.3.0\build\MicroBuild.Core.targets')" />
 </Project>

@@ -24,6 +24,12 @@ phases:
         restoreSolution: '$(Build.Solution)'
         verbosityRestore: 'quiet'
     
+    - task: NuGetCommand@2
+      displayName: NuGet restore
+      inputs:
+        command: custom
+        arguments: restore '$(Build.SourcesDirectory)\$(Build.Target)' '-SolutionDirectory $(Build.SourcesDirectory)'
+    
     - ${{ parameters.MicrobuildSetup }}
     
     - task: MSBuild@1
@@ -53,19 +59,19 @@ phases:
     - task: PublishBuildArtifacts@1
       displayName: 'Publish Artifact: Binary Log'
       continueOnError: true
-      condition: and(succeeded(), eq(variables['system.pullrequest.isfork'], false))
+      condition:  eq(variables['system.pullrequest.isfork'], false)
       inputs:
         pathtoPublish: '$(Build.SourcesDirectory)\gcmw-$(build.buildNumber).binlog'
         artifactName: '$(build.buildNumber).binlog'
         publishLocation: Container
     
     - task: PublishBuildArtifacts@1
-      displayName: 'Publish Artifact: Deploy Folder'
+      displayName: 'Publish Artifact: Binaries'
       continueOnError: true
       condition: and(succeeded(), eq(variables['system.pullrequest.isfork'], false))
       inputs:
         pathtoPublish: '$(Build.SourcesDirectory)\Deploy\'
-        artifactName: '$(Build.BuildNumber)-Artifacts'
+        artifactName: '$(Build.BuildNumber).output'
         publishLocation: Container
     
     - task: DeleteFiles@1
