@@ -408,10 +408,21 @@ namespace Microsoft.Alm.Win32
         public string ExeFileName;
     }
 
+    /// <summary>
+    /// Contains process information.
+    /// </summary>
+    /// <remarks>
+    /// Documentation: https://docs.microsoft.com/en-us/windows/desktop/api/winternl/ns-winternl-_peb
+    /// <para/>
+    /// Note that this structure does not attempt to mimic the original C structure field by field, instead
+    /// it relied on offsets based on the original. This is because much of the original structure is difficult
+    /// or impossible to reliable define in C# when pointer size and packing of structs can be determined only
+    /// at runtime or during the JITter.
+    /// </remarks>
     [StructLayout(LayoutKind.Sequential)]
     internal unsafe struct ProcessEnvironmentBlock
     {
-        fixed byte _[256];
+        private fixed byte _[256];
 
         /// <summary>
         /// Gets `<see langword="true"/> if the process is currently being debugged; otherwise `<see langword="false"/>`.
@@ -440,10 +451,21 @@ namespace Microsoft.Alm.Win32
         }
     }
 
-    [StructLayout(LayoutKind.Sequential, Size = 128)]
+    /// <summary>
+    /// Contains process parameter information.
+    /// </summary>
+    /// <remarks>
+    /// Documentation: https://docs.microsoft.com/en-us/windows/desktop/api/winternl/ns-winternl-_rtl_user_process_parameters
+    /// <para/>
+    /// Note that this structure does not attempt to mimic the original C structure field by field, instead
+    /// it relied on offsets based on the original. This is because much of the original structure is difficult
+    /// or impossible to reliable define in C# when pointer size and packing of structs can be determined only
+    /// at runtime or during the JITter.
+    /// </remarks>
+    [StructLayout(LayoutKind.Sequential)]
     internal unsafe struct PebProcessParameters
     {
-        fixed byte _[128];
+        private fixed byte _[128];
 
         /// <summary>
         /// Gets the command-line string passed to the process.
@@ -478,25 +500,28 @@ namespace Microsoft.Alm.Win32
         }
     }
 
+    /// <summary>
+    /// Retrieves information about the specified process.
+    /// </summary>
+    /// <remarks>
+    /// Documentation: https://docs.microsoft.com/en-us/windows/desktop/api/winternl/nf-winternl-ntqueryinformationprocess#process_basic_information
+    /// </remarks>
     [StructLayout(LayoutKind.Sequential)]
     internal unsafe struct ProcessBasicInformation
     {
-        fixed byte _[32];
+        private void* _reserved1;
+        private void* _pebBaseAddress;
+        private void* _reserved2;
+        private void* _reserved3;
+        private uint* _uniqueProcessId;
+        private void* _reserved4;
 
         /// <summary>
         /// Gets the address of the `<seealso cref="ProcessEnvironmentBlock"/>`.
         /// </summary>
         public void* ProcessEnvironmentBlock
         {
-            get
-            {
-                fixed (byte* p = _)
-                {
-                    return IntPtr.Size == 4
-                        ? *((void**)(p + 0x04))
-                        : *((void**)(p + 0x08));
-                }
-            }
+            get { return _pebBaseAddress; }
         }
 
         /// <summary>
@@ -506,15 +531,7 @@ namespace Microsoft.Alm.Win32
         /// </summary>
         public uint* UniqueProcessId
         {
-            get
-            {
-                fixed (byte* p = _)
-                {
-                    return IntPtr.Size == 4
-                        ? *((uint**)(p + 0x10))
-                        : *((uint**)(p + 0x20));
-                }
-            }
+            get { return _uniqueProcessId; }
         }
     }
 
