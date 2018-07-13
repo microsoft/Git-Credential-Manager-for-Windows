@@ -50,7 +50,7 @@ Support for Mac OS and Linux are handled by [Microsoft Git Credential Manager fo
 
 ## Q: Why is my distribution/version of Git not supported? Why is Git for Windows favored?
 
-The Credential Manager deployment helpers (`install.cmd` and `Setup.exe`) are focused on support for [Git for Windows](https://github.com/git-for-windows) because Git for Windows conforms to the expected/normal behavior of software on Windows.
+The Credential Manager deployment helpers (`install.cmd` and `GCMW-{version}.exe`) are focused on support for [Git for Windows](https://github.com/git-for-windows) because Git for Windows conforms to the expected/normal behavior of software on Windows.
 It is easy to detect, has predictable installation location, etc. This makes supporting it easier and more reliable.
 
 That said, so long as your favorite version of Git supports Git’s git-credential flow, it is supported by the Git Credential Manager for Windows.

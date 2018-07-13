@@ -19,7 +19,7 @@ For detailed information on how the GCM works go to the [wiki](https://github.co
 ## Download and Install
 
 To use the GCM, you can download the [latest installer](https://github.com/Microsoft/Git-Credential-Manager-for-Windows/releases/latest).
-To install, double-click Setup.exe and follow the instructions presented.
+To install, double-click `GCMW-{version}.exe` and follow the instructions presented.
 
 When prompted to select your terminal emulator for Git Bash you should choose the Windows' default console window, or make sure GCM is [configured to use modal dialogs](Configuration.md#modalprompt).
 GCM cannot prompt you for credentials, at the console, in a MinTTY setup.
