@@ -50,9 +50,9 @@ This is when standard input will be consumed by the GCM.
 * `Program.QueryCredentials` method is where the "action" happens.
 * `OperationArguments` class is where the GCM consumes standard input and keeps internal state.
 
-## Installer (setup.exe)
+## Installer
 
-Changes to the installer (setup.exe) requires [Inno Setup Compiler 5.5.9](http://www.jrsoftware.org/isinfo.php) or later to compile.
+Changes to the installer (`GCMW-{version}.exe`) requires [Inno Setup Compiler 5.5.9](http://www.jrsoftware.org/isinfo.php) or later to compile.
 Additionally, the [IDP plugin for Inno Setup](https://mitrichsoftware.wordpress.com/inno-setup-tools/inno-download-plugin/) is also required.
 
 The setup compiler pulls content from the "Deploy/" folder, therefore a completed Debug or Release build needs to have been completed prior to running the setup compiler.
