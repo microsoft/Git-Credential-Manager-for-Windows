@@ -26,7 +26,6 @@
 using System;
 using System.Threading.Tasks;
 using Microsoft.Alm.Authentication;
-using Microsoft.IdentityModel.Clients.ActiveDirectory;
 
 namespace VisualStudioTeamServices.Authentication
 {
@@ -101,7 +100,7 @@ namespace VisualStudioTeamServices.Authentication
                     return await GeneratePersonalAccessToken(targetUri, token, options);
                 }
             }
-            catch (AdalException)
+            catch (AuthenticationException)
             {
                 Trace.WriteLine($"token acquisition for '{targetUri}' failed.");
             }
@@ -138,7 +137,7 @@ namespace VisualStudioTeamServices.Authentication
                     return await GeneratePersonalAccessToken(targetUri, token, requestCompactToken);
                 }
             }
-            catch (AdalException)
+            catch (AuthenticationException)
             {
                 Trace.WriteLine($"token acquisition for '{targetUri}' failed.");
             }
@@ -170,7 +169,7 @@ namespace VisualStudioTeamServices.Authentication
                     return await GeneratePersonalAccessToken(targetUri, token, options);
                 }
             }
-            catch (AdalException)
+            catch (AuthenticationException)
             {
                 Trace.WriteLine($"failed to acquire for '{targetUri}' token from VstsAuthority.");
             }
@@ -207,7 +206,7 @@ namespace VisualStudioTeamServices.Authentication
                     return await GeneratePersonalAccessToken(targetUri, token, requestCompactToken);
                 }
             }
-            catch (AdalException)
+            catch (AuthenticationException)
             {
                 Trace.WriteLine($"failed to acquire for '{targetUri}' token from VstsAuthority.");
             }

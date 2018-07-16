@@ -31,7 +31,6 @@ using System.Net.Http;
 using System.Text;
 using System.Threading.Tasks;
 using Microsoft.Alm.Authentication;
-using Microsoft.IdentityModel.Clients.ActiveDirectory;
 
 using static System.StringComparer;
 using static VisualStudioTeamServices.Authentication.Authority;
@@ -89,7 +88,6 @@ namespace VisualStudioTeamServices.Authentication
 
             IdeTokenCache = ideTokenCache;
             Authority = authority;
-            AdalTokenCache = TokenCache.DefaultShared;
         }
 
         /// <summary>
@@ -115,8 +113,6 @@ namespace VisualStudioTeamServices.Authentication
         {
             get { return GetSecretKey; }
         }
-
-        internal TokenCache AdalTokenCache { get; private set; }
 
         internal ITokenStore IdeTokenCache { get; private set; }
 
@@ -334,7 +330,7 @@ namespace VisualStudioTeamServices.Authentication
         /// <param name="scope">The scope of the access being requested.</param>
         /// <param name="personalAccessTokenStore">Storage container for personal access token secrets.</param>
         public static async Task<BaseAuthentication> GetAuthentication(
-            RuntimeContext context,
+            Microsoft.Alm.Authentication.RuntimeContext context,
             TargetUri targetUri,
             TokenScope scope,
             ICredentialStore personalAccessTokenStore)

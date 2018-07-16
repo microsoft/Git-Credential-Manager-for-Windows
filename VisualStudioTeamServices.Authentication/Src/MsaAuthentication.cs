@@ -27,10 +27,10 @@ using System;
 using System.Diagnostics;
 using System.Threading.Tasks;
 using Microsoft.Alm.Authentication;
-using Microsoft.IdentityModel.Clients.ActiveDirectory;
 
 namespace VisualStudioTeamServices.Authentication
 {
+
     public sealed class MsaAuthentication : Authentication, IMsaAuthentication
     {
         public const string DefaultAuthorityHost = VisualStudioTeamServices.Authentication.Authority.AuthorityHostUrlBase + "/live.com";
@@ -86,7 +86,7 @@ namespace VisualStudioTeamServices.Authentication
                     return await GeneratePersonalAccessToken(targetUri, token, options);
                 }
             }
-            catch (AdalException exception)
+            catch (AuthenticationException exception)
             {
                 Debug.Write(exception);
             }
@@ -116,7 +116,7 @@ namespace VisualStudioTeamServices.Authentication
                     return await GeneratePersonalAccessToken(targetUri, token, requestCompactToken);
                 }
             }
-            catch (AdalException exception)
+            catch (AuthenticationException exception)
             {
                 Debug.Write(exception);
             }

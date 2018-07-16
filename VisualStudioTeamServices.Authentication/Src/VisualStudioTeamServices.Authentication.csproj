@@ -40,6 +40,9 @@
     <Compile Include="..\..\Microsoft.Alm.Authentication\Src\GlobalSuppressions.cs">
       <Link>GlobalSuppressions.cs</Link>
     </Compile>
+    <Compile Include="AuthenticationException.cs" />
+    <Compile Include="Adal.cs" />
+    <Compile Include="Base.cs" />
     <Compile Include="PersonalAccessTokenOptions.cs" />
     <Compile Include="Authority.cs" />
     <Compile Include="Authentication.cs" />

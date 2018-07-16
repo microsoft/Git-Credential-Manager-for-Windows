@@ -29,9 +29,9 @@ using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using Microsoft.Alm.Authentication;
-using Microsoft.IdentityModel.Clients.ActiveDirectory;
-using Culture = System.Globalization.CultureInfo;
+
 using static System.StringComparer;
+using Culture = System.Globalization.CultureInfo;
 
 namespace VisualStudioTeamServices.Authentication
 {
@@ -76,14 +76,11 @@ namespace VisualStudioTeamServices.Authentication
             }
 
             AuthorityHostUrl = authorityHostUrl;
-            _adalTokenCache = new AdalTokenCache(context);
         }
 
         public Authority(RuntimeContext context)
             : this(context, DefaultAuthorityHostUrl)
         { }
-
-        private readonly AdalTokenCache _adalTokenCache;
 
         /// <summary>
         /// The URL used to interact with the Azure identity service.
@@ -183,13 +180,12 @@ namespace VisualStudioTeamServices.Authentication
 
             try
             {
-                var authCtx = new AuthenticationContext(AuthorityHostUrl, _adalTokenCache);
-                AuthenticationResult authResult = await authCtx.AcquireTokenAsync(resource,
-                                                                                  clientId,
-                                                                                  redirectUri,
-                                                                                  new PlatformParameters(PromptBehavior.SelectAccount),
-                                                                                  UserIdentifier.AnyUser,
-                                                                                  queryParameters);
+                var authResult = await Adal.AcquireTokenAsync(AuthorityHostUrl,
+                                                              resource,
+                                                              clientId,
+                                                              redirectUri,
+                                                              queryParameters);
+
                 if (Guid.TryParse(authResult.TenantId, out Guid tenantId))
                 {
                     token = new Token(authResult.AccessToken, tenantId, TokenType.AzureAccess);
@@ -197,7 +193,7 @@ namespace VisualStudioTeamServices.Authentication
 
                 Trace.WriteLine($"authority host URL = '{AuthorityHostUrl}', token acquisition for tenant [{tenantId.ToString("N")}] succeeded.");
             }
-            catch (AdalException)
+            catch (AuthenticationException)
             {
                 Trace.WriteLine($"authority host URL = '{AuthorityHostUrl}', token acquisition failed.");
             }
@@ -234,10 +230,9 @@ namespace VisualStudioTeamServices.Authentication
 
             try
             {
-                var authCtx = new AuthenticationContext(AuthorityHostUrl, _adalTokenCache);
-                AuthenticationResult authResult = await authCtx.AcquireTokenAsync(resource,
-                                                                                  clientId,
-                                                                                  new UserCredential());
+                var authResult = await Adal.AcquireTokenAsync(AuthorityHostUrl,
+                                                              resource,
+                                                              clientId);
 
                 if (Guid.TryParse(authResult.TenantId, out Guid tentantId))
                 {
@@ -246,7 +241,7 @@ namespace VisualStudioTeamServices.Authentication
                     Trace.WriteLine($"token acquisition for authority host URL = '{AuthorityHostUrl}' succeeded.");
                 }
             }
-            catch (AdalException)
+            catch (AuthenticationException)
             {
                 Trace.WriteLine($"token acquisition for authority host URL = '{AuthorityHostUrl}' failed.");
             }
