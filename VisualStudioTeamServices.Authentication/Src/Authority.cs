@@ -112,7 +112,7 @@ namespace VisualStudioTeamServices.Authentication
                 {
                     if (response.IsSuccessStatusCode)
                     {
-                        string responseText = await response.Content.ReadAsStringAsync();
+                        string responseText = response.Content.AsString;
 
                         if (!string.IsNullOrWhiteSpace(responseText))
                         {
@@ -130,7 +130,7 @@ namespace VisualStudioTeamServices.Authentication
                         }
                     }
 
-                    Trace.WriteLine($"failed to acquire personal access token for '{targetUri}' [{(int)response.StatusCode} {response.ReasonPhrase}].");
+                    Trace.WriteLine($"failed to acquire personal access token for '{targetUri}' [{(int)response.StatusCode}].");
                 }
             }
             catch (Exception exception)
@@ -275,7 +275,7 @@ namespace VisualStudioTeamServices.Authentication
                 {
                     if (response.IsSuccessStatusCode)
                     {
-                        string content = await response.Content.ReadAsStringAsync();
+                        string content = response.Content.AsString;
                         Match match;
 
                         if ((match = Regex.Match(content, @"""instanceId""\s*\:\s*""([^""]+)""", RegexOptions.CultureInvariant | RegexOptions.IgnoreCase)).Success
@@ -293,7 +293,7 @@ namespace VisualStudioTeamServices.Authentication
                         }
                     }
 
-                    Trace.WriteLine($"failed to acquire the token's target identity for `{targetUri}` [{(int)response.StatusCode} {response.ReasonPhrase}].");
+                    Trace.WriteLine($"failed to acquire the token's target identity for `{targetUri}` [{(int)response.StatusCode}].");
                 }
             }
             catch (HttpRequestException exception)
@@ -327,7 +327,7 @@ namespace VisualStudioTeamServices.Authentication
                     if (response.IsSuccessStatusCode)
                         return true;
 
-                    Trace.WriteLine($"credential validation for '{targetUri}' failed [{(int)response.StatusCode} {response.ReasonPhrase}].");
+                    Trace.WriteLine($"credential validation for '{targetUri}' failed [{(int)response.StatusCode}].");
 
                     // Even if the service responded, if the issue isn't a 400 class response then
                     // the credentials were likely not rejected.
@@ -373,12 +373,12 @@ namespace VisualStudioTeamServices.Authentication
                         // the credentials were likely not rejected.
                         if ((int)response.StatusCode < 400 && (int)response.StatusCode >= 500)
                         {
-                            Trace.WriteLine($"unable to validate credentials for '{targetUri}', unexpected response [{(int)response.StatusCode} {response.ReasonPhrase}].");
+                            Trace.WriteLine($"unable to validate credentials for '{targetUri}', unexpected response [{(int)response.StatusCode}].");
 
                             return true;
                         }
 
-                        Trace.WriteLine($"credential validation for '{targetUri}' failed [{(int)response.StatusCode} {response.ReasonPhrase}].");
+                        Trace.WriteLine($"credential validation for '{targetUri}' failed [{(int)response.StatusCode}].");
 
                         return false;
                     }
@@ -439,22 +439,19 @@ namespace VisualStudioTeamServices.Authentication
                 {
                     if (response.IsSuccessStatusCode)
                     {
-                        using (HttpContent content = response.Content)
+                        string responseText = response.Content.AsString;
+
+                        Match match;
+                        if ((match = Regex.Match(responseText, @"\""location\""\:\""([^\""]+)\""", RegexOptions.Compiled | RegexOptions.CultureInvariant | RegexOptions.IgnoreCase)).Success)
                         {
-                            string responseText = await content.ReadAsStringAsync();
+                            string identityServiceUrl = match.Groups[1].Value;
+                            var idenitityServiceUri = new Uri(identityServiceUrl, UriKind.Absolute);
 
-                            Match match;
-                            if ((match = Regex.Match(responseText, @"\""location\""\:\""([^\""]+)\""", RegexOptions.Compiled | RegexOptions.CultureInvariant | RegexOptions.IgnoreCase)).Success)
-                            {
-                                string identityServiceUrl = match.Groups[1].Value;
-                                var idenitityServiceUri = new Uri(identityServiceUrl, UriKind.Absolute);
-
-                                return targetUri.CreateWith(idenitityServiceUri);
-                            }
+                            return targetUri.CreateWith(idenitityServiceUri);
                         }
                     }
 
-                    Trace.WriteLine($"failed to find Identity Service for '{targetUri}' via location service [{(int)response.StatusCode} {response.ReasonPhrase}].");
+                    Trace.WriteLine($"failed to find Identity Service for '{targetUri}' via location service [{(int)response.StatusCode}].");
                 }
             }
             catch (Exception exception)
@@ -549,9 +546,9 @@ namespace VisualStudioTeamServices.Authentication
             Trace.WriteLine($"creating access token scoped to '{tokenScope}' for '{targetUri}'");
 
             string jsonContent = (duration.HasValue && duration.Value > TimeSpan.FromHours(1))
-                ? string.Format(Culture.InvariantCulture, ContentTimedJsonFormat, tokenScope, tokenUrl, Environment.MachineName, DateTime.UtcNow + duration.Value)
-                : string.Format(Culture.InvariantCulture, ContentBasicJsonFormat, tokenScope, tokenUrl, Environment.MachineName);
-            StringContent content = new StringContent(jsonContent, Encoding.UTF8, HttpJsonContentType);
+                ? string.Format(Culture.InvariantCulture, ContentTimedJsonFormat, tokenScope, tokenUrl, Settings.MachineName, DateTime.UtcNow + duration.Value)
+                : string.Format(Culture.InvariantCulture, ContentBasicJsonFormat, tokenScope, tokenUrl, Settings.MachineName);
+            var content = new StringContent(jsonContent, Encoding.UTF8, HttpJsonContentType);
 
             return content;
         }
