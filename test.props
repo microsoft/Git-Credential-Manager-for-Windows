@@ -15,7 +15,7 @@
   <Import Project="Build.props" />
   <PropertyGroup>
     <TargetFrameworkProfile />
-    <TargetFrameworkVersion>v4.6.2</TargetFrameworkVersion>
+    <TargetFrameworkVersion>v4.7.2</TargetFrameworkVersion>
     <RunCodeAnalysis>false</RunCodeAnalysis>
   </PropertyGroup>
   <PropertyGroup>

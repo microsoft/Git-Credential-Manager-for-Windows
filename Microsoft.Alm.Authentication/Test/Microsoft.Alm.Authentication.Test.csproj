@@ -11,6 +11,7 @@
     </NuGetPackageImportStamp>
     <ProjectGuid>{19781214-371F-415C-93C5-44CEAA0E9A34}</ProjectGuid>
     <RootNamespace>Microsoft.Alm.Authentication.Test</RootNamespace>
+    <TargetFrameworkVersion>v4.7.2</TargetFrameworkVersion>
   </PropertyGroup>
   <Import Project="..\..\test.props" />
   <ItemGroup>

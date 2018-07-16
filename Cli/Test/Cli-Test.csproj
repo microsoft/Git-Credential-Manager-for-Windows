@@ -9,7 +9,7 @@
     <RootNamespace>Microsoft.Alm.Cli.Test</RootNamespace>
     <AssemblyName>Microsoft.Alm.Cli.Test</AssemblyName>
     <IsCodedUITest>False</IsCodedUITest>
-    <NuGetPackageImportStamp/>
+    <NuGetPackageImportStamp />
   </PropertyGroup>
   <Import Project="..\..\test.props" />
   <ItemGroup>
