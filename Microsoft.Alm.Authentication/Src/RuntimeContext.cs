@@ -24,25 +24,31 @@
 **/
 
 using System;
+using System.Collections.Concurrent;
+using System.Collections.Generic;
 using System.Threading;
 
 namespace Microsoft.Alm.Authentication
 {
+    [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Design", "CA1001:TypesThatOwnDisposableFieldsShouldBeDisposable")]
+    [System.Diagnostics.DebuggerDisplay("{DebuggerDisplay, nq}")]
     public class RuntimeContext
     {
         /// <summary>
         /// The default `<see cref="RuntimeContext"/>` instance.
         /// </summary>
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Security", "CA2104:DoNotDeclareReadOnlyMutableReferenceTypes")]
-        public static readonly RuntimeContext Default;
+        public static readonly RuntimeContext Default = Create();
 
-        public RuntimeContext(IStorage storage, INetwork network, Git.ITrace trace, Git.IUtilities utilities, Git.IWhere where)
+        public RuntimeContext(INetwork network, ISettings settings, IStorage storage, Git.ITrace trace, Git.IUtilities utilities, Git.IWhere where)
             : this()
         {
-            if (storage is null)
-                throw new ArgumentNullException(nameof(storage));
             if (network is null)
                 throw new ArgumentNullException(nameof(network));
+            if (settings is null)
+                throw new ArgumentNullException(nameof(settings));
+            if (storage is null)
+                throw new ArgumentNullException(nameof(storage));
             if (trace is null)
                 throw new ArgumentNullException(nameof(trace));
             if (utilities is null)
@@ -50,39 +56,25 @@ namespace Microsoft.Alm.Authentication
             if (where is null)
                 throw new ArgumentNullException(nameof(where));
 
-            _network = network;
-            _storage = storage;
-            _trace = trace;
-            _utilities = utilities;
-            _where = where;
+            SetService(network);
+            SetService(settings);
+            SetService(storage);
+            SetService(trace);
+            SetService(utilities);
+            SetService(where);
         }
 
         private RuntimeContext()
         {
             _id = Interlocked.Increment(ref _count);
+            _services = new Dictionary<Type, IRuntimeService>();
+            _syncpoint = new object();
         }
 
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Reliability", "CA2000:Dispose objects before losing scope")]
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Performance", "CA1810:InitializeReferenceTypeStaticFieldsInline")]
-        static RuntimeContext()
-        {
-            Volatile.Write(ref _count, 0);
-
-            Default = new RuntimeContext();
-            Default._network = new Network(Default);
-            Default._storage = new Storage(Default);
-            Default._trace = new Git.Trace(Default);
-            Default._utilities = new Git.Utilities(Default);
-            Default._where = new Git.Where(Default);
-        }
-
-        private static int _count;
+        private static int _count = 0;
         private readonly int _id;
-        private INetwork _network;
-        private IStorage _storage;
-        private Git.ITrace _trace;
-        private Git.IUtilities _utilities;
-        private Git.IWhere _where;
+        private readonly Dictionary<Type, IRuntimeService> _services;
+        private readonly object _syncpoint;
 
         public int Id
         {
@@ -91,27 +83,103 @@ namespace Microsoft.Alm.Authentication
 
         public INetwork Network
         {
-            get { return _network; }
+            get { return GetService<INetwork>(); }
+            internal set { SetService(value); }
+        }
+
+        public ISettings Settings
+        {
+            get { return GetService<ISettings>(); }
+            internal set { SetService(value); }
         }
 
         public IStorage Storage
         {
-            get { return _storage; }
+            get { return GetService<IStorage>(); }
+            internal set { SetService(value); }
         }
 
         public Git.ITrace Trace
         {
-            get { return _trace; }
+            get { return GetService<Git.ITrace>(); }
+            internal set { SetService(value); }
         }
 
         public Git.IUtilities Utilities
         {
-            get { return _utilities; }
+            get { return GetService<Git.IUtilities>(); }
+            internal set { SetService(value); }
         }
 
         public Git.IWhere Where
         {
-            get { return _where; }
+            get { return GetService<Git.IWhere>(); }
+            internal set { SetService(value); }
+        }
+
+        internal string DebuggerDisplay
+        {
+            get { return $"{nameof(RuntimeContext)}: Id = {_id}, Count = {_services.Count}"; }
+        }
+
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Reliability", "CA2000:Dispose objects before losing scope")]
+        public static RuntimeContext Create()
+        {
+            var context = new RuntimeContext();
+
+            context.SetService<INetwork>(new Network(context));
+            context.SetService<ISettings>(new Settings(context));
+            context.SetService<IStorage>(new Storage(context));
+            context.SetService<Git.ITrace>(new Git.Trace(context));
+            context.SetService<Git.IUtilities>(new Git.Utilities(context));
+            context.SetService<Git.IWhere>(new Git.Where(context));
+
+            return context;
+        }
+
+        internal IEnumerable<IRuntimeService> EnumerateServices()
+        {
+            List<IRuntimeService> services;
+
+            lock (_syncpoint)
+            {
+                services = new List<IRuntimeService>(_services.Values.Count);
+
+                foreach (var service in _services.Values)
+                {
+                    services.Add(service);
+                }
+            }
+
+            return services;
+        }
+
+        internal T GetService<T>() where T : class, IRuntimeService
+        {
+            lock (_syncpoint)
+            {
+                _services.TryGetValue(typeof(T), out IRuntimeService service);
+
+                return service as T;
+            }
+        }
+
+        internal void SetService<T>(T service) where T : class, IRuntimeService
+        {
+            if (service is null)
+                throw new ArgumentNullException(nameof(service));
+
+            lock (_syncpoint)
+            {
+                if (_services.ContainsKey(service.ServiceType))
+                {
+                    _services[service.ServiceType] = service;
+                }
+                else
+                {
+                    _services.Add(service.ServiceType, service);
+                }
+            }
         }
     }
 }
