@@ -281,6 +281,18 @@ namespace Microsoft.Alm.Win32
         NoToken = 1008,
 
         /// <summary>
+        /// Element not found.
+        /// </summary>
+        NotFound = 1168,
+
+        /// <summary>
+        /// A specified logon session does not exist.
+        /// <para/>
+        /// It may already have been terminated.
+        /// </summary>
+        NoSuchLogonSession = 1312,
+
+        /// <summary>
         /// A required privilege is not held by the client.
         /// </summary>
         PrivilegeNotHeld = 1314,
@@ -294,6 +306,11 @@ namespace Microsoft.Alm.Win32
         /// Not enough quota is available to process this command.
         /// </summary>
         NotEnoughQuota = 1816,
+
+        /// <summary>
+        /// The specified username is invalid.
+        /// </summary>
+        BadUserName = 2202,
     }
 
     internal enum Hresult : uint

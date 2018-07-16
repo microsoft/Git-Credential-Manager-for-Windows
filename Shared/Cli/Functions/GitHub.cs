@@ -89,7 +89,7 @@ namespace Microsoft.Alm.Cli
                 }
 
                 authenticationCode = buffer.ToString(0, (int)read);
-                authenticationCode = authenticationCode.Trim(Program.NewLineChars);
+                authenticationCode = authenticationCode.Trim(program.NewLineChars);
             }
 
             return authenticationCode != null;

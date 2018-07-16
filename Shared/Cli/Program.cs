@@ -76,8 +76,6 @@ namespace Microsoft.Alm.Cli
         internal const string ConfigPrefix = "credential";
         internal const string SecretsNamespace = "git";
 
-        internal static readonly char[] NewLineChars = Environment.NewLine.ToCharArray();
-
         internal static readonly Vsts.TokenScope VstsCredentialScope = Vsts.TokenScope.CodeWrite | Vsts.TokenScope.PackagingRead;
         internal static readonly Github.TokenScope GitHubCredentialScope = Github.TokenScope.Gist | Github.TokenScope.Repo;
 
@@ -162,6 +160,7 @@ namespace Microsoft.Alm.Cli
         private readonly RuntimeContext _context;
         private string _location;
         private string _name;
+        private char[] _newlineChars;
         private IntPtr _parentHwnd;
         private Stream _stdErrStream;
         private TextWriter _stdErrWriter;
@@ -371,6 +370,22 @@ namespace Microsoft.Alm.Cli
 
         internal INetwork Network
             => _context.Network;
+
+        internal char[] NewLineChars
+        {
+            get
+            {
+                lock (_syncpoint)
+                {
+                    if (_newlineChars is null)
+                    {
+                        _newlineChars = Environment.NewLine.ToCharArray();
+                    }
+
+                    return _newlineChars;
+                }
+            }
+        }
 
         internal TextWriter Out
         {

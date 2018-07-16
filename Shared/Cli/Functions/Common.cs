@@ -86,9 +86,9 @@ namespace Microsoft.Alm.Cli
 
                     // Detect the authority.
                     authority = await Vsts.Authentication.GetAuthentication(program.Context,
-                                                                                   operationArguments.TargetUri,
-                                                                                   Program.VstsCredentialScope,
-                                                                                   new SecretStore(program.Context, secretsNamespace, Vsts.Authentication.UriNameConversion))
+                                                                            operationArguments.TargetUri,
+                                                                            Program.VstsCredentialScope,
+                                                                            new SecretStore(program.Context, secretsNamespace, Vsts.Authentication.UriNameConversion))
                              ?? Github.Authentication.GetAuthentication(program.Context,
                                                                         operationArguments.TargetUri,
                                                                         Program.GitHubCredentialScope,
@@ -145,9 +145,9 @@ namespace Microsoft.Alm.Cli
 
                         // Create the authority object.
                         authority = new Vsts.AadAuthentication(program.Context,
-                                                              tenantId,
-                                                              operationArguments.VstsTokenScope,
-                                                              new SecretStore(program.Context, secretsNamespace, Vsts.AadAuthentication.UriNameConversion));
+                                                               tenantId,
+                                                               operationArguments.VstsTokenScope,
+                                                               new SecretStore(program.Context, secretsNamespace, Vsts.AadAuthentication.UriNameConversion));
                     }
 
                     // Return the allocated authority or a generic AAD backed VSTS authentication object.
@@ -184,8 +184,8 @@ namespace Microsoft.Alm.Cli
 
                     // Return the allocated authority or a generic MSA backed VSTS authentication object.
                     return authority ?? new Vsts.MsaAuthentication(program.Context,
-                                                                  operationArguments.VstsTokenScope,
-                                                                  new SecretStore(program.Context, secretsNamespace, Vsts.MsaAuthentication.UriNameConversion));
+                                                                   operationArguments.VstsTokenScope,
+                                                                   new SecretStore(program.Context, secretsNamespace, Vsts.MsaAuthentication.UriNameConversion));
 
                 case AuthorityType.Ntlm:
                     // Enforce NTLM authentication only.
