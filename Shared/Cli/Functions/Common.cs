@@ -309,7 +309,7 @@ namespace Microsoft.Alm.Cli
                 }
             }
 #if DEBUG
-            program.Trace.WriteLine($"GCM arguments:{Environment.NewLine}{operationArguments}");
+            program.Trace.WriteLine($"GCM arguments:{program.Settings.NewLine}{operationArguments}");
 #endif
         }
 

@@ -379,7 +379,7 @@ namespace Microsoft.Alm.Cli
                 {
                     if (_newlineChars is null)
                     {
-                        _newlineChars = Environment.NewLine.ToCharArray();
+                        _newlineChars = Settings.NewLine.ToCharArray();
                     }
 
                     return _newlineChars;
@@ -425,6 +425,9 @@ namespace Microsoft.Alm.Cli
             set { lock (_syncpoint) _parentHwnd = value; }
         }
 
+        internal ISettings Settings
+            => _context.Settings;
+
         internal IStorage Storage
             => _context.Storage;
 
@@ -445,7 +448,7 @@ namespace Microsoft.Alm.Cli
             if (Debugger.IsAttached)
                 return;
 
-            string debug = Environment.GetEnvironmentVariable(EnvironConfigDebugKey);
+            string debug = program.Settings.GetEnvironmentVariable(EnvironConfigDebugKey);
             if (debug != null
                 && (StringComparer.OrdinalIgnoreCase.Equals(debug, "true")
                     || StringComparer.OrdinalIgnoreCase.Equals(debug, "1")
@@ -464,7 +467,7 @@ namespace Microsoft.Alm.Cli
 
             try
             {
-                string traceValue = Environment.GetEnvironmentVariable(environmentKey);
+                string traceValue = Settings.GetEnvironmentVariable(environmentKey);
 
                 if (traceValue is null)
                     return;

@@ -208,7 +208,7 @@ namespace GitHub.Authentication
             }
         }
 
-        private static HttpContent GetTokenJsonContent(TargetUri targetUri, TokenScope scope)
+        private HttpContent GetTokenJsonContent(TargetUri targetUri, TokenScope scope)
         {
             const string HttpJsonContentType = "application/x-www-form-urlencoded";
             const string JsonContentFormat = @"{{ ""scopes"": {0}, ""note"": ""git: {1} on {2} at {3:dd-MMM-yyyy HH:mm}"" }}";
@@ -232,7 +232,7 @@ namespace GitHub.Authentication
 
             scopesBuilder.Append(']');
 
-            string jsonContent = string.Format(JsonContentFormat, scopesBuilder, targetUri, Environment.MachineName, DateTime.Now);
+            string jsonContent = string.Format(JsonContentFormat, scopesBuilder, targetUri, Settings.MachineName, DateTime.Now);
 
             return new StringContent(jsonContent, Encoding.UTF8, HttpJsonContentType);
         }

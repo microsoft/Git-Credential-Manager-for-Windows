@@ -37,10 +37,10 @@ namespace Microsoft.Alm.Authentication
         /// <summary>
         /// The maximum wait time for a network request before timing out
         /// </summary>
-        public const int RequestTimeout = 15 * 1000; // 15 second limit
+        public const int RequestTimeout = 90 * 1000; // 90 second limit
 
         private static readonly object _syncpoint = new object();
-        private static string _useragent = BuildDefaultUserAgent();
+        private static string _useragent = BuildDefaultUserAgent(RuntimeContext.Default);
 
         /// <summary>
         /// Gets or sets the user-agent string sent as part of the header in any HTTP operations.
@@ -57,7 +57,7 @@ namespace Microsoft.Alm.Authentication
                 {
                     if (_useragent is null)
                     {
-                        _useragent = BuildDefaultUserAgent();
+                        _useragent = BuildDefaultUserAgent(RuntimeContext.Default);
                     }
 
                     return _useragent;
@@ -67,18 +67,21 @@ namespace Microsoft.Alm.Authentication
 
         }
 
-        private static string BuildDefaultUserAgent()
+        private static string BuildDefaultUserAgent(RuntimeContext context)
         {
+            if (context is null)
+                throw new ArgumentNullException(nameof(context));
+
             var assembly = System.Reflection.Assembly.GetEntryAssembly() ?? typeof(Global).Assembly;
             var assemblyName = assembly.GetName();
             var name = assemblyName.Name;
             var version = assemblyName.Version;
             var useragent = string.Format("{0} ({1}; {2}; {3}) CLR/{4} git-tools/{5}",
                                           name,
-                                          Environment.OSVersion.VersionString,
-                                          Environment.OSVersion.Platform,
-                                          Environment.Is64BitOperatingSystem ? "x64" : "x86",
-                                          Environment.Version.ToString(3),
+                                          context.Settings.OsVersion.VersionString,
+                                          context.Settings.OsVersion.Platform,
+                                          context.Settings.Is64BitOperatingSystem ? "x64" : "x86",
+                                          context.Settings.Version.ToString(3),
                                           version.ToString(3));
 
             return useragent;

@@ -28,6 +28,7 @@
   <ItemGroup>
     <Compile Include="Base.cs" />
     <Compile Include="IRuntimeService.cs" />
+    <Compile Include="Settings.cs" />
     <Compile Include="ISecretStore.cs" />
     <Compile Include="Storage.cs" />
     <Compile Include="Git\Configuration.cs" />

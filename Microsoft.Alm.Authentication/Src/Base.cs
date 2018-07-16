@@ -46,6 +46,9 @@ namespace Microsoft.Alm.Authentication
         protected INetwork Network
             => _context.Network;
 
+        protected ISettings Settings
+            => _context.Settings;
+
         protected IStorage Storage
             => _context.Storage;
 

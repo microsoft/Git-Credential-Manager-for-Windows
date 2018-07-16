@@ -114,7 +114,7 @@ namespace Microsoft.Alm.Cli
 
                 // Record input from the user into local storage, stripping any EOL chars.
                 username = buffer.ToString(0, (int)read);
-                username = username.Trim(Environment.NewLine.ToCharArray());
+                username = username.Trim(program.Settings.NewLine.ToCharArray());
 
                 // Clear the buffer for the next operation.
                 buffer.Clear();
@@ -152,7 +152,7 @@ namespace Microsoft.Alm.Cli
 
                     // Record input from the user into local storage, stripping any EOL chars.
                     password = buffer.ToString(0, (int)read);
-                    password = password.Trim(Environment.NewLine.ToCharArray());
+                    password = password.Trim(program.Settings.NewLine.ToCharArray());
                 }
                 finally
                 {
@@ -182,7 +182,7 @@ namespace Microsoft.Alm.Cli
 
             program.Trace.Flush();
 
-            Environment.Exit(exitcode);
+            program.Settings.Exit(exitcode);
         }
 
         public static Stream OpenStandardErrorStream(Program program)

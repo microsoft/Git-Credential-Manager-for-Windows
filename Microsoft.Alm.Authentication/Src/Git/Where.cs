@@ -115,7 +115,7 @@ namespace Microsoft.Alm.Authentication.Git
         /// <summary>
         /// Gets the path to Git's portable system configuration file.
         /// <para/>
-        /// Searches starting with `<see cref="Environment.CurrentDirectory"/>` working up towards the device root.
+        /// Searches starting with `<see cref="Settings.CurrentDirectory"/>` working up towards the device root.
         /// <para/>
         /// Returns `<see langword="true"/>` if successful; otherwise `<see langword="false"/>`.
         /// </summary>
@@ -163,8 +163,8 @@ namespace Microsoft.Alm.Authentication.Git
         {
             if (!string.IsNullOrWhiteSpace(name))
             {
-                string pathext = Environment.GetEnvironmentVariable("PATHEXT");
-                string envpath = Environment.GetEnvironmentVariable("PATH");
+                string pathext = Settings.GetEnvironmentVariable("PATHEXT");
+                string envpath = Settings.GetEnvironmentVariable("PATH");
 
                 if (string.IsNullOrEmpty(pathext) || string.IsNullOrEmpty(envpath))
                 {
@@ -218,7 +218,7 @@ namespace Microsoft.Alm.Authentication.Git
             {
                 var appDataRoamingPath = string.Empty;
 
-                if ((appDataRoamingPath = Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData)) != null)
+                if ((appDataRoamingPath = Settings.GetFolderPath(Environment.SpecialFolder.ApplicationData)) != null)
                 {
                     appDataRoamingPath = Path.Combine(appDataRoamingPath, GitAppName);
 
@@ -229,7 +229,7 @@ namespace Microsoft.Alm.Authentication.Git
 
                 var appDataLocalPath = string.Empty;
 
-                if ((appDataLocalPath = Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData)) != null)
+                if ((appDataLocalPath = Settings.GetFolderPath(Environment.SpecialFolder.LocalApplicationData)) != null)
                 {
                     appDataLocalPath = Path.Combine(appDataLocalPath, GitAppName);
 
@@ -240,7 +240,7 @@ namespace Microsoft.Alm.Authentication.Git
 
                 var programDataPath = string.Empty;
 
-                if ((programDataPath = Environment.GetFolderPath(Environment.SpecialFolder.CommonApplicationData)) != null)
+                if ((programDataPath = Settings.GetFolderPath(Environment.SpecialFolder.CommonApplicationData)) != null)
                 {
                     programDataPath = Path.Combine(programDataPath, GitAppName);
 
@@ -254,7 +254,7 @@ namespace Microsoft.Alm.Authentication.Git
             {
                 var programFiles32Path = string.Empty;
 
-                if ((programFiles32Path = Environment.GetFolderPath(Environment.SpecialFolder.ProgramFilesX86)) != null)
+                if ((programFiles32Path = Settings.GetFolderPath(Environment.SpecialFolder.ProgramFilesX86)) != null)
                 {
                     programFiles32Path = Path.Combine(programFiles32Path, GitAppName);
 
@@ -262,11 +262,11 @@ namespace Microsoft.Alm.Authentication.Git
                     output.Add(new Installation(Context, programFiles32Path, KnownDistribution.GitForWindows32v1));
                 }
 
-                if (Environment.Is64BitOperatingSystem)
+                if (Settings.Is64BitOperatingSystem)
                 {
                     var programFiles64Path = string.Empty;
 
-                    if ((programFiles64Path = Environment.GetFolderPath(Environment.SpecialFolder.ProgramFiles)) != null)
+                    if ((programFiles64Path = Settings.GetFolderPath(Environment.SpecialFolder.ProgramFiles)) != null)
                     {
                         programFiles64Path = Path.Combine(programFiles64Path, GitAppName);
 
@@ -292,7 +292,7 @@ namespace Microsoft.Alm.Authentication.Git
                     output.Add(new Installation(Context, reg32HkcuPath, KnownDistribution.GitForWindows32v1));
                 }
 
-                if (Environment.Is64BitOperatingSystem)
+                if (Settings.Is64BitOperatingSystem)
                 {
                     var reg64HklmPath = Storage.RegistryReadString(RegistryHive.LocalMachine, RegistryView.Registry64, GitSubkeyName, GitValueName);
                     var reg64HkcuPath = Storage.RegistryReadString(RegistryHive.CurrentUser, RegistryView.Registry64, GitSubkeyName, GitValueName);
@@ -354,11 +354,11 @@ namespace Microsoft.Alm.Authentication.Git
         {
             // Git relies on the %HOME% environment variable to represent the users home directory it
             // can contain embedded environment variables, so we need to expand it
-            string path = Environment.GetEnvironmentVariable("HOME", EnvironmentVariableTarget.Process);
+            string path = Settings.GetEnvironmentVariable("HOME", EnvironmentVariableTarget.Process);
 
             if (path != null)
             {
-                path = Environment.ExpandEnvironmentVariables(path);
+                path = Settings.ExpandEnvironmentVariables(path);
 
                 // If the path is good, return it.
                 if (Storage.DirectoryExists(path))
@@ -367,8 +367,8 @@ namespace Microsoft.Alm.Authentication.Git
 
             // Absent the %HOME% variable, Git will construct it via %HOMEDRIVE%%HOMEPATH%, so we'll
             // attempt to that here and if it is valid, return it as %HOME%.
-            string homeDrive = Environment.GetEnvironmentVariable("HOMEDRIVE", EnvironmentVariableTarget.Process);
-            string homePath = Environment.GetEnvironmentVariable("HOMEPATH", EnvironmentVariableTarget.Process);
+            string homeDrive = Settings.GetEnvironmentVariable("HOMEDRIVE", EnvironmentVariableTarget.Process);
+            string homePath = Settings.GetEnvironmentVariable("HOMEPATH", EnvironmentVariableTarget.Process);
 
             if (homeDrive != null && homePath != null)
             {
@@ -379,7 +379,7 @@ namespace Microsoft.Alm.Authentication.Git
             }
 
             // When all else fails, Git falls back to %USERPROFILE% as the user's home directory, so should we.
-            return Environment.GetFolderPath(Environment.SpecialFolder.UserProfile);
+            return Settings.GetFolderPath(Environment.SpecialFolder.UserProfile);
         }
 
         public bool GitGlobalConfig(out string path)
@@ -519,7 +519,7 @@ namespace Microsoft.Alm.Authentication.Git
 
         public bool GitLocalConfig(out string path)
         {
-            return GitLocalConfig(Environment.CurrentDirectory, out path);
+            return GitLocalConfig(Settings.CurrentDirectory, out path);
         }
 
         public bool GitPortableConfig(out string path)
@@ -529,7 +529,7 @@ namespace Microsoft.Alm.Authentication.Git
 
             path = null;
 
-            var portableConfigPath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.CommonApplicationData), PortableConfigFolder, PortableConfigFileName);
+            var portableConfigPath = Path.Combine(Settings.GetFolderPath(Environment.SpecialFolder.CommonApplicationData), PortableConfigFolder, PortableConfigFileName);
 
             if (Storage.FileExists(portableConfigPath))
             {
@@ -572,7 +572,7 @@ namespace Microsoft.Alm.Authentication.Git
             string xdgConfigPath;
 
             // The XDG config home is defined by an environment variable.
-            xdgConfigHome = Environment.GetEnvironmentVariable("XDG_CONFIG_HOME");
+            xdgConfigHome = Settings.GetEnvironmentVariable("XDG_CONFIG_HOME");
 
             if (Storage.DirectoryExists(xdgConfigHome))
             {
@@ -586,7 +586,7 @@ namespace Microsoft.Alm.Authentication.Git
             }
 
             // Fall back to using the %AppData% folder, and try again.
-            xdgConfigHome = Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData);
+            xdgConfigHome = Settings.GetFolderPath(Environment.SpecialFolder.ApplicationData);
 
             xdgConfigPath = Path.Combine(xdgConfigHome, XdgConfigFolder, XdgConfigFileName);
 

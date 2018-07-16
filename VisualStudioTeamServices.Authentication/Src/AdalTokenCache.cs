@@ -51,10 +51,10 @@ namespace VisualStudioTeamServices.Authentication
 
             _context = context;
 
-            string localAppDataPath = Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData);
-
             AfterAccess = AfterAccessNotification;
             BeforeAccess = BeforeAccessNotification;
+
+            string localAppDataPath = context.Settings.GetFolderPath(Environment.SpecialFolder.LocalApplicationData);
 
             for (int i = 0; i < AdalCachePaths.Count; i += 1)
             {
