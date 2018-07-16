@@ -30,7 +30,7 @@ using static System.Globalization.CultureInfo;
 
 namespace Microsoft.Alm.Authentication.Git
 {
-    public interface ITrace
+    public interface ITrace : IRuntimeService
     {
         /// <summary>
         /// Add a listener to the trace writer.
@@ -90,6 +90,8 @@ namespace Microsoft.Alm.Authentication.Git
         private readonly object _syncpoint = new object();
         private List<TextWriter> _writers;
 
+        public Type ServiceType
+            => typeof(ITrace);
 
         public void AddListener(TextWriter listener)
         {

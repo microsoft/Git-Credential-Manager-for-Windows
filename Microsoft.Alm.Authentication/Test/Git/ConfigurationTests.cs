@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Threading.Tasks;
+using Microsoft.Alm.Authentication.Test;
 using Xunit;
 
 namespace Microsoft.Alm.Authentication.Git.Test
@@ -24,8 +25,8 @@ namespace Microsoft.Alm.Authentication.Git.Test
         }
 
         [Theory]
-        [MemberData(nameof(ParseData), DisableDiscoveryEnumeration = true)]
-        public async Task GitConfif_Parse(string input, string expectedName, string expected, bool ignoreCase)
+        [MemberData(nameof(GitConfig_Parse_Data), DisableDiscoveryEnumeration = true)]
+        public async Task GitConfig_Parse(string input, string expectedName, string expected, bool ignoreCase)
         {
             var values = await TestParseGitConfig(input);
             Assert.NotNull(values);
@@ -109,6 +110,7 @@ namespace Microsoft.Alm.Authentication.Git.Test
             {
                 await Configuration.ParseGitConfig(RuntimeContext.Default, sr, values);
             }
+
             return values;
         }
     }

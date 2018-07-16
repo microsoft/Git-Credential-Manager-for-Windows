@@ -422,7 +422,7 @@ namespace Microsoft.Alm.Authentication.Git
 
                                 includePath = Path.GetFullPath(includePath);
 
-                                using (FileStream includeFile = context.Storage.FileOpen(includePath, FileMode.Open, FileAccess.Read, FileShare.Read))
+                                using (var includeFile = context.Storage.FileOpen(includePath, FileMode.Open, FileAccess.Read, FileShare.Read))
                                 using (var includeReader = new StreamReader(includeFile))
                                 {
                                     await ParseGitConfig(context, includeReader, destination);
@@ -472,7 +472,7 @@ namespace Microsoft.Alm.Authentication.Git
             if (!Storage.FileExists(configPath))
                 return;
 
-            using (FileStream stream = Storage.FileOpen(configPath, FileMode.Open, FileAccess.Read, FileShare.ReadWrite))
+            using (var stream = Storage.FileOpen(configPath, FileMode.Open, FileAccess.Read, FileShare.ReadWrite))
             using (var reader = new StreamReader(stream))
             {
                 await ParseGitConfig(Context, reader, _values[level]);

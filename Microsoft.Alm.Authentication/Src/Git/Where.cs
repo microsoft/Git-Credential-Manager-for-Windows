@@ -30,9 +30,11 @@ using System.Linq;
 using System.Text.RegularExpressions;
 using Microsoft.Win32;
 
+using static System.StringComparer;
+
 namespace Microsoft.Alm.Authentication.Git
 {
-    public interface IWhere
+    public interface IWhere : IRuntimeService
     {
         /// <summary>
         /// Finds the "best" path to an app of a given name.
@@ -154,6 +156,9 @@ namespace Microsoft.Alm.Authentication.Git
             : base(context)
         { }
 
+        public Type ServiceType
+            => typeof(IWhere);
+
         public bool FindApp(string name, out string path)
         {
             if (!string.IsNullOrWhiteSpace(name))
@@ -272,17 +277,8 @@ namespace Microsoft.Alm.Authentication.Git
 
             void ScanRegistry(IList<Installation> output)
             {
-                var reg32HklmPath = string.Empty;
-                var reg32HkcuPath = string.Empty;
-
-                using (var reg32HklmKey = RegistryKey.OpenBaseKey(RegistryHive.LocalMachine, RegistryView.Registry32))
-                using (var reg32HkcuKey = RegistryKey.OpenBaseKey(RegistryHive.CurrentUser, RegistryView.Registry32))
-                using (var reg32HklmSubKey = reg32HklmKey?.OpenSubKey(GitSubkeyName))
-                using (var reg32HkcuSubKey = reg32HkcuKey?.OpenSubKey(GitSubkeyName))
-                {
-                    reg32HklmPath = reg32HklmSubKey?.GetValue(GitValueName, reg32HklmPath) as string;
-                    reg32HkcuPath = reg32HkcuSubKey?.GetValue(GitValueName, reg32HkcuPath) as string;
-                }
+                var reg32HklmPath = Storage.RegistryReadString(RegistryHive.LocalMachine, RegistryView.Registry32, GitSubkeyName, GitValueName);
+                var reg32HkcuPath = Storage.RegistryReadString(RegistryHive.CurrentUser, RegistryView.Registry32, GitSubkeyName, GitValueName);
 
                 if (!string.IsNullOrEmpty(reg32HklmPath))
                 {
@@ -298,17 +294,8 @@ namespace Microsoft.Alm.Authentication.Git
 
                 if (Environment.Is64BitOperatingSystem)
                 {
-                    var reg64HklmPath = string.Empty;
-                    var reg64HkcuPath = string.Empty;
-
-                    using (var reg64HklmKey = RegistryKey.OpenBaseKey(RegistryHive.LocalMachine, RegistryView.Registry64))
-                    using (var reg64HkcuKey = RegistryKey.OpenBaseKey(RegistryHive.CurrentUser, RegistryView.Registry64))
-                    using (var reg64HklmSubKey = reg64HklmKey?.OpenSubKey(GitSubkeyName))
-                    using (var reg64HkcuSubKey = reg64HkcuKey?.OpenSubKey(GitSubkeyName))
-                    {
-                        reg64HklmPath = reg64HklmSubKey?.GetValue(GitValueName, reg64HklmPath) as string;
-                        reg64HkcuPath = reg64HkcuSubKey?.GetValue(GitValueName, reg64HkcuPath) as string;
-                    }
+                    var reg64HklmPath = Storage.RegistryReadString(RegistryHive.LocalMachine, RegistryView.Registry64, GitSubkeyName, GitValueName);
+                    var reg64HkcuPath = Storage.RegistryReadString(RegistryHive.CurrentUser, RegistryView.Registry64, GitSubkeyName, GitValueName);
 
                     if (!string.IsNullOrEmpty(reg64HklmPath))
                     {
@@ -424,50 +411,61 @@ namespace Microsoft.Alm.Authentication.Git
 
             if (!string.IsNullOrWhiteSpace(startingDirectory))
             {
-                var dir = new DirectoryInfo(startingDirectory);
+                string directory = startingDirectory;
+                string result = null;
 
-                if (dir.Exists)
+                if (Storage.DirectoryExists(directory))
                 {
-                    FileSystemInfo hasOdb(DirectoryInfo info)
+                    string hasOdb(string dir)
                     {
-                        if (info == null || !info.Exists)
+                        if (dir == null || !Storage.DirectoryExists(dir))
                             return null;
 
-                        foreach (var item in info.EnumerateFileSystemInfos())
+                        foreach (var entryPath in Storage.EnumerateFileSystemEntries(dir))
                         {
-                            if (item != null
-                                && item.Exists
-                                && (GitFolderName.Equals(item.Name, StringComparison.OrdinalIgnoreCase)
-                                    || LocalConfigFileName.Equals(item.Name, StringComparison.OrdinalIgnoreCase)))
-                                return item;
+                            if (entryPath is null)
+                                continue;
+
+                            string file = Storage.GetFileName(entryPath);
+
+                            if (OrdinalIgnoreCase.Equals(file, GitFolderName)
+                                && Storage.DirectoryExists(entryPath))
+                                return entryPath;
+
+                            if (OrdinalIgnoreCase.Equals(file, LocalConfigFileName)
+                                && Storage.FileExists(entryPath))
+                                return entryPath;
                         }
 
                         return null;
                     }
 
-                    FileSystemInfo result = null;
-                    while (dir != null && dir.Exists && dir.Parent != null && dir.Parent.Exists)
+                    while (directory != null
+                        && Storage.DirectoryExists(directory))
                     {
-                        if ((result = hasOdb(dir)) != null)
+                        if ((result = hasOdb(directory)) != null)
                             break;
 
-                        dir = dir.Parent;
+                        directory = Storage.GetParent(directory);
                     }
 
-                    if (result != null && result.Exists)
+                    if (result != null)
                     {
-                        if (result is DirectoryInfo)
+                        result = Storage.GetFullPath(result);
+
+                        if (Storage.DirectoryExists(result))
                         {
-                            var localPath = Path.Combine(result.FullName, LocalConfigFileName);
+                            var localPath = Path.Combine(result, LocalConfigFileName);
                             if (Storage.FileExists(localPath))
                             {
                                 path = localPath;
                                 return true;
                             }
                         }
-                        else if (result.Name == LocalConfigFileName && result is FileInfo)
+                        else if (Storage.FileExists(result)
+                            && OrdinalIgnoreCase.Equals(Storage.GetFileName(result), LocalConfigFileName))
                         {
-                            path = result.FullName;
+                            path = result;
                             return true;
                         }
                         else
@@ -475,8 +473,8 @@ namespace Microsoft.Alm.Authentication.Git
                             // parse the file like gitdir: ../.git/modules/libgit2sharp
                             string content = null;
 
-                            using (FileStream stream = (result as FileInfo).OpenRead())
-                            using (StreamReader reader = new StreamReader(stream))
+                            using (var stream = Storage.FileOpen(result, FileMode.Open, FileAccess.Read, FileShare.Read))
+                            using (var reader = new StreamReader(stream))
                             {
                                 content = reader.ReadToEnd();
                             }
@@ -496,7 +494,7 @@ namespace Microsoft.Alm.Authentication.Git
                                 }
                                 else
                                 {
-                                    localPath = Path.GetDirectoryName(result.FullName);
+                                    localPath = Storage.GetParent(result);
                                     localPath = Path.Combine(localPath, content);
                                 }
 
