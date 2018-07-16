@@ -19,5 +19,6 @@ using System.Runtime.InteropServices;
 
 // Only expose internals when the binary isn't signed.
 #if !SIGNED
+[assembly: InternalsVisibleTo("VisualStudioTeamServices.Authentication.Proxy")]
 [assembly: InternalsVisibleTo("VisualStudioTeamServices.Authentication.Test")]
 #endif
