@@ -1,0 +1,3066 @@
+/**** Git Process Management Library ****
+ *
+ * Copyright (c) Microsoft Corporation
+ * All rights reserved.
+ *
+ * MIT License
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy
+ * of this software and associated documentation files (the "Software"), to deal
+ * in the Software without restriction, including without limitation the rights to
+ * use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of
+ * the Software, and to permit persons to whom the Software is furnished to do so,
+ * subject to the following conditions:
+ *
+ * The above copyright notice and this permission notice shall be included in all
+ * copies or substantial portions of the Software.
+ *
+ * THE SOFTWARE IS PROVIDED *AS IS*, WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS
+ * FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR
+ * COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN
+ * AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
+ * WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+**/
+
+// Use `Formatting.Indented` to ease review readability.
+{
+  "DisplayName": "GithubLogonTests_Logon2fa_Cancel",
+  "ResultPath": "E:\\Src\\Microsoft.Alm\\Gcm\\Cli\\Test\\Results",
+  "Services": {
+    "Network": {
+      "Operations": [
+        {
+          "Methods": [
+            {
+              "Method": "HttpHeadAsync",
+              "Queries": [
+                {
+                  "Ordinal": 1,
+                  "Request": {
+                    "Headers": [],
+                    "Flags": 16
+                  },
+                  "Response": {
+                    "Content": {
+                      "AsString": "",
+                      "ContentType": "text/html",
+                      "HasContent": true
+                    },
+                    "Headers": [
+                      "Status=200 OK",
+                      "X-Content-Type-Options=nosniff",
+                      "X-GitHub-Request-Id=000:1112:2233334:4455566:6777888"
+                    ],
+                    "StatusCode": 200
+                  }
+                }
+              ]
+            }
+          ],
+          "QueryUrl": "https://github.com/"
+        }
+      ]
+    },
+    "Settings": {
+      "EnvironmentVariables": [
+        {
+          "Target": 0,
+          "Values": [
+            {
+              "Name": "GCM_DEBUG"
+            },
+            {
+              "Name": "ProgramFiles(x86)",
+              "Variable": "C:\\Program Files (x86)"
+            },
+            {
+              "Name": "ProgramW6432",
+              "Variable": "C:\\Program Files"
+            },
+            {
+              "Name": "GIT_TRACE",
+              "Variable": "D:\\.trace\\git"
+            },
+            {
+              "Name": "TMP",
+              "Variable": "C:\\Users\\Tester\\AppData\\Local\\Temp"
+            },
+            {
+              "Name": "Path",
+              "Variable": "C:\\WINDOWS\\system32;C:\\WINDOWS;C:\\WINDOWS\\System32\\Wbem;C:\\WINDOWS\\System32\\WindowsPowerShell\\v1.0;C:\\Program Files\\Git\\cmd;C:\\WINDOWS\\System32\\WindowsPowerShell\\v1.0\\;C:\\Program Files\\Git LFS;C:\\WINDOWS\\System32\\OpenSSH\\;C:\\Program Files\\Git\\cmd"
+            },
+            {
+              "Name": "USERPROFILE",
+              "Variable": "C:\\Users\\Tester"
+            },
+            {
+              "Name": "TEMP",
+              "Variable": "C:\\Users\\Tester\\AppData\\Local\\Temp"
+            },
+            {
+              "Name": "USERNAME",
+              "Variable": "Tester"
+            },
+            {
+              "Name": "SystemRoot",
+              "Variable": "C:\\WINDOWS"
+            },
+            {
+              "Name": "CommonProgramFiles(x86)",
+              "Variable": "C:\\Program Files (x86)\\Common Files"
+            },
+            {
+              "Name": "GIT_TRACE_PATH",
+              "Variable": "D:\\.trace\\git"
+            },
+            {
+              "Name": "ProgramData",
+              "Variable": "C:\\ProgramData"
+            },
+            {
+              "Name": "HOMEPATH",
+              "Variable": "\\Users\\Tester"
+            },
+            {
+              "Name": "XDG_CONFIG_HOME",
+              "Variable": "C:\\Users\\Tester\\AppData\\Local\\Xdg"
+            },
+            {
+              "Name": "ALLUSERSPROFILE",
+              "Variable": "C:\\ProgramData"
+            },
+            {
+              "Name": "CommonProgramW6432",
+              "Variable": "C:\\Program Files\\Common Files"
+            },
+            {
+              "Name": "CommonProgramFiles",
+              "Variable": "C:\\Program Files (x86)\\Common File"
+            },
+            {
+              "Name": "HOMEDRIVE",
+              "Variable": "C:"
+            },
+            {
+              "Name": "windir",
+              "Variable": "C:\\Windows"
+            },
+            {
+              "Name": "SystemDrive",
+              "Variable": "C:"
+            },
+            {
+              "Name": "GIT_MERGE_AUTOEDIT",
+              "Variable": "NO"
+            },
+            {
+              "Name": "ProgramFiles",
+              "Variable": "C:\\Program Files"
+            },
+            {
+              "Name": "GIT_LFS_PATH",
+              "Variable": "C:\\Program Files\\Git LFS"
+            },
+            {
+              "Name": "GIT_MERGE_VERBOSITY",
+              "Variable": "4"
+            },
+            {
+              "Name": "PATHEXT",
+              "Variable": ".COM;.EXE;.BAT;.CMD"
+            },
+            {
+              "Name": "HOME",
+              "Variable": "C:\\Users\\Tester"
+            },
+            {
+              "Name": "GCM_TRACE",
+              "Variable": "D:\\.trace\\git"
+            },
+            {
+              "Name": "APPDATA",
+              "Variable": "C:\\Users\\Tester\\AppData\\Roaming"
+            },
+            {
+              "Name": "LOCALAPPDATA",
+              "Variable": "C:\\Users\\Tester\\AppData\\Local"
+            }
+          ]
+        }
+      ],
+      "ExitCode": -1,
+      "ExpandVariables": [
+        {
+          "Expanded": "C:\\Users\\Tester",
+          "Original": "C:\\Users\\Tester"
+        }
+      ],
+      "CurrentDirectory": "C:\\Src\\MS.ALM.GCM\\Cli\\Test\\bin\\Debug",
+      "Is64BitOperatingSystem": true,
+      "NewLine": "\r\n",
+      "OsVersion": 0,
+      "SpecialFolders": [
+        {
+          "Path": "C:\\ProgramData",
+          "SpecialFolder": 35
+        },
+        {
+          "Path": "C:\\Program Files (x86)",
+          "SpecialFolder": 42
+        },
+        {
+          "Path": "C:\\Program Files",
+          "SpecialFolder": 38
+        },
+        {
+          "Path": "C:\\Users\\Tester\\AppData\\Roaming",
+          "SpecialFolder": 26
+        },
+        {
+          "Path": "C:\\Users\\Tester\\AppData\\Local",
+          "SpecialFolder": 28
+        }
+      ]
+    },
+    "Storage": {
+      "Operations": [
+        {
+          "Path": "C:\\Src\\MS.ALM.GCM\\Cli\\Test\\bin\\Debug",
+          "Methods": [
+            {
+              "Method": "DirectoryExists",
+              "Queries": [
+                {
+                  "Input": "C:\\Src\\MS.ALM.GCM\\Cli\\Test\\bin\\Debug",
+                  "Ordinal": 1,
+                  "Output": true
+                },
+                {
+                  "Input": "C:\\Src\\MS.ALM.GCM\\Cli\\Test\\bin\\Debug",
+                  "Ordinal": 285,
+                  "Output": true
+                },
+                {
+                  "Input": "C:\\Src\\MS.ALM.GCM\\Cli\\Test\\bin\\Debug",
+                  "Ordinal": 286,
+                  "Output": true
+                },
+                {
+                  "Input": "C:\\Src\\MS.ALM.GCM\\Cli\\Test\\bin\\Debug",
+                  "Ordinal": 287,
+                  "Output": true
+                }
+              ]
+            },
+            {
+              "Method": "EnumerateFileSystemEntries",
+              "Queries": [
+                {
+                  "Input": {
+                    "Options": 0,
+                    "Path": "C:\\Src\\MS.ALM.GCM\\Cli\\Test\\bin\\Debug",
+                    "Pattern": "*"
+                  },
+                  "Ordinal": 288,
+                  "Output": [
+                    "C:\\Src\\MS.ALM.GCM\\Cli\\Test\\bin\\Debug\\Bitbucket.Authentication.dll",
+                    "C:\\Src\\MS.ALM.GCM\\Cli\\Test\\bin\\Debug\\Bitbucket.Authentication.pdb",
+                    "C:\\Src\\MS.ALM.GCM\\Cli\\Test\\bin\\Debug\\Castle.Core.dll",
+                    "C:\\Src\\MS.ALM.GCM\\Cli\\Test\\bin\\Debug\\Castle.Core.xml",
+                    "C:\\Src\\MS.ALM.GCM\\Cli\\Test\\bin\\Debug\\git-credential-manager.exe",
+                    "C:\\Src\\MS.ALM.GCM\\Cli\\Test\\bin\\Debug\\git-credential-manager.exe.config",
+                    "C:\\Src\\MS.ALM.GCM\\Cli\\Test\\bin\\Debug\\git-credential-manager.pdb",
+                    "C:\\Src\\MS.ALM.GCM\\Cli\\Test\\bin\\Debug\\GitHub.Authentication.exe",
+                    "C:\\Src\\MS.ALM.GCM\\Cli\\Test\\bin\\Debug\\GitHub.Authentication.exe.config",
+                    "C:\\Src\\MS.ALM.GCM\\Cli\\Test\\bin\\Debug\\GitHub.Authentication.pdb",
+                    "C:\\Src\\MS.ALM.GCM\\Cli\\Test\\bin\\Debug\\GitHub.Authentication.Proxy.dll",
+                    "C:\\Src\\MS.ALM.GCM\\Cli\\Test\\bin\\Debug\\GitHub.Authentication.Proxy.dll.config",
+                    "C:\\Src\\MS.ALM.GCM\\Cli\\Test\\bin\\Debug\\GitHub.Authentication.Proxy.pdb",
+                    "C:\\Src\\MS.ALM.GCM\\Cli\\Test\\bin\\Debug\\Microsoft.Alm.Authentication.dll",
+                    "C:\\Src\\MS.ALM.GCM\\Cli\\Test\\bin\\Debug\\Microsoft.Alm.Authentication.dll.config",
+                    "C:\\Src\\MS.ALM.GCM\\Cli\\Test\\bin\\Debug\\Microsoft.Alm.Authentication.pdb",
+                    "C:\\Src\\MS.ALM.GCM\\Cli\\Test\\bin\\Debug\\Microsoft.Alm.Authentication.Proxy.dll",
+                    "C:\\Src\\MS.ALM.GCM\\Cli\\Test\\bin\\Debug\\Microsoft.Alm.Authentication.Proxy.dll.config",
+                    "C:\\Src\\MS.ALM.GCM\\Cli\\Test\\bin\\Debug\\Microsoft.Alm.Authentication.Proxy.pdb",
+                    "C:\\Src\\MS.ALM.GCM\\Cli\\Test\\bin\\Debug\\Microsoft.Alm.Cli.Test.dll",
+                    "C:\\Src\\MS.ALM.GCM\\Cli\\Test\\bin\\Debug\\Microsoft.Alm.Cli.Test.dll.config",
+                    "C:\\Src\\MS.ALM.GCM\\Cli\\Test\\bin\\Debug\\Microsoft.Alm.Cli.Test.pdb",
+                    "C:\\Src\\MS.ALM.GCM\\Cli\\Test\\bin\\Debug\\Microsoft.IdentityModel.Clients.ActiveDirectory.dll",
+                    "C:\\Src\\MS.ALM.GCM\\Cli\\Test\\bin\\Debug\\Microsoft.IdentityModel.Clients.ActiveDirectory.xml",
+                    "C:\\Src\\MS.ALM.GCM\\Cli\\Test\\bin\\Debug\\Moq.dll",
+                    "C:\\Src\\MS.ALM.GCM\\Cli\\Test\\bin\\Debug\\Moq.pdb",
+                    "C:\\Src\\MS.ALM.GCM\\Cli\\Test\\bin\\Debug\\Moq.xml",
+                    "C:\\Src\\MS.ALM.GCM\\Cli\\Test\\bin\\Debug\\Newtonsoft.Json.dll",
+                    "C:\\Src\\MS.ALM.GCM\\Cli\\Test\\bin\\Debug\\Newtonsoft.Json.xml",
+                    "C:\\Src\\MS.ALM.GCM\\Cli\\Test\\bin\\Debug\\System.Threading.Tasks.Extensions.dll",
+                    "C:\\Src\\MS.ALM.GCM\\Cli\\Test\\bin\\Debug\\System.Threading.Tasks.Extensions.xml",
+                    "C:\\Src\\MS.ALM.GCM\\Cli\\Test\\bin\\Debug\\System.ValueTuple.dll",
+                    "C:\\Src\\MS.ALM.GCM\\Cli\\Test\\bin\\Debug\\System.ValueTuple.xml",
+                    "C:\\Src\\MS.ALM.GCM\\Cli\\Test\\bin\\Debug\\VisualStudioTeamServices.Authentication.dll",
+                    "C:\\Src\\MS.ALM.GCM\\Cli\\Test\\bin\\Debug\\VisualStudioTeamServices.Authentication.pdb",
+                    "C:\\Src\\MS.ALM.GCM\\Cli\\Test\\bin\\Debug\\VisualStudioTeamServices.Authentication.Proxy.dll",
+                    "C:\\Src\\MS.ALM.GCM\\Cli\\Test\\bin\\Debug\\VisualStudioTeamServices.Authentication.Proxy.dll.config",
+                    "C:\\Src\\MS.ALM.GCM\\Cli\\Test\\bin\\Debug\\VisualStudioTeamServices.Authentication.Proxy.pdb",
+                    "C:\\Src\\MS.ALM.GCM\\Cli\\Test\\bin\\Debug\\xunit.abstractions.dll",
+                    "C:\\Src\\MS.ALM.GCM\\Cli\\Test\\bin\\Debug\\xunit.assert.dll",
+                    "C:\\Src\\MS.ALM.GCM\\Cli\\Test\\bin\\Debug\\xunit.assert.xml",
+                    "C:\\Src\\MS.ALM.GCM\\Cli\\Test\\bin\\Debug\\xunit.core.dll",
+                    "C:\\Src\\MS.ALM.GCM\\Cli\\Test\\bin\\Debug\\xunit.core.xml",
+                    "C:\\Src\\MS.ALM.GCM\\Cli\\Test\\bin\\Debug\\xunit.execution.desktop.dll",
+                    "C:\\Src\\MS.ALM.GCM\\Cli\\Test\\bin\\Debug\\xunit.execution.desktop.xml",
+                    "C:\\Src\\MS.ALM.GCM\\Cli\\Test\\bin\\Debug\\xunit.runner.json",
+                    "C:\\Src\\MS.ALM.GCM\\Cli\\Test\\bin\\Debug\\xunit.runner.reporters.net452.dll",
+                    "C:\\Src\\MS.ALM.GCM\\Cli\\Test\\bin\\Debug\\xunit.runner.utility.net452.dll",
+                    "C:\\Src\\MS.ALM.GCM\\Cli\\Test\\bin\\Debug\\xunit.runner.visualstudio.testadapter.dll"
+                  ]
+                }
+              ]
+            },
+            {
+              "Method": "GetFileName",
+              "Queries": [
+                {
+                  "Input": "C:\\Src\\MS.ALM.GCM\\Cli\\Test\\bin\\Debug",
+                  "Ordinal": 342,
+                  "Output": "Debug"
+                }
+              ]
+            },
+            {
+              "Method": "GetParent",
+              "Queries": [
+                {
+                  "Input": "C:\\Src\\MS.ALM.GCM\\Cli\\Test\\bin\\Debug",
+                  "Ordinal": 338,
+                  "Output": "C:\\Src\\MS.ALM.GCM\\Cli\\Test\\bin"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "Path": "C:\\Program Files\\Git",
+          "Methods": [
+            {
+              "Method": "DirectoryExists",
+              "Queries": [
+                {
+                  "Input": "C:\\Program Files\\Git",
+                  "Ordinal": 246,
+                  "Output": true
+                },
+                {
+                  "Input": "C:\\Program Files\\Git",
+                  "Ordinal": 249,
+                  "Output": true
+                },
+                {
+                  "Input": "C:\\Program Files\\Git",
+                  "Ordinal": 251,
+                  "Output": true
+                },
+                {
+                  "Input": "C:\\Program Files\\Git",
+                  "Ordinal": 253,
+                  "Output": true
+                },
+                {
+                  "Input": "C:\\Program Files\\Git",
+                  "Ordinal": 258,
+                  "Output": true
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "Path": "C:\\Program Files\\Git\\mingw64\\libexec\\git-core",
+          "Methods": [
+            {
+              "Method": "DirectoryExists",
+              "Queries": [
+                {
+                  "Input": "C:\\Program Files\\Git\\mingw64\\libexec\\git-core",
+                  "Ordinal": 247,
+                  "Output": true
+                },
+                {
+                  "Input": "C:\\Program Files\\Git\\mingw64\\libexec\\git-core",
+                  "Ordinal": 254,
+                  "Output": true
+                },
+                {
+                  "Input": "C:\\Program Files\\Git\\mingw64\\libexec\\git-core",
+                  "Ordinal": 259,
+                  "Output": true
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "Path": "C:\\Program Files\\Git\\mingw32\\libexec\\git-core",
+          "Methods": [
+            {
+              "Method": "DirectoryExists",
+              "Queries": [
+                {
+                  "Input": "C:\\Program Files\\Git\\mingw32\\libexec\\git-core",
+                  "Ordinal": 250,
+                  "Output": false
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "Path": "C:\\Program Files\\Git\\libexec\\git-core",
+          "Methods": [
+            {
+              "Method": "DirectoryExists",
+              "Queries": [
+                {
+                  "Input": "C:\\Program Files\\Git\\libexec\\git-core",
+                  "Ordinal": 252,
+                  "Output": false
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "Path": "C:\\Program Files (x86)\\Git",
+          "Methods": [
+            {
+              "Method": "DirectoryExists",
+              "Queries": [
+                {
+                  "Input": "C:\\Program Files (x86)\\Git",
+                  "Ordinal": 256,
+                  "Output": false
+                },
+                {
+                  "Input": "C:\\Program Files (x86)\\Git",
+                  "Ordinal": 257,
+                  "Output": false
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "Path": "C:\\Users\\Tester\\AppData\\Roaming\\Git",
+          "Methods": [
+            {
+              "Method": "DirectoryExists",
+              "Queries": [
+                {
+                  "Input": "C:\\Users\\Tester\\AppData\\Roaming\\Git",
+                  "Ordinal": 261,
+                  "Output": false
+                },
+                {
+                  "Input": "C:\\Users\\Tester\\AppData\\Roaming\\Git",
+                  "Ordinal": 262,
+                  "Output": false
+                },
+                {
+                  "Input": "C:\\Users\\Tester\\AppData\\Roaming\\Git",
+                  "Ordinal": 263,
+                  "Output": false
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "Path": "C:\\Users\\Tester\\AppData\\Local\\Git",
+          "Methods": [
+            {
+              "Method": "DirectoryExists",
+              "Queries": [
+                {
+                  "Input": "C:\\Users\\Tester\\AppData\\Local\\Git",
+                  "Ordinal": 264,
+                  "Output": false
+                },
+                {
+                  "Input": "C:\\Users\\Tester\\AppData\\Local\\Git",
+                  "Ordinal": 265,
+                  "Output": false
+                },
+                {
+                  "Input": "C:\\Users\\Tester\\AppData\\Local\\Git",
+                  "Ordinal": 266,
+                  "Output": false
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "Path": "C:\\ProgramData\\Git",
+          "Methods": [
+            {
+              "Method": "DirectoryExists",
+              "Queries": [
+                {
+                  "Input": "C:\\ProgramData\\Git",
+                  "Ordinal": 267,
+                  "Output": true
+                },
+                {
+                  "Input": "C:\\ProgramData\\Git",
+                  "Ordinal": 269,
+                  "Output": true
+                },
+                {
+                  "Input": "C:\\ProgramData\\Git",
+                  "Ordinal": 271,
+                  "Output": true
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "Path": "C:\\ProgramData\\Git\\mingw64\\libexec\\git-core",
+          "Methods": [
+            {
+              "Method": "DirectoryExists",
+              "Queries": [
+                {
+                  "Input": "C:\\ProgramData\\Git\\mingw64\\libexec\\git-core",
+                  "Ordinal": 268,
+                  "Output": false
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "Path": "C:\\ProgramData\\Git\\mingw32\\libexec\\git-core",
+          "Methods": [
+            {
+              "Method": "DirectoryExists",
+              "Queries": [
+                {
+                  "Input": "C:\\ProgramData\\Git\\mingw32\\libexec\\git-core",
+                  "Ordinal": 270,
+                  "Output": false
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "Path": "C:\\ProgramData\\Git\\libexec\\git-core",
+          "Methods": [
+            {
+              "Method": "DirectoryExists",
+              "Queries": [
+                {
+                  "Input": "C:\\ProgramData\\Git\\libexec\\git-core",
+                  "Ordinal": 272,
+                  "Output": false
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "Path": "C:\\Users\\Tester\\AppData\\Local\\Xdg",
+          "Methods": [
+            {
+              "Method": "DirectoryExists",
+              "Queries": [
+                {
+                  "Input": "C:\\Users\\Tester\\AppData\\Local\\Xdg",
+                  "Ordinal": 277,
+                  "Output": true
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "Path": "C:\\Users\\Tester",
+          "Methods": [
+            {
+              "Method": "DirectoryExists",
+              "Queries": [
+                {
+                  "Input": "C:\\Users\\Tester",
+                  "Ordinal": 280,
+                  "Output": true
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "Path": "C:\\Src\\MS.ALM.GCM\\Cli\\Test\\bin",
+          "Methods": [
+            {
+              "Method": "DirectoryExists",
+              "Queries": [
+                {
+                  "Input": "C:\\Src\\MS.ALM.GCM\\Cli\\Test\\bin",
+                  "Ordinal": 339,
+                  "Output": true
+                },
+                {
+                  "Input": "C:\\Src\\MS.ALM.GCM\\Cli\\Test\\bin",
+                  "Ordinal": 340,
+                  "Output": true
+                }
+              ]
+            },
+            {
+              "Method": "EnumerateFileSystemEntries",
+              "Queries": [
+                {
+                  "Input": {
+                    "Options": 0,
+                    "Path": "C:\\Src\\MS.ALM.GCM\\Cli\\Test\\bin",
+                    "Pattern": "*"
+                  },
+                  "Ordinal": 341,
+                  "Output": [
+                    "C:\\Src\\MS.ALM.GCM\\Cli\\Test\\bin\\Debug"
+                  ]
+                }
+              ]
+            },
+            {
+              "Method": "GetFileName",
+              "Queries": [
+                {
+                  "Input": "C:\\Src\\MS.ALM.GCM\\Cli\\Test\\bin",
+                  "Ordinal": 349,
+                  "Output": "bin"
+                }
+              ]
+            },
+            {
+              "Method": "GetParent",
+              "Queries": [
+                {
+                  "Input": "C:\\Src\\MS.ALM.GCM\\Cli\\Test\\bin",
+                  "Ordinal": 343,
+                  "Output": "C:\\Src\\MS.ALM.GCM\\Cli\\Test"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "Path": "C:\\Src\\MS.ALM.GCM\\Cli\\Test",
+          "Methods": [
+            {
+              "Method": "DirectoryExists",
+              "Queries": [
+                {
+                  "Input": "C:\\Src\\MS.ALM.GCM\\Cli\\Test",
+                  "Ordinal": 344,
+                  "Output": true
+                },
+                {
+                  "Input": "C:\\Src\\MS.ALM.GCM\\Cli\\Test",
+                  "Ordinal": 345,
+                  "Output": true
+                }
+              ]
+            },
+            {
+              "Method": "EnumerateFileSystemEntries",
+              "Queries": [
+                {
+                  "Input": {
+                    "Options": 0,
+                    "Path": "C:\\Src\\MS.ALM.GCM\\Cli\\Test",
+                    "Pattern": "*"
+                  },
+                  "Ordinal": 346,
+                  "Output": [
+                    "C:\\Src\\MS.ALM.GCM\\Cli\\Test\\app.config",
+                    "C:\\Src\\MS.ALM.GCM\\Cli\\Test\\BasicAuthenticationTests.cs",
+                    "C:\\Src\\MS.ALM.GCM\\Cli\\Test\\bin",
+                    "C:\\Src\\MS.ALM.GCM\\Cli\\Test\\BitbucketLogonTests.cs",
+                    "C:\\Src\\MS.ALM.GCM\\Cli\\Test\\Cli-Test.csproj",
+                    "C:\\Src\\MS.ALM.GCM\\Cli\\Test\\Data",
+                    "C:\\Src\\MS.ALM.GCM\\Cli\\Test\\GithubLogonTests.cs",
+                    "C:\\Src\\MS.ALM.GCM\\Cli\\Test\\GlobalSuppressions.cs",
+                    "C:\\Src\\MS.ALM.GCM\\Cli\\Test\\obj",
+                    "C:\\Src\\MS.ALM.GCM\\Cli\\Test\\OperationArgumentsTests.cs",
+                    "C:\\Src\\MS.ALM.GCM\\Cli\\Test\\packages.config",
+                    "C:\\Src\\MS.ALM.GCM\\Cli\\Test\\ProgramTests.cs",
+                    "C:\\Src\\MS.ALM.GCM\\Cli\\Test\\Properties",
+                    "C:\\Src\\MS.ALM.GCM\\Result",
+                    "C:\\Src\\MS.ALM.GCM\\Cli\\Test\\VstsLogonTests.cs",
+                    "C:\\Src\\MS.ALM.GCM\\Cli\\Test\\XunitHelper.cs"
+                  ]
+                }
+              ]
+            },
+            {
+              "Method": "GetFileName",
+              "Queries": [
+                {
+                  "Input": "C:\\Src\\MS.ALM.GCM\\Cli\\Test",
+                  "Ordinal": 369,
+                  "Output": "Test"
+                }
+              ]
+            },
+            {
+              "Method": "GetParent",
+              "Queries": [
+                {
+                  "Input": "C:\\Src\\MS.ALM.GCM\\Cli\\Test",
+                  "Ordinal": 363,
+                  "Output": "C:\\Src\\MS.ALM.GCM\\Cli"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "Path": "C:\\Src\\MS.ALM.GCM\\Cli",
+          "Methods": [
+            {
+              "Method": "DirectoryExists",
+              "Queries": [
+                {
+                  "Input": "C:\\Src\\MS.ALM.GCM\\Cli",
+                  "Ordinal": 364,
+                  "Output": true
+                },
+                {
+                  "Input": "C:\\Src\\MS.ALM.GCM\\Cli",
+                  "Ordinal": 365,
+                  "Output": true
+                }
+              ]
+            },
+            {
+              "Method": "EnumerateFileSystemEntries",
+              "Queries": [
+                {
+                  "Input": {
+                    "Options": 0,
+                    "Path": "C:\\Src\\MS.ALM.GCM\\Cli",
+                    "Pattern": "*"
+                  },
+                  "Ordinal": 366,
+                  "Output": [
+                    "C:\\Src\\MS.ALM.GCM\\Cli\\Askpass",
+                    "C:\\Src\\MS.ALM.GCM\\Cli\\Manager",
+                    "C:\\Src\\MS.ALM.GCM\\Cli\\Test"
+                  ]
+                }
+              ]
+            },
+            {
+              "Method": "GetParent",
+              "Queries": [
+                {
+                  "Input": "C:\\Src\\MS.ALM.GCM\\Cli",
+                  "Ordinal": 370,
+                  "Output": "C:\\Src\\MS.ALM.GCM"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "Path": "C:\\Src\\MS.ALM.GCM",
+          "Methods": [
+            {
+              "Method": "DirectoryExists",
+              "Queries": [
+                {
+                  "Input": "C:\\Src\\MS.ALM.GCM",
+                  "Ordinal": 371,
+                  "Output": true
+                },
+                {
+                  "Input": "C:\\Src\\MS.ALM.GCM",
+                  "Ordinal": 372,
+                  "Output": true
+                }
+              ]
+            },
+            {
+              "Method": "EnumerateFileSystemEntries",
+              "Queries": [
+                {
+                  "Input": {
+                    "Options": 0,
+                    "Path": "C:\\Src\\MS.ALM.GCM",
+                    "Pattern": "*"
+                  },
+                  "Ordinal": 373,
+                  "Output": [
+                    "C:\\Src\\MS.ALM.GCM\\.git",
+                    "C:\\Src\\MS.ALM.GCM\\.gitattributes",
+                    "C:\\Src\\MS.ALM.GCM\\.gitignore",
+                    "C:\\Src\\MS.ALM.GCM\\.vs",
+                    "C:\\Src\\MS.ALM.GCM\\analysisRules.ruleset",
+                    "C:\\Src\\MS.ALM.GCM\\appveyor.yml",
+                    "C:\\Src\\MS.ALM.GCM\\Assets",
+                    "C:\\Src\\MS.ALM.GCM\\Bitbucket.Authentication",
+                    "C:\\Src\\MS.ALM.GCM\\build-docs.cmd",
+                    "C:\\Src\\MS.ALM.GCM\\build.props",
+                    "C:\\Src\\MS.ALM.GCM\\build.targets",
+                    "C:\\Src\\MS.ALM.GCM\\Cli",
+                    "C:\\Src\\MS.ALM.GCM\\CodeMaid.config",
+                    "C:\\Src\\MS.ALM.GCM\\coverity.bat",
+                    "C:\\Src\\MS.ALM.GCM\\Data",
+                    "C:\\Src\\MS.ALM.GCM\\Deploy",
+                    "C:\\Src\\MS.ALM.GCM\\Docs",
+                    "C:\\Src\\MS.ALM.GCM\\GcmParentWindowTest",
+                    "C:\\Src\\MS.ALM.GCM\\GitCredentialManager.sln",
+                    "C:\\Src\\MS.ALM.GCM\\GitHub.Authentication",
+                    "C:\\Src\\MS.ALM.GCM\\Installer",
+                    "C:\\Src\\MS.ALM.GCM\\LICENSE.txt",
+                    "C:\\Src\\MS.ALM.GCM\\Microsoft.Alm.Authentication",
+                    "C:\\Src\\MS.ALM.GCM\\packages",
+                    "C:\\Src\\MS.ALM.GCM\\README.md",
+                    "C:\\Src\\MS.ALM.GCM\\Shared",
+                    "C:\\Src\\MS.ALM.GCM\\test.props",
+                    "C:\\Src\\MS.ALM.GCM\\test.targets",
+                    "C:\\Src\\MS.ALM.GCM\\VisualStudioTeamServices.Authentication",
+                    "C:\\Src\\MS.ALM.GCM\\vsts-ci.yml",
+                    "C:\\Src\\MS.ALM.GCM\\xunit.runner.json",
+                    "C:\\Src\\MS.ALM.GCM\\_config.yml"
+                  ]
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "Path": "C:\\Src\\MS.ALM.GCM\\.git",
+          "Methods": [
+            {
+              "Method": "DirectoryExists",
+              "Queries": [
+                {
+                  "Input": "C:\\Src\\MS.ALM.GCM\\.git",
+                  "Ordinal": 375,
+                  "Output": true
+                },
+                {
+                  "Input": "C:\\Src\\MS.ALM.GCM\\.git",
+                  "Ordinal": 377,
+                  "Output": true
+                }
+              ]
+            },
+            {
+              "Method": "GetFileName",
+              "Queries": [
+                {
+                  "Input": "C:\\Src\\MS.ALM.GCM\\.git",
+                  "Ordinal": 374,
+                  "Output": ".git"
+                }
+              ]
+            },
+            {
+              "Method": "GetFullPath",
+              "Queries": [
+                {
+                  "Input": "C:\\Src\\MS.ALM.GCM\\.git",
+                  "Ordinal": 376,
+                  "Output": "C:\\Src\\MS.ALM.GCM\\.git"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "Path": "C:\\Users\\Tester\\AppData\\Local\\GitCredentialManager",
+          "Methods": [
+            {
+              "Method": "DirectoryExists",
+              "Queries": [
+                {
+                  "Input": "C:\\Users\\Tester\\AppData\\Local\\GitCredentialManager",
+                  "Ordinal": 382,
+                  "Output": true
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "Path": "C:\\ProgramData\\Git\\config",
+          "Methods": [
+            {
+              "Method": "FileExists",
+              "Queries": [
+                {
+                  "Input": "C:\\ProgramData\\Git\\config",
+                  "Ordinal": 2,
+                  "Output": true
+                },
+                {
+                  "Input": "C:\\ProgramData\\Git\\config",
+                  "Ordinal": 3,
+                  "Output": true
+                },
+                {
+                  "Input": "C:\\ProgramData\\Git\\config",
+                  "Ordinal": 4,
+                  "Output": true
+                }
+              ]
+            },
+            {
+              "Method": "FileOpen",
+              "Queries": [
+                {
+                  "Input": {
+                    "Access": 1,
+                    "Mode": 3,
+                    "Path": "C:\\ProgramData\\Git\\config",
+                    "Share": 3
+                  },
+                  "Ordinal": 5,
+                  "Output": {
+                    "Access": 1,
+                    "Data": [
+                      "W2NvcmVdCglzeW1saW5rcyA9IHRydWUKCWF1dG9jcmxmID0gZmFsc2UKCWZzY2FjaGUgPSB0cnVlCltjb2xvcl0KCWRpZmYgPSBhdXRvCglzdGF0dXMgPSBhdXRvCglicmFuY2ggPSBhdXRvCglpbnRlcmFjdGl2ZSA9IHRydWUKW3BhY2tdCltoZWxwXQoJZm9ybWF0ID0gaHRtbApbaHR0cF0KCXNzbGNhaW5mbyA9IEM6L1Byb2dyYW1EYXRhL0dpdC91c3Ivc3NsL2NlcnRzL2NhLWJ1bmRsZS5jcnQKW2RpZmYgImFzdGV4dHBsYWluIl0KCXRleHRjb252ID0gYXN0ZXh0cGxhaW4KW3JlYmFzZV0KCWF1dG9zcXVhc2ggPSB0cnVlCg==",
+                      ""
+                    ]
+                  }
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "Path": "C:\\WINDOWS\\system32\\Git.COM",
+          "Methods": [
+            {
+              "Method": "FileExists",
+              "Queries": [
+                {
+                  "Input": "C:\\WINDOWS\\system32\\Git.COM",
+                  "Ordinal": 58,
+                  "Output": false
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "Path": "C:\\WINDOWS\\system32\\Git.EXE",
+          "Methods": [
+            {
+              "Method": "FileExists",
+              "Queries": [
+                {
+                  "Input": "C:\\WINDOWS\\system32\\Git.EXE",
+                  "Ordinal": 59,
+                  "Output": false
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "Path": "C:\\WINDOWS\\system32\\Git.BAT",
+          "Methods": [
+            {
+              "Method": "FileExists",
+              "Queries": [
+                {
+                  "Input": "C:\\WINDOWS\\system32\\Git.BAT",
+                  "Ordinal": 60,
+                  "Output": false
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "Path": "C:\\WINDOWS\\system32\\Git.CMD",
+          "Methods": [
+            {
+              "Method": "FileExists",
+              "Queries": [
+                {
+                  "Input": "C:\\WINDOWS\\system32\\Git.CMD",
+                  "Ordinal": 61,
+                  "Output": false
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "Path": "C:\\WINDOWS\\system32\\Git.VBS",
+          "Methods": [
+            {
+              "Method": "FileExists",
+              "Queries": [
+                {
+                  "Input": "C:\\WINDOWS\\system32\\Git.VBS",
+                  "Ordinal": 62,
+                  "Output": false
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "Path": "C:\\WINDOWS\\system32\\Git.VBE",
+          "Methods": [
+            {
+              "Method": "FileExists",
+              "Queries": [
+                {
+                  "Input": "C:\\WINDOWS\\system32\\Git.VBE",
+                  "Ordinal": 63,
+                  "Output": false
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "Path": "C:\\WINDOWS\\system32\\Git.JS",
+          "Methods": [
+            {
+              "Method": "FileExists",
+              "Queries": [
+                {
+                  "Input": "C:\\WINDOWS\\system32\\Git.JS",
+                  "Ordinal": 64,
+                  "Output": false
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "Path": "C:\\WINDOWS\\system32\\Git.JSE",
+          "Methods": [
+            {
+              "Method": "FileExists",
+              "Queries": [
+                {
+                  "Input": "C:\\WINDOWS\\system32\\Git.JSE",
+                  "Ordinal": 65,
+                  "Output": false
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "Path": "C:\\WINDOWS\\system32\\Git.WSF",
+          "Methods": [
+            {
+              "Method": "FileExists",
+              "Queries": [
+                {
+                  "Input": "C:\\WINDOWS\\system32\\Git.WSF",
+                  "Ordinal": 66,
+                  "Output": false
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "Path": "C:\\WINDOWS\\system32\\Git.WSH",
+          "Methods": [
+            {
+              "Method": "FileExists",
+              "Queries": [
+                {
+                  "Input": "C:\\WINDOWS\\system32\\Git.WSH",
+                  "Ordinal": 67,
+                  "Output": false
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "Path": "C:\\WINDOWS\\system32\\Git.MSC",
+          "Methods": [
+            {
+              "Method": "FileExists",
+              "Queries": [
+                {
+                  "Input": "C:\\WINDOWS\\system32\\Git.MSC",
+                  "Ordinal": 68,
+                  "Output": false
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "Path": "C:\\WINDOWS\\system32\\Git.LNK",
+          "Methods": [
+            {
+              "Method": "FileExists",
+              "Queries": [
+                {
+                  "Input": "C:\\WINDOWS\\system32\\Git.LNK",
+                  "Ordinal": 69,
+                  "Output": false
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "Path": "C:\\WINDOWS\\system32\\Git.CPL",
+          "Methods": [
+            {
+              "Method": "FileExists",
+              "Queries": [
+                {
+                  "Input": "C:\\WINDOWS\\system32\\Git.CPL",
+                  "Ordinal": 70,
+                  "Output": false
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "Path": "C:\\WINDOWS\\Git.COM",
+          "Methods": [
+            {
+              "Method": "FileExists",
+              "Queries": [
+                {
+                  "Input": "C:\\WINDOWS\\Git.COM",
+                  "Ordinal": 71,
+                  "Output": false
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "Path": "C:\\WINDOWS\\Git.EXE",
+          "Methods": [
+            {
+              "Method": "FileExists",
+              "Queries": [
+                {
+                  "Input": "C:\\WINDOWS\\Git.EXE",
+                  "Ordinal": 72,
+                  "Output": false
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "Path": "C:\\WINDOWS\\Git.BAT",
+          "Methods": [
+            {
+              "Method": "FileExists",
+              "Queries": [
+                {
+                  "Input": "C:\\WINDOWS\\Git.BAT",
+                  "Ordinal": 73,
+                  "Output": false
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "Path": "C:\\WINDOWS\\Git.CMD",
+          "Methods": [
+            {
+              "Method": "FileExists",
+              "Queries": [
+                {
+                  "Input": "C:\\WINDOWS\\Git.CMD",
+                  "Ordinal": 74,
+                  "Output": false
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "Path": "C:\\WINDOWS\\Git.VBS",
+          "Methods": [
+            {
+              "Method": "FileExists",
+              "Queries": [
+                {
+                  "Input": "C:\\WINDOWS\\Git.VBS",
+                  "Ordinal": 75,
+                  "Output": false
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "Path": "C:\\WINDOWS\\Git.VBE",
+          "Methods": [
+            {
+              "Method": "FileExists",
+              "Queries": [
+                {
+                  "Input": "C:\\WINDOWS\\Git.VBE",
+                  "Ordinal": 76,
+                  "Output": false
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "Path": "C:\\WINDOWS\\Git.JS",
+          "Methods": [
+            {
+              "Method": "FileExists",
+              "Queries": [
+                {
+                  "Input": "C:\\WINDOWS\\Git.JS",
+                  "Ordinal": 77,
+                  "Output": false
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "Path": "C:\\WINDOWS\\Git.JSE",
+          "Methods": [
+            {
+              "Method": "FileExists",
+              "Queries": [
+                {
+                  "Input": "C:\\WINDOWS\\Git.JSE",
+                  "Ordinal": 78,
+                  "Output": false
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "Path": "C:\\WINDOWS\\Git.WSF",
+          "Methods": [
+            {
+              "Method": "FileExists",
+              "Queries": [
+                {
+                  "Input": "C:\\WINDOWS\\Git.WSF",
+                  "Ordinal": 79,
+                  "Output": false
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "Path": "C:\\WINDOWS\\Git.WSH",
+          "Methods": [
+            {
+              "Method": "FileExists",
+              "Queries": [
+                {
+                  "Input": "C:\\WINDOWS\\Git.WSH",
+                  "Ordinal": 80,
+                  "Output": false
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "Path": "C:\\WINDOWS\\Git.MSC",
+          "Methods": [
+            {
+              "Method": "FileExists",
+              "Queries": [
+                {
+                  "Input": "C:\\WINDOWS\\Git.MSC",
+                  "Ordinal": 81,
+                  "Output": false
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "Path": "C:\\WINDOWS\\Git.LNK",
+          "Methods": [
+            {
+              "Method": "FileExists",
+              "Queries": [
+                {
+                  "Input": "C:\\WINDOWS\\Git.LNK",
+                  "Ordinal": 82,
+                  "Output": false
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "Path": "C:\\WINDOWS\\Git.CPL",
+          "Methods": [
+            {
+              "Method": "FileExists",
+              "Queries": [
+                {
+                  "Input": "C:\\WINDOWS\\Git.CPL",
+                  "Ordinal": 83,
+                  "Output": false
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "Path": "C:\\WINDOWS\\System32\\Wbem\\Git.COM",
+          "Methods": [
+            {
+              "Method": "FileExists",
+              "Queries": [
+                {
+                  "Input": "C:\\WINDOWS\\System32\\Wbem\\Git.COM",
+                  "Ordinal": 84,
+                  "Output": false
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "Path": "C:\\WINDOWS\\System32\\Wbem\\Git.EXE",
+          "Methods": [
+            {
+              "Method": "FileExists",
+              "Queries": [
+                {
+                  "Input": "C:\\WINDOWS\\System32\\Wbem\\Git.EXE",
+                  "Ordinal": 85,
+                  "Output": false
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "Path": "C:\\WINDOWS\\System32\\Wbem\\Git.BAT",
+          "Methods": [
+            {
+              "Method": "FileExists",
+              "Queries": [
+                {
+                  "Input": "C:\\WINDOWS\\System32\\Wbem\\Git.BAT",
+                  "Ordinal": 86,
+                  "Output": false
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "Path": "C:\\WINDOWS\\System32\\Wbem\\Git.CMD",
+          "Methods": [
+            {
+              "Method": "FileExists",
+              "Queries": [
+                {
+                  "Input": "C:\\WINDOWS\\System32\\Wbem\\Git.CMD",
+                  "Ordinal": 87,
+                  "Output": false
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "Path": "C:\\WINDOWS\\System32\\Wbem\\Git.VBS",
+          "Methods": [
+            {
+              "Method": "FileExists",
+              "Queries": [
+                {
+                  "Input": "C:\\WINDOWS\\System32\\Wbem\\Git.VBS",
+                  "Ordinal": 88,
+                  "Output": false
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "Path": "C:\\WINDOWS\\System32\\Wbem\\Git.VBE",
+          "Methods": [
+            {
+              "Method": "FileExists",
+              "Queries": [
+                {
+                  "Input": "C:\\WINDOWS\\System32\\Wbem\\Git.VBE",
+                  "Ordinal": 89,
+                  "Output": false
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "Path": "C:\\WINDOWS\\System32\\Wbem\\Git.JS",
+          "Methods": [
+            {
+              "Method": "FileExists",
+              "Queries": [
+                {
+                  "Input": "C:\\WINDOWS\\System32\\Wbem\\Git.JS",
+                  "Ordinal": 90,
+                  "Output": false
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "Path": "C:\\WINDOWS\\System32\\Wbem\\Git.JSE",
+          "Methods": [
+            {
+              "Method": "FileExists",
+              "Queries": [
+                {
+                  "Input": "C:\\WINDOWS\\System32\\Wbem\\Git.JSE",
+                  "Ordinal": 91,
+                  "Output": false
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "Path": "C:\\WINDOWS\\System32\\Wbem\\Git.WSF",
+          "Methods": [
+            {
+              "Method": "FileExists",
+              "Queries": [
+                {
+                  "Input": "C:\\WINDOWS\\System32\\Wbem\\Git.WSF",
+                  "Ordinal": 92,
+                  "Output": false
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "Path": "C:\\WINDOWS\\System32\\Wbem\\Git.WSH",
+          "Methods": [
+            {
+              "Method": "FileExists",
+              "Queries": [
+                {
+                  "Input": "C:\\WINDOWS\\System32\\Wbem\\Git.WSH",
+                  "Ordinal": 93,
+                  "Output": false
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "Path": "C:\\WINDOWS\\System32\\Wbem\\Git.MSC",
+          "Methods": [
+            {
+              "Method": "FileExists",
+              "Queries": [
+                {
+                  "Input": "C:\\WINDOWS\\System32\\Wbem\\Git.MSC",
+                  "Ordinal": 94,
+                  "Output": false
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "Path": "C:\\WINDOWS\\System32\\Wbem\\Git.LNK",
+          "Methods": [
+            {
+              "Method": "FileExists",
+              "Queries": [
+                {
+                  "Input": "C:\\WINDOWS\\System32\\Wbem\\Git.LNK",
+                  "Ordinal": 95,
+                  "Output": false
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "Path": "C:\\WINDOWS\\System32\\Wbem\\Git.CPL",
+          "Methods": [
+            {
+              "Method": "FileExists",
+              "Queries": [
+                {
+                  "Input": "C:\\WINDOWS\\System32\\Wbem\\Git.CPL",
+                  "Ordinal": 96,
+                  "Output": false
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "Path": "C:\\WINDOWS\\System32\\WindowsPowerShell\\v1.0\\Git.COM",
+          "Methods": [
+            {
+              "Method": "FileExists",
+              "Queries": [
+                {
+                  "Input": "C:\\WINDOWS\\System32\\WindowsPowerShell\\v1.0\\Git.COM",
+                  "Ordinal": 97,
+                  "Output": false
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "Path": "C:\\WINDOWS\\System32\\WindowsPowerShell\\v1.0\\Git.EXE",
+          "Methods": [
+            {
+              "Method": "FileExists",
+              "Queries": [
+                {
+                  "Input": "C:\\WINDOWS\\System32\\WindowsPowerShell\\v1.0\\Git.EXE",
+                  "Ordinal": 98,
+                  "Output": false
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "Path": "C:\\WINDOWS\\System32\\WindowsPowerShell\\v1.0\\Git.BAT",
+          "Methods": [
+            {
+              "Method": "FileExists",
+              "Queries": [
+                {
+                  "Input": "C:\\WINDOWS\\System32\\WindowsPowerShell\\v1.0\\Git.BAT",
+                  "Ordinal": 99,
+                  "Output": false
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "Path": "C:\\WINDOWS\\System32\\WindowsPowerShell\\v1.0\\Git.CMD",
+          "Methods": [
+            {
+              "Method": "FileExists",
+              "Queries": [
+                {
+                  "Input": "C:\\WINDOWS\\System32\\WindowsPowerShell\\v1.0\\Git.CMD",
+                  "Ordinal": 100,
+                  "Output": false
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "Path": "C:\\WINDOWS\\System32\\WindowsPowerShell\\v1.0\\Git.VBS",
+          "Methods": [
+            {
+              "Method": "FileExists",
+              "Queries": [
+                {
+                  "Input": "C:\\WINDOWS\\System32\\WindowsPowerShell\\v1.0\\Git.VBS",
+                  "Ordinal": 101,
+                  "Output": false
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "Path": "C:\\WINDOWS\\System32\\WindowsPowerShell\\v1.0\\Git.VBE",
+          "Methods": [
+            {
+              "Method": "FileExists",
+              "Queries": [
+                {
+                  "Input": "C:\\WINDOWS\\System32\\WindowsPowerShell\\v1.0\\Git.VBE",
+                  "Ordinal": 102,
+                  "Output": false
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "Path": "C:\\WINDOWS\\System32\\WindowsPowerShell\\v1.0\\Git.JS",
+          "Methods": [
+            {
+              "Method": "FileExists",
+              "Queries": [
+                {
+                  "Input": "C:\\WINDOWS\\System32\\WindowsPowerShell\\v1.0\\Git.JS",
+                  "Ordinal": 103,
+                  "Output": false
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "Path": "C:\\WINDOWS\\System32\\WindowsPowerShell\\v1.0\\Git.JSE",
+          "Methods": [
+            {
+              "Method": "FileExists",
+              "Queries": [
+                {
+                  "Input": "C:\\WINDOWS\\System32\\WindowsPowerShell\\v1.0\\Git.JSE",
+                  "Ordinal": 104,
+                  "Output": false
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "Path": "C:\\WINDOWS\\System32\\WindowsPowerShell\\v1.0\\Git.WSF",
+          "Methods": [
+            {
+              "Method": "FileExists",
+              "Queries": [
+                {
+                  "Input": "C:\\WINDOWS\\System32\\WindowsPowerShell\\v1.0\\Git.WSF",
+                  "Ordinal": 105,
+                  "Output": false
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "Path": "C:\\WINDOWS\\System32\\WindowsPowerShell\\v1.0\\Git.WSH",
+          "Methods": [
+            {
+              "Method": "FileExists",
+              "Queries": [
+                {
+                  "Input": "C:\\WINDOWS\\System32\\WindowsPowerShell\\v1.0\\Git.WSH",
+                  "Ordinal": 106,
+                  "Output": false
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "Path": "C:\\WINDOWS\\System32\\WindowsPowerShell\\v1.0\\Git.MSC",
+          "Methods": [
+            {
+              "Method": "FileExists",
+              "Queries": [
+                {
+                  "Input": "C:\\WINDOWS\\System32\\WindowsPowerShell\\v1.0\\Git.MSC",
+                  "Ordinal": 107,
+                  "Output": false
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "Path": "C:\\WINDOWS\\System32\\WindowsPowerShell\\v1.0\\Git.LNK",
+          "Methods": [
+            {
+              "Method": "FileExists",
+              "Queries": [
+                {
+                  "Input": "C:\\WINDOWS\\System32\\WindowsPowerShell\\v1.0\\Git.LNK",
+                  "Ordinal": 108,
+                  "Output": false
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "Path": "C:\\WINDOWS\\System32\\WindowsPowerShell\\v1.0\\Git.CPL",
+          "Methods": [
+            {
+              "Method": "FileExists",
+              "Queries": [
+                {
+                  "Input": "C:\\WINDOWS\\System32\\WindowsPowerShell\\v1.0\\Git.CPL",
+                  "Ordinal": 109,
+                  "Output": false
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "Path": "C:\\Program Files\\Git\\cmd\\Git.COM",
+          "Methods": [
+            {
+              "Method": "FileExists",
+              "Queries": [
+                {
+                  "Input": "C:\\Program Files\\Git\\cmd\\Git.COM",
+                  "Ordinal": 240,
+                  "Output": false
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "Path": "C:\\Program Files\\Git\\cmd\\Git.EXE",
+          "Methods": [
+            {
+              "Method": "FileExists",
+              "Queries": [
+                {
+                  "Input": "C:\\Program Files\\Git\\cmd\\Git.EXE",
+                  "Ordinal": 241,
+                  "Output": true
+                },
+                {
+                  "Input": "C:\\Program Files\\Git\\cmd\\git.exe",
+                  "Ordinal": 248,
+                  "Output": true
+                },
+                {
+                  "Input": "C:\\Program Files\\Git\\cmd\\git.exe",
+                  "Ordinal": 255,
+                  "Output": true
+                },
+                {
+                  "Input": "C:\\Program Files\\Git\\cmd\\git.exe",
+                  "Ordinal": 260,
+                  "Output": true
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "Path": "C:\\Program Files\\Git\\mingw64\\etc\\gitconfig",
+          "Methods": [
+            {
+              "Method": "FileExists",
+              "Queries": [
+                {
+                  "Input": "C:\\Program Files\\Git\\mingw64\\etc\\gitconfig",
+                  "Ordinal": 273,
+                  "Output": true
+                },
+                {
+                  "Input": "C:\\Program Files\\Git\\mingw64\\etc\\gitconfig",
+                  "Ordinal": 274,
+                  "Output": true
+                },
+                {
+                  "Input": "C:\\Program Files\\Git\\mingw64\\etc\\gitconfig",
+                  "Ordinal": 275,
+                  "Output": true
+                }
+              ]
+            },
+            {
+              "Method": "FileOpen",
+              "Queries": [
+                {
+                  "Input": {
+                    "Access": 1,
+                    "Mode": 3,
+                    "Path": "C:\\Program Files\\Git\\mingw64\\etc\\gitconfig",
+                    "Share": 3
+                  },
+                  "Ordinal": 276,
+                  "Output": {
+                    "Access": 1,
+                    "Data": [
+                      "W2h0dHBdCglzc2xCYWNrZW5kID0gc2NoYW5uZWwKW2RpZmYgImFzdGV4dHBsYWluIl0KCXRleHRjb252ID0gYXN0ZXh0cGxhaW4KW2NvcmVdCgllZGl0b3IgPSAnQzpcXFByb2dyYW0gRmlsZXNcXE5vdGVwYWQrK1xcbm90ZXBhZCsrLmV4ZScgLW11bHRpSW5zdCAtbm90YWJiYXIgLW5vc2Vzc2lvbiAtbm9QbHVnaW4K",
+                      ""
+                    ]
+                  }
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "Path": "C:\\Users\\Tester\\AppData\\Local\\Xdg\\Git\\config",
+          "Methods": [
+            {
+              "Method": "FileExists",
+              "Queries": [
+                {
+                  "Input": "C:\\Users\\Tester\\AppData\\Local\\Xdg\\Git\\config",
+                  "Ordinal": 278,
+                  "Output": false
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "Path": "C:\\Users\\Tester\\AppData\\Roaming\\Git\\config",
+          "Methods": [
+            {
+              "Method": "FileExists",
+              "Queries": [
+                {
+                  "Input": "C:\\Users\\Tester\\AppData\\Roaming\\Git\\config",
+                  "Ordinal": 279,
+                  "Output": false
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "Path": "C:\\Users\\Tester\\.gitconfig",
+          "Methods": [
+            {
+              "Method": "FileExists",
+              "Queries": [
+                {
+                  "Input": "C:\\Users\\Tester\\.gitconfig",
+                  "Ordinal": 281,
+                  "Output": true
+                },
+                {
+                  "Input": "C:\\Users\\Tester\\.gitconfig",
+                  "Ordinal": 282,
+                  "Output": true
+                },
+                {
+                  "Input": "C:\\Users\\Tester\\.gitconfig",
+                  "Ordinal": 283,
+                  "Output": true
+                }
+              ]
+            },
+            {
+              "Method": "FileOpen",
+              "Queries": [
+                {
+                  "Input": {
+                    "Access": 1,
+                    "Mode": 3,
+                    "Path": "C:\\Users\\Tester\\.gitconfig",
+                    "Share": 3
+                  },
+                  "Ordinal": 284,
+                  "Output": {
+                    "Access": 1,
+                    "Data": [
+                      "W2JyYW5jaF0NCglhdXRvc2V0dXBtZXJnZSA9IGFsd2F5cw0KCWF1dG9zZXR1cHJlYmFzZSA9IGFsd2F5cw0KW3VzZXJdDQoJbmFtZSA9IEogV3ltYW4g4oieCgllbWFpbCA9IGp3eW1hbkBtaWNyb3NvZnQuY29tCltmZXRjaF0NCglwcnVuZSA9IHRydWUNCltodHRwXQ0KCXNzbGJhY2tlbmQgPSBzY2hhbm5lbAoJc3NsQ0FJbmZvID0gYzovdXNlcnMvSldZTUFOL2NhLWJ1bmRsZS5jcnQKW3B1c2hdDQoJZGVmYXVsdCA9IHNpbXBsZQ0KW2NvcmVdDQoJZWRpdG9yID0gXCJDOi9Qcm9ncmFtIEZpbGVzL05vdGVwYWQrKy9ub3RlcGFkKysuZXhlXCIgLW11bHRpSW5zdCAtbm9zZXNzaW9uIC1ub1BsdWdpbiAkQA0KCXByZWxvYWRpbmRleCA9IHRydWUNCglmc2NhY2hlID0gdHJ1ZQ0KCWFza3Bhc3MgPSBhc2twYXNzDQpbYWxpYXNdDQoJYW1lbmQgPSAiIWYoKSB7IGdpdCBjb21taXQgLS1hbWVuZCAtLW5vLWVkaXQgLS1uby12ZXJpZnkgLS1zdGF0dXMgJEA7IH07IGYiDQoJZGV0YWNoID0gIiFmKCkgeyBnaXQgY2hlY2tvdXQgLS1kZXRhY2ggJHsxOi1IRUFEfTsgfTsgZiINCgllZGl0ID0gIiFmKCkgeyBcIkM6L1Byb2dyYW0gRmlsZXMvTm90ZXBhZCsrL25vdGVwYWQrKy5leGVcIiAtbXVsdGlJbnN0IC1ub3Nlc3Npb24gLW5vUGx1Z2luICRAOyB9OyBmIg0KCWZvcmNlID0gIiFmKCkgeyBnaXQgcHVzaCAtLWZvcmNlLXdpdGgtbGVhc2U7IH07IGYiDQoJZ2V0ID0gIiFmKCkgeyBnaXQgZmV0Y2ggLW5wICRAOyB9OyBmIg0KCWxvZ2kgPSAiIWYoKSB7IGdpdCBsb2cgLS1vbmVsaW5lIC0tZGVjb3JhdGUgLS1maXJzdC1wYXJlbnQgLTMwICRAOyB9OyBmIg0KCWxvZ3ggPSAiIWYoKSB7IGdpdCBsb2cgLS1vbmVsaW5lIC0tZGVjb3JhdGUgLS1ncmFwaCAtMzAgJEA7IH07IGYiDQoJbnVrZSA9ICIhZigpIHsgZ2l0IGNsZWFuIC14ZGY7IGdpdCByZXNldCAtLWhhcmQgSEVBRDsgfTsgZiINCglwaWNrID0gIiFmKCkgeyBnaXQgY2hlcnJ5LXBpY2sgJEA7IH07IGYiDQoJcmVzYWZlID0gIiFmKCkgeyBnaXQgY29uZmlnIA==",
+                      "LS1nbG9iYWwgLS11bnNldCBodHRwLnByb3h5OyBnaXQgY29uZmlnIC0tZ2xvYmFsIC0tdW5zZXQgaHR0cC5zc2xWZXJpZnk7IHByaW50ZiAndW5zYWZlIGluamVjdGlvbiAqZGlzYWJsZWQqIGZvciBGaWRkbGVyIHRyYWNpbmcuXG4nOyB9OyBmIg0KCXJvb3QgPSAiIWYoKSB7IGdpdCByZXYtcGFyc2UgLS1zaG93LXRvcGxldmVsOyB9OyBmIg0KCXN3ZWVwID0gIiFmKCkgeyBnaXQgYnJhbmNoIC0tbWVyZ2VkIG9yaWdpbi9tYXN0ZXIgfCB4YXJncyAtbiAxIGdpdCBicmFuY2ggLUQgMj4vZGV2L251bGw7IH07IGYiDQoJc3luYyA9ICIhZigpIHsgZ2l0IGZldGNoIC0tYWxsOyBnaXQgc3dlZXA7IH07IGYiDQoJdW5zYWZlID0gIiFmKCkgeyBnaXQgY29uZmlnIC0tZ2xvYmFsIGh0dHAucHJveHkgMTI3LjAuMC4xOjg4ODg7IGdpdCBjb25maWcgLS1nbG9iYWwgaHR0cC5zc2xWZXJpZnkgZmFsc2U7IHByaW50ZiAndW5zYWZlIGluamVjdGlvbiAqZW5hYmxlZCogZm9yIEZpZGRsZXIgdHJhY2luZy5cbic7IH07IGYiDQoJZGlmZnRvb2wyID0gIiFmKCkgeyBnaXQgZGlmZnRvb2wgJDF+MSAkMTsgfTsgZiIKW2djXQ0KCWF1dG8gPSA0MDk2DQpbZ2MgInJlZnMvcmVtb3Rlcy8qIl0NCglyZWZsb2dFeHBpcmUgPSA3IGRheXMNCglyZWZsb2dFeHBpcmVVbnJlYWNoYWJsZSA9IDIgZGF5cw0KW3N0YXR1c10NCglyZWxhdGl2ZVBhdGhzID0gZmFsc2UNCltmaWx0ZXIgImxmcyJdDQoJcmVxdWlyZWQgPSB0cnVlDQoJY2xlYW4gPSBnaXQtbGZzIGNsZWFuIC0tICVmCglzbXVkZ2UgPSBnaXQtbGZzIHNtdWRnZSAtLSAlZgoJcHJvY2VzcyA9IGdpdC1sZnMgZmlsdGVyLXByb2Nlc3MKW2RpZmZ0b29sICJiYzQiXQ0KCWNtZCA9IFwiQzovUHJvZ3JhbSBGaWxlcy9CZXlvbmQgQ29tcGFyZSA0L2Jjb21wLmV4ZVwiIFwiJExPQ0FMXCIgXCIkUkVNT1RFXCIKW21lcmdldG9vbCAiYmM0Il0NCgljbWQgPSBcIkM6L1Byb2dyYW0gRmlsZXMvQmV5b25kIENvbXBhcmUgNC9iY29tcC5leGVcIiBcIiRMT0NBTFwiIFwiJFJFTU9URVwiIA==",
+                      "XCIkQkFTRVwiIFwiJE1FUkdFRFwiDQoJcHJvbXB0ID0gZmFsc2UNCgl0cnVzdEV4aXRDb2RlID0gdHJ1ZQ0KCWtlZXBCYWNrdXAgPSBmYWxzZQpbZGlmZnRvb2wgInZzZGlmZm1lcmdlIl0KCWNtZCA9IFwiQzpcXFByb2dyYW0gRmlsZXMgKHg4NilcXE1pY3Jvc29mdCBWaXN1YWwgU3R1ZGlvXFxQcmV2aWV3XFxFbnRlcnByaXNlXFxDb21tb243XFxJREVcXENvbW1vbkV4dGVuc2lvbnNcXE1pY3Jvc29mdFxcVGVhbUZvdW5kYXRpb25cXFRlYW0gRXhwbG9yZXJcXHZzZGlmZm1lcmdlLmV4ZVwiIFwiJExPQ0FMXCIgXCIkUkVNT1RFXCIgLy90CglrZWVwQmFja3VwID0gZmFsc2UNCltkaWZmdG9vbF0NCglwcm9tcHQgPSB0cnVlDQpbZGlmZl0NCgl0b29sID0gdnNkaWZmbWVyZ2UNClttZXJnZV0NCgl0b29sID0gYmM0ClttZXJnZXRvb2wgInZzZGlmZm1lcmdlIl0KCWNtZCA9IFwiQzpcXFByb2dyYW0gRmlsZXMgKHg4NilcXE1pY3Jvc29mdCBWaXN1YWwgU3R1ZGlvXFxQcmV2aWV3XFxFbnRlcnByaXNlXFxDb21tb243XFxJREVcXENvbW1vbkV4dGVuc2lvbnNcXE1pY3Jvc29mdFxcVGVhbUZvdW5kYXRpb25cXFRlYW0gRXhwbG9yZXJcXHZzZGlmZm1lcmdlLmV4ZVwiIFwiJFJFTU9URVwiIFwiJExPQ0FMXCIgXCIkQkFTRVwiIFwiJE1FUkdFRFwiIC8vbQoJa2VlcEJhY2t1cCA9IGZhbHNlCgl0cnVzdEV4aXRDb2RlID0gdHJ1ZQ0KCXByb21wdCA9IHRydWUKW3B1bGxdCglyZWJhc2UgPSB0cnVlClt3aW5VcGRhdGVyXQoJcmVjZW50bHlTZWVuVmVyc2lvbiA9IDIuMTcuMS53aW5kb3dzLjIKW2ltcG9ydGFudGtleV0KW2ltcG9ydGFudGtleV0KW2ltcG9ydGFudGtleV0KCW15YXdlc29tZXZhbHVlID0gYWdyZWF0c3RyaW5nCltjcmVkZW50aWFsXQoJaGVscGVyID0gbWFuYWdlcgo=",
+                      ""
+                    ]
+                  }
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "Path": "C:\\Src\\MS.ALM.GCM\\.git\\config",
+          "Methods": [
+            {
+              "Method": "FileExists",
+              "Queries": [
+                {
+                  "Input": "C:\\Src\\MS.ALM.GCM\\.git\\config",
+                  "Ordinal": 378,
+                  "Output": true
+                },
+                {
+                  "Input": "C:\\Src\\MS.ALM.GCM\\.git\\config",
+                  "Ordinal": 379,
+                  "Output": true
+                },
+                {
+                  "Input": "C:\\Src\\MS.ALM.GCM\\.git\\config",
+                  "Ordinal": 380,
+                  "Output": true
+                }
+              ]
+            },
+            {
+              "Method": "FileOpen",
+              "Queries": [
+                {
+                  "Input": {
+                    "Access": 1,
+                    "Mode": 3,
+                    "Path": "C:\\Src\\MS.ALM.GCM\\.git\\config",
+                    "Share": 3
+                  },
+                  "Ordinal": 381,
+                  "Output": {
+                    "Access": 1,
+                    "Data": [
+                      "W2NvcmVdCglyZXBvc2l0b3J5Zm9ybWF0dmVyc2lvbiA9IDAKCWZpbGVtb2RlID0gZmFsc2UKCWJhcmUgPSBmYWxzZQoJbG9nYWxscmVmdXBkYXRlcyA9IHRydWUKCXN5bWxpbmtzID0gZmFsc2UKCWlnbm9yZWNhc2UgPSB0cnVlCgloaWRlRG90RmlsZXMgPSBkb3RHaXRPbmx5Clt1c2VyXQoJbmFtZSA9IEogV3ltYW4g4oieCgllbWFpbCA9IGplcmVteS53eW1hbkBvdXRsb29rLmNvbQpbY3JlZGVudGlhbF0KIwloZWxwZXIgPSAiRTovU3JjL01pY3Jvc29mdC5BbG0vR2NtL0NsaS1DcmVkZW50aWFsSGVscGVyL2Jpbi9EZWJ1Zy9naXQtY3JlZGVudGlhbC1tYW5hZ2VyLmV4ZSIKCW1vZGFscHJvbXB0ID0gdHJ1ZQpbcmVtb3RlICJzcmMiXQoJdXJsID0gaHR0cHM6Ly9naXRodWIuY29tL01pY3Jvc29mdC9HaXQtQ3JlZGVudGlhbC1NYW5hZ2VyLWZvci1XaW5kb3dzLmdpdAoJZmV0Y2ggPSArcmVmcy9oZWFkcy8qOnJlZnMvcmVtb3Rlcy9zcmMvKgpbYnJhbmNoICJhcmNoaXZlL2FsdGVybmF0ZS1zdG9yZSJdCglyZW1vdGUgPSAuCgltZXJnZSA9IHJlZnMvaGVhZHMvbWFzdGVyCglyZWJhc2UgPSB0cnVlCltyZW1vdGUgImRzdCJdCgl1cmwgPSBodHRwczovL3dob2lzakBnaXRodWIuY29tL3dob2lzai9HaXQtQ3JlZGVudGlhbC1NYW5hZ2VyLWZvci1XaW5kb3dzLmdpdAoJZmV0Y2ggPSArcmVmcy9oZWFkcy8qOnJlZnMvcmVtb3Rlcy9kc3QvKgpbaHR0cF0KW2JyYW5jaCAiYXJjaGl2ZS9zcGFyc2UiXQoJcmVtb3RlID0gZHN0CgltZXJnZSA9IHJlZnMvaGVhZHMvc3BhcnNlCglyZWJhc2UgPSB0cnVlClthbGlhc10KCXN3ZWVwID0gIiFmKCkgeyBnaXQgYnJhbmNoIC0tbWVyZ2VkIHNyYy9tYXN0ZXIgfCB4YXJncyAtbiAxIGdpdCBicmFuY2ggLUQgMj4vZGV2L251bGw7IGdpdCBicmFuY2ggLS1saXN0IC1yIHNyYy9yZWwvKiB8IHhhcmdzIC1uIDEgZ2l0IGJyYW5jaCAtLW1lcmdlZCB8IHhhcmdzIC1uIDEgZ2l0IGJyYW5jaCAtRCAyPi9kZXYvbnVsbDsgfTsgZiIKCXN5bmMgPSAiIWYoKSB7IGdpdCBmZXRjaA==",
+                      "IC0tYWxsOyBnaXQgc3dlZXA7IGdpdCBwdXNoIGRzdCBzcmMvbWFzdGVyOm1hc3RlcjsgZ2l0IHB1c2ggdnMvZHN0IHZzL3NyYy9tYXN0ZXI6bWFzdGVyOyB9OyBmIgpbcmVtb3RlICJ2cy9kc3QiXQoJdXJsID0gaHR0cHM6Ly9tc2VuZy52aXN1YWxzdHVkaW8uY29tL1ZTT25saW5lLUZvcmtzL19naXQvSld5bWFuLkdpdENyZWRlbnRpYWxNYW5hZ2VyCglmZXRjaCA9ICtyZWZzL2hlYWRzLyo6cmVmcy9yZW1vdGVzL3ZzL2RzdC8qCltyZW1vdGUgInZzL3NyYyJdCgl1cmwgPSBodHRwczovL21zZW5nLnZpc3VhbHN0dWRpby5jb20vVlNPbmxpbmUvX2dpdC9HaXRDcmVkZW50aWFsTWFuYWdlcgoJZmV0Y2ggPSArcmVmcy9oZWFkcy8qOnJlZnMvcmVtb3Rlcy92cy9zcmMvKgpbYnJhbmNoICJhcmNoaXZlL2RldGVjdC1pbXBlcnNvbmF0aW9uIl0KCXJlbW90ZSA9IGRzdAoJbWVyZ2UgPSByZWZzL2hlYWRzL2RldGVjdC1pbXBlcnNvbmF0aW9uCglyZWJhc2UgPSB0cnVlCltodHRwXQpbcmVtb3RlICJiaXRidWNrZXQiXQoJdXJsID0gaHR0cHM6Ly93aG9pc2pAYml0YnVja2V0Lm9yZy93aG9pc2ovZ2l0LWNyZWRlbnRpYWwtbWFuYWdlci1mb3Itd2luZG93cy5naXQKCWZldGNoID0gK3JlZnMvaGVhZHMvKjpyZWZzL3JlbW90ZXMvYml0YnVja2V0LyoKW2JyYW5jaCAiYmV5b25kLW1heHBhdGgiXQoJcmVtb3RlID0gc3JjCgltZXJnZSA9IHJlZnMvaGVhZHMvbWFzdGVyCglyZWJhc2UgPSB0cnVlClticmFuY2ggImltcHJvdmUtYXNrcGFzcyJdCglyZW1vdGUgPSBkc3QKCW1lcmdlID0gcmVmcy9oZWFkcy9pbXByb3ZlLWFza3Bhc3MKCXJlYmFzZSA9IHRydWUKW2JyYW5jaCAidGVzdC1wcm94eSJdCglyZW1vdGUgPSBkc3QKCW1lcmdlID0gcmVmcy9oZWFkcy90ZXN0LXByb3h5CglyZWJhc2UgPSB0cnVlClticmFuY2ggImZpeC1wcm9jcmVhZCJdCglyZW1vdGUgPSBkc3QKCW1lcmdlID0gcmVmcy9oZWFkcy9maXgtcHJvY3JlYWQKCXJlYmFzZSA9IHRydWUKW2JyYW5jaCAidjEuMTcvZml4LXByb2NyZWFkIl0KCXJlbQ==",
+                      "b3RlID0gZHN0CgltZXJnZSA9IHJlZnMvaGVhZHMvdjEuMTcvZml4LXByb2NyZWFkCglyZWJhc2UgPSB0cnVlClticmFuY2ggImF2b2lkLWN5Y2xlcyJdCglyZW1vdGUgPSBkc3QKCW1lcmdlID0gcmVmcy9oZWFkcy9hdm9pZC1jeWNsZXMKCXJlYmFzZSA9IHRydWUKW2JyYW5jaCAidjEuMTcvYXZvaWQtY3ljbGVzIl0KCXJlbW90ZSA9IHNyYwoJbWVyZ2UgPSByZWZzL2hlYWRzL3JlbC92MS4xNwoJcmViYXNlID0gdHJ1ZQo=",
+                      ""
+                    ]
+                  }
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "Path": "C:\\Users\\Tester\\AppData\\Local\\GitCredentialManager\\tenant.cache",
+          "Methods": [
+            {
+              "Method": "FileOpen",
+              "Queries": [
+                {
+                  "Input": {
+                    "Access": 1,
+                    "Mode": 4,
+                    "Path": "C:\\Users\\Tester\\AppData\\Local\\GitCredentialManager\\tenant.cache",
+                    "Share": 1
+                  },
+                  "Ordinal": 383,
+                  "Output": {
+                    "Access": 1,
+                    "Data": [
+                      "H4sIAAAAAAAEAJ3MbQ5AMAwAUBeqqYiNxGH2obZkVLSc3y8X8A7wsuopszF7iRcLk8JWFJS5SvsUuX0VvVPhNvJuFtvT5FwgcCMhDOgJJvQB+mRj6hBTGGyTv1LWY/ubvC55vpiYAAAA"
+                    ]
+                  }
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "Path": "reg:\\Registry32:LocalMachine\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Uninstall\\Git_is1\\InstallLocation",
+          "Methods": [
+            {
+              "Method": "RegistryReadString",
+              "Queries": [
+                {
+                  "Input": {
+                    "Hive": -2147483646,
+                    "Name": "InstallLocation",
+                    "Path": "SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Uninstall\\Git_is1",
+                    "View": 512
+                  },
+                  "Ordinal": 242
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "Path": "reg:\\Registry32:CurrentUser\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Uninstall\\Git_is1\\InstallLocation",
+          "Methods": [
+            {
+              "Method": "RegistryReadString",
+              "Queries": [
+                {
+                  "Input": {
+                    "Hive": -2147483647,
+                    "Name": "InstallLocation",
+                    "Path": "SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Uninstall\\Git_is1",
+                    "View": 512
+                  },
+                  "Ordinal": 243
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "Path": "reg:\\Registry64:LocalMachine\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Uninstall\\Git_is1\\InstallLocation",
+          "Methods": [
+            {
+              "Method": "RegistryReadString",
+              "Queries": [
+                {
+                  "Input": {
+                    "Hive": -2147483646,
+                    "Name": "InstallLocation",
+                    "Path": "SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Uninstall\\Git_is1",
+                    "View": 256
+                  },
+                  "Ordinal": 244,
+                  "Output": "C:\\Program Files\\Git"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "Path": "reg:\\Registry64:CurrentUser\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Uninstall\\Git_is1\\InstallLocation",
+          "Methods": [
+            {
+              "Method": "RegistryReadString",
+              "Queries": [
+                {
+                  "Input": {
+                    "Hive": -2147483647,
+                    "Name": "InstallLocation",
+                    "Path": "SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Uninstall\\Git_is1",
+                    "View": 256
+                  },
+                  "Ordinal": 245
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "Path": "C:\\Src\\MS.ALM.GCM\\Cli\\Test\\bin\\Debug\\Bitbucket.Authentication.dll",
+          "Methods": [
+            {
+              "Method": "GetFileName",
+              "Queries": [
+                {
+                  "Input": "C:\\Src\\MS.ALM.GCM\\Cli\\Test\\bin\\Debug\\Bitbucket.Authentication.dll",
+                  "Ordinal": 289,
+                  "Output": "Bitbucket.Authentication.dll"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "Path": "C:\\Src\\MS.ALM.GCM\\Cli\\Test\\bin\\Debug\\Bitbucket.Authentication.pdb",
+          "Methods": [
+            {
+              "Method": "GetFileName",
+              "Queries": [
+                {
+                  "Input": "C:\\Src\\MS.ALM.GCM\\Cli\\Test\\bin\\Debug\\Bitbucket.Authentication.pdb",
+                  "Ordinal": 290,
+                  "Output": "Bitbucket.Authentication.pdb"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "Path": "C:\\Src\\MS.ALM.GCM\\Cli\\Test\\bin\\Debug\\Castle.Core.dll",
+          "Methods": [
+            {
+              "Method": "GetFileName",
+              "Queries": [
+                {
+                  "Input": "C:\\Src\\MS.ALM.GCM\\Cli\\Test\\bin\\Debug\\Castle.Core.dll",
+                  "Ordinal": 291,
+                  "Output": "Castle.Core.dll"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "Path": "C:\\Src\\MS.ALM.GCM\\Cli\\Test\\bin\\Debug\\Castle.Core.xml",
+          "Methods": [
+            {
+              "Method": "GetFileName",
+              "Queries": [
+                {
+                  "Input": "C:\\Src\\MS.ALM.GCM\\Cli\\Test\\bin\\Debug\\Castle.Core.xml",
+                  "Ordinal": 292,
+                  "Output": "Castle.Core.xml"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "Path": "C:\\Src\\MS.ALM.GCM\\Cli\\Test\\bin\\Debug\\git-credential-manager.exe",
+          "Methods": [
+            {
+              "Method": "GetFileName",
+              "Queries": [
+                {
+                  "Input": "C:\\Src\\MS.ALM.GCM\\Cli\\Test\\bin\\Debug\\git-credential-manager.exe",
+                  "Ordinal": 293,
+                  "Output": "git-credential-manager.exe"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "Path": "C:\\Src\\MS.ALM.GCM\\Cli\\Test\\bin\\Debug\\git-credential-manager.exe.config",
+          "Methods": [
+            {
+              "Method": "GetFileName",
+              "Queries": [
+                {
+                  "Input": "C:\\Src\\MS.ALM.GCM\\Cli\\Test\\bin\\Debug\\git-credential-manager.exe.config",
+                  "Ordinal": 294,
+                  "Output": "git-credential-manager.exe.config"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "Path": "C:\\Src\\MS.ALM.GCM\\Cli\\Test\\bin\\Debug\\git-credential-manager.pdb",
+          "Methods": [
+            {
+              "Method": "GetFileName",
+              "Queries": [
+                {
+                  "Input": "C:\\Src\\MS.ALM.GCM\\Cli\\Test\\bin\\Debug\\git-credential-manager.pdb",
+                  "Ordinal": 295,
+                  "Output": "git-credential-manager.pdb"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "Path": "C:\\Src\\MS.ALM.GCM\\Cli\\Test\\bin\\Debug\\GitHub.Authentication.exe",
+          "Methods": [
+            {
+              "Method": "GetFileName",
+              "Queries": [
+                {
+                  "Input": "C:\\Src\\MS.ALM.GCM\\Cli\\Test\\bin\\Debug\\GitHub.Authentication.exe",
+                  "Ordinal": 296,
+                  "Output": "GitHub.Authentication.exe"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "Path": "C:\\Src\\MS.ALM.GCM\\Cli\\Test\\bin\\Debug\\GitHub.Authentication.exe.config",
+          "Methods": [
+            {
+              "Method": "GetFileName",
+              "Queries": [
+                {
+                  "Input": "C:\\Src\\MS.ALM.GCM\\Cli\\Test\\bin\\Debug\\GitHub.Authentication.exe.config",
+                  "Ordinal": 297,
+                  "Output": "GitHub.Authentication.exe.config"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "Path": "C:\\Src\\MS.ALM.GCM\\Cli\\Test\\bin\\Debug\\GitHub.Authentication.pdb",
+          "Methods": [
+            {
+              "Method": "GetFileName",
+              "Queries": [
+                {
+                  "Input": "C:\\Src\\MS.ALM.GCM\\Cli\\Test\\bin\\Debug\\GitHub.Authentication.pdb",
+                  "Ordinal": 298,
+                  "Output": "GitHub.Authentication.pdb"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "Path": "C:\\Src\\MS.ALM.GCM\\Cli\\Test\\bin\\Debug\\GitHub.Authentication.Proxy.dll",
+          "Methods": [
+            {
+              "Method": "GetFileName",
+              "Queries": [
+                {
+                  "Input": "C:\\Src\\MS.ALM.GCM\\Cli\\Test\\bin\\Debug\\GitHub.Authentication.Proxy.dll",
+                  "Ordinal": 299,
+                  "Output": "GitHub.Authentication.Proxy.dll"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "Path": "C:\\Src\\MS.ALM.GCM\\Cli\\Test\\bin\\Debug\\GitHub.Authentication.Proxy.dll.config",
+          "Methods": [
+            {
+              "Method": "GetFileName",
+              "Queries": [
+                {
+                  "Input": "C:\\Src\\MS.ALM.GCM\\Cli\\Test\\bin\\Debug\\GitHub.Authentication.Proxy.dll.config",
+                  "Ordinal": 300,
+                  "Output": "GitHub.Authentication.Proxy.dll.config"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "Path": "C:\\Src\\MS.ALM.GCM\\Cli\\Test\\bin\\Debug\\GitHub.Authentication.Proxy.pdb",
+          "Methods": [
+            {
+              "Method": "GetFileName",
+              "Queries": [
+                {
+                  "Input": "C:\\Src\\MS.ALM.GCM\\Cli\\Test\\bin\\Debug\\GitHub.Authentication.Proxy.pdb",
+                  "Ordinal": 301,
+                  "Output": "GitHub.Authentication.Proxy.pdb"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "Path": "C:\\Src\\MS.ALM.GCM\\Cli\\Test\\bin\\Debug\\Microsoft.Alm.Authentication.dll",
+          "Methods": [
+            {
+              "Method": "GetFileName",
+              "Queries": [
+                {
+                  "Input": "C:\\Src\\MS.ALM.GCM\\Cli\\Test\\bin\\Debug\\Microsoft.Alm.Authentication.dll",
+                  "Ordinal": 302,
+                  "Output": "Microsoft.Alm.Authentication.dll"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "Path": "C:\\Src\\MS.ALM.GCM\\Cli\\Test\\bin\\Debug\\Microsoft.Alm.Authentication.dll.config",
+          "Methods": [
+            {
+              "Method": "GetFileName",
+              "Queries": [
+                {
+                  "Input": "C:\\Src\\MS.ALM.GCM\\Cli\\Test\\bin\\Debug\\Microsoft.Alm.Authentication.dll.config",
+                  "Ordinal": 303,
+                  "Output": "Microsoft.Alm.Authentication.dll.config"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "Path": "C:\\Src\\MS.ALM.GCM\\Cli\\Test\\bin\\Debug\\Microsoft.Alm.Authentication.pdb",
+          "Methods": [
+            {
+              "Method": "GetFileName",
+              "Queries": [
+                {
+                  "Input": "C:\\Src\\MS.ALM.GCM\\Cli\\Test\\bin\\Debug\\Microsoft.Alm.Authentication.pdb",
+                  "Ordinal": 304,
+                  "Output": "Microsoft.Alm.Authentication.pdb"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "Path": "C:\\Src\\MS.ALM.GCM\\Cli\\Test\\bin\\Debug\\Microsoft.Alm.Authentication.Proxy.dll",
+          "Methods": [
+            {
+              "Method": "GetFileName",
+              "Queries": [
+                {
+                  "Input": "C:\\Src\\MS.ALM.GCM\\Cli\\Test\\bin\\Debug\\Microsoft.Alm.Authentication.Proxy.dll",
+                  "Ordinal": 305,
+                  "Output": "Microsoft.Alm.Authentication.Proxy.dll"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "Path": "C:\\Src\\MS.ALM.GCM\\Cli\\Test\\bin\\Debug\\Microsoft.Alm.Authentication.Proxy.dll.config",
+          "Methods": [
+            {
+              "Method": "GetFileName",
+              "Queries": [
+                {
+                  "Input": "C:\\Src\\MS.ALM.GCM\\Cli\\Test\\bin\\Debug\\Microsoft.Alm.Authentication.Proxy.dll.config",
+                  "Ordinal": 306,
+                  "Output": "Microsoft.Alm.Authentication.Proxy.dll.config"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "Path": "C:\\Src\\MS.ALM.GCM\\Cli\\Test\\bin\\Debug\\Microsoft.Alm.Authentication.Proxy.pdb",
+          "Methods": [
+            {
+              "Method": "GetFileName",
+              "Queries": [
+                {
+                  "Input": "C:\\Src\\MS.ALM.GCM\\Cli\\Test\\bin\\Debug\\Microsoft.Alm.Authentication.Proxy.pdb",
+                  "Ordinal": 307,
+                  "Output": "Microsoft.Alm.Authentication.Proxy.pdb"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "Path": "C:\\Src\\MS.ALM.GCM\\Cli\\Test\\bin\\Debug\\Microsoft.Alm.Cli.Test.dll",
+          "Methods": [
+            {
+              "Method": "GetFileName",
+              "Queries": [
+                {
+                  "Input": "C:\\Src\\MS.ALM.GCM\\Cli\\Test\\bin\\Debug\\Microsoft.Alm.Cli.Test.dll",
+                  "Ordinal": 308,
+                  "Output": "Microsoft.Alm.Cli.Test.dll"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "Path": "C:\\Src\\MS.ALM.GCM\\Cli\\Test\\bin\\Debug\\Microsoft.Alm.Cli.Test.dll.config",
+          "Methods": [
+            {
+              "Method": "GetFileName",
+              "Queries": [
+                {
+                  "Input": "C:\\Src\\MS.ALM.GCM\\Cli\\Test\\bin\\Debug\\Microsoft.Alm.Cli.Test.dll.config",
+                  "Ordinal": 309,
+                  "Output": "Microsoft.Alm.Cli.Test.dll.config"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "Path": "C:\\Src\\MS.ALM.GCM\\Cli\\Test\\bin\\Debug\\Microsoft.Alm.Cli.Test.pdb",
+          "Methods": [
+            {
+              "Method": "GetFileName",
+              "Queries": [
+                {
+                  "Input": "C:\\Src\\MS.ALM.GCM\\Cli\\Test\\bin\\Debug\\Microsoft.Alm.Cli.Test.pdb",
+                  "Ordinal": 310,
+                  "Output": "Microsoft.Alm.Cli.Test.pdb"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "Path": "C:\\Src\\MS.ALM.GCM\\Cli\\Test\\bin\\Debug\\Microsoft.IdentityModel.Clients.ActiveDirectory.dll",
+          "Methods": [
+            {
+              "Method": "GetFileName",
+              "Queries": [
+                {
+                  "Input": "C:\\Src\\MS.ALM.GCM\\Cli\\Test\\bin\\Debug\\Microsoft.IdentityModel.Clients.ActiveDirectory.dll",
+                  "Ordinal": 311,
+                  "Output": "Microsoft.IdentityModel.Clients.ActiveDirectory.dll"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "Path": "C:\\Src\\MS.ALM.GCM\\Cli\\Test\\bin\\Debug\\Microsoft.IdentityModel.Clients.ActiveDirectory.xml",
+          "Methods": [
+            {
+              "Method": "GetFileName",
+              "Queries": [
+                {
+                  "Input": "C:\\Src\\MS.ALM.GCM\\Cli\\Test\\bin\\Debug\\Microsoft.IdentityModel.Clients.ActiveDirectory.xml",
+                  "Ordinal": 312,
+                  "Output": "Microsoft.IdentityModel.Clients.ActiveDirectory.xml"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "Path": "C:\\Src\\MS.ALM.GCM\\Cli\\Test\\bin\\Debug\\Moq.dll",
+          "Methods": [
+            {
+              "Method": "GetFileName",
+              "Queries": [
+                {
+                  "Input": "C:\\Src\\MS.ALM.GCM\\Cli\\Test\\bin\\Debug\\Moq.dll",
+                  "Ordinal": 313,
+                  "Output": "Moq.dll"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "Path": "C:\\Src\\MS.ALM.GCM\\Cli\\Test\\bin\\Debug\\Moq.pdb",
+          "Methods": [
+            {
+              "Method": "GetFileName",
+              "Queries": [
+                {
+                  "Input": "C:\\Src\\MS.ALM.GCM\\Cli\\Test\\bin\\Debug\\Moq.pdb",
+                  "Ordinal": 314,
+                  "Output": "Moq.pdb"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "Path": "C:\\Src\\MS.ALM.GCM\\Cli\\Test\\bin\\Debug\\Moq.xml",
+          "Methods": [
+            {
+              "Method": "GetFileName",
+              "Queries": [
+                {
+                  "Input": "C:\\Src\\MS.ALM.GCM\\Cli\\Test\\bin\\Debug\\Moq.xml",
+                  "Ordinal": 315,
+                  "Output": "Moq.xml"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "Path": "C:\\Src\\MS.ALM.GCM\\Cli\\Test\\bin\\Debug\\Newtonsoft.Json.dll",
+          "Methods": [
+            {
+              "Method": "GetFileName",
+              "Queries": [
+                {
+                  "Input": "C:\\Src\\MS.ALM.GCM\\Cli\\Test\\bin\\Debug\\Newtonsoft.Json.dll",
+                  "Ordinal": 316,
+                  "Output": "Newtonsoft.Json.dll"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "Path": "C:\\Src\\MS.ALM.GCM\\Cli\\Test\\bin\\Debug\\Newtonsoft.Json.xml",
+          "Methods": [
+            {
+              "Method": "GetFileName",
+              "Queries": [
+                {
+                  "Input": "C:\\Src\\MS.ALM.GCM\\Cli\\Test\\bin\\Debug\\Newtonsoft.Json.xml",
+                  "Ordinal": 317,
+                  "Output": "Newtonsoft.Json.xml"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "Path": "C:\\Src\\MS.ALM.GCM\\Cli\\Test\\bin\\Debug\\System.Threading.Tasks.Extensions.dll",
+          "Methods": [
+            {
+              "Method": "GetFileName",
+              "Queries": [
+                {
+                  "Input": "C:\\Src\\MS.ALM.GCM\\Cli\\Test\\bin\\Debug\\System.Threading.Tasks.Extensions.dll",
+                  "Ordinal": 318,
+                  "Output": "System.Threading.Tasks.Extensions.dll"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "Path": "C:\\Src\\MS.ALM.GCM\\Cli\\Test\\bin\\Debug\\System.Threading.Tasks.Extensions.xml",
+          "Methods": [
+            {
+              "Method": "GetFileName",
+              "Queries": [
+                {
+                  "Input": "C:\\Src\\MS.ALM.GCM\\Cli\\Test\\bin\\Debug\\System.Threading.Tasks.Extensions.xml",
+                  "Ordinal": 319,
+                  "Output": "System.Threading.Tasks.Extensions.xml"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "Path": "C:\\Src\\MS.ALM.GCM\\Cli\\Test\\bin\\Debug\\System.ValueTuple.dll",
+          "Methods": [
+            {
+              "Method": "GetFileName",
+              "Queries": [
+                {
+                  "Input": "C:\\Src\\MS.ALM.GCM\\Cli\\Test\\bin\\Debug\\System.ValueTuple.dll",
+                  "Ordinal": 320,
+                  "Output": "System.ValueTuple.dll"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "Path": "C:\\Src\\MS.ALM.GCM\\Cli\\Test\\bin\\Debug\\System.ValueTuple.xml",
+          "Methods": [
+            {
+              "Method": "GetFileName",
+              "Queries": [
+                {
+                  "Input": "C:\\Src\\MS.ALM.GCM\\Cli\\Test\\bin\\Debug\\System.ValueTuple.xml",
+                  "Ordinal": 321,
+                  "Output": "System.ValueTuple.xml"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "Path": "C:\\Src\\MS.ALM.GCM\\Cli\\Test\\bin\\Debug\\VisualStudioTeamServices.Authentication.dll",
+          "Methods": [
+            {
+              "Method": "GetFileName",
+              "Queries": [
+                {
+                  "Input": "C:\\Src\\MS.ALM.GCM\\Cli\\Test\\bin\\Debug\\VisualStudioTeamServices.Authentication.dll",
+                  "Ordinal": 322,
+                  "Output": "VisualStudioTeamServices.Authentication.dll"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "Path": "C:\\Src\\MS.ALM.GCM\\Cli\\Test\\bin\\Debug\\VisualStudioTeamServices.Authentication.pdb",
+          "Methods": [
+            {
+              "Method": "GetFileName",
+              "Queries": [
+                {
+                  "Input": "C:\\Src\\MS.ALM.GCM\\Cli\\Test\\bin\\Debug\\VisualStudioTeamServices.Authentication.pdb",
+                  "Ordinal": 323,
+                  "Output": "VisualStudioTeamServices.Authentication.pdb"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "Path": "C:\\Src\\MS.ALM.GCM\\Cli\\Test\\bin\\Debug\\VisualStudioTeamServices.Authentication.Proxy.dll",
+          "Methods": [
+            {
+              "Method": "GetFileName",
+              "Queries": [
+                {
+                  "Input": "C:\\Src\\MS.ALM.GCM\\Cli\\Test\\bin\\Debug\\VisualStudioTeamServices.Authentication.Proxy.dll",
+                  "Ordinal": 324,
+                  "Output": "VisualStudioTeamServices.Authentication.Proxy.dll"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "Path": "C:\\Src\\MS.ALM.GCM\\Cli\\Test\\bin\\Debug\\VisualStudioTeamServices.Authentication.Proxy.dll.config",
+          "Methods": [
+            {
+              "Method": "GetFileName",
+              "Queries": [
+                {
+                  "Input": "C:\\Src\\MS.ALM.GCM\\Cli\\Test\\bin\\Debug\\VisualStudioTeamServices.Authentication.Proxy.dll.config",
+                  "Ordinal": 325,
+                  "Output": "VisualStudioTeamServices.Authentication.Proxy.dll.config"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "Path": "C:\\Src\\MS.ALM.GCM\\Cli\\Test\\bin\\Debug\\VisualStudioTeamServices.Authentication.Proxy.pdb",
+          "Methods": [
+            {
+              "Method": "GetFileName",
+              "Queries": [
+                {
+                  "Input": "C:\\Src\\MS.ALM.GCM\\Cli\\Test\\bin\\Debug\\VisualStudioTeamServices.Authentication.Proxy.pdb",
+                  "Ordinal": 326,
+                  "Output": "VisualStudioTeamServices.Authentication.Proxy.pdb"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "Path": "C:\\Src\\MS.ALM.GCM\\Cli\\Test\\bin\\Debug\\xunit.abstractions.dll",
+          "Methods": [
+            {
+              "Method": "GetFileName",
+              "Queries": [
+                {
+                  "Input": "C:\\Src\\MS.ALM.GCM\\Cli\\Test\\bin\\Debug\\xunit.abstractions.dll",
+                  "Ordinal": 327,
+                  "Output": "xunit.abstractions.dll"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "Path": "C:\\Src\\MS.ALM.GCM\\Cli\\Test\\bin\\Debug\\xunit.assert.dll",
+          "Methods": [
+            {
+              "Method": "GetFileName",
+              "Queries": [
+                {
+                  "Input": "C:\\Src\\MS.ALM.GCM\\Cli\\Test\\bin\\Debug\\xunit.assert.dll",
+                  "Ordinal": 328,
+                  "Output": "xunit.assert.dll"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "Path": "C:\\Src\\MS.ALM.GCM\\Cli\\Test\\bin\\Debug\\xunit.assert.xml",
+          "Methods": [
+            {
+              "Method": "GetFileName",
+              "Queries": [
+                {
+                  "Input": "C:\\Src\\MS.ALM.GCM\\Cli\\Test\\bin\\Debug\\xunit.assert.xml",
+                  "Ordinal": 329,
+                  "Output": "xunit.assert.xml"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "Path": "C:\\Src\\MS.ALM.GCM\\Cli\\Test\\bin\\Debug\\xunit.core.dll",
+          "Methods": [
+            {
+              "Method": "GetFileName",
+              "Queries": [
+                {
+                  "Input": "C:\\Src\\MS.ALM.GCM\\Cli\\Test\\bin\\Debug\\xunit.core.dll",
+                  "Ordinal": 330,
+                  "Output": "xunit.core.dll"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "Path": "C:\\Src\\MS.ALM.GCM\\Cli\\Test\\bin\\Debug\\xunit.core.xml",
+          "Methods": [
+            {
+              "Method": "GetFileName",
+              "Queries": [
+                {
+                  "Input": "C:\\Src\\MS.ALM.GCM\\Cli\\Test\\bin\\Debug\\xunit.core.xml",
+                  "Ordinal": 331,
+                  "Output": "xunit.core.xml"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "Path": "C:\\Src\\MS.ALM.GCM\\Cli\\Test\\bin\\Debug\\xunit.execution.desktop.dll",
+          "Methods": [
+            {
+              "Method": "GetFileName",
+              "Queries": [
+                {
+                  "Input": "C:\\Src\\MS.ALM.GCM\\Cli\\Test\\bin\\Debug\\xunit.execution.desktop.dll",
+                  "Ordinal": 332,
+                  "Output": "xunit.execution.desktop.dll"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "Path": "C:\\Src\\MS.ALM.GCM\\Cli\\Test\\bin\\Debug\\xunit.execution.desktop.xml",
+          "Methods": [
+            {
+              "Method": "GetFileName",
+              "Queries": [
+                {
+                  "Input": "C:\\Src\\MS.ALM.GCM\\Cli\\Test\\bin\\Debug\\xunit.execution.desktop.xml",
+                  "Ordinal": 333,
+                  "Output": "xunit.execution.desktop.xml"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "Path": "C:\\Src\\MS.ALM.GCM\\Cli\\Test\\bin\\Debug\\xunit.runner.json",
+          "Methods": [
+            {
+              "Method": "GetFileName",
+              "Queries": [
+                {
+                  "Input": "C:\\Src\\MS.ALM.GCM\\Cli\\Test\\bin\\Debug\\xunit.runner.json",
+                  "Ordinal": 334,
+                  "Output": "xunit.runner.json"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "Path": "C:\\Src\\MS.ALM.GCM\\Cli\\Test\\bin\\Debug\\xunit.runner.reporters.net452.dll",
+          "Methods": [
+            {
+              "Method": "GetFileName",
+              "Queries": [
+                {
+                  "Input": "C:\\Src\\MS.ALM.GCM\\Cli\\Test\\bin\\Debug\\xunit.runner.reporters.net452.dll",
+                  "Ordinal": 335,
+                  "Output": "xunit.runner.reporters.net452.dll"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "Path": "C:\\Src\\MS.ALM.GCM\\Cli\\Test\\bin\\Debug\\xunit.runner.utility.net452.dll",
+          "Methods": [
+            {
+              "Method": "GetFileName",
+              "Queries": [
+                {
+                  "Input": "C:\\Src\\MS.ALM.GCM\\Cli\\Test\\bin\\Debug\\xunit.runner.utility.net452.dll",
+                  "Ordinal": 336,
+                  "Output": "xunit.runner.utility.net452.dll"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "Path": "C:\\Src\\MS.ALM.GCM\\Cli\\Test\\bin\\Debug\\xunit.runner.visualstudio.testadapter.dll",
+          "Methods": [
+            {
+              "Method": "GetFileName",
+              "Queries": [
+                {
+                  "Input": "C:\\Src\\MS.ALM.GCM\\Cli\\Test\\bin\\Debug\\xunit.runner.visualstudio.testadapter.dll",
+                  "Ordinal": 337,
+                  "Output": "xunit.runner.visualstudio.testadapter.dll"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "Path": "C:\\Src\\MS.ALM.GCM\\Cli\\Test\\app.config",
+          "Methods": [
+            {
+              "Method": "GetFileName",
+              "Queries": [
+                {
+                  "Input": "C:\\Src\\MS.ALM.GCM\\Cli\\Test\\app.config",
+                  "Ordinal": 347,
+                  "Output": "app.config"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "Path": "C:\\Src\\MS.ALM.GCM\\Cli\\Test\\BasicAuthenticationTests.cs",
+          "Methods": [
+            {
+              "Method": "GetFileName",
+              "Queries": [
+                {
+                  "Input": "C:\\Src\\MS.ALM.GCM\\Cli\\Test\\BasicAuthenticationTests.cs",
+                  "Ordinal": 348,
+                  "Output": "BasicAuthenticationTests.cs"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "Path": "C:\\Src\\MS.ALM.GCM\\Cli\\Test\\BitbucketLogonTests.cs",
+          "Methods": [
+            {
+              "Method": "GetFileName",
+              "Queries": [
+                {
+                  "Input": "C:\\Src\\MS.ALM.GCM\\Cli\\Test\\BitbucketLogonTests.cs",
+                  "Ordinal": 350,
+                  "Output": "BitbucketLogonTests.cs"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "Path": "C:\\Src\\MS.ALM.GCM\\Cli\\Test\\Cli-Test.csproj",
+          "Methods": [
+            {
+              "Method": "GetFileName",
+              "Queries": [
+                {
+                  "Input": "C:\\Src\\MS.ALM.GCM\\Cli\\Test\\Cli-Test.csproj",
+                  "Ordinal": 351,
+                  "Output": "Cli-Test.csproj"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "Path": "C:\\Src\\MS.ALM.GCM\\Cli\\Test\\Data",
+          "Methods": [
+            {
+              "Method": "GetFileName",
+              "Queries": [
+                {
+                  "Input": "C:\\Src\\MS.ALM.GCM\\Cli\\Test\\Data",
+                  "Ordinal": 352,
+                  "Output": "Data"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "Path": "C:\\Src\\MS.ALM.GCM\\Cli\\Test\\GithubLogonTests.cs",
+          "Methods": [
+            {
+              "Method": "GetFileName",
+              "Queries": [
+                {
+                  "Input": "C:\\Src\\MS.ALM.GCM\\Cli\\Test\\GithubLogonTests.cs",
+                  "Ordinal": 353,
+                  "Output": "GithubLogonTests.cs"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "Path": "C:\\Src\\MS.ALM.GCM\\Cli\\Test\\GlobalSuppressions.cs",
+          "Methods": [
+            {
+              "Method": "GetFileName",
+              "Queries": [
+                {
+                  "Input": "C:\\Src\\MS.ALM.GCM\\Cli\\Test\\GlobalSuppressions.cs",
+                  "Ordinal": 354,
+                  "Output": "GlobalSuppressions.cs"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "Path": "C:\\Src\\MS.ALM.GCM\\Cli\\Test\\obj",
+          "Methods": [
+            {
+              "Method": "GetFileName",
+              "Queries": [
+                {
+                  "Input": "C:\\Src\\MS.ALM.GCM\\Cli\\Test\\obj",
+                  "Ordinal": 355,
+                  "Output": "obj"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "Path": "C:\\Src\\MS.ALM.GCM\\Cli\\Test\\OperationArgumentsTests.cs",
+          "Methods": [
+            {
+              "Method": "GetFileName",
+              "Queries": [
+                {
+                  "Input": "C:\\Src\\MS.ALM.GCM\\Cli\\Test\\OperationArgumentsTests.cs",
+                  "Ordinal": 356,
+                  "Output": "OperationArgumentsTests.cs"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "Path": "C:\\Src\\MS.ALM.GCM\\Cli\\Test\\packages.config",
+          "Methods": [
+            {
+              "Method": "GetFileName",
+              "Queries": [
+                {
+                  "Input": "C:\\Src\\MS.ALM.GCM\\Cli\\Test\\packages.config",
+                  "Ordinal": 357,
+                  "Output": "packages.config"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "Path": "C:\\Src\\MS.ALM.GCM\\Cli\\Test\\ProgramTests.cs",
+          "Methods": [
+            {
+              "Method": "GetFileName",
+              "Queries": [
+                {
+                  "Input": "C:\\Src\\MS.ALM.GCM\\Cli\\Test\\ProgramTests.cs",
+                  "Ordinal": 358,
+                  "Output": "ProgramTests.cs"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "Path": "C:\\Src\\MS.ALM.GCM\\Cli\\Test\\Properties",
+          "Methods": [
+            {
+              "Method": "GetFileName",
+              "Queries": [
+                {
+                  "Input": "C:\\Src\\MS.ALM.GCM\\Cli\\Test\\Properties",
+                  "Ordinal": 359,
+                  "Output": "Properties"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "Path": "C:\\Src\\MS.ALM.GCM\\Result",
+          "Methods": [
+            {
+              "Method": "GetFileName",
+              "Queries": [
+                {
+                  "Input": "C:\\Src\\MS.ALM.GCM\\Result",
+                  "Ordinal": 360,
+                  "Output": "Results"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "Path": "C:\\Src\\MS.ALM.GCM\\Cli\\Test\\VstsLogonTests.cs",
+          "Methods": [
+            {
+              "Method": "GetFileName",
+              "Queries": [
+                {
+                  "Input": "C:\\Src\\MS.ALM.GCM\\Cli\\Test\\VstsLogonTests.cs",
+                  "Ordinal": 361,
+                  "Output": "VstsLogonTests.cs"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "Path": "C:\\Src\\MS.ALM.GCM\\Cli\\Test\\XunitHelper.cs",
+          "Methods": [
+            {
+              "Method": "GetFileName",
+              "Queries": [
+                {
+                  "Input": "C:\\Src\\MS.ALM.GCM\\Cli\\Test\\XunitHelper.cs",
+                  "Ordinal": 362,
+                  "Output": "XunitHelper.cs"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "Path": "C:\\Src\\MS.ALM.GCM\\Cli\\Askpass",
+          "Methods": [
+            {
+              "Method": "GetFileName",
+              "Queries": [
+                {
+                  "Input": "C:\\Src\\MS.ALM.GCM\\Cli\\Askpass",
+                  "Ordinal": 367,
+                  "Output": "Askpass"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "Path": "C:\\Src\\MS.ALM.GCM\\Cli\\Manager",
+          "Methods": [
+            {
+              "Method": "GetFileName",
+              "Queries": [
+                {
+                  "Input": "C:\\Src\\MS.ALM.GCM\\Cli\\Manager",
+                  "Ordinal": 368,
+                  "Output": "Manager"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "Path": "",
+          "Methods": [
+            {
+              "Method": "TryReadSecureData",
+              "Queries": [
+                {
+                  "Input": "git:https://github.com",
+                  "Ordinal": 384,
+                  "Output": {
+                    "Result": false
+                  }
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    "Gui": {
+      "Operations": [
+        {
+          "Output": {
+            "IsValid": false,
+            "Result": 2,
+            "Success": false
+          },
+          "DialogType": "GitHub.Authentication.ViewModels.CredentialsViewModel"
+        }
+      ]
+    }
+  }
+}

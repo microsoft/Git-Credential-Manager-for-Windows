@@ -1,0 +1,3142 @@
+/**** Git Process Management Library ****
+ *
+ * Copyright (c) Microsoft Corporation
+ * All rights reserved.
+ *
+ * MIT License
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy
+ * of this software and associated documentation files (the "Software"), to deal
+ * in the Software without restriction, including without limitation the rights to
+ * use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of
+ * the Software, and to permit persons to whom the Software is furnished to do so,
+ * subject to the following conditions:
+ *
+ * The above copyright notice and this permission notice shall be included in all
+ * copies or substantial portions of the Software.
+ *
+ * THE SOFTWARE IS PROVIDED *AS IS*, WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS
+ * FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR
+ * COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN
+ * AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
+ * WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+**/
+
+// Use `Formatting.Indented` to ease review readability.
+{
+  "DisplayName": "NoninteractiveAadLogon_Success",
+  "ResultPath": "E:\\Src\\Microsoft.Alm\\Gcm\\Cli\\Test\\Results",
+  "Services": {
+    "Network": {
+      "Operations": [
+        {
+          "Methods": [
+            {
+              "Method": "HttpGetAsync",
+              "Queries": [
+                {
+                  "Ordinal": 1,
+                  "Request": {
+                    "Headers": [
+                      "User-Agent=Microsoft.Alm.Authentication",
+                      "User-Agent=(Microsoft Windows NT 10.0.17134.0; Win32NT; x64)",
+                      "User-Agent=CLR/4.0.30319",
+                      "User-Agent=git-tools/4.5.0"
+                    ],
+                    "Flags": 27
+                  },
+                  "Response": {
+                    "Content": {
+                      "AsString": "{\"serviceType\":\"LocationService2\",\"identifier\":\"00001111-2222-3333-4444-555566667777\",\"displayName\":\"SPS Location Service\",\"relativeToSetting\":\"fullyQualified\",\"description\":\"\",\"serviceOwner\":\"00001111-2222-3333-4444-555566667777\",\"locationMappings\":[{\"accessMappingMoniker\":\"HostGuidAccessMapping\",\"location\":\"https://app.vssps.visualstudio.com/A2fbf7d71-6a3a-48c7-8be2-4d697f92f59d/\"}],\"toolId\":\"Framework\",\"parentServiceType\":\"LocationService2\",\"parentIdentifier\":\"00001111-2222-3333-4444-555566667777\",\"properties\":{}}",
+                      "ContentType": "application/json",
+                      "HasContent": true
+                    },
+                    "Headers": [
+                      "X-VSS-UserData=00001111-2222-3333-4444-555566667777:tester@testing.com",
+                      "X-Content-Type-Options=nosniff"
+                    ],
+                    "StatusCode": 200
+                  }
+                }
+              ]
+            }
+          ],
+          "QueryUrl": "https://microsoft-git-tools.visualstudio.com/_apis/ServiceDefinitions/LocationService2/951917AC-A960-4999-8464-E3F0AA25B381?api-version=1.0"
+        },
+        {
+          "Methods": [
+            {
+              "Method": "HttpPostAsync",
+              "Queries": [
+                {
+                  "Ordinal": 2,
+                  "Request": {
+                    "Content": "{ \"scope\" : \"vso.code_write vso.packaging\", \"displayName\" : \"Git: https://microsoft-git-tools.visualstudio.com/ on JWYMAN-Z440\" }",
+                    "Headers": [
+                      "User-Agent=Microsoft.Alm.Authentication",
+                      "User-Agent=(Microsoft Windows NT 10.0.17134.0; Win32NT; x64)",
+                      "User-Agent=CLR/4.0.30319",
+                      "User-Agent=git-tools/4.5.0"
+                    ],
+                    "Flags": 27
+                  },
+                  "Response": {
+                    "Content": {
+                      "AsString": "{\"clientId\":\"00000000-0000-0000-0000-000000000000\",\"accessId\":\"00001111-2222-3333-4444-555566667777\",\"authorizationId\":\"00001111-2222-3333-4444-555566667777\",\"hostAuthorizationId\":\"00001111-2222-3333-4444-555566667777\",\"userId\":\"00001111-2222-3333-4444-555566667777\",\"validFrom\":\"2018-07-16T19:11:44.6266667Z\",\"validTo\":\"2019-07-16T19:11:44.6133333Z\",\"displayName\":\"Git: https://microsoft-git-tools.visualstudio.com/ on JWYMAN-Z440\",\"scope\":\"vso.code_write vso.packaging\",\"targetAccounts\":[\"00001111-2222-3333-4444-555566667777\"],\"token\":\"012345689abcdefthisisafaketokenfedcba9876543210\",\"alternateToken\":\"012345689abcdefthisisafaketokenfedcba9876543210_[0.0]_012345689abcdefthisisafaketokenfedcba9876543210\",\"isValid\":true,\"isPublic\":false,\"publicData\":null,\"source\":null}",
+                      "ContentType": "application/json",
+                      "HasContent": true
+                    },
+                    "Headers": [
+                      "X-VSS-UserData=00001111-2222-3333-4444-555566667777:tester@testing.com",
+                      "X-Content-Type-Options=nosniff"
+                    ],
+                    "StatusCode": 200
+                  }
+                }
+              ]
+            }
+          ],
+          "QueryUrl": "https://app.vssps.visualstudio.com/A2fbf7d71-6a3a-48c7-8be2-4d697f92f59d/_apis/token/sessiontokens?api-version=1.0&tokentype=compact"
+        },
+        {
+          "Methods": [
+            {
+              "Method": "HttpGetAsync",
+              "Queries": [
+                {
+                  "Ordinal": 3,
+                  "Request": {
+                    "Headers": [
+                      "User-Agent=Microsoft.Alm.Authentication",
+                      "User-Agent=(Microsoft Windows NT 10.0.17134.0; Win32NT; x64)",
+                      "User-Agent=CLR/4.0.30319",
+                      "User-Agent=git-tools/4.5.0"
+                    ],
+                    "Flags": 27
+                  },
+                  "Response": {
+                    "Content": {
+                      "AsString": "{\"authenticatedUser\":{\"id\":\"1c3911d3-a1e2-460d-a829-ca1075f933c1\",\"descriptor\":\"Microsoft.IdentityModel.Claims.ClaimsIdentity;72f988bf-86f1-41af-91ab-2d7cd011db47\\\\tester@testing.com\",\"subjectDescriptor\":\"aad.ZThhODRmYjgtMjQ4NC03ZTJhLTgyZGQtODAwOGZiMTdhNDE0\",\"providerDisplayName\":\"Tester\",\"isActive\":true,\"properties\":{\"Account\":{\"$type\":\"System.String\",\"$value\":\"tester@testing.com\"}},\"resourceVersion\":2,\"metaTypeId\":0},\"authorizedUser\":{\"id\":\"1c3911d3-a1e2-460d-a829-ca1075f933c1\",\"descriptor\":\"Microsoft.IdentityModel.Claims.ClaimsIdentity;72f988bf-86f1-41af-91ab-2d7cd011db47\\\\tester@testing.com\",\"subjectDescriptor\":\"aad.ZThhODRmYjgtMjQ4NC03ZTJhLTgyZGQtODAwOGZiMTdhNDE0\",\"providerDisplayName\":\"Tester\",\"isActive\":true,\"properties\":{\"Account\":{\"$type\":\"System.String\",\"$value\":\"tester@testing.com\"}},\"resourceVersion\":2,\"metaTypeId\":0},\"instanceId\":\"00001111-2222-3333-4444-555566667777\",\"deploymentId\":\"00001111-2222-3333-4444-555566667777\",\"deploymentType\":\"hosted\",\"locationServiceData\":{\"serviceOwner\":\"00001111-2222-3333-4444-555566667777\",\"defaultAccessMappingMoniker\":\"PublicAccessMapping\",\"lastChangeId\":45572120,\"lastChangeId64\":45572120}}",
+                      "ContentType": "application/json",
+                      "HasContent": true
+                    },
+                    "Headers": [
+                      "X-VSS-UserData=00001111-2222-3333-4444-555566667777:tester@testing.com",
+                      "X-Content-Type-Options=nosniff"
+                    ],
+                    "StatusCode": 200
+                  }
+                }
+              ]
+            }
+          ],
+          "QueryUrl": "https://microsoft-git-tools.visualstudio.com/_apis/connectiondata"
+        }
+      ]
+    },
+    "Settings": {
+      "EnvironmentVariables": [
+        {
+          "Target": 0,
+          "Values": [
+            {
+              "Name": "GCM_DEBUG"
+            },
+            {
+              "Name": "ProgramFiles(x86)",
+              "Variable": "C:\\Program Files (x86)"
+            },
+            {
+              "Name": "ProgramW6432",
+              "Variable": "C:\\Program Files"
+            },
+            {
+              "Name": "GIT_TRACE",
+              "Variable": "D:\\.trace\\git"
+            },
+            {
+              "Name": "TMP",
+              "Variable": "C:\\Users\\Tester\\AppData\\Local\\Temp"
+            },
+            {
+              "Name": "Path",
+              "Variable": "C:\\WINDOWS\\system32;C:\\WINDOWS;C:\\WINDOWS\\System32\\Wbem;C:\\WINDOWS\\System32\\WindowsPowerShell\\v1.0;C:\\Program Files\\Git\\cmd;C:\\WINDOWS\\System32\\WindowsPowerShell\\v1.0\\;C:\\Program Files\\Git LFS;C:\\WINDOWS\\System32\\OpenSSH\\;C:\\Program Files\\Git\\cmd"
+            },
+            {
+              "Name": "USERPROFILE",
+              "Variable": "C:\\Users\\Tester"
+            },
+            {
+              "Name": "TEMP",
+              "Variable": "C:\\Users\\Tester\\AppData\\Local\\Temp"
+            },
+            {
+              "Name": "USERNAME",
+              "Variable": "Tester"
+            },
+            {
+              "Name": "SystemRoot",
+              "Variable": "C:\\WINDOWS"
+            },
+            {
+              "Name": "CommonProgramFiles(x86)",
+              "Variable": "C:\\Program Files (x86)\\Common Files"
+            },
+            {
+              "Name": "GIT_TRACE_PATH",
+              "Variable": "D:\\.trace\\git"
+            },
+            {
+              "Name": "ProgramData",
+              "Variable": "C:\\ProgramData"
+            },
+            {
+              "Name": "HOMEPATH",
+              "Variable": "\\Users\\Tester"
+            },
+            {
+              "Name": "XDG_CONFIG_HOME",
+              "Variable": "C:\\Users\\Tester\\AppData\\Local\\Xdg"
+            },
+            {
+              "Name": "ALLUSERSPROFILE",
+              "Variable": "C:\\ProgramData"
+            },
+            {
+              "Name": "CommonProgramW6432",
+              "Variable": "C:\\Program Files\\Common Files"
+            },
+            {
+              "Name": "CommonProgramFiles",
+              "Variable": "C:\\Program Files (x86)\\Common File"
+            },
+            {
+              "Name": "HOMEDRIVE",
+              "Variable": "C:"
+            },
+            {
+              "Name": "windir",
+              "Variable": "C:\\Windows"
+            },
+            {
+              "Name": "SystemDrive",
+              "Variable": "C:"
+            },
+            {
+              "Name": "GIT_MERGE_AUTOEDIT",
+              "Variable": "NO"
+            },
+            {
+              "Name": "ProgramFiles",
+              "Variable": "C:\\Program Files"
+            },
+            {
+              "Name": "GIT_LFS_PATH",
+              "Variable": "C:\\Program Files\\Git LFS"
+            },
+            {
+              "Name": "GIT_MERGE_VERBOSITY",
+              "Variable": "4"
+            },
+            {
+              "Name": "PATHEXT",
+              "Variable": ".COM;.EXE;.BAT;.CMD"
+            },
+            {
+              "Name": "HOME",
+              "Variable": "C:\\Users\\Tester"
+            },
+            {
+              "Name": "GCM_TRACE",
+              "Variable": "D:\\.trace\\git"
+            },
+            {
+              "Name": "APPDATA",
+              "Variable": "C:\\Users\\Tester\\AppData\\Roaming"
+            },
+            {
+              "Name": "LOCALAPPDATA",
+              "Variable": "C:\\Users\\Tester\\AppData\\Local"
+            }
+          ]
+        }
+      ],
+      "ExitCode": 0,
+      "ExpandVariables": [
+        {
+          "Expanded": "C:\\Users\\Tester",
+          "Original": "C:\\Users\\Tester"
+        }
+      ],
+      "CurrentDirectory": "C:\\Src\\MS.ALM.GCM\\Cli\\Test\\bin\\Debug",
+      "Is64BitOperatingSystem": true,
+      "MachineName": "JWYMAN-Z440",
+      "NewLine": "\r\n",
+      "OsVersion": 0,
+      "SpecialFolders": [
+        {
+          "Path": "C:\\ProgramData",
+          "SpecialFolder": 35
+        },
+        {
+          "Path": "C:\\Program Files (x86)",
+          "SpecialFolder": 42
+        },
+        {
+          "Path": "C:\\Program Files",
+          "SpecialFolder": 38
+        },
+        {
+          "Path": "C:\\Users\\Tester\\AppData\\Roaming",
+          "SpecialFolder": 26
+        },
+        {
+          "Path": "C:\\Users\\Tester\\AppData\\Local",
+          "SpecialFolder": 28
+        }
+      ]
+    },
+    "Storage": {
+      "Operations": [
+        {
+          "Path": "C:\\Src\\MS.ALM.GCM\\Cli\\Test\\bin\\Debug",
+          "Methods": [
+            {
+              "Method": "DirectoryExists",
+              "Queries": [
+                {
+                  "Input": "C:\\Src\\MS.ALM.GCM\\Cli\\Test\\bin\\Debug",
+                  "Ordinal": 1,
+                  "Output": true
+                },
+                {
+                  "Input": "C:\\Src\\MS.ALM.GCM\\Cli\\Test\\bin\\Debug",
+                  "Ordinal": 298,
+                  "Output": true
+                },
+                {
+                  "Input": "C:\\Src\\MS.ALM.GCM\\Cli\\Test\\bin\\Debug",
+                  "Ordinal": 299,
+                  "Output": true
+                },
+                {
+                  "Input": "C:\\Src\\MS.ALM.GCM\\Cli\\Test\\bin\\Debug",
+                  "Ordinal": 300,
+                  "Output": true
+                }
+              ]
+            },
+            {
+              "Method": "EnumerateFileSystemEntries",
+              "Queries": [
+                {
+                  "Input": {
+                    "Options": 0,
+                    "Path": "C:\\Src\\MS.ALM.GCM\\Cli\\Test\\bin\\Debug",
+                    "Pattern": "*"
+                  },
+                  "Ordinal": 301,
+                  "Output": [
+                    "C:\\Src\\MS.ALM.GCM\\Cli\\Test\\bin\\Debug\\Bitbucket.Authentication.dll",
+                    "C:\\Src\\MS.ALM.GCM\\Cli\\Test\\bin\\Debug\\Bitbucket.Authentication.pdb",
+                    "C:\\Src\\MS.ALM.GCM\\Cli\\Test\\bin\\Debug\\Castle.Core.dll",
+                    "C:\\Src\\MS.ALM.GCM\\Cli\\Test\\bin\\Debug\\Castle.Core.xml",
+                    "C:\\Src\\MS.ALM.GCM\\Cli\\Test\\bin\\Debug\\git-credential-manager.exe",
+                    "C:\\Src\\MS.ALM.GCM\\Cli\\Test\\bin\\Debug\\git-credential-manager.exe.config",
+                    "C:\\Src\\MS.ALM.GCM\\Cli\\Test\\bin\\Debug\\git-credential-manager.pdb",
+                    "C:\\Src\\MS.ALM.GCM\\Cli\\Test\\bin\\Debug\\GitHub.Authentication.exe",
+                    "C:\\Src\\MS.ALM.GCM\\Cli\\Test\\bin\\Debug\\GitHub.Authentication.exe.config",
+                    "C:\\Src\\MS.ALM.GCM\\Cli\\Test\\bin\\Debug\\GitHub.Authentication.pdb",
+                    "C:\\Src\\MS.ALM.GCM\\Cli\\Test\\bin\\Debug\\Microsoft.Alm.Authentication.dll",
+                    "C:\\Src\\MS.ALM.GCM\\Cli\\Test\\bin\\Debug\\Microsoft.Alm.Authentication.dll.config",
+                    "C:\\Src\\MS.ALM.GCM\\Cli\\Test\\bin\\Debug\\Microsoft.Alm.Authentication.pdb",
+                    "C:\\Src\\MS.ALM.GCM\\Cli\\Test\\bin\\Debug\\Microsoft.Alm.Authentication.Proxy.dll",
+                    "C:\\Src\\MS.ALM.GCM\\Cli\\Test\\bin\\Debug\\Microsoft.Alm.Authentication.Proxy.dll.config",
+                    "C:\\Src\\MS.ALM.GCM\\Cli\\Test\\bin\\Debug\\Microsoft.Alm.Authentication.Proxy.pdb",
+                    "C:\\Src\\MS.ALM.GCM\\Cli\\Test\\bin\\Debug\\Microsoft.Alm.Cli.Test.dll",
+                    "C:\\Src\\MS.ALM.GCM\\Cli\\Test\\bin\\Debug\\Microsoft.Alm.Cli.Test.dll.config",
+                    "C:\\Src\\MS.ALM.GCM\\Cli\\Test\\bin\\Debug\\Microsoft.Alm.Cli.Test.pdb",
+                    "C:\\Src\\MS.ALM.GCM\\Cli\\Test\\bin\\Debug\\Microsoft.IdentityModel.Clients.ActiveDirectory.dll",
+                    "C:\\Src\\MS.ALM.GCM\\Cli\\Test\\bin\\Debug\\Microsoft.IdentityModel.Clients.ActiveDirectory.xml",
+                    "C:\\Src\\MS.ALM.GCM\\Cli\\Test\\bin\\Debug\\Moq.dll",
+                    "C:\\Src\\MS.ALM.GCM\\Cli\\Test\\bin\\Debug\\Moq.pdb",
+                    "C:\\Src\\MS.ALM.GCM\\Cli\\Test\\bin\\Debug\\Moq.xml",
+                    "C:\\Src\\MS.ALM.GCM\\Cli\\Test\\bin\\Debug\\Newtonsoft.Json.dll",
+                    "C:\\Src\\MS.ALM.GCM\\Cli\\Test\\bin\\Debug\\Newtonsoft.Json.xml",
+                    "C:\\Src\\MS.ALM.GCM\\Cli\\Test\\bin\\Debug\\System.Threading.Tasks.Extensions.dll",
+                    "C:\\Src\\MS.ALM.GCM\\Cli\\Test\\bin\\Debug\\System.Threading.Tasks.Extensions.xml",
+                    "C:\\Src\\MS.ALM.GCM\\Cli\\Test\\bin\\Debug\\System.ValueTuple.dll",
+                    "C:\\Src\\MS.ALM.GCM\\Cli\\Test\\bin\\Debug\\System.ValueTuple.xml",
+                    "C:\\Src\\MS.ALM.GCM\\Cli\\Test\\bin\\Debug\\VisualStudioTeamServices.Authentication.dll",
+                    "C:\\Src\\MS.ALM.GCM\\Cli\\Test\\bin\\Debug\\VisualStudioTeamServices.Authentication.pdb",
+                    "C:\\Src\\MS.ALM.GCM\\Cli\\Test\\bin\\Debug\\VisualStudioTeamServices.Authentication.Proxy.dll",
+                    "C:\\Src\\MS.ALM.GCM\\Cli\\Test\\bin\\Debug\\VisualStudioTeamServices.Authentication.Proxy.dll.config",
+                    "C:\\Src\\MS.ALM.GCM\\Cli\\Test\\bin\\Debug\\VisualStudioTeamServices.Authentication.Proxy.pdb",
+                    "C:\\Src\\MS.ALM.GCM\\Cli\\Test\\bin\\Debug\\xunit.abstractions.dll",
+                    "C:\\Src\\MS.ALM.GCM\\Cli\\Test\\bin\\Debug\\xunit.assert.dll",
+                    "C:\\Src\\MS.ALM.GCM\\Cli\\Test\\bin\\Debug\\xunit.assert.xml",
+                    "C:\\Src\\MS.ALM.GCM\\Cli\\Test\\bin\\Debug\\xunit.core.dll",
+                    "C:\\Src\\MS.ALM.GCM\\Cli\\Test\\bin\\Debug\\xunit.core.xml",
+                    "C:\\Src\\MS.ALM.GCM\\Cli\\Test\\bin\\Debug\\xunit.execution.desktop.dll",
+                    "C:\\Src\\MS.ALM.GCM\\Cli\\Test\\bin\\Debug\\xunit.execution.desktop.xml",
+                    "C:\\Src\\MS.ALM.GCM\\Cli\\Test\\bin\\Debug\\xunit.runner.json",
+                    "C:\\Src\\MS.ALM.GCM\\Cli\\Test\\bin\\Debug\\xunit.runner.reporters.net452.dll",
+                    "C:\\Src\\MS.ALM.GCM\\Cli\\Test\\bin\\Debug\\xunit.runner.utility.net452.dll",
+                    "C:\\Src\\MS.ALM.GCM\\Cli\\Test\\bin\\Debug\\xunit.runner.visualstudio.testadapter.dll"
+                  ]
+                }
+              ]
+            },
+            {
+              "Method": "GetFileName",
+              "Queries": [
+                {
+                  "Input": "C:\\Src\\MS.ALM.GCM\\Cli\\Test\\bin\\Debug",
+                  "Ordinal": 352,
+                  "Output": "Debug"
+                }
+              ]
+            },
+            {
+              "Method": "GetParent",
+              "Queries": [
+                {
+                  "Input": "C:\\Src\\MS.ALM.GCM\\Cli\\Test\\bin\\Debug",
+                  "Ordinal": 348,
+                  "Output": "C:\\Src\\MS.ALM.GCM\\Cli\\Test\\bin"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "Path": "C:\\Program Files\\Git",
+          "Methods": [
+            {
+              "Method": "DirectoryExists",
+              "Queries": [
+                {
+                  "Input": "C:\\Program Files\\Git",
+                  "Ordinal": 259,
+                  "Output": true
+                },
+                {
+                  "Input": "C:\\Program Files\\Git",
+                  "Ordinal": 262,
+                  "Output": true
+                },
+                {
+                  "Input": "C:\\Program Files\\Git",
+                  "Ordinal": 264,
+                  "Output": true
+                },
+                {
+                  "Input": "C:\\Program Files\\Git",
+                  "Ordinal": 266,
+                  "Output": true
+                },
+                {
+                  "Input": "C:\\Program Files\\Git",
+                  "Ordinal": 271,
+                  "Output": true
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "Path": "C:\\Program Files\\Git\\mingw64\\libexec\\git-core",
+          "Methods": [
+            {
+              "Method": "DirectoryExists",
+              "Queries": [
+                {
+                  "Input": "C:\\Program Files\\Git\\mingw64\\libexec\\git-core",
+                  "Ordinal": 260,
+                  "Output": true
+                },
+                {
+                  "Input": "C:\\Program Files\\Git\\mingw64\\libexec\\git-core",
+                  "Ordinal": 267,
+                  "Output": true
+                },
+                {
+                  "Input": "C:\\Program Files\\Git\\mingw64\\libexec\\git-core",
+                  "Ordinal": 272,
+                  "Output": true
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "Path": "C:\\Program Files\\Git\\mingw32\\libexec\\git-core",
+          "Methods": [
+            {
+              "Method": "DirectoryExists",
+              "Queries": [
+                {
+                  "Input": "C:\\Program Files\\Git\\mingw32\\libexec\\git-core",
+                  "Ordinal": 263,
+                  "Output": false
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "Path": "C:\\Program Files\\Git\\libexec\\git-core",
+          "Methods": [
+            {
+              "Method": "DirectoryExists",
+              "Queries": [
+                {
+                  "Input": "C:\\Program Files\\Git\\libexec\\git-core",
+                  "Ordinal": 265,
+                  "Output": false
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "Path": "C:\\Program Files (x86)\\Git",
+          "Methods": [
+            {
+              "Method": "DirectoryExists",
+              "Queries": [
+                {
+                  "Input": "C:\\Program Files (x86)\\Git",
+                  "Ordinal": 269,
+                  "Output": false
+                },
+                {
+                  "Input": "C:\\Program Files (x86)\\Git",
+                  "Ordinal": 270,
+                  "Output": false
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "Path": "C:\\Users\\Tester\\AppData\\Roaming\\Git",
+          "Methods": [
+            {
+              "Method": "DirectoryExists",
+              "Queries": [
+                {
+                  "Input": "C:\\Users\\Tester\\AppData\\Roaming\\Git",
+                  "Ordinal": 274,
+                  "Output": false
+                },
+                {
+                  "Input": "C:\\Users\\Tester\\AppData\\Roaming\\Git",
+                  "Ordinal": 275,
+                  "Output": false
+                },
+                {
+                  "Input": "C:\\Users\\Tester\\AppData\\Roaming\\Git",
+                  "Ordinal": 276,
+                  "Output": false
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "Path": "C:\\Users\\Tester\\AppData\\Local\\Git",
+          "Methods": [
+            {
+              "Method": "DirectoryExists",
+              "Queries": [
+                {
+                  "Input": "C:\\Users\\Tester\\AppData\\Local\\Git",
+                  "Ordinal": 277,
+                  "Output": false
+                },
+                {
+                  "Input": "C:\\Users\\Tester\\AppData\\Local\\Git",
+                  "Ordinal": 278,
+                  "Output": false
+                },
+                {
+                  "Input": "C:\\Users\\Tester\\AppData\\Local\\Git",
+                  "Ordinal": 279,
+                  "Output": false
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "Path": "C:\\ProgramData\\Git",
+          "Methods": [
+            {
+              "Method": "DirectoryExists",
+              "Queries": [
+                {
+                  "Input": "C:\\ProgramData\\Git",
+                  "Ordinal": 280,
+                  "Output": true
+                },
+                {
+                  "Input": "C:\\ProgramData\\Git",
+                  "Ordinal": 282,
+                  "Output": true
+                },
+                {
+                  "Input": "C:\\ProgramData\\Git",
+                  "Ordinal": 284,
+                  "Output": true
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "Path": "C:\\ProgramData\\Git\\mingw64\\libexec\\git-core",
+          "Methods": [
+            {
+              "Method": "DirectoryExists",
+              "Queries": [
+                {
+                  "Input": "C:\\ProgramData\\Git\\mingw64\\libexec\\git-core",
+                  "Ordinal": 281,
+                  "Output": false
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "Path": "C:\\ProgramData\\Git\\mingw32\\libexec\\git-core",
+          "Methods": [
+            {
+              "Method": "DirectoryExists",
+              "Queries": [
+                {
+                  "Input": "C:\\ProgramData\\Git\\mingw32\\libexec\\git-core",
+                  "Ordinal": 283,
+                  "Output": false
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "Path": "C:\\ProgramData\\Git\\libexec\\git-core",
+          "Methods": [
+            {
+              "Method": "DirectoryExists",
+              "Queries": [
+                {
+                  "Input": "C:\\ProgramData\\Git\\libexec\\git-core",
+                  "Ordinal": 285,
+                  "Output": false
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "Path": "C:\\Users\\Tester\\AppData\\Local\\Xdg",
+          "Methods": [
+            {
+              "Method": "DirectoryExists",
+              "Queries": [
+                {
+                  "Input": "C:\\Users\\Tester\\AppData\\Local\\Xdg",
+                  "Ordinal": 290,
+                  "Output": true
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "Path": "C:\\Users\\Tester",
+          "Methods": [
+            {
+              "Method": "DirectoryExists",
+              "Queries": [
+                {
+                  "Input": "C:\\Users\\Tester",
+                  "Ordinal": 293,
+                  "Output": true
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "Path": "C:\\Src\\MS.ALM.GCM\\Cli\\Test\\bin",
+          "Methods": [
+            {
+              "Method": "DirectoryExists",
+              "Queries": [
+                {
+                  "Input": "C:\\Src\\MS.ALM.GCM\\Cli\\Test\\bin",
+                  "Ordinal": 349,
+                  "Output": true
+                },
+                {
+                  "Input": "C:\\Src\\MS.ALM.GCM\\Cli\\Test\\bin",
+                  "Ordinal": 350,
+                  "Output": true
+                }
+              ]
+            },
+            {
+              "Method": "EnumerateFileSystemEntries",
+              "Queries": [
+                {
+                  "Input": {
+                    "Options": 0,
+                    "Path": "C:\\Src\\MS.ALM.GCM\\Cli\\Test\\bin",
+                    "Pattern": "*"
+                  },
+                  "Ordinal": 351,
+                  "Output": [
+                    "C:\\Src\\MS.ALM.GCM\\Cli\\Test\\bin\\Debug"
+                  ]
+                }
+              ]
+            },
+            {
+              "Method": "GetFileName",
+              "Queries": [
+                {
+                  "Input": "C:\\Src\\MS.ALM.GCM\\Cli\\Test\\bin",
+                  "Ordinal": 359,
+                  "Output": "bin"
+                }
+              ]
+            },
+            {
+              "Method": "GetParent",
+              "Queries": [
+                {
+                  "Input": "C:\\Src\\MS.ALM.GCM\\Cli\\Test\\bin",
+                  "Ordinal": 353,
+                  "Output": "C:\\Src\\MS.ALM.GCM\\Cli\\Test"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "Path": "C:\\Src\\MS.ALM.GCM\\Cli\\Test",
+          "Methods": [
+            {
+              "Method": "DirectoryExists",
+              "Queries": [
+                {
+                  "Input": "C:\\Src\\MS.ALM.GCM\\Cli\\Test",
+                  "Ordinal": 354,
+                  "Output": true
+                },
+                {
+                  "Input": "C:\\Src\\MS.ALM.GCM\\Cli\\Test",
+                  "Ordinal": 355,
+                  "Output": true
+                }
+              ]
+            },
+            {
+              "Method": "EnumerateFileSystemEntries",
+              "Queries": [
+                {
+                  "Input": {
+                    "Options": 0,
+                    "Path": "C:\\Src\\MS.ALM.GCM\\Cli\\Test",
+                    "Pattern": "*"
+                  },
+                  "Ordinal": 356,
+                  "Output": [
+                    "C:\\Src\\MS.ALM.GCM\\Cli\\Test\\app.config",
+                    "C:\\Src\\MS.ALM.GCM\\Cli\\Test\\BasicAuthenticationTests.cs",
+                    "C:\\Src\\MS.ALM.GCM\\Cli\\Test\\bin",
+                    "C:\\Src\\MS.ALM.GCM\\Cli\\Test\\BitbucketLogonTests.cs",
+                    "C:\\Src\\MS.ALM.GCM\\Cli\\Test\\Cli-Test.csproj",
+                    "C:\\Src\\MS.ALM.GCM\\Cli\\Test\\Data",
+                    "C:\\Src\\MS.ALM.GCM\\Cli\\Test\\GitHubLogonTests.cs",
+                    "C:\\Src\\MS.ALM.GCM\\Cli\\Test\\GlobalSuppressions.cs",
+                    "C:\\Src\\MS.ALM.GCM\\Cli\\Test\\obj",
+                    "C:\\Src\\MS.ALM.GCM\\Cli\\Test\\OperationArgumentsTests.cs",
+                    "C:\\Src\\MS.ALM.GCM\\Cli\\Test\\packages.config",
+                    "C:\\Src\\MS.ALM.GCM\\Cli\\Test\\ProgramTests.cs",
+                    "C:\\Src\\MS.ALM.GCM\\Cli\\Test\\Properties",
+                    "C:\\Src\\MS.ALM.GCM\\Result",
+                    "C:\\Src\\MS.ALM.GCM\\Cli\\Test\\VstsLogonTests.cs",
+                    "C:\\Src\\MS.ALM.GCM\\Cli\\Test\\XunitHelper.cs"
+                  ]
+                }
+              ]
+            },
+            {
+              "Method": "GetFileName",
+              "Queries": [
+                {
+                  "Input": "C:\\Src\\MS.ALM.GCM\\Cli\\Test",
+                  "Ordinal": 379,
+                  "Output": "Test"
+                }
+              ]
+            },
+            {
+              "Method": "GetParent",
+              "Queries": [
+                {
+                  "Input": "C:\\Src\\MS.ALM.GCM\\Cli\\Test",
+                  "Ordinal": 373,
+                  "Output": "C:\\Src\\MS.ALM.GCM\\Cli"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "Path": "C:\\Src\\MS.ALM.GCM\\Cli",
+          "Methods": [
+            {
+              "Method": "DirectoryExists",
+              "Queries": [
+                {
+                  "Input": "C:\\Src\\MS.ALM.GCM\\Cli",
+                  "Ordinal": 374,
+                  "Output": true
+                },
+                {
+                  "Input": "C:\\Src\\MS.ALM.GCM\\Cli",
+                  "Ordinal": 375,
+                  "Output": true
+                }
+              ]
+            },
+            {
+              "Method": "EnumerateFileSystemEntries",
+              "Queries": [
+                {
+                  "Input": {
+                    "Options": 0,
+                    "Path": "C:\\Src\\MS.ALM.GCM\\Cli",
+                    "Pattern": "*"
+                  },
+                  "Ordinal": 376,
+                  "Output": [
+                    "C:\\Src\\MS.ALM.GCM\\Cli\\Askpass",
+                    "C:\\Src\\MS.ALM.GCM\\Cli\\Manager",
+                    "C:\\Src\\MS.ALM.GCM\\Cli\\Test"
+                  ]
+                }
+              ]
+            },
+            {
+              "Method": "GetParent",
+              "Queries": [
+                {
+                  "Input": "C:\\Src\\MS.ALM.GCM\\Cli",
+                  "Ordinal": 380,
+                  "Output": "C:\\Src\\MS.ALM.GCM"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "Path": "C:\\Src\\MS.ALM.GCM",
+          "Methods": [
+            {
+              "Method": "DirectoryExists",
+              "Queries": [
+                {
+                  "Input": "C:\\Src\\MS.ALM.GCM",
+                  "Ordinal": 381,
+                  "Output": true
+                },
+                {
+                  "Input": "C:\\Src\\MS.ALM.GCM",
+                  "Ordinal": 382,
+                  "Output": true
+                }
+              ]
+            },
+            {
+              "Method": "EnumerateFileSystemEntries",
+              "Queries": [
+                {
+                  "Input": {
+                    "Options": 0,
+                    "Path": "C:\\Src\\MS.ALM.GCM",
+                    "Pattern": "*"
+                  },
+                  "Ordinal": 383,
+                  "Output": [
+                    "C:\\Src\\MS.ALM.GCM\\.git",
+                    "C:\\Src\\MS.ALM.GCM\\.gitattributes",
+                    "C:\\Src\\MS.ALM.GCM\\.gitignore",
+                    "C:\\Src\\MS.ALM.GCM\\.vs",
+                    "C:\\Src\\MS.ALM.GCM\\analysisRules.ruleset",
+                    "C:\\Src\\MS.ALM.GCM\\appveyor.yml",
+                    "C:\\Src\\MS.ALM.GCM\\Assets",
+                    "C:\\Src\\MS.ALM.GCM\\Bitbucket.Authentication",
+                    "C:\\Src\\MS.ALM.GCM\\build-docs.cmd",
+                    "C:\\Src\\MS.ALM.GCM\\build.props",
+                    "C:\\Src\\MS.ALM.GCM\\build.targets",
+                    "C:\\Src\\MS.ALM.GCM\\Cli",
+                    "C:\\Src\\MS.ALM.GCM\\CodeMaid.config",
+                    "C:\\Src\\MS.ALM.GCM\\coverity.bat",
+                    "C:\\Src\\MS.ALM.GCM\\Data",
+                    "C:\\Src\\MS.ALM.GCM\\Deploy",
+                    "C:\\Src\\MS.ALM.GCM\\Docs",
+                    "C:\\Src\\MS.ALM.GCM\\GcmParentWindowTest",
+                    "C:\\Src\\MS.ALM.GCM\\GitCredentialManager.sln",
+                    "C:\\Src\\MS.ALM.GCM\\GitHub.Authentication",
+                    "C:\\Src\\MS.ALM.GCM\\Installer",
+                    "C:\\Src\\MS.ALM.GCM\\LICENSE.txt",
+                    "C:\\Src\\MS.ALM.GCM\\Microsoft.Alm.Authentication",
+                    "C:\\Src\\MS.ALM.GCM\\packages",
+                    "C:\\Src\\MS.ALM.GCM\\README.md",
+                    "C:\\Src\\MS.ALM.GCM\\Shared",
+                    "C:\\Src\\MS.ALM.GCM\\test.props",
+                    "C:\\Src\\MS.ALM.GCM\\test.targets",
+                    "C:\\Src\\MS.ALM.GCM\\VisualStudioTeamServices.Authentication",
+                    "C:\\Src\\MS.ALM.GCM\\vsts-ci.yml",
+                    "C:\\Src\\MS.ALM.GCM\\xunit.runner.json",
+                    "C:\\Src\\MS.ALM.GCM\\_config.yml"
+                  ]
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "Path": "C:\\Src\\MS.ALM.GCM\\.git",
+          "Methods": [
+            {
+              "Method": "DirectoryExists",
+              "Queries": [
+                {
+                  "Input": "C:\\Src\\MS.ALM.GCM\\.git",
+                  "Ordinal": 385,
+                  "Output": true
+                },
+                {
+                  "Input": "C:\\Src\\MS.ALM.GCM\\.git",
+                  "Ordinal": 387,
+                  "Output": true
+                }
+              ]
+            },
+            {
+              "Method": "GetFileName",
+              "Queries": [
+                {
+                  "Input": "C:\\Src\\MS.ALM.GCM\\.git",
+                  "Ordinal": 384,
+                  "Output": ".git"
+                }
+              ]
+            },
+            {
+              "Method": "GetFullPath",
+              "Queries": [
+                {
+                  "Input": "C:\\Src\\MS.ALM.GCM\\.git",
+                  "Ordinal": 386,
+                  "Output": "C:\\Src\\MS.ALM.GCM\\.git"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "Path": "C:\\Users\\Tester\\AppData\\Local\\GitCredentialManager",
+          "Methods": [
+            {
+              "Method": "DirectoryExists",
+              "Queries": [
+                {
+                  "Input": "C:\\Users\\Tester\\AppData\\Local\\GitCredentialManager",
+                  "Ordinal": 392,
+                  "Output": true
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "Path": "C:\\ProgramData\\Git\\config",
+          "Methods": [
+            {
+              "Method": "FileExists",
+              "Queries": [
+                {
+                  "Input": "C:\\ProgramData\\Git\\config",
+                  "Ordinal": 2,
+                  "Output": true
+                },
+                {
+                  "Input": "C:\\ProgramData\\Git\\config",
+                  "Ordinal": 3,
+                  "Output": true
+                },
+                {
+                  "Input": "C:\\ProgramData\\Git\\config",
+                  "Ordinal": 4,
+                  "Output": true
+                }
+              ]
+            },
+            {
+              "Method": "FileOpen",
+              "Queries": [
+                {
+                  "Input": {
+                    "Access": 1,
+                    "Mode": 3,
+                    "Path": "C:\\ProgramData\\Git\\config",
+                    "Share": 3
+                  },
+                  "Ordinal": 5,
+                  "Output": {
+                    "Access": 1,
+                    "Data": [
+                      "W2NvcmVdCglzeW1saW5rcyA9IHRydWUKCWF1dG9jcmxmID0gZmFsc2UKCWZzY2FjaGUgPSB0cnVlCltjb2xvcl0KCWRpZmYgPSBhdXRvCglzdGF0dXMgPSBhdXRvCglicmFuY2ggPSBhdXRvCglpbnRlcmFjdGl2ZSA9IHRydWUKW3BhY2tdCltoZWxwXQoJZm9ybWF0ID0gaHRtbApbaHR0cF0KCXNzbGNhaW5mbyA9IEM6L1Byb2dyYW1EYXRhL0dpdC91c3Ivc3NsL2NlcnRzL2NhLWJ1bmRsZS5jcnQKW2RpZmYgImFzdGV4dHBsYWluIl0KCXRleHRjb252ID0gYXN0ZXh0cGxhaW4KW3JlYmFzZV0KCWF1dG9zcXVhc2ggPSB0cnVlCg==",
+                      ""
+                    ]
+                  }
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "Path": "C:\\WINDOWS\\system32\\Git.COM",
+          "Methods": [
+            {
+              "Method": "FileExists",
+              "Queries": [
+                {
+                  "Input": "C:\\WINDOWS\\system32\\Git.COM",
+                  "Ordinal": 71,
+                  "Output": false
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "Path": "C:\\WINDOWS\\system32\\Git.EXE",
+          "Methods": [
+            {
+              "Method": "FileExists",
+              "Queries": [
+                {
+                  "Input": "C:\\WINDOWS\\system32\\Git.EXE",
+                  "Ordinal": 72,
+                  "Output": false
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "Path": "C:\\WINDOWS\\system32\\Git.BAT",
+          "Methods": [
+            {
+              "Method": "FileExists",
+              "Queries": [
+                {
+                  "Input": "C:\\WINDOWS\\system32\\Git.BAT",
+                  "Ordinal": 73,
+                  "Output": false
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "Path": "C:\\WINDOWS\\system32\\Git.CMD",
+          "Methods": [
+            {
+              "Method": "FileExists",
+              "Queries": [
+                {
+                  "Input": "C:\\WINDOWS\\system32\\Git.CMD",
+                  "Ordinal": 74,
+                  "Output": false
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "Path": "C:\\WINDOWS\\system32\\Git.VBS",
+          "Methods": [
+            {
+              "Method": "FileExists",
+              "Queries": [
+                {
+                  "Input": "C:\\WINDOWS\\system32\\Git.VBS",
+                  "Ordinal": 75,
+                  "Output": false
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "Path": "C:\\WINDOWS\\system32\\Git.VBE",
+          "Methods": [
+            {
+              "Method": "FileExists",
+              "Queries": [
+                {
+                  "Input": "C:\\WINDOWS\\system32\\Git.VBE",
+                  "Ordinal": 76,
+                  "Output": false
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "Path": "C:\\WINDOWS\\system32\\Git.JS",
+          "Methods": [
+            {
+              "Method": "FileExists",
+              "Queries": [
+                {
+                  "Input": "C:\\WINDOWS\\system32\\Git.JS",
+                  "Ordinal": 77,
+                  "Output": false
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "Path": "C:\\WINDOWS\\system32\\Git.JSE",
+          "Methods": [
+            {
+              "Method": "FileExists",
+              "Queries": [
+                {
+                  "Input": "C:\\WINDOWS\\system32\\Git.JSE",
+                  "Ordinal": 78,
+                  "Output": false
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "Path": "C:\\WINDOWS\\system32\\Git.WSF",
+          "Methods": [
+            {
+              "Method": "FileExists",
+              "Queries": [
+                {
+                  "Input": "C:\\WINDOWS\\system32\\Git.WSF",
+                  "Ordinal": 79,
+                  "Output": false
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "Path": "C:\\WINDOWS\\system32\\Git.WSH",
+          "Methods": [
+            {
+              "Method": "FileExists",
+              "Queries": [
+                {
+                  "Input": "C:\\WINDOWS\\system32\\Git.WSH",
+                  "Ordinal": 80,
+                  "Output": false
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "Path": "C:\\WINDOWS\\system32\\Git.MSC",
+          "Methods": [
+            {
+              "Method": "FileExists",
+              "Queries": [
+                {
+                  "Input": "C:\\WINDOWS\\system32\\Git.MSC",
+                  "Ordinal": 81,
+                  "Output": false
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "Path": "C:\\WINDOWS\\system32\\Git.LNK",
+          "Methods": [
+            {
+              "Method": "FileExists",
+              "Queries": [
+                {
+                  "Input": "C:\\WINDOWS\\system32\\Git.LNK",
+                  "Ordinal": 82,
+                  "Output": false
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "Path": "C:\\WINDOWS\\system32\\Git.CPL",
+          "Methods": [
+            {
+              "Method": "FileExists",
+              "Queries": [
+                {
+                  "Input": "C:\\WINDOWS\\system32\\Git.CPL",
+                  "Ordinal": 83,
+                  "Output": false
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "Path": "C:\\WINDOWS\\Git.COM",
+          "Methods": [
+            {
+              "Method": "FileExists",
+              "Queries": [
+                {
+                  "Input": "C:\\WINDOWS\\Git.COM",
+                  "Ordinal": 84,
+                  "Output": false
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "Path": "C:\\WINDOWS\\Git.EXE",
+          "Methods": [
+            {
+              "Method": "FileExists",
+              "Queries": [
+                {
+                  "Input": "C:\\WINDOWS\\Git.EXE",
+                  "Ordinal": 85,
+                  "Output": false
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "Path": "C:\\WINDOWS\\Git.BAT",
+          "Methods": [
+            {
+              "Method": "FileExists",
+              "Queries": [
+                {
+                  "Input": "C:\\WINDOWS\\Git.BAT",
+                  "Ordinal": 86,
+                  "Output": false
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "Path": "C:\\WINDOWS\\Git.CMD",
+          "Methods": [
+            {
+              "Method": "FileExists",
+              "Queries": [
+                {
+                  "Input": "C:\\WINDOWS\\Git.CMD",
+                  "Ordinal": 87,
+                  "Output": false
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "Path": "C:\\WINDOWS\\Git.VBS",
+          "Methods": [
+            {
+              "Method": "FileExists",
+              "Queries": [
+                {
+                  "Input": "C:\\WINDOWS\\Git.VBS",
+                  "Ordinal": 88,
+                  "Output": false
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "Path": "C:\\WINDOWS\\Git.VBE",
+          "Methods": [
+            {
+              "Method": "FileExists",
+              "Queries": [
+                {
+                  "Input": "C:\\WINDOWS\\Git.VBE",
+                  "Ordinal": 89,
+                  "Output": false
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "Path": "C:\\WINDOWS\\Git.JS",
+          "Methods": [
+            {
+              "Method": "FileExists",
+              "Queries": [
+                {
+                  "Input": "C:\\WINDOWS\\Git.JS",
+                  "Ordinal": 90,
+                  "Output": false
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "Path": "C:\\WINDOWS\\Git.JSE",
+          "Methods": [
+            {
+              "Method": "FileExists",
+              "Queries": [
+                {
+                  "Input": "C:\\WINDOWS\\Git.JSE",
+                  "Ordinal": 91,
+                  "Output": false
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "Path": "C:\\WINDOWS\\Git.WSF",
+          "Methods": [
+            {
+              "Method": "FileExists",
+              "Queries": [
+                {
+                  "Input": "C:\\WINDOWS\\Git.WSF",
+                  "Ordinal": 92,
+                  "Output": false
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "Path": "C:\\WINDOWS\\Git.WSH",
+          "Methods": [
+            {
+              "Method": "FileExists",
+              "Queries": [
+                {
+                  "Input": "C:\\WINDOWS\\Git.WSH",
+                  "Ordinal": 93,
+                  "Output": false
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "Path": "C:\\WINDOWS\\Git.MSC",
+          "Methods": [
+            {
+              "Method": "FileExists",
+              "Queries": [
+                {
+                  "Input": "C:\\WINDOWS\\Git.MSC",
+                  "Ordinal": 94,
+                  "Output": false
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "Path": "C:\\WINDOWS\\Git.LNK",
+          "Methods": [
+            {
+              "Method": "FileExists",
+              "Queries": [
+                {
+                  "Input": "C:\\WINDOWS\\Git.LNK",
+                  "Ordinal": 95,
+                  "Output": false
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "Path": "C:\\WINDOWS\\Git.CPL",
+          "Methods": [
+            {
+              "Method": "FileExists",
+              "Queries": [
+                {
+                  "Input": "C:\\WINDOWS\\Git.CPL",
+                  "Ordinal": 96,
+                  "Output": false
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "Path": "C:\\WINDOWS\\System32\\Wbem\\Git.COM",
+          "Methods": [
+            {
+              "Method": "FileExists",
+              "Queries": [
+                {
+                  "Input": "C:\\WINDOWS\\System32\\Wbem\\Git.COM",
+                  "Ordinal": 97,
+                  "Output": false
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "Path": "C:\\WINDOWS\\System32\\Wbem\\Git.EXE",
+          "Methods": [
+            {
+              "Method": "FileExists",
+              "Queries": [
+                {
+                  "Input": "C:\\WINDOWS\\System32\\Wbem\\Git.EXE",
+                  "Ordinal": 98,
+                  "Output": false
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "Path": "C:\\WINDOWS\\System32\\Wbem\\Git.BAT",
+          "Methods": [
+            {
+              "Method": "FileExists",
+              "Queries": [
+                {
+                  "Input": "C:\\WINDOWS\\System32\\Wbem\\Git.BAT",
+                  "Ordinal": 99,
+                  "Output": false
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "Path": "C:\\WINDOWS\\System32\\Wbem\\Git.CMD",
+          "Methods": [
+            {
+              "Method": "FileExists",
+              "Queries": [
+                {
+                  "Input": "C:\\WINDOWS\\System32\\Wbem\\Git.CMD",
+                  "Ordinal": 100,
+                  "Output": false
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "Path": "C:\\WINDOWS\\System32\\Wbem\\Git.VBS",
+          "Methods": [
+            {
+              "Method": "FileExists",
+              "Queries": [
+                {
+                  "Input": "C:\\WINDOWS\\System32\\Wbem\\Git.VBS",
+                  "Ordinal": 101,
+                  "Output": false
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "Path": "C:\\WINDOWS\\System32\\Wbem\\Git.VBE",
+          "Methods": [
+            {
+              "Method": "FileExists",
+              "Queries": [
+                {
+                  "Input": "C:\\WINDOWS\\System32\\Wbem\\Git.VBE",
+                  "Ordinal": 102,
+                  "Output": false
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "Path": "C:\\WINDOWS\\System32\\Wbem\\Git.JS",
+          "Methods": [
+            {
+              "Method": "FileExists",
+              "Queries": [
+                {
+                  "Input": "C:\\WINDOWS\\System32\\Wbem\\Git.JS",
+                  "Ordinal": 103,
+                  "Output": false
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "Path": "C:\\WINDOWS\\System32\\Wbem\\Git.JSE",
+          "Methods": [
+            {
+              "Method": "FileExists",
+              "Queries": [
+                {
+                  "Input": "C:\\WINDOWS\\System32\\Wbem\\Git.JSE",
+                  "Ordinal": 104,
+                  "Output": false
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "Path": "C:\\WINDOWS\\System32\\Wbem\\Git.WSF",
+          "Methods": [
+            {
+              "Method": "FileExists",
+              "Queries": [
+                {
+                  "Input": "C:\\WINDOWS\\System32\\Wbem\\Git.WSF",
+                  "Ordinal": 105,
+                  "Output": false
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "Path": "C:\\WINDOWS\\System32\\Wbem\\Git.WSH",
+          "Methods": [
+            {
+              "Method": "FileExists",
+              "Queries": [
+                {
+                  "Input": "C:\\WINDOWS\\System32\\Wbem\\Git.WSH",
+                  "Ordinal": 106,
+                  "Output": false
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "Path": "C:\\WINDOWS\\System32\\Wbem\\Git.MSC",
+          "Methods": [
+            {
+              "Method": "FileExists",
+              "Queries": [
+                {
+                  "Input": "C:\\WINDOWS\\System32\\Wbem\\Git.MSC",
+                  "Ordinal": 107,
+                  "Output": false
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "Path": "C:\\WINDOWS\\System32\\Wbem\\Git.LNK",
+          "Methods": [
+            {
+              "Method": "FileExists",
+              "Queries": [
+                {
+                  "Input": "C:\\WINDOWS\\System32\\Wbem\\Git.LNK",
+                  "Ordinal": 108,
+                  "Output": false
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "Path": "C:\\WINDOWS\\System32\\Wbem\\Git.CPL",
+          "Methods": [
+            {
+              "Method": "FileExists",
+              "Queries": [
+                {
+                  "Input": "C:\\WINDOWS\\System32\\Wbem\\Git.CPL",
+                  "Ordinal": 109,
+                  "Output": false
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "Path": "C:\\WINDOWS\\System32\\WindowsPowerShell\\v1.0\\Git.COM",
+          "Methods": [
+            {
+              "Method": "FileExists",
+              "Queries": [
+                {
+                  "Input": "C:\\WINDOWS\\System32\\WindowsPowerShell\\v1.0\\Git.COM",
+                  "Ordinal": 110,
+                  "Output": false
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "Path": "C:\\WINDOWS\\System32\\WindowsPowerShell\\v1.0\\Git.EXE",
+          "Methods": [
+            {
+              "Method": "FileExists",
+              "Queries": [
+                {
+                  "Input": "C:\\WINDOWS\\System32\\WindowsPowerShell\\v1.0\\Git.EXE",
+                  "Ordinal": 111,
+                  "Output": false
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "Path": "C:\\WINDOWS\\System32\\WindowsPowerShell\\v1.0\\Git.BAT",
+          "Methods": [
+            {
+              "Method": "FileExists",
+              "Queries": [
+                {
+                  "Input": "C:\\WINDOWS\\System32\\WindowsPowerShell\\v1.0\\Git.BAT",
+                  "Ordinal": 112,
+                  "Output": false
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "Path": "C:\\WINDOWS\\System32\\WindowsPowerShell\\v1.0\\Git.CMD",
+          "Methods": [
+            {
+              "Method": "FileExists",
+              "Queries": [
+                {
+                  "Input": "C:\\WINDOWS\\System32\\WindowsPowerShell\\v1.0\\Git.CMD",
+                  "Ordinal": 113,
+                  "Output": false
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "Path": "C:\\WINDOWS\\System32\\WindowsPowerShell\\v1.0\\Git.VBS",
+          "Methods": [
+            {
+              "Method": "FileExists",
+              "Queries": [
+                {
+                  "Input": "C:\\WINDOWS\\System32\\WindowsPowerShell\\v1.0\\Git.VBS",
+                  "Ordinal": 114,
+                  "Output": false
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "Path": "C:\\WINDOWS\\System32\\WindowsPowerShell\\v1.0\\Git.VBE",
+          "Methods": [
+            {
+              "Method": "FileExists",
+              "Queries": [
+                {
+                  "Input": "C:\\WINDOWS\\System32\\WindowsPowerShell\\v1.0\\Git.VBE",
+                  "Ordinal": 115,
+                  "Output": false
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "Path": "C:\\WINDOWS\\System32\\WindowsPowerShell\\v1.0\\Git.JS",
+          "Methods": [
+            {
+              "Method": "FileExists",
+              "Queries": [
+                {
+                  "Input": "C:\\WINDOWS\\System32\\WindowsPowerShell\\v1.0\\Git.JS",
+                  "Ordinal": 116,
+                  "Output": false
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "Path": "C:\\WINDOWS\\System32\\WindowsPowerShell\\v1.0\\Git.JSE",
+          "Methods": [
+            {
+              "Method": "FileExists",
+              "Queries": [
+                {
+                  "Input": "C:\\WINDOWS\\System32\\WindowsPowerShell\\v1.0\\Git.JSE",
+                  "Ordinal": 117,
+                  "Output": false
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "Path": "C:\\WINDOWS\\System32\\WindowsPowerShell\\v1.0\\Git.WSF",
+          "Methods": [
+            {
+              "Method": "FileExists",
+              "Queries": [
+                {
+                  "Input": "C:\\WINDOWS\\System32\\WindowsPowerShell\\v1.0\\Git.WSF",
+                  "Ordinal": 118,
+                  "Output": false
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "Path": "C:\\WINDOWS\\System32\\WindowsPowerShell\\v1.0\\Git.WSH",
+          "Methods": [
+            {
+              "Method": "FileExists",
+              "Queries": [
+                {
+                  "Input": "C:\\WINDOWS\\System32\\WindowsPowerShell\\v1.0\\Git.WSH",
+                  "Ordinal": 119,
+                  "Output": false
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "Path": "C:\\WINDOWS\\System32\\WindowsPowerShell\\v1.0\\Git.MSC",
+          "Methods": [
+            {
+              "Method": "FileExists",
+              "Queries": [
+                {
+                  "Input": "C:\\WINDOWS\\System32\\WindowsPowerShell\\v1.0\\Git.MSC",
+                  "Ordinal": 120,
+                  "Output": false
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "Path": "C:\\WINDOWS\\System32\\WindowsPowerShell\\v1.0\\Git.LNK",
+          "Methods": [
+            {
+              "Method": "FileExists",
+              "Queries": [
+                {
+                  "Input": "C:\\WINDOWS\\System32\\WindowsPowerShell\\v1.0\\Git.LNK",
+                  "Ordinal": 121,
+                  "Output": false
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "Path": "C:\\WINDOWS\\System32\\WindowsPowerShell\\v1.0\\Git.CPL",
+          "Methods": [
+            {
+              "Method": "FileExists",
+              "Queries": [
+                {
+                  "Input": "C:\\WINDOWS\\System32\\WindowsPowerShell\\v1.0\\Git.CPL",
+                  "Ordinal": 122,
+                  "Output": false
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "Path": "C:\\Program Files\\Git\\cmd\\Git.COM",
+          "Methods": [
+            {
+              "Method": "FileExists",
+              "Queries": [
+                {
+                  "Input": "C:\\Program Files\\Git\\cmd\\Git.COM",
+                  "Ordinal": 253,
+                  "Output": false
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "Path": "C:\\Program Files\\Git\\cmd\\Git.EXE",
+          "Methods": [
+            {
+              "Method": "FileExists",
+              "Queries": [
+                {
+                  "Input": "C:\\Program Files\\Git\\cmd\\Git.EXE",
+                  "Ordinal": 254,
+                  "Output": true
+                },
+                {
+                  "Input": "C:\\Program Files\\Git\\cmd\\git.exe",
+                  "Ordinal": 261,
+                  "Output": true
+                },
+                {
+                  "Input": "C:\\Program Files\\Git\\cmd\\git.exe",
+                  "Ordinal": 268,
+                  "Output": true
+                },
+                {
+                  "Input": "C:\\Program Files\\Git\\cmd\\git.exe",
+                  "Ordinal": 273,
+                  "Output": true
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "Path": "C:\\Program Files\\Git\\mingw64\\etc\\gitconfig",
+          "Methods": [
+            {
+              "Method": "FileExists",
+              "Queries": [
+                {
+                  "Input": "C:\\Program Files\\Git\\mingw64\\etc\\gitconfig",
+                  "Ordinal": 286,
+                  "Output": true
+                },
+                {
+                  "Input": "C:\\Program Files\\Git\\mingw64\\etc\\gitconfig",
+                  "Ordinal": 287,
+                  "Output": true
+                },
+                {
+                  "Input": "C:\\Program Files\\Git\\mingw64\\etc\\gitconfig",
+                  "Ordinal": 288,
+                  "Output": true
+                }
+              ]
+            },
+            {
+              "Method": "FileOpen",
+              "Queries": [
+                {
+                  "Input": {
+                    "Access": 1,
+                    "Mode": 3,
+                    "Path": "C:\\Program Files\\Git\\mingw64\\etc\\gitconfig",
+                    "Share": 3
+                  },
+                  "Ordinal": 289,
+                  "Output": {
+                    "Access": 1,
+                    "Data": [
+                      "W2h0dHBdCglzc2xCYWNrZW5kID0gc2NoYW5uZWwKW2RpZmYgImFzdGV4dHBsYWluIl0KCXRleHRjb252ID0gYXN0ZXh0cGxhaW4KW2NvcmVdCgllZGl0b3IgPSAnQzpcXFByb2dyYW0gRmlsZXNcXE5vdGVwYWQrK1xcbm90ZXBhZCsrLmV4ZScgLW11bHRpSW5zdCAtbm90YWJiYXIgLW5vc2Vzc2lvbiAtbm9QbHVnaW4K",
+                      ""
+                    ]
+                  }
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "Path": "C:\\Users\\Tester\\AppData\\Local\\Xdg\\Git\\config",
+          "Methods": [
+            {
+              "Method": "FileExists",
+              "Queries": [
+                {
+                  "Input": "C:\\Users\\Tester\\AppData\\Local\\Xdg\\Git\\config",
+                  "Ordinal": 291,
+                  "Output": false
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "Path": "C:\\Users\\Tester\\AppData\\Roaming\\Git\\config",
+          "Methods": [
+            {
+              "Method": "FileExists",
+              "Queries": [
+                {
+                  "Input": "C:\\Users\\Tester\\AppData\\Roaming\\Git\\config",
+                  "Ordinal": 292,
+                  "Output": false
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "Path": "C:\\Users\\Tester\\.gitconfig",
+          "Methods": [
+            {
+              "Method": "FileExists",
+              "Queries": [
+                {
+                  "Input": "C:\\Users\\Tester\\.gitconfig",
+                  "Ordinal": 294,
+                  "Output": true
+                },
+                {
+                  "Input": "C:\\Users\\Tester\\.gitconfig",
+                  "Ordinal": 295,
+                  "Output": true
+                },
+                {
+                  "Input": "C:\\Users\\Tester\\.gitconfig",
+                  "Ordinal": 296,
+                  "Output": true
+                }
+              ]
+            },
+            {
+              "Method": "FileOpen",
+              "Queries": [
+                {
+                  "Input": {
+                    "Access": 1,
+                    "Mode": 3,
+                    "Path": "C:\\Users\\Tester\\.gitconfig",
+                    "Share": 3
+                  },
+                  "Ordinal": 297,
+                  "Output": {
+                    "Access": 1,
+                    "Data": [
+                      "W2JyYW5jaF0NCglhdXRvc2V0dXBtZXJnZSA9IGFsd2F5cw0KCWF1dG9zZXR1cHJlYmFzZSA9IGFsd2F5cw0KW3VzZXJdDQoJbmFtZSA9IEogV3ltYW4g4oieCgllbWFpbCA9IGp3eW1hbkBtaWNyb3NvZnQuY29tCltmZXRjaF0NCglwcnVuZSA9IHRydWUNCltodHRwXQ0KCXNzbGJhY2tlbmQgPSBzY2hhbm5lbAoJc3NsQ0FJbmZvID0gYzovdXNlcnMvSldZTUFOL2NhLWJ1bmRsZS5jcnQKW3B1c2hdDQoJZGVmYXVsdCA9IHNpbXBsZQ0KW2NvcmVdDQoJZWRpdG9yID0gXCJDOi9Qcm9ncmFtIEZpbGVzL05vdGVwYWQrKy9ub3RlcGFkKysuZXhlXCIgLW11bHRpSW5zdCAtbm9zZXNzaW9uIC1ub1BsdWdpbiAkQA0KCXByZWxvYWRpbmRleCA9IHRydWUNCglmc2NhY2hlID0gdHJ1ZQ0KCWFza3Bhc3MgPSBhc2twYXNzDQpbYWxpYXNdDQoJYW1lbmQgPSAiIWYoKSB7IGdpdCBjb21taXQgLS1hbWVuZCAtLW5vLWVkaXQgLS1uby12ZXJpZnkgLS1zdGF0dXMgJEA7IH07IGYiDQoJZGV0YWNoID0gIiFmKCkgeyBnaXQgY2hlY2tvdXQgLS1kZXRhY2ggJHsxOi1IRUFEfTsgfTsgZiINCgllZGl0ID0gIiFmKCkgeyBcIkM6L1Byb2dyYW0gRmlsZXMvTm90ZXBhZCsrL25vdGVwYWQrKy5leGVcIiAtbXVsdGlJbnN0IC1ub3Nlc3Npb24gLW5vUGx1Z2luICRAOyB9OyBmIg0KCWZvcmNlID0gIiFmKCkgeyBnaXQgcHVzaCAtLWZvcmNlLXdpdGgtbGVhc2U7IH07IGYiDQoJZ2V0ID0gIiFmKCkgeyBnaXQgZmV0Y2ggLW5wICRAOyB9OyBmIg0KCWxvZ2kgPSAiIWYoKSB7IGdpdCBsb2cgLS1vbmVsaW5lIC0tZGVjb3JhdGUgLS1maXJzdC1wYXJlbnQgLTMwICRAOyB9OyBmIg0KCWxvZ3ggPSAiIWYoKSB7IGdpdCBsb2cgLS1vbmVsaW5lIC0tZGVjb3JhdGUgLS1ncmFwaCAtMzAgJEA7IH07IGYiDQoJbnVrZSA9ICIhZigpIHsgZ2l0IGNsZWFuIC14ZGY7IGdpdCByZXNldCAtLWhhcmQgSEVBRDsgfTsgZiINCglwaWNrID0gIiFmKCkgeyBnaXQgY2hlcnJ5LXBpY2sgJEA7IH07IGYiDQoJcmVzYWZlID0gIiFmKCkgeyBnaXQgY29uZmlnIA==",
+                      "LS1nbG9iYWwgLS11bnNldCBodHRwLnByb3h5OyBnaXQgY29uZmlnIC0tZ2xvYmFsIC0tdW5zZXQgaHR0cC5zc2xWZXJpZnk7IHByaW50ZiAndW5zYWZlIGluamVjdGlvbiAqZGlzYWJsZWQqIGZvciBGaWRkbGVyIHRyYWNpbmcuXG4nOyB9OyBmIg0KCXJvb3QgPSAiIWYoKSB7IGdpdCByZXYtcGFyc2UgLS1zaG93LXRvcGxldmVsOyB9OyBmIg0KCXN3ZWVwID0gIiFmKCkgeyBnaXQgYnJhbmNoIC0tbWVyZ2VkIG9yaWdpbi9tYXN0ZXIgfCB4YXJncyAtbiAxIGdpdCBicmFuY2ggLUQgMj4vZGV2L251bGw7IH07IGYiDQoJc3luYyA9ICIhZigpIHsgZ2l0IGZldGNoIC0tYWxsOyBnaXQgc3dlZXA7IH07IGYiDQoJdW5zYWZlID0gIiFmKCkgeyBnaXQgY29uZmlnIC0tZ2xvYmFsIGh0dHAucHJveHkgMTI3LjAuMC4xOjg4ODg7IGdpdCBjb25maWcgLS1nbG9iYWwgaHR0cC5zc2xWZXJpZnkgZmFsc2U7IHByaW50ZiAndW5zYWZlIGluamVjdGlvbiAqZW5hYmxlZCogZm9yIEZpZGRsZXIgdHJhY2luZy5cbic7IH07IGYiDQoJZGlmZnRvb2wyID0gIiFmKCkgeyBnaXQgZGlmZnRvb2wgJDF+MSAkMTsgfTsgZiIKW2djXQ0KCWF1dG8gPSA0MDk2DQpbZ2MgInJlZnMvcmVtb3Rlcy8qIl0NCglyZWZsb2dFeHBpcmUgPSA3IGRheXMNCglyZWZsb2dFeHBpcmVVbnJlYWNoYWJsZSA9IDIgZGF5cw0KW3N0YXR1c10NCglyZWxhdGl2ZVBhdGhzID0gZmFsc2UNCltmaWx0ZXIgImxmcyJdDQoJcmVxdWlyZWQgPSB0cnVlDQoJY2xlYW4gPSBnaXQtbGZzIGNsZWFuIC0tICVmCglzbXVkZ2UgPSBnaXQtbGZzIHNtdWRnZSAtLSAlZgoJcHJvY2VzcyA9IGdpdC1sZnMgZmlsdGVyLXByb2Nlc3MKW2RpZmZ0b29sICJiYzQiXQ0KCWNtZCA9IFwiQzovUHJvZ3JhbSBGaWxlcy9CZXlvbmQgQ29tcGFyZSA0L2Jjb21wLmV4ZVwiIFwiJExPQ0FMXCIgXCIkUkVNT1RFXCIKW21lcmdldG9vbCAiYmM0Il0NCgljbWQgPSBcIkM6L1Byb2dyYW0gRmlsZXMvQmV5b25kIENvbXBhcmUgNC9iY29tcC5leGVcIiBcIiRMT0NBTFwiIFwiJFJFTU9URVwiIA==",
+                      "XCIkQkFTRVwiIFwiJE1FUkdFRFwiDQoJcHJvbXB0ID0gZmFsc2UNCgl0cnVzdEV4aXRDb2RlID0gdHJ1ZQ0KCWtlZXBCYWNrdXAgPSBmYWxzZQpbZGlmZnRvb2wgInZzZGlmZm1lcmdlIl0KCWNtZCA9IFwiQzpcXFByb2dyYW0gRmlsZXMgKHg4NilcXE1pY3Jvc29mdCBWaXN1YWwgU3R1ZGlvXFxQcmV2aWV3XFxFbnRlcnByaXNlXFxDb21tb243XFxJREVcXENvbW1vbkV4dGVuc2lvbnNcXE1pY3Jvc29mdFxcVGVhbUZvdW5kYXRpb25cXFRlYW0gRXhwbG9yZXJcXHZzZGlmZm1lcmdlLmV4ZVwiIFwiJExPQ0FMXCIgXCIkUkVNT1RFXCIgLy90CglrZWVwQmFja3VwID0gZmFsc2UNCltkaWZmdG9vbF0NCglwcm9tcHQgPSB0cnVlDQpbZGlmZl0NCgl0b29sID0gdnNkaWZmbWVyZ2UNClttZXJnZV0NCgl0b29sID0gYmM0ClttZXJnZXRvb2wgInZzZGlmZm1lcmdlIl0KCWNtZCA9IFwiQzpcXFByb2dyYW0gRmlsZXMgKHg4NilcXE1pY3Jvc29mdCBWaXN1YWwgU3R1ZGlvXFxQcmV2aWV3XFxFbnRlcnByaXNlXFxDb21tb243XFxJREVcXENvbW1vbkV4dGVuc2lvbnNcXE1pY3Jvc29mdFxcVGVhbUZvdW5kYXRpb25cXFRlYW0gRXhwbG9yZXJcXHZzZGlmZm1lcmdlLmV4ZVwiIFwiJFJFTU9URVwiIFwiJExPQ0FMXCIgXCIkQkFTRVwiIFwiJE1FUkdFRFwiIC8vbQoJa2VlcEJhY2t1cCA9IGZhbHNlCgl0cnVzdEV4aXRDb2RlID0gdHJ1ZQ0KCXByb21wdCA9IHRydWUKW3B1bGxdCglyZWJhc2UgPSB0cnVlClt3aW5VcGRhdGVyXQoJcmVjZW50bHlTZWVuVmVyc2lvbiA9IDIuMTcuMS53aW5kb3dzLjIKW2ltcG9ydGFudGtleV0KW2ltcG9ydGFudGtleV0KW2ltcG9ydGFudGtleV0KCW15YXdlc29tZXZhbHVlID0gYWdyZWF0c3RyaW5nCltjcmVkZW50aWFsXQoJaGVscGVyID0gbWFuYWdlcgo=",
+                      ""
+                    ]
+                  }
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "Path": "C:\\Src\\MS.ALM.GCM\\.git\\config",
+          "Methods": [
+            {
+              "Method": "FileExists",
+              "Queries": [
+                {
+                  "Input": "C:\\Src\\MS.ALM.GCM\\.git\\config",
+                  "Ordinal": 388,
+                  "Output": true
+                },
+                {
+                  "Input": "C:\\Src\\MS.ALM.GCM\\.git\\config",
+                  "Ordinal": 389,
+                  "Output": true
+                },
+                {
+                  "Input": "C:\\Src\\MS.ALM.GCM\\.git\\config",
+                  "Ordinal": 390,
+                  "Output": true
+                }
+              ]
+            },
+            {
+              "Method": "FileOpen",
+              "Queries": [
+                {
+                  "Input": {
+                    "Access": 1,
+                    "Mode": 3,
+                    "Path": "C:\\Src\\MS.ALM.GCM\\.git\\config",
+                    "Share": 3
+                  },
+                  "Ordinal": 391,
+                  "Output": {
+                    "Access": 1,
+                    "Data": [
+                      "W2NvcmVdCglyZXBvc2l0b3J5Zm9ybWF0dmVyc2lvbiA9IDAKCWZpbGVtb2RlID0gZmFsc2UKCWJhcmUgPSBmYWxzZQoJbG9nYWxscmVmdXBkYXRlcyA9IHRydWUKCXN5bWxpbmtzID0gZmFsc2UKCWlnbm9yZWNhc2UgPSB0cnVlCgloaWRlRG90RmlsZXMgPSBkb3RHaXRPbmx5Clt1c2VyXQoJbmFtZSA9IEogV3ltYW4g4oieCgllbWFpbCA9IGplcmVteS53eW1hbkBvdXRsb29rLmNvbQpbY3JlZGVudGlhbF0KIwloZWxwZXIgPSAiRTovU3JjL01pY3Jvc29mdC5BbG0vR2NtL0NsaS1DcmVkZW50aWFsSGVscGVyL2Jpbi9EZWJ1Zy9naXQtY3JlZGVudGlhbC1tYW5hZ2VyLmV4ZSIKCW1vZGFscHJvbXB0ID0gdHJ1ZQpbcmVtb3RlICJzcmMiXQoJdXJsID0gaHR0cHM6Ly9naXRodWIuY29tL01pY3Jvc29mdC9HaXQtQ3JlZGVudGlhbC1NYW5hZ2VyLWZvci1XaW5kb3dzLmdpdAoJZmV0Y2ggPSArcmVmcy9oZWFkcy8qOnJlZnMvcmVtb3Rlcy9zcmMvKgpbYnJhbmNoICJhcmNoaXZlL2FsdGVybmF0ZS1zdG9yZSJdCglyZW1vdGUgPSAuCgltZXJnZSA9IHJlZnMvaGVhZHMvbWFzdGVyCglyZWJhc2UgPSB0cnVlCltyZW1vdGUgImRzdCJdCgl1cmwgPSBodHRwczovL3dob2lzakBnaXRodWIuY29tL3dob2lzai9HaXQtQ3JlZGVudGlhbC1NYW5hZ2VyLWZvci1XaW5kb3dzLmdpdAoJZmV0Y2ggPSArcmVmcy9oZWFkcy8qOnJlZnMvcmVtb3Rlcy9kc3QvKgpbaHR0cF0KW2JyYW5jaCAiYXJjaGl2ZS9zcGFyc2UiXQoJcmVtb3RlID0gZHN0CgltZXJnZSA9IHJlZnMvaGVhZHMvc3BhcnNlCglyZWJhc2UgPSB0cnVlClthbGlhc10KCXN3ZWVwID0gIiFmKCkgeyBnaXQgYnJhbmNoIC0tbWVyZ2VkIHNyYy9tYXN0ZXIgfCB4YXJncyAtbiAxIGdpdCBicmFuY2ggLUQgMj4vZGV2L251bGw7IGdpdCBicmFuY2ggLS1saXN0IC1yIHNyYy9yZWwvKiB8IHhhcmdzIC1uIDEgZ2l0IGJyYW5jaCAtLW1lcmdlZCB8IHhhcmdzIC1uIDEgZ2l0IGJyYW5jaCAtRCAyPi9kZXYvbnVsbDsgfTsgZiIKCXN5bmMgPSAiIWYoKSB7IGdpdCBmZXRjaA==",
+                      "IC0tYWxsOyBnaXQgc3dlZXA7IGdpdCBwdXNoIGRzdCBzcmMvbWFzdGVyOm1hc3RlcjsgZ2l0IHB1c2ggdnMvZHN0IHZzL3NyYy9tYXN0ZXI6bWFzdGVyOyB9OyBmIgpbcmVtb3RlICJ2cy9kc3QiXQoJdXJsID0gaHR0cHM6Ly9tc2VuZy52aXN1YWxzdHVkaW8uY29tL1ZTT25saW5lLUZvcmtzL19naXQvSld5bWFuLkdpdENyZWRlbnRpYWxNYW5hZ2VyCglmZXRjaCA9ICtyZWZzL2hlYWRzLyo6cmVmcy9yZW1vdGVzL3ZzL2RzdC8qCltyZW1vdGUgInZzL3NyYyJdCgl1cmwgPSBodHRwczovL21zZW5nLnZpc3VhbHN0dWRpby5jb20vVlNPbmxpbmUvX2dpdC9HaXRDcmVkZW50aWFsTWFuYWdlcgoJZmV0Y2ggPSArcmVmcy9oZWFkcy8qOnJlZnMvcmVtb3Rlcy92cy9zcmMvKgpbYnJhbmNoICJhcmNoaXZlL2RldGVjdC1pbXBlcnNvbmF0aW9uIl0KCXJlbW90ZSA9IGRzdAoJbWVyZ2UgPSByZWZzL2hlYWRzL2RldGVjdC1pbXBlcnNvbmF0aW9uCglyZWJhc2UgPSB0cnVlCltodHRwXQpbcmVtb3RlICJiaXRidWNrZXQiXQoJdXJsID0gaHR0cHM6Ly93aG9pc2pAYml0YnVja2V0Lm9yZy93aG9pc2ovZ2l0LWNyZWRlbnRpYWwtbWFuYWdlci1mb3Itd2luZG93cy5naXQKCWZldGNoID0gK3JlZnMvaGVhZHMvKjpyZWZzL3JlbW90ZXMvYml0YnVja2V0LyoKW2JyYW5jaCAiYmV5b25kLW1heHBhdGgiXQoJcmVtb3RlID0gc3JjCgltZXJnZSA9IHJlZnMvaGVhZHMvbWFzdGVyCglyZWJhc2UgPSB0cnVlClticmFuY2ggImltcHJvdmUtYXNrcGFzcyJdCglyZW1vdGUgPSBkc3QKCW1lcmdlID0gcmVmcy9oZWFkcy9pbXByb3ZlLWFza3Bhc3MKCXJlYmFzZSA9IHRydWUKW2JyYW5jaCAidGVzdC1wcm94eSJdCglyZW1vdGUgPSBkc3QKCW1lcmdlID0gcmVmcy9oZWFkcy90ZXN0LXByb3h5CglyZWJhc2UgPSB0cnVlClticmFuY2ggImZpeC1wcm9jcmVhZCJdCglyZW1vdGUgPSBkc3QKCW1lcmdlID0gcmVmcy9oZWFkcy9maXgtcHJvY3JlYWQKCXJlYmFzZSA9IHRydWUKW2JyYW5jaCAidjEuMTcvZml4LXByb2NyZWFkIl0KCXJlbQ==",
+                      "b3RlID0gZHN0CgltZXJnZSA9IHJlZnMvaGVhZHMvdjEuMTcvZml4LXByb2NyZWFkCglyZWJhc2UgPSB0cnVlCg==",
+                      ""
+                    ]
+                  }
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "Path": "C:\\Users\\Tester\\AppData\\Local\\.IdentityService\\IdentityServiceAdalCache.cache",
+          "Methods": [
+            {
+              "Method": "FileExists",
+              "Queries": [
+                {
+                  "Input": "C:\\Users\\Tester\\AppData\\Local\\.IdentityService\\IdentityServiceAdalCache.cache",
+                  "Ordinal": 395,
+                  "Output": true
+                },
+                {
+                  "Input": "C:\\Users\\Tester\\AppData\\Local\\.IdentityService\\IdentityServiceAdalCache.cache",
+                  "Ordinal": 397,
+                  "Output": true
+                }
+              ]
+            },
+            {
+              "Method": "FileReadAllBytes",
+              "Queries": [
+                {
+                  "Input": "C:\\Users\\Tester\\AppData\\Local\\.IdentityService\\IdentityServiceAdalCache.cache",
+                  "Ordinal": 396,
+                  "Output": "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"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "Path": "C:\\Users\\Tester\\AppData\\Local\\GitCredentialManager\\tenant.cache",
+          "Methods": [
+            {
+              "Method": "FileOpen",
+              "Queries": [
+                {
+                  "Input": {
+                    "Access": 1,
+                    "Mode": 4,
+                    "Path": "C:\\Users\\Tester\\AppData\\Local\\GitCredentialManager\\tenant.cache",
+                    "Share": 1
+                  },
+                  "Ordinal": 393,
+                  "Output": {
+                    "Access": 1,
+                    "Data": [
+                      "H4sIAAAAAAAEAAXBCwqAIAwA0C40bSGpQYfxw0pQFm12/t67VR85rB2tvCxMCldTUOYu5msyUxedtbEpPOzpN4ohZIKwE4LDRBAxZdiqL3VFrNn55QcB6ECmUwAAAA=="
+                    ]
+                  }
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "Path": "reg:\\Registry32:LocalMachine\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Uninstall\\Git_is1\\InstallLocation",
+          "Methods": [
+            {
+              "Method": "RegistryReadString",
+              "Queries": [
+                {
+                  "Input": {
+                    "Hive": -2147483646,
+                    "Name": "InstallLocation",
+                    "Path": "SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Uninstall\\Git_is1",
+                    "View": 512
+                  },
+                  "Ordinal": 255
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "Path": "reg:\\Registry32:CurrentUser\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Uninstall\\Git_is1\\InstallLocation",
+          "Methods": [
+            {
+              "Method": "RegistryReadString",
+              "Queries": [
+                {
+                  "Input": {
+                    "Hive": -2147483647,
+                    "Name": "InstallLocation",
+                    "Path": "SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Uninstall\\Git_is1",
+                    "View": 512
+                  },
+                  "Ordinal": 256
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "Path": "reg:\\Registry64:LocalMachine\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Uninstall\\Git_is1\\InstallLocation",
+          "Methods": [
+            {
+              "Method": "RegistryReadString",
+              "Queries": [
+                {
+                  "Input": {
+                    "Hive": -2147483646,
+                    "Name": "InstallLocation",
+                    "Path": "SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Uninstall\\Git_is1",
+                    "View": 256
+                  },
+                  "Ordinal": 257,
+                  "Output": "C:\\Program Files\\Git"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "Path": "reg:\\Registry64:CurrentUser\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Uninstall\\Git_is1\\InstallLocation",
+          "Methods": [
+            {
+              "Method": "RegistryReadString",
+              "Queries": [
+                {
+                  "Input": {
+                    "Hive": -2147483647,
+                    "Name": "InstallLocation",
+                    "Path": "SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Uninstall\\Git_is1",
+                    "View": 256
+                  },
+                  "Ordinal": 258
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "Path": "C:\\Src\\MS.ALM.GCM\\Cli\\Test\\bin\\Debug\\Bitbucket.Authentication.dll",
+          "Methods": [
+            {
+              "Method": "GetFileName",
+              "Queries": [
+                {
+                  "Input": "C:\\Src\\MS.ALM.GCM\\Cli\\Test\\bin\\Debug\\Bitbucket.Authentication.dll",
+                  "Ordinal": 302,
+                  "Output": "Bitbucket.Authentication.dll"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "Path": "C:\\Src\\MS.ALM.GCM\\Cli\\Test\\bin\\Debug\\Bitbucket.Authentication.pdb",
+          "Methods": [
+            {
+              "Method": "GetFileName",
+              "Queries": [
+                {
+                  "Input": "C:\\Src\\MS.ALM.GCM\\Cli\\Test\\bin\\Debug\\Bitbucket.Authentication.pdb",
+                  "Ordinal": 303,
+                  "Output": "Bitbucket.Authentication.pdb"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "Path": "C:\\Src\\MS.ALM.GCM\\Cli\\Test\\bin\\Debug\\Castle.Core.dll",
+          "Methods": [
+            {
+              "Method": "GetFileName",
+              "Queries": [
+                {
+                  "Input": "C:\\Src\\MS.ALM.GCM\\Cli\\Test\\bin\\Debug\\Castle.Core.dll",
+                  "Ordinal": 304,
+                  "Output": "Castle.Core.dll"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "Path": "C:\\Src\\MS.ALM.GCM\\Cli\\Test\\bin\\Debug\\Castle.Core.xml",
+          "Methods": [
+            {
+              "Method": "GetFileName",
+              "Queries": [
+                {
+                  "Input": "C:\\Src\\MS.ALM.GCM\\Cli\\Test\\bin\\Debug\\Castle.Core.xml",
+                  "Ordinal": 305,
+                  "Output": "Castle.Core.xml"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "Path": "C:\\Src\\MS.ALM.GCM\\Cli\\Test\\bin\\Debug\\git-credential-manager.exe",
+          "Methods": [
+            {
+              "Method": "GetFileName",
+              "Queries": [
+                {
+                  "Input": "C:\\Src\\MS.ALM.GCM\\Cli\\Test\\bin\\Debug\\git-credential-manager.exe",
+                  "Ordinal": 306,
+                  "Output": "git-credential-manager.exe"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "Path": "C:\\Src\\MS.ALM.GCM\\Cli\\Test\\bin\\Debug\\git-credential-manager.exe.config",
+          "Methods": [
+            {
+              "Method": "GetFileName",
+              "Queries": [
+                {
+                  "Input": "C:\\Src\\MS.ALM.GCM\\Cli\\Test\\bin\\Debug\\git-credential-manager.exe.config",
+                  "Ordinal": 307,
+                  "Output": "git-credential-manager.exe.config"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "Path": "C:\\Src\\MS.ALM.GCM\\Cli\\Test\\bin\\Debug\\git-credential-manager.pdb",
+          "Methods": [
+            {
+              "Method": "GetFileName",
+              "Queries": [
+                {
+                  "Input": "C:\\Src\\MS.ALM.GCM\\Cli\\Test\\bin\\Debug\\git-credential-manager.pdb",
+                  "Ordinal": 308,
+                  "Output": "git-credential-manager.pdb"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "Path": "C:\\Src\\MS.ALM.GCM\\Cli\\Test\\bin\\Debug\\GitHub.Authentication.exe",
+          "Methods": [
+            {
+              "Method": "GetFileName",
+              "Queries": [
+                {
+                  "Input": "C:\\Src\\MS.ALM.GCM\\Cli\\Test\\bin\\Debug\\GitHub.Authentication.exe",
+                  "Ordinal": 309,
+                  "Output": "GitHub.Authentication.exe"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "Path": "C:\\Src\\MS.ALM.GCM\\Cli\\Test\\bin\\Debug\\GitHub.Authentication.exe.config",
+          "Methods": [
+            {
+              "Method": "GetFileName",
+              "Queries": [
+                {
+                  "Input": "C:\\Src\\MS.ALM.GCM\\Cli\\Test\\bin\\Debug\\GitHub.Authentication.exe.config",
+                  "Ordinal": 310,
+                  "Output": "GitHub.Authentication.exe.config"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "Path": "C:\\Src\\MS.ALM.GCM\\Cli\\Test\\bin\\Debug\\GitHub.Authentication.pdb",
+          "Methods": [
+            {
+              "Method": "GetFileName",
+              "Queries": [
+                {
+                  "Input": "C:\\Src\\MS.ALM.GCM\\Cli\\Test\\bin\\Debug\\GitHub.Authentication.pdb",
+                  "Ordinal": 311,
+                  "Output": "GitHub.Authentication.pdb"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "Path": "C:\\Src\\MS.ALM.GCM\\Cli\\Test\\bin\\Debug\\Microsoft.Alm.Authentication.dll",
+          "Methods": [
+            {
+              "Method": "GetFileName",
+              "Queries": [
+                {
+                  "Input": "C:\\Src\\MS.ALM.GCM\\Cli\\Test\\bin\\Debug\\Microsoft.Alm.Authentication.dll",
+                  "Ordinal": 312,
+                  "Output": "Microsoft.Alm.Authentication.dll"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "Path": "C:\\Src\\MS.ALM.GCM\\Cli\\Test\\bin\\Debug\\Microsoft.Alm.Authentication.dll.config",
+          "Methods": [
+            {
+              "Method": "GetFileName",
+              "Queries": [
+                {
+                  "Input": "C:\\Src\\MS.ALM.GCM\\Cli\\Test\\bin\\Debug\\Microsoft.Alm.Authentication.dll.config",
+                  "Ordinal": 313,
+                  "Output": "Microsoft.Alm.Authentication.dll.config"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "Path": "C:\\Src\\MS.ALM.GCM\\Cli\\Test\\bin\\Debug\\Microsoft.Alm.Authentication.pdb",
+          "Methods": [
+            {
+              "Method": "GetFileName",
+              "Queries": [
+                {
+                  "Input": "C:\\Src\\MS.ALM.GCM\\Cli\\Test\\bin\\Debug\\Microsoft.Alm.Authentication.pdb",
+                  "Ordinal": 314,
+                  "Output": "Microsoft.Alm.Authentication.pdb"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "Path": "C:\\Src\\MS.ALM.GCM\\Cli\\Test\\bin\\Debug\\Microsoft.Alm.Authentication.Proxy.dll",
+          "Methods": [
+            {
+              "Method": "GetFileName",
+              "Queries": [
+                {
+                  "Input": "C:\\Src\\MS.ALM.GCM\\Cli\\Test\\bin\\Debug\\Microsoft.Alm.Authentication.Proxy.dll",
+                  "Ordinal": 315,
+                  "Output": "Microsoft.Alm.Authentication.Proxy.dll"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "Path": "C:\\Src\\MS.ALM.GCM\\Cli\\Test\\bin\\Debug\\Microsoft.Alm.Authentication.Proxy.dll.config",
+          "Methods": [
+            {
+              "Method": "GetFileName",
+              "Queries": [
+                {
+                  "Input": "C:\\Src\\MS.ALM.GCM\\Cli\\Test\\bin\\Debug\\Microsoft.Alm.Authentication.Proxy.dll.config",
+                  "Ordinal": 316,
+                  "Output": "Microsoft.Alm.Authentication.Proxy.dll.config"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "Path": "C:\\Src\\MS.ALM.GCM\\Cli\\Test\\bin\\Debug\\Microsoft.Alm.Authentication.Proxy.pdb",
+          "Methods": [
+            {
+              "Method": "GetFileName",
+              "Queries": [
+                {
+                  "Input": "C:\\Src\\MS.ALM.GCM\\Cli\\Test\\bin\\Debug\\Microsoft.Alm.Authentication.Proxy.pdb",
+                  "Ordinal": 317,
+                  "Output": "Microsoft.Alm.Authentication.Proxy.pdb"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "Path": "C:\\Src\\MS.ALM.GCM\\Cli\\Test\\bin\\Debug\\Microsoft.Alm.Cli.Test.dll",
+          "Methods": [
+            {
+              "Method": "GetFileName",
+              "Queries": [
+                {
+                  "Input": "C:\\Src\\MS.ALM.GCM\\Cli\\Test\\bin\\Debug\\Microsoft.Alm.Cli.Test.dll",
+                  "Ordinal": 318,
+                  "Output": "Microsoft.Alm.Cli.Test.dll"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "Path": "C:\\Src\\MS.ALM.GCM\\Cli\\Test\\bin\\Debug\\Microsoft.Alm.Cli.Test.dll.config",
+          "Methods": [
+            {
+              "Method": "GetFileName",
+              "Queries": [
+                {
+                  "Input": "C:\\Src\\MS.ALM.GCM\\Cli\\Test\\bin\\Debug\\Microsoft.Alm.Cli.Test.dll.config",
+                  "Ordinal": 319,
+                  "Output": "Microsoft.Alm.Cli.Test.dll.config"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "Path": "C:\\Src\\MS.ALM.GCM\\Cli\\Test\\bin\\Debug\\Microsoft.Alm.Cli.Test.pdb",
+          "Methods": [
+            {
+              "Method": "GetFileName",
+              "Queries": [
+                {
+                  "Input": "C:\\Src\\MS.ALM.GCM\\Cli\\Test\\bin\\Debug\\Microsoft.Alm.Cli.Test.pdb",
+                  "Ordinal": 320,
+                  "Output": "Microsoft.Alm.Cli.Test.pdb"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "Path": "C:\\Src\\MS.ALM.GCM\\Cli\\Test\\bin\\Debug\\Microsoft.IdentityModel.Clients.ActiveDirectory.dll",
+          "Methods": [
+            {
+              "Method": "GetFileName",
+              "Queries": [
+                {
+                  "Input": "C:\\Src\\MS.ALM.GCM\\Cli\\Test\\bin\\Debug\\Microsoft.IdentityModel.Clients.ActiveDirectory.dll",
+                  "Ordinal": 321,
+                  "Output": "Microsoft.IdentityModel.Clients.ActiveDirectory.dll"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "Path": "C:\\Src\\MS.ALM.GCM\\Cli\\Test\\bin\\Debug\\Microsoft.IdentityModel.Clients.ActiveDirectory.xml",
+          "Methods": [
+            {
+              "Method": "GetFileName",
+              "Queries": [
+                {
+                  "Input": "C:\\Src\\MS.ALM.GCM\\Cli\\Test\\bin\\Debug\\Microsoft.IdentityModel.Clients.ActiveDirectory.xml",
+                  "Ordinal": 322,
+                  "Output": "Microsoft.IdentityModel.Clients.ActiveDirectory.xml"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "Path": "C:\\Src\\MS.ALM.GCM\\Cli\\Test\\bin\\Debug\\Moq.dll",
+          "Methods": [
+            {
+              "Method": "GetFileName",
+              "Queries": [
+                {
+                  "Input": "C:\\Src\\MS.ALM.GCM\\Cli\\Test\\bin\\Debug\\Moq.dll",
+                  "Ordinal": 323,
+                  "Output": "Moq.dll"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "Path": "C:\\Src\\MS.ALM.GCM\\Cli\\Test\\bin\\Debug\\Moq.pdb",
+          "Methods": [
+            {
+              "Method": "GetFileName",
+              "Queries": [
+                {
+                  "Input": "C:\\Src\\MS.ALM.GCM\\Cli\\Test\\bin\\Debug\\Moq.pdb",
+                  "Ordinal": 324,
+                  "Output": "Moq.pdb"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "Path": "C:\\Src\\MS.ALM.GCM\\Cli\\Test\\bin\\Debug\\Moq.xml",
+          "Methods": [
+            {
+              "Method": "GetFileName",
+              "Queries": [
+                {
+                  "Input": "C:\\Src\\MS.ALM.GCM\\Cli\\Test\\bin\\Debug\\Moq.xml",
+                  "Ordinal": 325,
+                  "Output": "Moq.xml"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "Path": "C:\\Src\\MS.ALM.GCM\\Cli\\Test\\bin\\Debug\\Newtonsoft.Json.dll",
+          "Methods": [
+            {
+              "Method": "GetFileName",
+              "Queries": [
+                {
+                  "Input": "C:\\Src\\MS.ALM.GCM\\Cli\\Test\\bin\\Debug\\Newtonsoft.Json.dll",
+                  "Ordinal": 326,
+                  "Output": "Newtonsoft.Json.dll"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "Path": "C:\\Src\\MS.ALM.GCM\\Cli\\Test\\bin\\Debug\\Newtonsoft.Json.xml",
+          "Methods": [
+            {
+              "Method": "GetFileName",
+              "Queries": [
+                {
+                  "Input": "C:\\Src\\MS.ALM.GCM\\Cli\\Test\\bin\\Debug\\Newtonsoft.Json.xml",
+                  "Ordinal": 327,
+                  "Output": "Newtonsoft.Json.xml"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "Path": "C:\\Src\\MS.ALM.GCM\\Cli\\Test\\bin\\Debug\\System.Threading.Tasks.Extensions.dll",
+          "Methods": [
+            {
+              "Method": "GetFileName",
+              "Queries": [
+                {
+                  "Input": "C:\\Src\\MS.ALM.GCM\\Cli\\Test\\bin\\Debug\\System.Threading.Tasks.Extensions.dll",
+                  "Ordinal": 328,
+                  "Output": "System.Threading.Tasks.Extensions.dll"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "Path": "C:\\Src\\MS.ALM.GCM\\Cli\\Test\\bin\\Debug\\System.Threading.Tasks.Extensions.xml",
+          "Methods": [
+            {
+              "Method": "GetFileName",
+              "Queries": [
+                {
+                  "Input": "C:\\Src\\MS.ALM.GCM\\Cli\\Test\\bin\\Debug\\System.Threading.Tasks.Extensions.xml",
+                  "Ordinal": 329,
+                  "Output": "System.Threading.Tasks.Extensions.xml"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "Path": "C:\\Src\\MS.ALM.GCM\\Cli\\Test\\bin\\Debug\\System.ValueTuple.dll",
+          "Methods": [
+            {
+              "Method": "GetFileName",
+              "Queries": [
+                {
+                  "Input": "C:\\Src\\MS.ALM.GCM\\Cli\\Test\\bin\\Debug\\System.ValueTuple.dll",
+                  "Ordinal": 330,
+                  "Output": "System.ValueTuple.dll"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "Path": "C:\\Src\\MS.ALM.GCM\\Cli\\Test\\bin\\Debug\\System.ValueTuple.xml",
+          "Methods": [
+            {
+              "Method": "GetFileName",
+              "Queries": [
+                {
+                  "Input": "C:\\Src\\MS.ALM.GCM\\Cli\\Test\\bin\\Debug\\System.ValueTuple.xml",
+                  "Ordinal": 331,
+                  "Output": "System.ValueTuple.xml"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "Path": "C:\\Src\\MS.ALM.GCM\\Cli\\Test\\bin\\Debug\\VisualStudioTeamServices.Authentication.dll",
+          "Methods": [
+            {
+              "Method": "GetFileName",
+              "Queries": [
+                {
+                  "Input": "C:\\Src\\MS.ALM.GCM\\Cli\\Test\\bin\\Debug\\VisualStudioTeamServices.Authentication.dll",
+                  "Ordinal": 332,
+                  "Output": "VisualStudioTeamServices.Authentication.dll"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "Path": "C:\\Src\\MS.ALM.GCM\\Cli\\Test\\bin\\Debug\\VisualStudioTeamServices.Authentication.pdb",
+          "Methods": [
+            {
+              "Method": "GetFileName",
+              "Queries": [
+                {
+                  "Input": "C:\\Src\\MS.ALM.GCM\\Cli\\Test\\bin\\Debug\\VisualStudioTeamServices.Authentication.pdb",
+                  "Ordinal": 333,
+                  "Output": "VisualStudioTeamServices.Authentication.pdb"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "Path": "C:\\Src\\MS.ALM.GCM\\Cli\\Test\\bin\\Debug\\VisualStudioTeamServices.Authentication.Proxy.dll",
+          "Methods": [
+            {
+              "Method": "GetFileName",
+              "Queries": [
+                {
+                  "Input": "C:\\Src\\MS.ALM.GCM\\Cli\\Test\\bin\\Debug\\VisualStudioTeamServices.Authentication.Proxy.dll",
+                  "Ordinal": 334,
+                  "Output": "VisualStudioTeamServices.Authentication.Proxy.dll"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "Path": "C:\\Src\\MS.ALM.GCM\\Cli\\Test\\bin\\Debug\\VisualStudioTeamServices.Authentication.Proxy.dll.config",
+          "Methods": [
+            {
+              "Method": "GetFileName",
+              "Queries": [
+                {
+                  "Input": "C:\\Src\\MS.ALM.GCM\\Cli\\Test\\bin\\Debug\\VisualStudioTeamServices.Authentication.Proxy.dll.config",
+                  "Ordinal": 335,
+                  "Output": "VisualStudioTeamServices.Authentication.Proxy.dll.config"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "Path": "C:\\Src\\MS.ALM.GCM\\Cli\\Test\\bin\\Debug\\VisualStudioTeamServices.Authentication.Proxy.pdb",
+          "Methods": [
+            {
+              "Method": "GetFileName",
+              "Queries": [
+                {
+                  "Input": "C:\\Src\\MS.ALM.GCM\\Cli\\Test\\bin\\Debug\\VisualStudioTeamServices.Authentication.Proxy.pdb",
+                  "Ordinal": 336,
+                  "Output": "VisualStudioTeamServices.Authentication.Proxy.pdb"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "Path": "C:\\Src\\MS.ALM.GCM\\Cli\\Test\\bin\\Debug\\xunit.abstractions.dll",
+          "Methods": [
+            {
+              "Method": "GetFileName",
+              "Queries": [
+                {
+                  "Input": "C:\\Src\\MS.ALM.GCM\\Cli\\Test\\bin\\Debug\\xunit.abstractions.dll",
+                  "Ordinal": 337,
+                  "Output": "xunit.abstractions.dll"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "Path": "C:\\Src\\MS.ALM.GCM\\Cli\\Test\\bin\\Debug\\xunit.assert.dll",
+          "Methods": [
+            {
+              "Method": "GetFileName",
+              "Queries": [
+                {
+                  "Input": "C:\\Src\\MS.ALM.GCM\\Cli\\Test\\bin\\Debug\\xunit.assert.dll",
+                  "Ordinal": 338,
+                  "Output": "xunit.assert.dll"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "Path": "C:\\Src\\MS.ALM.GCM\\Cli\\Test\\bin\\Debug\\xunit.assert.xml",
+          "Methods": [
+            {
+              "Method": "GetFileName",
+              "Queries": [
+                {
+                  "Input": "C:\\Src\\MS.ALM.GCM\\Cli\\Test\\bin\\Debug\\xunit.assert.xml",
+                  "Ordinal": 339,
+                  "Output": "xunit.assert.xml"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "Path": "C:\\Src\\MS.ALM.GCM\\Cli\\Test\\bin\\Debug\\xunit.core.dll",
+          "Methods": [
+            {
+              "Method": "GetFileName",
+              "Queries": [
+                {
+                  "Input": "C:\\Src\\MS.ALM.GCM\\Cli\\Test\\bin\\Debug\\xunit.core.dll",
+                  "Ordinal": 340,
+                  "Output": "xunit.core.dll"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "Path": "C:\\Src\\MS.ALM.GCM\\Cli\\Test\\bin\\Debug\\xunit.core.xml",
+          "Methods": [
+            {
+              "Method": "GetFileName",
+              "Queries": [
+                {
+                  "Input": "C:\\Src\\MS.ALM.GCM\\Cli\\Test\\bin\\Debug\\xunit.core.xml",
+                  "Ordinal": 341,
+                  "Output": "xunit.core.xml"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "Path": "C:\\Src\\MS.ALM.GCM\\Cli\\Test\\bin\\Debug\\xunit.execution.desktop.dll",
+          "Methods": [
+            {
+              "Method": "GetFileName",
+              "Queries": [
+                {
+                  "Input": "C:\\Src\\MS.ALM.GCM\\Cli\\Test\\bin\\Debug\\xunit.execution.desktop.dll",
+                  "Ordinal": 342,
+                  "Output": "xunit.execution.desktop.dll"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "Path": "C:\\Src\\MS.ALM.GCM\\Cli\\Test\\bin\\Debug\\xunit.execution.desktop.xml",
+          "Methods": [
+            {
+              "Method": "GetFileName",
+              "Queries": [
+                {
+                  "Input": "C:\\Src\\MS.ALM.GCM\\Cli\\Test\\bin\\Debug\\xunit.execution.desktop.xml",
+                  "Ordinal": 343,
+                  "Output": "xunit.execution.desktop.xml"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "Path": "C:\\Src\\MS.ALM.GCM\\Cli\\Test\\bin\\Debug\\xunit.runner.json",
+          "Methods": [
+            {
+              "Method": "GetFileName",
+              "Queries": [
+                {
+                  "Input": "C:\\Src\\MS.ALM.GCM\\Cli\\Test\\bin\\Debug\\xunit.runner.json",
+                  "Ordinal": 344,
+                  "Output": "xunit.runner.json"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "Path": "C:\\Src\\MS.ALM.GCM\\Cli\\Test\\bin\\Debug\\xunit.runner.reporters.net452.dll",
+          "Methods": [
+            {
+              "Method": "GetFileName",
+              "Queries": [
+                {
+                  "Input": "C:\\Src\\MS.ALM.GCM\\Cli\\Test\\bin\\Debug\\xunit.runner.reporters.net452.dll",
+                  "Ordinal": 345,
+                  "Output": "xunit.runner.reporters.net452.dll"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "Path": "C:\\Src\\MS.ALM.GCM\\Cli\\Test\\bin\\Debug\\xunit.runner.utility.net452.dll",
+          "Methods": [
+            {
+              "Method": "GetFileName",
+              "Queries": [
+                {
+                  "Input": "C:\\Src\\MS.ALM.GCM\\Cli\\Test\\bin\\Debug\\xunit.runner.utility.net452.dll",
+                  "Ordinal": 346,
+                  "Output": "xunit.runner.utility.net452.dll"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "Path": "C:\\Src\\MS.ALM.GCM\\Cli\\Test\\bin\\Debug\\xunit.runner.visualstudio.testadapter.dll",
+          "Methods": [
+            {
+              "Method": "GetFileName",
+              "Queries": [
+                {
+                  "Input": "C:\\Src\\MS.ALM.GCM\\Cli\\Test\\bin\\Debug\\xunit.runner.visualstudio.testadapter.dll",
+                  "Ordinal": 347,
+                  "Output": "xunit.runner.visualstudio.testadapter.dll"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "Path": "C:\\Src\\MS.ALM.GCM\\Cli\\Test\\app.config",
+          "Methods": [
+            {
+              "Method": "GetFileName",
+              "Queries": [
+                {
+                  "Input": "C:\\Src\\MS.ALM.GCM\\Cli\\Test\\app.config",
+                  "Ordinal": 357,
+                  "Output": "app.config"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "Path": "C:\\Src\\MS.ALM.GCM\\Cli\\Test\\BasicAuthenticationTests.cs",
+          "Methods": [
+            {
+              "Method": "GetFileName",
+              "Queries": [
+                {
+                  "Input": "C:\\Src\\MS.ALM.GCM\\Cli\\Test\\BasicAuthenticationTests.cs",
+                  "Ordinal": 358,
+                  "Output": "BasicAuthenticationTests.cs"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "Path": "C:\\Src\\MS.ALM.GCM\\Cli\\Test\\BitbucketLogonTests.cs",
+          "Methods": [
+            {
+              "Method": "GetFileName",
+              "Queries": [
+                {
+                  "Input": "C:\\Src\\MS.ALM.GCM\\Cli\\Test\\BitbucketLogonTests.cs",
+                  "Ordinal": 360,
+                  "Output": "BitbucketLogonTests.cs"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "Path": "C:\\Src\\MS.ALM.GCM\\Cli\\Test\\Cli-Test.csproj",
+          "Methods": [
+            {
+              "Method": "GetFileName",
+              "Queries": [
+                {
+                  "Input": "C:\\Src\\MS.ALM.GCM\\Cli\\Test\\Cli-Test.csproj",
+                  "Ordinal": 361,
+                  "Output": "Cli-Test.csproj"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "Path": "C:\\Src\\MS.ALM.GCM\\Cli\\Test\\Data",
+          "Methods": [
+            {
+              "Method": "GetFileName",
+              "Queries": [
+                {
+                  "Input": "C:\\Src\\MS.ALM.GCM\\Cli\\Test\\Data",
+                  "Ordinal": 362,
+                  "Output": "Data"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "Path": "C:\\Src\\MS.ALM.GCM\\Cli\\Test\\GitHubLogonTests.cs",
+          "Methods": [
+            {
+              "Method": "GetFileName",
+              "Queries": [
+                {
+                  "Input": "C:\\Src\\MS.ALM.GCM\\Cli\\Test\\GitHubLogonTests.cs",
+                  "Ordinal": 363,
+                  "Output": "GitHubLogonTests.cs"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "Path": "C:\\Src\\MS.ALM.GCM\\Cli\\Test\\GlobalSuppressions.cs",
+          "Methods": [
+            {
+              "Method": "GetFileName",
+              "Queries": [
+                {
+                  "Input": "C:\\Src\\MS.ALM.GCM\\Cli\\Test\\GlobalSuppressions.cs",
+                  "Ordinal": 364,
+                  "Output": "GlobalSuppressions.cs"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "Path": "C:\\Src\\MS.ALM.GCM\\Cli\\Test\\obj",
+          "Methods": [
+            {
+              "Method": "GetFileName",
+              "Queries": [
+                {
+                  "Input": "C:\\Src\\MS.ALM.GCM\\Cli\\Test\\obj",
+                  "Ordinal": 365,
+                  "Output": "obj"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "Path": "C:\\Src\\MS.ALM.GCM\\Cli\\Test\\OperationArgumentsTests.cs",
+          "Methods": [
+            {
+              "Method": "GetFileName",
+              "Queries": [
+                {
+                  "Input": "C:\\Src\\MS.ALM.GCM\\Cli\\Test\\OperationArgumentsTests.cs",
+                  "Ordinal": 366,
+                  "Output": "OperationArgumentsTests.cs"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "Path": "C:\\Src\\MS.ALM.GCM\\Cli\\Test\\packages.config",
+          "Methods": [
+            {
+              "Method": "GetFileName",
+              "Queries": [
+                {
+                  "Input": "C:\\Src\\MS.ALM.GCM\\Cli\\Test\\packages.config",
+                  "Ordinal": 367,
+                  "Output": "packages.config"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "Path": "C:\\Src\\MS.ALM.GCM\\Cli\\Test\\ProgramTests.cs",
+          "Methods": [
+            {
+              "Method": "GetFileName",
+              "Queries": [
+                {
+                  "Input": "C:\\Src\\MS.ALM.GCM\\Cli\\Test\\ProgramTests.cs",
+                  "Ordinal": 368,
+                  "Output": "ProgramTests.cs"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "Path": "C:\\Src\\MS.ALM.GCM\\Cli\\Test\\Properties",
+          "Methods": [
+            {
+              "Method": "GetFileName",
+              "Queries": [
+                {
+                  "Input": "C:\\Src\\MS.ALM.GCM\\Cli\\Test\\Properties",
+                  "Ordinal": 369,
+                  "Output": "Properties"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "Path": "C:\\Src\\MS.ALM.GCM\\Result",
+          "Methods": [
+            {
+              "Method": "GetFileName",
+              "Queries": [
+                {
+                  "Input": "C:\\Src\\MS.ALM.GCM\\Result",
+                  "Ordinal": 370,
+                  "Output": "Results"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "Path": "C:\\Src\\MS.ALM.GCM\\Cli\\Test\\VstsLogonTests.cs",
+          "Methods": [
+            {
+              "Method": "GetFileName",
+              "Queries": [
+                {
+                  "Input": "C:\\Src\\MS.ALM.GCM\\Cli\\Test\\VstsLogonTests.cs",
+                  "Ordinal": 371,
+                  "Output": "VstsLogonTests.cs"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "Path": "C:\\Src\\MS.ALM.GCM\\Cli\\Test\\XunitHelper.cs",
+          "Methods": [
+            {
+              "Method": "GetFileName",
+              "Queries": [
+                {
+                  "Input": "C:\\Src\\MS.ALM.GCM\\Cli\\Test\\XunitHelper.cs",
+                  "Ordinal": 372,
+                  "Output": "XunitHelper.cs"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "Path": "C:\\Src\\MS.ALM.GCM\\Cli\\Askpass",
+          "Methods": [
+            {
+              "Method": "GetFileName",
+              "Queries": [
+                {
+                  "Input": "C:\\Src\\MS.ALM.GCM\\Cli\\Askpass",
+                  "Ordinal": 377,
+                  "Output": "Askpass"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "Path": "C:\\Src\\MS.ALM.GCM\\Cli\\Manager",
+          "Methods": [
+            {
+              "Method": "GetFileName",
+              "Queries": [
+                {
+                  "Input": "C:\\Src\\MS.ALM.GCM\\Cli\\Manager",
+                  "Ordinal": 378,
+                  "Output": "Manager"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "Path": "",
+          "Methods": [
+            {
+              "Method": "TryReadSecureData",
+              "Queries": [
+                {
+                  "Input": "git:https://microsoft-git-tools.visualstudio.com",
+                  "Ordinal": 394,
+                  "Output": {
+                    "Result": false
+                  }
+                }
+              ]
+            },
+            {
+              "Method": "TryWriteSecureData",
+              "Queries": [
+                {
+                  "Input": {
+                    "Data": "YwBvAGYAeABzAG8AcwBmAHcAZwB4AHYAbABoAHAAZQBuAGwAbwBoADIAbwBkAGIAZQBkAGwAaABtAGoAYgB1AHAAagA1ADQAbAAyAGkAZgA3AHAAegBtAGoAYwB3AGMAYwBoAHgAYQA=",
+                    "Key": "git:https://microsoft-git-tools.visualstudio.com",
+                    "Name": "Personal Access Token"
+                  },
+                  "Ordinal": 398,
+                  "Output": true
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    "Adal": {
+      "Operations": [
+        {
+          "AuthorityUrl": "https://login.microsoftonline.com/72f988bf-86f1-41af-91ab-2d7cd011db47",
+          "Error": {},
+          "Input": {
+            "Resource": "499b84ac-1321-427f-aa17-267ca6975798",
+            "ClientId": "872cd9fa-d31f-45e0-9eab-6e460a02d1f1"
+          },
+          "Result": {
+            "AccessToken": "Fake+Token;Fake+Token;Fake+Token;Fake+Token;Fake+Token;Fake+Token;Fake+Token;Fake+Token",
+            "Authority": "https://login.windows.net/72f988bf-86f1-41af-91ab-2d7cd011db47/",
+            "TokenType": "Bearer",
+            "TenantId": "72f988bf-86f1-41af-91ab-2d7cd011db47"
+          }
+        }
+      ]
+    }
+  }
+}
