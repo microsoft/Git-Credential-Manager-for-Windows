@@ -876,6 +876,8 @@ namespace Microsoft.Alm.Authentication
 
         public void Dispose()
         {
+            GC.SuppressFinalize(this);
+
             Dispose(false);
         }
 
@@ -887,8 +889,6 @@ namespace Microsoft.Alm.Authentication
             }
             else
             {
-                GC.SuppressFinalize(this);
-
                 _content = null;
 
                 if (_message != null)

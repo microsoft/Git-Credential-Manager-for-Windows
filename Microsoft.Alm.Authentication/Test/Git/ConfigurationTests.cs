@@ -7,9 +7,13 @@ using Xunit;
 
 namespace Microsoft.Alm.Authentication.Git.Test
 {
-    public class ConfigurationTests
+    public class ConfigurationTests : UnitTestBase
     {
-        public static object[][] ParseData
+        public ConfigurationTests(Xunit.Abstractions.ITestOutputHelper output)
+            : base(XunitHelper.Convert(output))
+        { }
+
+        public static object[][] GitConfig_Parse_Data
         {
             get
             {
@@ -100,6 +104,15 @@ namespace Microsoft.Alm.Authentication.Git.Test
 
             Assert.True(cut.TryGetEntry("credential", new Uri("https://ntlm.visualstudio.com"), "authority", out entry));
             Assert.Equal("NTLM", entry.Value, StringComparer.OrdinalIgnoreCase);
+        }
+
+        [Fact]
+        public async Task GitConfig_Read()
+        {
+            InitializeTest(false);
+
+            var configuration = new Configuration(Context);
+            await configuration.LoadGitConfiguration(SolutionDirectory, ConfigurationLevel.All);
         }
 
         private static async Task<Dictionary<string, string>> TestParseGitConfig(string input)
