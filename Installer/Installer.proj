@@ -8,7 +8,8 @@
     <ProjectGuid>{19770407-3808-4B17-9EE0-21DD3468F875}</ProjectGuid>
     <ProjectDir Condition=" '$(ProjectDir)' == '' Or '$(ProjectDir)' == '*Undefined*' ">$(MSBuildProjectDirectory)</ProjectDir>
     <RootNamespace>Installer</RootNamespace>
-    <TargetFrameworkVersion>v4.6.2</TargetFrameworkVersion>
+    <TargetFrameworkVersion>v4.6.1</TargetFrameworkVersion>
+    <TargetFrameworkProfile />
   </PropertyGroup>
   <PropertyGroup>
     <SolutionDir Condition=" '$(SolutionDir)' == '' Or '$(SolutionDir)' == '*Undefined*' ">$([System.IO.Directory]::GetParent($(ProjectDir)))</SolutionDir>
@@ -32,29 +33,9 @@
     <GcmPkgPath>$(OutputPath)\Microsoft.Alm.Authentication.$(PkgVersion).nupkg</GcmPkgPath>
   </PropertyGroup>
   <ItemGroup>
-    <ProjectReference Include="..\Cli\Askpass\Cli-Askpass.csproj">
-      <Project>{19770407-B33A-4EBE-92B8-04C93F43CAE0}</Project>
-      <Name>Cli-Askpass</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\Cli\Manager\Cli-Manager.csproj">
-      <Project>{19770407-63D4-40A8-A9DF-F1C4B473308A}</Project>
-      <Name>Cli-Manager</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\Bitbucket.Authentication\Src\Bitbucket.Authentication.csproj">
-      <Project>{EE663736-5BAD-4CA6-A4F8-99978925AD8A}</Project>
-      <Name>Bitbucket.Authentication</Name>
-    </ProjectReference>
     <ProjectReference Include="..\GitHub.Authentication\Src\GitHub.Authentication.csproj">
       <Project>{CF306116-BBF0-4CC7-AFCE-A506AC4752CB}</Project>
       <Name>GitHub.Authentication</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\Microsoft.Alm.Authentication\Src\Microsoft.Alm.Authentication.csproj">
-      <Project>{19770407-B493-459D-BB4F-04FBEFB1BA13}</Project>
-      <Name>Microsoft.Alm.Authentication</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\Microsoft.Vsts.Authentication\Src\Microsoft.Vsts.Authentication.csproj">
-      <Project>{19770407-D7D8-4A37-914C-F552FF4B90D4}</Project>
-      <Name>Microsoft.Vsts.Authentication</Name>
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
@@ -106,6 +87,7 @@
     </ZipContents>
   </ItemGroup>
   <ItemGroup>
+    <None Include="app.config" />
     <None Include="packages.config">
       <InProject>false</InProject>
     </None>

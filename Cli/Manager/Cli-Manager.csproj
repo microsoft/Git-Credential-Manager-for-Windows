@@ -12,7 +12,8 @@
     <ProjectGuid>{19770407-63D4-40A8-A9DF-F1C4B473308A}</ProjectGuid>
     <ProjectName>Cli-Manager</ProjectName>
     <RootNamespace>Microsoft.Alm.Cli</RootNamespace>
-    <TargetFrameworkVersion>v4.5.2</TargetFrameworkVersion>
+    <TargetFrameworkVersion>v4.6.1</TargetFrameworkVersion>
+    <TargetFrameworkProfile />
   </PropertyGroup>
   <Import Project="..\..\build.props" />
   <PropertyGroup>
@@ -29,21 +30,9 @@
     <Reference Include="System.Net.Http" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\..\Bitbucket.Authentication\Src\Bitbucket.Authentication.csproj">
-      <Project>{ee663736-5bad-4ca6-a4f8-99978925ad8a}</Project>
-      <Name>Bitbucket.Authentication</Name>
-    </ProjectReference>
     <ProjectReference Include="..\..\GitHub.Authentication\Src\GitHub.Authentication.csproj">
       <Project>{cf306116-bbf0-4cc7-afce-a506ac4752cb}</Project>
       <Name>GitHub.Authentication</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\..\Microsoft.Alm.Authentication\Src\Microsoft.Alm.Authentication.csproj">
-      <Project>{19770407-b493-459d-bb4f-04fbefb1ba13}</Project>
-      <Name>Microsoft.Alm.Authentication</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\..\Microsoft.Vsts.Authentication\Src\Microsoft.Vsts.Authentication.csproj">
-      <Project>{19770407-d7d8-4a37-914c-f552ff4b90d4}</Project>
-      <Name>Microsoft.Vsts.Authentication</Name>
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
@@ -56,6 +45,7 @@
     <None Include="app.config">
       <InProject>false</InProject>
     </None>
+    <None Include="app.config" />
     <None Include="packages.config">
       <InProject>false</InProject>
     </None>

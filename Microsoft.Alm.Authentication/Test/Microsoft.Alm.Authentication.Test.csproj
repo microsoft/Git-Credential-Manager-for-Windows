@@ -11,6 +11,8 @@
     </NuGetPackageImportStamp>
     <ProjectGuid>{19781214-371F-415C-93C5-44CEAA0E9A34}</ProjectGuid>
     <RootNamespace>Microsoft.Alm.Authentication.Test</RootNamespace>
+    <TargetFrameworkVersion>v4.6.1</TargetFrameworkVersion>
+    <TargetFrameworkProfile />
   </PropertyGroup>
   <Import Project="..\..\test.props" />
   <ItemGroup>
@@ -54,12 +56,6 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="TargetUriTests.cs" />
     <Compile Include="TokenTests.cs" />
-  </ItemGroup>
-  <ItemGroup>
-    <ProjectReference Include="..\Src\Microsoft.Alm.Authentication.csproj">
-      <Project>{19770407-b493-459d-bb4f-04fbefb1ba13}</Project>
-      <Name>Microsoft.Alm.Authentication</Name>
-    </ProjectReference>
   </ItemGroup>
   <ItemGroup>
     <None Include="app.config" />

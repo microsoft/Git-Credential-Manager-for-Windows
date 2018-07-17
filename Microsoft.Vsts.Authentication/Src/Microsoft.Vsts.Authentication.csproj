@@ -11,7 +11,8 @@
     <ProjectGuid>{19770407-D7D8-4A37-914C-F552FF4B90D4}</ProjectGuid>
     <ProjectName>Microsoft.Vsts.Authentication</ProjectName>
     <RootNamespace>Microsoft.Alm.Authentication</RootNamespace>
-    <TargetFrameworkVersion>v4.5.1</TargetFrameworkVersion>
+    <TargetFrameworkVersion>v4.6.1</TargetFrameworkVersion>
+    <TargetFrameworkProfile />
   </PropertyGroup>
   <Import Project="..\..\build.props" />
   <PropertyGroup>
@@ -31,12 +32,6 @@
     <Reference Include="Microsoft.CSharp" />
     <Reference Include="System.Net.Http" />
     <Reference Include="System.Security" />
-  </ItemGroup>
-  <ItemGroup>
-    <ProjectReference Include="..\..\Microsoft.Alm.Authentication\Src\Microsoft.Alm.Authentication.csproj">
-      <Project>{19770407-b493-459d-bb4f-04fbefb1ba13}</Project>
-      <Name>Microsoft.Alm.Authentication</Name>
-    </ProjectReference>
   </ItemGroup>
   <ItemGroup>
     <Compile Include="..\..\Microsoft.Alm.Authentication\Src\GlobalSuppressions.cs">
@@ -85,7 +80,8 @@
     <!-- Only download a new copy of nuget.exe if we don't have a copy available -->
     <PropertyGroup>
       <NugetPath>nuget.exe</NugetPath>
-      <IsSigned></IsSigned>
+      <IsSigned>
+      </IsSigned>
       <IsSigned Condition=" '$(SignType)' == '' Or '$(SignType)' == '*Undefined*' ">-unsigned</IsSigned>
       <NugetWorkDir>$(OutputPath.TrimEnd('\'))</NugetWorkDir>
     </PropertyGroup>

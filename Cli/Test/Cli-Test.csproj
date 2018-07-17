@@ -9,7 +9,9 @@
     <RootNamespace>Microsoft.Alm.Cli.Test</RootNamespace>
     <AssemblyName>Microsoft.Alm.Cli.Test</AssemblyName>
     <IsCodedUITest>False</IsCodedUITest>
-    <NuGetPackageImportStamp/>
+    <NuGetPackageImportStamp />
+    <TargetFrameworkVersion>v4.6.1</TargetFrameworkVersion>
+    <TargetFrameworkProfile />
   </PropertyGroup>
   <Import Project="..\..\test.props" />
   <ItemGroup>
@@ -39,20 +41,6 @@
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.Configuration" />
-  </ItemGroup>
-  <ItemGroup>
-    <ProjectReference Include="..\Manager\Cli-Manager.csproj">
-      <Project>{19770407-63d4-40a8-a9df-f1c4b473308a}</Project>
-      <Name>Cli-Manager</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\..\Microsoft.Alm.Authentication\Src\Microsoft.Alm.Authentication.csproj">
-      <Project>{19770407-b493-459d-bb4f-04fbefb1ba13}</Project>
-      <Name>Microsoft.Alm.Authentication</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\..\Microsoft.Vsts.Authentication\Src\Microsoft.Vsts.Authentication.csproj">
-      <Project>{19770407-d7d8-4a37-914c-f552ff4b90d4}</Project>
-      <Name>Microsoft.Vsts.Authentication</Name>
-    </ProjectReference>
   </ItemGroup>
   <ItemGroup>
     <Compile Include="BasicAuthenticationTests.cs" />

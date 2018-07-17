@@ -14,7 +14,9 @@
     <ReferencePath>$(ProgramFiles)\Common Files\microsoft shared\VSTT\$(VisualStudioVersion)\UITestExtensionPackages</ReferencePath>
     <IsCodedUITest>False</IsCodedUITest>
     <TestProjectType>UnitTest</TestProjectType>
-    <NuGetPackageImportStamp/>
+    <NuGetPackageImportStamp />
+    <TargetFrameworkVersion>v4.6.1</TargetFrameworkVersion>
+    <TargetFrameworkProfile />
   </PropertyGroup>
   <Import Project="..\..\test.props" />
   <PropertyGroup>
@@ -39,16 +41,6 @@
     <Compile Include="BitbucketAuthTests.cs" />
     <Compile Include="AuthenticationTest.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-  </ItemGroup>
-  <ItemGroup>
-    <ProjectReference Include="..\Src\Bitbucket.Authentication.csproj">
-      <Project>{ee663736-5bad-4ca6-a4f8-99978925ad8a}</Project>
-      <Name>Bitbucket.Authentication</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\..\Microsoft.Alm.Authentication\Src\Microsoft.Alm.Authentication.csproj">
-      <Project>{C1DAABC1-B493-459D-BB4F-04FBEFB1BA13}</Project>
-      <Name>Microsoft.Alm.Authentication</Name>
-    </ProjectReference>
   </ItemGroup>
   <ItemGroup>
     <None Include="..\..\xunit.runner.json">

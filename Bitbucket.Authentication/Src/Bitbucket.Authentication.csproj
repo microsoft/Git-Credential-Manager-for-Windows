@@ -5,12 +5,12 @@
   <PropertyGroup>
     <AppDesignerFolder>Properties</AppDesignerFolder>
     <AssemblyName>Bitbucket.Authentication</AssemblyName>
-    <NuGetPackageImportStamp/>
+    <NuGetPackageImportStamp />
     <OutputType>Library</OutputType>
     <ProjectGuid>{EE663736-5BAD-4CA6-A4F8-99978925AD8A}</ProjectGuid>
     <ProjectName>Bitbucket.Authentication</ProjectName>
     <RootNamespace>Atlassian.Bitbucket.Authentication</RootNamespace>
-    <TargetFrameworkVersion>v4.5.1</TargetFrameworkVersion>
+    <TargetFrameworkVersion>v4.6.1</TargetFrameworkVersion>
     <TargetFrameworkProfile />
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug|AnyCPU'">
@@ -69,12 +69,6 @@
     <Compile Include="Views\OAuthWindow.xaml.cs">
       <DependentUpon>OAuthWindow.xaml</DependentUpon>
     </Compile>
-  </ItemGroup>
-  <ItemGroup>
-    <ProjectReference Include="..\..\Microsoft.Alm.Authentication\Src\Microsoft.Alm.Authentication.csproj">
-      <Project>{19770407-B493-459D-BB4F-04FBEFB1BA13}</Project>
-      <Name>Microsoft.Alm.Authentication</Name>
-    </ProjectReference>
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Controls\Icon\" />
