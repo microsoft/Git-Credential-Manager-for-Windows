@@ -32,7 +32,7 @@ namespace GitHub.Shared.ViewModels
         public AuthenticationDialogResult Result
         {
             get { return _result; }
-            protected set
+            internal set
             {
                 _result = value;
                 RaisePropertyChangedEvent(nameof(Result));

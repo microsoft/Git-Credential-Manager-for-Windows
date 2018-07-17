@@ -47,7 +47,7 @@ namespace GitHub.Authentication
         bool ShowViewModel(DialogViewModel viewModel, Func<AuthenticationDialogWindow> windowCreator);
     }
 
-    internal class Gui : Base, IGui
+    internal class Gui : Microsoft.Alm.Authentication.Base, IGui
     {
         public Gui(RuntimeContext context)
             : base(context)
