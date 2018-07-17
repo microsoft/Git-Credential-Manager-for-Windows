@@ -122,12 +122,15 @@ namespace Microsoft.Alm.Authentication.Git
                 }
             }
 
+            var cycleGuard = new HashSet<uint>();
             var processList = new LinkedList<Win32.ProcessEntry32>();
             uint processId = Win32.Kernel32.GetCurrentProcessId();
 
             // Starting with the current process, build a parentage chain back to the initial system process.
             // The resulting list will be a list of processes in invocation order starting with system, and ending with the current process.
-            while (processTable.ContainsKey(processId))
+            // Since cycles are possible, use `cycleGuard` as a guard - if a process has already been seen, stop building the list.
+            while (cycleGuard.Add(processId)
+                && processTable.ContainsKey(processId))
             {
                 processEntry = processEntries[processId];
 
