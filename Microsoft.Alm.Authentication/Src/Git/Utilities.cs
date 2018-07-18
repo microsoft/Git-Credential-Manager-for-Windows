@@ -29,7 +29,7 @@ using System.Runtime.InteropServices;
 
 namespace Microsoft.Alm.Authentication.Git
 {
-    public interface IUtilities
+    public interface IUtilities : IRuntimeService
     {
         /// <summary>
         /// Enumerates all processes visible by the current user, and builds process parentage chain from the current process back to System.
@@ -50,6 +50,9 @@ namespace Microsoft.Alm.Authentication.Git
         public Utilities(RuntimeContext context)
             : base(context)
         { }
+
+        public Type ServiceType
+            => typeof(IUtilities);
 
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Performance", "CA1804:RemoveUnusedLocals", MessageId = "error")]
         public bool TryReadGitRemoteHttpDetails(out string commandLine, out string imagePath)

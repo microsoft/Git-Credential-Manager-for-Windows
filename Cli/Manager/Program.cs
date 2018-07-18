@@ -56,6 +56,8 @@ namespace Microsoft.Alm.Cli
         internal const string CommandUninstall = "uninstall";
         internal const string CommandVersion = "version";
 
+        internal const string LogonFailedMessage = "Logon failed, use ctrl+c to cancel basic credential prompt.";
+
         private static readonly IReadOnlyList<string> CommandList = new string[]
         {
             CommandApprove,
@@ -88,7 +90,7 @@ namespace Microsoft.Alm.Cli
 
         internal void Clear()
         {
-            var args = Environment.GetCommandLineArgs();
+            var args = Settings.GetCommandLineArgs();
             string url = null;
             bool forced = false;
 
@@ -170,7 +172,7 @@ namespace Microsoft.Alm.Cli
 
         internal void Config()
         {
-            string[] args = Environment.GetCommandLineArgs();
+            string[] args = Settings.GetCommandLineArgs();
 
             // Attempt to parse a target URI from the command line arguments.
             if (args.Length < 3 || !Uri.TryCreate(args[2], UriKind.Absolute, out Uri targetUri))
@@ -241,7 +243,7 @@ namespace Microsoft.Alm.Cli
 
         internal void Delete()
         {
-            string[] args = Environment.GetCommandLineArgs();
+            string[] args = Settings.GetCommandLineArgs();
 
             if (args.Length < 3)
                 goto error_parse;
@@ -404,7 +406,7 @@ namespace Microsoft.Alm.Cli
                     Credential credentials;
                     if ((credentials = await QueryCredentials(operationArguments)) == null)
                     {
-                        Exit(-1, "Logon failed, use ctrl+c to cancel basic credential prompt.");
+                        Exit(-1, LogonFailedMessage);
                     }
                     else
                     {

@@ -1,0 +1,692 @@
+/**** Git Process Management Library ****
+ *
+ * Copyright (c) Microsoft Corporation
+ * All rights reserved.
+ *
+ * MIT License
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy
+ * of this software and associated documentation files (the "Software"), to deal
+ * in the Software without restriction, including without limitation the rights to
+ * use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of
+ * the Software, and to permit persons to whom the Software is furnished to do so,
+ * subject to the following conditions:
+ *
+ * The above copyright notice and this permission notice shall be included in all
+ * copies or substantial portions of the Software.
+ *
+ * THE SOFTWARE IS PROVIDED *AS IS*, WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS
+ * FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR
+ * COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN
+ * AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
+ * WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+**/
+
+// Use `Formatting.Indented` to ease review readability.
+{
+  "ExtendedData": [
+    {
+      "WhereTests_CmdWhere": [
+        {
+          "powershell": "C:\\Windows\\System32\\WindowsPowerShell\\v1.0\\powershell.exe"
+        }
+      ]
+    }
+  ],
+  "DisplayName": "WhereTests_Where_FindApp",
+  "ResultPath": "E:\\Src\\Microsoft.Alm\\Gcm\\Microsoft.Alm.Authentication\\Test\\Results",
+  "Services": {
+    "Network": {
+      "Operations": []
+    },
+    "Settings": {
+      "EnvironmentVariables": [
+        {
+          "Target": 0,
+          "Values": [
+            {
+              "Name": "PATHEXT",
+              "Variable": ".COM;.EXE;.BAT;.CMD"
+            },
+            {
+              "Name": "PATH",
+              "Variable": "C:\\WINDOWS\\system32;C:\\WINDOWS;C:\\WINDOWS\\System32\\Wbem;C:\\WINDOWS\\System32\\WindowsPowerShell\\v1.0;C:\\Program Files\\Git\\cmd;C:\\WINDOWS\\System32\\WindowsPowerShell\\v1.0\\;C:\\Program Files\\Git LFS;C:\\WINDOWS\\System32\\OpenSSH\\;C:\\Program Files\\Git\\cmd"
+            },
+            {
+              "Name": "HOME",
+              "Variable": "C:\\Users\\Tester"
+            },
+            {
+              "Name": "GCM_DEBUG"
+            }
+          ]
+        }
+      ],
+      "ExitCode": 0,
+      "ExpandVariables": [],
+      "Is64BitOperatingSystem": false,
+      "OsVersion": 0,
+      "SpecialFolders": []
+    },
+    "Storage": {
+      "Operations": [
+        {
+          "Path": "C:\\WINDOWS\\system32\\powershell.COM",
+          "Methods": [
+            {
+              "Method": "FileExists",
+              "Queries": [
+                {
+                  "Input": "C:\\WINDOWS\\system32\\powershell.COM",
+                  "Ordinal": 53,
+                  "Output": false
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "Path": "C:\\WINDOWS\\system32\\powershell.EXE",
+          "Methods": [
+            {
+              "Method": "FileExists",
+              "Queries": [
+                {
+                  "Input": "C:\\WINDOWS\\system32\\powershell.EXE",
+                  "Ordinal": 54,
+                  "Output": false
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "Path": "C:\\WINDOWS\\system32\\powershell.BAT",
+          "Methods": [
+            {
+              "Method": "FileExists",
+              "Queries": [
+                {
+                  "Input": "C:\\WINDOWS\\system32\\powershell.BAT",
+                  "Ordinal": 55,
+                  "Output": false
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "Path": "C:\\WINDOWS\\system32\\powershell.CMD",
+          "Methods": [
+            {
+              "Method": "FileExists",
+              "Queries": [
+                {
+                  "Input": "C:\\WINDOWS\\system32\\powershell.CMD",
+                  "Ordinal": 56,
+                  "Output": false
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "Path": "C:\\WINDOWS\\system32\\powershell.VBS",
+          "Methods": [
+            {
+              "Method": "FileExists",
+              "Queries": [
+                {
+                  "Input": "C:\\WINDOWS\\system32\\powershell.VBS",
+                  "Ordinal": 57,
+                  "Output": false
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "Path": "C:\\WINDOWS\\system32\\powershell.VBE",
+          "Methods": [
+            {
+              "Method": "FileExists",
+              "Queries": [
+                {
+                  "Input": "C:\\WINDOWS\\system32\\powershell.VBE",
+                  "Ordinal": 58,
+                  "Output": false
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "Path": "C:\\WINDOWS\\system32\\powershell.JS",
+          "Methods": [
+            {
+              "Method": "FileExists",
+              "Queries": [
+                {
+                  "Input": "C:\\WINDOWS\\system32\\powershell.JS",
+                  "Ordinal": 59,
+                  "Output": false
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "Path": "C:\\WINDOWS\\system32\\powershell.JSE",
+          "Methods": [
+            {
+              "Method": "FileExists",
+              "Queries": [
+                {
+                  "Input": "C:\\WINDOWS\\system32\\powershell.JSE",
+                  "Ordinal": 60,
+                  "Output": false
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "Path": "C:\\WINDOWS\\system32\\powershell.WSF",
+          "Methods": [
+            {
+              "Method": "FileExists",
+              "Queries": [
+                {
+                  "Input": "C:\\WINDOWS\\system32\\powershell.WSF",
+                  "Ordinal": 61,
+                  "Output": false
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "Path": "C:\\WINDOWS\\system32\\powershell.WSH",
+          "Methods": [
+            {
+              "Method": "FileExists",
+              "Queries": [
+                {
+                  "Input": "C:\\WINDOWS\\system32\\powershell.WSH",
+                  "Ordinal": 62,
+                  "Output": false
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "Path": "C:\\WINDOWS\\system32\\powershell.MSC",
+          "Methods": [
+            {
+              "Method": "FileExists",
+              "Queries": [
+                {
+                  "Input": "C:\\WINDOWS\\system32\\powershell.MSC",
+                  "Ordinal": 63,
+                  "Output": false
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "Path": "C:\\WINDOWS\\system32\\powershell.LNK",
+          "Methods": [
+            {
+              "Method": "FileExists",
+              "Queries": [
+                {
+                  "Input": "C:\\WINDOWS\\system32\\powershell.LNK",
+                  "Ordinal": 64,
+                  "Output": false
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "Path": "C:\\WINDOWS\\system32\\powershell.CPL",
+          "Methods": [
+            {
+              "Method": "FileExists",
+              "Queries": [
+                {
+                  "Input": "C:\\WINDOWS\\system32\\powershell.CPL",
+                  "Ordinal": 65,
+                  "Output": false
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "Path": "C:\\WINDOWS\\powershell.COM",
+          "Methods": [
+            {
+              "Method": "FileExists",
+              "Queries": [
+                {
+                  "Input": "C:\\WINDOWS\\powershell.COM",
+                  "Ordinal": 66,
+                  "Output": false
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "Path": "C:\\WINDOWS\\powershell.EXE",
+          "Methods": [
+            {
+              "Method": "FileExists",
+              "Queries": [
+                {
+                  "Input": "C:\\WINDOWS\\powershell.EXE",
+                  "Ordinal": 67,
+                  "Output": false
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "Path": "C:\\WINDOWS\\powershell.BAT",
+          "Methods": [
+            {
+              "Method": "FileExists",
+              "Queries": [
+                {
+                  "Input": "C:\\WINDOWS\\powershell.BAT",
+                  "Ordinal": 68,
+                  "Output": false
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "Path": "C:\\WINDOWS\\powershell.CMD",
+          "Methods": [
+            {
+              "Method": "FileExists",
+              "Queries": [
+                {
+                  "Input": "C:\\WINDOWS\\powershell.CMD",
+                  "Ordinal": 69,
+                  "Output": false
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "Path": "C:\\WINDOWS\\powershell.VBS",
+          "Methods": [
+            {
+              "Method": "FileExists",
+              "Queries": [
+                {
+                  "Input": "C:\\WINDOWS\\powershell.VBS",
+                  "Ordinal": 70,
+                  "Output": false
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "Path": "C:\\WINDOWS\\powershell.VBE",
+          "Methods": [
+            {
+              "Method": "FileExists",
+              "Queries": [
+                {
+                  "Input": "C:\\WINDOWS\\powershell.VBE",
+                  "Ordinal": 71,
+                  "Output": false
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "Path": "C:\\WINDOWS\\powershell.JS",
+          "Methods": [
+            {
+              "Method": "FileExists",
+              "Queries": [
+                {
+                  "Input": "C:\\WINDOWS\\powershell.JS",
+                  "Ordinal": 72,
+                  "Output": false
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "Path": "C:\\WINDOWS\\powershell.JSE",
+          "Methods": [
+            {
+              "Method": "FileExists",
+              "Queries": [
+                {
+                  "Input": "C:\\WINDOWS\\powershell.JSE",
+                  "Ordinal": 73,
+                  "Output": false
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "Path": "C:\\WINDOWS\\powershell.WSF",
+          "Methods": [
+            {
+              "Method": "FileExists",
+              "Queries": [
+                {
+                  "Input": "C:\\WINDOWS\\powershell.WSF",
+                  "Ordinal": 74,
+                  "Output": false
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "Path": "C:\\WINDOWS\\powershell.WSH",
+          "Methods": [
+            {
+              "Method": "FileExists",
+              "Queries": [
+                {
+                  "Input": "C:\\WINDOWS\\powershell.WSH",
+                  "Ordinal": 75,
+                  "Output": false
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "Path": "C:\\WINDOWS\\powershell.MSC",
+          "Methods": [
+            {
+              "Method": "FileExists",
+              "Queries": [
+                {
+                  "Input": "C:\\WINDOWS\\powershell.MSC",
+                  "Ordinal": 76,
+                  "Output": false
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "Path": "C:\\WINDOWS\\powershell.LNK",
+          "Methods": [
+            {
+              "Method": "FileExists",
+              "Queries": [
+                {
+                  "Input": "C:\\WINDOWS\\powershell.LNK",
+                  "Ordinal": 77,
+                  "Output": false
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "Path": "C:\\WINDOWS\\powershell.CPL",
+          "Methods": [
+            {
+              "Method": "FileExists",
+              "Queries": [
+                {
+                  "Input": "C:\\WINDOWS\\powershell.CPL",
+                  "Ordinal": 78,
+                  "Output": false
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "Path": "C:\\WINDOWS\\System32\\Wbem\\powershell.COM",
+          "Methods": [
+            {
+              "Method": "FileExists",
+              "Queries": [
+                {
+                  "Input": "C:\\WINDOWS\\System32\\Wbem\\powershell.COM",
+                  "Ordinal": 79,
+                  "Output": false
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "Path": "C:\\WINDOWS\\System32\\Wbem\\powershell.EXE",
+          "Methods": [
+            {
+              "Method": "FileExists",
+              "Queries": [
+                {
+                  "Input": "C:\\WINDOWS\\System32\\Wbem\\powershell.EXE",
+                  "Ordinal": 80,
+                  "Output": false
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "Path": "C:\\WINDOWS\\System32\\Wbem\\powershell.BAT",
+          "Methods": [
+            {
+              "Method": "FileExists",
+              "Queries": [
+                {
+                  "Input": "C:\\WINDOWS\\System32\\Wbem\\powershell.BAT",
+                  "Ordinal": 81,
+                  "Output": false
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "Path": "C:\\WINDOWS\\System32\\Wbem\\powershell.CMD",
+          "Methods": [
+            {
+              "Method": "FileExists",
+              "Queries": [
+                {
+                  "Input": "C:\\WINDOWS\\System32\\Wbem\\powershell.CMD",
+                  "Ordinal": 82,
+                  "Output": false
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "Path": "C:\\WINDOWS\\System32\\Wbem\\powershell.VBS",
+          "Methods": [
+            {
+              "Method": "FileExists",
+              "Queries": [
+                {
+                  "Input": "C:\\WINDOWS\\System32\\Wbem\\powershell.VBS",
+                  "Ordinal": 83,
+                  "Output": false
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "Path": "C:\\WINDOWS\\System32\\Wbem\\powershell.VBE",
+          "Methods": [
+            {
+              "Method": "FileExists",
+              "Queries": [
+                {
+                  "Input": "C:\\WINDOWS\\System32\\Wbem\\powershell.VBE",
+                  "Ordinal": 84,
+                  "Output": false
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "Path": "C:\\WINDOWS\\System32\\Wbem\\powershell.JS",
+          "Methods": [
+            {
+              "Method": "FileExists",
+              "Queries": [
+                {
+                  "Input": "C:\\WINDOWS\\System32\\Wbem\\powershell.JS",
+                  "Ordinal": 85,
+                  "Output": false
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "Path": "C:\\WINDOWS\\System32\\Wbem\\powershell.JSE",
+          "Methods": [
+            {
+              "Method": "FileExists",
+              "Queries": [
+                {
+                  "Input": "C:\\WINDOWS\\System32\\Wbem\\powershell.JSE",
+                  "Ordinal": 86,
+                  "Output": false
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "Path": "C:\\WINDOWS\\System32\\Wbem\\powershell.WSF",
+          "Methods": [
+            {
+              "Method": "FileExists",
+              "Queries": [
+                {
+                  "Input": "C:\\WINDOWS\\System32\\Wbem\\powershell.WSF",
+                  "Ordinal": 87,
+                  "Output": false
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "Path": "C:\\WINDOWS\\System32\\Wbem\\powershell.WSH",
+          "Methods": [
+            {
+              "Method": "FileExists",
+              "Queries": [
+                {
+                  "Input": "C:\\WINDOWS\\System32\\Wbem\\powershell.WSH",
+                  "Ordinal": 88,
+                  "Output": false
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "Path": "C:\\WINDOWS\\System32\\Wbem\\powershell.MSC",
+          "Methods": [
+            {
+              "Method": "FileExists",
+              "Queries": [
+                {
+                  "Input": "C:\\WINDOWS\\System32\\Wbem\\powershell.MSC",
+                  "Ordinal": 89,
+                  "Output": false
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "Path": "C:\\WINDOWS\\System32\\Wbem\\powershell.LNK",
+          "Methods": [
+            {
+              "Method": "FileExists",
+              "Queries": [
+                {
+                  "Input": "C:\\WINDOWS\\System32\\Wbem\\powershell.LNK",
+                  "Ordinal": 90,
+                  "Output": false
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "Path": "C:\\WINDOWS\\System32\\Wbem\\powershell.CPL",
+          "Methods": [
+            {
+              "Method": "FileExists",
+              "Queries": [
+                {
+                  "Input": "C:\\WINDOWS\\System32\\Wbem\\powershell.CPL",
+                  "Ordinal": 91,
+                  "Output": false
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "Path": "C:\\WINDOWS\\System32\\WindowsPowerShell\\v1.0\\powershell.COM",
+          "Methods": [
+            {
+              "Method": "FileExists",
+              "Queries": [
+                {
+                  "Input": "C:\\WINDOWS\\System32\\WindowsPowerShell\\v1.0\\powershell.COM",
+                  "Ordinal": 92,
+                  "Output": false
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "Path": "C:\\WINDOWS\\System32\\WindowsPowerShell\\v1.0\\powershell.EXE",
+          "Methods": [
+            {
+              "Method": "FileExists",
+              "Queries": [
+                {
+                  "Input": "C:\\WINDOWS\\System32\\WindowsPowerShell\\v1.0\\powershell.EXE",
+                  "Ordinal": 93,
+                  "Output": true
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  }
+}

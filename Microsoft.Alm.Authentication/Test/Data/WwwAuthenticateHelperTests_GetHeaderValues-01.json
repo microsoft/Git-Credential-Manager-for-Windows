@@ -1,0 +1,97 @@
+/**** Git Process Management Library ****
+ *
+ * Copyright (c) Microsoft Corporation
+ * All rights reserved.
+ *
+ * MIT License
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy
+ * of this software and associated documentation files (the "Software"), to deal
+ * in the Software without restriction, including without limitation the rights to
+ * use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of
+ * the Software, and to permit persons to whom the Software is furnished to do so,
+ * subject to the following conditions:
+ *
+ * The above copyright notice and this permission notice shall be included in all
+ * copies or substantial portions of the Software.
+ *
+ * THE SOFTWARE IS PROVIDED *AS IS*, WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS
+ * FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR
+ * COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN
+ * AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
+ * WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+**/
+
+// Use `Formatting.Indented` to ease review readability.
+{
+  "ExtendedData": [],
+  "DisplayName": "WwwAuthenticateHelperTests_GetHeaderValues",
+  "ResultPath": "E:\\Src\\Microsoft.Alm\\Gcm\\Microsoft.Alm.Authentication\\Test\\Results",
+  "Services": {
+    "Network": {
+      "Operations": [
+        {
+          "Methods": [
+            {
+              "Method": "HttpHeadAsync",
+              "Queries": [
+                {
+                  "Ordinal": 1,
+                  "Request": {
+                    "Headers": [],
+                    "Flags": 16
+                  },
+                  "Response": {
+                    "Content": {
+                      "AsString": "",
+                      "ContentType": "text/html",
+                      "HasContent": true
+                    },
+                    "Headers": [
+                      "X-TFS-ProcessId=5b238cd5-a505-4d2b-a499-54b9a94c808a",
+                      "X-TFS-Session=e1901675-e0b3-48ca-ac88-2514fd5f75e9",
+                      "X-VSS-E2EID=e1901675-e0b3-48ca-ac88-2514fd5f75e9",
+                      "X-TFS-FedAuthRealm=https://tfsprodwus21.app.visualstudio.com/",
+                      "X-TFS-FedAuthIssuer=https://microsoft.visualstudio.com/",
+                      "X-VSS-AuthorizationEndpoint=https://microsoft.vssps.visualstudio.com/",
+                      "X-VSS-ResourceTenant=72f988bf-86f1-41af-91ab-2d7cd011db47",
+                      "X-TFS-ServiceError=Page%20not%20found.",
+                      "WWW-Authenticate=Bearer authorization_uri=https://login.microsoftonline.com/72f988bf-86f1-41af-91ab-2d7cd011db47"
+                    ],
+                    "StatusCode": 404
+                  }
+                }
+              ]
+            }
+          ],
+          "QueryUrl": "https://microsoft.visualstudio.com/"
+        }
+      ]
+    },
+    "Settings": {
+      "EnvironmentVariables": [
+        {
+          "Target": 0,
+          "Values": [
+            {
+              "Name": "HOME",
+              "Variable": "C:\\Users\\Tester"
+            },
+            {
+              "Name": "GCM_DEBUG"
+            }
+          ]
+        }
+      ],
+      "ExitCode": 0,
+      "ExpandVariables": [],
+      "Is64BitOperatingSystem": false,
+      "OsVersion": 0,
+      "SpecialFolders": []
+    },
+    "Storage": {
+      "Operations": []
+    }
+  }
+}

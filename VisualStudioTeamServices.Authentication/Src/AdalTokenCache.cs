@@ -28,11 +28,11 @@ using System.Collections.Generic;
 using System.IO;
 using System.Security.Cryptography;
 using Microsoft.Alm.Authentication;
-using Microsoft.IdentityModel.Clients.ActiveDirectory;
+using ActiveDirectory = Microsoft.IdentityModel.Clients.ActiveDirectory;
 
 namespace VisualStudioTeamServices.Authentication
 {
-    internal class AdalTokenCache : Microsoft.IdentityModel.Clients.ActiveDirectory.TokenCache
+    internal class AdalTokenCache : ActiveDirectory.TokenCache
     {
         private static readonly IReadOnlyList<IReadOnlyList<string>> AdalCachePaths = new string[][]
         {
@@ -51,10 +51,10 @@ namespace VisualStudioTeamServices.Authentication
 
             _context = context;
 
-            string localAppDataPath = Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData);
-
             AfterAccess = AfterAccessNotification;
             BeforeAccess = BeforeAccessNotification;
+
+            string localAppDataPath = context.Settings.GetFolderPath(Environment.SpecialFolder.LocalApplicationData);
 
             for (int i = 0; i < AdalCachePaths.Count; i += 1)
             {
@@ -75,7 +75,7 @@ namespace VisualStudioTeamServices.Authentication
         private readonly RuntimeContext _context;
         private readonly object _syncpoint = new object();
 
-        private void AfterAccessNotification(TokenCacheNotificationArgs args)
+        private void AfterAccessNotification(ActiveDirectory.TokenCacheNotificationArgs args)
         {
             lock (_syncpoint)
             {
@@ -100,7 +100,7 @@ namespace VisualStudioTeamServices.Authentication
             }
         }
 
-        private void BeforeAccessNotification(TokenCacheNotificationArgs args)
+        private void BeforeAccessNotification(ActiveDirectory.TokenCacheNotificationArgs args)
         {
             lock (_syncpoint)
             {

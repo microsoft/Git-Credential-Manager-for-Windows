@@ -40,7 +40,7 @@ namespace Atlassian.Bitbucket.Authentication.Rest
                             Trace.WriteLine("authentication success: new password token created.");
 
                             // Get username to cross check against supplied one
-                            var responseText = await response.Content.ReadAsStringAsync();
+                            var responseText = response.Content.AsString;
                             var username = FindUsername(responseText);
                             return new AuthenticationResult(AuthenticationResultType.Success, username);
                         }

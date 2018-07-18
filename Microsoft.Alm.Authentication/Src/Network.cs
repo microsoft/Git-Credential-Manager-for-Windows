@@ -24,10 +24,13 @@
 **/
 
 using System;
+using System.Collections;
+using System.Collections.Generic;
 using System.Net;
 using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Threading.Tasks;
+using static System.StringComparer;
 
 namespace Microsoft.Alm.Authentication
 {
@@ -215,7 +218,65 @@ namespace Microsoft.Alm.Authentication
         }
     }
 
-    public interface INetwork
+    public interface INetworkResponseContent
+    {
+        /// <summary>
+        /// Gets the HTTP content serialized to a `<see langword="byte"/>[]`.
+        /// </summary>
+        byte[] AsByteArray { get; }
+
+        /// <summary>
+        /// Gets the HTTP content serialized to a `<see langword="string"/>`.
+        /// </summary>
+        string AsString { get; }
+
+        /// <summary>
+        /// Gets `<see langword="true"/>` if the HTTP content is represented as a `<see langword="byte"/>[]` array; otherwise `<see langword="false"/>`.
+        /// </summary>
+        bool IsByteArray { get; }
+
+        /// <summary>
+        /// Gets `<see langword="true"/>` if the HTTP content is represented as a `<see langword="string"/>`; otherwise `<see langword="false"/>`.
+        /// </summary>
+        bool IsString { get; }
+
+        /// <summary>
+        /// Gets the media-type header value associated with the content.
+        /// </summary>
+        string MediaType { get; }
+    }
+
+    public interface INetworkResponseHeaders : IEnumerable<KeyValuePair<string, IEnumerable<string>>>
+    {
+        IEnumerable<AuthenticationHeaderValue> WwwAuthenticate { get; }
+
+        bool TryGetValues(string name, out IEnumerable<string> values);
+    }
+
+    public interface INetworkResponseMessage : IDisposable
+    {
+        /// <summary>
+        /// Gets or sets the content of a HTTP response message.
+        /// </summary>
+        INetworkResponseContent Content { get; }
+
+        /// <summary>
+        /// Gets or sets the status code of the HTTP response.
+        /// </summary>
+        HttpStatusCode StatusCode { get; }
+
+        /// <summary>
+        /// Gets the collection of HTTP response headers.
+        /// </summary>
+        INetworkResponseHeaders Headers { get; }
+
+        /// <summary>
+        /// Gets a value that indicates if the HTTP response was successful.
+        /// </summary>
+        bool IsSuccessStatusCode { get; }
+    }
+
+    public interface INetwork : IRuntimeService
     {
         /// <summary>
         /// Send a GET request, using `<paramref name="options"/>`, to the specified server as an asynchronous operation.
@@ -224,7 +285,7 @@ namespace Microsoft.Alm.Authentication
         /// </summary>
         /// <param name="targetUri">The Uri of the target.</param>
         /// <param name="options">Options which govern how the HTTP request is sent.</param>
-        Task<HttpResponseMessage> HttpGetAsync(TargetUri targetUri, NetworkRequestOptions options);
+        Task<INetworkResponseMessage> HttpGetAsync(TargetUri targetUri, NetworkRequestOptions options);
 
         /// <summary>
         /// Send a GET request, using `<see cref="NetworkRequestOptions.Default"/>`, to the specified server as an asynchronous operation.
@@ -232,7 +293,7 @@ namespace Microsoft.Alm.Authentication
         /// Returns a task to get the response from the server.
         /// </summary>
         /// <param name="targetUri">The Uri of the server.</param>
-        Task<HttpResponseMessage> HttpGetAsync(TargetUri targetUri);
+        Task<INetworkResponseMessage> HttpGetAsync(TargetUri targetUri);
 
         /// <summary>
         /// Send a HEAD request, using `<paramref name="options"/>`, to the specified server as an asynchronous operation.
@@ -241,7 +302,7 @@ namespace Microsoft.Alm.Authentication
         /// </summary>
         /// <param name="targetUri">The Uri of the server.</param>
         /// <param name="options">Options which govern how the HTTP request is sent.</param>
-        Task<HttpResponseMessage> HttpHeadAsync(TargetUri targetUri, NetworkRequestOptions options);
+        Task<INetworkResponseMessage> HttpHeadAsync(TargetUri targetUri, NetworkRequestOptions options);
 
         /// <summary>
         /// Send a GET request, using `<see cref="NetworkRequestOptions.Default"/>`, to the specified target as an asynchronous operation.
@@ -249,7 +310,7 @@ namespace Microsoft.Alm.Authentication
         /// Returns a task to get the response from the target.
         /// </summary>
         /// <param name="targetUri">The Uri of the target.</param>
-        Task<HttpResponseMessage> HttpHeadAsync(TargetUri targetUri);
+        Task<INetworkResponseMessage> HttpHeadAsync(TargetUri targetUri);
 
         /// <summary>
         /// Send a POST request, using `<paramref name="options"/>`, to the specified server as an asynchronous operation.
@@ -259,7 +320,7 @@ namespace Microsoft.Alm.Authentication
         /// <param name="targetUri">The Uri of the target.</param>
         /// <param name="content">Content to send, as part of the request, to the server.</param>
         /// <param name="options">Options which govern how the HTTP request is sent.</param>
-        Task<HttpResponseMessage> HttpPostAsync(TargetUri targetUri, HttpContent content, NetworkRequestOptions options);
+        Task<INetworkResponseMessage> HttpPostAsync(TargetUri targetUri, HttpContent content, NetworkRequestOptions options);
 
         /// <summary>
         /// Send a POST request, using `<see cref="NetworkRequestOptions.Default"/>`, to the specified server as an asynchronous operation.
@@ -268,7 +329,7 @@ namespace Microsoft.Alm.Authentication
         /// </summary>
         /// <param name="targetUri">The Uri of the target.</param>
         /// <param name="content">Content to send, as part of the request, to the server.</param>
-        Task<HttpResponseMessage> HttpPostAsync(TargetUri targetUri, StringContent content);
+        Task<INetworkResponseMessage> HttpPostAsync(TargetUri targetUri, StringContent content);
     }
 
     internal class Network : Base, INetwork
@@ -280,60 +341,95 @@ namespace Microsoft.Alm.Authentication
             : base(context)
         { }
 
-        public async Task<HttpResponseMessage> HttpGetAsync(TargetUri targetUri, NetworkRequestOptions options)
+        public Type ServiceType
+            => typeof(INetwork);
+
+        public Task<INetworkResponseMessage> HttpGetAsync(TargetUri targetUri, NetworkRequestOptions options)
         {
             if (targetUri is null)
                 throw new ArgumentNullException(nameof(targetUri));
 
-            // Craft the request header for the GitHub v3 API w/ credentials;
-            using (var handler = GetHttpMessageHandler(targetUri, options))
-            using (var httpClient = GetHttpClient(targetUri, handler, options))
+            return Task.Run<INetworkResponseMessage>(async () =>
             {
-                return await httpClient.GetAsync(targetUri);
-            }
+                using (var handler = GetHttpMessageHandler(targetUri, options))
+                using (var httpClient = GetHttpClient(targetUri, handler, options))
+                {
+                    var httpMessage = await httpClient.GetAsync(targetUri);
+                    var response = new NetworkResponseMessage(httpMessage);
+
+                    if (httpMessage.Content != null)
+                    {
+                        await response.SetContent(httpMessage.Content);
+                    }
+
+                    return response;
+                }
+            });
         }
 
-        public Task<HttpResponseMessage> HttpGetAsync(TargetUri targetUri)
+        public Task<INetworkResponseMessage> HttpGetAsync(TargetUri targetUri)
             => HttpGetAsync(targetUri, NetworkRequestOptions.Default);
 
-        public async Task<HttpResponseMessage> HttpHeadAsync(TargetUri targetUri, NetworkRequestOptions options)
+        public Task<INetworkResponseMessage> HttpHeadAsync(TargetUri targetUri, NetworkRequestOptions options)
         {
             if (targetUri is null)
                 throw new ArgumentNullException(nameof(targetUri));
 
-            using (var httpMessageHandler = GetHttpMessageHandler(targetUri, options))
-            using (var httpClient = GetHttpClient(targetUri, httpMessageHandler, options))
-            using (var requestMessage = new HttpRequestMessage(HttpMethod.Head, targetUri))
+            return Task.Run<INetworkResponseMessage>(async () =>
             {
-                // Copy the headers from the client into the message because the framework
-                // will not do this when using `SendAsync`.
-                foreach (var header in httpClient.DefaultRequestHeaders)
+                using (var httpMessageHandler = GetHttpMessageHandler(targetUri, options))
+                using (var httpClient = GetHttpClient(targetUri, httpMessageHandler, options))
+                using (var requestMessage = new HttpRequestMessage(HttpMethod.Head, targetUri))
                 {
-                    requestMessage.Headers.Add(header.Key, header.Value);
-                }
+                    // Copy the headers from the client into the message because the framework
+                    // will not do this when using `SendAsync`.
+                    foreach (var header in httpClient.DefaultRequestHeaders)
+                    {
+                        requestMessage.Headers.Add(header.Key, header.Value);
+                    }
 
-                return await httpClient.SendAsync(requestMessage, HttpCompletionOption.ResponseHeadersRead);
-            }
+                    var httpMessage = await httpClient.SendAsync(requestMessage, HttpCompletionOption.ResponseHeadersRead);
+                    var response = new NetworkResponseMessage(httpMessage);
+
+                    if (httpMessage.Content != null)
+                    {
+                        await response.SetContent(httpMessage.Content);
+                    }
+
+                    return response;
+                }
+            });
         }
 
-        public Task<HttpResponseMessage> HttpHeadAsync(TargetUri targetUri)
+        public Task<INetworkResponseMessage> HttpHeadAsync(TargetUri targetUri)
             => HttpHeadAsync(targetUri, NetworkRequestOptions.Default);
 
-        public async Task<HttpResponseMessage> HttpPostAsync(TargetUri targetUri, HttpContent content, NetworkRequestOptions options)
+        public Task<INetworkResponseMessage> HttpPostAsync(TargetUri targetUri, HttpContent content, NetworkRequestOptions options)
         {
             if (targetUri is null)
                 throw new ArgumentNullException(nameof(targetUri));
             if (content is null)
                 throw new ArgumentNullException(nameof(content));
 
-            using (var handler = GetHttpMessageHandler(targetUri, options))
-            using (var httpClient = GetHttpClient(targetUri, handler, options))
+            return Task.Run<INetworkResponseMessage>(async () =>
             {
-                return await httpClient.PostAsync(targetUri, content);
-            }
+                using (var handler = GetHttpMessageHandler(targetUri, options))
+                using (var httpClient = GetHttpClient(targetUri, handler, options))
+                {
+                    var httpMessage = await httpClient.PostAsync(targetUri, content);
+                    var response = new NetworkResponseMessage(httpMessage);
+
+                    if (httpMessage.Content != null)
+                    {
+                        await response.SetContent(httpMessage.Content);
+                    }
+
+                    return response;
+                }
+            });
         }
 
-        public Task<HttpResponseMessage> HttpPostAsync(TargetUri targetUri, StringContent content)
+        public Task<INetworkResponseMessage> HttpPostAsync(TargetUri targetUri, StringContent content)
             => HttpPostAsync(targetUri, content, NetworkRequestOptions.Default);
 
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Reliability", "CA2000:Dispose objects before losing scope")]
@@ -435,37 +531,37 @@ namespace Microsoft.Alm.Authentication
                     switch (options.Authorization)
                     {
                         case Token token:
+                        {
+                            // Different types of tokens are packed differently.
+                            switch (token.Type)
                             {
-                                // Different types of tokens are packed differently.
-                                switch (token.Type)
+                                case TokenType.AzureAccess:
                                 {
-                                    case TokenType.AzureAccess:
-                                        {
-                                            // ADAL access tokens are packed into the Authorization header.
-                                            httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token.Value);
-                                        }
-                                        break;
-
-                                    case TokenType.AzureFederated:
-                                        {
-                                            // Federated authentication tokens are sent as cookie(s).
-                                            httpClient.DefaultRequestHeaders.Add("Cookie", token.Value);
-                                        }
-                                        break;
-
-                                    default:
-                                        Trace.WriteLine("! unsupported token type, not appending an authentication header to the request.");
-                                        break;
+                                    // ADAL access tokens are packed into the Authorization header.
+                                    httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token.Value);
                                 }
+                                break;
+
+                                case TokenType.AzureFederated:
+                                {
+                                    // Federated authentication tokens are sent as cookie(s).
+                                    httpClient.DefaultRequestHeaders.Add("Cookie", token.Value);
+                                }
+                                break;
+
+                                default:
+                                Trace.WriteLine("! unsupported token type, not appending an authentication header to the request.");
+                                break;
                             }
-                            break;
+                        }
+                        break;
 
                         case Credential credentials:
-                            {
-                                // Credentials are packed into the 'Authorization' header as a base64 encoded pair.
-                                httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Basic", credentials.ToBase64String());
-                            }
-                            break;
+                        {
+                            // Credentials are packed into the 'Authorization' header as a base64 encoded pair.
+                            httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Basic", credentials.ToBase64String());
+                        }
+                        break;
                     }
                 }
             }
@@ -514,6 +610,307 @@ namespace Microsoft.Alm.Authentication
             else
             {
                 return new WebProxy();
+            }
+        }
+    }
+
+    internal class NetworkResponseContent : INetworkResponseContent
+    {
+        private byte[] _byteArray;
+        private string _mediaType;
+        private string _string;
+        private readonly object _syncpoint = new object();
+
+        public byte[] AsByteArray
+        {
+            get { lock (_syncpoint) return _byteArray; }
+        }
+
+        public string AsString
+        {
+            get { lock (_syncpoint) return _string; }
+        }
+
+        public bool IsByteArray
+        {
+            get { lock (_syncpoint) return _byteArray != null; }
+        }
+
+        public bool IsString
+        {
+            get { lock (_syncpoint) return _string != null; }
+        }
+
+        public string MediaType
+        {
+            get { lock (_syncpoint) return _mediaType; }
+        }
+
+        internal string DebuggerDisplay
+        {
+            get { return $"{nameof(NetworkResponseContent)}: {ToString()}"; }
+        }
+
+        public async Task SetContent(HttpContent content)
+        {
+            if (content is null)
+                throw new ArgumentNullException(nameof(content));
+
+            if (content.Headers.ContentType.MediaType != null
+                && (content.Headers.ContentType.MediaType.StartsWith("text/", StringComparison.OrdinalIgnoreCase)
+                    || content.Headers.ContentType.MediaType.EndsWith("/json", StringComparison.OrdinalIgnoreCase)))
+            {
+                string asString = await content.ReadAsStringAsync();
+
+                lock (_syncpoint)
+                {
+                    _mediaType = content.Headers.ContentType.MediaType;
+                    _string = asString;
+                }
+            }
+            else
+            {
+                byte[] asBytes = await content.ReadAsByteArrayAsync();
+
+                lock (_syncpoint)
+                {
+                    _mediaType = content.Headers.ContentType.MediaType;
+                    _byteArray = asBytes;
+                }
+            }
+        }
+
+        public override string ToString()
+        {
+            byte[] asBytes = null;
+            string asString = null;
+
+            lock (_syncpoint)
+            {
+                asBytes = AsByteArray;
+                asString = AsString;
+            }
+
+            return (asBytes is null)
+                ? (asString is null)
+                    ? "<Empty>"
+                    : $"{nameof(AsString)} Length = {asString.Length}"
+                : (asString is null)
+                    ? $"{nameof(AsByteArray)} Length = {asBytes.Length}"
+                    : "<Error>";
+        }
+    }
+
+    internal class NetworkResponseHeaders : INetworkResponseHeaders
+    {
+        private readonly Dictionary<string, List<string>> _lookup = new Dictionary<string, List<string>>(OrdinalIgnoreCase);
+
+        public IEnumerable<AuthenticationHeaderValue> WwwAuthenticate
+        {
+            get
+            {
+                const string WwwAuthenticate = "WWW-Authenticate";
+
+                if (_lookup.TryGetValue(WwwAuthenticate, out var values))
+                {
+                    var headers = new List<AuthenticationHeaderValue>(values.Count);
+
+                    foreach (var value in values)
+                    {
+                        var header = null as AuthenticationHeaderValue;
+                        int index = value.IndexOf(' ');
+
+                        if (index > 0)
+                        {
+                            string scheme = value.Substring(0, index - 1);
+                            string parameter = value.Substring(index);
+
+                            header = new AuthenticationHeaderValue(scheme, parameter);
+                        }
+                        else
+                        {
+                            header = new AuthenticationHeaderValue(value);
+                        }
+
+                        headers.Add(header);
+                    }
+
+                    return headers;
+                }
+
+                return System.Linq.Enumerable.Empty<AuthenticationHeaderValue>();
+            }
+        }
+
+        public IEnumerator<KeyValuePair<string, IEnumerable<string>>> GetEnumerator()
+        {
+            foreach (var kvp in _lookup)
+            {
+                var result = new KeyValuePair<string, IEnumerable<string>>(kvp.Key, kvp.Value);
+
+                yield return result;
+            }
+        }
+
+        public void SetHeaders(IEnumerable<string> data)
+        {
+            if (data is null)
+                throw new ArgumentNullException(nameof(data));
+
+            foreach (var item in data)
+            {
+                int idx = item.IndexOf('=');
+                if (idx < 0)
+                    continue;
+
+                string name = item.Substring(0, idx);
+                string value = item.Substring(idx + 1);
+
+                if (!_lookup.TryGetValue(name, out var list))
+                {
+                    list = new List<string>();
+                    _lookup.Add(name, list);
+                }
+
+                list.Add(value);
+            }
+        }
+
+        public void SetHeaders(HttpResponseHeaders data)
+        {
+            if (data is null)
+                throw new ArgumentNullException(nameof(data));
+
+            foreach (var item in data)
+            {
+                var name = item.Key;
+                var values = item.Value;
+
+                if (!_lookup.TryGetValue(name, out var list))
+                {
+                    list = new List<string>();
+                    _lookup.Add(name, list);
+                }
+
+                list.AddRange(values);
+            }
+        }
+
+        public bool TryGetValues(string name, out IEnumerable<string> values)
+        {
+            if (_lookup.TryGetValue(name, out var vs))
+            {
+                values = vs;
+                return true;
+            }
+
+            values = null;
+            return false;
+        }
+
+        IEnumerator IEnumerable.GetEnumerator()
+            => GetEnumerator();
+    }
+
+    internal class NetworkResponseMessage : INetworkResponseMessage
+    {
+        public NetworkResponseMessage(INetworkResponseContent content, INetworkResponseHeaders headers, HttpStatusCode status)
+            : this()
+        {
+            _content = content;
+            _headers = headers;
+            _message = null;
+            _status = status;
+        }
+
+        public NetworkResponseMessage(HttpResponseMessage httpMessage)
+            : this()
+        {
+            if (httpMessage is null)
+                throw new ArgumentNullException(nameof(httpMessage));
+
+            _message = httpMessage;
+
+            var headers = new NetworkResponseHeaders();
+            headers.SetHeaders(httpMessage.Headers);
+
+            _headers = headers;
+            _status = httpMessage.StatusCode;
+        }
+
+        private NetworkResponseMessage()
+        {
+            _syncpoint = new object();
+        }
+
+        ~NetworkResponseMessage()
+        {
+            Dispose(true);
+        }
+
+        private INetworkResponseContent _content;
+        private readonly INetworkResponseHeaders _headers;
+        private HttpResponseMessage _message;
+        private readonly HttpStatusCode _status;
+        private readonly object _syncpoint;
+
+        public INetworkResponseContent Content
+        {
+            get { lock (_syncpoint) return _content; }
+        }
+
+        public HttpStatusCode StatusCode
+        {
+            get { lock (_syncpoint) return _status; }
+        }
+
+        public INetworkResponseHeaders Headers
+        {
+            get { lock (_syncpoint) return _headers; }
+        }
+
+        public bool IsSuccessStatusCode
+        {
+            get { lock (_syncpoint) return (_status >= HttpStatusCode.OK && _status < HttpStatusCode.Ambiguous); }
+        }
+
+        public void Dispose()
+        {
+            GC.SuppressFinalize(this);
+
+            Dispose(false);
+        }
+
+        private void Dispose(bool finalizing)
+        {
+            if (finalizing)
+            {
+                _message?.Dispose();
+            }
+            else
+            {
+                _content = null;
+
+                if (_message != null)
+                {
+                    _message.Dispose();
+                    _message = null;
+                }
+            }
+        }
+
+        public async Task SetContent(HttpContent httpContent)
+        {
+            if (httpContent is null)
+                return;
+
+            var content = new NetworkResponseContent();
+
+            await content.SetContent(httpContent);
+
+            lock (_syncpoint)
+            {
+                _content = content;
             }
         }
     }

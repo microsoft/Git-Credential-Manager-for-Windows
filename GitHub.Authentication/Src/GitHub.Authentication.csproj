@@ -6,7 +6,7 @@
     <AppDesignerFolder>Properties</AppDesignerFolder>
     <AssemblyName>GitHub.Authentication</AssemblyName>
     <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>
-    <NuGetPackageImportStamp/>
+    <NuGetPackageImportStamp />
     <OutputType>WinExe</OutputType>
     <ProjectGuid>{CF306116-BBF0-4CC7-AFCE-A506AC4752CB}</ProjectGuid>
     <ProjectName>GitHub.Authentication</ProjectName>
@@ -44,6 +44,7 @@
       <SubType>Designer</SubType>
     </ApplicationDefinition>
     <Compile Include="AuthenticationPrompts.cs" />
+    <Compile Include="Base.cs" />
     <Compile Include="Controls\CredentialsControl.xaml.cs">
       <DependentUpon>CredentialsControl.xaml</DependentUpon>
     </Compile>
@@ -54,6 +55,7 @@
     <Compile Include="Authentication.cs" />
     <Compile Include="AuthenticationResult.cs" />
     <Compile Include="Authority.cs" />
+    <Compile Include="Gui.cs" />
     <Compile Include="TokenScope.cs" />
     <Compile Include="GlobalSuppressions.cs" />
     <Compile Include="Helpers\BindingProxy.cs" />

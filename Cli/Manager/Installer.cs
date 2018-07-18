@@ -174,22 +174,22 @@ namespace Microsoft.Alm.Cli
                     string val1 = null;
                     string val2 = null;
                     string val3 = null;
-                    var vars = Environment.GetEnvironmentVariables(EnvironmentVariableTarget.Process);
 
                     // Git for Windows checks %HOME% first
-                    if ((val1 = vars["HOME"] as string) != null
+                    if ((val1 = Program.Settings.GetEnvironmentVariable("HOME")) != null
                         && Program.Storage.DirectoryExists(val1))
                     {
                         _userBinPath = val1;
                     }
                     // Git for Windows checks %HOMEDRIVE%%HOMEPATH% second
-                    else if ((val1 = vars["HOMEDRIVE"] as string) != null && (val2 = vars["HOMEPATH"] as string) != null
+                    else if ((val1 = Program.Settings.GetEnvironmentVariable("HOMEDRIVE")) != null
+                        && (val2 = Program.Settings.GetEnvironmentVariable("HOMEPATH")) != null
                         && Program.Storage.DirectoryExists(val3 = val1 + val2))
                     {
                         _userBinPath = val3;
                     }
                     // Git for Windows checks %USERPROFILE% last
-                    else if ((val1 = vars["USERPROFILE"] as string) != null)
+                    else if ((val1 = Program.Settings.GetEnvironmentVariable("USERPROFILE")) != null)
                     {
                         _userBinPath = val1;
                     }

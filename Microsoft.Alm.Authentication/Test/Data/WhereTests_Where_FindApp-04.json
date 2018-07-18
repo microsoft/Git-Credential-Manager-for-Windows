@@ -1,0 +1,887 @@
+/**** Git Process Management Library ****
+ *
+ * Copyright (c) Microsoft Corporation
+ * All rights reserved.
+ *
+ * MIT License
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy
+ * of this software and associated documentation files (the "Software"), to deal
+ * in the Software without restriction, including without limitation the rights to
+ * use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of
+ * the Software, and to permit persons to whom the Software is furnished to do so,
+ * subject to the following conditions:
+ *
+ * The above copyright notice and this permission notice shall be included in all
+ * copies or substantial portions of the Software.
+ *
+ * THE SOFTWARE IS PROVIDED *AS IS*, WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS
+ * FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR
+ * COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN
+ * AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
+ * WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+**/
+
+// Use `Formatting.Indented` to ease review readability.
+{
+  "ExtendedData": [
+    {
+      "WhereTests_CmdWhere": [
+        {
+          "git": "C:\\Program Files\\Git\\cmd\\git.exe"
+        }
+      ]
+    }
+  ],
+  "DisplayName": "WhereTests_Where_FindApp",
+  "ResultPath": "E:\\Src\\Microsoft.Alm\\Gcm\\Microsoft.Alm.Authentication\\Test\\Results",
+  "Services": {
+    "Network": {
+      "Operations": []
+    },
+    "Settings": {
+      "EnvironmentVariables": [
+        {
+          "Target": 0,
+          "Values": [
+            {
+              "Name": "PATHEXT",
+              "Variable": ".COM;.EXE;.BAT;.CMD"
+            },
+            {
+              "Name": "PATH",
+              "Variable": "C:\\WINDOWS\\system32;C:\\WINDOWS;C:\\WINDOWS\\System32\\Wbem;C:\\WINDOWS\\System32\\WindowsPowerShell\\v1.0;C:\\Program Files\\Git\\cmd;C:\\WINDOWS\\System32\\WindowsPowerShell\\v1.0\\;C:\\Program Files\\Git LFS;C:\\WINDOWS\\System32\\OpenSSH\\;C:\\Program Files\\Git\\cmd"
+            },
+            {
+              "Name": "HOME",
+              "Variable": "C:\\Users\\Tester"
+            },
+            {
+              "Name": "GCM_DEBUG"
+            }
+          ]
+        }
+      ],
+      "ExitCode": 0,
+      "ExpandVariables": [],
+      "Is64BitOperatingSystem": false,
+      "OsVersion": 0,
+      "SpecialFolders": []
+    },
+    "Storage": {
+      "Operations": [
+        {
+          "Path": "C:\\WINDOWS\\system32\\git.COM",
+          "Methods": [
+            {
+              "Method": "FileExists",
+              "Queries": [
+                {
+                  "Input": "C:\\WINDOWS\\system32\\git.COM",
+                  "Ordinal": 53,
+                  "Output": false
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "Path": "C:\\WINDOWS\\system32\\git.EXE",
+          "Methods": [
+            {
+              "Method": "FileExists",
+              "Queries": [
+                {
+                  "Input": "C:\\WINDOWS\\system32\\git.EXE",
+                  "Ordinal": 54,
+                  "Output": false
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "Path": "C:\\WINDOWS\\system32\\git.BAT",
+          "Methods": [
+            {
+              "Method": "FileExists",
+              "Queries": [
+                {
+                  "Input": "C:\\WINDOWS\\system32\\git.BAT",
+                  "Ordinal": 55,
+                  "Output": false
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "Path": "C:\\WINDOWS\\system32\\git.CMD",
+          "Methods": [
+            {
+              "Method": "FileExists",
+              "Queries": [
+                {
+                  "Input": "C:\\WINDOWS\\system32\\git.CMD",
+                  "Ordinal": 56,
+                  "Output": false
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "Path": "C:\\WINDOWS\\system32\\git.VBS",
+          "Methods": [
+            {
+              "Method": "FileExists",
+              "Queries": [
+                {
+                  "Input": "C:\\WINDOWS\\system32\\git.VBS",
+                  "Ordinal": 57,
+                  "Output": false
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "Path": "C:\\WINDOWS\\system32\\git.VBE",
+          "Methods": [
+            {
+              "Method": "FileExists",
+              "Queries": [
+                {
+                  "Input": "C:\\WINDOWS\\system32\\git.VBE",
+                  "Ordinal": 58,
+                  "Output": false
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "Path": "C:\\WINDOWS\\system32\\git.JS",
+          "Methods": [
+            {
+              "Method": "FileExists",
+              "Queries": [
+                {
+                  "Input": "C:\\WINDOWS\\system32\\git.JS",
+                  "Ordinal": 59,
+                  "Output": false
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "Path": "C:\\WINDOWS\\system32\\git.JSE",
+          "Methods": [
+            {
+              "Method": "FileExists",
+              "Queries": [
+                {
+                  "Input": "C:\\WINDOWS\\system32\\git.JSE",
+                  "Ordinal": 60,
+                  "Output": false
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "Path": "C:\\WINDOWS\\system32\\git.WSF",
+          "Methods": [
+            {
+              "Method": "FileExists",
+              "Queries": [
+                {
+                  "Input": "C:\\WINDOWS\\system32\\git.WSF",
+                  "Ordinal": 61,
+                  "Output": false
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "Path": "C:\\WINDOWS\\system32\\git.WSH",
+          "Methods": [
+            {
+              "Method": "FileExists",
+              "Queries": [
+                {
+                  "Input": "C:\\WINDOWS\\system32\\git.WSH",
+                  "Ordinal": 62,
+                  "Output": false
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "Path": "C:\\WINDOWS\\system32\\git.MSC",
+          "Methods": [
+            {
+              "Method": "FileExists",
+              "Queries": [
+                {
+                  "Input": "C:\\WINDOWS\\system32\\git.MSC",
+                  "Ordinal": 63,
+                  "Output": false
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "Path": "C:\\WINDOWS\\system32\\git.LNK",
+          "Methods": [
+            {
+              "Method": "FileExists",
+              "Queries": [
+                {
+                  "Input": "C:\\WINDOWS\\system32\\git.LNK",
+                  "Ordinal": 64,
+                  "Output": false
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "Path": "C:\\WINDOWS\\system32\\git.CPL",
+          "Methods": [
+            {
+              "Method": "FileExists",
+              "Queries": [
+                {
+                  "Input": "C:\\WINDOWS\\system32\\git.CPL",
+                  "Ordinal": 65,
+                  "Output": false
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "Path": "C:\\WINDOWS\\git.COM",
+          "Methods": [
+            {
+              "Method": "FileExists",
+              "Queries": [
+                {
+                  "Input": "C:\\WINDOWS\\git.COM",
+                  "Ordinal": 66,
+                  "Output": false
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "Path": "C:\\WINDOWS\\git.EXE",
+          "Methods": [
+            {
+              "Method": "FileExists",
+              "Queries": [
+                {
+                  "Input": "C:\\WINDOWS\\git.EXE",
+                  "Ordinal": 67,
+                  "Output": false
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "Path": "C:\\WINDOWS\\git.BAT",
+          "Methods": [
+            {
+              "Method": "FileExists",
+              "Queries": [
+                {
+                  "Input": "C:\\WINDOWS\\git.BAT",
+                  "Ordinal": 68,
+                  "Output": false
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "Path": "C:\\WINDOWS\\git.CMD",
+          "Methods": [
+            {
+              "Method": "FileExists",
+              "Queries": [
+                {
+                  "Input": "C:\\WINDOWS\\git.CMD",
+                  "Ordinal": 69,
+                  "Output": false
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "Path": "C:\\WINDOWS\\git.VBS",
+          "Methods": [
+            {
+              "Method": "FileExists",
+              "Queries": [
+                {
+                  "Input": "C:\\WINDOWS\\git.VBS",
+                  "Ordinal": 70,
+                  "Output": false
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "Path": "C:\\WINDOWS\\git.VBE",
+          "Methods": [
+            {
+              "Method": "FileExists",
+              "Queries": [
+                {
+                  "Input": "C:\\WINDOWS\\git.VBE",
+                  "Ordinal": 71,
+                  "Output": false
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "Path": "C:\\WINDOWS\\git.JS",
+          "Methods": [
+            {
+              "Method": "FileExists",
+              "Queries": [
+                {
+                  "Input": "C:\\WINDOWS\\git.JS",
+                  "Ordinal": 72,
+                  "Output": false
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "Path": "C:\\WINDOWS\\git.JSE",
+          "Methods": [
+            {
+              "Method": "FileExists",
+              "Queries": [
+                {
+                  "Input": "C:\\WINDOWS\\git.JSE",
+                  "Ordinal": 73,
+                  "Output": false
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "Path": "C:\\WINDOWS\\git.WSF",
+          "Methods": [
+            {
+              "Method": "FileExists",
+              "Queries": [
+                {
+                  "Input": "C:\\WINDOWS\\git.WSF",
+                  "Ordinal": 74,
+                  "Output": false
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "Path": "C:\\WINDOWS\\git.WSH",
+          "Methods": [
+            {
+              "Method": "FileExists",
+              "Queries": [
+                {
+                  "Input": "C:\\WINDOWS\\git.WSH",
+                  "Ordinal": 75,
+                  "Output": false
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "Path": "C:\\WINDOWS\\git.MSC",
+          "Methods": [
+            {
+              "Method": "FileExists",
+              "Queries": [
+                {
+                  "Input": "C:\\WINDOWS\\git.MSC",
+                  "Ordinal": 76,
+                  "Output": false
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "Path": "C:\\WINDOWS\\git.LNK",
+          "Methods": [
+            {
+              "Method": "FileExists",
+              "Queries": [
+                {
+                  "Input": "C:\\WINDOWS\\git.LNK",
+                  "Ordinal": 77,
+                  "Output": false
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "Path": "C:\\WINDOWS\\git.CPL",
+          "Methods": [
+            {
+              "Method": "FileExists",
+              "Queries": [
+                {
+                  "Input": "C:\\WINDOWS\\git.CPL",
+                  "Ordinal": 78,
+                  "Output": false
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "Path": "C:\\WINDOWS\\System32\\Wbem\\git.COM",
+          "Methods": [
+            {
+              "Method": "FileExists",
+              "Queries": [
+                {
+                  "Input": "C:\\WINDOWS\\System32\\Wbem\\git.COM",
+                  "Ordinal": 79,
+                  "Output": false
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "Path": "C:\\WINDOWS\\System32\\Wbem\\git.EXE",
+          "Methods": [
+            {
+              "Method": "FileExists",
+              "Queries": [
+                {
+                  "Input": "C:\\WINDOWS\\System32\\Wbem\\git.EXE",
+                  "Ordinal": 80,
+                  "Output": false
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "Path": "C:\\WINDOWS\\System32\\Wbem\\git.BAT",
+          "Methods": [
+            {
+              "Method": "FileExists",
+              "Queries": [
+                {
+                  "Input": "C:\\WINDOWS\\System32\\Wbem\\git.BAT",
+                  "Ordinal": 81,
+                  "Output": false
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "Path": "C:\\WINDOWS\\System32\\Wbem\\git.CMD",
+          "Methods": [
+            {
+              "Method": "FileExists",
+              "Queries": [
+                {
+                  "Input": "C:\\WINDOWS\\System32\\Wbem\\git.CMD",
+                  "Ordinal": 82,
+                  "Output": false
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "Path": "C:\\WINDOWS\\System32\\Wbem\\git.VBS",
+          "Methods": [
+            {
+              "Method": "FileExists",
+              "Queries": [
+                {
+                  "Input": "C:\\WINDOWS\\System32\\Wbem\\git.VBS",
+                  "Ordinal": 83,
+                  "Output": false
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "Path": "C:\\WINDOWS\\System32\\Wbem\\git.VBE",
+          "Methods": [
+            {
+              "Method": "FileExists",
+              "Queries": [
+                {
+                  "Input": "C:\\WINDOWS\\System32\\Wbem\\git.VBE",
+                  "Ordinal": 84,
+                  "Output": false
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "Path": "C:\\WINDOWS\\System32\\Wbem\\git.JS",
+          "Methods": [
+            {
+              "Method": "FileExists",
+              "Queries": [
+                {
+                  "Input": "C:\\WINDOWS\\System32\\Wbem\\git.JS",
+                  "Ordinal": 85,
+                  "Output": false
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "Path": "C:\\WINDOWS\\System32\\Wbem\\git.JSE",
+          "Methods": [
+            {
+              "Method": "FileExists",
+              "Queries": [
+                {
+                  "Input": "C:\\WINDOWS\\System32\\Wbem\\git.JSE",
+                  "Ordinal": 86,
+                  "Output": false
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "Path": "C:\\WINDOWS\\System32\\Wbem\\git.WSF",
+          "Methods": [
+            {
+              "Method": "FileExists",
+              "Queries": [
+                {
+                  "Input": "C:\\WINDOWS\\System32\\Wbem\\git.WSF",
+                  "Ordinal": 87,
+                  "Output": false
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "Path": "C:\\WINDOWS\\System32\\Wbem\\git.WSH",
+          "Methods": [
+            {
+              "Method": "FileExists",
+              "Queries": [
+                {
+                  "Input": "C:\\WINDOWS\\System32\\Wbem\\git.WSH",
+                  "Ordinal": 88,
+                  "Output": false
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "Path": "C:\\WINDOWS\\System32\\Wbem\\git.MSC",
+          "Methods": [
+            {
+              "Method": "FileExists",
+              "Queries": [
+                {
+                  "Input": "C:\\WINDOWS\\System32\\Wbem\\git.MSC",
+                  "Ordinal": 89,
+                  "Output": false
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "Path": "C:\\WINDOWS\\System32\\Wbem\\git.LNK",
+          "Methods": [
+            {
+              "Method": "FileExists",
+              "Queries": [
+                {
+                  "Input": "C:\\WINDOWS\\System32\\Wbem\\git.LNK",
+                  "Ordinal": 90,
+                  "Output": false
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "Path": "C:\\WINDOWS\\System32\\Wbem\\git.CPL",
+          "Methods": [
+            {
+              "Method": "FileExists",
+              "Queries": [
+                {
+                  "Input": "C:\\WINDOWS\\System32\\Wbem\\git.CPL",
+                  "Ordinal": 91,
+                  "Output": false
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "Path": "C:\\WINDOWS\\System32\\WindowsPowerShell\\v1.0\\git.COM",
+          "Methods": [
+            {
+              "Method": "FileExists",
+              "Queries": [
+                {
+                  "Input": "C:\\WINDOWS\\System32\\WindowsPowerShell\\v1.0\\git.COM",
+                  "Ordinal": 92,
+                  "Output": false
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "Path": "C:\\WINDOWS\\System32\\WindowsPowerShell\\v1.0\\git.EXE",
+          "Methods": [
+            {
+              "Method": "FileExists",
+              "Queries": [
+                {
+                  "Input": "C:\\WINDOWS\\System32\\WindowsPowerShell\\v1.0\\git.EXE",
+                  "Ordinal": 93,
+                  "Output": false
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "Path": "C:\\WINDOWS\\System32\\WindowsPowerShell\\v1.0\\git.BAT",
+          "Methods": [
+            {
+              "Method": "FileExists",
+              "Queries": [
+                {
+                  "Input": "C:\\WINDOWS\\System32\\WindowsPowerShell\\v1.0\\git.BAT",
+                  "Ordinal": 94,
+                  "Output": false
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "Path": "C:\\WINDOWS\\System32\\WindowsPowerShell\\v1.0\\git.CMD",
+          "Methods": [
+            {
+              "Method": "FileExists",
+              "Queries": [
+                {
+                  "Input": "C:\\WINDOWS\\System32\\WindowsPowerShell\\v1.0\\git.CMD",
+                  "Ordinal": 95,
+                  "Output": false
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "Path": "C:\\WINDOWS\\System32\\WindowsPowerShell\\v1.0\\git.VBS",
+          "Methods": [
+            {
+              "Method": "FileExists",
+              "Queries": [
+                {
+                  "Input": "C:\\WINDOWS\\System32\\WindowsPowerShell\\v1.0\\git.VBS",
+                  "Ordinal": 96,
+                  "Output": false
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "Path": "C:\\WINDOWS\\System32\\WindowsPowerShell\\v1.0\\git.VBE",
+          "Methods": [
+            {
+              "Method": "FileExists",
+              "Queries": [
+                {
+                  "Input": "C:\\WINDOWS\\System32\\WindowsPowerShell\\v1.0\\git.VBE",
+                  "Ordinal": 97,
+                  "Output": false
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "Path": "C:\\WINDOWS\\System32\\WindowsPowerShell\\v1.0\\git.JS",
+          "Methods": [
+            {
+              "Method": "FileExists",
+              "Queries": [
+                {
+                  "Input": "C:\\WINDOWS\\System32\\WindowsPowerShell\\v1.0\\git.JS",
+                  "Ordinal": 98,
+                  "Output": false
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "Path": "C:\\WINDOWS\\System32\\WindowsPowerShell\\v1.0\\git.JSE",
+          "Methods": [
+            {
+              "Method": "FileExists",
+              "Queries": [
+                {
+                  "Input": "C:\\WINDOWS\\System32\\WindowsPowerShell\\v1.0\\git.JSE",
+                  "Ordinal": 99,
+                  "Output": false
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "Path": "C:\\WINDOWS\\System32\\WindowsPowerShell\\v1.0\\git.WSF",
+          "Methods": [
+            {
+              "Method": "FileExists",
+              "Queries": [
+                {
+                  "Input": "C:\\WINDOWS\\System32\\WindowsPowerShell\\v1.0\\git.WSF",
+                  "Ordinal": 100,
+                  "Output": false
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "Path": "C:\\WINDOWS\\System32\\WindowsPowerShell\\v1.0\\git.WSH",
+          "Methods": [
+            {
+              "Method": "FileExists",
+              "Queries": [
+                {
+                  "Input": "C:\\WINDOWS\\System32\\WindowsPowerShell\\v1.0\\git.WSH",
+                  "Ordinal": 101,
+                  "Output": false
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "Path": "C:\\WINDOWS\\System32\\WindowsPowerShell\\v1.0\\git.MSC",
+          "Methods": [
+            {
+              "Method": "FileExists",
+              "Queries": [
+                {
+                  "Input": "C:\\WINDOWS\\System32\\WindowsPowerShell\\v1.0\\git.MSC",
+                  "Ordinal": 102,
+                  "Output": false
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "Path": "C:\\WINDOWS\\System32\\WindowsPowerShell\\v1.0\\git.LNK",
+          "Methods": [
+            {
+              "Method": "FileExists",
+              "Queries": [
+                {
+                  "Input": "C:\\WINDOWS\\System32\\WindowsPowerShell\\v1.0\\git.LNK",
+                  "Ordinal": 103,
+                  "Output": false
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "Path": "C:\\WINDOWS\\System32\\WindowsPowerShell\\v1.0\\git.CPL",
+          "Methods": [
+            {
+              "Method": "FileExists",
+              "Queries": [
+                {
+                  "Input": "C:\\WINDOWS\\System32\\WindowsPowerShell\\v1.0\\git.CPL",
+                  "Ordinal": 104,
+                  "Output": false
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "Path": "C:\\Program Files\\Git\\cmd\\git.COM",
+          "Methods": [
+            {
+              "Method": "FileExists",
+              "Queries": [
+                {
+                  "Input": "C:\\Program Files\\Git\\cmd\\git.COM",
+                  "Ordinal": 235,
+                  "Output": false
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "Path": "C:\\Program Files\\Git\\cmd\\git.EXE",
+          "Methods": [
+            {
+              "Method": "FileExists",
+              "Queries": [
+                {
+                  "Input": "C:\\Program Files\\Git\\cmd\\git.EXE",
+                  "Ordinal": 236,
+                  "Output": true
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  }
+}

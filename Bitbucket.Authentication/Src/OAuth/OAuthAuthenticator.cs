@@ -189,7 +189,7 @@ namespace Atlassian.Bitbucket.Authentication.OAuth
                     case HttpStatusCode.Created:
                         {
                             // the request was successful, look for the tokens in the response
-                            string responseText = await response.Content.ReadAsStringAsync();
+                            string responseText = response.Content.AsString;
                             var token = FindAccessToken(responseText);
                             var refreshToken = FindRefreshToken(responseText);
                             return GetAuthenticationResult(token, refreshToken);
@@ -203,7 +203,7 @@ namespace Atlassian.Bitbucket.Authentication.OAuth
 
                     default:
                         Trace.WriteLine("authentication failed");
-                        var error = response.Content.ReadAsStringAsync();
+                        var error = response.Content.AsString;
                         return new AuthenticationResult(AuthenticationResultType.Failure);
                 }
             }
@@ -240,7 +240,7 @@ namespace Atlassian.Bitbucket.Authentication.OAuth
                     case HttpStatusCode.Created:
                         {
                             // the request was successful, look for the tokens in the response
-                            string responseText = await response.Content.ReadAsStringAsync();
+                            string responseText = response.Content.AsString;
                             var token = FindAccessToken(responseText);
                             var refreshToken = FindRefreshToken(responseText);
                             return GetAuthenticationResult(token, refreshToken);
@@ -254,7 +254,7 @@ namespace Atlassian.Bitbucket.Authentication.OAuth
 
                     default:
                         Trace.WriteLine("authentication failed");
-                        var error = response.Content.ReadAsStringAsync();
+                        var error = response.Content.AsString;
                         return new AuthenticationResult(AuthenticationResultType.Failure);
                 }
             }

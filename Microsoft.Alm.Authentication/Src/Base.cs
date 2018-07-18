@@ -24,6 +24,7 @@
 **/
 
 using System;
+using System.Collections.Generic;
 
 namespace Microsoft.Alm.Authentication
 {
@@ -45,6 +46,9 @@ namespace Microsoft.Alm.Authentication
         protected INetwork Network
             => _context.Network;
 
+        protected ISettings Settings
+            => _context.Settings;
+
         protected IStorage Storage
             => _context.Storage;
 
@@ -53,5 +57,14 @@ namespace Microsoft.Alm.Authentication
 
         protected Git.IWhere Where
             => _context.Where;
+
+        protected IEnumerable<IRuntimeService> EnumerateServices()
+            => _context.EnumerateServices();
+
+        protected T GetService<T>() where T : class, IRuntimeService
+            => _context.GetService<T>();
+
+        protected void SetService<T>(T service) where T : class, IRuntimeService
+            => _context.SetService(service);
     }
 }

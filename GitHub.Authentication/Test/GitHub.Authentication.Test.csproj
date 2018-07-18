@@ -10,8 +10,7 @@
     <AppDesignerFolder>Properties</AppDesignerFolder>
     <RootNamespace>GitHub.Authentication.Test</RootNamespace>
     <AssemblyName>GitHub.Authentication.Test</AssemblyName>
-    <NuGetPackageImportStamp>
-    </NuGetPackageImportStamp>
+    <NuGetPackageImportStamp />
     <TargetFrameworkProfile />
   </PropertyGroup>
   <Import Project="..\..\test.props" />
@@ -59,6 +58,10 @@
     <Compile Include="Xunit\WpfTheoryDiscoverer.cs" />
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\Proxy\GitHub.Authentication.Proxy.csproj">
+      <Project>{f24e0e80-4df4-4312-8f35-72bad788f741}</Project>
+      <Name>GitHub.Authentication.Proxy</Name>
+    </ProjectReference>
     <ProjectReference Include="..\Src\GitHub.Authentication.csproj">
       <Project>{cf306116-bbf0-4cc7-afce-a506ac4752cb}</Project>
       <Name>GitHub.Authentication</Name>

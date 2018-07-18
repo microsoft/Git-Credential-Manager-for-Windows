@@ -12,13 +12,14 @@ using System.Runtime.InteropServices;
 [assembly: AssemblyTrademark("Microsoft Corporation")]
 [assembly: AssemblyCulture("")]
 [assembly: ComVisible(false)]
-[assembly: Guid("c1daabc1-b493-459d-bb4f-04fbefb1ba13")]
+[assembly: Guid("19770407-b493-0415-bb4f-04fbefb1ba13")]
 [assembly: AssemblyVersion("4.5.0.0")]
 [assembly: AssemblyFileVersion("4.5.0.0")]
 [assembly: NeutralResourcesLanguage("en-US")]
 
 // Only expose internals when the binary isn't signed.
 #if !SIGNED
+[assembly: InternalsVisibleTo("Microsoft.Alm.Authentication.Proxy")]
 [assembly: InternalsVisibleTo("Microsoft.Alm.Authentication.Test")]
 [assembly: InternalsVisibleTo("Microsoft.Alm.Cli.Test")]
 [assembly: InternalsVisibleTo("DynamicProxyGenAssembly2")]

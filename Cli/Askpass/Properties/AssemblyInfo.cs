@@ -11,7 +11,7 @@ using System.Runtime.InteropServices;
 [assembly: AssemblyCopyright("Copyright © Microsoft Corporation 2018. All rights reserved.")]
 [assembly: AssemblyTrademark("Microsoft Corporation")]
 [assembly: AssemblyCulture("")]
-[assembly: Guid("62f52119-63d4-40a8-a9df-f1c4b473308a")]
+[assembly: Guid("19770407-63d4-1230-a9df-f1c4b473308a")]
 [assembly: AssemblyVersion("1.17.0.0")]
 [assembly: AssemblyFileVersion("1.17.0.0")]
 [assembly: NeutralResourcesLanguage("en-US")]

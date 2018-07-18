@@ -28,7 +28,7 @@ using System.Collections.Generic;
 using System.ComponentModel;
 using System.Diagnostics;
 using System.Runtime.InteropServices;
-using System.Text;
+using static System.Text.Encoding;
 
 namespace Microsoft.Alm.Authentication
 {
@@ -79,47 +79,21 @@ namespace Microsoft.Alm.Authentication
 
         protected IEnumerable<Secret> EnumerateCredentials(string @namespace)
         {
-            string filter = @namespace ?? string.Empty + "*";
-
-            if (NativeMethods.CredEnumerate(filter, 0, out int count, out IntPtr credentialArrayPtr))
+            foreach (var secure in Storage.EnumerateSecureData(@namespace))
             {
-                Trace.WriteLine($"{count} credentials enumerated from secret store.");
-
-                try
+                if (Token.GetTypeFromFriendlyName(secure.Name, out TokenType type)
+                    && Token.Deserialize(Context, secure.Data, type, out Token token))
                 {
-                    for (int i = 0; i < count; i += 1)
-                    {
-                        int offset = i * Marshal.SizeOf(typeof(IntPtr));
-                        IntPtr credentialPtr = Marshal.ReadIntPtr(credentialArrayPtr, offset);
-
-                        if (credentialPtr != IntPtr.Zero)
-                        {
-                            NativeMethods.Credential credStruct = Marshal.PtrToStructure<NativeMethods.Credential>(credentialPtr);
-                            int passwordLength = (int)credStruct.CredentialBlobSize;
-
-                            string password = passwordLength > 0
-                                            ? Marshal.PtrToStringUni(credStruct.CredentialBlob, passwordLength / sizeof(char))
-                                            : string.Empty;
-                            string username = credStruct.UserName ?? string.Empty;
-
-                            var credentials = new Credential(username, password);
-
-                            yield return credentials;
-                        }
-                    }
+                    yield return token;
                 }
-                finally
+                else
                 {
-                    NativeMethods.CredFree(credentialArrayPtr);
-                }
-            }
-            else
-            {
-                int error = Marshal.GetLastWin32Error();
-                if (error != NativeMethods.Win32Error.FileNotFound
-                    && error != NativeMethods.Win32Error.NotFound)
-                {
-                    Debug.Fail("Failed with error code " + error.ToString("X"));
+                    var username = secure.Name;
+                    var password = Unicode.GetString(secure.Data);
+
+                    var credential = new Credential(username, password);
+
+                    yield return credential;
                 }
             }
         }
@@ -128,134 +102,55 @@ namespace Microsoft.Alm.Authentication
 
         protected void PurgeCredentials(string @namespace)
         {
-            string filter = @namespace ?? string.Empty + "*";
-
-            if (NativeMethods.CredEnumerate(filter, 0, out int count, out IntPtr credentialArrayPtr))
-            {
-                try
-                {
-                    for (int i = 0; i < count; i += 1)
-                    {
-                        int offset = i * Marshal.SizeOf(typeof(IntPtr));
-                        IntPtr credentialPtr = Marshal.ReadIntPtr(credentialArrayPtr, offset);
-
-                        if (credentialPtr != IntPtr.Zero)
-                        {
-                            NativeMethods.Credential credential = Marshal.PtrToStructure<NativeMethods.Credential>(credentialPtr);
-
-                            if (!NativeMethods.CredDelete(credential.TargetName, credential.Type, 0))
-                            {
-                                int error = Marshal.GetLastWin32Error();
-                                if (error != NativeMethods.Win32Error.FileNotFound)
-                                {
-                                    Debug.Fail("Failed with error code " + error.ToString("X"));
-                                }
-                            }
-                            else
-                            {
-                                Trace.WriteLine($"credentials for '{@namespace}' purged from store.");
-                            }
-                        }
-                    }
-                }
-                finally
-                {
-                    NativeMethods.CredFree(credentialArrayPtr);
-                }
-            }
-            else
-            {
-                int error = Marshal.GetLastWin32Error();
-                if (error != NativeMethods.Win32Error.FileNotFound
-                    && error != NativeMethods.Win32Error.NotFound)
-                {
-                    Debug.Fail("Failed with error code " + error.ToString("X"));
-                }
-            }
+            Storage.TryPurgeSecureData(@namespace);
         }
 
         protected Credential ReadCredentials(string targetName)
         {
-            Credential credentials = null;
+            if (targetName is null)
+                throw new ArgumentNullException(nameof(targetName));
 
-            if (NativeMethods.CredRead(targetName, NativeMethods.CredentialType.Generic, 0, out IntPtr credPtr))
+            try
             {
-                try
+                if (Storage.TryReadSecureData(targetName, out string name, out byte[] data))
                 {
-                    NativeMethods.Credential credStruct = (NativeMethods.Credential)Marshal.PtrToStructure(credPtr, typeof(NativeMethods.Credential));
-                    int passwordLength = (int)credStruct.CredentialBlobSize;
+                    string password = Unicode.GetString(data);
 
-                    string password = passwordLength > 0
-                                    ? Marshal.PtrToStringUni(credStruct.CredentialBlob, passwordLength / sizeof(char))
-                                    : string.Empty;
-                    string username = credStruct.UserName ?? string.Empty;
-
-                    credentials = new Credential(username, password);
-
-                    Trace.WriteLine($"credentials for '{targetName}' read from store.");
-                }
-                catch (Exception exception)
-                {
-                    Debug.WriteLine(exception);
-
-                    Trace.WriteLine($"failed to read credentials: {exception.GetType().Name}.");
-
-                    return null;
-                }
-                finally
-                {
-                    if (credPtr != IntPtr.Zero)
-                    {
-                        NativeMethods.CredFree(credPtr);
-                    }
+                    return new Credential(name, password);
                 }
             }
+            catch (Exception exception)
+            {
+                Debug.WriteLine(exception);
 
-            return credentials;
+                Trace.WriteException(exception);
+            }
+
+            return null;
         }
 
         protected Token ReadToken(string targetName)
         {
-            Token token = null;
-            IntPtr credPtr = IntPtr.Zero;
+            if (targetName is null)
+                throw new ArgumentNullException(nameof(targetName));
 
-            if (NativeMethods.CredRead(targetName, NativeMethods.CredentialType.Generic, 0, out credPtr))
+            try
             {
-                try
+                if (Storage.TryReadSecureData(targetName, out string name, out byte[] data)
+                    && Token.GetTypeFromFriendlyName(name, out TokenType type)
+                    && Token.Deserialize(Context, data, type, out Token token))
                 {
-                    NativeMethods.Credential credStruct = (NativeMethods.Credential)Marshal.PtrToStructure(credPtr, typeof(NativeMethods.Credential));
-                    if (credStruct.CredentialBlob != null && credStruct.CredentialBlobSize > 0)
-                    {
-                        int size = (int)credStruct.CredentialBlobSize;
-                        var bytes = new byte[size];
-                        Marshal.Copy(credStruct.CredentialBlob, bytes, 0, size);
-
-                        if (Token.GetTypeFromFriendlyName(credStruct.UserName, out TokenType type))
-                        {
-                            Token.Deserialize(Context, bytes, type, out token);
-                        }
-
-                        Trace.WriteLine($"token for '{targetName}' read from store.");
-                    }
-                }
-                catch (Exception exception)
-                {
-                    Debug.WriteLine(exception);
-
-                    Trace.WriteLine($"failed to read credentials: {exception.GetType().Name}.");
-
-                    return null;
-                }
-                finally
-                {
-                    if (credPtr != IntPtr.Zero)
-                    {
-                        NativeMethods.CredFree(credPtr);
-                    }
+                    return token;
                 }
             }
+            catch (Exception exception)
+            {
+                Debug.WriteLine(exception);
 
-            return token;
+                Trace.WriteException(exception);
+            }
+
+            return null;
         }
 
         protected bool WriteCredential(string targetName, Credential credentials)
@@ -265,43 +160,21 @@ namespace Microsoft.Alm.Authentication
             if (credentials is null)
                 throw new ArgumentNullException(nameof(credentials));
 
-            NativeMethods.Credential credential = new NativeMethods.Credential()
-            {
-                Type = NativeMethods.CredentialType.Generic,
-                TargetName = targetName,
-                CredentialBlob = Marshal.StringToCoTaskMemUni(credentials.Password),
-                CredentialBlobSize = (uint)Encoding.Unicode.GetByteCount(credentials.Password),
-                Persist = NativeMethods.CredentialPersist.LocalMachine,
-                AttributeCount = 0,
-                UserName = credentials.Username,
-            };
             try
             {
-                if (!NativeMethods.CredWrite(ref credential, 0))
-                {
-                    int error = Marshal.GetLastWin32Error();
-                    throw new Win32Exception(error, "Failed to write credentials");
-                }
+                string name = credentials.Username;
+                byte[] data = Unicode.GetBytes(credentials.Password);
 
-                Trace.WriteLine($"credentials for '{targetName}' written to store.");
+                return Storage.TryWriteSecureData(targetName, name, data);
             }
             catch (Exception exception)
             {
                 Debug.WriteLine(exception);
 
-                Trace.WriteLine($"failed to write credentials: {exception.GetType().Name}.");
-
-                return false;
-            }
-            finally
-            {
-                if (credential.CredentialBlob != IntPtr.Zero)
-                {
-                    Marshal.FreeCoTaskMem(credential.CredentialBlob);
-                }
+                Trace.WriteException(exception);
             }
 
-            return true;
+            return false;
         }
 
         protected bool WriteToken(string targetName, Token token)
@@ -311,52 +184,24 @@ namespace Microsoft.Alm.Authentication
             if (token is null)
                 throw new ArgumentNullException(nameof(token));
 
-            if (Token.Serialize(Context, token, out byte[] bytes))
+            if (Token.Serialize(Context, token, out byte[] data))
             {
-                string name;
-                if (Token.GetFriendlyNameFromType(token.Type, out name))
+                if (Token.GetFriendlyNameFromType(token.Type, out string name))
                 {
-                    NativeMethods.Credential credential = new NativeMethods.Credential()
-                    {
-                        Type = NativeMethods.CredentialType.Generic,
-                        TargetName = targetName,
-                        CredentialBlob = Marshal.AllocCoTaskMem(bytes.Length),
-                        CredentialBlobSize = (uint)bytes.Length,
-                        Persist = NativeMethods.CredentialPersist.LocalMachine,
-                        AttributeCount = 0,
-                        UserName = name,
-                    };
                     try
                     {
-                        Marshal.Copy(bytes, 0, credential.CredentialBlob, bytes.Length);
-
-                        if (!NativeMethods.CredWrite(ref credential, 0))
-                        {
-                            int error = Marshal.GetLastWin32Error();
-                            throw new Win32Exception(error, "Failed to write credentials");
-                        }
-
-                        Trace.WriteLine($"token for '{targetName}' written to store.");
+                        return Storage.TryWriteSecureData(targetName, name, data);
                     }
                     catch (Exception exception)
                     {
                         Debug.WriteLine(exception);
 
-                        Trace.WriteLine($"failed to write credentials: {exception.GetType().Name}.");
-
-                        return false;
-                    }
-                    finally
-                    {
-                        if (credential.CredentialBlob != IntPtr.Zero)
-                        {
-                            Marshal.FreeCoTaskMem(credential.CredentialBlob);
-                        }
+                        Trace.WriteException(exception);
                     }
                 }
             }
 
-            return true;
+            return false;
         }
 
         [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]

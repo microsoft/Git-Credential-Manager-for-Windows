@@ -391,7 +391,7 @@ namespace Microsoft.Alm.Authentication
             /// <para>The size, in bytes, of the ` <see cref="CredentialBlob"/>` member.</para>
             /// <para>This member cannot be larger than ` <see cref="PasswordMaxLength"/>` bytes.</para>
             /// </summary>
-            public uint CredentialBlobSize;
+            public int CredentialBlobSize;
 
             /// <summary>
             /// <para>

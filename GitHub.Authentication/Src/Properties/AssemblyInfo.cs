@@ -1,4 +1,5 @@
 ﻿using System.Reflection;
+using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 using System.Windows;
 
@@ -34,6 +35,13 @@ using System.Windows;
                                               //(used if a resource is not found in the page,
                                               // app, or any theme specific resource dictionaries)
 )]
+
+// Only expose internals when the binary isn't signed.
+#if !SIGNED
+[assembly: InternalsVisibleTo("GitHub.Authentication.Proxy")]
+[assembly: InternalsVisibleTo("GitHub.Authentication.Test")]
+[assembly: InternalsVisibleTo("DynamicProxyGenAssembly2")]
+#endif
 
 // Version information for an assembly consists of the following four values:
 //

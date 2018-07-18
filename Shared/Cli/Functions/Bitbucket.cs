@@ -94,7 +94,7 @@ namespace Microsoft.Alm.Cli
                     }
 
                     accessToken = buffer.ToString(0, (int)read);
-                    accessToken = accessToken.Trim(Program.NewLineChars);
+                    accessToken = accessToken.Trim(program.NewLineChars);
                 }
             }
             return accessToken != null;

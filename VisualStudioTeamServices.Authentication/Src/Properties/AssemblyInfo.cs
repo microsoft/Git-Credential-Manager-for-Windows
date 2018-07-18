@@ -12,12 +12,13 @@ using System.Runtime.InteropServices;
 [assembly: AssemblyTrademark("Microsoft Corporation")]
 [assembly: AssemblyCulture("")]
 [assembly: ComVisible(false)]
-[assembly: Guid("c1daabc1-b493-459d-bb4f-04fbefb1ba13")]
+[assembly: Guid("19770407-b493-1230-bb4f-04fbefb1ba13")]
 [assembly: AssemblyVersion("1.0.0.0")]
 [assembly: AssemblyFileVersion("1.0.0.0")]
 [assembly: NeutralResourcesLanguage("en-US")]
 
 // Only expose internals when the binary isn't signed.
 #if !SIGNED
+[assembly: InternalsVisibleTo("VisualStudioTeamServices.Authentication.Proxy")]
 [assembly: InternalsVisibleTo("VisualStudioTeamServices.Authentication.Test")]
 #endif

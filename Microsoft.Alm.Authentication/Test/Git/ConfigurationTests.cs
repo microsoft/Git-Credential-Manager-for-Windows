@@ -2,13 +2,18 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Threading.Tasks;
+using Microsoft.Alm.Authentication.Test;
 using Xunit;
 
 namespace Microsoft.Alm.Authentication.Git.Test
 {
-    public class ConfigurationTests
+    public class ConfigurationTests : UnitTestBase
     {
-        public static object[][] ParseData
+        public ConfigurationTests(Xunit.Abstractions.ITestOutputHelper output)
+            : base(XunitHelper.Convert(output))
+        { }
+
+        public static object[][] GitConfig_Parse_Data
         {
             get
             {
@@ -24,8 +29,8 @@ namespace Microsoft.Alm.Authentication.Git.Test
         }
 
         [Theory]
-        [MemberData(nameof(ParseData), DisableDiscoveryEnumeration = true)]
-        public async Task GitConfif_Parse(string input, string expectedName, string expected, bool ignoreCase)
+        [MemberData(nameof(GitConfig_Parse_Data), DisableDiscoveryEnumeration = true)]
+        public async Task GitConfig_Parse(string input, string expectedName, string expected, bool ignoreCase)
         {
             var values = await TestParseGitConfig(input);
             Assert.NotNull(values);
@@ -101,6 +106,15 @@ namespace Microsoft.Alm.Authentication.Git.Test
             Assert.Equal("NTLM", entry.Value, StringComparer.OrdinalIgnoreCase);
         }
 
+        [Fact]
+        public async Task GitConfig_Read()
+        {
+            InitializeTest();
+
+            var configuration = new Configuration(Context);
+            await configuration.LoadGitConfiguration(SolutionDirectory, ConfigurationLevel.All);
+        }
+
         private static async Task<Dictionary<string, string>> TestParseGitConfig(string input)
         {
             var values = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
@@ -109,6 +123,7 @@ namespace Microsoft.Alm.Authentication.Git.Test
             {
                 await Configuration.ParseGitConfig(RuntimeContext.Default, sr, values);
             }
+
             return values;
         }
     }

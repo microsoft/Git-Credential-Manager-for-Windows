@@ -76,8 +76,6 @@ namespace Microsoft.Alm.Cli
         internal const string ConfigPrefix = "credential";
         internal const string SecretsNamespace = "git";
 
-        internal static readonly char[] NewLineChars = Environment.NewLine.ToCharArray();
-
         internal static readonly Vsts.TokenScope VstsCredentialScope = Vsts.TokenScope.CodeWrite | Vsts.TokenScope.PackagingRead;
         internal static readonly Github.TokenScope GitHubCredentialScope = Github.TokenScope.Gist | Github.TokenScope.Repo;
 
@@ -162,6 +160,7 @@ namespace Microsoft.Alm.Cli
         private readonly RuntimeContext _context;
         private string _location;
         private string _name;
+        private char[] _newlineChars;
         private IntPtr _parentHwnd;
         private Stream _stdErrStream;
         private TextWriter _stdErrWriter;
@@ -372,6 +371,22 @@ namespace Microsoft.Alm.Cli
         internal INetwork Network
             => _context.Network;
 
+        internal char[] NewLineChars
+        {
+            get
+            {
+                lock (_syncpoint)
+                {
+                    if (_newlineChars is null)
+                    {
+                        _newlineChars = Settings.NewLine.ToCharArray();
+                    }
+
+                    return _newlineChars;
+                }
+            }
+        }
+
         internal TextWriter Out
         {
             get
@@ -410,6 +425,9 @@ namespace Microsoft.Alm.Cli
             set { lock (_syncpoint) _parentHwnd = value; }
         }
 
+        internal ISettings Settings
+            => _context.Settings;
+
         internal IStorage Storage
             => _context.Storage;
 
@@ -430,7 +448,7 @@ namespace Microsoft.Alm.Cli
             if (Debugger.IsAttached)
                 return;
 
-            string debug = Environment.GetEnvironmentVariable(EnvironConfigDebugKey);
+            string debug = program.Settings.GetEnvironmentVariable(EnvironConfigDebugKey);
             if (debug != null
                 && (StringComparer.OrdinalIgnoreCase.Equals(debug, "true")
                     || StringComparer.OrdinalIgnoreCase.Equals(debug, "1")
@@ -449,7 +467,7 @@ namespace Microsoft.Alm.Cli
 
             try
             {
-                string traceValue = Environment.GetEnvironmentVariable(environmentKey);
+                string traceValue = Settings.GetEnvironmentVariable(environmentKey);
 
                 if (traceValue is null)
                     return;

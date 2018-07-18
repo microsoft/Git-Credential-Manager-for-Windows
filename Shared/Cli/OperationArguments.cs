@@ -131,12 +131,7 @@ namespace Microsoft.Alm.Cli
             {
                 if (_environmentVariables == null)
                 {
-                    _environmentVariables = new Dictionary<string, string>(Program.EnvironKeyComparer);
-                    var iter = Environment.GetEnvironmentVariables().GetEnumerator();
-                    while (iter.MoveNext())
-                    {
-                        _environmentVariables[iter.Key as string] = iter.Value as string;
-                    }
+                    _environmentVariables = new Dictionary<string, string>(Settings.GetEnvironmentVariables(), Program.EnvironKeyComparer);
                 }
                 return _environmentVariables;
             }
@@ -436,7 +431,7 @@ namespace Microsoft.Alm.Cli
         /// </summary>
         public virtual async Task LoadConfiguration()
         {
-            _configuration = await Git.Configuration.ReadConfiuration(Context, Environment.CurrentDirectory, UseConfigLocal, UseConfigSystem);
+            _configuration = await Git.Configuration.ReadConfiuration(Context, Settings.CurrentDirectory, UseConfigLocal, UseConfigSystem);
         }
 
         /// <summary>

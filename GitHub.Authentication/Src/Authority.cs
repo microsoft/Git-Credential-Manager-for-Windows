@@ -105,7 +105,7 @@ namespace GitHub.Authentication
                     case HttpStatusCode.OK:
                     case HttpStatusCode.Created:
                         {
-                            string responseText = await response.Content.ReadAsStringAsync();
+                            string responseText = response.Content.AsString;
 
                             Match tokenMatch;
                             if ((tokenMatch = Regex.Match(responseText, @"\s*""token""\s*:\s*""([^""]+)""\s*", RegexOptions.CultureInvariant | RegexOptions.IgnoreCase)).Success
@@ -156,7 +156,7 @@ namespace GitHub.Authentication
                         // as the password, then a Forbidden response is returned instead of an Unauthorized.
                         // In that case, the supplied password is an OAuth token and is valid and we don't need
                         // to create a new personal access token.
-                        var contentBody = await response.Content.ReadAsStringAsync();
+                        var contentBody = response.Content.AsString;
                         if (contentBody.Contains("This API can only be accessed with username and password Basic Auth"))
                         {
                             Trace.WriteLine($"authentication success: user supplied personal access token for '{targetUri}'.");
@@ -208,7 +208,7 @@ namespace GitHub.Authentication
             }
         }
 
-        private static HttpContent GetTokenJsonContent(TargetUri targetUri, TokenScope scope)
+        private HttpContent GetTokenJsonContent(TargetUri targetUri, TokenScope scope)
         {
             const string HttpJsonContentType = "application/x-www-form-urlencoded";
             const string JsonContentFormat = @"{{ ""scopes"": {0}, ""note"": ""git: {1} on {2} at {3:dd-MMM-yyyy HH:mm}"" }}";
@@ -232,7 +232,7 @@ namespace GitHub.Authentication
 
             scopesBuilder.Append(']');
 
-            string jsonContent = string.Format(JsonContentFormat, scopesBuilder, targetUri, Environment.MachineName, DateTime.Now);
+            string jsonContent = string.Format(JsonContentFormat, scopesBuilder, targetUri, Settings.MachineName, DateTime.Now);
 
             return new StringContent(jsonContent, Encoding.UTF8, HttpJsonContentType);
         }

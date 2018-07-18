@@ -31,7 +31,6 @@ using System.Net.Http;
 using System.Text;
 using System.Threading.Tasks;
 using Microsoft.Alm.Authentication;
-using Microsoft.IdentityModel.Clients.ActiveDirectory;
 
 using static System.StringComparer;
 using static VisualStudioTeamServices.Authentication.Authority;
@@ -89,7 +88,6 @@ namespace VisualStudioTeamServices.Authentication
 
             IdeTokenCache = ideTokenCache;
             Authority = authority;
-            AdalTokenCache = TokenCache.DefaultShared;
         }
 
         /// <summary>
@@ -115,8 +113,6 @@ namespace VisualStudioTeamServices.Authentication
         {
             get { return GetSecretKey; }
         }
-
-        internal TokenCache AdalTokenCache { get; private set; }
 
         internal ITokenStore IdeTokenCache { get; private set; }
 
@@ -194,7 +190,7 @@ namespace VisualStudioTeamServices.Authentication
             }
 
             // If the protocol (aka scheme) being used isn't HTTP based, there's no point in
-            // queryng the server, so skip that work.
+            // querying the server, so skip that work.
             if (OrdinalIgnoreCase.Equals(requestUri.Scheme, Uri.UriSchemeHttp)
                 || OrdinalIgnoreCase.Equals(requestUri.Scheme, Uri.UriSchemeHttps))
             {
@@ -242,17 +238,17 @@ namespace VisualStudioTeamServices.Authentication
                                         if (value.Length >= AuthorizationUriPrefix.Length + AuthorityHostUrlBase.Length + GuidStringLength)
                                         {
                                             // The header parameter will look something like "authorization_uri=https://login.microsoftonline.com/72f988bf-86f1-41af-91ab-2d7cd011db47"
-                                            // and all we want is the the portion after the '=' and before the last '/'.
+                                            // and all we want is the portion after the '=' and before the last '/'.
                                             int index1 = value.IndexOf('=', AuthorizationUriPrefix.Length - 1);
                                             int index2 = value.LastIndexOf('/');
 
-                                            // Parse the header value if the necissary characters exist...
+                                            // Parse the header value if the necessary characters exist...
                                             if (index1 > 0 && index2 > index1)
                                             {
                                                 var authorityUrl = value.Substring(index1 + 1, index2 - index1 - 1);
                                                 var guidString = value.Substring(index2 + 1, GuidStringLength);
 
-                                                // If the authorty URL is as expected, attempt to parse the tenant resource identity.
+                                                // If the authority URL is as expected, attempt to parse the tenant resource identity.
                                                 if (OrdinalIgnoreCase.Equals(authorityUrl, AuthorityHostUrlBase)
                                                     && Guid.TryParse(guidString, out tenantId))
                                                 {
@@ -276,7 +272,7 @@ namespace VisualStudioTeamServices.Authentication
                                     foreach (string value in values)
                                     {
                                         // Try to find a value for the resource-tenant identity.
-                                        // Given that some projects will return multiple tenant idenities, 
+                                        // Given that some projects will return multiple tenant identities, 
                                         if (!string.IsNullOrWhiteSpace(value)
                                             && Guid.TryParse(value, out tenantId))
                                         {
@@ -334,7 +330,7 @@ namespace VisualStudioTeamServices.Authentication
         /// <param name="scope">The scope of the access being requested.</param>
         /// <param name="personalAccessTokenStore">Storage container for personal access token secrets.</param>
         public static async Task<BaseAuthentication> GetAuthentication(
-            RuntimeContext context,
+            Microsoft.Alm.Authentication.RuntimeContext context,
             TargetUri targetUri,
             TokenScope scope,
             ICredentialStore personalAccessTokenStore)
@@ -611,7 +607,7 @@ namespace VisualStudioTeamServices.Authentication
             if (context is null)
                 throw new ArgumentNullException(nameof(context));
 
-            string path = Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData);
+            string path = context.Settings.GetFolderPath(Environment.SpecialFolder.LocalApplicationData);
             path = Path.Combine(path, CachePathDirectory);
 
             // Create the directory if necessary

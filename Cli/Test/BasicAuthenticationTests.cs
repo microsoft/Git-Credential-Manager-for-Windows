@@ -28,7 +28,7 @@ using System.Threading.Tasks;
 using Microsoft.Alm.Authentication;
 using Xunit;
 
-namespace Microsoft.Alm.CredentialHelper.Test
+namespace Microsoft.Alm.Cli.Test
 {
     public class BasicAuthenticationTests
     {
@@ -46,7 +46,7 @@ namespace Microsoft.Alm.CredentialHelper.Test
 
             var expected = Secret.UriToName(targetUri, Namespace);
 
-            Assert.Contains(credentialCache.EnumerateSecrets(), 
+            Assert.Contains(credentialCache.EnumerateSecrets(),
                             k => k.Name.Equals(expected, StringComparison.OrdinalIgnoreCase));
         }
     }
