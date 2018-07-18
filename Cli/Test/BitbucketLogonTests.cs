@@ -40,7 +40,7 @@ namespace Microsoft.Alm.Cli.Test
         [Fact(Skip = "No modal proxy available")]
         public void Logon2fa_Success()
         {
-            InitializeTest(false);
+            InitializeTest();
 
             var errorBuffer = new byte[4096];
             var outputBuffer = new byte[4096];

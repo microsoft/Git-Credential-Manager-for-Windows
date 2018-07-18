@@ -29,7 +29,7 @@
     {
       "WhereTests_CmdWhere": [
         {
-          "calc": "C:\\Windows\\System32\\calc.exe"
+          "cmd": "C:\\Windows\\System32\\cmd.exe"
         }
       ]
     }
@@ -72,13 +72,13 @@
     "Storage": {
       "Operations": [
         {
-          "Path": "C:\\WINDOWS\\system32\\calc.COM",
+          "Path": "C:\\WINDOWS\\system32\\cmd.COM",
           "Methods": [
             {
               "Method": "FileExists",
               "Queries": [
                 {
-                  "Input": "C:\\WINDOWS\\system32\\calc.COM",
+                  "Input": "C:\\WINDOWS\\system32\\cmd.COM",
                   "Ordinal": 53,
                   "Output": false
                 }
@@ -87,13 +87,13 @@
           ]
         },
         {
-          "Path": "C:\\WINDOWS\\system32\\calc.EXE",
+          "Path": "C:\\WINDOWS\\system32\\cmd.EXE",
           "Methods": [
             {
               "Method": "FileExists",
               "Queries": [
                 {
-                  "Input": "C:\\WINDOWS\\system32\\calc.EXE",
+                  "Input": "C:\\WINDOWS\\system32\\cmd.EXE",
                   "Ordinal": 54,
                   "Output": true
                 }

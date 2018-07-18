@@ -25,6 +25,7 @@
 
 // Use `Formatting.Indented` to ease review readability.
 {
+  "ExtendedData": [],
   "DisplayName": "WwwAuthenticateHelperTests_GetHeaderValues",
   "ResultPath": "E:\\Src\\Microsoft.Alm\\Gcm\\Microsoft.Alm.Authentication\\Test\\Results",
   "Services": {
@@ -48,17 +49,23 @@
                       "HasContent": true
                     },
                     "Headers": [
-                      "Status=200 OK",
-                      "X-Content-Type-Options=nosniff",
-                      "X-GitHub-Request-Id=000:1112:2233334:4455566:6777888"
+                      "X-TFS-ProcessId=5b238cd5-a505-4d2b-a499-54b9a94c808a",
+                      "X-TFS-Session=e1901675-e0b3-48ca-ac88-2514fd5f75e9",
+                      "X-VSS-E2EID=e1901675-e0b3-48ca-ac88-2514fd5f75e9",
+                      "X-TFS-FedAuthRealm=https://tfsprodwus21.app.visualstudio.com/",
+                      "X-TFS-FedAuthIssuer=https://microsoft.visualstudio.com/",
+                      "X-VSS-AuthorizationEndpoint=https://microsoft.vssps.visualstudio.com/",
+                      "X-VSS-ResourceTenant=72f988bf-86f1-41af-91ab-2d7cd011db47",
+                      "X-TFS-ServiceError=Page%20not%20found.",
+                      "WWW-Authenticate=Bearer authorization_uri=https://login.microsoftonline.com/72f988bf-86f1-41af-91ab-2d7cd011db47"
                     ],
-                    "StatusCode": 200
+                    "StatusCode": 404
                   }
                 }
               ]
             }
           ],
-          "QueryUrl": "https://github.com/"
+          "QueryUrl": "https://microsoft.visualstudio.com/"
         }
       ]
     },

@@ -44,21 +44,23 @@ namespace Microsoft.Alm.Authentication.Git.Test
         {
             get
             {
+                int iteration = 0;
+
                 return new object[ ][ ]
                 {
-                    new object[] { "cmd" },
-                    new object[] { "calc" },
-                    new object[] { "powershell" },
-                    new object[] { "git" },
+                    new object[] { ++iteration, "cmd" },
+                    new object[] { ++iteration, "calc" },
+                    new object[] { ++iteration, "powershell" },
+                    new object[] { ++iteration, "git" },
                 };
             }
         }
 
         [Theory]
         [MemberData(nameof(FindAppData), DisableDiscoveryEnumeration = false)]
-        public void Where_FindApp(string app)
+        public void Where_FindApp(int iteration, string app)
         {
-            InitializeTest(true);
+            InitializeTest(iteration);
 
             bool expected = CmdWhere(app, out string path1);
             bool actual = Where.FindApp(app, out string path2);
@@ -71,7 +73,7 @@ namespace Microsoft.Alm.Authentication.Git.Test
         [Fact]
         public void Where_FindGit()
         {
-            InitializeTest(false);
+            InitializeTest();
 
             if (!Where.FindApp("git", out string gitPath))
                 throw new Exception("Git not found on system");

@@ -43,7 +43,7 @@ namespace Microsoft.Alm.Cli.Test
             const string Protocol = "https";
             const string Host = "github.com";
 
-            InitializeTest(false);
+            InitializeTest();
 
             var errorBuffer = new byte[4096];
             var outputBuffer = new byte[4096];
@@ -120,7 +120,7 @@ namespace Microsoft.Alm.Cli.Test
             const string Protocol = "https";
             const string Host = "github.com";
 
-            InitializeTest(false);
+            InitializeTest();
 
             var errorBuffer = new byte[4096];
             var outputBuffer = new byte[4096];
@@ -219,7 +219,7 @@ namespace Microsoft.Alm.Cli.Test
             const string Protocol = "https";
             const string Host = "github.com";
 
-            InitializeTest(false);
+            InitializeTest();
 
             var errorBuffer = new byte[4096];
             var outputBuffer = new byte[4096];

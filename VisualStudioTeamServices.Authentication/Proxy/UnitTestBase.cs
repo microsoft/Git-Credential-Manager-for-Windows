@@ -43,7 +43,7 @@ namespace VisualStudioTeamServices.Authentication.Test
             : this(output, null, filePath)
         { }
 
-        protected override void InitializeTest(bool isParameterized, [CallerMemberName] string testName = "")
+        protected override void InitializeTest(int iteration = -1, [CallerMemberName] string testName = "")
         {
             switch (TestMode)
             {
@@ -67,7 +67,7 @@ namespace VisualStudioTeamServices.Authentication.Test
                 break;
             }
 
-            base.InitializeTest(isParameterized, testName);
+            base.InitializeTest(iteration, testName);
         }
     }
 }

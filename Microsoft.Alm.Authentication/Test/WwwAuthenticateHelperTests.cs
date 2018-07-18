@@ -16,16 +16,16 @@ namespace Microsoft.Alm.Authentication.Test
             {
                 return new object[][]
                 {
-                    new object[] { "https://microsoft.visualstudio.com", 1, },
-                    new object[] { "https://github.com", 0, },
+                    new object[] { 1, "https://microsoft.visualstudio.com", 1, },
+                    new object[] { 2, "https://github.com", 0, },
                 };
             }
         }
 
         [Theory, MemberData(nameof(GetHeaderValuesData))]
-        public async Task GetHeaderValues(string queryUrl, int expectedCount)
+        public async Task GetHeaderValues(int iteration, string queryUrl, int expectedCount)
         {
-            InitializeTest(true);
+            InitializeTest(iteration);
 
             var targetUri = new TargetUri(queryUrl);
 

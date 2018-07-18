@@ -79,7 +79,7 @@
               "Queries": [
                 {
                   "Input": "C:\\WINDOWS\\system32\\git.COM",
-                  "Ordinal": 66,
+                  "Ordinal": 53,
                   "Output": false
                 }
               ]
@@ -94,7 +94,7 @@
               "Queries": [
                 {
                   "Input": "C:\\WINDOWS\\system32\\git.EXE",
-                  "Ordinal": 67,
+                  "Ordinal": 54,
                   "Output": false
                 }
               ]
@@ -109,7 +109,7 @@
               "Queries": [
                 {
                   "Input": "C:\\WINDOWS\\system32\\git.BAT",
-                  "Ordinal": 68,
+                  "Ordinal": 55,
                   "Output": false
                 }
               ]
@@ -124,7 +124,7 @@
               "Queries": [
                 {
                   "Input": "C:\\WINDOWS\\system32\\git.CMD",
-                  "Ordinal": 69,
+                  "Ordinal": 56,
                   "Output": false
                 }
               ]
@@ -139,7 +139,7 @@
               "Queries": [
                 {
                   "Input": "C:\\WINDOWS\\system32\\git.VBS",
-                  "Ordinal": 70,
+                  "Ordinal": 57,
                   "Output": false
                 }
               ]
@@ -154,7 +154,7 @@
               "Queries": [
                 {
                   "Input": "C:\\WINDOWS\\system32\\git.VBE",
-                  "Ordinal": 71,
+                  "Ordinal": 58,
                   "Output": false
                 }
               ]
@@ -169,7 +169,7 @@
               "Queries": [
                 {
                   "Input": "C:\\WINDOWS\\system32\\git.JS",
-                  "Ordinal": 72,
+                  "Ordinal": 59,
                   "Output": false
                 }
               ]
@@ -184,7 +184,7 @@
               "Queries": [
                 {
                   "Input": "C:\\WINDOWS\\system32\\git.JSE",
-                  "Ordinal": 73,
+                  "Ordinal": 60,
                   "Output": false
                 }
               ]
@@ -199,7 +199,7 @@
               "Queries": [
                 {
                   "Input": "C:\\WINDOWS\\system32\\git.WSF",
-                  "Ordinal": 74,
+                  "Ordinal": 61,
                   "Output": false
                 }
               ]
@@ -214,7 +214,7 @@
               "Queries": [
                 {
                   "Input": "C:\\WINDOWS\\system32\\git.WSH",
-                  "Ordinal": 75,
+                  "Ordinal": 62,
                   "Output": false
                 }
               ]
@@ -229,7 +229,7 @@
               "Queries": [
                 {
                   "Input": "C:\\WINDOWS\\system32\\git.MSC",
-                  "Ordinal": 76,
+                  "Ordinal": 63,
                   "Output": false
                 }
               ]
@@ -244,7 +244,7 @@
               "Queries": [
                 {
                   "Input": "C:\\WINDOWS\\system32\\git.LNK",
-                  "Ordinal": 77,
+                  "Ordinal": 64,
                   "Output": false
                 }
               ]
@@ -259,7 +259,7 @@
               "Queries": [
                 {
                   "Input": "C:\\WINDOWS\\system32\\git.CPL",
-                  "Ordinal": 78,
+                  "Ordinal": 65,
                   "Output": false
                 }
               ]
@@ -274,7 +274,7 @@
               "Queries": [
                 {
                   "Input": "C:\\WINDOWS\\git.COM",
-                  "Ordinal": 79,
+                  "Ordinal": 66,
                   "Output": false
                 }
               ]
@@ -289,7 +289,7 @@
               "Queries": [
                 {
                   "Input": "C:\\WINDOWS\\git.EXE",
-                  "Ordinal": 80,
+                  "Ordinal": 67,
                   "Output": false
                 }
               ]
@@ -304,7 +304,7 @@
               "Queries": [
                 {
                   "Input": "C:\\WINDOWS\\git.BAT",
-                  "Ordinal": 81,
+                  "Ordinal": 68,
                   "Output": false
                 }
               ]
@@ -319,7 +319,7 @@
               "Queries": [
                 {
                   "Input": "C:\\WINDOWS\\git.CMD",
-                  "Ordinal": 82,
+                  "Ordinal": 69,
                   "Output": false
                 }
               ]
@@ -334,7 +334,7 @@
               "Queries": [
                 {
                   "Input": "C:\\WINDOWS\\git.VBS",
-                  "Ordinal": 83,
+                  "Ordinal": 70,
                   "Output": false
                 }
               ]
@@ -349,7 +349,7 @@
               "Queries": [
                 {
                   "Input": "C:\\WINDOWS\\git.VBE",
-                  "Ordinal": 84,
+                  "Ordinal": 71,
                   "Output": false
                 }
               ]
@@ -364,7 +364,7 @@
               "Queries": [
                 {
                   "Input": "C:\\WINDOWS\\git.JS",
-                  "Ordinal": 85,
+                  "Ordinal": 72,
                   "Output": false
                 }
               ]
@@ -379,7 +379,7 @@
               "Queries": [
                 {
                   "Input": "C:\\WINDOWS\\git.JSE",
-                  "Ordinal": 86,
+                  "Ordinal": 73,
                   "Output": false
                 }
               ]
@@ -394,7 +394,7 @@
               "Queries": [
                 {
                   "Input": "C:\\WINDOWS\\git.WSF",
-                  "Ordinal": 87,
+                  "Ordinal": 74,
                   "Output": false
                 }
               ]
@@ -409,7 +409,7 @@
               "Queries": [
                 {
                   "Input": "C:\\WINDOWS\\git.WSH",
-                  "Ordinal": 88,
+                  "Ordinal": 75,
                   "Output": false
                 }
               ]
@@ -424,7 +424,7 @@
               "Queries": [
                 {
                   "Input": "C:\\WINDOWS\\git.MSC",
-                  "Ordinal": 89,
+                  "Ordinal": 76,
                   "Output": false
                 }
               ]
@@ -439,7 +439,7 @@
               "Queries": [
                 {
                   "Input": "C:\\WINDOWS\\git.LNK",
-                  "Ordinal": 90,
+                  "Ordinal": 77,
                   "Output": false
                 }
               ]
@@ -454,7 +454,7 @@
               "Queries": [
                 {
                   "Input": "C:\\WINDOWS\\git.CPL",
-                  "Ordinal": 91,
+                  "Ordinal": 78,
                   "Output": false
                 }
               ]
@@ -469,7 +469,7 @@
               "Queries": [
                 {
                   "Input": "C:\\WINDOWS\\System32\\Wbem\\git.COM",
-                  "Ordinal": 92,
+                  "Ordinal": 79,
                   "Output": false
                 }
               ]
@@ -484,7 +484,7 @@
               "Queries": [
                 {
                   "Input": "C:\\WINDOWS\\System32\\Wbem\\git.EXE",
-                  "Ordinal": 93,
+                  "Ordinal": 80,
                   "Output": false
                 }
               ]
@@ -499,7 +499,7 @@
               "Queries": [
                 {
                   "Input": "C:\\WINDOWS\\System32\\Wbem\\git.BAT",
-                  "Ordinal": 94,
+                  "Ordinal": 81,
                   "Output": false
                 }
               ]
@@ -514,7 +514,7 @@
               "Queries": [
                 {
                   "Input": "C:\\WINDOWS\\System32\\Wbem\\git.CMD",
-                  "Ordinal": 95,
+                  "Ordinal": 82,
                   "Output": false
                 }
               ]
@@ -529,7 +529,7 @@
               "Queries": [
                 {
                   "Input": "C:\\WINDOWS\\System32\\Wbem\\git.VBS",
-                  "Ordinal": 96,
+                  "Ordinal": 83,
                   "Output": false
                 }
               ]
@@ -544,7 +544,7 @@
               "Queries": [
                 {
                   "Input": "C:\\WINDOWS\\System32\\Wbem\\git.VBE",
-                  "Ordinal": 97,
+                  "Ordinal": 84,
                   "Output": false
                 }
               ]
@@ -559,7 +559,7 @@
               "Queries": [
                 {
                   "Input": "C:\\WINDOWS\\System32\\Wbem\\git.JS",
-                  "Ordinal": 98,
+                  "Ordinal": 85,
                   "Output": false
                 }
               ]
@@ -574,7 +574,7 @@
               "Queries": [
                 {
                   "Input": "C:\\WINDOWS\\System32\\Wbem\\git.JSE",
-                  "Ordinal": 99,
+                  "Ordinal": 86,
                   "Output": false
                 }
               ]
@@ -589,7 +589,7 @@
               "Queries": [
                 {
                   "Input": "C:\\WINDOWS\\System32\\Wbem\\git.WSF",
-                  "Ordinal": 100,
+                  "Ordinal": 87,
                   "Output": false
                 }
               ]
@@ -604,7 +604,7 @@
               "Queries": [
                 {
                   "Input": "C:\\WINDOWS\\System32\\Wbem\\git.WSH",
-                  "Ordinal": 101,
+                  "Ordinal": 88,
                   "Output": false
                 }
               ]
@@ -619,7 +619,7 @@
               "Queries": [
                 {
                   "Input": "C:\\WINDOWS\\System32\\Wbem\\git.MSC",
-                  "Ordinal": 102,
+                  "Ordinal": 89,
                   "Output": false
                 }
               ]
@@ -634,7 +634,7 @@
               "Queries": [
                 {
                   "Input": "C:\\WINDOWS\\System32\\Wbem\\git.LNK",
-                  "Ordinal": 103,
+                  "Ordinal": 90,
                   "Output": false
                 }
               ]
@@ -649,7 +649,7 @@
               "Queries": [
                 {
                   "Input": "C:\\WINDOWS\\System32\\Wbem\\git.CPL",
-                  "Ordinal": 104,
+                  "Ordinal": 91,
                   "Output": false
                 }
               ]
@@ -664,7 +664,7 @@
               "Queries": [
                 {
                   "Input": "C:\\WINDOWS\\System32\\WindowsPowerShell\\v1.0\\git.COM",
-                  "Ordinal": 105,
+                  "Ordinal": 92,
                   "Output": false
                 }
               ]
@@ -679,7 +679,7 @@
               "Queries": [
                 {
                   "Input": "C:\\WINDOWS\\System32\\WindowsPowerShell\\v1.0\\git.EXE",
-                  "Ordinal": 106,
+                  "Ordinal": 93,
                   "Output": false
                 }
               ]
@@ -694,7 +694,7 @@
               "Queries": [
                 {
                   "Input": "C:\\WINDOWS\\System32\\WindowsPowerShell\\v1.0\\git.BAT",
-                  "Ordinal": 107,
+                  "Ordinal": 94,
                   "Output": false
                 }
               ]
@@ -709,7 +709,7 @@
               "Queries": [
                 {
                   "Input": "C:\\WINDOWS\\System32\\WindowsPowerShell\\v1.0\\git.CMD",
-                  "Ordinal": 108,
+                  "Ordinal": 95,
                   "Output": false
                 }
               ]
@@ -724,7 +724,7 @@
               "Queries": [
                 {
                   "Input": "C:\\WINDOWS\\System32\\WindowsPowerShell\\v1.0\\git.VBS",
-                  "Ordinal": 109,
+                  "Ordinal": 96,
                   "Output": false
                 }
               ]
@@ -739,7 +739,7 @@
               "Queries": [
                 {
                   "Input": "C:\\WINDOWS\\System32\\WindowsPowerShell\\v1.0\\git.VBE",
-                  "Ordinal": 110,
+                  "Ordinal": 97,
                   "Output": false
                 }
               ]
@@ -754,7 +754,7 @@
               "Queries": [
                 {
                   "Input": "C:\\WINDOWS\\System32\\WindowsPowerShell\\v1.0\\git.JS",
-                  "Ordinal": 111,
+                  "Ordinal": 98,
                   "Output": false
                 }
               ]
@@ -769,7 +769,7 @@
               "Queries": [
                 {
                   "Input": "C:\\WINDOWS\\System32\\WindowsPowerShell\\v1.0\\git.JSE",
-                  "Ordinal": 112,
+                  "Ordinal": 99,
                   "Output": false
                 }
               ]
@@ -784,7 +784,7 @@
               "Queries": [
                 {
                   "Input": "C:\\WINDOWS\\System32\\WindowsPowerShell\\v1.0\\git.WSF",
-                  "Ordinal": 113,
+                  "Ordinal": 100,
                   "Output": false
                 }
               ]
@@ -799,7 +799,7 @@
               "Queries": [
                 {
                   "Input": "C:\\WINDOWS\\System32\\WindowsPowerShell\\v1.0\\git.WSH",
-                  "Ordinal": 114,
+                  "Ordinal": 101,
                   "Output": false
                 }
               ]
@@ -814,7 +814,7 @@
               "Queries": [
                 {
                   "Input": "C:\\WINDOWS\\System32\\WindowsPowerShell\\v1.0\\git.MSC",
-                  "Ordinal": 115,
+                  "Ordinal": 102,
                   "Output": false
                 }
               ]
@@ -829,7 +829,7 @@
               "Queries": [
                 {
                   "Input": "C:\\WINDOWS\\System32\\WindowsPowerShell\\v1.0\\git.LNK",
-                  "Ordinal": 116,
+                  "Ordinal": 103,
                   "Output": false
                 }
               ]
@@ -844,7 +844,7 @@
               "Queries": [
                 {
                   "Input": "C:\\WINDOWS\\System32\\WindowsPowerShell\\v1.0\\git.CPL",
-                  "Ordinal": 117,
+                  "Ordinal": 104,
                   "Output": false
                 }
               ]
@@ -859,7 +859,7 @@
               "Queries": [
                 {
                   "Input": "C:\\Program Files\\Git\\cmd\\git.COM",
-                  "Ordinal": 248,
+                  "Ordinal": 235,
                   "Output": false
                 }
               ]
@@ -874,7 +874,7 @@
               "Queries": [
                 {
                   "Input": "C:\\Program Files\\Git\\cmd\\git.EXE",
-                  "Ordinal": 249,
+                  "Ordinal": 236,
                   "Output": true
                 }
               ]

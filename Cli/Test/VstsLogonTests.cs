@@ -45,7 +45,7 @@ namespace Microsoft.Alm.Cli.Test
             const string protocol = "https";
             const string host = "microsoft-git-tools.visualstudio.com";
 
-            InitializeTest(false);
+            InitializeTest();
 
             var errorBuffer = new byte[4096];
             var outputBuffer = new byte[4096];
@@ -122,7 +122,7 @@ namespace Microsoft.Alm.Cli.Test
             const string protocol = "https";
             const string host = "dev-x.visualstudio.com";
 
-            InitializeTest(false);
+            InitializeTest();
 
             var errorBuffer = new byte[4096];
             var outputBuffer = new byte[4096];
@@ -199,7 +199,7 @@ namespace Microsoft.Alm.Cli.Test
             const string protocol = "https";
             const string host = "microsoft-git-tools.visualstudio.com";
 
-            InitializeTest(false);
+            InitializeTest();
 
             var errorBuffer = new byte[4096];
             var outputBuffer = new byte[4096];
@@ -299,7 +299,7 @@ namespace Microsoft.Alm.Cli.Test
             const string protocol = "https";
             const string host = "dev-x.visualstudio.com";
 
-            InitializeTest(false);
+            InitializeTest();
 
             var errorBuffer = new byte[4096];
             var outputBuffer = new byte[4096];
@@ -399,7 +399,7 @@ namespace Microsoft.Alm.Cli.Test
             const string protocol = "https";
             const string host = "microsoft-git-tools.visualstudio.com";
 
-            InitializeTest(false);
+            InitializeTest();
 
             var errorBuffer = new byte[4096];
             var outputBuffer = new byte[4096];
@@ -499,7 +499,7 @@ namespace Microsoft.Alm.Cli.Test
             const string protocol = "https";
             const string host = "microsoft-git-tools.visualstudio.com";
 
-            InitializeTest(false);
+            InitializeTest();
 
             var errorBuffer = new byte[4096];
             var outputBuffer = new byte[4096];

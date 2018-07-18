@@ -82,6 +82,7 @@ namespace Microsoft.Alm.Authentication.Test
             TestMode = ProjectTestMode;
 
             _filePath = filePath;
+            _iteration = -1;
             _projectDirectory = projectDirectory ?? Directory.GetParent(filePath).FullName;
             _tempDirectory = Path.GetTempPath();
             _testInstanceName = Guid.NewGuid().ToString("N");
@@ -113,22 +114,20 @@ namespace Microsoft.Alm.Authentication.Test
                                                             | System.Net.SecurityProtocolType.Tls12;
 
             ProjectTestMode = UnitTestMode.Replay;
-
-            _testIterations = new ConcurrentDictionary<string, int>(Ordinal);
         }
 
         private readonly string _filePath;
         private bool _initialized;
-        private bool _isParameterized;
+        private int _iteration;
         private readonly IUnitTestTrace _output;
         private readonly string _projectDirectory;
         private IProxy _proxy;
         private readonly string _solutionDirectory;
         private readonly object _syncpoint = new object();
         private string _tempDirectory;
+        private string _testDataFile;
         private string _testDataPath;
         private readonly string _testInstanceName;
-        private readonly static ConcurrentDictionary<string, int> _testIterations;
         private string _testName;
         private UnitTestMode _testMode;
         private string _testResultsPath;
@@ -147,21 +146,7 @@ namespace Microsoft.Alm.Authentication.Test
                     if (!_initialized)
                         throw new InvalidOperationException($"`{nameof(InitializeTest)}` must be called before `{nameof(IsParameterized)}' can be accessed.");
 
-                    return _isParameterized;
-                }
-            }
-        }
-
-        protected int Iteration
-        {
-            get
-            {
-                lock (_syncpoint)
-                {
-                    if (_testName is null)
-                        throw new InvalidOperationException($"`{nameof(InitializeTest)}` needs to be called before `{nameof(Iteration)}` property can be accessed.");
-
-                    return _testIterations[_testName];
+                    return _iteration > 0; ;
                 }
             }
         }
@@ -223,7 +208,24 @@ namespace Microsoft.Alm.Authentication.Test
         }
 
         /// <summary>
-        /// Gets the persistent location of where mock data gets written to or read from.
+        /// Gets the persistent file location of where captured data gets written to or read from.
+        /// </summary>
+        protected string TestDataFile
+        {
+            get
+            {
+                lock (_syncpoint)
+                {
+                    if (!_initialized)
+                        throw new InvalidOperationException($"`{nameof(InitializeTest)}` must be called before `{nameof(TestDataFile)}` property can be accessed.");
+
+                    return _testDataFile;
+                }
+            }
+        }
+
+        /// <summary>
+        /// Gets the persistent directory location of where captured data gets written to or read from.
         /// </summary>
         protected string TestDataPath
         {
@@ -284,26 +286,16 @@ namespace Microsoft.Alm.Authentication.Test
                 {
                     if (TestMode == UnitTestMode.Capture)
                     {
-                        var testName = TestName.Replace("::", "-");
-                        var testDataPath = Path.Combine(TestDataPath, testName);
-
-                        if (IsParameterized)
-                        {
-                            testDataPath = Invariant($"{testDataPath}-{Iteration:00}");
-                        }
-
-                        testDataPath = Path.ChangeExtension(testDataPath, TestDataFileExtension);
-
-                        var resultDirectory = Path.GetDirectoryName(testDataPath);
+                        var resultDirectory = Path.GetDirectoryName(_testDataFile);
 
                         if (!Directory.Exists(resultDirectory))
                         {
                             Directory.CreateDirectory(resultDirectory);
                         }
 
-                        Trace.WriteLine($"writing data \"{testDataPath}\".");
+                        Trace.WriteLine($"writing data \"{_testDataFile}\".");
 
-                        using (var writableStream = File.Open(testDataPath, FileMode.Create, FileAccess.Write, FileShare.None))
+                        using (var writableStream = File.Open(_testDataFile, FileMode.Create, FileAccess.Write, FileShare.None))
                         {
                             Proxy.WriteTestData(writableStream);
                         }
@@ -331,7 +323,7 @@ namespace Microsoft.Alm.Authentication.Test
             }
         }
 
-        protected virtual void InitializeTest(bool isParameterized, [CallerMemberName] string testName = "")
+        protected virtual void InitializeTest(int iteration = -1, [CallerMemberName] string testName = "")
         {
             if (string.IsNullOrWhiteSpace(testName))
                 throw new ArgumentNullException(nameof(testName));
@@ -341,12 +333,9 @@ namespace Microsoft.Alm.Authentication.Test
                 if (_initialized)
                     throw new InvalidOperationException("Test already initialized.");
 
+                _iteration = iteration;
+
                 InitializeTestPaths(testName);
-
-                _isParameterized = isParameterized;
-
-                // Track the number of times this test has been seen
-                _testIterations.AddOrUpdate(_testName, 1, (string name, int value) => { return value += 1; });
 
                 var projectDirectory = Path.Combine(_solutionDirectory, _projectDirectory);
                 var options = new ProxyOptions(Translate(TestMode), _solutionDirectory, projectDirectory)
@@ -372,18 +361,7 @@ namespace Microsoft.Alm.Authentication.Test
 
                     case UnitTestMode.Replay:
                     {
-                        string dataFilePath = _testName.Replace("::", "-");
-
-                        dataFilePath = Path.Combine(_testDataPath, dataFilePath);
-
-                        if (_isParameterized)
-                        {
-                            dataFilePath = Invariant($"{dataFilePath}-{Iteration:00}");
-                        }
-
-                        dataFilePath = Path.ChangeExtension(dataFilePath, TestDataFileExtension);
-
-                        using (var readableStream = File.Open(dataFilePath, FileMode.Open, FileAccess.Read, FileShare.Read))
+                        using (var readableStream = File.Open(_testDataFile, FileMode.Open, FileAccess.Read, FileShare.Read))
                         {
                             _proxy.ReadTestData(readableStream);
                         }
@@ -498,6 +476,19 @@ namespace Microsoft.Alm.Authentication.Test
             _testDataPath = testDataPath;
 
             Trace.WriteLine($"{nameof(TestDataPath)} = '{_testDataPath}'.");
+
+            string dataFilePath = _testName.Replace("::", "-");
+
+            dataFilePath = Path.Combine(_testDataPath, dataFilePath);
+
+            if (_iteration >= 0)
+            {
+                dataFilePath = Invariant($"{dataFilePath}-{_iteration:00}");
+            }
+
+            _testDataFile = Path.ChangeExtension(dataFilePath, TestDataFileExtension);
+
+            Trace.WriteLine($"{nameof(TestDataFile)} = \"{_testDataFile}\".");
 
             if (TestMode == UnitTestMode.Replay)
             {

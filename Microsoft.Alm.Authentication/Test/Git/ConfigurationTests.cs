@@ -109,7 +109,7 @@ namespace Microsoft.Alm.Authentication.Git.Test
         [Fact]
         public async Task GitConfig_Read()
         {
-            InitializeTest(false);
+            InitializeTest();
 
             var configuration = new Configuration(Context);
             await configuration.LoadGitConfiguration(SolutionDirectory, ConfigurationLevel.All);

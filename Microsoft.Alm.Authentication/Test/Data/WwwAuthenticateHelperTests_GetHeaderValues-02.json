@@ -25,6 +25,7 @@
 
 // Use `Formatting.Indented` to ease review readability.
 {
+  "ExtendedData": [],
   "DisplayName": "WwwAuthenticateHelperTests_GetHeaderValues",
   "ResultPath": "E:\\Src\\Microsoft.Alm\\Gcm\\Microsoft.Alm.Authentication\\Test\\Results",
   "Services": {
@@ -48,18 +49,16 @@
                       "HasContent": true
                     },
                     "Headers": [
-                      "X-TFS-FedAuthIssuer=https://microsoft.visualstudio.com/",
-                      "X-VSS-ResourceTenant=72f988bf-86f1-41af-91ab-2d7cd011db47",
-                      "X-Content-Type-Options=nosniff",
-                      "WWW-Authenticate=Bearer authorization_uri=https://login.microsoftonline.com/72f988bf-86f1-41af-91ab-2d7cd011db47"
+                      "Status=200 OK",
+                      "X-GitHub-Request-Id=000:1112:2233334:4455566:6777888"
                     ],
-                    "StatusCode": 404
+                    "StatusCode": 200
                   }
                 }
               ]
             }
           ],
-          "QueryUrl": "https://microsoft.visualstudio.com/"
+          "QueryUrl": "https://github.com/"
         }
       ]
     },
