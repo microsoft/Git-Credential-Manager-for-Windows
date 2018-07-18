@@ -24,7 +24,6 @@
 **/
 
 using System;
-using System.Collections.Generic;
 using System.IO;
 using System.Text;
 using System.Text.RegularExpressions;
@@ -152,6 +151,7 @@ namespace Microsoft.Alm.Authentication.Test
 
                 var jsonSettings = new JsonSerializerSettings()
                 {
+                    Converters = CustomJsonConverters,
                     Culture = System.Globalization.CultureInfo.InvariantCulture,
                     Formatting = Formatting.Indented,
                     NullValueHandling = NullValueHandling.Ignore,

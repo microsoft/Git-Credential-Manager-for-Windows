@@ -60,6 +60,7 @@ namespace Microsoft.Alm.Authentication.Test
 
                 var settings = new JsonSerializerSettings()
                 {
+                    Converters = CustomJsonConverters,
                     Culture = System.Globalization.CultureInfo.InvariantCulture,
                     Formatting = Formatting.Indented,
                     NullValueHandling = NullValueHandling.Ignore,
@@ -88,6 +89,8 @@ namespace Microsoft.Alm.Authentication.Test
 
                     replayService.SetReplayData(serviceData.Value);
                 }
+
+                _data = data;
             }
         }
     }

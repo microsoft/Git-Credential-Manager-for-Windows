@@ -367,7 +367,6 @@ namespace Microsoft.Alm.Authentication.Test
                     {
                         _proxy.Data.ResultPath = Path.Combine(projectDirectory, TestResultDirectoryName);
                         _proxy.Data.DisplayName = _testName;
-                        _proxy.Data.SolutionDirectory = FauxDataSolutionPath;
                     }
                     break;
 
@@ -379,7 +378,7 @@ namespace Microsoft.Alm.Authentication.Test
 
                         if (_isParameterized)
                         {
-                            dataFilePath = FormattableString.Invariant($"{dataFilePath}-{Iteration:00}");
+                            dataFilePath = Invariant($"{dataFilePath}-{Iteration:00}");
                         }
 
                         dataFilePath = Path.ChangeExtension(dataFilePath, TestDataFileExtension);

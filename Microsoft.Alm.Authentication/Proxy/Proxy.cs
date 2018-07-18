@@ -29,6 +29,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Text;
 using System.Text.RegularExpressions;
+using Newtonsoft.Json;
 using static System.StringComparer;
 
 namespace Microsoft.Alm.Authentication.Test
@@ -47,6 +48,9 @@ namespace Microsoft.Alm.Authentication.Test
         /// </summary>
         ProxyData Data { get; }
 
+        /// <summary>
+        /// Gets the `<seealso cref="ProxyMode"/>` the proxy was initialized with.
+        /// </summary>
         ProxyMode Mode { get; }
 
         /// <summary>
@@ -54,14 +58,15 @@ namespace Microsoft.Alm.Authentication.Test
         /// </summary>
         ProxyOptions Options { get; }
 
-        INetwork Network { get; }
-
-        ISettings Settings { get; }
-
-        IStorage Storage { get; }
-
+        /// <summary>
+        /// Returns an enumeration of all services known to the proxy.
+        /// </summary>
         IEnumerable<IRuntimeService> EnumerateServices();
 
+        /// <summary>
+        /// Returns the service associated with `<typeparamref name="T"/>` from the proxy's collection of known services; otherwise `<see langword="null"/>`.
+        /// </summary>
+        /// <typeparam name="T">The `<seealso cref="IRuntimeService"/>` based type of the service to be returned.</typeparam>
         T GetService<T>() where T : class, IRuntimeService;
 
         /// <summary>
@@ -70,15 +75,35 @@ namespace Microsoft.Alm.Authentication.Test
         /// <param name="currentDirectory">The directory this instance of `<see cref="Proxy"/>` should report as the current working directory.</param>
         void Initialize(string currentDirectory);
 
+        /// <summary>
+        /// Reads replay test data from `<paramref name="readableStream"/>`.
+        /// <para/>
+        /// Only supported when `<see cref="Mode"/>` returns `<seealso cref="ProxyMode.DataReplay"/>`.
+        /// </summary>
+        /// <param name="readableStream">The readable stream from which to read the proxy's replay test data.</param>
         void ReadTestData(Stream readableStream);
 
+        /// <summary>
+        /// Sets the service associated with `<typeparamref name="T"/>` in the proxy's collection of known services.
+        /// </summary>
+        /// <typeparam name="T">The `<seealso cref="IRuntimeService"/>` based type of the service to be added or updated.</typeparam>
+        /// <param name="service">The service to be added or updated.</param>
+        /// <exception cref="ArgumentNullException">`<paramref name="service"/>` is `<see langword="null"/>`.</exception>
         void SetService<T>(T service) where T : class, IRuntimeService;
 
+        /// <summary>
+        /// Writes captured test data to `<paramref name="writableStream"/>`.
+        /// <para/>
+        /// Only supported when `<see cref="Mode"/>` returns `<seealso cref="ProxyMode.DataCapture"/>`.
+        /// </summary>
+        /// <param name="writableStream">The writable stream which to write captured tests data.</param>
         void WriteTestData(Stream writableStream);
     }
 
     public abstract class Proxy : IProxy
     {
+        protected static readonly IList<JsonConverter> CustomJsonConverters  = new JsonConverter[] { new NestedDictionatyConverter(), };
+
         private static readonly Regex NormalizePathRegex = new Regex(@"[\\/]+", RegexOptions.CultureInvariant);
 
         protected Proxy(RuntimeContext context, ProxyOptions options)
@@ -91,9 +116,9 @@ namespace Microsoft.Alm.Authentication.Test
             _services = new ConcurrentDictionary<Type, object>();
             _storageFilters = new ConcurrentDictionary<string, string>(Ordinal);
 
-            AddService(_context.Network);
-            AddService(_context.Settings);
-            AddService(_context.Storage);
+            SetService(_context.Network);
+            SetService(_context.Settings);
+            SetService(_context.Storage);
         }
 
         protected readonly RuntimeContext _context;
@@ -118,15 +143,6 @@ namespace Microsoft.Alm.Authentication.Test
         {
             get { return _options; }
         }
-
-        public virtual INetwork Network
-            => GetService<INetwork>();
-
-        public virtual ISettings Settings
-            => GetService<ISettings>();
-
-        public virtual IStorage Storage
-            => GetService<IStorage>();
 
         public void AddFilter(string pattern, string replacement)
         {
@@ -164,9 +180,6 @@ namespace Microsoft.Alm.Authentication.Test
 
         public virtual void WriteTestData(Stream writableStream)
         { }
-
-        protected void AddService<T>(T service) where T : class, IRuntimeService
-            => _context.SetService(service);
 
         protected static Regex BuildFilter(string pattern)
         {

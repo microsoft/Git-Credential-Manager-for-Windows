@@ -23,9 +23,11 @@
  * WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE."
 **/
 
+using System;
 using System.Collections.Generic;
-using System.IO;
 using Newtonsoft.Json;
+using Newtonsoft.Json.Converters;
+using Newtonsoft.Json.Linq;
 using static System.FormattableString;
 using static System.StringComparer;
 
@@ -34,24 +36,21 @@ namespace Microsoft.Alm.Authentication.Test
     [System.Diagnostics.DebuggerDisplay("{DebuggerDisplay, nq}")]
     public class ProxyData
     {
-        [JsonProperty(PropertyName = "TestDisplayName", Required = Required.DisallowNull)]
+        [JsonProperty(PropertyName = "DisplayName", NullValueHandling = NullValueHandling.Ignore)]
         public string DisplayName { get; set; }
 
-        [JsonProperty(PropertyName = "ProjectDirectory", NullValueHandling = NullValueHandling.Ignore)]
-        public string ProjectDirectory { get; set; }
+        [JsonProperty(PropertyName = "ExtendedData", NullValueHandling = NullValueHandling.Ignore)]
+        public Dictionary<string, Dictionary<string, string>> ExtendedData = new Dictionary<string, Dictionary<string, string>>(Ordinal);
 
-        [JsonProperty(PropertyName = "TestResultPath")]
+        [JsonProperty(PropertyName = "ResultPath", NullValueHandling = NullValueHandling.Ignore)]
         public string ResultPath { get; set; }
 
         [JsonProperty(PropertyName = "Services", NullValueHandling = NullValueHandling.Ignore)]
         public Dictionary<string, object> Services { get; } = new Dictionary<string, object>(Ordinal);
 
-        [JsonProperty(PropertyName = "SolutionDirectory", NullValueHandling = NullValueHandling.Ignore)]
-        public string SolutionDirectory { get; set; }
-
         internal string DebuggerDisplay
         {
-            get { return Invariant($"{nameof(ProxyData)}: \"{DisplayName}\", Results = \"{ResultPath}\""); }
+            get { return Invariant($"{nameof(ProxyData)}: \"{DisplayName}\", {nameof(Services)}[{Services?.Count}], {nameof(ExtendedData)}[{ExtendedData?.Count}]"); }
         }
     }
 }

@@ -72,6 +72,7 @@
     <Compile Include="CaptureStream.cs" />
     <Compile Include="FilterComparer.cs" />
     <Compile Include="IProxyService.cs" />
+    <Compile Include="NestedDictionaryConverter.cs" />
     <Compile Include="NullProxy.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Proxy.cs" />
