@@ -80,6 +80,7 @@ namespace Microsoft.Alm.Cli
         private string _queryProtocol;
         private TargetUri _targetUri;
         private TimeSpan? _tokenDuration;
+        private string _urlOverride;
         private bool _useHttpPath;
         private bool _useLocalConfig;
         private bool _useModalUi;
@@ -163,6 +164,7 @@ namespace Microsoft.Alm.Cli
             {
                 _gitRemoteHttpCommandLine = value;
 
+                // Re-create the target Uri.
                 CreateTargetUri();
             }
         }
@@ -333,6 +335,23 @@ namespace Microsoft.Alm.Cli
         }
 
         /// <summary>
+        /// Gets or sets the override value for the `<seealso cref="TargetUri.ActualUri"/>` value.
+        /// <para/>
+        /// Default value is `<see langword="null"/>`.
+        /// </summary>
+        public virtual string UrlOverride
+        {
+            get { return _urlOverride; }
+            set
+            {
+                _urlOverride = value;
+
+                // Re-create the target Uri.
+                CreateTargetUri();
+            }
+        }
+
+        /// <summary>
         /// Gets or sets `<see langword="false"/>` if `<seealso cref="LoadConfiguration"/>` ignores local Git configuration values; otherwise `<see langword="true"/>`.
         /// <para/>
         /// Default value is `<see langword="true"/>`.
@@ -435,7 +454,7 @@ namespace Microsoft.Alm.Cli
         }
 
         /// <summary>
-        /// 
+        /// Reads git-credential formatted input from `<paramref name="readableStream"/>`, parses the data, and populates `<seealso cref="TargetUri"/>`.
         /// </summary>
         /// <param name="readableStream">
         /// Readable stream with credential protocol formatted information.
@@ -576,9 +595,7 @@ namespace Microsoft.Alm.Cli
         /// <param name="url">The uniform-resource-locater of the proxy.</param>
         public virtual void SetProxy(string url)
         {
-            Uri tmp = null;
-
-            if (Uri.TryCreate(url, UriKind.Absolute, out tmp))
+            if (Uri.TryCreate(url, UriKind.Absolute, out Uri tmp))
             {
                 Trace.WriteLine($"successfully set proxy to '{tmp.AbsoluteUri}'.");
             }
@@ -621,7 +638,7 @@ namespace Microsoft.Alm.Cli
         /// </summary>
         public override string ToString()
         {
-            StringBuilder builder = new StringBuilder();
+            var builder = new StringBuilder();
 
             builder.Append("protocol=")
                    .Append(_queryProtocol ?? string.Empty)
@@ -686,7 +703,7 @@ namespace Microsoft.Alm.Cli
             string proxyUrl = _proxyUri?.OriginalString;
             string actualUrl = null;
 
-            StringBuilder buffer = new StringBuilder();
+            var buffer = new StringBuilder();
 
             // URI format is {protocol}://{username}@{host}/{path] with
             // everything optional except for {host}.
@@ -721,32 +738,52 @@ namespace Microsoft.Alm.Cli
 
             queryUrl = buffer.ToString();
 
+            // If the actual-url override has been set, honor it.
+            if (!string.IsNullOrEmpty(_urlOverride))
+            {
+                if (Uri.TryCreate(_urlOverride, UriKind.Absolute, out Uri uri))
+                {
+                    actualUrl = uri.ToString();
+                }
+                else
+                {
+                    Trace.WriteLine($"failed to parse \"{_urlOverride}\", unable to set URL override.");
+                }
+            }
             // If the git-remote-http(s) command line has been captured,
             // try and parse it and provide the command-url .
-            if (!string.IsNullOrEmpty(_gitRemoteHttpCommandLine))
+            else if (!string.IsNullOrEmpty(_gitRemoteHttpCommandLine))
             {
                 string[] parts = _gitRemoteHttpCommandLine.Split(' ');
 
-                switch(parts.Length)
+                switch (parts.Length)
                 {
                     case 1:
+                    {
+                        if (Uri.TryCreate(parts[0], UriKind.Absolute, out Uri uri))
                         {
-                            if (Uri.TryCreate(parts[0], UriKind.Absolute, out Uri uri))
-                            {
-                                actualUrl = uri.ToString();
-                            }
+                            actualUrl = uri.ToString();
                         }
-                        break;
+                        else
+                        {
+                            Trace.WriteLine($"failed to parse \"{parts[0]}\", unable to set URL override.");
+                        }
+                    }
+                    break;
 
                     case 3:
+                    {
+                        if (Uri.TryCreate(parts[2], UriKind.Absolute, out Uri uri))
                         {
-                            if (Uri.TryCreate(parts[2], UriKind.Absolute, out Uri uri))
-                            {
-                                actualUrl = uri.ToString();
-                            }
+                            actualUrl = uri.ToString();
                         }
-                        break;
-                }                
+                        else
+                        {
+                            Trace.WriteLine($"failed to parse \"{parts[2]}\", unable to set URL override.");
+                        }
+                    }
+                    break;
+                }
             }
 
             // Create the target URI object.
@@ -778,7 +815,7 @@ namespace Microsoft.Alm.Cli
                     case ',':
                     case ';':
                     case '=':
-                        return true;
+                    return true;
                 }
             }
             return false;
