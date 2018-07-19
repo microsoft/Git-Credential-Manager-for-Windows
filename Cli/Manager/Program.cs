@@ -121,7 +121,7 @@ namespace Microsoft.Alm.Cli
             {
                 _context.Trace.WriteLine($"converted '{url}' to '{uri.AbsoluteUri}'.");
 
-                OperationArguments operationArguments = new OperationArguments(_context);
+                var operationArguments = new OperationArguments(_context);
 
                 operationArguments.SetTargetUri(uri);
 
@@ -355,8 +355,12 @@ namespace Microsoft.Alm.Cli
                     await LoadOperationArguments(operationArguments);
                     EnableTraceLogging(operationArguments);
 
-                    // Read the details of any git-remote-http(s).exe parent process.
-                    ReadGitRemoteDetails(operationArguments);
+                    // Read the details of any git-remote-http(s).exe parent process, but only if
+                    // an override hasn't been set which would override the git-remote details.
+                    if (string.IsNullOrEmpty(operationArguments.UrlOverride))
+                    {
+                        ReadGitRemoteDetails(operationArguments);
+                    }
 
                     // Set the parent window handle.
                     ParentHwnd = operationArguments.ParentHwnd;
@@ -379,7 +383,7 @@ namespace Microsoft.Alm.Cli
             // see: https://www.kernel.org/pub/software/scm/git/docs/git-credential.html
             using (var stdin = InStream)
             {
-                OperationArguments operationArguments = new OperationArguments(_context);
+                var operationArguments = new OperationArguments(_context);
 
                 Task.Run(async () =>
                 {
@@ -395,8 +399,12 @@ namespace Microsoft.Alm.Cli
                     await LoadOperationArguments(operationArguments);
                     EnableTraceLogging(operationArguments);
 
-                    // Read the details of any git-remote-http(s).exe parent process.
-                    ReadGitRemoteDetails(operationArguments);
+                    // Read the details of any git-remote-http(s).exe parent process, but only if
+                    // an override hasn't been set which would override the git-remote details.
+                    if (string.IsNullOrEmpty(operationArguments.UrlOverride))
+                    {
+                        ReadGitRemoteDetails(operationArguments);
+                    }
 
                     // Set the parent window handle.
                     ParentHwnd = operationArguments.ParentHwnd;
@@ -431,7 +439,7 @@ namespace Microsoft.Alm.Cli
                     {
                         string doc = Path.Combine(installation.Doc, HelpFileName);
 
-                        // if the help file exists, send it to the operating system to display to the user
+                        // If the help file exists, send it to the operating system to display to the user.
                         if (Storage.FileExists(doc))
                         {
                             Trace.WriteLine($"opening help documentation '{doc}'.");
@@ -465,7 +473,7 @@ namespace Microsoft.Alm.Cli
             // see: https://www.kernel.org/pub/software/scm/git/docs/git-credential.html
             using (var stdin = InStream)
             {
-                OperationArguments operationArguments = new OperationArguments(_context);
+                var operationArguments = new OperationArguments(_context);
 
                 Task.Run(async () =>
                 {
@@ -486,8 +494,12 @@ namespace Microsoft.Alm.Cli
                     await LoadOperationArguments(operationArguments);
                     EnableTraceLogging(operationArguments);
 
-                    // Read the details of any git-remote-http(s).exe parent process.
-                    ReadGitRemoteDetails(operationArguments);
+                    // Read the details of any git-remote-http(s).exe parent process, but only if
+                    // an override hasn't been set which would override the git-remote details.
+                    if (string.IsNullOrEmpty(operationArguments.UrlOverride))
+                    {
+                        ReadGitRemoteDetails(operationArguments);
+                    }
 
                     // Set the parent window handle.
                     ParentHwnd = operationArguments.ParentHwnd;

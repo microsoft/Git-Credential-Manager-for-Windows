@@ -80,6 +80,7 @@ namespace Microsoft.Alm.Cli
         private string _queryProtocol;
         private TargetUri _targetUri;
         private TimeSpan? _tokenDuration;
+        private string _urlOverride;
         private bool _useHttpPath;
         private bool _useLocalConfig;
         private bool _useModalUi;
@@ -338,6 +339,22 @@ namespace Microsoft.Alm.Cli
         }
 
         /// <summary>
+        /// Gets or sets the override value for the `<seealso cref="TargetUri.ActualUri"/>` value.
+        /// <para/>
+        /// Default value is `<see langword="null"/>`.
+        /// </summary>
+        public virtual string UrlOverride
+        {
+            get { return _urlOverride; }
+            set
+            {
+                _urlOverride = value;
+
+                CreateTargetUri();
+            }
+        }
+
+        /// <summary>
         /// Gets or sets `<see langword="false"/>` if `<seealso cref="LoadConfiguration"/>` ignores local Git configuration values; otherwise `<see langword="true"/>`.
         /// <para/>
         /// Default value is `<see langword="true"/>`.
@@ -440,7 +457,7 @@ namespace Microsoft.Alm.Cli
         }
 
         /// <summary>
-        /// 
+        /// Reads git-credential formatted input from `<paramref name="readableStream"/>`, parses the data, and populates `<seealso cref="TargetUri"/>`.
         /// </summary>
         /// <param name="readableStream">
         /// Readable stream with credential protocol formatted information.
@@ -726,32 +743,52 @@ namespace Microsoft.Alm.Cli
 
             queryUrl = buffer.ToString();
 
+            // If the actual-url override has been set, honor it.
+            if (!string.IsNullOrEmpty(_urlOverride))
+            {
+                if (Uri.TryCreate(_urlOverride, UriKind.Absolute, out Uri uri))
+                {
+                    actualUrl = uri.ToString();
+                }
+                else
+                {
+                    Trace.WriteLine($"failed to parse \"{_urlOverride}\", unable to set URL override.");
+                }
+            }
             // If the git-remote-http(s) command line has been captured,
             // try and parse it and provide the command-url .
-            if (!string.IsNullOrEmpty(_gitRemoteHttpCommandLine))
+            else if (!string.IsNullOrEmpty(_gitRemoteHttpCommandLine))
             {
                 string[] parts = _gitRemoteHttpCommandLine.Split(' ');
 
-                switch(parts.Length)
+                switch (parts.Length)
                 {
                     case 1:
+                    {
+                        if (Uri.TryCreate(parts[0], UriKind.Absolute, out Uri uri))
                         {
-                            if (Uri.TryCreate(parts[0], UriKind.Absolute, out Uri uri))
-                            {
-                                actualUrl = uri.ToString();
-                            }
+                            actualUrl = uri.ToString();
                         }
-                        break;
+                        else
+                        {
+                            Trace.WriteLine($"failed to parse \"{parts[0]}\", unable to set URL override.");
+                        }
+                    }
+                    break;
 
                     case 3:
+                    {
+                        if (Uri.TryCreate(parts[2], UriKind.Absolute, out Uri uri))
                         {
-                            if (Uri.TryCreate(parts[2], UriKind.Absolute, out Uri uri))
-                            {
-                                actualUrl = uri.ToString();
-                            }
+                            actualUrl = uri.ToString();
                         }
-                        break;
-                }                
+                        else
+                        {
+                            Trace.WriteLine($"failed to parse \"{parts[2]}\", unable to set URL override.");
+                        }
+                    }
+                    break;
+                }
             }
 
             // Create the target URI object.
