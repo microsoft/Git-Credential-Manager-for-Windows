@@ -35,9 +35,9 @@ namespace Microsoft.Alm.Authentication
         public const int MaxAutomaticRedirections = 16;
 
         /// <summary>
-        /// The maximum wait time for a network request before timing out
+        /// The maximum time for a network request will wait before timing out.
         /// </summary>
-        public const int RequestTimeout = 15 * 1000; // 15 second limit
+        public const int RequestTimeout = 90 * 1000; // 90 second limit.
 
         private static readonly object _syncpoint = new object();
         private static string _useragent = BuildDefaultUserAgent();
