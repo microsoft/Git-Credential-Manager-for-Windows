@@ -53,6 +53,7 @@ namespace Microsoft.Alm.Cli
         Namespace,
         PreserveCredentials,
         TokenDuration,
+        UrlOverride,
         Username,
         Validate,
         VstsScope,
@@ -117,19 +118,19 @@ namespace Microsoft.Alm.Cli
 
         internal readonly Dictionary<KeyType, string> _configurationKeys = new Dictionary<KeyType, string>()
         {
-            { KeyType.Authority,  "authority" },
-            { KeyType.HttpProxy,  "httpProxy" },
-            { KeyType.HttpsProxy,  "httpsProxy" },
-            { KeyType.Interactive,  "interactive" },
-            { KeyType.ModalPrompt,  "modalPrompt" },
-            { KeyType.Namespace,  "namespace" },
-            { KeyType.PreserveCredentials,  "preserve" },
-            { KeyType.TokenDuration,  "tokenDuration" },
-            { KeyType.HttpPath,  "useHttpPath" },
-            { KeyType.Username,  "username" },
-            { KeyType.Validate,  "validate" },
-            { KeyType.VstsScope, "vstsScope" },
-            { KeyType.Writelog,  "writeLog" },
+            { KeyType.Authority, "authority" },
+            { KeyType.HttpProxy, "httpProxy" },
+            { KeyType.HttpsProxy, "httpsProxy" },
+            { KeyType.Interactive, "interactive" },
+            { KeyType.ModalPrompt, "modalPrompt" },
+            { KeyType.Namespace, "namespace" },
+            { KeyType.PreserveCredentials, "preserve" },
+            { KeyType.TokenDuration, "tokenDuration" },
+            { KeyType.HttpPath, "useHttpPath" },
+            { KeyType.Username, "username" },
+            { KeyType.Validate, "validate" },
+            { KeyType.VstsScope,"vstsScope" },
+            { KeyType.Writelog, "writeLog" },
         };
         internal readonly Dictionary<KeyType, string> _environmentKeys = new Dictionary<KeyType, string>()
         {
@@ -142,11 +143,12 @@ namespace Microsoft.Alm.Cli
             { KeyType.Interactive, "GCM_INTERACTIVE" },
             { KeyType.ModalPrompt, "GCM_MODAL_PROMPT" },
             { KeyType.Namespace, "GCM_NAMESPACE" },
+            { KeyType.ParentHwnd, "GCM_MODAL_PARENTHWND" },
             { KeyType.PreserveCredentials, "GCM_PRESERVE" },
             { KeyType.TokenDuration, "GCM_TOKEN_DURATION" },
+            { KeyType.UrlOverride, "GCM_URL_OVERRIDE" },
             { KeyType.Validate, "GCM_VALIDATE" },
             { KeyType.VstsScope, "GCM_VSTS_SCOPE" },
-            { KeyType.ParentHwnd, "GCM_MODAL_PARENTHWND" },
             { KeyType.Writelog, "GCM_WRITELOG" },
         };
 
@@ -475,7 +477,7 @@ namespace Microsoft.Alm.Cli
                 // If the value is true or a number greater than zero, then trace to standard error.
                 if (Git.Configuration.PaserBoolean(traceValue))
                 {
-                    Trace.AddListener(Console.Error);
+                    Trace.AddListener(Error);
                 }
                 // If the value is a rooted path, then trace to that file and not to the console.
                 else if (Path.IsPathRooted(traceValue))

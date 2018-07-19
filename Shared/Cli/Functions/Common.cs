@@ -82,125 +82,125 @@ namespace Microsoft.Alm.Cli
             switch (operationArguments.Authority)
             {
                 case AuthorityType.Auto:
-                    program.Trace.WriteLine($"detecting authority type for '{operationArguments.TargetUri}'.");
+                program.Trace.WriteLine($"detecting authority type for '{operationArguments.TargetUri}'.");
 
-                    // Detect the authority.
-                    authority = await Vsts.Authentication.GetAuthentication(program.Context,
-                                                                            operationArguments.TargetUri,
-                                                                            Program.VstsCredentialScope,
-                                                                            new SecretStore(program.Context, secretsNamespace, Vsts.Authentication.UriNameConversion))
-                             ?? Github.Authentication.GetAuthentication(program.Context,
+                // Detect the authority.
+                authority = await Vsts.Authentication.GetAuthentication(program.Context,
                                                                         operationArguments.TargetUri,
-                                                                        Program.GitHubCredentialScope,
-                                                                        new SecretStore(program.Context, secretsNamespace, Secret.UriToName),
-                                                                        githubCredentialCallback,
-                                                                        githubAuthcodeCallback,
-                                                                        null)
-                            ?? Bitbucket.Authentication.GetAuthentication(program.Context,
-                                                                          operationArguments.TargetUri,
-                                                                          new SecretStore(program.Context, secretsNamespace, Secret.UriToIdentityUrl),
-                                                                          bitbucketCredentialCallback,
-                                                                          bitbucketOauthCallback);
+                                                                        Program.VstsCredentialScope,
+                                                                        new SecretStore(program.Context, secretsNamespace, Vsts.Authentication.UriNameConversion))
+                         ?? Github.Authentication.GetAuthentication(program.Context,
+                                                                    operationArguments.TargetUri,
+                                                                    Program.GitHubCredentialScope,
+                                                                    new SecretStore(program.Context, secretsNamespace, Secret.UriToName),
+                                                                    githubCredentialCallback,
+                                                                    githubAuthcodeCallback,
+                                                                    null)
+                        ?? Bitbucket.Authentication.GetAuthentication(program.Context,
+                                                                      operationArguments.TargetUri,
+                                                                      new SecretStore(program.Context, secretsNamespace, Secret.UriToIdentityUrl),
+                                                                      bitbucketCredentialCallback,
+                                                                      bitbucketOauthCallback);
 
-                    if (authority != null)
+                if (authority != null)
+                {
+                    // Set the authority type based on the returned value.
+                    if (authority is Vsts.MsaAuthentication)
                     {
-                        // Set the authority type based on the returned value.
-                        if (authority is Vsts.MsaAuthentication)
-                        {
-                            operationArguments.Authority = AuthorityType.MicrosoftAccount;
-                            goto case AuthorityType.MicrosoftAccount;
-                        }
-                        else if (authority is Vsts.AadAuthentication)
-                        {
-                            operationArguments.Authority = AuthorityType.AzureDirectory;
-                            goto case AuthorityType.AzureDirectory;
-                        }
-                        else if (authority is Github.Authentication)
-                        {
-                            operationArguments.Authority = AuthorityType.GitHub;
-                            goto case AuthorityType.GitHub;
-                        }
-                        else if (authority is Bitbucket.Authentication)
-                        {
-                            operationArguments.Authority = AuthorityType.Bitbucket;
-                            goto case AuthorityType.Bitbucket;
-                        }
+                        operationArguments.Authority = AuthorityType.MicrosoftAccount;
+                        goto case AuthorityType.MicrosoftAccount;
                     }
-                    goto default;
+                    else if (authority is Vsts.AadAuthentication)
+                    {
+                        operationArguments.Authority = AuthorityType.AzureDirectory;
+                        goto case AuthorityType.AzureDirectory;
+                    }
+                    else if (authority is Github.Authentication)
+                    {
+                        operationArguments.Authority = AuthorityType.GitHub;
+                        goto case AuthorityType.GitHub;
+                    }
+                    else if (authority is Bitbucket.Authentication)
+                    {
+                        operationArguments.Authority = AuthorityType.Bitbucket;
+                        goto case AuthorityType.Bitbucket;
+                    }
+                }
+                goto default;
 
                 case AuthorityType.AzureDirectory:
-                    program.Trace.WriteLine($"authority for '{operationArguments.TargetUri}' is Azure Directory.");
+                program.Trace.WriteLine($"authority for '{operationArguments.TargetUri}' is Azure Directory.");
 
-                    if (authority is null)
+                if (authority is null)
+                {
+                    Guid tenantId = Guid.Empty;
+
+                    // Get the identity of the tenant.
+                    var result = await Vsts.Authentication.DetectAuthority(program.Context, operationArguments.TargetUri);
+
+                    if (result.HasValue)
                     {
-                        Guid tenantId = Guid.Empty;
-
-                        // Get the identity of the tenant.
-                        var result = await Vsts.Authentication.DetectAuthority(program.Context, operationArguments.TargetUri);
-
-                        if (result.HasValue)
-                        {
-                            tenantId = result.Value;
-                        }
-
-                        // Create the authority object.
-                        authority = new Vsts.AadAuthentication(program.Context,
-                                                               tenantId,
-                                                               operationArguments.VstsTokenScope,
-                                                               new SecretStore(program.Context, secretsNamespace, Vsts.AadAuthentication.UriNameConversion));
+                        tenantId = result.Value;
                     }
 
-                    // Return the allocated authority or a generic AAD backed VSTS authentication object.
-                    return authority;
+                    // Create the authority object.
+                    authority = new Vsts.AadAuthentication(program.Context,
+                                                           tenantId,
+                                                           operationArguments.VstsTokenScope,
+                                                           new SecretStore(program.Context, secretsNamespace, Vsts.AadAuthentication.UriNameConversion));
+                }
+
+                // Return the allocated authority or a generic AAD backed VSTS authentication object.
+                return authority;
 
                 case AuthorityType.Basic:
-                    // Enforce basic authentication only.
-                    basicNtlmSupport = NtlmSupport.Never;
-                    goto default;
+                // Enforce basic authentication only.
+                basicNtlmSupport = NtlmSupport.Never;
+                goto default;
 
                 case AuthorityType.GitHub:
-                    program.Trace.WriteLine($"authority for '{operationArguments.TargetUri}' is GitHub.");
+                program.Trace.WriteLine($"authority for '{operationArguments.TargetUri}' is GitHub.");
 
-                    // Return a GitHub authentication object.
-                    return authority ?? new Github.Authentication(program.Context,
-                                                                  operationArguments.TargetUri,
-                                                                  Program.GitHubCredentialScope,
-                                                                  new SecretStore(program.Context, secretsNamespace, Secret.UriToName),
-                                                                  githubCredentialCallback,
-                                                                  githubAuthcodeCallback,
-                                                                  null);
+                // Return a GitHub authentication object.
+                return authority ?? new Github.Authentication(program.Context,
+                                                              operationArguments.TargetUri,
+                                                              Program.GitHubCredentialScope,
+                                                              new SecretStore(program.Context, secretsNamespace, Secret.UriToName),
+                                                              githubCredentialCallback,
+                                                              githubAuthcodeCallback,
+                                                              null);
 
                 case AuthorityType.Bitbucket:
-                    program.Trace.WriteLine($"authority for '{operationArguments.TargetUri}'  is Bitbucket.");
+                program.Trace.WriteLine($"authority for '{operationArguments.TargetUri}'  is Bitbucket.");
 
-                    // Return a Bitbucket authentication object.
-                    return authority ?? new Bitbucket.Authentication(program.Context,
-                                                                     new SecretStore(program.Context, secretsNamespace, Secret.UriToIdentityUrl),
-                                                                     bitbucketCredentialCallback,
-                                                                     bitbucketOauthCallback);
+                // Return a Bitbucket authentication object.
+                return authority ?? new Bitbucket.Authentication(program.Context,
+                                                                 new SecretStore(program.Context, secretsNamespace, Secret.UriToIdentityUrl),
+                                                                 bitbucketCredentialCallback,
+                                                                 bitbucketOauthCallback);
 
                 case AuthorityType.MicrosoftAccount:
-                    program.Trace.WriteLine($"authority for '{operationArguments.TargetUri}' is Microsoft Live.");
+                program.Trace.WriteLine($"authority for '{operationArguments.TargetUri}' is Microsoft Live.");
 
-                    // Return the allocated authority or a generic MSA backed VSTS authentication object.
-                    return authority ?? new Vsts.MsaAuthentication(program.Context,
-                                                                   operationArguments.VstsTokenScope,
-                                                                   new SecretStore(program.Context, secretsNamespace, Vsts.MsaAuthentication.UriNameConversion));
+                // Return the allocated authority or a generic MSA backed VSTS authentication object.
+                return authority ?? new Vsts.MsaAuthentication(program.Context,
+                                                               operationArguments.VstsTokenScope,
+                                                               new SecretStore(program.Context, secretsNamespace, Vsts.MsaAuthentication.UriNameConversion));
 
                 case AuthorityType.Ntlm:
-                    // Enforce NTLM authentication only.
-                    basicNtlmSupport = NtlmSupport.Always;
-                    goto default;
+                // Enforce NTLM authentication only.
+                basicNtlmSupport = NtlmSupport.Always;
+                goto default;
 
                 default:
-                    program.Trace.WriteLine($"authority for '{operationArguments.TargetUri}' is basic with NTLM={basicNtlmSupport}.");
+                program.Trace.WriteLine($"authority for '{operationArguments.TargetUri}' is basic with NTLM={basicNtlmSupport}.");
 
-                    // Return a generic username + password authentication object.
-                    return authority ?? new BasicAuthentication(program.Context,
-                                                                new SecretStore(program.Context, secretsNamespace, Secret.UriToIdentityUrl),
-                                                                basicNtlmSupport,
-                                                                basicCredentialCallback,
-                                                                null);
+                // Return a generic username + password authentication object.
+                return authority ?? new BasicAuthentication(program.Context,
+                                                            new SecretStore(program.Context, secretsNamespace, Secret.UriToIdentityUrl),
+                                                            basicNtlmSupport,
+                                                            basicCredentialCallback,
+                                                            null);
             }
         }
 
@@ -217,24 +217,24 @@ namespace Microsoft.Alm.Cli
             {
                 default:
                 case AuthorityType.Basic:
-                    program.Trace.WriteLine($"deleting basic credentials for '{operationArguments.TargetUri}'.");
-                    return await authentication.DeleteCredentials(operationArguments.TargetUri);
+                program.Trace.WriteLine($"deleting basic credentials for '{operationArguments.TargetUri}'.");
+                return await authentication.DeleteCredentials(operationArguments.TargetUri);
 
                 case AuthorityType.AzureDirectory:
                 case AuthorityType.MicrosoftAccount:
-                    program.Trace.WriteLine($"deleting VSTS credentials for '{operationArguments.TargetUri}'.");
-                    var vstsAuth = authentication as Vsts.Authentication;
-                    return await vstsAuth.DeleteCredentials(operationArguments.TargetUri);
+                program.Trace.WriteLine($"deleting VSTS credentials for '{operationArguments.TargetUri}'.");
+                var vstsAuth = authentication as Vsts.Authentication;
+                return await vstsAuth.DeleteCredentials(operationArguments.TargetUri);
 
                 case AuthorityType.GitHub:
-                    program.Trace.WriteLine($"deleting GitHub credentials for '{operationArguments.TargetUri}'.");
-                    var ghAuth = authentication as Github.Authentication;
-                    return await ghAuth.DeleteCredentials(operationArguments.TargetUri);
+                program.Trace.WriteLine($"deleting GitHub credentials for '{operationArguments.TargetUri}'.");
+                var ghAuth = authentication as Github.Authentication;
+                return await ghAuth.DeleteCredentials(operationArguments.TargetUri);
 
                 case AuthorityType.Bitbucket:
-                    program.Trace.WriteLine($"deleting Bitbucket credentials for '{operationArguments.TargetUri}'.");
-                    var bbAuth = authentication as Bitbucket.Authentication;
-                    return await bbAuth.DeleteCredentials(operationArguments.TargetUri, operationArguments.Username);
+                program.Trace.WriteLine($"deleting Bitbucket credentials for '{operationArguments.TargetUri}'.");
+                var bbAuth = authentication as Bitbucket.Authentication;
+                return await bbAuth.DeleteCredentials(operationArguments.TargetUri, operationArguments.Username);
             }
         }
 
@@ -617,6 +617,17 @@ namespace Microsoft.Alm.Cli
                     Trace.WriteLine($"Failed to parse {program.KeyTypeName(KeyType.ParentHwnd)}.");
                 }
             }
+
+            // Check for URL overrides provided by the calling process.
+            if (program.TryReadString(operationArguments, KeyType.UrlOverride, out value))
+            {
+                program.Trace.WriteLine($"{program.KeyTypeName(KeyType.UrlOverride)} = '{value}'.");
+
+                if (Uri.TryCreate(value, UriKind.Absolute, out Uri actualUri))
+                {
+                    operationArguments.UrlOverride = value;
+                }
+            }
         }
 
         public static void LogEvent(Program program, string message, EventLogEntryType eventType)
@@ -688,154 +699,154 @@ namespace Microsoft.Alm.Cli
             {
                 default:
                 case AuthorityType.Basic:
-                    {
-                        var basicAuth = authentication as BasicAuthentication;
+                {
+                    var basicAuth = authentication as BasicAuthentication;
 
-                        // Attempt to get cached credentials or acquire credentials if interactivity is allowed.
-                        if ((operationArguments.Interactivity != Interactivity.Always
-                                && (credentials = await authentication.GetCredentials(operationArguments.TargetUri)) != null)
-                            || (operationArguments.Interactivity != Interactivity.Never
-                                && (credentials = await basicAuth.AcquireCredentials(operationArguments.TargetUri)) != null))
-                        {
-                            program.Trace.WriteLine("credentials found.");
-                            // No need to save the credentials explicitly, as Git will call back
-                            // with a store command if the credentials are valid.
-                        }
-                        else
-                        {
-                            program.Trace.WriteLine($"credentials for '{operationArguments.TargetUri}' not found.");
-                            program.LogEvent($"Failed to retrieve credentials for '{operationArguments.TargetUri}'.", EventLogEntryType.FailureAudit);
-                        }
+                    // Attempt to get cached credentials or acquire credentials if interactivity is allowed.
+                    if ((operationArguments.Interactivity != Interactivity.Always
+                            && (credentials = await authentication.GetCredentials(operationArguments.TargetUri)) != null)
+                        || (operationArguments.Interactivity != Interactivity.Never
+                            && (credentials = await basicAuth.AcquireCredentials(operationArguments.TargetUri)) != null))
+                    {
+                        program.Trace.WriteLine("credentials found.");
+                        // No need to save the credentials explicitly, as Git will call back
+                        // with a store command if the credentials are valid.
                     }
-                    break;
+                    else
+                    {
+                        program.Trace.WriteLine($"credentials for '{operationArguments.TargetUri}' not found.");
+                        program.LogEvent($"Failed to retrieve credentials for '{operationArguments.TargetUri}'.", EventLogEntryType.FailureAudit);
+                    }
+                }
+                break;
 
                 case AuthorityType.AzureDirectory:
+                {
+                    var aadAuth = authentication as Vsts.AadAuthentication;
+                    var patOptions = new Vsts.PersonalAccessTokenOptions()
                     {
-                        var aadAuth = authentication as Vsts.AadAuthentication;
-                        var patOptions = new Vsts.PersonalAccessTokenOptions()
-                        {
-                            RequireCompactToken = true,
-                            TokenDuration = operationArguments.TokenDuration,
-                            TokenScope = null,
-                        };
+                        RequireCompactToken = true,
+                        TokenDuration = operationArguments.TokenDuration,
+                        TokenScope = null,
+                    };
 
-                        // Attempt to get cached credentials -> non-interactive logon -> interactive
-                        // logon note that AAD "credentials" are always scoped access tokens.
-                        if (((operationArguments.Interactivity != Interactivity.Always
-                                && ((credentials = await aadAuth.GetCredentials(operationArguments.TargetUri)) != null)
-                                && (!operationArguments.ValidateCredentials
-                                    || await aadAuth.ValidateCredentials(operationArguments.TargetUri, credentials))))
-                            || (operationArguments.Interactivity != Interactivity.Always
-                                && ((credentials = await aadAuth.NoninteractiveLogon(operationArguments.TargetUri, patOptions)) != null)
-                                && (!operationArguments.ValidateCredentials
-                                    || await aadAuth.ValidateCredentials(operationArguments.TargetUri, credentials)))
-                            || (operationArguments.Interactivity != Interactivity.Never
-                                && ((credentials = await aadAuth.InteractiveLogon(operationArguments.TargetUri, patOptions)) != null)
-                                && (!operationArguments.ValidateCredentials
-                                    || await aadAuth.ValidateCredentials(operationArguments.TargetUri, credentials))))
-                        {
-                            program.Trace.WriteLine($"credentials for '{operationArguments.TargetUri}' found.");
-                            program.LogEvent($"Azure Directory credentials  for '{operationArguments.TargetUri}' successfully retrieved.", EventLogEntryType.SuccessAudit);
-                        }
-                        else
-                        {
-                            program.Trace.WriteLine($"credentials for '{operationArguments.TargetUri}' not found.");
-                            program.LogEvent($"Failed to retrieve Azure Directory credentials for '{operationArguments.TargetUri}'.", EventLogEntryType.FailureAudit);
-                        }
+                    // Attempt to get cached credentials -> non-interactive logon -> interactive
+                    // logon note that AAD "credentials" are always scoped access tokens.
+                    if (((operationArguments.Interactivity != Interactivity.Always
+                            && ((credentials = await aadAuth.GetCredentials(operationArguments.TargetUri)) != null)
+                            && (!operationArguments.ValidateCredentials
+                                || await aadAuth.ValidateCredentials(operationArguments.TargetUri, credentials))))
+                        || (operationArguments.Interactivity != Interactivity.Always
+                            && ((credentials = await aadAuth.NoninteractiveLogon(operationArguments.TargetUri, patOptions)) != null)
+                            && (!operationArguments.ValidateCredentials
+                                || await aadAuth.ValidateCredentials(operationArguments.TargetUri, credentials)))
+                        || (operationArguments.Interactivity != Interactivity.Never
+                            && ((credentials = await aadAuth.InteractiveLogon(operationArguments.TargetUri, patOptions)) != null)
+                            && (!operationArguments.ValidateCredentials
+                                || await aadAuth.ValidateCredentials(operationArguments.TargetUri, credentials))))
+                    {
+                        program.Trace.WriteLine($"credentials for '{operationArguments.TargetUri}' found.");
+                        program.LogEvent($"Azure Directory credentials  for '{operationArguments.TargetUri}' successfully retrieved.", EventLogEntryType.SuccessAudit);
                     }
-                    break;
+                    else
+                    {
+                        program.Trace.WriteLine($"credentials for '{operationArguments.TargetUri}' not found.");
+                        program.LogEvent($"Failed to retrieve Azure Directory credentials for '{operationArguments.TargetUri}'.", EventLogEntryType.FailureAudit);
+                    }
+                }
+                break;
 
                 case AuthorityType.MicrosoftAccount:
+                {
+                    var msaAuth = authentication as Vsts.MsaAuthentication;
+                    var patOptions = new Vsts.PersonalAccessTokenOptions()
                     {
-                        var msaAuth = authentication as Vsts.MsaAuthentication;
-                        var patOptions = new Vsts.PersonalAccessTokenOptions()
-                        {
-                            RequireCompactToken = true,
-                            TokenDuration = operationArguments.TokenDuration,
-                            TokenScope = null,
-                        };
+                        RequireCompactToken = true,
+                        TokenDuration = operationArguments.TokenDuration,
+                        TokenScope = null,
+                    };
 
-                        // Attempt to get cached credentials -> interactive logon note that MSA
-                        // "credentials" are always scoped access tokens.
-                        if (((operationArguments.Interactivity != Interactivity.Always
-                                && ((credentials = await msaAuth.GetCredentials(operationArguments.TargetUri)) != null)
-                                && (!operationArguments.ValidateCredentials
-                                    || await msaAuth.ValidateCredentials(operationArguments.TargetUri, credentials))))
-                            || (operationArguments.Interactivity != Interactivity.Never
-                                && ((credentials = await msaAuth.InteractiveLogon(operationArguments.TargetUri, patOptions)) != null)
-                                && (!operationArguments.ValidateCredentials
-                                    || await msaAuth.ValidateCredentials(operationArguments.TargetUri, credentials))))
-                        {
-                            program.Trace.WriteLine($"credentials for '{operationArguments.TargetUri}' found.");
-                            program.LogEvent($"Microsoft Live credentials for '{operationArguments.TargetUri}' successfully retrieved.", EventLogEntryType.SuccessAudit);
-                        }
-                        else
-                        {
-                            program.Trace.WriteLine($"credentials for '{operationArguments.TargetUri}' not found.");
-                            program.LogEvent($"Failed to retrieve Microsoft Live credentials for '{operationArguments.TargetUri}'.", EventLogEntryType.FailureAudit);
-                        }
+                    // Attempt to get cached credentials -> interactive logon note that MSA
+                    // "credentials" are always scoped access tokens.
+                    if (((operationArguments.Interactivity != Interactivity.Always
+                            && ((credentials = await msaAuth.GetCredentials(operationArguments.TargetUri)) != null)
+                            && (!operationArguments.ValidateCredentials
+                                || await msaAuth.ValidateCredentials(operationArguments.TargetUri, credentials))))
+                        || (operationArguments.Interactivity != Interactivity.Never
+                            && ((credentials = await msaAuth.InteractiveLogon(operationArguments.TargetUri, patOptions)) != null)
+                            && (!operationArguments.ValidateCredentials
+                                || await msaAuth.ValidateCredentials(operationArguments.TargetUri, credentials))))
+                    {
+                        program.Trace.WriteLine($"credentials for '{operationArguments.TargetUri}' found.");
+                        program.LogEvent($"Microsoft Live credentials for '{operationArguments.TargetUri}' successfully retrieved.", EventLogEntryType.SuccessAudit);
                     }
-                    break;
+                    else
+                    {
+                        program.Trace.WriteLine($"credentials for '{operationArguments.TargetUri}' not found.");
+                        program.LogEvent($"Failed to retrieve Microsoft Live credentials for '{operationArguments.TargetUri}'.", EventLogEntryType.FailureAudit);
+                    }
+                }
+                break;
 
                 case AuthorityType.GitHub:
-                    {
-                        var ghAuth = authentication as Github.Authentication;
+                {
+                    var ghAuth = authentication as Github.Authentication;
 
-                        if ((operationArguments.Interactivity != Interactivity.Always
-                                && ((credentials = await ghAuth.GetCredentials(operationArguments.TargetUri)) != null)
-                                && (!operationArguments.ValidateCredentials
-                                    || await ghAuth.ValidateCredentials(operationArguments.TargetUri, credentials)))
-                            || (operationArguments.Interactivity != Interactivity.Never
-                                && ((credentials = await ghAuth.InteractiveLogon(operationArguments.TargetUri)) != null)
-                                && (!operationArguments.ValidateCredentials
-                                    || await ghAuth.ValidateCredentials(operationArguments.TargetUri, credentials))))
-                        {
-                            program.Trace.WriteLine($"credentials for '{operationArguments.TargetUri}' found.");
-                            program.LogEvent($"GitHub credentials for '{operationArguments.TargetUri}' successfully retrieved.", EventLogEntryType.SuccessAudit);
-                        }
-                        else
-                        {
-                            program.Trace.WriteLine($"credentials for '{operationArguments.TargetUri}' not found.");
-                            program.LogEvent($"Failed to retrieve GitHub credentials for '{operationArguments.TargetUri}'.", EventLogEntryType.FailureAudit);
-                        }
+                    if ((operationArguments.Interactivity != Interactivity.Always
+                            && ((credentials = await ghAuth.GetCredentials(operationArguments.TargetUri)) != null)
+                            && (!operationArguments.ValidateCredentials
+                                || await ghAuth.ValidateCredentials(operationArguments.TargetUri, credentials)))
+                        || (operationArguments.Interactivity != Interactivity.Never
+                            && ((credentials = await ghAuth.InteractiveLogon(operationArguments.TargetUri)) != null)
+                            && (!operationArguments.ValidateCredentials
+                                || await ghAuth.ValidateCredentials(operationArguments.TargetUri, credentials))))
+                    {
+                        program.Trace.WriteLine($"credentials for '{operationArguments.TargetUri}' found.");
+                        program.LogEvent($"GitHub credentials for '{operationArguments.TargetUri}' successfully retrieved.", EventLogEntryType.SuccessAudit);
                     }
-                    break;
+                    else
+                    {
+                        program.Trace.WriteLine($"credentials for '{operationArguments.TargetUri}' not found.");
+                        program.LogEvent($"Failed to retrieve GitHub credentials for '{operationArguments.TargetUri}'.", EventLogEntryType.FailureAudit);
+                    }
+                }
+                break;
 
                 case AuthorityType.Bitbucket:
-                    {
-                        var bbcAuth = authentication as Bitbucket.Authentication;
+                {
+                    var bbcAuth = authentication as Bitbucket.Authentication;
 
-                        if (((operationArguments.Interactivity != Interactivity.Always)
-                                && ((credentials = await bbcAuth.GetCredentials(operationArguments.TargetUri, operationArguments.Username)) != null)
-                                && (!operationArguments.ValidateCredentials
-                                    || ((credentials = await bbcAuth.ValidateCredentials(operationArguments.TargetUri, operationArguments.Username, credentials)) != null)))
-                            || ((operationArguments.Interactivity != Interactivity.Never)
-                                && ((credentials = await bbcAuth.InteractiveLogon(operationArguments.TargetUri, operationArguments.Username)) != null)
-                                && (!operationArguments.ValidateCredentials
-                                    || ((credentials = await bbcAuth.ValidateCredentials(operationArguments.TargetUri, operationArguments.Username, credentials)) != null))))
+                    if (((operationArguments.Interactivity != Interactivity.Always)
+                            && ((credentials = await bbcAuth.GetCredentials(operationArguments.TargetUri, operationArguments.Username)) != null)
+                            && (!operationArguments.ValidateCredentials
+                                || ((credentials = await bbcAuth.ValidateCredentials(operationArguments.TargetUri, operationArguments.Username, credentials)) != null)))
+                        || ((operationArguments.Interactivity != Interactivity.Never)
+                            && ((credentials = await bbcAuth.InteractiveLogon(operationArguments.TargetUri, operationArguments.Username)) != null)
+                            && (!operationArguments.ValidateCredentials
+                                || ((credentials = await bbcAuth.ValidateCredentials(operationArguments.TargetUri, operationArguments.Username, credentials)) != null))))
+                    {
+                        program.Trace.WriteLine($"credentials for '{operationArguments.TargetUri}' found.");
+                        // Bitbucket relies on a username + secret, so make sure there is a
+                        // username to return.
+                        if (operationArguments.Username != null)
                         {
-                            program.Trace.WriteLine($"credentials for '{operationArguments.TargetUri}' found.");
-                            // Bitbucket relies on a username + secret, so make sure there is a
-                            // username to return.
-                            if (operationArguments.Username != null)
-                            {
-                                credentials = new Credential(operationArguments.Username, credentials.Password);
-                            }
-                            program.LogEvent($"Bitbucket credentials for '{operationArguments.TargetUri}' successfully retrieved.", EventLogEntryType.SuccessAudit);
+                            credentials = new Credential(operationArguments.Username, credentials.Password);
                         }
-                        else
-                        {
-                            program.LogEvent($"Failed to retrieve Bitbucket credentials for '{operationArguments.TargetUri}'.", EventLogEntryType.FailureAudit);
-                        }
+                        program.LogEvent($"Bitbucket credentials for '{operationArguments.TargetUri}' successfully retrieved.", EventLogEntryType.SuccessAudit);
                     }
-                    break;
+                    else
+                    {
+                        program.LogEvent($"Failed to retrieve Bitbucket credentials for '{operationArguments.TargetUri}'.", EventLogEntryType.FailureAudit);
+                    }
+                }
+                break;
 
                 case AuthorityType.Ntlm:
-                    {
-                        program.Trace.WriteLine($"'{operationArguments.TargetUri}' is NTLM.");
-                        credentials = BasicAuthentication.NtlmCredentials;
-                    }
-                    break;
+                {
+                    program.Trace.WriteLine($"'{operationArguments.TargetUri}' is NTLM.");
+                    credentials = BasicAuthentication.NtlmCredentials;
+                }
+                break;
             }
 
             if (credentials != null)
@@ -902,8 +913,8 @@ namespace Microsoft.Alm.Cli
                     goto parse_localval;
                 }
 
-                // Parse the value into a bool.
-                parse_localval:
+            // Parse the value into a bool.
+            parse_localval:
 
                 // An empty value is unset / should not be there, so treat it as if it isn't.
                 if (string.IsNullOrWhiteSpace(localVal))

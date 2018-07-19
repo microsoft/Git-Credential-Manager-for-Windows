@@ -72,6 +72,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="BasicAuthenticationTests.cs" />
+    <Compile Include="BasicLogonTests.cs" />
     <Compile Include="BitbucketLogonTests.cs" />
     <Compile Include="GlobalSuppressions.cs" />
     <Compile Include="OperationArgumentsTests.cs" />
