@@ -371,7 +371,7 @@ namespace VisualStudioTeamServices.Authentication
                     {
                         // Even if the service responded, if the issue isn't a 400 class response then
                         // the credentials were likely not rejected.
-                        if ((int)response.StatusCode < 400 && (int)response.StatusCode >= 500)
+                        if ((int)response.StatusCode < 400 || (int)response.StatusCode >= 500)
                         {
                             Trace.WriteLine($"unable to validate credentials for '{targetUri}', unexpected response [{(int)response.StatusCode} {response.ReasonPhrase}].");
 
