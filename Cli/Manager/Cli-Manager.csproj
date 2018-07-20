@@ -20,6 +20,9 @@
     <ProjectDir>$(MSBuildThisFileDirectory)</ProjectDir>
     <OutputPath>$(ProjectDir)$(OutputPath)</OutputPath>
   </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)' == 'Debug' ">
+    <StartArguments Condition=" '$(StartArguments)' == '' OR '$(StartArguments)' == '*Undefined*' ">get</StartArguments>
+  </PropertyGroup>
   <ItemGroup>
     <Reference Include="System" />
     <Reference Include="System.Core" />
