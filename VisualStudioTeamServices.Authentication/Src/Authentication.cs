@@ -409,7 +409,11 @@ namespace VisualStudioTeamServices.Authentication
         /// <param name="credentials">The credentials to validate.</param>
         public async Task<bool> ValidateCredentials(TargetUri targetUri, Credential credentials)
         {
-            return await Authority.ValidateCredentials(targetUri, credentials);
+            if (targetUri is null)
+                throw new ArgumentNullException(nameof(targetUri));
+
+            return credentials != null
+                && await Authority.ValidateCredentials(targetUri, credentials);
         }
 
         /// <summary>

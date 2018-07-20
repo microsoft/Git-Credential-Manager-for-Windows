@@ -304,8 +304,9 @@ namespace VisualStudioTeamServices.Authentication
         {
             if (targetUri is null)
                 throw new ArgumentNullException(nameof(targetUri));
+
             if (credentials is null)
-                throw new ArgumentNullException(nameof(credentials));
+                return false;
 
             try
             {
