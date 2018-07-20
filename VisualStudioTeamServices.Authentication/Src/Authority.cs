@@ -344,8 +344,9 @@ namespace VisualStudioTeamServices.Authentication
         {
             if (targetUri is null)
                 throw new ArgumentNullException(nameof(targetUri));
+
             if (token is null)
-                throw new ArgumentNullException(nameof(token));
+                return false;
 
             // Personal access tokens are effectively credentials, treat them as such.
             if (token.Type == TokenType.Personal)
