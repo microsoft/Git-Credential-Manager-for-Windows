@@ -310,7 +310,7 @@ namespace VisualStudioTeamServices.Authentication
             if (targetUri is null)
                 throw new ArgumentNullException(nameof(targetUri));
             if (credentials is null)
-                throw new ArgumentNullException(nameof(credentials));
+                return false;
 
             try
             {
@@ -331,14 +331,31 @@ namespace VisualStudioTeamServices.Authentication
 
                     // Even if the service responded, if the issue isn't a 400 class response then
                     // the credentials were likely not rejected.
-                    if ((int)response.StatusCode < 400 && (int)response.StatusCode >= 500)
+                    if ((int)response.StatusCode < 400 || (int)response.StatusCode >= 500)
+                    {
+                        Trace.WriteLine($"unable to validate credentials for '{targetUri}', unexpected response [{(int)response.StatusCode} {response.ReasonPhrase}].");
+
                         return true;
+                    }
+
+                    Trace.WriteLine($"credential validation for '{targetUri}' failed [{(int)response.StatusCode} {response.ReasonPhrase}].");
+
+                    return false;
                 }
+            }
+            catch (HttpRequestException exception)
+            {
+                // Since we're unable to invalidate the credentials, return optimistic results.
+                // This avoid credential invalidation due to network instability, etc.
+                Trace.WriteLine($"unable to validate credentials for '{targetUri}', failure occurred before server could respond.");
+                Trace.WriteException(exception);
+
+                return true;
             }
             catch (Exception exception)
             {
                 Trace.WriteException(exception);
-            }
+            };
 
             Trace.WriteLine($"credential validation for '{targetUri}' failed.");
             return false;
@@ -349,7 +366,7 @@ namespace VisualStudioTeamServices.Authentication
             if (targetUri is null)
                 throw new ArgumentNullException(nameof(targetUri));
             if (token is null)
-                throw new ArgumentNullException(nameof(token));
+                return false;
 
             // Personal access tokens are effectively credentials, treat them as such.
             if (token.Type == TokenType.Personal)
