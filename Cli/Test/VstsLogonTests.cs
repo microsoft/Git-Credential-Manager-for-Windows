@@ -227,61 +227,7 @@ namespace Microsoft.Alm.Cli.Test
             using (var stream = new MemoryStream(outputBuffer))
             using (var reader = new StreamReader(stream))
             {
-                bool foundHost = false;
-                bool foundPassword = false;
-                bool foundProtocol = false;
-                bool foundUsername = false;
-
-                string line;
-                while ((line = reader.ReadLine()) != null)
-                {
-                    if (string.IsNullOrWhiteSpace(line))
-                        break;
-
-                    int index = line.IndexOf('=');
-                    Assert.NotEqual(-1, index);
-
-                    string name = line.Substring(0, index);
-                    string value = line.Substring(index + 1);
-
-                    switch (name)
-                    {
-                        case "protocol":
-                        {
-                            foundProtocol = true;
-                            Assert.Equal(protocol, value, Ordinal);
-                        }
-                        break;
-
-                        case "host":
-                        {
-                            foundHost = true;
-                            Assert.Equal(host, value, Ordinal);
-                        }
-                        break;
-
-                        case "path":
-                            break;
-
-                        case "username":
-                        {
-                            foundUsername = true;
-                            Assert.Equal("Personal Access Token", value, Ordinal);
-                        }
-                        break;
-
-                        case "password":
-                        {
-                            foundPassword = true;
-                        }
-                        break;
-                    }
-                }
-
-                Assert.True(foundProtocol);
-                Assert.True(foundHost);
-                Assert.True(foundPassword);
-                Assert.True(foundUsername);
+                ValidateOutput(reader, protocol, host, "Personal Access Token", true);
             }
 
             using (var stream = new MemoryStream(errorBuffer))
@@ -327,61 +273,7 @@ namespace Microsoft.Alm.Cli.Test
             using (var stream = new MemoryStream(outputBuffer))
             using (var reader = new StreamReader(stream))
             {
-                bool foundHost = false;
-                bool foundPassword = false;
-                bool foundProtocol = false;
-                bool foundUsername = false;
-
-                string line;
-                while ((line = reader.ReadLine()) != null)
-                {
-                    if (string.IsNullOrWhiteSpace(line))
-                        break;
-
-                    int index = line.IndexOf('=');
-                    Assert.NotEqual(-1, index);
-
-                    string name = line.Substring(0, index);
-                    string value = line.Substring(index + 1);
-
-                    switch (name)
-                    {
-                        case "protocol":
-                        {
-                            foundProtocol = true;
-                            Assert.Equal(protocol, value, Ordinal);
-                        }
-                        break;
-
-                        case "host":
-                        {
-                            foundHost = true;
-                            Assert.Equal(host, value, Ordinal);
-                        }
-                        break;
-
-                        case "path":
-                            break;
-
-                        case "username":
-                        {
-                            foundUsername = true;
-                            Assert.Equal("Personal Access Token", value, Ordinal);
-                        }
-                        break;
-
-                        case "password":
-                        {
-                            foundPassword = true;
-                        }
-                        break;
-                    }
-                }
-
-                Assert.True(foundProtocol);
-                Assert.True(foundHost);
-                Assert.True(foundPassword);
-                Assert.True(foundUsername);
+                ValidateOutput(reader, protocol, host, "Personal Access Token", true);
             }
 
             using (var stream = new MemoryStream(errorBuffer))
@@ -427,61 +319,7 @@ namespace Microsoft.Alm.Cli.Test
             using (var stream = new MemoryStream(outputBuffer))
             using (var reader = new StreamReader(stream))
             {
-                bool foundHost = false;
-                bool foundPassword = false;
-                bool foundProtocol = false;
-                bool foundUsername = false;
-
-                string line;
-                while ((line = reader.ReadLine()) != null)
-                {
-                    if (string.IsNullOrWhiteSpace(line))
-                        break;
-
-                    int index = line.IndexOf('=');
-                    Assert.NotEqual(-1, index);
-
-                    string name = line.Substring(0, index);
-                    string value = line.Substring(index + 1);
-
-                    switch (name)
-                    {
-                        case "protocol":
-                        {
-                            foundProtocol = true;
-                            Assert.Equal(protocol, value, Ordinal);
-                        }
-                        break;
-
-                        case "host":
-                        {
-                            foundHost = true;
-                            Assert.Equal(host, value, Ordinal);
-                        }
-                        break;
-
-                        case "path":
-                            break;
-
-                        case "username":
-                        {
-                            foundUsername = true;
-                            Assert.Equal("Personal Access Token", value, Ordinal);
-                        }
-                        break;
-
-                        case "password":
-                        {
-                            foundPassword = true;
-                        }
-                        break;
-                    }
-                }
-
-                Assert.True(foundProtocol);
-                Assert.True(foundHost);
-                Assert.True(foundPassword);
-                Assert.True(foundUsername);
+                ValidateOutput(reader, protocol, host, "Personal Access Token", true);
             }
 
             using (var stream = new MemoryStream(errorBuffer))
@@ -527,61 +365,7 @@ namespace Microsoft.Alm.Cli.Test
             using (var stream = new MemoryStream(outputBuffer))
             using (var reader = new StreamReader(stream))
             {
-                bool foundHost = false;
-                bool foundPassword = false;
-                bool foundProtocol = false;
-                bool foundUsername = false;
-
-                string line;
-                while ((line = reader.ReadLine()) != null)
-                {
-                    if (string.IsNullOrWhiteSpace(line))
-                        break;
-
-                    int index = line.IndexOf('=');
-                    Assert.NotEqual(-1, index);
-
-                    string name = line.Substring(0, index);
-                    string value = line.Substring(index + 1);
-
-                    switch (name)
-                    {
-                        case "protocol":
-                        {
-                            foundProtocol = true;
-                            Assert.Equal(protocol, value, Ordinal);
-                        }
-                        break;
-
-                        case "host":
-                        {
-                            foundHost = true;
-                            Assert.Equal(host, value, Ordinal);
-                        }
-                        break;
-
-                        case "path":
-                            break;
-
-                        case "username":
-                        {
-                            foundUsername = true;
-                            Assert.Equal("Personal Access Token", value, Ordinal);
-                        }
-                        break;
-
-                        case "password":
-                        {
-                            foundPassword = true;
-                        }
-                        break;
-                    }
-                }
-
-                Assert.True(foundProtocol);
-                Assert.True(foundHost);
-                Assert.True(foundPassword);
-                Assert.True(foundUsername);
+                ValidateOutput(reader, protocol, host, "Personal Access Token", true);
             }
 
             using (var stream = new MemoryStream(errorBuffer))
@@ -640,6 +424,86 @@ namespace Microsoft.Alm.Cli.Test
                 var buffer = Encoding.Unicode.GetBytes(message + Environment.NewLine);
                 standardError.Write(buffer, 0, buffer.Length);
             };
+        }
+
+        private static void ValidateOutput(
+            TextReader reader,
+            string expectedProtocol,
+            string expectedHost,
+            string expectedUsername,
+            bool expectPassword)
+        {
+            bool foundHost = false;
+            bool foundPassword = false;
+            bool foundProtocol = false;
+            bool foundUsername = false;
+
+            string line;
+            while ((line = reader.ReadLine()) != null)
+            {
+                if (string.IsNullOrWhiteSpace(line))
+                    break;
+
+                int index = line.IndexOf('=');
+                Assert.NotEqual(-1, index);
+
+                string name = line.Substring(0, index);
+                string value = line.Substring(index + 1);
+
+                switch (name)
+                {
+                    case "protocol":
+                    {
+                        foundProtocol = true;
+                        Assert.Equal(expectedProtocol, value, Ordinal);
+                    }
+                    break;
+
+                    case "host":
+                    {
+                        foundHost = true;
+                        Assert.Equal(expectedHost, value, Ordinal);
+                    }
+                    break;
+
+                    case "path":
+                        break;
+
+                    case "username":
+                    {
+                        foundUsername = true;
+                        Assert.Equal(expectedUsername, value, Ordinal);
+                    }
+                    break;
+
+                    case "password":
+                    {
+                        foundPassword = true;
+                    }
+                    break;
+                }
+            }
+
+            Assert.True(foundProtocol);
+            Assert.True(foundHost);
+
+            if (expectPassword)
+            {
+                Assert.True(foundPassword);
+            }
+            else
+            {
+                Assert.False(foundPassword);
+            }
+
+            if (expectedUsername is null)
+            {
+                Assert.False(foundUsername);
+            }
+            else
+            {
+                Assert.True(foundUsername);
+            }
         }
     }
 }

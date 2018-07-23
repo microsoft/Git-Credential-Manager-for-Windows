@@ -24,6 +24,7 @@
 **/
 
 using System;
+using System.Net;
 using System.Net.Http;
 using System.Text;
 using System.Text.RegularExpressions;
@@ -426,6 +427,8 @@ namespace VisualStudioTeamServices.Authentication
 
         internal async Task<bool> ValidateSecret(TargetUri targetUri, Secret secret)
         {
+            const string AnonymousUserPattern = @"""properties""\s*:\s*{\s*""Account""\s*:\s*{\s*""\$type""\s*:\s*""System.String""\s*,\s*""\$value""\s*:\s*""Anonymous""}\s*}";
+
             if (targetUri is null)
                 throw new ArgumentNullException(nameof(targetUri));
 
@@ -437,6 +440,7 @@ namespace VisualStudioTeamServices.Authentication
             var options = new NetworkRequestOptions(true)
             {
                 Authorization = secret,
+                CookieContainer = new CookieContainer(),
             };
 
             try
@@ -444,14 +448,26 @@ namespace VisualStudioTeamServices.Authentication
                 // Send the request and wait for the response.
                 using (var response = await Network.HttpGetAsync(requestUri, options))
                 {
-                    if (response.IsSuccessStatusCode)
+                    HttpStatusCode statusCode = response.StatusCode;
+                    string content = response?.Content?.AsString;
+
+                    // If the server responds with content, and said content matches the anonymous details the credentials are invalid.
+                    if (content != null && Regex.IsMatch(content, AnonymousUserPattern, RegexOptions.CultureInvariant | RegexOptions.IgnoreCase))
+                    {
+                        Trace.WriteLine($"credential validation for '{targetUri}' failed.");
+
+                        return false;
+                    }
+
+                    // If the service responded with a 2XX status code the credentials are valid.
+                    if (statusCode >= HttpStatusCode.OK && statusCode < HttpStatusCode.Ambiguous)
                         return true;
 
                     Trace.WriteLine($"credential validation for '{targetUri}' failed [{(int)response.StatusCode}].");
 
                     // Even if the service responded, if the issue isn't a 400 class response then the credentials were likely not rejected.
-                    return (int)response.StatusCode < 400
-                        || (int)response.StatusCode >= 500;
+                    if (statusCode < HttpStatusCode.BadRequest || statusCode >= HttpStatusCode.InternalServerError)
+                        return true;
                 }
             }
             catch (HttpRequestException exception)
@@ -467,8 +483,12 @@ namespace VisualStudioTeamServices.Authentication
             {
                 Trace.WriteLine($"credential validation for '{targetUri}' failed.");
                 Trace.WriteException(exception);
+
                 return false;
             }
+
+            Trace.WriteLine($"credential validation for '{targetUri}' failed.");
+            return false;
         }
 
         private async Task<TargetUri> CreatePersonalAccessTokenRequestUri(TargetUri targetUri, Secret authorization, bool requireCompactToken)

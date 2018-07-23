@@ -113,7 +113,7 @@
                       "User-Agent=CLR/4.0.30319",
                       "User-Agent=git-tools/4.5.0"
                     ],
-                    "Flags": 27
+                    "Flags": 31
                   },
                   "Response": {
                     "Content": {

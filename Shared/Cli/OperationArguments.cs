@@ -30,7 +30,6 @@ using System.Text;
 using System.Threading.Tasks;
 using Microsoft.Alm.Authentication;
 using static System.Globalization.CultureInfo;
-
 using Git = Microsoft.Alm.Authentication.Git;
 using Vsts = VisualStudioTeamServices.Authentication;
 
@@ -130,7 +129,7 @@ namespace Microsoft.Alm.Cli
         {
             get
             {
-                if (_environmentVariables == null)
+                if (_environmentVariables is null)
                 {
                     _environmentVariables = new Dictionary<string, string>(Settings.GetEnvironmentVariables(), Program.EnvironKeyComparer);
                 }
