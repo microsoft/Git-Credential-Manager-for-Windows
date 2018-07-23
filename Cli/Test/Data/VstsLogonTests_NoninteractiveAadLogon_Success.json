@@ -3109,7 +3109,7 @@
                   "Input": {
                     "Data": "YwBvAGYAeABzAG8AcwBmAHcAZwB4AHYAbABoAHAAZQBuAGwAbwBoADIAbwBkAGIAZQBkAGwAaABtAGoAYgB1AHAAagA1ADQAbAAyAGkAZgA3AHAAegBtAGoAYwB3AGMAYwBoAHgAYQA=",
                     "Key": "git:https://microsoft-git-tools.visualstudio.com",
-                    "Name": "Personal Access Token"
+                    "Name": "PersonalAccessToken"
                   },
                   "Ordinal": 398,
                   "Output": true

@@ -42,9 +42,21 @@
     <Reference Include="System.Configuration" />
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\..\Microsoft.Alm.Authentication\Proxy\Microsoft.Alm.Authentication.Proxy.csproj">
+      <Project>{04151231-fe04-4a05-943a-54eb952cea62}</Project>
+      <Name>Microsoft.Alm.Authentication.Proxy</Name>
+    </ProjectReference>
     <ProjectReference Include="..\..\Microsoft.Alm.Authentication\Src\Microsoft.Alm.Authentication.csproj">
       <Project>{19770407-b493-459d-bb4f-04fbefb1ba13}</Project>
       <Name>Microsoft.Alm.Authentication</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\..\Microsoft.Alm.Authentication\Test\Microsoft.Alm.Authentication.Test.csproj">
+      <Project>{19781214-371f-415c-93c5-44ceaa0e9a34}</Project>
+      <Name>Microsoft.Alm.Authentication.Test</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\Proxy\VisualStudioTeamServices.Authentication.Proxy.csproj">
+      <Project>{04151231-4fa4-49b2-ae6d-ebdba36b1169}</Project>
+      <Name>VisualStudioTeamServices.Authentication.Proxy</Name>
     </ProjectReference>
     <ProjectReference Include="..\Src\VisualStudioTeamServices.Authentication.csproj">
       <Project>{19770407-d7d8-4a37-914c-f552ff4b90d4}</Project>

@@ -227,7 +227,53 @@ namespace Microsoft.Alm.Cli.Test
             using (var stream = new MemoryStream(outputBuffer))
             using (var reader = new StreamReader(stream))
             {
-                ValidateOutput(reader, protocol, host, "Personal Access Token", true);
+                ValidateOutput(reader, protocol, host, "PersonalAccessToken", true);
+            }
+
+            using (var stream = new MemoryStream(errorBuffer))
+            using (var reader = new StreamReader(stream))
+            {
+                string line = reader.ReadLine();
+
+                Assert.True(line is null || line.Length == 0 || line[0] == '\0', $"Unexpected standard error content: \"{line}\"");
+            }
+        }
+
+        [Fact]
+        public void InteractiveAadLogonWithRevokedCredentials_Success()
+        {
+            const string protocol = "https";
+            const string host = "microsoft-git-tools.visualstudio.com";
+
+            InitializeTest();
+
+            var errorBuffer = new byte[4096];
+            var outputBuffer = new byte[4096];
+            var program = new Program(Context);
+
+            using (var inputStream = new MemoryStream())
+            using (var outputStream = new MemoryStream(outputBuffer))
+            using (var errorStream = new MemoryStream(errorBuffer))
+            using (var writer = new StreamWriter(inputStream, Utf8))
+            {
+                SetupProgramStandardPipes(program, inputStream, outputStream, errorStream);
+
+                MimicGitCredential(writer, protocol, host);
+
+                inputStream.Seek(0, SeekOrigin.Begin);
+
+                program._exit = (Program p, int exitcode, string message, string path, int line, string name) =>
+                {
+                    Assert.Same(program, p);
+                };
+
+                program.Get();
+            }
+
+            using (var stream = new MemoryStream(outputBuffer))
+            using (var reader = new StreamReader(stream))
+            {
+                ValidateOutput(reader, protocol, host, "PersonalAccessToken", true);
             }
 
             using (var stream = new MemoryStream(errorBuffer))
@@ -273,7 +319,53 @@ namespace Microsoft.Alm.Cli.Test
             using (var stream = new MemoryStream(outputBuffer))
             using (var reader = new StreamReader(stream))
             {
-                ValidateOutput(reader, protocol, host, "Personal Access Token", true);
+                ValidateOutput(reader, protocol, host, "PersonalAccessToken", true);
+            }
+
+            using (var stream = new MemoryStream(errorBuffer))
+            using (var reader = new StreamReader(stream))
+            {
+                string line = reader.ReadLine();
+
+                Assert.True(line is null || line.Length == 0 || line[0] == '\0', $"Unexpected standard error content: \"{line}\"");
+            }
+        }
+
+        [Fact]
+        public void InteractiveMsaLogonWithRevokedCredentials_Success()
+        {
+            const string protocol = "https";
+            const string host = "dev-x.visualstudio.com";
+
+            InitializeTest();
+
+            var errorBuffer = new byte[4096];
+            var outputBuffer = new byte[4096];
+            var program = new Program(Context);
+
+            using (var inputStream = new MemoryStream())
+            using (var outputStream = new MemoryStream(outputBuffer))
+            using (var errorStream = new MemoryStream(errorBuffer))
+            using (var writer = new StreamWriter(inputStream, Utf8))
+            {
+                SetupProgramStandardPipes(program, inputStream, outputStream, errorStream);
+
+                MimicGitCredential(writer, protocol, host);
+
+                inputStream.Seek(0, SeekOrigin.Begin);
+
+                program._exit = (Program p, int exitcode, string message, string path, int line, string name) =>
+                {
+                    Assert.Same(program, p);
+                };
+
+                program.Get();
+            }
+
+            using (var stream = new MemoryStream(outputBuffer))
+            using (var reader = new StreamReader(stream))
+            {
+                ValidateOutput(reader, protocol, host, "PersonalAccessToken", true);
             }
 
             using (var stream = new MemoryStream(errorBuffer))
@@ -319,7 +411,7 @@ namespace Microsoft.Alm.Cli.Test
             using (var stream = new MemoryStream(outputBuffer))
             using (var reader = new StreamReader(stream))
             {
-                ValidateOutput(reader, protocol, host, "Personal Access Token", true);
+                ValidateOutput(reader, protocol, host, "PersonalAccessToken", true);
             }
 
             using (var stream = new MemoryStream(errorBuffer))
@@ -365,7 +457,7 @@ namespace Microsoft.Alm.Cli.Test
             using (var stream = new MemoryStream(outputBuffer))
             using (var reader = new StreamReader(stream))
             {
-                ValidateOutput(reader, protocol, host, "Personal Access Token", true);
+                ValidateOutput(reader, protocol, host, "PersonalAccessToken", true);
             }
 
             using (var stream = new MemoryStream(errorBuffer))
