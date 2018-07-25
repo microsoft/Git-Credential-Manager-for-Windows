@@ -25,13 +25,22 @@
 
 using System;
 using System.Collections.Generic;
+using System.Threading.Tasks;
 using Microsoft.Alm.Authentication;
+using Microsoft.Alm.Authentication.Test;
 using Xunit;
 
 namespace VisualStudioTeamServices.Authentication.Test
 {
-    public class AuthorityTests
+    public class AuthorityTests : UnitTestBase
     {
+        private const string OnceValidPersonalAccessToken = "u73gjiqqr5wyixbextwup2a5sx3veuklvbfmc54c5yuisnew2uwq";
+        private const string MicrosoftGitToolsVstsAccount = "http://microsoft-git-tools.visualstudio.com/";
+
+        public AuthorityTests(Xunit.Abstractions.ITestOutputHelper outputHelper)
+            : base(XunitHelper.Convert(outputHelper))
+        { }
+
         public static object[][] GetSecretKeyData
         {
             get
@@ -166,6 +175,88 @@ namespace VisualStudioTeamServices.Authentication.Test
             string actualKey = Authentication.GetSecretKey(targetUri, "git");
 
             Assert.Equal(expectedKey, actualKey, StringComparer.Ordinal);
+        }
+
+        [Fact]
+        public async Task ValidateCredentials_Failed()
+        {
+            InitializeTest();
+
+            var authority = new Authority(Context);
+            var credentials = new Credential("invalid-user", "fake+password");
+            var targetUri = new TargetUri(MicrosoftGitToolsVstsAccount);
+
+            Assert.False(await authority.ValidateCredentials(targetUri, credentials));
+        }
+
+        [Fact]
+        public async Task ValidateCredentials_Null()
+        {
+            InitializeTest();
+
+            var authority = new Authority(Context);
+            var targetUri = new TargetUri(MicrosoftGitToolsVstsAccount);
+
+            Assert.False(await authority.ValidateCredentials(targetUri, null));
+        }
+
+        [Fact]
+        public async Task ValidateCredentials_Success()
+        {
+            InitializeTest();
+
+            var authority = new Authority(Context);
+            var credentials = (Credential)new Token(OnceValidPersonalAccessToken, TokenType.Personal);
+            var targetUri = new TargetUri(MicrosoftGitToolsVstsAccount);
+
+            Assert.True(await authority.ValidateCredentials(targetUri, credentials));
+        }
+
+        [Fact]
+        public async Task ValidateToken_Access_Failed()
+        {
+            InitializeTest();
+
+            var authority = new Authority(Context);
+            var token = new Token("invalid+token+value", TokenType.AzureAccess);
+            var targetUri = new TargetUri(MicrosoftGitToolsVstsAccount);
+
+            Assert.False(await authority.ValidateToken(targetUri, token));
+        }
+
+        [Fact]
+        public async Task ValidateToken_Federated_Failed()
+        {
+            InitializeTest();
+
+            var authority = new Authority(Context);
+            var token = new Token("invalid+token+value", TokenType.AzureFederated);
+            var targetUri = new TargetUri(MicrosoftGitToolsVstsAccount);
+
+            Assert.False(await authority.ValidateToken(targetUri, token));
+        }
+
+        [Fact]
+        public async Task ValidateToken_Null()
+        {
+            InitializeTest();
+
+            var authority = new Authority(Context);
+            var targetUri = new TargetUri(MicrosoftGitToolsVstsAccount);
+
+            Assert.False(await authority.ValidateToken(targetUri, null));
+        }
+
+        [Fact]
+        public async Task ValidateToken_Success()
+        {
+            InitializeTest();
+
+            var authority = new Authority(Context);
+            var token = new Token(OnceValidPersonalAccessToken, TokenType.Personal);
+            var targetUri = new TargetUri(MicrosoftGitToolsVstsAccount);
+
+            Assert.True(await authority.ValidateToken(targetUri, token));
         }
     }
 }

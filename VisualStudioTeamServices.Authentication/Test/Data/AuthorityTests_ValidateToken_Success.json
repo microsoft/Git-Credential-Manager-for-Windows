@@ -1,0 +1,102 @@
+/**** Git Process Management Library ****
+ *
+ * Copyright (c) Microsoft Corporation
+ * All rights reserved.
+ *
+ * MIT License
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy
+ * of this software and associated documentation files (the "Software"), to deal
+ * in the Software without restriction, including without limitation the rights to
+ * use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of
+ * the Software, and to permit persons to whom the Software is furnished to do so,
+ * subject to the following conditions:
+ *
+ * The above copyright notice and this permission notice shall be included in all
+ * copies or substantial portions of the Software.
+ *
+ * THE SOFTWARE IS PROVIDED *AS IS*, WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS
+ * FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR
+ * COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN
+ * AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
+ * WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+**/
+
+// Use `Formatting.Indented` to ease review readability.
+{
+  "ExtendedData": [],
+  "DisplayName": "AuthorityTests_ValidateToken_Success",
+  "ResultPath": "E:\\Src\\Microsoft.Alm\\Gcm\\VisualStudioTeamServices.Authentication\\Test\\Results",
+  "Services": {
+    "Network": {
+      "Operations": [
+        {
+          "Methods": [
+            {
+              "Method": "HttpGetAsync",
+              "Queries": [
+                {
+                  "Ordinal": 1,
+                  "Request": {
+                    "Headers": [
+                      "accept=*/*",
+                      "accept-encoding=gzip",
+                      "accept-encoding=deflate",
+                      "User-Agent=Microsoft.Alm.Authentication",
+                      "User-Agent=(Microsoft Windows NT 10.0.17134.0; Win32NT; x64)",
+                      "User-Agent=CLR/4.0.30319",
+                      "User-Agent=git-tools/4.6.0"
+                    ],
+                    "Flags": 31
+                  },
+                  "Response": {
+                    "Content": {
+                      "AsString": "\u001f�\b\u0000\u0000\u0000\u0000\u0000\u0004\u0000�\u0007`\u001cI�%&/m�{J�J��t�\b�`\u0013$ؐ@\u0010������\u001diG#)�*��eVe]f\u0016@�흼��{���{���;�N'���?\\fd\u0001l��J�ɞ!���\u001f?~|\u001f?\"~�Gٺ��˶�fm>����\u001e�⏊�G�>��٦�w�1�G��fy3��U[ћ\u001f��n�|���zR\u0016���4o�Cj�\u000f����<\u0004gUW��,��\u0016̮ͪ_d��\u0000\u001e/����Z7�b�n�j1�}�\u001cO��>n�u�\u0010Wy�\u0016y�1\u00116�z���߭�^Q+�v�����\u0005\u0001��.�r�/\u001c�_�KF\u001f�yS��i��y�\u0014��G{��\u0016y��!(gD�����\u0015\bY��\u000f~D�\u000f�b�l�l9�O>�;��?�=���4��m�\u001fL\u001fl\u001fL���٧\u000f\u001f�?�;��pF\u001d��UY]/������d��I�p�|v0ݞd�l��~��=�w>=�ݙM��÷�\u0001�7�h\u001c���H\u0018\b��y}YL�Y�a�4���˫%���������\u001e�o���} �m\u001f<�=�~p~��\u0007{\u0007����\u0007\u0004l��g�%��,~��VD�/�e��S�_�;eִ'�ly�d�������\u0007����o~�/�\u0000\u0012�m8�\u0003\u0000\u0000",
+                      "ContentType": "application/json",
+                      "HasContent": true
+                    },
+                    "Headers": [
+                      "X-TFS-ProcessId=ea6c2660-572f-427b-a518-383d51cbad11",
+                      "X-TFS-Session=98549428-972b-4fa4-8da5-8a0b700e1419",
+                      "X-VSS-E2EID=98549428-972b-4fa4-8da5-8a0b700e1419"
+                    ],
+                    "StatusCode": 200
+                  }
+                }
+              ]
+            }
+          ],
+          "QueryUrl": "http://microsoft-git-tools.visualstudio.com/_apis/connectiondata"
+        }
+      ]
+    },
+    "Settings": {
+      "EnvironmentVariables": [
+        {
+          "Target": 0,
+          "Values": [
+            {
+              "Name": "HOME",
+              "Variable": "C:\\Users\\Tester"
+            },
+            {
+              "Name": "GCM_DEBUG"
+            }
+          ]
+        }
+      ],
+      "ExitCode": 0,
+      "ExpandVariables": [],
+      "Is64BitOperatingSystem": false,
+      "OsVersion": 0,
+      "SpecialFolders": []
+    },
+    "Storage": {
+      "Operations": []
+    },
+    "Adal": {
+      "Operations": []
+    }
+  }
+}

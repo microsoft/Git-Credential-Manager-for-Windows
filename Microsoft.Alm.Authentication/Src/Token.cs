@@ -26,7 +26,8 @@
 using System;
 using System.Diagnostics;
 using System.Linq;
-using System.Text;
+using static System.Text.Encoding;
+using static System.StringComparer;
 
 namespace Microsoft.Alm.Authentication
 {
@@ -35,7 +36,7 @@ namespace Microsoft.Alm.Authentication
     /// </summary>
     public class Token : Secret, IEquatable<Token>
     {
-        public static readonly StringComparer TokenComparer = StringComparer.Ordinal;
+        public static readonly StringComparer TokenComparer = Ordinal;
 
         public Token(string value, TokenType type)
         {
@@ -130,10 +131,10 @@ namespace Microsoft.Alm.Authentication
 
             name = null;
 
-            System.ComponentModel.DescriptionAttribute attribute = type.GetType()
-                                                                       .GetField(type.ToString())
-                                                                       .GetCustomAttributes(typeof(System.ComponentModel.DescriptionAttribute), false)
-                                                                       .SingleOrDefault() as System.ComponentModel.DescriptionAttribute;
+            var attribute = type.GetType()
+                                .GetField(type.ToString())
+                                .GetCustomAttributes(typeof(System.ComponentModel.DescriptionAttribute), false)
+                                .SingleOrDefault() as System.ComponentModel.DescriptionAttribute;
             name = attribute == null
                 ? type.ToString()
                 : attribute.Description;
@@ -154,7 +155,7 @@ namespace Microsoft.Alm.Authentication
 
                 if (GetFriendlyNameFromType(type, out string typename))
                 {
-                    if (string.Equals(name, typename, StringComparison.OrdinalIgnoreCase))
+                    if (OrdinalIgnoreCase.Equals(name, typename))
                         return true;
                 }
             }
@@ -224,7 +225,7 @@ namespace Microsoft.Alm.Authentication
 
                     if (readType == type)
                     {
-                        string value = Encoding.UTF8.GetString(bytes, preamble, bytes.Length - preamble);
+                        string value = UTF8.GetString(bytes, preamble, bytes.Length - preamble);
 
                         if (!string.IsNullOrWhiteSpace(value))
                         {
@@ -239,7 +240,7 @@ namespace Microsoft.Alm.Authentication
                 // If value hasn't been set yet, fall back to old format decode.
                 if (token is null)
                 {
-                    string value = Encoding.UTF8.GetString(bytes);
+                    string value = UTF8.GetString(bytes);
 
                     if (!string.IsNullOrWhiteSpace(value))
                     {
@@ -271,7 +272,7 @@ namespace Microsoft.Alm.Authentication
 
             try
             {
-                byte[] utf8bytes = Encoding.UTF8.GetBytes(token._value);
+                byte[] utf8bytes = UTF8.GetBytes(token._value);
                 bytes = new byte[utf8bytes.Length + sizeof(TokenType) + sizeof(Guid)];
 
                 fixed (byte* p = bytes)
@@ -308,7 +309,7 @@ namespace Microsoft.Alm.Authentication
             if (token.Type != TokenType.Personal)
                 throw new InvalidCastException($"Cannot cast `{nameof(Token)}` of type '{token.Type}' to `{nameof(Credential)}`");
 
-            return new Credential(token.ToString(), token._value);
+            return new Credential("PersonalAccessToken", token._value);
         }
 
         /// <summary>

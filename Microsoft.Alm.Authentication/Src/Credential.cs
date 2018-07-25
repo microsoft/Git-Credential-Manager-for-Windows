@@ -24,6 +24,10 @@
 **/
 
 using System;
+using static System.StringComparer;
+using static System.Text.Encoding;
+using Convert = System.Convert;
+using CultureInfo = System.Globalization.CultureInfo;
 
 namespace Microsoft.Alm.Authentication
 {
@@ -110,8 +114,8 @@ namespace Microsoft.Alm.Authentication
                 // the credentials hash code.
                 unchecked
                 {
-                    return (int)(StringComparer.Ordinal.GetHashCode(_username) & 0xFFFF0000)
-                         | (int)(StringComparer.Ordinal.GetHashCode(_password) & 0x0000FFFF);
+                    return (int)(Ordinal.GetHashCode(_username) & 0xFFFF0000)
+                         | (int)(Ordinal.GetHashCode(_password) & 0x0000FFFF);
                 }
             }
         }
@@ -121,8 +125,8 @@ namespace Microsoft.Alm.Authentication
         /// </summary>
         public string ToBase64String()
         {
-            string basicAuthValue = string.Format("{0}:{1}", _username, _password);
-            byte[] authBytes = System.Text.Encoding.UTF8.GetBytes(basicAuthValue);
+            string basicAuthValue = string.Format(CultureInfo.InvariantCulture, "{0}:{1}", _username, _password);
+            byte[] authBytes = UTF8.GetBytes(basicAuthValue);
             return Convert.ToBase64String(authBytes);
         }
 
@@ -140,8 +144,8 @@ namespace Microsoft.Alm.Authentication
             if (lhs is null || rhs is null)
                 return false;
 
-            return string.Equals(lhs.Username, rhs.Username, StringComparison.Ordinal)
-                && string.Equals(lhs.Password, rhs.Password, StringComparison.Ordinal);
+            return Ordinal.Equals(lhs.Username, rhs.Username)
+                && Ordinal.Equals(lhs.Password, rhs.Password);
         }
 
         /// <summary>

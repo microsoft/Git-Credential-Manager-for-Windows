@@ -26,9 +26,13 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.IO;
+using System.IO.Compression;
+using System.Linq;
 using System.Net;
 using System.Net.Http;
 using System.Net.Http.Headers;
+using System.Text;
 using System.Threading.Tasks;
 using static System.StringComparer;
 
@@ -75,6 +79,14 @@ namespace Microsoft.Alm.Authentication
 
     public class NetworkRequestOptions
     {
+        internal const string AcceptName = "accept";
+        internal const string AcceptValue = "*/*";
+        internal const string AcceptEncodingName = "accept-encoding";
+        internal const string AcceptEncodingDeflate = "deflate";
+        internal const string AcceptEncodingGzip = "gzip";
+        internal const string CacheControlName = "cache-control";
+        internal const string CacheControlValue = "no-cache";
+
         public NetworkRequestOptions(bool setDefaults)
             : this()
         {
@@ -99,6 +111,10 @@ namespace Microsoft.Alm.Authentication
             var flags = System.Reflection.BindingFlags.Instance | System.Reflection.BindingFlags.NonPublic;
 
             _headers = (HttpRequestHeaders)assembly.CreateInstance(type.FullName, false, flags, null, new object[0], null, null);
+            _headers.Add(AcceptName, AcceptValue);
+            _headers.Add(AcceptEncodingName, AcceptEncodingGzip);
+            _headers.Add(AcceptEncodingName, AcceptEncodingDeflate);
+            _headers.Add(CacheControlName, CacheControlValue);
         }
 
         private Secret _authentication;
@@ -616,6 +632,9 @@ namespace Microsoft.Alm.Authentication
 
     internal class NetworkResponseContent : INetworkResponseContent
     {
+        public const string AcceptEncodingDeflate = NetworkRequestOptions.AcceptEncodingDeflate;
+        public const string AcceptEncodingGzip = NetworkRequestOptions.AcceptEncodingGzip;
+
         private byte[] _byteArray;
         private string _mediaType;
         private string _string;
@@ -660,7 +679,30 @@ namespace Microsoft.Alm.Authentication
                 && (content.Headers.ContentType.MediaType.StartsWith("text/", StringComparison.OrdinalIgnoreCase)
                     || content.Headers.ContentType.MediaType.EndsWith("/json", StringComparison.OrdinalIgnoreCase)))
             {
-                string asString = await content.ReadAsStringAsync();
+                string asString = null;
+
+                if (content.Headers.ContentEncoding.Any(e => OrdinalIgnoreCase.Equals(AcceptEncodingGzip, e)))
+                {
+                    using (var stream = await content.ReadAsStreamAsync())
+                    using (var inflate = new GZipStream(stream, CompressionMode.Decompress))
+                    using (var reader = new StreamReader(inflate, Encoding.UTF8))
+                    {
+                        asString = reader.ReadToEnd();
+                    }
+                }
+                else if (content.Headers.ContentEncoding.Any(e => OrdinalIgnoreCase.Equals(AcceptEncodingDeflate, e)))
+                {
+                    using (var stream = await content.ReadAsStreamAsync())
+                    using (var inflate = new DeflateStream(stream, CompressionMode.Decompress))
+                    using (var reader = new StreamReader(inflate, Encoding.UTF8))
+                    {
+                        asString = reader.ReadToEnd();
+                    }
+                }
+                else
+                {
+                    asString = await content.ReadAsStringAsync();
+                }
 
                 lock (_syncpoint)
                 {
@@ -670,7 +712,34 @@ namespace Microsoft.Alm.Authentication
             }
             else
             {
-                byte[] asBytes = await content.ReadAsByteArrayAsync();
+                byte[] asBytes = null;
+
+                if (content.Headers.ContentEncoding.Any(e => OrdinalIgnoreCase.Equals(AcceptEncodingGzip, e)))
+                {
+                    using (var stream = await content.ReadAsStreamAsync())
+                    using (var inflate = new GZipStream(stream, CompressionMode.Decompress))
+                    using (var memory = new MemoryStream())
+                    {
+                        inflate.CopyTo(memory);
+
+                        asBytes = memory.ToArray();
+                    }
+                }
+                else if (content.Headers.ContentEncoding.Any(e => OrdinalIgnoreCase.Equals(AcceptEncodingDeflate, e)))
+                {
+                    using (var stream = await content.ReadAsStreamAsync())
+                    using (var inflate = new DeflateStream(stream, CompressionMode.Decompress))
+                    using (var memory = new MemoryStream())
+                    {
+                        inflate.CopyTo(memory);
+
+                        asBytes = memory.ToArray();
+                    }
+                }
+                else
+                {
+                    asBytes = await content.ReadAsByteArrayAsync();
+                }
 
                 lock (_syncpoint)
                 {
