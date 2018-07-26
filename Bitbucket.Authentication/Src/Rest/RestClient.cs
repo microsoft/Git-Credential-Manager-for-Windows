@@ -26,7 +26,9 @@ namespace Atlassian.Bitbucket.Authentication.Rest
                 Authorization = authorization,
                 Timeout = TimeSpan.FromMilliseconds(requestTimeout),
             };
-            var requestUri = targetUri.CreateWith(restRootUrl);
+
+            var apiUrl = new Uri(restRootUrl, UserUrl);
+            var requestUri = targetUri.CreateWith(apiUrl);
 
             using (var response = await Network.HttpGetAsync(requestUri, options))
             {
