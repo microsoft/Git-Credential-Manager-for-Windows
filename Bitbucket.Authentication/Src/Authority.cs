@@ -166,7 +166,7 @@ namespace Atlassian.Bitbucket.Authentication
             }
 
             // If the basic authentication test failed then try again as OAuth
-            if (await ValidateCredentials(targetUri, new Token(credentials.Password, TokenType.BitbucketPassword)))
+            if (await ValidateCredentials(targetUri, new Token(credentials.Password, TokenType.BitbucketAccess)))
             {
                 return true;
             }
