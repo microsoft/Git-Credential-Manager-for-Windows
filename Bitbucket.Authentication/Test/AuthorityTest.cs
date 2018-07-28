@@ -1,14 +1,10 @@
-﻿using Atlassian.Bitbucket.Authentication;
-using GitHub.Authentication;
-using Microsoft.Alm.Authentication;
-using System;
-using System.Collections.Generic;
+﻿using System;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+using Atlassian.Bitbucket.Authentication;
+using Microsoft.Alm.Authentication;
 using Xunit;
 
-namespace Bitbucket.Authentication.Test
+namespace Atlassian.Bitbucket.Authentication.Test
 {
     public class AuthorityTest
     {

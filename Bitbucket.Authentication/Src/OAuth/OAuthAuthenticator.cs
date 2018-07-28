@@ -105,7 +105,7 @@ namespace Atlassian.Bitbucket.Authentication.OAuth
             string rawUrlData;
             try
             {
-                //Start a temporary server to handle the callback request and await for the reply
+                // Start a temporary server to handle the callback request and await for the reply.
                 rawUrlData = await SimpleServer.WaitForURLAsync(CallbackUri, cancellationToken);
             }
             catch (Exception ex)
@@ -140,20 +140,18 @@ namespace Atlassian.Bitbucket.Authentication.OAuth
 
         private string GetAuthenticationCode(Dictionary<string, string> qs)
         {
-            if (qs == null)
-            {
+            if (qs is null)
                 return null;
-            }
 
-            return qs.Keys.Where(k => k.EndsWith("code", StringComparison.InvariantCultureIgnoreCase)).Select(k => qs[k]).FirstOrDefault();
+            return qs.Keys.Where(k => k.EndsWith("code", StringComparison.OrdinalIgnoreCase))
+                          .Select(k => qs[k])
+                          .FirstOrDefault();
         }
 
         private string GetErrorDescription(Dictionary<string, string> qs)
         {
-            if (qs == null)
-            {
+            if (qs is null)
                 return null;
-            }
 
             return qs["error_description"];
         }
@@ -188,7 +186,7 @@ namespace Atlassian.Bitbucket.Authentication.OAuth
                     case HttpStatusCode.OK:
                     case HttpStatusCode.Created:
                         {
-                            // the request was successful, look for the tokens in the response
+                            // The request was successful, look for the tokens in the response.
                             string responseText = response.Content.AsString;
                             var token = FindAccessToken(responseText);
                             var refreshToken = FindRefreshToken(responseText);
@@ -197,7 +195,7 @@ namespace Atlassian.Bitbucket.Authentication.OAuth
 
                     case HttpStatusCode.Unauthorized:
                         {
-                            // do something
+                            // Do something.
                             return new AuthenticationResult(AuthenticationResultType.Failure);
                         }
 
@@ -239,7 +237,7 @@ namespace Atlassian.Bitbucket.Authentication.OAuth
                     case HttpStatusCode.OK:
                     case HttpStatusCode.Created:
                         {
-                            // the request was successful, look for the tokens in the response
+                            // The request was successful, look for the tokens in the response.
                             string responseText = response.Content.AsString;
                             var token = FindAccessToken(responseText);
                             var refreshToken = FindRefreshToken(responseText);
@@ -248,7 +246,7 @@ namespace Atlassian.Bitbucket.Authentication.OAuth
 
                     case HttpStatusCode.Unauthorized:
                         {
-                            // do something
+                            // Do something.
                             return new AuthenticationResult(AuthenticationResultType.Failure);
                         }
 
@@ -301,7 +299,9 @@ namespace Atlassian.Bitbucket.Authentication.OAuth
 
         private Dictionary<string, string> GetQueryParameters(string rawUrlData)
         {
-            return rawUrlData.Split('&').ToDictionary(c => c.Split('=')[0], c => Uri.UnescapeDataString(c.Split('=')[1]));
+            return rawUrlData.Split('&')
+                             .ToDictionary(c => c.Split('=')[0],
+                                           c => Uri.UnescapeDataString(c.Split('=')[1]));
         }
 
         private MultipartFormDataContent GetRefreshRequestContent(string currentRefreshToken)
@@ -344,7 +344,7 @@ namespace Atlassian.Bitbucket.Authentication.OAuth
 
         private AuthenticationResult GetAuthenticationResult(Token token, Token refreshToken)
         {
-            // Bitbucket should always return both
+            // Bitbucket should always return both.
             if (token == null || refreshToken == null)
             {
                 Trace.WriteLine("authentication failure");

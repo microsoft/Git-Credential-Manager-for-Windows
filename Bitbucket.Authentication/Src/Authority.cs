@@ -117,7 +117,7 @@ namespace Atlassian.Bitbucket.Authentication
             }
             else
             {
-                BasicAuthAuthenticator basicauth = new BasicAuthAuthenticator(Context);
+                var basicauth = new BasicAuthAuthenticator(Context);
                 try
                 {
                     var restRootUri = new Uri(_restRootUrl);
@@ -135,7 +135,7 @@ namespace Atlassian.Bitbucket.Authentication
         public async Task<AuthenticationResult> RefreshToken(TargetUri targetUri, string refreshToken)
         {
             // Refreshing is only an OAuth concept so use the OAuth tools
-            OAuth.OAuthAuthenticator oauth = new OAuth.OAuthAuthenticator(Context);
+            var oauth = new OAuth.OAuthAuthenticator(Context);
             try
             {
                 return await oauth.RefreshAuthAsync(targetUri, refreshToken, CancellationToken.None);
