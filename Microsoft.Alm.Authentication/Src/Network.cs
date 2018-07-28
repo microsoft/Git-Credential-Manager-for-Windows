@@ -552,6 +552,7 @@ namespace Microsoft.Alm.Authentication
                             switch (token.Type)
                             {
                                 case TokenType.AzureAccess:
+                                case TokenType.BitbucketAccess:
                                 {
                                     // ADAL access tokens are packed into the Authorization header.
                                     httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token.Value);
