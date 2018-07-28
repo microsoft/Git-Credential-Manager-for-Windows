@@ -31,58 +31,115 @@ using static System.StringComparer;
 
 namespace Microsoft.Alm.Cli.Test
 {
-    public class BibucketLogonTests : Authentication.Test.UnitTestBase
+    public class BibucketLogonTests : Atlassian.Bitbucket.Authentication.Test.UnitTestBase
     {
         public BibucketLogonTests(Xunit.Abstractions.ITestOutputHelper output)
             : base(XunitHelper.Convert(output))
         { }
 
-        [Fact(Skip = "No modal proxy available")]
-        public void Logon2fa_Success()
+        [Fact]
+        public void Logon2fa_Cancel()
         {
+            const string Protocol = "https";
+            const string Host = "bitbucket.org";
+
             InitializeTest();
 
             var errorBuffer = new byte[4096];
             var outputBuffer = new byte[4096];
             var program = new Program(Context);
 
-            using (var errorStream = new MemoryStream(errorBuffer))
             using (var inputStream = new MemoryStream())
             using (var outputStream = new MemoryStream(outputBuffer))
+            using (var errorStream = new MemoryStream(errorBuffer))
             using (var writer = new StreamWriter(inputStream, new UTF8Encoding(encoderShouldEmitUTF8Identifier: false)))
             {
-                writer.Write("protocol=https");
-                writer.Write("\n");
-                writer.Write("host=bitbucket.org");
-                writer.Write("\n");
-                writer.Write("username=whoisj");
-                writer.Write("\n\n");
+                SetupProgramStandardPipes(program, inputStream, outputStream, errorStream);
 
-                writer.Flush();
+                MimicGitCredential(writer, Protocol, Host);
 
                 inputStream.Seek(0, SeekOrigin.Begin);
 
                 program._exit = (Program p, int exitcode, string message, string path, int line, string name) =>
                 {
                     Assert.Same(program, p);
+                    Assert.Equal(-1, exitcode);
+                    Assert.Equal(Program.LogonFailedMessage, message, Ordinal);
+                    Assert.Equal(nameof(Program.Get), name, Ordinal);
+
+                    ConsoleFunctions.Exit(program, exitcode, message, path, line, name);
+
+                    throw new ApplicationException(message);
                 };
-                program._openStandardErrorStream = (Program p) =>
+
+                // We know this will throw.
+                Assert.Throws<AggregateException>(() =>
+                {
+                    try
+                    {
+                        program.Get();
+                    }
+                    catch (AggregateException exception)
+                    {
+                        Assert.NotNull(exception.InnerException);
+
+                        Trace.WriteException(exception);
+
+                        Assert.IsType<ApplicationException>(exception.InnerException);
+                        Assert.Equal(Program.LogonFailedMessage, exception.InnerException.Message, Ordinal);
+
+                        throw exception;
+                    }
+                });
+            }
+
+            // Assert nothing gets written to the output stream.
+            using (var stream = new MemoryStream(outputBuffer))
+            using (var reader = new StreamReader(stream, Encoding.Unicode))
+            {
+                string content = reader.ReadToEnd();
+
+                Assert.NotNull(content);
+                Assert.NotEmpty(content);
+                Assert.Equal('\0', content[0]);
+            }
+
+            // Assert the correct error message gets written to the error stream.
+            using (var stream = new MemoryStream(errorBuffer))
+            using (var reader = new StreamReader(stream, Encoding.Unicode))
+            {
+                string content = reader.ReadToEnd();
+
+                Assert.StartsWith(Program.LogonFailedMessage, content, StringComparison.Ordinal);
+            }
+        }
+
+        [Fact]
+        public void Logon2fa_Success()
+        {
+            const string Protocol = "https";
+            const string Host = "bitbucket.org";
+
+            InitializeTest();
+
+            var errorBuffer = new byte[4096];
+            var outputBuffer = new byte[4096];
+            var program = new Program(Context);
+
+            using (var inputStream = new MemoryStream())
+            using (var outputStream = new MemoryStream(outputBuffer))
+            using (var errorStream = new MemoryStream(errorBuffer))
+            using (var writer = new StreamWriter(inputStream, new UTF8Encoding(encoderShouldEmitUTF8Identifier: false)))
+            {
+                SetupProgramStandardPipes(program, inputStream, outputStream, errorStream);
+
+                MimicGitCredential(writer, Protocol, Host);
+
+                inputStream.Seek(0, SeekOrigin.Begin);
+
+                program._exit = (Program p, int exitcode, string message, string path, int line, string name) =>
                 {
                     Assert.Same(program, p);
-
-                    return errorStream;
-                };
-                program._openStandardInputStream = (Program p) =>
-                {
-                    Assert.Same(program, p);
-
-                    return inputStream;
-                };
-                program._openStandardOutputStream = (Program p) =>
-                {
-                    Assert.Same(program, p);
-
-                    return outputStream;
                 };
 
                 program.Get();
@@ -113,19 +170,19 @@ namespace Microsoft.Alm.Cli.Test
                         case "protocol":
                         {
                             foundProtocol = true;
-                            Assert.Equal("https", value, Ordinal);
+                            Assert.Equal(Protocol, value, Ordinal);
                         }
                         break;
 
                         case "host":
                         {
                             foundHost = true;
-                            Assert.Equal("github.com", value, Ordinal);
+                            Assert.Equal(Host, value, Ordinal);
                         }
                         break;
 
                         case "path":
-                            break;
+                        break;
 
                         case "username":
                         {
@@ -154,6 +211,55 @@ namespace Microsoft.Alm.Cli.Test
 
                 Assert.True(line is null || line.Length == 0 || line[0] == '\0', $"Unexpected standard error content: \"{line}\"");
             }
+        }
+
+        private static void MimicGitCredential(TextWriter writer, string protocol, string host)
+        {
+            writer.Write("protocol=");
+            writer.Write(protocol);
+            writer.Write("\n");
+            writer.Write("host=");
+            writer.Write(host);
+            writer.Write("\n");
+            writer.Write("\n");
+
+            writer.Flush();
+        }
+
+        private static void SetupProgramStandardPipes(Program program, Stream standardInput, Stream standardOutput, Stream standardError)
+        {
+            program._openStandardErrorStream = (Program p) =>
+            {
+                Assert.Same(program, p);
+
+                return standardError;
+            };
+            program._openStandardInputStream = (Program p) =>
+            {
+                Assert.Same(program, p);
+
+                return standardInput;
+            };
+            program._openStandardOutputStream = (Program p) =>
+            {
+                Assert.Same(program, p);
+
+                return standardOutput;
+            };
+            program._write = (Program p, string message) =>
+            {
+                Assert.Same(program, p);
+
+                var buffer = Encoding.Unicode.GetBytes(message);
+                standardError.Write(buffer, 0, buffer.Length);
+            };
+            program._writeLine = (Program p, string message) =>
+            {
+                Assert.Same(program, p);
+
+                var buffer = Encoding.Unicode.GetBytes(message + Environment.NewLine);
+                standardError.Write(buffer, 0, buffer.Length);
+            };
         }
     }
 }
