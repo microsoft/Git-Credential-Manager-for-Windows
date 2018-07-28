@@ -56,12 +56,12 @@ namespace Atlassian.Bitbucket.Authentication.OAuth
                 var context = await listener.GetContextAsync().RunWithCancellation(cancellationToken);
                 rawUrl = context.Request.RawUrl;
 
-                //Serve back a simple auth message.
+                // Serve back a simple authentication message.
                 var html = GetSuccessString();
                 context.Response.ContentType = "text/html";
                 context.Response.OutputStream.WriteStringUtf8(html);
 
-                await Task.Delay(100); //Wait 100ms without this the server closes before the complete response has been written
+                Thread.Sleep(100); // Wait 100ms without this the server closes before the complete response has been written
 
                 context.Response.Close();
             }
@@ -71,7 +71,7 @@ namespace Atlassian.Bitbucket.Authentication.OAuth
             }
             catch (Exception ex)
             {
-                throw new Exception("Failure awating incoming request.", ex);
+                throw new Exception("Failure awaiting incoming request.", ex);
             }
             finally
             {
@@ -89,7 +89,7 @@ namespace Atlassian.Bitbucket.Authentication.OAuth
         /// <returns></returns>
         private static string GetSuccessString()
         {
-            var result = "Auth Successful. You may now close this page";
+            var result = "Authentication Successful. You may now close this page";
 
             try
             {

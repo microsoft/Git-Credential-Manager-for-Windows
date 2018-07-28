@@ -18,6 +18,7 @@ using System.Runtime.InteropServices;
 
 // Only expose internals when the binary isn't signed.
 #if !SIGNED
+[assembly: InternalsVisibleTo("Microsoft.Alm.Cli.Proxy")]
 [assembly: InternalsVisibleTo("Microsoft.Alm.Cli.Test")]
 [assembly: InternalsVisibleTo("DynamicProxyGenAssembly2")]
 #endif

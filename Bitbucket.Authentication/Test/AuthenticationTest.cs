@@ -1,9 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Net;
 using System.Threading.Tasks;
-using Atlassian.Bitbucket.Authentication.BasicAuth;
 using Microsoft.Alm.Authentication;
 using Moq;
 using Xunit;
@@ -63,7 +61,7 @@ namespace Atlassian.Bitbucket.Authentication.Test
 
                 Assert.Single(writeCalls);
             }
-            catch (System.AggregateException exception)
+            catch (AggregateException exception)
             {
                 exception = exception.Flatten();
                 throw exception.InnerException;
@@ -86,7 +84,7 @@ namespace Atlassian.Bitbucket.Authentication.Test
                         await bbAuth.SetCredentials(null, credentials);
                     }).Wait();
                 }
-                catch (System.AggregateException exception)
+                catch (AggregateException exception)
                 {
                     exception = exception.Flatten();
                     throw exception.InnerException;
@@ -110,7 +108,7 @@ namespace Atlassian.Bitbucket.Authentication.Test
                         await bbAuth.SetCredentials(targetUri, null);
                     }).Wait();
                 }
-                catch (System.AggregateException exception)
+                catch (AggregateException exception)
                 {
                     exception = exception.Flatten();
                     throw exception.InnerException;
@@ -135,7 +133,7 @@ namespace Atlassian.Bitbucket.Authentication.Test
                         await bbAuth.SetCredentials(targetUri, credentials);
                     }).Wait();
                 }
-                catch (System.AggregateException exception)
+                catch (AggregateException exception)
                 {
                     exception = exception.Flatten();
                     throw exception.InnerException;
@@ -160,7 +158,7 @@ namespace Atlassian.Bitbucket.Authentication.Test
                         await bbAuth.SetCredentials(targetUri, credentials);
                     }).Wait();
                 }
-                catch (System.AggregateException exception)
+                catch (AggregateException exception)
                 {
                     exception = exception.Flatten();
                     throw exception.InnerException;
@@ -189,7 +187,7 @@ namespace Atlassian.Bitbucket.Authentication.Test
                         Assert.Empty(deleteCalls);
                     }).Wait();
                 }
-                catch (System.AggregateException exception)
+                catch (AggregateException exception)
                 {
                     exception = exception.Flatten();
                     throw exception.InnerException;
@@ -429,7 +427,7 @@ namespace Atlassian.Bitbucket.Authentication.Test
             authority
                 .Setup(a => a.AcquireToken(It.IsAny<TargetUri>(), It.IsAny<Credential>(), It.IsAny<AuthenticationResultType>(), It.IsAny<TokenScope>()))
                 // return 'success' with the validated credentials
-                .Returns(Task.FromResult<AuthenticationResult>(new AuthenticationResult(AuthenticationResultType.Success, new Token(_validBasicAuthCredentials.Password, TokenType.Personal))));
+                .Returns(Task.FromResult(new AuthenticationResult(AuthenticationResultType.Success, new Token(_validBasicAuthCredentials.Password, TokenType.Personal))));
 
             var bbAuth = new Authentication(RuntimeContext.Default, credentialStore.Object, MockValidBasicAuthCredentialsAquireCredentialsCallback, MockValidAquireAuthenticationOAuthCallback, authority.Object);
 
@@ -457,7 +455,7 @@ namespace Atlassian.Bitbucket.Authentication.Test
             authority
                 .Setup(a => a.AcquireToken(It.IsAny<TargetUri>(), It.IsAny<Credential>(), It.IsAny<AuthenticationResultType>(), It.IsAny<TokenScope>()))
                 // return 'failure' with the validated credentials
-                .Returns(Task.FromResult<AuthenticationResult>(new AuthenticationResult(AuthenticationResultType.Failure)));
+                .Returns(Task.FromResult(new AuthenticationResult(AuthenticationResultType.Failure)));
 
             var bbAuth = new Authentication(RuntimeContext.Default, credentialStore.Object, MockInvalidBasicAuthCredentialsAquireCredentialsCallback, MockValidAquireAuthenticationOAuthCallback, authority.Object);
 
@@ -486,7 +484,7 @@ namespace Atlassian.Bitbucket.Authentication.Test
             authority
                 .Setup(a => a.AcquireToken(It.IsAny<TargetUri>(), It.IsAny<Credential>(), It.IsAny<AuthenticationResultType>(), It.IsAny<TokenScope>()))
                 // return 'failure' with the validated credentials
-                .Returns(Task.FromResult<AuthenticationResult>(new AuthenticationResult(AuthenticationResultType.Failure)));
+                .Returns(Task.FromResult(new AuthenticationResult(AuthenticationResultType.Failure)));
 
             var bbAuth = new Authentication(RuntimeContext.Default, credentialStore.Object, MockNoCredentialsAquireCredentialsCallback, MockValidAquireAuthenticationOAuthCallback, authority.Object);
 
@@ -513,11 +511,11 @@ namespace Atlassian.Bitbucket.Authentication.Test
             authority
                 .Setup(a => a.AcquireToken(It.IsAny<TargetUri>(), It.IsAny<Credential>(), AuthenticationResultType.None, It.IsAny<TokenScope>()))
                 // return 'twofactor' with the validated credentials to indicate 2FAOAuth
-                .Returns(Task.FromResult<AuthenticationResult>(new AuthenticationResult(AuthenticationResultType.TwoFactor)));
+                .Returns(Task.FromResult(new AuthenticationResult(AuthenticationResultType.TwoFactor)));
             authority
                 .Setup(a => a.AcquireToken(It.IsAny<TargetUri>(), It.IsAny<Credential>(), AuthenticationResultType.TwoFactor, It.IsAny<TokenScope>()))
                 // return 'twofactor' with the validated credentials to indicate 2FA/OAuth
-                .Returns(Task.FromResult<AuthenticationResult>(new AuthenticationResult(AuthenticationResultType.Success, new Token("access_token", TokenType.Personal), new Token("refresh_token", TokenType.BitbucketRefresh))));
+                .Returns(Task.FromResult(new AuthenticationResult(AuthenticationResultType.Success, new Token("access_token", TokenType.Personal), new Token("refresh_token", TokenType.BitbucketRefresh))));
 
             var bbAuth = new Authentication(RuntimeContext.Default, credentialStore.Object, MockValidBasicAuthCredentialsAquireCredentialsCallback, MockValidAquireAuthenticationOAuthCallback, authority.Object);
 

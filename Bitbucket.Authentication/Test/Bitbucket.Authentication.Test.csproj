@@ -55,9 +55,9 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\..\GitHub.Authentication\Src\GitHub.Authentication.csproj">
-      <Project>{CF306116-BBF0-4CC7-AFCE-A506AC4752CB}</Project>
-      <Name>GitHub.Authentication</Name>
+    <ProjectReference Include="..\Proxy\Bitbucket.Authentication.Proxy.csproj">
+      <Project>{04151231-2501-4212-a7f7-c07e932b4a4c}</Project>
+      <Name>Bitbucket.Authentication.Proxy</Name>
     </ProjectReference>
     <ProjectReference Include="..\Src\Bitbucket.Authentication.csproj">
       <Project>{ee663736-5bad-4ca6-a4f8-99978925ad8a}</Project>

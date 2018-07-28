@@ -37,11 +37,13 @@
     <Compile Include="Authentication.cs" />
     <Compile Include="Authority.cs" />
     <Compile Include="AuthenticationResult.cs" />
+    <Compile Include="Base.cs" />
     <Compile Include="BasicAuth\BasicAuthAuthenticator.cs" />
     <Compile Include="Controls\CredentialsControl.xaml.cs">
       <DependentUpon>CredentialsControl.xaml</DependentUpon>
     </Compile>
     <Compile Include="Controls\Text\ValidationMessage.cs" />
+    <Compile Include="Gui.cs" />
     <Compile Include="Rest\RestClient.cs" />
     <Compile Include="TokenScope.cs" />
     <Compile Include="Controls\OAuthControl.xaml.cs">
