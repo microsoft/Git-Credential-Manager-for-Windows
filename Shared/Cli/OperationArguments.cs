@@ -35,6 +35,7 @@ using Vsts = VisualStudioTeamServices.Authentication;
 
 namespace Microsoft.Alm.Cli
 {
+    [System.Diagnostics.DebuggerDisplay("{DebuggerDisplay, nq}")]
     internal class OperationArguments : Base
     {
         /// <summary>
@@ -442,6 +443,11 @@ namespace Microsoft.Alm.Cli
         {
             get { return _writeLog; }
             set { _writeLog = value; }
+        }
+
+        internal string DebuggerDisplay
+        {
+            get { return $"{nameof(OperationArguments)}: TargetUri: {TargetUri}, Authority: {Authority}, Credentials: {Credentials}"; }
         }
 
         /// <summary>

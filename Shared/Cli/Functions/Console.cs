@@ -25,14 +25,12 @@
 
 using System;
 using System.ComponentModel;
-using System.Diagnostics;
 using System.IO;
 using System.Runtime.InteropServices;
 using System.Text;
 using Microsoft.Alm.Authentication;
 using Microsoft.Win32.SafeHandles;
-
-using Git = Microsoft.Alm.Authentication.Git;
+using static Microsoft.Alm.NativeMethods;
 
 namespace Microsoft.Alm.Cli
 {
@@ -50,18 +48,32 @@ namespace Microsoft.Alm.Cli
 
             titleMessage = titleMessage ?? "Please enter your credentials for ";
 
-            StringBuilder buffer = new StringBuilder(BufferReadSize);
+            var buffer = new StringBuilder(BufferReadSize);
             uint read = 0;
             uint written = 0;
 
-            NativeMethods.ConsoleMode consoleMode = 0;
-            NativeMethods.FileAccess fileAccessFlags = NativeMethods.FileAccess.GenericRead | NativeMethods.FileAccess.GenericWrite;
-            NativeMethods.FileAttributes fileAttributes = NativeMethods.FileAttributes.Normal;
-            NativeMethods.FileCreationDisposition fileCreationDisposition = NativeMethods.FileCreationDisposition.OpenExisting;
-            NativeMethods.FileShare fileShareFlags = NativeMethods.FileShare.Read | NativeMethods.FileShare.Write;
+            ConsoleMode consoleMode = 0;
+            var fileAccessFlags = NativeMethods.FileAccess.GenericRead
+                                | NativeMethods.FileAccess.GenericWrite;
+            var fileAttributes = NativeMethods.FileAttributes.Normal;
+            var fileCreationDisposition = FileCreationDisposition.OpenExisting;
+            var fileShareFlags = NativeMethods.FileShare.Read
+                               | NativeMethods.FileShare.Write;
 
-            using (SafeFileHandle stdout = NativeMethods.CreateFile(NativeMethods.ConsoleOutName, fileAccessFlags, fileShareFlags, IntPtr.Zero, fileCreationDisposition, fileAttributes, IntPtr.Zero))
-            using (SafeFileHandle stdin = NativeMethods.CreateFile(NativeMethods.ConsoleInName, fileAccessFlags, fileShareFlags, IntPtr.Zero, fileCreationDisposition, fileAttributes, IntPtr.Zero))
+            using (SafeFileHandle stdout = CreateFile(fileName: ConsoleOutName, 
+                                                 desiredAccess: fileAccessFlags, 
+                                                     shareMode: fileShareFlags, 
+                                            securityAttributes: IntPtr.Zero, 
+                                           creationDisposition: fileCreationDisposition, 
+                                            flagsAndAttributes: fileAttributes, 
+                                                  templateFile: IntPtr.Zero))
+            using (SafeFileHandle stdin = CreateFile(fileName: ConsoleInName,
+                                                desiredAccess: fileAccessFlags,
+                                                    shareMode: fileShareFlags,
+                                           securityAttributes: IntPtr.Zero,
+                                          creationDisposition: fileCreationDisposition,
+                                           flagsAndAttributes: fileAttributes,
+                                                 templateFile: IntPtr.Zero))
             {
 
                 // Read the current console mode.
@@ -70,10 +82,11 @@ namespace Microsoft.Alm.Cli
                     program.Trace.WriteLine("not a tty detected, abandoning prompt.");
                     return null;
                 }
-                else if (!NativeMethods.GetConsoleMode(stdin, out consoleMode))
+                else if (!GetConsoleMode(consoleMode: out consoleMode,
+                                       consoleHandle: stdin))
                 {
                     int error = Marshal.GetLastWin32Error();
-                    throw new Win32Exception(error, "Unable to determine console mode (" + NativeMethods.Win32Error.GetText(error) + ").");
+                    throw new Win32Exception(error, "Unable to determine console mode (" + Win32Error.GetText(error) + ").");
                 }
 
                 program.Trace.WriteLine($"console mode = '{consoleMode}'.");
@@ -85,10 +98,15 @@ namespace Microsoft.Alm.Cli
                 buffer.Append(titleMessage)
                       .Append(targetUri)
                       .AppendLine();
-                if (!NativeMethods.WriteConsole(stdout, buffer, (uint)buffer.Length, out written, IntPtr.Zero))
+
+                if (!WriteConsole(buffer: buffer,
+                     consoleOutputHandle: stdout,
+                    numberOfCharsToWrite: (uint)buffer.Length,
+                    numberOfCharsWritten: out written,
+                                reserved: IntPtr.Zero))
                 {
                     int error = Marshal.GetLastWin32Error();
-                    throw new Win32Exception(error, "Unable to write to standard output (" + NativeMethods.Win32Error.GetText(error) + ").");
+                    throw new Win32Exception(error, "Unable to write to standard output (" + Win32Error.GetText(error) + ").");
                 }
 
                 // Clear the buffer for the next operation.
@@ -96,20 +114,28 @@ namespace Microsoft.Alm.Cli
 
                 // Prompt the user for the username wanted.
                 buffer.Append("username: ");
-                if (!NativeMethods.WriteConsole(stdout, buffer, (uint)buffer.Length, out written, IntPtr.Zero))
+                if (!WriteConsole(buffer: buffer, 
+                     consoleOutputHandle: stdout,             
+                    numberOfCharsToWrite: (uint)buffer.Length,
+                    numberOfCharsWritten: out written,
+                                reserved: IntPtr.Zero))
                 {
                     int error = Marshal.GetLastWin32Error();
-                    throw new Win32Exception(error, "Unable to write to standard output (" + NativeMethods.Win32Error.GetText(error) + ").");
+                    throw new Win32Exception(error, "Unable to write to standard output (" + Win32Error.GetText(error) + ").");
                 }
 
                 // Clear the buffer for the next operation.
                 buffer.Clear();
 
                 // Read input from the user.
-                if (!NativeMethods.ReadConsole(stdin, buffer, BufferReadSize, out read, IntPtr.Zero))
+                if (!ReadConsole(buffer: buffer, 
+                     consoleInputHandle: stdin,
+                    numberOfCharsToRead: BufferReadSize,
+                      numberOfCharsRead: out read,
+                               reserved: IntPtr.Zero))
                 {
                     int error = Marshal.GetLastWin32Error();
-                    throw new Win32Exception(error, "Unable to read from standard input (" + NativeMethods.Win32Error.GetText(error) + ").");
+                    throw new Win32Exception(error, "Unable to read from standard input (" + Win32Error.GetText(error) + ").");
                 }
 
                 // Record input from the user into local storage, stripping any EOL chars.
@@ -120,34 +146,43 @@ namespace Microsoft.Alm.Cli
                 buffer.Clear();
 
                 // Set the console mode to current without echo input.
-                NativeMethods.ConsoleMode consoleMode2 = consoleMode ^ NativeMethods.ConsoleMode.EchoInput;
+                ConsoleMode consoleMode2 = consoleMode ^ ConsoleMode.EchoInput;
 
                 try
                 {
-                    if (!NativeMethods.SetConsoleMode(stdin, consoleMode2))
+                    if (!SetConsoleMode(consoleMode: consoleMode2,
+                                      consoleHandle: stdin))
                     {
                         int error = Marshal.GetLastWin32Error();
-                        throw new Win32Exception(error, "Unable to set console mode (" + NativeMethods.Win32Error.GetText(error) + ").");
+                        throw new Win32Exception(error, "Unable to set console mode (" + Win32Error.GetText(error) + ").");
                     }
 
-                    program.Trace.WriteLine($"console mode = '{(consoleMode2 & NativeMethods.ConsoleMode.AllFlags)}'.");
+                    program.Trace.WriteLine($"console mode = '{(consoleMode2 & ConsoleMode.AllFlags)}'.");
 
                     // Prompt the user for password.
                     buffer.Append("password: ");
-                    if (!NativeMethods.WriteConsole(stdout, buffer, (uint)buffer.Length, out written, IntPtr.Zero))
+                    if (!WriteConsole(buffer: buffer, 
+                         consoleOutputHandle: stdout,
+                        numberOfCharsToWrite: (uint)buffer.Length,
+                        numberOfCharsWritten: out written,
+                                    reserved: IntPtr.Zero))
                     {
                         int error = Marshal.GetLastWin32Error();
-                        throw new Win32Exception(error, "Unable to write to standard output (" + NativeMethods.Win32Error.GetText(error) + ").");
+                        throw new Win32Exception(error, "Unable to write to standard output (" + Win32Error.GetText(error) + ").");
                     }
 
                     // Clear the buffer for the next operation.
                     buffer.Clear();
 
                     // Read input from the user.
-                    if (!NativeMethods.ReadConsole(stdin, buffer, BufferReadSize, out read, IntPtr.Zero))
+                    if (!ReadConsole(buffer: buffer, 
+                         consoleInputHandle: stdin,                        
+                        numberOfCharsToRead: BufferReadSize,
+                          numberOfCharsRead: out read,
+                                   reserved: IntPtr.Zero))
                     {
                         int error = Marshal.GetLastWin32Error();
-                        throw new Win32Exception(error, "Unable to read from standard input (" + NativeMethods.Win32Error.GetText(error) + ").");
+                        throw new Win32Exception(error, "Unable to read from standard input (" + Win32Error.GetText(error) + ").");
                     }
 
                     // Record input from the user into local storage, stripping any EOL chars.
@@ -157,7 +192,8 @@ namespace Microsoft.Alm.Cli
                 finally
                 {
                     // Restore the console mode to its original value.
-                    NativeMethods.SetConsoleMode(stdin, consoleMode);
+                    SetConsoleMode(consoleMode: consoleMode,
+                                 consoleHandle: stdin);
 
                     program.Trace.WriteLine($"console mode = '{consoleMode}'.");
                 }
@@ -219,11 +255,11 @@ namespace Microsoft.Alm.Cli
         public static void SetStandardOutputWriter(Program program, TextWriter writer)
             => Console.SetOut(writer);
 
-        public static bool StandardHandleIsTty(Program program, NativeMethods.StandardHandleType handleType)
+        public static bool StandardHandleIsTty(Program program, StandardHandleType handleType)
         {
-            var standardHandle = NativeMethods.GetStdHandle(handleType);
-            var handleFileType = NativeMethods.GetFileType(standardHandle);
-            return handleFileType == NativeMethods.FileType.Char;
+            var standardHandle = GetStdHandle(std: handleType);
+            var handleFileType = GetFileType(fileHandle: standardHandle);
+            return handleFileType == FileType.Char;
         }
 
         public static void Write(Program program, string message)

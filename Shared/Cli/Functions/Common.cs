@@ -50,8 +50,9 @@ namespace Microsoft.Alm.Cli
                 throw new ArgumentException(innerException.Message, nameof(operationArguments), innerException);
             }
 
-            var secretsNamespace = operationArguments.CustomNamespace ?? Program.SecretsNamespace;
             BaseAuthentication authority = null;
+            NtlmSupport basicNtlmSupport = NtlmSupport.Auto;
+            string secretsNamespace = operationArguments.CustomNamespace ?? Program.SecretsNamespace;
 
             var basicCredentialCallback = (operationArguments.UseModalUi)
                     ? new AcquireCredentialsDelegate(program.ModalPromptForCredentials)
@@ -77,130 +78,144 @@ namespace Microsoft.Alm.Cli
                     ? new Github.Authentication.AcquireAuthenticationCodeDelegate(githubPrompts.AuthenticationCodeModalPrompt)
                     : new Github.Authentication.AcquireAuthenticationCodeDelegate(program.GitHubAuthCodePrompt);
 
-            NtlmSupport basicNtlmSupport = NtlmSupport.Auto;
-
             switch (operationArguments.Authority)
             {
                 case AuthorityType.Auto:
-                program.Trace.WriteLine($"detecting authority type for '{operationArguments.TargetUri}'.");
-
-                // Detect the authority.
-                authority = await Vsts.Authentication.GetAuthentication(program.Context,
-                                                                        operationArguments.TargetUri,
-                                                                        Program.VstsCredentialScope,
-                                                                        new SecretStore(program.Context, secretsNamespace, Vsts.Authentication.UriNameConversion))
-                         ?? Github.Authentication.GetAuthentication(program.Context,
-                                                                    operationArguments.TargetUri,
-                                                                    Program.GitHubCredentialScope,
-                                                                    new SecretStore(program.Context, secretsNamespace, Secret.UriToName),
-                                                                    githubCredentialCallback,
-                                                                    githubAuthcodeCallback,
-                                                                    null)
-                        ?? Bitbucket.Authentication.GetAuthentication(program.Context,
-                                                                      operationArguments.TargetUri,
-                                                                      new SecretStore(program.Context, secretsNamespace, Secret.UriToIdentityUrl),
-                                                                      bitbucketCredentialCallback,
-                                                                      bitbucketOauthCallback);
-
-                if (authority != null)
                 {
-                    // Set the authority type based on the returned value.
-                    if (authority is Vsts.MsaAuthentication)
+                    program.Trace.WriteLine($"detecting authority type for '{operationArguments.TargetUri}'.");
+
+                    // Detect the authority.
+                    authority = await Vsts.Authentication.GetAuthentication(program.Context,
+                                                                            operationArguments.TargetUri,
+                                                                            Program.VstsCredentialScope,
+                                                                            new SecretStore(program.Context, secretsNamespace, Vsts.Authentication.UriNameConversion))
+                             ?? Github.Authentication.GetAuthentication(program.Context,
+                                                                        operationArguments.TargetUri,
+                                                                        Program.GitHubCredentialScope,
+                                                                        new SecretStore(program.Context, secretsNamespace, Secret.UriToName),
+                                                                        githubCredentialCallback,
+                                                                        githubAuthcodeCallback,
+                                                                        null)
+                            ?? Bitbucket.Authentication.GetAuthentication(program.Context,
+                                                                          operationArguments.TargetUri,
+                                                                          new SecretStore(program.Context, secretsNamespace, Secret.UriToIdentityUrl),
+                                                                          bitbucketCredentialCallback,
+                                                                          bitbucketOauthCallback);
+
+                    if (authority != null)
                     {
-                        operationArguments.Authority = AuthorityType.MicrosoftAccount;
-                        goto case AuthorityType.MicrosoftAccount;
-                    }
-                    else if (authority is Vsts.AadAuthentication)
-                    {
-                        operationArguments.Authority = AuthorityType.AzureDirectory;
-                        goto case AuthorityType.AzureDirectory;
-                    }
-                    else if (authority is Github.Authentication)
-                    {
-                        operationArguments.Authority = AuthorityType.GitHub;
-                        goto case AuthorityType.GitHub;
-                    }
-                    else if (authority is Bitbucket.Authentication)
-                    {
-                        operationArguments.Authority = AuthorityType.Bitbucket;
-                        goto case AuthorityType.Bitbucket;
+                        // Set the authority type based on the returned value.
+                        if (authority is Vsts.MsaAuthentication)
+                        {
+                            operationArguments.Authority = AuthorityType.MicrosoftAccount;
+                            goto case AuthorityType.MicrosoftAccount;
+                        }
+                        else if (authority is Vsts.AadAuthentication)
+                        {
+                            operationArguments.Authority = AuthorityType.AzureDirectory;
+                            goto case AuthorityType.AzureDirectory;
+                        }
+                        else if (authority is Github.Authentication)
+                        {
+                            operationArguments.Authority = AuthorityType.GitHub;
+                            goto case AuthorityType.GitHub;
+                        }
+                        else if (authority is Bitbucket.Authentication)
+                        {
+                            operationArguments.Authority = AuthorityType.Bitbucket;
+                            goto case AuthorityType.Bitbucket;
+                        }
                     }
                 }
                 goto default;
 
                 case AuthorityType.AzureDirectory:
-                program.Trace.WriteLine($"authority for '{operationArguments.TargetUri}' is Azure Directory.");
-
-                if (authority is null)
                 {
-                    Guid tenantId = Guid.Empty;
+                    program.Trace.WriteLine($"authority for '{operationArguments.TargetUri}' is Azure Directory.");
 
-                    // Get the identity of the tenant.
-                    var result = await Vsts.Authentication.DetectAuthority(program.Context, operationArguments.TargetUri);
-
-                    if (result.HasValue)
+                    if (authority is null)
                     {
-                        tenantId = result.Value;
+                        Guid tenantId = Guid.Empty;
+
+                        // Get the identity of the tenant.
+                        var result = await Vsts.Authentication.DetectAuthority(program.Context, operationArguments.TargetUri);
+
+                        if (result.HasValue)
+                        {
+                            tenantId = result.Value;
+                        }
+
+                        // Create the authority object.
+                        authority = new Vsts.AadAuthentication(program.Context,
+                                                               tenantId,
+                                                               operationArguments.VstsTokenScope,
+                                                               new SecretStore(program.Context, secretsNamespace, Vsts.AadAuthentication.UriNameConversion));
                     }
 
-                    // Create the authority object.
-                    authority = new Vsts.AadAuthentication(program.Context,
-                                                           tenantId,
-                                                           operationArguments.VstsTokenScope,
-                                                           new SecretStore(program.Context, secretsNamespace, Vsts.AadAuthentication.UriNameConversion));
+                    // Return the allocated authority or a generic AAD backed VSTS authentication object.
+                    return authority;
                 }
 
-                // Return the allocated authority or a generic AAD backed VSTS authentication object.
-                return authority;
-
                 case AuthorityType.Basic:
-                // Enforce basic authentication only.
-                basicNtlmSupport = NtlmSupport.Never;
+                {
+                    // Enforce basic authentication only.
+                    basicNtlmSupport = NtlmSupport.Never;
+                }
                 goto default;
 
                 case AuthorityType.GitHub:
-                program.Trace.WriteLine($"authority for '{operationArguments.TargetUri}' is GitHub.");
+                {
+                    program.Trace.WriteLine($"authority for '{operationArguments.TargetUri}' is GitHub.");
 
-                // Return a GitHub authentication object.
-                return authority ?? new Github.Authentication(program.Context,
-                                                              operationArguments.TargetUri,
-                                                              Program.GitHubCredentialScope,
-                                                              new SecretStore(program.Context, secretsNamespace, Secret.UriToName),
-                                                              githubCredentialCallback,
-                                                              githubAuthcodeCallback,
-                                                              null);
+                    // Return a GitHub authentication object.
+                    return authority ?? new Github.Authentication(program.Context,
+                                                                  operationArguments.TargetUri,
+                                                                  Program.GitHubCredentialScope,
+                                                                  new SecretStore(program.Context, secretsNamespace, Secret.UriToName),
+                                                                  githubCredentialCallback,
+                                                                  githubAuthcodeCallback,
+                                                                  null);
+                }
 
                 case AuthorityType.Bitbucket:
-                program.Trace.WriteLine($"authority for '{operationArguments.TargetUri}'  is Bitbucket.");
+                {
+                    program.Trace.WriteLine($"authority for '{operationArguments.TargetUri}'  is Bitbucket.");
 
-                // Return a Bitbucket authentication object.
-                return authority ?? new Bitbucket.Authentication(program.Context,
-                                                                 new SecretStore(program.Context, secretsNamespace, Secret.UriToIdentityUrl),
-                                                                 bitbucketCredentialCallback,
-                                                                 bitbucketOauthCallback);
+                    // Return a Bitbucket authentication object.
+                    return authority ?? new Bitbucket.Authentication(program.Context,
+                                                                     new SecretStore(program.Context, secretsNamespace, Secret.UriToIdentityUrl),
+                                                                     bitbucketCredentialCallback,
+                                                                     bitbucketOauthCallback);
+                }
 
                 case AuthorityType.MicrosoftAccount:
-                program.Trace.WriteLine($"authority for '{operationArguments.TargetUri}' is Microsoft Live.");
+                {
+                    program.Trace.WriteLine($"authority for '{operationArguments.TargetUri}' is Microsoft Live.");
 
-                // Return the allocated authority or a generic MSA backed VSTS authentication object.
-                return authority ?? new Vsts.MsaAuthentication(program.Context,
-                                                               operationArguments.VstsTokenScope,
-                                                               new SecretStore(program.Context, secretsNamespace, Vsts.MsaAuthentication.UriNameConversion));
+                    // Return the allocated authority or a generic MSA backed VSTS authentication object.
+                    return authority ?? new Vsts.MsaAuthentication(program.Context,
+                                                                   operationArguments.VstsTokenScope,
+                                                                   new SecretStore(program.Context, secretsNamespace, Vsts.MsaAuthentication.UriNameConversion));
+                }
 
                 case AuthorityType.Ntlm:
-                // Enforce NTLM authentication only.
-                basicNtlmSupport = NtlmSupport.Always;
+                {
+                    // Enforce NTLM authentication only.
+                    basicNtlmSupport = NtlmSupport.Always;
+                }
                 goto default;
 
                 default:
-                program.Trace.WriteLine($"authority for '{operationArguments.TargetUri}' is basic with NTLM={basicNtlmSupport}.");
+                {
+                    program.Trace.WriteLine($"authority for '{operationArguments.TargetUri}' is basic with NTLM={basicNtlmSupport}.");
 
-                // Return a generic username + password authentication object.
-                return authority ?? new BasicAuthentication(program.Context,
-                                                            new SecretStore(program.Context, secretsNamespace, Secret.UriToIdentityUrl),
-                                                            basicNtlmSupport,
-                                                            basicCredentialCallback,
-                                                            null);
+                    // Return a generic username + password authentication object.
+                    return authority ?? new BasicAuthentication(program.Context,
+                                                                new SecretStore(program.Context, secretsNamespace, Secret.UriToIdentityUrl),
+                                                                basicNtlmSupport,
+                                                                basicCredentialCallback,
+                                                                null);
+                }
             }
         }
 
@@ -217,24 +232,32 @@ namespace Microsoft.Alm.Cli
             {
                 default:
                 case AuthorityType.Basic:
-                program.Trace.WriteLine($"deleting basic credentials for '{operationArguments.TargetUri}'.");
-                return await authentication.DeleteCredentials(operationArguments.TargetUri);
+                {
+                    program.Trace.WriteLine($"deleting basic credentials for '{operationArguments.TargetUri}'.");
+                    return await authentication.DeleteCredentials(operationArguments.TargetUri);
+                }
 
                 case AuthorityType.AzureDirectory:
                 case AuthorityType.MicrosoftAccount:
-                program.Trace.WriteLine($"deleting VSTS credentials for '{operationArguments.TargetUri}'.");
-                var vstsAuth = authentication as Vsts.Authentication;
-                return await vstsAuth.DeleteCredentials(operationArguments.TargetUri);
+                {
+                    program.Trace.WriteLine($"deleting VSTS credentials for '{operationArguments.TargetUri}'.");
+                    var vstsAuth = authentication as Vsts.Authentication;
+                    return await vstsAuth.DeleteCredentials(operationArguments.TargetUri);
+                }
 
                 case AuthorityType.GitHub:
-                program.Trace.WriteLine($"deleting GitHub credentials for '{operationArguments.TargetUri}'.");
-                var ghAuth = authentication as Github.Authentication;
-                return await ghAuth.DeleteCredentials(operationArguments.TargetUri);
+                {
+                    program.Trace.WriteLine($"deleting GitHub credentials for '{operationArguments.TargetUri}'.");
+                    var ghAuth = authentication as Github.Authentication;
+                    return await ghAuth.DeleteCredentials(operationArguments.TargetUri);
+                }
 
                 case AuthorityType.Bitbucket:
-                program.Trace.WriteLine($"deleting Bitbucket credentials for '{operationArguments.TargetUri}'.");
-                var bbAuth = authentication as Bitbucket.Authentication;
-                return await bbAuth.DeleteCredentials(operationArguments.TargetUri, operationArguments.Username);
+                {
+                    program.Trace.WriteLine($"deleting Bitbucket credentials for '{operationArguments.TargetUri}'.");
+                    var bbAuth = authentication as Bitbucket.Authentication;
+                    return await bbAuth.DeleteCredentials(operationArguments.TargetUri, operationArguments.Username);
+                }
             }
         }
 
@@ -248,15 +271,9 @@ namespace Microsoft.Alm.Cli
             program.Trace.WriteException(exception, path, line, name);
             program.LogEvent(exception.ToString(), EventLogEntryType.Error);
 
-            string message;
-            if (!string.IsNullOrWhiteSpace(exception.Message))
-            {
-                message = $"{exception.GetType().Name} encountered.\n   {exception.Message}";
-            }
-            else
-            {
-                message = $"{exception.GetType().Name} encountered.";
-            }
+            string message = string.IsNullOrWhiteSpace(exception.Message)
+                ? $"{exception.GetType().Name} encountered."
+                : $"{exception.GetType().Name} encountered.\n   {exception.Message}";
 
             program.Die(message, path, line, name);
         }
@@ -430,7 +447,7 @@ namespace Microsoft.Alm.Cli
                     operationArguments.Authority = AuthorityType.GitHub;
                 }
                 else if (Program.ConfigKeyComparer.Equals(value, "Atlassian")
-                    || Program.ConfigKeyComparer.Equals(value, "Bitbucket"))
+                         || Program.ConfigKeyComparer.Equals(value, "Bitbucket"))
                 {
                     operationArguments.Authority = AuthorityType.Bitbucket;
                 }
@@ -491,10 +508,10 @@ namespace Microsoft.Alm.Cli
             }
             else if (operationArguments.EnvironmentVariables.TryGetValue("GCM_PRESERVE_CREDS", out value))
             {
-                if (StringComparer.OrdinalIgnoreCase.Equals(value, "true")
-                    || StringComparer.OrdinalIgnoreCase.Equals(value, "yes")
-                    || StringComparer.OrdinalIgnoreCase.Equals(value, "1")
-                    || StringComparer.OrdinalIgnoreCase.Equals(value, "on"))
+                if (Program.ConfigValueComparer.Equals(value, "true")
+                    || Program.ConfigValueComparer.Equals(value, "yes")
+                    || Program.ConfigValueComparer.Equals(value, "1")
+                    || Program.ConfigValueComparer.Equals(value, "on"))
                 {
                     program.Trace.WriteLine($"GCM_PRESERVE_CREDS = '{yesno}'.");
 
@@ -540,8 +557,7 @@ namespace Microsoft.Alm.Cli
             // Check the git-config http.proxy setting just-in-case.
             else
             {
-                Git.Configuration.Entry entry;
-                if (operationArguments.GitConfiguration.TryGetEntry("http", operationArguments.QueryUri, "proxy", out entry)
+                if (operationArguments.GitConfiguration.TryGetEntry("http", operationArguments.QueryUri, "proxy", out Git.Configuration.Entry entry)
                     && !string.IsNullOrWhiteSpace(entry.Value))
                 {
                     program.Trace.WriteLine($"http.proxy = '{entry.Value}'.");
@@ -648,7 +664,7 @@ namespace Microsoft.Alm.Cli
             catch { /* squelch */ }
         }
 
-        public static void PrintArgs(Program program, string[] args)
+        public static void PrintArgs(Program program, string[ ] args)
         {
             if (program is null)
                 throw new ArgumentNullException(nameof(program));
@@ -694,6 +710,8 @@ namespace Microsoft.Alm.Cli
 
             BaseAuthentication authentication = await program.CreateAuthentication(operationArguments);
             Credential credentials = null;
+
+            program.Trace.WriteLine($"querying '{operationArguments.Authority}' for credentials.");
 
             switch (operationArguments.Authority)
             {
@@ -913,8 +931,8 @@ namespace Microsoft.Alm.Cli
                     goto parse_localval;
                 }
 
-            // Parse the value into a bool.
-            parse_localval:
+                // Parse the value into a bool.
+                parse_localval:
 
                 // An empty value is unset / should not be there, so treat it as if it isn't.
                 if (string.IsNullOrWhiteSpace(localVal))
@@ -959,9 +977,8 @@ namespace Microsoft.Alm.Cli
                 var envars = operationArguments.EnvironmentVariables;
 
                 // Look for an entry in the environment variables.
-                string localVal;
                 if (!string.IsNullOrWhiteSpace(environKey)
-                    && envars.TryGetValue(environKey, out localVal)
+                    && envars.TryGetValue(environKey, out string localVal)
                     && !string.IsNullOrWhiteSpace(localVal))
                 {
                     value = localVal;
@@ -971,9 +988,8 @@ namespace Microsoft.Alm.Cli
                 Git.Configuration config = operationArguments.GitConfiguration;
 
                 // Look for an entry in the git config.
-                Git.Configuration.Entry entry;
                 if (!string.IsNullOrWhiteSpace(configKey)
-                    && config.TryGetEntry(Program.ConfigPrefix, operationArguments.QueryUri, configKey, out entry)
+                    && config.TryGetEntry(Program.ConfigPrefix, operationArguments.QueryUri, configKey, out Git.Configuration.Entry entry)
                     && !string.IsNullOrWhiteSpace(entry.Value))
                 {
                     value = entry.Value;

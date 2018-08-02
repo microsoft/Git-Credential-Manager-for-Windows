@@ -600,16 +600,17 @@ namespace Microsoft.Alm.Cli
             _version = asseName.Version;
         }
 
-        internal bool ModalPromptDisplayDialog(ref NativeMethods.CredentialUiInfo credUiInfo,
-                                               ref NativeMethods.CredentialPackFlags authPackage,
-                                               IntPtr packedAuthBufferPtr,
-                                               uint packedAuthBufferSize,
-                                               IntPtr inBufferPtr,
-                                               int inBufferSize,
-                                               bool saveCredentials,
-                                               NativeMethods.CredentialUiWindowsFlags flags,
-                                               out string username,
-                                               out string password)
+        internal bool ModalPromptDisplayDialog(
+            ref NativeMethods.CredentialUiInfo credUiInfo,
+            ref NativeMethods.CredentialPackFlags authPackage,
+            IntPtr packedAuthBufferPtr,
+            uint packedAuthBufferSize,
+            IntPtr inBufferPtr,
+            int inBufferSize,
+            bool saveCredentials,
+            NativeMethods.CredentialUiWindowsFlags flags,
+            out string username,
+            out string password)
             => _modalPromptDisplayDialog(this,
                                          ref credUiInfo,
                                          ref authPackage,
