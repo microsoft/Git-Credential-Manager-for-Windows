@@ -1,0 +1,152 @@
+/**** Git Process Management Library ****
+ *
+ * Copyright (c) Microsoft Corporation
+ * All rights reserved.
+ *
+ * MIT License
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy
+ * of this software and associated documentation files (the "Software"), to deal
+ * in the Software without restriction, including without limitation the rights to
+ * use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of
+ * the Software, and to permit persons to whom the Software is furnished to do so,
+ * subject to the following conditions:
+ *
+ * The above copyright notice and this permission notice shall be included in all
+ * copies or substantial portions of the Software.
+ *
+ * THE SOFTWARE IS PROVIDED *AS IS*, WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS
+ * FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR
+ * COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN
+ * AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
+ * WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+**/
+
+// Use `Formatting.Indented` to ease review readability.
+{
+  "ExtendedData": [],
+  "DisplayName": "AuthorityTest_VerifyAcquireTokenAcceptsValidAuthenticationResultTypes",
+  "ResultPath": "C:\\Src\\Microsoft.Alm\\Gcm\\Bitbucket.Authentication\\Test\\Results",
+  "Services": {
+    "Network": {
+      "Operations": [
+        {
+          "Methods": [
+            {
+              "Method": "HttpGetAsync",
+              "Queries": [
+                {
+                  "Ordinal": 1,
+                  "Request": {
+                    "Headers": [
+                      "accept=*/*",
+                      "accept-encoding=gzip",
+                      "accept-encoding=deflate",
+                      "User-Agent=Microsoft.Alm.Authentication",
+                      "User-Agent=(Microsoft Windows NT 10.0.17134.0; Win32NT; x64)",
+                      "User-Agent=CLR/4.0.30319",
+                      "User-Agent=git-tools/4.6.0"
+                    ],
+                    "Flags": 27
+                  },
+                  "Response": {
+                    "Content": {
+                      "AsString": "",
+                      "ContentType": "text/html",
+                      "HasContent": true
+                    },
+                    "Headers": [
+                      "WWW-Authenticate=Basic realm=\"Bitbucket.org HTTP\""
+                    ],
+                    "StatusCode": 401
+                  }
+                },
+                {
+                  "Ordinal": 2,
+                  "Request": {
+                    "Headers": [
+                      "accept=*/*",
+                      "accept-encoding=gzip",
+                      "accept-encoding=deflate",
+                      "User-Agent=Microsoft.Alm.Authentication",
+                      "User-Agent=(Microsoft Windows NT 10.0.17134.0; Win32NT; x64)",
+                      "User-Agent=CLR/4.0.30319",
+                      "User-Agent=git-tools/4.6.0"
+                    ],
+                    "Flags": 27
+                  },
+                  "Response": {
+                    "Content": {
+                      "AsString": "",
+                      "ContentType": "text/html",
+                      "HasContent": true
+                    },
+                    "Headers": [
+                      "WWW-Authenticate=Basic realm=\"Bitbucket.org HTTP\""
+                    ],
+                    "StatusCode": 401
+                  }
+                },
+                {
+                  "Ordinal": 3,
+                  "Request": {
+                    "Headers": [
+                      "accept=*/*",
+                      "accept-encoding=gzip",
+                      "accept-encoding=deflate",
+                      "User-Agent=Microsoft.Alm.Authentication",
+                      "User-Agent=(Microsoft Windows NT 10.0.17134.0; Win32NT; x64)",
+                      "User-Agent=CLR/4.0.30319",
+                      "User-Agent=git-tools/4.6.0"
+                    ],
+                    "Flags": 27
+                  },
+                  "Response": {
+                    "Content": {
+                      "AsString": "",
+                      "ContentType": "text/html",
+                      "HasContent": true
+                    },
+                    "Headers": [
+                      "WWW-Authenticate=Basic realm=\"Bitbucket.org HTTP\""
+                    ],
+                    "StatusCode": 401
+                  }
+                }
+              ]
+            }
+          ],
+          "QueryUrl": "https://api.bitbucket.org/2.0/user"
+        }
+      ]
+    },
+    "Settings": {
+      "EnvironmentVariables": [
+        {
+          "Target": 0,
+          "Values": [
+            {
+              "Name": "HOME",
+              "Variable": "C:\\Users\\Tester"
+            },
+            {
+              "Name": "GCM_DEBUG"
+            }
+          ]
+        }
+      ],
+      "ExitCode": 0,
+      "ExpandVariables": [],
+      "Is64BitOperatingSystem": false,
+      "OsVersion": 0,
+      "SpecialFolders": []
+    },
+    "Storage": {
+      "Operations": []
+    },
+    "Gui": {
+      "Operations": []
+    }
+  }
+}

@@ -55,6 +55,14 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\..\Microsoft.Alm.Authentication\Proxy\Microsoft.Alm.Authentication.Proxy.csproj">
+      <Project>{04151231-fe04-4a05-943a-54eb952cea62}</Project>
+      <Name>Microsoft.Alm.Authentication.Proxy</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\..\Microsoft.Alm.Authentication\Test\Microsoft.Alm.Authentication.Test.csproj">
+      <Project>{19781214-371F-415C-93C5-44CEAA0E9A34}</Project>
+      <Name>Microsoft.Alm.Authentication.Test</Name>
+    </ProjectReference>
     <ProjectReference Include="..\Proxy\Bitbucket.Authentication.Proxy.csproj">
       <Project>{04151231-2501-4212-a7f7-c07e932b4a4c}</Project>
       <Name>Bitbucket.Authentication.Proxy</Name>

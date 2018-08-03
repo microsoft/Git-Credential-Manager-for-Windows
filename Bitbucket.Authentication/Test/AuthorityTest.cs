@@ -1,31 +1,48 @@
 ﻿using System;
 using System.Linq;
-using Atlassian.Bitbucket.Authentication;
+using System.Threading;
+using System.Threading.Tasks;
 using Microsoft.Alm.Authentication;
+using Microsoft.Alm.Authentication.Test;
 using Xunit;
 
 namespace Atlassian.Bitbucket.Authentication.Test
 {
-    public class AuthorityTest
+    public class AuthorityTest : UnitTestBase
     {
+        public AuthorityTest(Xunit.Abstractions.ITestOutputHelper output)
+            : base(XunitHelper.Convert(output))
+        { }
+
         [Fact]
         public void VerifyAcquireTokenAcceptsValidAuthenticationResultTypes()
         {
-            var context = RuntimeContext.Default;
-            var authority = new Authority(context);
+            InitializeTest();
+
+            var authority = new Authority(Context);
             var targetUri = new TargetUri("https://bitbucket.org");
             var credentials = new Credential("a", "b");
             var resultType = AuthenticationResultType.None;
-            var tokenScope = Atlassian.Bitbucket.Authentication.TokenScope.None;
+            var tokenScope = TokenScope.None;
 
-            var values = Enum.GetValues(typeof(AuthenticationResultType)).Cast<AuthenticationResultType>();
-            values.ToList().ForEach(async _ =>
+            var values = Enum.GetValues(typeof(AuthenticationResultType))
+                             .Cast<AuthenticationResultType>()
+                             .ToList();
+            int count = 0;
+
+            values.ToList().ForEach(_ =>
             {
-                var token = await authority.AcquireToken(targetUri, credentials, resultType, tokenScope);
+                Task.Run(async () =>
+                {
+                    Interlocked.Increment(ref count);
 
-                Assert.NotNull(token);
+                    AuthenticationResult token = await authority.AcquireToken(targetUri, credentials, resultType, tokenScope);
 
+                    Assert.NotNull(token);
+                }).Wait();
             });
+
+            Assert.Equal(values.Count, count);
         }
     }
 }
