@@ -29,6 +29,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
+using static System.StringComparer;
 
 namespace Microsoft.Alm.Authentication.Git
 {
@@ -169,52 +170,51 @@ namespace Microsoft.Alm.Authentication.Git
         {
             return value != null
                 && ((int.TryParse(value, out int ival) && ival > 0)
-                    || StringComparer.OrdinalIgnoreCase.Equals(value, "true")
-                    || StringComparer.OrdinalIgnoreCase.Equals(value, "yes")
-                    || StringComparer.OrdinalIgnoreCase.Equals(value, "on"));
+                    || Entry.ValueComparer.Equals(value, "true")
+                    || Entry.ValueComparer.Equals(value, "yes")
+                    || Entry.ValueComparer.Equals(value, "on"));
         }
 
-        public virtual async Task LoadGitConfiguration(string directory, ConfigurationLevel types)
+        /// <summary>
+        /// Populates this instance of `<see cref="Configuration"/>` with data from reachable Git configuraiton files.
+        /// </summary>
+        /// <param name="worktreePath">Path to the root of the worktree of the repository to used for reading the Git local configuration information.</param>
+        /// <param name="types">The types of Git configuration files to be parsed and loaded.</param>
+        public virtual async Task LoadGitConfiguration(string worktreePath, ConfigurationLevel types)
         {
-            string portableConfig = null;
-            string systemConfig = null;
-            string xdgConfig = null;
-            string globalConfig = null;
-            string localConfig = null;
-
             // Read Git's five configuration files from lowest priority to highest, overwriting values as higher priority configurations are parsed, storing them in a handy lookup table.
 
             // Find and parse Git's portable configuration file.
             if ((types & ConfigurationLevel.Portable) != 0
-                && Where.GitPortableConfig(out portableConfig))
+                && Where.GitPortableConfig(out string portableConfig))
             {
                 await ParseGitConfig(ConfigurationLevel.Portable, portableConfig);
             }
 
             // Find and parse Git's system configuration file.
             if ((types & ConfigurationLevel.System) != 0
-                && Where.GitSystemConfig(null, out systemConfig))
+                && Where.GitSystemConfig(null, out string systemConfig))
             {
                 await ParseGitConfig(ConfigurationLevel.System, systemConfig);
             }
 
             // Find and parse Git's XDG configuration file.
             if ((types & ConfigurationLevel.Xdg) != 0
-                && Where.GitXdgConfig(out xdgConfig))
+                && Where.GitXdgConfig(out string xdgConfig))
             {
                 await ParseGitConfig(ConfigurationLevel.Xdg, xdgConfig);
             }
 
             // Find and parse Git's global configuration file.
             if ((types & ConfigurationLevel.Global) != 0
-                && Where.GitGlobalConfig(out globalConfig))
+                && Where.GitGlobalConfig(out string globalConfig))
             {
                 await ParseGitConfig(ConfigurationLevel.Global, globalConfig);
             }
 
             // Find and parse Git's local configuration file.
             if ((types & ConfigurationLevel.Local) != 0
-                && Where.GitLocalConfig(directory, out localConfig))
+                && Where.GitLocalConfig(worktreePath, out string localConfig))
             {
                 await ParseGitConfig(ConfigurationLevel.Local, localConfig);
             }
@@ -227,23 +227,23 @@ namespace Microsoft.Alm.Authentication.Git
         /// <para/>
         /// Returns the combined database of configuration data.
         /// </summary>
-        /// <param name="directory">Optional working directory of a repository from which to read its Git local configuration.</param>
+        /// <param name="worktreePath">Optional working directory of a repository from which to read its Git local configuration.</param>
         /// <param name="loadLocal">Read, parse, and include Git local configuration values if `<see langword="true"/>`; otherwise do not.</param>
         /// <param name="loadSystem">Read, parse, and include Git system configuration values if `<see langword="true"/>`; otherwise do not.</param>
         public static async Task<Configuration> ReadConfiuration(
             RuntimeContext context,
-            string directory,
+            string worktreePath,
             bool loadLocal,
             bool loadSystem)
         {
             if (context is null)
                 throw new ArgumentNullException(nameof(context));
-            if (directory is null)
-                throw new ArgumentNullException(nameof(directory));
-            if (!context.Storage.DirectoryExists(directory))
+            if (worktreePath is null)
+                throw new ArgumentNullException(nameof(worktreePath));
+            if (!context.Storage.DirectoryExists(worktreePath))
             {
-                var inner = new DirectoryNotFoundException(directory);
-                throw new ArgumentException(inner.Message, nameof(directory), inner);
+                var inner = new DirectoryNotFoundException(worktreePath);
+                throw new ArgumentException(inner.Message, nameof(worktreePath), inner);
             }
 
             ConfigurationLevel types = ConfigurationLevel.All;
@@ -259,7 +259,7 @@ namespace Microsoft.Alm.Authentication.Git
             }
 
             var config = new Configuration(context);
-            await config.LoadGitConfiguration(directory, types);
+            await config.LoadGitConfiguration(worktreePath, types);
 
             return config;
         }
@@ -479,13 +479,12 @@ namespace Microsoft.Alm.Authentication.Git
             }
         }
 
+        [System.Diagnostics.DebuggerDisplay("{DebuggerDisplay, nq}")]
         public struct Entry : IEquatable<Entry>
         {
-            [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Security", "CA2104:DoNotDeclareReadOnlyMutableReferenceTypes")]
-            public static readonly StringComparer KeyComparer = StringComparer.OrdinalIgnoreCase;
-
-            [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Security", "CA2104:DoNotDeclareReadOnlyMutableReferenceTypes")]
-            public static readonly StringComparer ValueComparer = StringComparer.OrdinalIgnoreCase;
+            public static readonly IEqualityComparer<Entry> Comparer = new ConfigurationEntryComparer();
+            public static readonly IEqualityComparer<string> KeyComparer = OrdinalIgnoreCase;
+            public static readonly IEqualityComparer<string> ValueComparer = OrdinalIgnoreCase;
 
             public Entry(string key, string value, ConfigurationLevel level)
             {
@@ -501,47 +500,67 @@ namespace Microsoft.Alm.Authentication.Git
             /// <summary>
             /// Gets the name, or key, of the configuration entry.
             /// </summary>
-            public string Key { get { return _key; } }
+            public string Key
+            {
+                get { return _key; }
+            }
 
             /// <summary>
             /// Gets the configuration level of the entry.
             /// </summary>
-            public ConfigurationLevel Level { get { return _level; } }
+            public ConfigurationLevel Level
+            {
+                get { return _level; }
+            }
 
             /// <summary>
             /// Gets the value of the configuration entry.
             /// </summary>
-            public string Value { get { return _value; } }
+            public string Value
+            {
+                get { return _value; }
+            }
+
+            internal string DebuggerDisplay
+            {
+                get { return $"{nameof(Configuration)}.{nameof(Entry)}: {ToString()} [{Level}]"; }
+            }
 
             public override bool Equals(object obj)
             {
-                return (obj is Entry)
-                        && Equals((Entry)obj);
+                return obj is Entry other && Equals(other);
             }
 
             public bool Equals(Entry other)
-            {
-                return KeyComparer.Equals(_key, other._key)
-                    && ValueComparer.Equals(_value, other._value);
-            }
+                => Comparer.Equals(this, other);
 
             public override int GetHashCode()
-            {
-                return KeyComparer.GetHashCode(_key);
-            }
+                => Comparer.GetHashCode(this);
 
             public override string ToString()
             {
                 return string.Format(System.Globalization.CultureInfo.InvariantCulture, "{0} = {1}", _key, _value);
             }
 
-            public static bool operator ==(Entry left, Entry right)
-            {
-                return left.Equals(right);
-            }
+            public static bool operator ==(Entry lhs, Entry rhs)
+                => Comparer.Equals(lhs, rhs);
 
-            public static bool operator !=(Entry left, Entry right)
-                => !(left == right);
+            public static bool operator !=(Entry lhs, Entry rhs)
+                => !Comparer.Equals(lhs, rhs);
+        }
+    }
+
+    internal class ConfigurationEntryComparer : IEqualityComparer<Configuration.Entry>
+    {
+        public bool Equals(Configuration.Entry lhs, Configuration.Entry rhs)
+        {
+            return Configuration.Entry.KeyComparer.Equals(lhs.Key, rhs.Key)
+                && Configuration.Entry.ValueComparer.Equals(lhs.Value, rhs.Value);
+        }
+
+        public int GetHashCode(Configuration.Entry obj)
+        {
+            return Configuration.Entry.KeyComparer.GetHashCode(obj.Key);
         }
     }
 }

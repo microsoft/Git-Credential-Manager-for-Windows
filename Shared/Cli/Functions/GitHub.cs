@@ -25,12 +25,11 @@
 
 using System;
 using System.ComponentModel;
-using System.Diagnostics;
 using System.Runtime.InteropServices;
 using System.Text;
 using Microsoft.Alm.Authentication;
 using Microsoft.Win32.SafeHandles;
-using Git = Microsoft.Alm.Authentication.Git;
+using static Microsoft.Alm.NativeMethods;
 using Github = GitHub.Authentication;
 
 namespace Microsoft.Alm.Cli
@@ -55,13 +54,27 @@ namespace Microsoft.Alm.Cli
 
             authenticationCode = null;
 
-            NativeMethods.FileAccess fileAccessFlags = NativeMethods.FileAccess.GenericRead | NativeMethods.FileAccess.GenericWrite;
-            NativeMethods.FileAttributes fileAttributes = NativeMethods.FileAttributes.Normal;
-            NativeMethods.FileCreationDisposition fileCreationDisposition = NativeMethods.FileCreationDisposition.OpenExisting;
-            NativeMethods.FileShare fileShareFlags = NativeMethods.FileShare.Read | NativeMethods.FileShare.Write;
+            var fileAccessFlags = FileAccess.GenericRead
+                                | FileAccess.GenericWrite;
+            var fileAttributes = FileAttributes.Normal;
+            var fileCreationDisposition = FileCreationDisposition.OpenExisting;
+            var fileShareFlags = FileShare.Read
+                               | FileShare.Write;
 
-            using (SafeFileHandle stdout = NativeMethods.CreateFile(NativeMethods.ConsoleOutName, fileAccessFlags, fileShareFlags, IntPtr.Zero, fileCreationDisposition, fileAttributes, IntPtr.Zero))
-            using (SafeFileHandle stdin = NativeMethods.CreateFile(NativeMethods.ConsoleInName, fileAccessFlags, fileShareFlags, IntPtr.Zero, fileCreationDisposition, fileAttributes, IntPtr.Zero))
+            using (SafeFileHandle stdout = CreateFile(fileName: ConsoleOutName,
+                                                 desiredAccess: fileAccessFlags,
+                                                     shareMode: fileShareFlags,
+                                            securityAttributes: IntPtr.Zero,
+                                           creationDisposition: fileCreationDisposition,
+                                            flagsAndAttributes: fileAttributes,
+                                                  templateFile: IntPtr.Zero))
+            using (SafeFileHandle stdin = CreateFile(fileName: ConsoleInName,
+                                                desiredAccess: fileAccessFlags,
+                                                    shareMode: fileShareFlags,
+                                           securityAttributes: IntPtr.Zero,
+                                          creationDisposition: fileCreationDisposition,
+                                           flagsAndAttributes: fileAttributes,
+                                                 templateFile: IntPtr.Zero))
             {
                 string type = resultType == Github.GitHubAuthenticationResultType.TwoFactorApp
                     ? "app"
@@ -74,7 +87,11 @@ namespace Microsoft.Alm.Cli
                       .Append(type)
                       .Append("): ");
 
-                if (!NativeMethods.WriteConsole(stdout, buffer, (uint)buffer.Length, out written, IntPtr.Zero))
+                if (!WriteConsole(buffer: buffer,
+                     consoleOutputHandle: stdout,
+                    numberOfCharsToWrite: (uint)buffer.Length,
+                    numberOfCharsWritten: out written,
+                                reserved: IntPtr.Zero))
                 {
                     int error = Marshal.GetLastWin32Error();
                     throw new Win32Exception(error, "Unable to write to standard output (" + NativeMethods.Win32Error.GetText(error) + ").");
@@ -82,10 +99,14 @@ namespace Microsoft.Alm.Cli
                 buffer.Clear();
 
                 // read input from the user
-                if (!NativeMethods.ReadConsole(stdin, buffer, BufferReadSize, out read, IntPtr.Zero))
+                if (!ReadConsole(buffer: buffer,
+                     consoleInputHandle: stdin,
+                    numberOfCharsToRead: BufferReadSize,
+                      numberOfCharsRead: out read,
+                               reserved: IntPtr.Zero))
                 {
                     int error = Marshal.GetLastWin32Error();
-                    throw new Win32Exception(error, "Unable to read from standard input (" + NativeMethods.Win32Error.GetText(error) + ").");
+                    throw new Win32Exception(error, "Unable to read from standard input (" + Win32Error.GetText(error) + ").");
                 }
 
                 authenticationCode = buffer.ToString(0, (int)read);

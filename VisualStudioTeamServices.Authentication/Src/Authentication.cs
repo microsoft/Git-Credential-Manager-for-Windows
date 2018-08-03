@@ -330,7 +330,7 @@ namespace VisualStudioTeamServices.Authentication
         /// <param name="scope">The scope of the access being requested.</param>
         /// <param name="personalAccessTokenStore">Storage container for personal access token secrets.</param>
         public static async Task<BaseAuthentication> GetAuthentication(
-            Microsoft.Alm.Authentication.RuntimeContext context,
+            RuntimeContext context,
             TargetUri targetUri,
             TokenScope scope,
             ICredentialStore personalAccessTokenStore)
@@ -344,15 +344,14 @@ namespace VisualStudioTeamServices.Authentication
             if (personalAccessTokenStore is null)
                 throw new ArgumentNullException(nameof(personalAccessTokenStore));
 
-            BaseAuthentication authentication = null;
-
-            var result = await DetectAuthority(context, targetUri);
+            Guid? result = await DetectAuthority(context, targetUri);
 
             if (!result.HasValue)
                 return null;
 
             // Query for the tenant's identity
             Guid tenantId = result.Value;
+            BaseAuthentication authentication = null;
 
             // empty identity is MSA, anything else is AAD
             if (tenantId == Guid.Empty)

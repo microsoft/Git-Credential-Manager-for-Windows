@@ -34,17 +34,7 @@ namespace Microsoft.Alm.Cli
         /// Attempt to detect the authority automatically, fallback to `<see cref="Basic"/>` if unable
         /// to detect an authority.
         /// </summary>
-        Auto,
-
-        /// <summary>
-        /// Basic username and password scheme.
-        /// </summary>
-        Basic,
-
-        /// <summary>
-        /// Username and password scheme using Microsoft's Live system.
-        /// </summary>
-        MicrosoftAccount,
+        Auto = 0,
 
         /// <summary>
         /// Azure Directory Authentication based, including support for ADFS.
@@ -52,14 +42,24 @@ namespace Microsoft.Alm.Cli
         AzureDirectory,
 
         /// <summary>
-        /// GitHub authentication.
+        /// Basic username and password scheme.
         /// </summary>
-        GitHub,
+        Basic,
 
         /// <summary>
         /// Bitbucket authentication.
         /// </summary>
         Bitbucket,
+
+        /// <summary>
+        /// GitHub authentication.
+        /// </summary>
+        GitHub,
+
+        /// <summary>
+        /// Username and password scheme using Microsoft's Live system.
+        /// </summary>
+        MicrosoftAccount,
 
         /// <summary>
         /// Windows network integrated authentication layer.

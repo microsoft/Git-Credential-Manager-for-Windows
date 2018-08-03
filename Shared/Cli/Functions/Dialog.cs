@@ -27,7 +27,7 @@ using System;
 using System.Runtime.InteropServices;
 using System.Text;
 using Microsoft.Alm.Authentication;
-
+using static Microsoft.Alm.NativeMethods;
 using Git = Microsoft.Alm.Authentication.Git;
 
 namespace Microsoft.Alm.Cli
@@ -35,14 +35,14 @@ namespace Microsoft.Alm.Cli
     internal static class DialogFunctions
     {
         public static bool DisplayModal(Program program,
-                                        ref NativeMethods.CredentialUiInfo credUiInfo,
-                                        ref NativeMethods.CredentialPackFlags authPackage,
+                                        ref CredentialUiInfo credUiInfo,
+                                        ref CredentialPackFlags authPackage,
                                         IntPtr packedAuthBufferPtr,
                                         uint packedAuthBufferSize,
                                         IntPtr inBufferPtr,
                                         int inBufferSize,
                                         bool saveCredentials,
-                                        NativeMethods.CredentialUiWindowsFlags flags,
+                                        CredentialUiWindowsFlags flags,
                                         out string username,
                                         out string password)
         {
@@ -54,17 +54,17 @@ namespace Microsoft.Alm.Cli
             try
             {
                 // open a standard Windows authentication dialog to acquire username + password credentials
-                if ((error = NativeMethods.CredUIPromptForWindowsCredentials(credInfo: ref credUiInfo,
-                                                                             authError: 0,
-                                                                             authPackage: ref authPackage,
-                                                                             inAuthBuffer: inBufferPtr,
-                                                                             inAuthBufferSize: (uint)inBufferSize,
-                                                                             outAuthBuffer: out packedAuthBufferPtr,
-                                                                             outAuthBufferSize: out packedAuthBufferSize,
-                                                                             saveCredentials: ref saveCredentials,
-                                                                             flags: flags)) != NativeMethods.Win32Error.Success)
+                if ((error = CredUIPromptForWindowsCredentials(credInfo: ref credUiInfo,
+                                                                            authError: 0,
+                                                                          authPackage: ref authPackage,
+                                                                         inAuthBuffer: inBufferPtr,
+                                                                     inAuthBufferSize: (uint)inBufferSize,
+                                                                        outAuthBuffer: out packedAuthBufferPtr,
+                                                                    outAuthBufferSize: out packedAuthBufferSize,
+                                                                      saveCredentials: ref saveCredentials,
+                                                                                flags: flags)) != Win32Error.Success)
                 {
-                    program.Trace.WriteLine($"credential prompt failed ('{NativeMethods.Win32Error.GetText(error)}').");
+                    program.Trace.WriteLine($"credential prompt failed ('{Win32Error.GetText(error)}').");
 
                     username = null;
                     password = null;
@@ -81,21 +81,21 @@ namespace Microsoft.Alm.Cli
                 int domainLen = domainBuffer.Capacity;
 
                 // unpack the result into locally useful data
-                if (!NativeMethods.CredUnPackAuthenticationBuffer(flags: authPackage,
-                                                                  authBuffer: packedAuthBufferPtr,
-                                                                  authBufferSize: packedAuthBufferSize,
-                                                                  username: usernameBuffer,
-                                                                  maxUsernameLen: ref usernameLen,
-                                                                  domainName: domainBuffer,
-                                                                  maxDomainNameLen: ref domainLen,
-                                                                  password: passwordBuffer,
-                                                                  maxPasswordLen: ref passwordLen))
+                if (!CredUnPackAuthenticationBuffer(flags: authPackage,
+                                               authBuffer: packedAuthBufferPtr,
+                                           authBufferSize: packedAuthBufferSize,
+                                                 username: usernameBuffer,
+                                           maxUsernameLen: ref usernameLen,
+                                               domainName: domainBuffer,
+                                         maxDomainNameLen: ref domainLen,
+                                                 password: passwordBuffer,
+                                           maxPasswordLen: ref passwordLen))
                 {
                     username = null;
                     password = null;
 
                     error = Marshal.GetLastWin32Error();
-                    program.Trace.WriteLine($"failed to unpack buffer ('{NativeMethods.Win32Error.GetText(error)}').");
+                    program.Trace.WriteLine($"failed to unpack buffer ('{Win32Error.GetText(error)}').");
 
                     return false;
                 }
@@ -125,16 +125,16 @@ namespace Microsoft.Alm.Cli
             if (message is null)
                 throw new ArgumentNullException(nameof(message));
 
-            var credUiInfo = new NativeMethods.CredentialUiInfo
+            var credUiInfo = new CredentialUiInfo
             {
                 BannerArt = IntPtr.Zero,
                 CaptionText = program.Title,
                 Parent = program.ParentHwnd,
                 MessageText = message,
-                Size = Marshal.SizeOf(typeof(NativeMethods.CredentialUiInfo))
+                Size = Marshal.SizeOf(typeof(CredentialUiInfo))
             };
-            var flags = NativeMethods.CredentialUiWindowsFlags.Generic;
-            var authPackage = NativeMethods.CredentialPackFlags.None;
+            var flags = CredentialUiWindowsFlags.Generic;
+            var authPackage = CredentialPackFlags.None;
             var packedAuthBufferPtr = IntPtr.Zero;
             var inBufferPtr = IntPtr.Zero;
             uint packedAuthBufferSize = 0;
@@ -171,16 +171,16 @@ namespace Microsoft.Alm.Cli
             if (username is null)
                 throw new ArgumentNullException(nameof(username));
 
-            var credUiInfo = new NativeMethods.CredentialUiInfo
+            var credUiInfo = new CredentialUiInfo
             {
                 BannerArt = IntPtr.Zero,
                 CaptionText = program.Title,
                 MessageText = message,
                 Parent = program.ParentHwnd,
-                Size = Marshal.SizeOf(typeof(NativeMethods.CredentialUiInfo))
+                Size = Marshal.SizeOf(typeof(CredentialUiInfo))
             };
-            var flags = NativeMethods.CredentialUiWindowsFlags.Generic;
-            var authPackage = NativeMethods.CredentialPackFlags.None;
+            var flags = CredentialUiWindowsFlags.Generic;
+            var authPackage = CredentialPackFlags.None;
             var packedAuthBufferPtr = IntPtr.Zero;
             var inBufferPtr = IntPtr.Zero;
             uint packedAuthBufferSize = 0;
@@ -194,29 +194,29 @@ namespace Microsoft.Alm.Cli
 
                 // Execute with `null` to determine buffer size always returns false when determining
                 // size, only fail if `inBufferSize` looks bad.
-                NativeMethods.CredPackAuthenticationBuffer(flags: authPackage,
-                                                           username: username,
-                                                           password: string.Empty,
-                                                           packedCredentials: IntPtr.Zero,
-                                                           packedCredentialsSize: ref inBufferSize);
+                CredPackAuthenticationBuffer(flags: authPackage,
+                                          username: username,
+                                          password: string.Empty,
+                                 packedCredentials: IntPtr.Zero,
+                             packedCredentialsSize: ref inBufferSize);
                 if (inBufferSize <= 0)
                 {
                     error = Marshal.GetLastWin32Error();
-                    program.Trace.WriteLine($"unable to determine credential buffer size ('{NativeMethods.Win32Error.GetText(error)}').");
+                    program.Trace.WriteLine($"unable to determine credential buffer size ('{Win32Error.GetText(error)}').");
 
                     return null;
                 }
 
                 inBufferPtr = Marshal.AllocHGlobal(inBufferSize);
 
-                if (!NativeMethods.CredPackAuthenticationBuffer(flags: authPackage,
-                                                                username: username,
-                                                                password: string.Empty,
-                                                                packedCredentials: inBufferPtr,
-                                                                packedCredentialsSize: ref inBufferSize))
+                if (!CredPackAuthenticationBuffer(flags: authPackage,
+                                               username: username,
+                                               password: string.Empty,
+                                      packedCredentials: inBufferPtr,
+                                  packedCredentialsSize: ref inBufferSize))
                 {
                     error = Marshal.GetLastWin32Error();
-                    program.Trace.WriteLine($"unable to write to credential buffer ('{NativeMethods.Win32Error.GetText(error)}').");
+                    program.Trace.WriteLine($"unable to write to credential buffer ('{Win32Error.GetText(error)}').");
 
                     return null;
                 }
