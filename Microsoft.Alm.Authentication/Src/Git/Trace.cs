@@ -136,11 +136,11 @@ namespace Microsoft.Alm.Authentication.Git
             if (exception is null)
                 return;
 
-            WriteLine($"! error: '{exception.Message}'.");
+            WriteLine($"! error: '{exception.Message}'.", filePath, lineNumber, memberName);
 
             while ((exception = exception.InnerException) != null)
             {
-                WriteLine($"       > '{exception.Message}'.");
+                WriteLine($"       > '{exception.Message}'.", filePath, lineNumber, memberName);
             }
         }
 
