@@ -305,7 +305,9 @@ namespace Microsoft.Alm.Authentication
             if (token is null)
                 return null;
 
-            if (token.Type != TokenType.Personal)
+            if (token.Type == TokenType.AzureAccess
+                || token.Type == TokenType.AzureFederated
+                || token.Type == TokenType.Unknown)
                 throw new InvalidCastException($"Cannot cast `{nameof(Token)}` of type '{token.Type}' to `{nameof(Credential)}`");
 
             return new Credential(token.ToString(), token._value);
