@@ -435,39 +435,49 @@ namespace Microsoft.Alm.Authentication
                     switch (options.Authorization)
                     {
                         case Token token:
+                        {
+                            // Different types of tokens are packed differently.
+                            switch (token.Type)
                             {
-                                // Different types of tokens are packed differently.
-                                switch (token.Type)
+                                case TokenType.AzureAccess:
+                                case TokenType.BitbucketAccess:
                                 {
-                                    case TokenType.AzureAccess:
-                                    case TokenType.BitbucketAccess:
-                                    case TokenType.Personal:
-                                        {
-                                            // ADAL access tokens are packed into the Authorization header.
-                                            httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token.Value);
-                                        }
-                                        break;
-
-                                    case TokenType.AzureFederated:
-                                        {
-                                            // Federated authentication tokens are sent as cookie(s).
-                                            httpClient.DefaultRequestHeaders.Add("Cookie", token.Value);
-                                        }
-                                        break;
-
-                                    default:
-                                        Trace.WriteLine("! unsupported token type, not appending an authentication header to the request.");
-                                        break;
+                                    // ADAL access tokens are packed into the Authorization header.
+                                    httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token.Value);
                                 }
+                                break;
+
+                                case TokenType.AzureFederated:
+                                {
+                                    // Federated authentication tokens are sent as cookie(s).
+                                    httpClient.DefaultRequestHeaders.Add("Cookie", token.Value);
+                                }
+                                break;
+
+                                case TokenType.Personal:
+                                {
+                                    // Personal access tokens are designed to treated like credentials,
+                                    // so treat them like credentials.
+                                    var credentials = (Credential)token;
+
+                                    // Credentials are packed into the 'Authorization' header as a base64 encoded pair.
+                                    httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Basic", credentials.ToBase64String());
+                                }
+                                break;
+
+                                default:
+                                    Trace.WriteLine("! unsupported token type, not appending an authentication header to the request.");
+                                    break;
                             }
-                            break;
+                        }
+                        break;
 
                         case Credential credentials:
-                            {
-                                // Credentials are packed into the 'Authorization' header as a base64 encoded pair.
-                                httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Basic", credentials.ToBase64String());
-                            }
-                            break;
+                        {
+                            // Credentials are packed into the 'Authorization' header as a base64 encoded pair.
+                            httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Basic", credentials.ToBase64String());
+                        }
+                        break;
                     }
                 }
             }
@@ -491,7 +501,7 @@ namespace Microsoft.Alm.Authentication
 
             if (proxyUri != null)
             {
-                WebProxy proxy = new WebProxy(proxyUri) { UseDefaultCredentials = true };
+                var proxy = new WebProxy(proxyUri) { UseDefaultCredentials = true };
 
                 // check if the user has specified authentications (comes as UserInfo)
                 if (!string.IsNullOrWhiteSpace(proxyUri.UserInfo) && proxyUri.UserInfo.Length > 1)
@@ -504,7 +514,7 @@ namespace Microsoft.Alm.Authentication
                         string userName = proxyUri.UserInfo.Substring(0, tokenIndex);
                         string password = proxyUri.UserInfo.Substring(tokenIndex + 1);
 
-                        NetworkCredential proxyCreds = new NetworkCredential(userName, password);
+                        var proxyCreds = new NetworkCredential(userName, password);
 
                         proxy.UseDefaultCredentials = false;
                         proxy.Credentials = proxyCreds;
