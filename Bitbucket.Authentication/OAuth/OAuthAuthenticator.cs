@@ -323,7 +323,7 @@ namespace Atlassian.Bitbucket.Authentication.OAuth
                 && tokenMatch.Groups.Count > 1)
             {
                 string tokenText = tokenMatch.Groups[1].Value;
-                return new Token(tokenText, TokenType.Personal);
+                return new Token(tokenText, TokenType.BitbucketAccess);
             }
 
             return null;
