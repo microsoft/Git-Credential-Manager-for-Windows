@@ -104,6 +104,7 @@
     <ZipContents Include="$(SolutionDir)\README.md">
       <InProject>false</InProject>
     </ZipContents>
+    <ZipContents Include="$(ProjectDir)\update-vs.ps1" />
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />
@@ -128,6 +129,7 @@
         <InProject>false</InProject>
       </FilesToCopy>
       <FilesToCopy Include="$(ProjectDir)\Setup.iss" />
+      <FilesToCopy Include="$(ProjectDir)\update-vs.ps1" />
     </ItemGroup>
     <MakeDir Directories="$(IntermediateOutputPath)" />
     <MakeDir Directories="$(OutputPath)" />
