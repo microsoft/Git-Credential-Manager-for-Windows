@@ -566,6 +566,17 @@ namespace Microsoft.Alm.Authentication
                                 }
                                 break;
 
+                                case TokenType.Personal:
+                                {
+                                    // Personal access tokens are designed to treated like credentials,
+                                    // so treat them like credentials.
+                                    var credentials = (Credential)token;
+
+                                    // Credentials are packed into the 'Authorization' header as a base64 encoded pair.
+                                    httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Basic", credentials.ToBase64String());
+                                }
+                                break;
+
                                 default:
                                 Trace.WriteLine("! unsupported token type, not appending an authentication header to the request.");
                                 break;
@@ -602,7 +613,7 @@ namespace Microsoft.Alm.Authentication
 
             if (proxyUri != null)
             {
-                WebProxy proxy = new WebProxy(proxyUri) { UseDefaultCredentials = true };
+                var proxy = new WebProxy(proxyUri) { UseDefaultCredentials = true };
 
                 // check if the user has specified authentications (comes as UserInfo)
                 if (!string.IsNullOrWhiteSpace(proxyUri.UserInfo) && proxyUri.UserInfo.Length > 1)
@@ -615,7 +626,7 @@ namespace Microsoft.Alm.Authentication
                         string userName = proxyUri.UserInfo.Substring(0, tokenIndex);
                         string password = proxyUri.UserInfo.Substring(tokenIndex + 1);
 
-                        NetworkCredential proxyCreds = new NetworkCredential(userName, password);
+                        var proxyCreds = new NetworkCredential(userName, password);
 
                         proxy.UseDefaultCredentials = false;
                         proxy.Credentials = proxyCreds;
