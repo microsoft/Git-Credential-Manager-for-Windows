@@ -53,18 +53,12 @@ phases:
         restoreSolution: '$(Build.Solution)'
         verbosityRestore: 'quiet'
     
-    - task: NuGetCommand@2
-      displayName: NuGet restore
-      inputs:
-        command: custom
-        arguments: restore '$(Build.SourcesDirectory)\$(Build.Target)' '-SolutionDirectory $(Build.SourcesDirectory)'
-    
     - ${{ parameters.MicrobuildSetup }}
     
     - task: MSBuild@1
       displayName: 'Core Build'
       inputs:
-        solution: '$(Build.Target)'
+        solution: '$(Build.Solution)'
         msbuildArguments: '/nologo /verbosity:$(Build.Verbosity) /binaryLogger:$(Build.SourcesDirectory)/$(build.buildNumber).binlog'
         platform: '$(Build.Platform)'
         configuration: '$(Build.Configuration)'
