@@ -21,8 +21,8 @@ using System.Runtime.InteropServices;
 [assembly: Guid("ee663736-5bad-4ca6-a4f8-99978925ad8a")]
 
 // Major Version Minor Version Build Number Revision
-[assembly: AssemblyVersion("2.0.1.0")]
-[assembly: AssemblyFileVersion("2.0.1.0")]
+[assembly: AssemblyVersion("2.0.2.0")]
+[assembly: AssemblyFileVersion("2.0.2.0")]
 
 [assembly: InternalsVisibleTo("Bitbucket.Authentication.Test")]
 
