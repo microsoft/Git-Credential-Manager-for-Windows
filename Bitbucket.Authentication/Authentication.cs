@@ -411,11 +411,12 @@ namespace Atlassian.Bitbucket.Authentication
         {
             Credential credentials = (Credential)result.Token;
 
-            var realUsername = GetRealUsername(result.RemoteUsername, username);
 
-            if (!targetUri.ContainsUserInfo)
+            // No user info in Uri, or it's a basic login so we need to personalize the credentials.
+            if (!targetUri.ContainsUserInfo || result.Token.Type == TokenType.Personal)
             {
                 // No user info in Uri so personalize the credentials.
+                var realUsername = GetRealUsername(result.RemoteUsername, username);
                 credentials = new Credential(realUsername, credentials.Password);
             }
 
