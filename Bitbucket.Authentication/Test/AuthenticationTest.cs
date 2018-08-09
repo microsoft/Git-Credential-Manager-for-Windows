@@ -472,6 +472,46 @@ namespace Atlassian.Bitbucket.Authentication.Test
         }
 
         [Fact]
+        public async void VerifyInteractiveLoginDoesNotAquireInvalidBasicAuthCredentialsWithUsername()
+        {
+            var bitbucketUrl = "https://bitbucket.org";
+            var credentialStore = new Mock<ICredentialStore>();
+
+            // mock the result that normally causes issues
+            var validAuthenticationResult = new AuthenticationResult(AuthenticationResultType.Success)
+            {
+                Token = new Token(_validPassword, TokenType.Personal),
+                RemoteUsername = _validUsername
+            };
+
+            var targetUri = new TargetUri(bitbucketUrl);
+
+            // Mock the behaviour of IAuthority.AcquireToken() to basically mimic BasicAuthAuthenticator.GetAuthAsync() validating the useername/password
+            var authority = new Mock<IAuthority>();
+            authority
+                .Setup(a => a.AcquireToken(It.IsAny<TargetUri>(), It.IsAny<Credential>(), It.IsAny<AuthenticationResultType>(), It.IsAny<TokenScope>()))
+                // return 'success' with the validated credentials
+                .Returns(Task.FromResult(validAuthenticationResult));
+
+            var bbAuth = new Authentication(RuntimeContext.Default, credentialStore.Object, 
+                MockInvalidBasicAuthCredentialsAquireCredentialsCallback, MockValidAquireAuthenticationOAuthCallback, authority.Object);
+
+            // perform login with username
+            var credentials = await bbAuth.InteractiveLogon(targetUri, _validUsername);
+
+            Assert.NotNull(credentials);
+            Assert.Equal(_validUsername, credentials.Username);
+            Assert.Equal(_validPassword, credentials.Password);
+
+            // attempted to validate credentials
+            authority.Verify(a => a.AcquireToken(It.IsAny<TargetUri>(), It.IsAny<Credential>(), It.IsAny<AuthenticationResultType>(),
+                It.IsAny<TokenScope>()), Times.Once);
+           
+            // must have a valid attempt to store the valid credentials
+            credentialStore.Verify(c => c.WriteCredentials(It.IsAny<TargetUri>(), credentials), Times.Once);
+        }
+
+        [Fact]
         public async void VerifyInteractiveLoginDoesNothingIfUserDoesNotEnterCredentials()
         {
             var bitbucketUrl = "https://bitbucket.org";
