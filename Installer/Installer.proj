@@ -5,7 +5,7 @@
           Condition="Exists('..\packages\MicroBuild.Core.0.3.0\build\MicroBuild.Core.props')" />
   <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props"
           Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
-          
+  
   <PropertyGroup Label="Globals">
     <NuGetPackageImportStamp />
     <ProjectGuid>{19770407-3808-4B17-9EE0-21DD3468F875}</ProjectGuid>
@@ -126,6 +126,7 @@
       <ZipContents Include="$(SolutionDir)\LICENSE.TXT" />
       <ZipContents Include="$(ProjectDir)\install.cmd" />
       <ZipContents Include="$(SolutionDir)\README.md" />
+      <ZipContents Include="$(ProjectDir)\update-vs.ps1" />
     </ItemGroup>
     
     <!-- Generate 'GCMW-${version}.exe' -->
