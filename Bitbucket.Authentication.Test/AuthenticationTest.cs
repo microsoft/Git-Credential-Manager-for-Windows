@@ -2,8 +2,10 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Net;
+using System.Net.Http;
 using System.Threading.Tasks;
 using Atlassian.Bitbucket.Authentication.BasicAuth;
+using Atlassian.Bitbucket.Authentication.Rest;
 using Microsoft.Alm.Authentication;
 using Moq;
 using Xunit;
@@ -571,6 +573,43 @@ namespace Atlassian.Bitbucket.Authentication.Test
             // valid access token + refresh token stored for the per user and per host urls so 2 x 2 calls
             credentialStore.Verify(c => c.WriteCredentials(It.IsAny<TargetUri>(), It.IsAny<Credential>()), Times.Exactly(4));
 
+        }
+
+        [Fact]
+        public async void VerifyGetUserFromRestTargetsValidURL()
+        {
+            var expectedUri = new TargetUri("https://api.bitbucket.org/2.0/user");
+
+            var storage = new Mock<IStorage>();
+            var trace = new Mock<Microsoft.Alm.Authentication.Git.ITrace>();
+            var gitWhere = new Mock<Microsoft.Alm.Authentication.Git.IWhere>();
+
+            var network = new Mock<INetwork>();
+            network
+                .Setup(a => a.HttpGetAsync(It.IsAny<TargetUri>(), It.IsAny<NetworkRequestOptions>()))
+                .Returns(Task.FromResult<HttpResponseMessage>(new HttpResponseMessage(HttpStatusCode.Unauthorized)));
+
+            network
+                .Setup(a => a.HttpGetAsync(expectedUri, It.IsAny<NetworkRequestOptions>()))
+                .Returns(Task.FromResult<HttpResponseMessage>(new HttpResponseMessage(HttpStatusCode.Unauthorized)));
+
+            network
+                .Setup(a => a.HttpGetAsync(It.IsAny<TargetUri>()))
+                .Returns(Task.FromResult<HttpResponseMessage>(new HttpResponseMessage(HttpStatusCode.Unauthorized)));
+
+            var restClient = new RestClient(
+                new RuntimeContext(storage.Object, network.Object, trace.Object, gitWhere.Object));
+
+            var user = await restClient.TryGetUser(
+                new TargetUri($"https://{_validUsername}@bitbucket.org/"),
+                42,
+                new Uri("https://api.bitbucket.org/"),
+                new Credential(_validUsername, _validPassword));
+            
+            // Verify we got the same string result
+            network.Verify(a => a.HttpGetAsync(
+                It.Is<TargetUri>((uri) => uri.ToString() == expectedUri.ToString()),
+                It.IsAny<NetworkRequestOptions>()), Times.Once);
         }
 
         private bool MockValidAquireAuthenticationOAuthCallback(string title, TargetUri targetUri, AuthenticationResultType resultType, string username)
