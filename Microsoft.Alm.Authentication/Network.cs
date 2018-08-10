@@ -454,6 +454,15 @@ namespace Microsoft.Alm.Authentication
                                         }
                                         break;
 
+                                    case TokenType.Personal:
+                                        {
+                                            var credentials = (Credential)token;
+
+                                            // Credentials are packed into the 'Authorization' header as a base64 encoded pair.
+                                            httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Basic", credentials.ToBase64String());
+                                        }
+                                        break;
+
                                     default:
                                         Trace.WriteLine("! unsupported token type, not appending an authentication header to the request.");
                                         break;
