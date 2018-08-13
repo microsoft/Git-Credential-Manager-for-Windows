@@ -31,6 +31,26 @@ phases:
   - template: vsts-tt.yml
     parameters:
       QueueName: 'Hosted VS2017'
+
+      CoreBuild:
+        - task: MSBuild@1
+          displayName: 'Core Build'
+          inputs:
+            solution: "GitCredentialManager.sln"
+            msbuildArguments: /nologo /verbosity:$(Build.Verbosity) "/binaryLogger:$(Build.SourcesDirectory)/$(build.buildNumber).binlog"
+            platform: '$(Build.Platform)'
+            configuration: '$(Build.Configuration)'
+            maximumCpuCount: false
+            msbuildArchitecture: '$(Build.Architecture)'
+
       MicrobuildSetup: []
       MicrobuildClean: []
+
+      NugetCommand:
+        - task: NuGetCommand@2
+          displayName: NuGet restore
+          inputs:
+            restoreSolution: 'GitCredentialManager.sln'
+            verbosityRestore: 'quiet'
+
       PublishArtifacts: []
