@@ -77,8 +77,8 @@ phases:
           continueOnError: true
           condition:  eq(variables['system.pullrequest.isfork'], false)
           inputs:
-            pathtoPublish: "$(Build.SourcesDirectory)\$(build.buildNumber).binlog"
-            artifactName: "$(build.buildNumber).binlog"
+            pathtoPublish: $(Build.SourcesDirectory)\$(build.buildNumber).binlog
+            artifactName: $(build.buildNumber).binlog
             publishLocation: Container
         
         - task: PublishBuildArtifacts@1
@@ -86,6 +86,6 @@ phases:
           continueOnError: true
           condition: and(succeeded(), eq(variables['system.pullrequest.isfork'], false))
           inputs:
-            pathtoPublish: "$(Build.SourcesDirectory)\Deploy\"
-            artifactName: "$(Build.BuildNumber).output"
+            pathtoPublish: $(Build.SourcesDirectory)\Deploy\
+            artifactName: $(Build.BuildNumber).output
             publishLocation: Container
