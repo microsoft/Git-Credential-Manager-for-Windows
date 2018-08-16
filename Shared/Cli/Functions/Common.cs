@@ -418,36 +418,36 @@ namespace Microsoft.Alm.Cli
             {
                 program.Trace.WriteLine($"{program.KeyTypeName(KeyType.Authority)} = '{value}'.");
 
-                if (Program.ConfigKeyComparer.Equals(value, "MSA")
-                    || Program.ConfigKeyComparer.Equals(value, "Microsoft")
-                    || Program.ConfigKeyComparer.Equals(value, "MicrosoftAccount")
-                    || Program.ConfigKeyComparer.Equals(value, "Live")
-                    || Program.ConfigKeyComparer.Equals(value, "LiveConnect")
-                    || Program.ConfigKeyComparer.Equals(value, "LiveID"))
+                if (Program.ConfigValueComparer.Equals(value, "MSA")
+                    || Program.ConfigValueComparer.Equals(value, "Microsoft")
+                    || Program.ConfigValueComparer.Equals(value, "MicrosoftAccount")
+                    || Program.ConfigValueComparer.Equals(value, "Live")
+                    || Program.ConfigValueComparer.Equals(value, "LiveConnect")
+                    || Program.ConfigValueComparer.Equals(value, "LiveID"))
                 {
                     operationArguments.Authority = AuthorityType.MicrosoftAccount;
                 }
-                else if (Program.ConfigKeyComparer.Equals(value, "AAD")
-                         || Program.ConfigKeyComparer.Equals(value, "Azure")
-                         || Program.ConfigKeyComparer.Equals(value, "AzureDirectory"))
+                else if (Program.ConfigValueComparer.Equals(value, "AAD")
+                         || Program.ConfigValueComparer.Equals(value, "Azure")
+                         || Program.ConfigValueComparer.Equals(value, "AzureDirectory"))
                 {
                     operationArguments.Authority = AuthorityType.AzureDirectory;
                 }
-                else if (Program.ConfigKeyComparer.Equals(value, "Integrated")
-                         || Program.ConfigKeyComparer.Equals(value, "Windows")
-                         || Program.ConfigKeyComparer.Equals(value, "TFS")
-                         || Program.ConfigKeyComparer.Equals(value, "Kerberos")
-                         || Program.ConfigKeyComparer.Equals(value, "NTLM")
-                         || Program.ConfigKeyComparer.Equals(value, "SSO"))
+                else if (Program.ConfigValueComparer.Equals(value, "Integrated")
+                         || Program.ConfigValueComparer.Equals(value, "Windows")
+                         || Program.ConfigValueComparer.Equals(value, "TFS")
+                         || Program.ConfigValueComparer.Equals(value, "Kerberos")
+                         || Program.ConfigValueComparer.Equals(value, "NTLM")
+                         || Program.ConfigValueComparer.Equals(value, "SSO"))
                 {
                     operationArguments.Authority = AuthorityType.Ntlm;
                 }
-                else if (Program.ConfigKeyComparer.Equals(value, "GitHub"))
+                else if (Program.ConfigValueComparer.Equals(value, "GitHub"))
                 {
                     operationArguments.Authority = AuthorityType.GitHub;
                 }
-                else if (Program.ConfigKeyComparer.Equals(value, "Atlassian")
-                         || Program.ConfigKeyComparer.Equals(value, "Bitbucket"))
+                else if (Program.ConfigValueComparer.Equals(value, "Atlassian")
+                         || Program.ConfigValueComparer.Equals(value, "Bitbucket"))
                 {
                     operationArguments.Authority = AuthorityType.Bitbucket;
                 }
@@ -462,14 +462,14 @@ namespace Microsoft.Alm.Cli
             {
                 program.Trace.WriteLine($"{program.KeyTypeName(KeyType.Interactive)} = '{value}'.");
 
-                if (Program.ConfigKeyComparer.Equals(value, "always")
-                    || Program.ConfigKeyComparer.Equals(value, "true")
-                    || Program.ConfigKeyComparer.Equals(value, "force"))
+                if (Program.ConfigValueComparer.Equals(value, "always")
+                    || Program.ConfigValueComparer.Equals(value, "true")
+                    || Program.ConfigValueComparer.Equals(value, "force"))
                 {
                     operationArguments.Interactivity = Interactivity.Always;
                 }
-                else if (Program.ConfigKeyComparer.Equals(value, "never")
-                         || Program.ConfigKeyComparer.Equals(value, "false"))
+                else if (Program.ConfigValueComparer.Equals(value, "never")
+                         || Program.ConfigValueComparer.Equals(value, "false"))
                 {
                     operationArguments.Interactivity = Interactivity.Never;
                 }
