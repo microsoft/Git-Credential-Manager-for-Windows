@@ -207,106 +207,115 @@ namespace VisualStudioTeamServices.Authentication
                     return tenantId;
                 }
 
-                var options = new NetworkRequestOptions(false)
-                {
-                    Flags = NetworkRequestOptionFlags.UseProxy,
-                    Timeout = TimeSpan.FromMilliseconds(Global.RequestTimeout),
-                };
+                // Reconstruct the request URL in its original form.
+                requestUrl = requestUri.ToString(false, true, true);
 
-                try
+                // Only query the server if the request URL contains any signature elements ("/_git/", "azure.com", or "visualstudio.com").
+                if (requestUrl.IndexOf("/_git/", StringComparison.OrdinalIgnoreCase) > 0
+                    || requestUrl.IndexOf(AzureBaseUrlHost, StringComparison.OrdinalIgnoreCase) > 0
+                    || requestUrl.IndexOf(VstsBaseUrlHost, StringComparison.OrdinalIgnoreCase) > 0)
                 {
-                    // Query the host use the response headers to determine if the host is VSTS or not.
-                    using (var response = await context.Network.HttpHeadAsync(requestUri, options))
+                    var options = new NetworkRequestOptions(false)
                     {
-                        if (response.Headers != null)
+                        Flags = NetworkRequestOptionFlags.UseProxy,
+                        Timeout = TimeSpan.FromMilliseconds(Global.RequestTimeout),
+                    };
+
+                    try
+                    {
+                        // Query the host use the response headers to determine if the host is VSTS or not.
+                        using (var response = await context.Network.HttpHeadAsync(requestUri, options))
                         {
-                            // If the "X-VSS-ResourceTenant" was returned, then it is VSTS and we'll need it's value.
-                            if (response.Headers.TryGetValues(VstsResourceTenantHeader, out IEnumerable<string> values))
+                            if (response.Headers != null)
                             {
-                                context.Trace.WriteLine($"detected '{requestUrl}' as VSTS from GET response.");
-
-                                // The "Www-Authenticate" is a more reliable header, because it indicates the 
-                                // authentication scheme that should be used to access the requested entity.
-                                if (response.Headers.WwwAuthenticate != null)
+                                // If the "X-VSS-ResourceTenant" was returned, then it is VSTS and we'll need it's value.
+                                if (response.Headers.TryGetValues(VstsResourceTenantHeader, out IEnumerable<string> values))
                                 {
-                                    foreach (var header in response.Headers.WwwAuthenticate)
+                                    context.Trace.WriteLine($"detected '{requestUrl}' as VSTS from GET response.");
+
+                                    // The "Www-Authenticate" is a more reliable header, because it indicates the 
+                                    // authentication scheme that should be used to access the requested entity.
+                                    if (response.Headers.WwwAuthenticate != null)
                                     {
-                                        const string AuthorizationUriPrefix = "authorization_uri=";
-
-                                        var value = header.Parameter;
-
-                                        if (value.Length >= AuthorizationUriPrefix.Length + AuthorityHostUrlBase.Length + GuidStringLength)
+                                        foreach (var header in response.Headers.WwwAuthenticate)
                                         {
-                                            // The header parameter will look something like "authorization_uri=https://login.microsoftonline.com/72f988bf-86f1-41af-91ab-2d7cd011db47"
-                                            // and all we want is the portion after the '=' and before the last '/'.
-                                            int index1 = value.IndexOf('=', AuthorizationUriPrefix.Length - 1);
-                                            int index2 = value.LastIndexOf('/');
+                                            const string AuthorizationUriPrefix = "authorization_uri=";
 
-                                            // Parse the header value if the necessary characters exist...
-                                            if (index1 > 0 && index2 > index1)
+                                            var value = header.Parameter;
+
+                                            if (value.Length >= AuthorizationUriPrefix.Length + AuthorityHostUrlBase.Length + GuidStringLength)
                                             {
-                                                var authorityUrl = value.Substring(index1 + 1, index2 - index1 - 1);
-                                                var guidString = value.Substring(index2 + 1, GuidStringLength);
+                                                // The header parameter will look something like "authorization_uri=https://login.microsoftonline.com/72f988bf-86f1-41af-91ab-2d7cd011db47"
+                                                // and all we want is the portion after the '=' and before the last '/'.
+                                                int index1 = value.IndexOf('=', AuthorizationUriPrefix.Length - 1);
+                                                int index2 = value.LastIndexOf('/');
 
-                                                // If the authority URL is as expected, attempt to parse the tenant resource identity.
-                                                if (OrdinalIgnoreCase.Equals(authorityUrl, AuthorityHostUrlBase)
-                                                    && Guid.TryParse(guidString, out tenantId))
+                                                // Parse the header value if the necessary characters exist...
+                                                if (index1 > 0 && index2 > index1)
                                                 {
-                                                    // Update the cache.
-                                                    cache[requestUrl] = tenantId;
+                                                    var authorityUrl = value.Substring(index1 + 1, index2 - index1 - 1);
+                                                    var guidString = value.Substring(index2 + 1, GuidStringLength);
 
-                                                    // Write the cache to disk.
-                                                    await SerializeTenantCache(context, cache);
+                                                    // If the authority URL is as expected, attempt to parse the tenant resource identity.
+                                                    if (OrdinalIgnoreCase.Equals(authorityUrl, AuthorityHostUrlBase)
+                                                        && Guid.TryParse(guidString, out tenantId))
+                                                    {
+                                                        // Update the cache.
+                                                        cache[requestUrl] = tenantId;
 
-                                                    // Since we found a value, break the loop (likely a loop of one item anyways).
+                                                        // Write the cache to disk.
+                                                        await SerializeTenantCache(context, cache);
+
+                                                        // Since we found a value, break the loop (likely a loop of one item anyways).
+                                                        break;
+                                                    }
+                                                }
+                                            }
+                                        }
+                                    }
+                                    else
+                                    {
+                                        // Since there wasn't a "Www-Authenticate" header returned
+                                        // iterate through the values, taking the first non-zero value.
+                                        foreach (string value in values)
+                                        {
+                                            // Try to find a value for the resource-tenant identity.
+                                            // Given that some projects will return multiple tenant identities, 
+                                            if (!string.IsNullOrWhiteSpace(value)
+                                                && Guid.TryParse(value, out tenantId))
+                                            {
+                                                // Update the cache.
+                                                cache[requestUrl] = tenantId;
+
+                                                // Write the cache to disk.
+                                                await SerializeTenantCache(context, cache);
+
+                                                // Break the loop if a non-zero value has been detected.
+                                                if (tenantId != Guid.Empty)
+                                                {
                                                     break;
                                                 }
                                             }
                                         }
                                     }
+
+                                    context.Trace.WriteLine($"tenant resource for '{requestUrl}' is {{{tenantId.ToString("N")}}}.");
+
+                                    // Return the tenant identity to the caller because this is VSTS.
+                                    return tenantId;
                                 }
-                                else
-                                {
-                                    // Since there wasn't a "Www-Authenticate" header returned
-                                    // iterate through the values, taking the first non-zero value.
-                                    foreach (string value in values)
-                                    {
-                                        // Try to find a value for the resource-tenant identity.
-                                        // Given that some projects will return multiple tenant identities, 
-                                        if (!string.IsNullOrWhiteSpace(value)
-                                            && Guid.TryParse(value, out tenantId))
-                                        {
-                                            // Update the cache.
-                                            cache[requestUrl] = tenantId;
-
-                                            // Write the cache to disk.
-                                            await SerializeTenantCache(context, cache);
-
-                                            // Break the loop if a non-zero value has been detected.
-                                            if (tenantId != Guid.Empty)
-                                            {
-                                                break;
-                                            }
-                                        }
-                                    }
-                                }
-
-                                context.Trace.WriteLine($"tenant resource for '{requestUrl}' is {{{tenantId.ToString("N")}}}.");
-
-                                // Return the tenant identity to the caller because this is VSTS.
-                                return tenantId;
+                            }
+                            else
+                            {
+                                context.Trace.WriteLine($"unable to get response from '{requestUri}' [{(int)response.StatusCode} {response.StatusCode}].");
                             }
                         }
-                        else
-                        {
-                            context.Trace.WriteLine($"unable to get response from '{requestUri}' [{(int)response.StatusCode} {response.StatusCode}].");
-                        }
                     }
-                }
-                catch (HttpRequestException exception)
-                {
-                    context.Trace.WriteLine($"unable to get response from '{requestUri}', an error occurred before the server could respond.");
-                    context.Trace.WriteException(exception);
+                    catch (HttpRequestException exception)
+                    {
+                        context.Trace.WriteLine($"unable to get response from '{requestUri}', an error occurred before the server could respond.");
+                        context.Trace.WriteException(exception);
+                    }
                 }
             }
             else
