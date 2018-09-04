@@ -24,6 +24,7 @@
 **/
 
 using System;
+using System.Windows.Input;
 using GitHub.Shared.Controls;
 using GitHub.Shared.Helpers;
 
@@ -44,10 +45,12 @@ namespace Atlassian.Bitbucket.Authentication.Controls
             if (string.IsNullOrWhiteSpace(loginTextBox.Text))
             {
                 loginTextBox.TryFocus().Wait(TimeSpan.FromSeconds(1));
+                Keyboard.Focus(loginTextBox);
             }
             else
             {
                 passwordTextBox.TryFocus().Wait(TimeSpan.FromSeconds(1));
+                Keyboard.Focus(passwordTextBox);
             }
         }
     }
