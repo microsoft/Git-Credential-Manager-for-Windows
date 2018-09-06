@@ -41,6 +41,7 @@
     Title="Bitbucket OAuth Authentication"
     Height="420"
     Width="420"
+    Topmost="True"
     Icon="pack://application:,,,/Bitbucket.Authentication;component/Assets/ADG3/Images/Bitbucket-16x16.ico">
     <Window.DataContext>
         <viewmodels:OAuthViewModel />
