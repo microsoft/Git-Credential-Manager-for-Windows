@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Threading.Tasks;
 using Xunit;
 
@@ -9,11 +8,11 @@ namespace Microsoft.Alm.Authentication.Test
     {
         private const string Namespace = "test";
 
-        public static object[][] CredentialData
+        public static object[ ][ ] CredentialData
         {
             get
             {
-                List<object[]> data = new List<object[]>()
+                return new object[ ][ ]
                 {
                     new object[] { false, "http://dummy.url/for/testing", "username", "password", false },
                     new object[] { false, "http://dummy.url/for/testing?with=params", "username", "password", false },
@@ -32,17 +31,30 @@ namespace Microsoft.Alm.Authentication.Test
                     new object[] { true, "http://dummy.url/for/testing", "null_passwords_are_legal", null, false },
                     new object[] { true, "http://dummy.url/for/testing", "blank_passwords_are_legal", "", false },
                     new object[] { true, "http://dummy.url:999/for/testing", "username", "password", false },
-                };
 
-                return data.ToArray();
+                    new object[] { false, "http://useruser@dummy.url/for/testing", "username", "password", false },
+                    new object[] { false, "http://useruser@dummy.url/for/testing?with=params", "username", "password", false },
+                    new object[] { false, "http://useruser@dummy.url/for/testing", null, "null_usernames_are_illegal", true },
+                    new object[] { false, "http://useruser@dummy.url/for/testing", "", "blank_usernames_are_legal", false },
+                    new object[] { false, "http://useruser@dummy.url/for/testing", "null_passwords_are_legal", null, false },
+                    new object[] { false, "http://useruser@dummy.url/for/testing", "blank_passwords_are_legal", "", false },
+                    new object[] { false, "http://useruser@dummy.url:999/for/testing", "username", "password", false },
+
+                    new object[] { true, "http://useruser@dummy.url/for/testing", "username", "password", false },
+                    new object[] { true, "http://useruser@dummy.url/for/testing?with=params", "username", "password", false },
+                    new object[] { true, "http://useruser@dummy.url/for/testing", null, "null_usernames_are_illegal", true },
+                    new object[] { true, "http://useruser@dummy.url/for/testing", "", "blank_usernames_are_legal", false },
+                    new object[] { true, "http://useruser@dummy.url/for/testing", "null_passwords_are_legal", null, false },
+                    new object[] { true, "http://useruser@dummy.url/for/testing", "blank_passwords_are_legal", "", false },
+                    new object[] { true, "http://useruser@dummy.url:999/for/testing", "username", "password", false },
+                };
             }
         }
 
-        [Theory]
-        [MemberData(nameof(CredentialData), DisableDiscoveryEnumeration = true)]
-        public void Credential_WriteDelete(bool useCache, string url, string username, string password, bool throws)
+        [Theory, MemberData(nameof(CredentialData), DisableDiscoveryEnumeration = false)]
+        public async Task Credential_WriteDelete(bool useCache, string url, string username, string password, bool throws)
         {
-            var task = Task.Run(async () =>
+            try
             {
                 var uri = new TargetUri(url);
                 var writeCreds = new Credential(username, password);
@@ -60,35 +72,45 @@ namespace Microsoft.Alm.Authentication.Test
 
                 await credentialStore.DeleteCredentials(uri);
 
-                Assert.Null(readCreds = await credentialStore.ReadCredentials(uri));
-            });
-
-            if (throws)
-            {
-                Assert.Throws<ArgumentNullException>(() =>
-                {
-                    try
-                    {
-                        task.Wait();
-                    }
-                    catch (System.AggregateException exception)
-                    {
-                        exception = exception.Flatten();
-                        throw exception.InnerException;
-                    }
-                });
+                readCreds = await credentialStore.ReadCredentials(uri);
+                Assert.Null(readCreds);
             }
-            else
+            catch (ArgumentNullException) when (throws)
             {
-                task.Wait();
+                /* We expected the exception */
             }
         }
 
-        public static object[][] UriToNameData
+        [Theory, MemberData(nameof(CredentialData), DisableDiscoveryEnumeration = false)]
+        public async Task Credential_WriteRead(bool useCache, string url, string username, string password, bool throws)
+        {
+            try
+            {
+                var uri = new TargetUri(url);
+                var writeCreds = new Credential(username, password);
+                var credentialStore = useCache
+                    ? new SecretCache(RuntimeContext.Default, "test", Secret.UriToName) as ICredentialStore
+                    : new SecretStore(RuntimeContext.Default, "test", null, null, Secret.UriToName) as ICredentialStore;
+                Credential readCreds = null;
+
+                await credentialStore.WriteCredentials(uri, writeCreds);
+
+                readCreds = await credentialStore.ReadCredentials(uri);
+                Assert.NotNull(readCreds);
+                Assert.Equal(writeCreds.Password, readCreds.Password);
+                Assert.Equal(writeCreds.Username, readCreds.Username);
+            }
+            catch (ArgumentNullException) when (throws)
+            {
+                /* We expected the exception */
+            }
+        }
+
+        public static object[ ][ ] UriToNameData
         {
             get
             {
-                return new object[][]
+                return new object[ ][ ]
                 {
                     new object[] { "https://microsoft.visualstudio.com", null },
                     new object[] { "https://www.github.com", null },
@@ -111,8 +133,7 @@ namespace Microsoft.Alm.Authentication.Test
             }
         }
 
-        [Theory]
-        [MemberData(nameof(UriToNameData), DisableDiscoveryEnumeration = true)]
+        [Theory, MemberData(nameof(UriToNameData), DisableDiscoveryEnumeration = true)]
         public void UriToNameTest(string original, string expected)
         {
             var uri = new Uri(original);
@@ -123,11 +144,11 @@ namespace Microsoft.Alm.Authentication.Test
             Assert.Equal(expected, actual, StringComparer.Ordinal);
         }
 
-        public static object[][] UriToIdentityNameData
+        public static object[ ][ ] UriToIdentityNameData
         {
             get
             {
-                return new object[][]
+                return new object[ ][ ]
                 {
                     new object[] { "https://microsoft.visualstudio.com", null },
                     new object[] { "https://www.github.com", null },
@@ -150,8 +171,7 @@ namespace Microsoft.Alm.Authentication.Test
             }
         }
 
-        [Theory]
-        [MemberData(nameof(UriToIdentityNameData), DisableDiscoveryEnumeration = true)]
+        [Theory, MemberData(nameof(UriToIdentityNameData), DisableDiscoveryEnumeration = true)]
         public void UriToIdentityNameTest(string original, string expected)
         {
             var uri = new Uri(original);

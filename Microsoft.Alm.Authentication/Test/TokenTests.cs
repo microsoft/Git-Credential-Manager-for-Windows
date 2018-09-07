@@ -31,7 +31,7 @@ namespace Microsoft.Alm.Authentication.Test
         }
 
         [Theory]
-        [MemberData(nameof(TokenStoreData), DisableDiscoveryEnumeration = true)]
+        [MemberData(nameof(TokenStoreData), DisableDiscoveryEnumeration = false)]
         public async Task Token_WriteDelete(bool useCache, string secretName, string url, string token)
         {
             var tokenStore = useCache
