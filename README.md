@@ -27,16 +27,16 @@ If you are experiencing issue when using **Visual Studio**, please read **[Unabl
 
 * * *
 
-The [Git Credential Manager for Windows](https://github.com/Microsoft/Git-Credential-Manager-for-Windows) (GCM) provides secure Git credential storage for Windows. It's the successor to the [Windows Credential Store for Git](https://gitcredentialstore.codeplex.com/) (git-credential-winstore), which is no longer maintained. Compared to Git's built-in credential storage for Windows ([wincred](https://git-scm.com/book/en/v2/Git-Tools-Credential-Storage)), which provides single-factor authentication support working on any HTTP enabled Git repository, GCM provides multi-factor authentication support for [Visual Studio Team Services](https://www.visualstudio.com/), [Team Foundation Server](Docs/Faq.md#q-i-thought-microsoft-was-maintaining-this-why-does-the-gcm-not-work-as-expected-with-tfs), GitHub, and Bitbucket.
+The [Git Credential Manager for Windows](https://github.com/Microsoft/Git-Credential-Manager-for-Windows) (GCM) provides secure Git credential storage for Windows. It's the successor to the [Windows Credential Store for Git](https://gitcredentialstore.codeplex.com/) (git-credential-winstore), which is no longer maintained. Compared to Git's built-in credential storage for Windows ([wincred](https://git-scm.com/book/en/v2/Git-Tools-Credential-Storage)), which provides single-factor authentication support working on any HTTP enabled Git repository, GCM provides multi-factor authentication support for [Azure DevOps](https://dev.azure.com/), [Team Foundation Server](Docs/Faq.md#q-i-thought-microsoft-was-maintaining-this-why-does-the-gcm-not-work-as-expected-with-tfs), GitHub, and Bitbucket.
 
 This project includes:
 
 * Secure password storage in the Windows Credential Store.
-* Multi-factor authentication support for Visual Studio Team Services.
+* Multi-factor authentication support for Azure DevOps.
 * Two-factor authentication support for GitHub.
 * Two-factor authentication support for Bitbucket.
-* Personal Access Token generation and usage support for Visual Studio Team Services and GitHub.
-* Non-interactive mode support for Visual Studio Team Services backed by Azure Directory.
+* Personal Access Token generation and usage support for Azure DevOps, GitHub, and Bitbucket.
+* Non-interactive mode support for Azure DevOps backed by Azure Directory.
 * NTLM/Kerberos authentication for Team Foundation Server ([see notes](Docs/Faq.md#q-i-thought-microsoft-was-maintaining-this-why-does-the-gcm-not-work-as-expected-with-tfs)).
 * Optional settings for [build agent optimization](Docs/Automation.md).
 
@@ -64,7 +64,7 @@ git config --global credential.helper manager
 
 ## How to use
 
-You don't. It [magically](https://github.com/Microsoft/Git-Credential-Manager-for-Windows/issues/31) works when credentials are needed. For example, when pushing to [Visual Studio Team Services](https://www.visualstudio.com), it automatically opens a window and initializes an oauth2 flow to get your token.
+You don't. It [magically](https://github.com/Microsoft/Git-Credential-Manager-for-Windows/issues/31) works when credentials are needed. For example, when pushing to [Azure DevOps](https://dev.azure.com), it automatically opens a window and initializes an oauth2 flow to get your token.
 
 ### Build and Install from Sources
 

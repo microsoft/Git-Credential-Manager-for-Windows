@@ -52,9 +52,9 @@
       <Project>{19770407-B493-459D-BB4F-04FBEFB1BA13}</Project>
       <Name>Microsoft.Alm.Authentication</Name>
     </ProjectReference>
-    <ProjectReference Include="..\VisualStudioTeamServices.Authentication\Src\VisualStudioTeamServices.Authentication.csproj">
+    <ProjectReference Include="..\AzureDevOps.Authentication\Src\AzureDevOps.Authentication.csproj">
       <Project>{19770407-D7D8-4A37-914C-F552FF4B90D4}</Project>
-      <Name>VisualStudioTeamServices.Authentication</Name>
+      <Name>AzureDevOps.Authentication</Name>
     </ProjectReference>
   </ItemGroup>
   
@@ -97,17 +97,17 @@
     <ItemGroup>
       <FilesToCopy Include="$(SolutionDir)\Microsoft.Alm.Authentication\Src\$(InputPath)\Microsoft.Alm.Authentication.dll" />
       <FilesToCopy Include="$(SolutionDir)\Microsoft.Alm.Authentication\Src\$(InputPath)\Microsoft.Alm.Authentication.pdb" />
-      <FilesToCopy Include="$(SolutionDir)\VisualStudioTeamServices.Authentication\Src\$(InputPath)\VisualStudioTeamServices.Authentication.dll" />
-      <FilesToCopy Include="$(SolutionDir)\VisualStudioTeamServices.Authentication\Src\$(InputPath)\VisualStudioTeamServices.Authentication.pdb" />
+      <FilesToCopy Include="$(SolutionDir)\AzureDevops.Authentication\Src\$(InputPath)\AzureDevops.Authentication.dll" />
+      <FilesToCopy Include="$(SolutionDir)\AzureDevops.Authentication\Src\$(InputPath)\AzureDevops.Authentication.pdb" />
       <FilesToCopy Include="$(SolutionDir)\Bitbucket.Authentication\Src\$(InputPath)\Bitbucket.Authentication.dll" />
       <FilesToCopy Include="$(SolutionDir)\GitHub.Authentication\Src\$(InputPath)\GitHub.Authentication.exe" />
       <FilesToCopy Include="$(SolutionDir)\Cli\Manager\$(InputPath)\git-credential-manager.exe" />
       <FilesToCopy Include="$(SolutionDir)\Cli\Askpass\$(InputPath)\git-askpass.exe" />
-      <FilesToCopy Include="$(SolutionDir)\VisualStudioTeamServices.Authentication\Src\$(InputPath)\Microsoft.IdentityModel.Clients.ActiveDirectory.dll" />
+      <FilesToCopy Include="$(SolutionDir)\AzureDevops.Authentication\Src\$(InputPath)\Microsoft.IdentityModel.Clients.ActiveDirectory.dll" />
       <FilesToCopy Include="$(SolutionDir)\LICENSE.TXT" />
       <FilesToCopy Include="$(SolutionDir)\README.md" />
       <FilesToCopy Include="$(ProjectDir)\Setup.iss" />
-      <FilesToCopy Include="$(ProjectDir)\VisualStudioTeamServices.Authentication.nuspec" />
+      <FilesToCopy Include="$(ProjectDir)\AzureDevops.Authentication.nuspec" />
     </ItemGroup>
     
     <!-- Ensure the intermediate output path exists -->

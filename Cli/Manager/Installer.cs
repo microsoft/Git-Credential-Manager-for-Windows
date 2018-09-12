@@ -45,16 +45,17 @@ namespace Microsoft.Alm.Cli
 
         private static readonly IReadOnlyList<string> CopyList = new string[]
         {
+            "AzureDevOps.Authentication.dll",
             "Bitbucket.Authentication.dll",
             "git-askpass.exe",
             "git-credential-manager.exe",
             "GitHub.Authentication.exe",
             "Microsoft.Alm.Authentication.dll",
             "Microsoft.IdentityModel.Clients.ActiveDirectory.dll",
-            "VisualStudioTeamServices.Authentication.dll",
         };
         private static readonly IReadOnlyList<string> CleanList = new string[]
         {
+            "AzureDevOps.Authentication.dll",
             "Bitbucket.Authentication.dll",
             "git-askpass.exe",
             "git-credential-manager.exe",

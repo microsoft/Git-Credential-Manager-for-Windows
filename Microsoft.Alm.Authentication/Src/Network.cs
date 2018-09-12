@@ -539,9 +539,9 @@ namespace Microsoft.Alm.Authentication
                     }
                 }
 
-                // Manually add the correct headers for the type of authentication that is happening because if
-                // we rely on the framework to correctly write the headers neither GitHub nor VSTS authentication
-                // works reliably.
+                // Manually add the correct headers for the type of authentication that is happening because
+                // if we rely on the framework to correctly write the headers neither GitHub nor Azure DevOps
+                // authentication works reliably.
                 if (options.Authorization != null)
                 {
                     switch (options.Authorization)

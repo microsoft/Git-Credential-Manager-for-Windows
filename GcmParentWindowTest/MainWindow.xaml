@@ -37,7 +37,7 @@
                 </StackPanel.Resources>
                 <Button Content="GitHub" Tag="https://github.com" Click="Button_Click"/>
                 <Button Content="BitBucket" Tag="https://bitbucket.org" Click="Button_Click"/>
-                <Button Content="VSTS" Tag="https://devdiv.visualstudio.com" Click="Button_Click"/>
+                <Button Content="Azure DevOps" Tag="https://devdiv.visualstudio.com" Click="Button_Click"/>
                 <Button Content="Basic" Tag="https://mywebsite.com" Click="Button_Click"/>
                 <Button Content="Bogus hwnd" Click="BogusHwnd_Click"/>
             </StackPanel>

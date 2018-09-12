@@ -1,0 +1,29 @@
+<?xml version="1.0"?>
+<package >
+  <metadata>
+    <id>$id$</id>
+    <version>$version$</version>
+    <title>$title$</title>
+    <authors>Microsoft</authors>
+    <owners>Microsoft</owners>
+    <iconUrl>https://avatars2.githubusercontent.com/u/6154722?v=3&amp;s=200</iconUrl>
+    <licenseUrl>https://raw.githubusercontent.com/Microsoft/Git-Credential-Manager-for-Windows/master/LICENSE.txt</licenseUrl>
+    <projectUrl>https://github.com/Microsoft/Git-Credential-Manager-for-Windows</projectUrl>
+    <requireLicenseAcceptance>true</requireLicenseAcceptance>
+    <description>$description$</description>
+    <copyright>© Microsoft Corporation. All rights reserved.</copyright>
+    <language>en-US</language>
+    <dependencies>
+      <dependency id="Microsoft.IdentityModel.Clients.ActiveDirectory" version="3.19.4" />
+    </dependencies>
+    <tags>Git VSTS Visual Studio Team Services Azure DevOps AzDevOps TFS GitHub Active Directory NTLM Basic Authentication Library ADAL Directory Azure AD AAD Identity Authentication .NET Windows</tags>
+  </metadata>
+  <files>
+    <file src="Microsoft.Alm.Authentication.dll" target="lib\net451\Microsoft.Alm.Authentication.dll" />
+    <file src="AzureDevOps.Authentication.dll" target="lib\net451\AzureDevOps.Authentication.dll" />
+    <file src="Microsoft.Alm.Authentication.pdb" target="lib\net451\Microsoft.Alm.Authentication.pdb" />
+    <file src="AzureDevOps.Authentication.pdb" target="lib\net451\AzureDevOps.Authentication.pdb" />
+    <file src="..\..\Microsoft.Alm.Authentication\**\*.cs" target="src\Microsoft.Alm.Authentication" exclude="**\bin\**\.cs;**\obj\**\*.cs" />
+    <file src="..\..\AzureDevOps.Authentication\**\*.cs" target="src\AzureDevOps.Authentication" exclude="**\bin\**\.cs;**\obj\**\*.cs" />
+  </files>
+</package>

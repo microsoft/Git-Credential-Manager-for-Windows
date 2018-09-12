@@ -32,11 +32,11 @@
   
   <PropertyGroup>
     <GcmProps>$([System.IO.File]::ReadAllText($(SolutionDir)\Cli\Manager\Properties\AssemblyInfo.cs))</GcmProps>
-    <PkgProps>$([System.IO.File]::ReadAllText($(SolutionDir)\VisualStudioTeamServices.Authentication\Src\Properties\AssemblyInfo.cs))</PkgProps>
+    <PkgProps>$([System.IO.File]::ReadAllText($(SolutionDir)\AzureDevOps.Authentication\Src\Properties\AssemblyInfo.cs))</PkgProps>
     <Pattern>^\s*\[assembly\s*:\s*AssemblyVersion\s*\(\s*\s*"(\d+\.\d+\.\d+)\.?\d*\s*"\s*\)</Pattern>
     <GcmVersion>$([System.Text.RegularExpressions.Regex]::Match($(GcmProps), $(Pattern), System.Text.RegularExpressions.RegexOptions.Multiline).Groups[1].Value)</GcmVersion>
     <PkgVersion>$([System.Text.RegularExpressions.Regex]::Match($(PkgProps), $(Pattern), System.Text.RegularExpressions.RegexOptions.Multiline).Groups[1].Value)</PkgVersion>
-    <PkgName>VisualStudioTeamServices.Authentication</PkgName>
+    <PkgName>AzureDevOps.Authentication</PkgName>
     <!-- Read the nupkg meta data from the AssemblyInfo.cs file copied from VisualStudioTeamServicesAuthentication -->
     <Pattern>^\s*\[assembly: AssemblyDescription\s*\(\s*"\s*([^"]+)\s*"\s*\)</Pattern>
     <PkgDescription>$([System.Text.RegularExpressions.Regex]::Match($(PkgProps), $(Pattern), System.Text.RegularExpressions.RegexOptions.Multiline).Groups[1].Value)</PkgDescription>
@@ -48,7 +48,7 @@
   
   <PropertyGroup>
     <GcmExePath>$(OutputPath)\GCMW-$(GcmVersion).exe</GcmExePath>
-    <GcmPkgPath>$(OutputPath)\VisualStudioTeamServices.Authentication.$(PkgVersion).nupkg</GcmPkgPath>
+    <GcmPkgPath>$(OutputPath)\AzureDevOps.Authentication.$(PkgVersion).nupkg</GcmPkgPath>
     <GcmZipPath>$(OutputPath)\gcmw-v$(GcmVersion).zip</GcmZipPath>
   </PropertyGroup>
   
@@ -115,7 +115,7 @@
     <!-- Need to declare the items after dependencies have built, so that glob enumeration happens after the files are produced -->
     <ItemGroup>
       <ZipContents Include="$(IntermediateOutputPath)\Microsoft.IdentityModel.Clients.ActiveDirectory.dll" />
-      <ZipContents Include="$(IntermediateOutputPath)\VisualStudioTeamServices.Authentication.dll" />
+      <ZipContents Include="$(IntermediateOutputPath)\AzureDevOps.Authentication.dll" />
       <ZipContents Include="$(IntermediateOutputPath)\Microsoft.Alm.Authentication.dll" />
       <ZipContents Include="$(IntermediateOutputPath)\Bitbucket.Authentication.dll" />
       <ZipContents Include="$(IntermediateOutputPath)\git-credential-manager.html" />
@@ -145,7 +145,7 @@
              Directories="$(OutputPath)" />
     
     <!-- Generate isualStudioTeamServices.Authentication-{version}.nupkg  -->
-    <Exec Command="&quot;$(NugetPath)&quot; pack &quot;$(IntermediateOutputPath)\VisualStudioTeamServices.Authentication.nuspec&quot; -BasePath &quot;$(IntermediateOutputPath)&quot; -IncludeReferencedProjects -Properties Configuration=&quot;$(Configuration)&quot;;Version=&quot;$(PkgVersion)$(IsSigned)&quot;;Id=&quot;$(PkgName)&quot;;Title=&quot;$(PkgTitle)&quot;;Description=&quot;$(PkgDescription)&quot; -OutputDirectory &quot;$(NugetWorkDir)&quot;" />
+    <Exec Command="&quot;$(NugetPath)&quot; pack &quot;$(IntermediateOutputPath)\AzureDevOps.Authentication.nuspec&quot; -BasePath &quot;$(IntermediateOutputPath)&quot; -IncludeReferencedProjects -Properties Configuration=&quot;$(Configuration)&quot;;Version=&quot;$(PkgVersion)$(IsSigned)&quot;;Id=&quot;$(PkgName)&quot;;Title=&quot;$(PkgTitle)&quot;;Description=&quot;$(PkgDescription)&quot; -OutputDirectory &quot;$(NugetWorkDir)&quot;" />
   </Target>
   
   <Target Name="Clean">
@@ -175,8 +175,8 @@
   <Target Name="EnsureResourcesExist" BeforeTargets="PrepareForBuild">
     <Error Condition="!Exists('$(SolutionDir)\Cli\Manager\Properties\AssemblyInfo.cs')"
            Text="File not found: '$(SolutionDir)\Cli\Manager\Properties\AssemblyInfo.cs'." />
-    <Error Condition="!Exists('$(SolutionDir)\VisualStudioTeamServices.Authentication\Src\Properties\AssemblyInfo.cs)')"
-           Text="File not found: '$(SolutionDir)\VisualStudioTeamServices.Authentication\Src\Properties\AssemblyInfo.cs)'." />
+    <Error Condition="!Exists('$(SolutionDir)\AzureDevOps.Authentication\Src\Properties\AssemblyInfo.cs)')"
+           Text="File not found: '$(SolutionDir)\AzureDevOps.Authentication\Src\Properties\AssemblyInfo.cs)'." />
   </Target>
   
   <Import Project="..\packages\MSBuildTasks.1.5.0.235\build\MSBuildTasks.targets"
