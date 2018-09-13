@@ -97,7 +97,7 @@ See [credential.preserve](Configuration.md#preserve).
 
 ### GCM_TOKEN_DURATION
 
-Sets a duration, in hours, limit for the validity of Personal Access Tokens requested from Visual Studio Team Services [VSTS].
+Sets a duration, in hours, limit for the validity of Personal Access Tokens requested from Azure DevOps.
 
 If the value is greater than the maximum duration set for the account, the account value supersedes. The value cannot be less than a one hour (1).
 
@@ -137,7 +137,7 @@ See [credential.validate](Configuration.md#validate).
 
 ### GCM_VSTS_SCOPE
 
-Overrides GCM default scope request when generating a Personal Access Token from Visual Studio Team Services [VSTS].
+Overrides GCM default scope request when generating a Personal Access Token from Azure DevOps.
 The supported format is one or more [scope values](https://docs.microsoft.com/en-us/vsts/integrate/get-started/authentication/oauth#scopes) separated by whitespace, commas, semi-colons, or pipe characters (`' '`, `','`, `';'`, `'|'`).
 
 Defaults to `vso.code_write|vso.packaging`; Honored when host is 'visualstudio.com'.

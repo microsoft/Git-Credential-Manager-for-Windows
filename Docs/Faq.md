@@ -39,7 +39,7 @@ If you're looking to extend the GCM, or need a way to authenticate with VSTS but
 
 The Git Credential Manager does not work on Windows XP, Max OS, or Linux because we had to scope our work and we decided to support the same operating systems that Visual Studio support.
 Why Visual Studio?
-Well, because it is our favorite IDE and in order to support [Visual Studio Team Services](https://www.visualstudio.com/en-us/products/visual-studio-team-services-vs.aspx) we had to use the [Azure Directory Authentication Libraries](https://github.com/AzureAD) which only have multi-factor interactive logon support in their .NET libraries.
+Well, because it is our favorite IDE and in order to support [Azure DevOps](https://www.visualstudio.com/en-us/products/visual-studio-team-services-vs.aspx) we had to use the [Azure Directory Authentication Libraries](https://github.com/AzureAD) which only have multi-factor interactive logon support in their .NET libraries.
 Using .NET means using Visual Studio (which we love anyways) and using Visual Studio means Windows 7 or newer.
 
 ## Q: Will there ever be support for Windows XP, Mac OS, or Linux?
@@ -94,11 +94,11 @@ This works in v1.8.3.0 of SourceTree.
 Check that you are using the HTTP(S) URL instead of the SSH URL for your repository.
 You can do this by running `git remote show origin`.
 The Fetch URL and Push URL should start with `https://` or `http://`.
-If this is not the case, look for the HTTP(S) URL in the web interface of VSTS, TFS, GitHub or Bitbucket, and then run `git remote set-url origin <url>`, where `<url>` is the HTTP(S) URL.
+If this is not the case, look for the HTTP(S) URL in the web interface of Azure DevOps, TFS, GitHub or Bitbucket, and then run `git remote set-url origin <url>`, where `<url>` is the HTTP(S) URL.
 
-## Q: Why is git.exe failing to authenticate after linking/unlinking your Visual Studio Team Services account from Azure Active Directory?
+## Q: Why is git.exe failing to authenticate after linking/unlinking your Azure DevOps account from Azure Active Directory?
 
-When the tenant backing the Visual Studio Team Services (VSTS) account changes like when you [Connect VSTS account to Azure Active Directory (Azure AD)](https://docs.microsoft.com/en-us/vsts/accounts/connect-account-to-aad), the tenant cache needs to be cleared if you're using a GCM version prior to v1.15.0.
+When the tenant backing the Azure DevOps account changes like when you [Connect VSTS account to Azure Active Directory (Azure AD)](https://docs.microsoft.com/en-us/vsts/accounts/connect-account-to-aad), the tenant cache needs to be cleared if you're using a GCM version prior to v1.15.0.
 Clearing the tenant cache is as easy as deleting the *%LocalAppData%\GitCredentialManager\tenant.cache* file on each machine returning a login error like below.
 The GCM will automatically recreate and populate the cache file as needed on subsequent login attempts.
 

@@ -1,15 +1,15 @@
 # Git Credential Manager for Windows
 
 The [Git Credential Manager for Windows](https://github.com/Microsoft/Git-Credential-Manager-for-Windows) (GCM) provides secure Git credential storage for Windows.
-GCM provides multi-factor authentication support for [Visual Studio Team Services](https://www.visualstudio.com/), [Team Foundation Server](Faq.md#q-i-thought-microsoft-was-maintaining-this-why-does-the-gcm-not-work-as-expected-with-tfs), and [GitHub](https://github.com/).
+GCM provides multi-factor authentication support for [Azure DevOps](https://dev.azure.com/), [Team Foundation Server](Faq.md#q-i-thought-microsoft-was-maintaining-this-why-does-the-gcm-not-work-as-expected-with-tfs), and [GitHub](https://github.com/).
 
 This project includes:
 
 * Secure password storage in the Windows Credential Store
-* Multi-factor authentication support for Visual Studio Team Services
+* Multi-factor authentication support for Azure DevOps
 * Two-factor authentication support for GitHub
-* Personal Access Token generation and usage support for Visual Studio Team Services and GitHub
-* Non-interactive mode support for Visual Studio Team Services backed by Azure Directory
+* Personal Access Token generation and usage support for Azure DevOps, GitHub, and Bitbucket
+* Non-interactive mode support for Azure DevOps backed by Azure Directory
 * Kerberos authentication for Team Foundation Server ([see notes](#q-i-thought-microsoft-was-maintaining-this-why-does-the-gcm-not-work-as-expected-with-tfs))
 * Optional settings for build agent optimization
 
@@ -28,7 +28,7 @@ GCM cannot prompt you for credentials, at the console, in a MinTTY setup.
 
 You don't.
 It [magically](https://github.com/Microsoft/Git-Credential-Manager-for-Windows/issues/31) works when credentials are needed.
-For example, when pushing to [Visual Studio Team Services](https://www.visualstudio.com), it automatically opens a window and initializes an oauth2 flow to get your token.
+For example, when pushing to [Azure DevOps](https://dev.azure.com), it automatically opens a window and initializes an oauth2 flow to get your token.
 
 ### Manual Installation
 

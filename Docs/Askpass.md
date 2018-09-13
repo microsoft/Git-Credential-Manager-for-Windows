@@ -1,7 +1,7 @@
 # Git Askpass for Windows
 
 [Git Askpass for Windows](https://github.com/Microsoft/Git-Credential-Manager-for-Windows) (Askpass) provides secure Git credential storage for Windows.
-Askpass provides multi-factor authentication support for [Visual Studio Team Services](https://www.visualstudio.com/), [Team Foundation Server](https://www.visualstudio.com/en-us/products/tfs-overview-vs.aspx), and [GitHub](https://github.com/).
+Askpass provides multi-factor authentication support for [Azure DevOps](https://dev.azure.com/), [Team Foundation Server](https://www.visualstudio.com/en-us/products/tfs-overview-vs.aspx), and [GitHub](https://github.com/).
 
 ## Usage
 

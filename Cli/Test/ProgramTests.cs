@@ -29,9 +29,8 @@ using System.Threading.Tasks;
 using Microsoft.Alm.Authentication;
 using Moq;
 using Xunit;
-
+using Azure = AzureDevOps.Authentication;
 using Git = Microsoft.Alm.Authentication.Git;
-using Vsts = VisualStudioTeamServices.Authentication;
 
 namespace Microsoft.Alm.Cli.Test
 {
@@ -97,7 +96,7 @@ namespace Microsoft.Alm.Cli.Test
                       .Returns(targetUri);
             opargsMock.SetupProperty(o => o.UseHttpPath);
             opargsMock.SetupProperty(o => o.ValidateCredentials);
-            opargsMock.SetupProperty(o => o.VstsTokenScope);
+            opargsMock.SetupProperty(o => o.DevOpsTokenScope);
 
             var opargs = opargsMock.Object;
 
@@ -107,10 +106,10 @@ namespace Microsoft.Alm.Cli.Test
             Assert.True(opargs.ValidateCredentials, "credential.validate");
             Assert.True(opargs.UseHttpPath, "credential.useHttpPath");
 
-            Assert.NotNull(opargs.VstsTokenScope);
+            Assert.NotNull(opargs.DevOpsTokenScope);
 
-            var expectedScope = Vsts.TokenScope.BuildAccess | Vsts.TokenScope.CodeWrite;
-            Assert.Equal(expectedScope, opargs.VstsTokenScope);
+            var expectedScope = Azure.TokenScope.BuildAccess | Azure.TokenScope.CodeWrite;
+            Assert.Equal(expectedScope, opargs.DevOpsTokenScope);
         }
 
         public static object[][] TryReadBooleanData

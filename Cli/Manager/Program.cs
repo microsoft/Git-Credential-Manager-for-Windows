@@ -239,7 +239,7 @@ namespace Microsoft.Alm.Cli
                 WriteLine($"  UseHttpPath = {operationArguments.UseHttpPath}");
                 WriteLine($"  UseModalUi = {operationArguments.UseModalUi}");
                 WriteLine($"  ValidateCredentials = {operationArguments.ValidateCredentials}");
-                WriteLine($"  VstsTokenScope = {operationArguments.VstsTokenScope}");
+                WriteLine($"  DevOpsTokenScope = {operationArguments.DevOpsTokenScope}");
                 WriteLine($"  WriteLog = {operationArguments.WriteLog}");
             }).Wait();
         }
@@ -295,7 +295,7 @@ namespace Microsoft.Alm.Cli
 
                     case AuthorityType.AzureDirectory:
                     case AuthorityType.MicrosoftAccount:
-                        _context.Trace.WriteLine($"deleting VSTS credentials for '{operationArguments.TargetUri}'.");
+                        _context.Trace.WriteLine($"deleting Azure DevOps credentials for '{operationArguments.TargetUri}'.");
                         break;
 
                     case AuthorityType.GitHub:
@@ -519,7 +519,7 @@ namespace Microsoft.Alm.Cli
 
                     case AuthorityType.AzureDirectory:
                     case AuthorityType.MicrosoftAccount:
-                        Trace.WriteLine($"storing VSTS credentials for '{operationArguments.TargetUri}'.");
+                        Trace.WriteLine($"storing Azure DevOps credentials for '{operationArguments.TargetUri}'.");
                         break;
 
                     case AuthorityType.GitHub:

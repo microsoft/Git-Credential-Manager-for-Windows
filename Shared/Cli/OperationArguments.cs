@@ -30,8 +30,8 @@ using System.Text;
 using System.Threading.Tasks;
 using Microsoft.Alm.Authentication;
 using static System.Globalization.CultureInfo;
+using Azure = AzureDevOps.Authentication;
 using Git = Microsoft.Alm.Authentication.Git;
-using Vsts = VisualStudioTeamServices.Authentication;
 
 namespace Microsoft.Alm.Cli
 {
@@ -53,7 +53,7 @@ namespace Microsoft.Alm.Cli
             _useModalUi = true;
             _useSystemConfig = true;
             _validateCredentials = true;
-            _vstsTokenScope = Program.VstsCredentialScope;
+            _devopsTokenScope = Program.DevOpsCredentialScope;
         }
 
         /// <summary>
@@ -69,6 +69,7 @@ namespace Microsoft.Alm.Cli
         private Git.Configuration _configuration;
         private Credential _credentials;
         private string _customNamespace;
+        private Azure.TokenScope _devopsTokenScope;
         private Dictionary<string, string> _environmentVariables;
         private string _gitRemoteHttpCommandLine;
         private Interactivity _interactivity;
@@ -87,7 +88,6 @@ namespace Microsoft.Alm.Cli
         private string _username;
         private bool _useSystemConfig;
         private bool _validateCredentials;
-        private Vsts.TokenScope _vstsTokenScope;
         private bool _writeLog;
 
         /// <summary>
@@ -121,6 +121,17 @@ namespace Microsoft.Alm.Cli
         {
             get { return _customNamespace; }
             set { _customNamespace = value; }
+        }
+
+        /// <summary>
+        /// Gets or sets the scope, or permissions, when requesting new access tokens from Azure DevOps.
+        /// <para/>
+        /// Default value is `<seealso cref="Program.DevOpsCredentialScope"/>`.
+        /// </summary>
+        public virtual Azure.TokenScope DevOpsTokenScope
+        {
+            get { return _devopsTokenScope; }
+            set { _devopsTokenScope = value; }
         }
 
         /// <summary>
@@ -421,17 +432,6 @@ namespace Microsoft.Alm.Cli
         {
             get { return _validateCredentials; }
             set { _validateCredentials = value; }
-        }
-
-        /// <summary>
-        /// Gets or sets the scope, or permissions, when requesting new access tokens from VSTS.
-        /// <para/>
-        /// Default value is `<seealso cref="Program.VstsCredentialScope"/>`.
-        /// </summary>
-        public virtual Vsts.TokenScope VstsTokenScope
-        {
-            get { return _vstsTokenScope; }
-            set { _vstsTokenScope = value; }
         }
 
         /// <summary>

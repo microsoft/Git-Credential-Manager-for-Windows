@@ -5,12 +5,12 @@ While there is detailed documentation on [GCM configuration options](Configurati
 
 _Note:_ SSH is often a better choice for automated system because requiring interactivity is a non-default option, and SSH is known to be secure and reliable.
 
-## Recommendations for VSTS Build Services
+## Recommendations for Azure DevOps Build Services
 
 The majority of build definitions will work with a single repository, or at least a set of repositories which all have the same authentication requirements.
-In this case, it is generally better to rely on [VSTS Build Variables](https://docs.microsoft.com/en-us/vsts/build-release/concepts/definitions/build/variables?tabs=batch); specifically the `$(System.AccessToken)` build process OAuth token.
+In this case, it is generally better to rely on [Azure DevOps Build Variables](https://docs.microsoft.com/en-us/vsts/build-release/concepts/definitions/build/variables?tabs=batch); specifically the `$(System.AccessToken)` build process OAuth token.
 To enable scripts to use the build process OAuth token, go to the Options tab of the build definition and select 'Allow Scripts to Access OAuth Token'.
-For more information, read [VSTS: Use the OAuth token to access the REST API](https://docs.microsoft.com/en-us/vsts/build-release/actions/scripts/powershell#oauth).
+For more information, read [Azure DevOps: Use the OAuth token to access the REST API](https://docs.microsoft.com/en-us/vsts/build-release/actions/scripts/powershell#oauth).
 
 ## Recommendations for Other Build Services
 
@@ -22,7 +22,7 @@ git config --global credential.interactive never
 
 Build agents often need to minimize the amount of network traffic they generate.
 
-To avoid Microsoft Account vs. Azure Active Directory look-up against a Visual Studio Team Services \[VSTS\] account use...
+To avoid Microsoft Account vs. Azure Active Directory look-up against an Azure DevOps account use...
 
 ... for Azure Directory backed authentication:
 

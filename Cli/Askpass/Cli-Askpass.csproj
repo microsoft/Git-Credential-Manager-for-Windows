@@ -6,7 +6,7 @@
     <AppDesignerFolder>Properties</AppDesignerFolder>
     <AssemblyName>git-askpass</AssemblyName>
     <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>
-    <NuGetPackageImportStamp/>
+    <NuGetPackageImportStamp />
     <OutputType>Exe</OutputType>
     <ProjectGuid>{19770407-B33A-4EBE-92B8-04C93F43CAE0}</ProjectGuid>
     <ProjectName>Cli-Askpass</ProjectName>
@@ -49,9 +49,9 @@
       <Project>{19770407-b493-459d-bb4f-04fbefb1ba13}</Project>
       <Name>Microsoft.Alm.Authentication</Name>
     </ProjectReference>
-    <ProjectReference Include="..\..\VisualStudioTeamServices.Authentication\Src\VisualStudioTeamServices.Authentication.csproj">
+    <ProjectReference Include="..\..\AzureDevops.Authentication\Src\AzureDevops.Authentication.csproj">
       <Project>{19770407-d7d8-4a37-914c-f552ff4b90d4}</Project>
-      <Name>VisualStudioTeamServices.Authentication</Name>
+      <Name>AzureDevops.Authentication</Name>
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
@@ -65,8 +65,8 @@
     <Compile Include="UserPromptKind.cs" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="app.config"/>
-    <None Include="packages.config"/>
+    <None Include="app.config" />
+    <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup>
     <Page Include="UserPromptDialog.xaml">
