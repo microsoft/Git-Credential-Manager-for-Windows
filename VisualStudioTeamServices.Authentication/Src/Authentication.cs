@@ -211,6 +211,9 @@ namespace VisualStudioTeamServices.Authentication
                     return tenantId;
                 }
 
+                // Use the properly formatted URL
+                requestUri = requestUri.CreateWith(queryUrl: requestUrl);
+
                 var options = new NetworkRequestOptions(false)
                 {
                     Flags = NetworkRequestOptionFlags.UseProxy,
