@@ -37,7 +37,7 @@
     <GcmVersion>$([System.Text.RegularExpressions.Regex]::Match($(GcmProps), $(Pattern), System.Text.RegularExpressions.RegexOptions.Multiline).Groups[1].Value)</GcmVersion>
     <PkgVersion>$([System.Text.RegularExpressions.Regex]::Match($(PkgProps), $(Pattern), System.Text.RegularExpressions.RegexOptions.Multiline).Groups[1].Value)</PkgVersion>
     <PkgName>AzureDevOps.Authentication</PkgName>
-    <!-- Read the nupkg meta data from the AssemblyInfo.cs file copied from VisualStudioTeamServicesAuthentication -->
+    <!-- Read the nupkg meta data from the AssemblyInfo.cs file copied from AzureDevOps.Authentication -->
     <Pattern>^\s*\[assembly: AssemblyDescription\s*\(\s*"\s*([^"]+)\s*"\s*\)</Pattern>
     <PkgDescription>$([System.Text.RegularExpressions.Regex]::Match($(PkgProps), $(Pattern), System.Text.RegularExpressions.RegexOptions.Multiline).Groups[1].Value)</PkgDescription>
     <Pattern>^\s*\[assembly: AssemblyProduct\s*\(\s*"\s*([^"]+)\s*"\s*\)</Pattern>
