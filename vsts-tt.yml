@@ -56,7 +56,7 @@ phases:
       displayName: NuGet restore
       inputs:
         command: custom
-        arguments: restore '$(Build.SourcesDirectory)\$(Build.Target)' '-SolutionDirectory $(Build.SourcesDirectory)'
+        arguments: 'restore "$(Build.SourcesDirectory)\$(Build.Target)" -SolutionDirectory "$(Build.SourcesDirectory)"'
     
     - ${{ parameters.MicrobuildSetup }}
     
