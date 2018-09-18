@@ -64,7 +64,7 @@ phases:
       displayName: 'Core Build'
       inputs:
         solution: '$(Build.Target)'
-        msbuildArguments: '/nologo /verbosity:$(Build.Verbosity) /binaryLogger:$(Build.SourcesDirectory)/$(build.buildNumber).binlog'
+        msbuildArguments: '/nologo /verbosity:$(Build.Verbosity) /binaryLogger:$(Build.SourcesDirectory)\gcmw-$(build.buildNumber).binlog'
         platform: '$(Build.Platform)'
         configuration: '$(Build.Configuration)'
         maximumCpuCount: false
