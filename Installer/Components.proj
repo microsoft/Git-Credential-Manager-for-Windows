@@ -63,7 +63,7 @@
     <FilesToSign Include="$(IntermediateOutputPath)\Microsoft.Alm.Authentication.dll">
       <Authenticode>Microsoft</Authenticode>
     </FilesToSign>
-    <FilesToSign Include="$(IntermediateOutputPath)\VisualStudioTeamServices.Authentication.dll">
+    <FilesToSign Include="$(IntermediateOutputPath)\AzureDevOps.Authentication.dll">
       <Authenticode>Microsoft</Authenticode>
     </FilesToSign>
     <FilesToSign Include="$(IntermediateOutputPath)\git-credential-manager.exe">
