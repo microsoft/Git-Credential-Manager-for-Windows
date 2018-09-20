@@ -111,6 +111,19 @@ git config --global credential.visualstudio.com.preserve true
 
 See [GCM_PRESERVE](Environment.md#gcm_preserve)
 
+### httpTimeout
+
+Sets the maximum time, in milliseconds, for a network request to wait before timing out. 
+This allows changing the default for slow connections.
+
+Supports an integer value. Defaults to 90,000 miliseconds.
+
+```shell
+git config --global credential.visualstudio.com.httpTimeout 100000
+```
+
+See [GCM_HTTP_TIMEOUT](Environment.md#gcm_http_timeout)
+
 ### tokenDuration
 
 Sets a duration, in hours, limit for the validity of Personal Access Tokens requested from Azure DevOps.
