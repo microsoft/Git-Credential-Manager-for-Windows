@@ -34,11 +34,7 @@ namespace Microsoft.Alm.Authentication
         /// </summary>
         public const int MaxAutomaticRedirections = 16;
 
-        /// <summary>
-        /// The maximum wait time for a network request before timing out
-        /// </summary>
-        public const int RequestTimeout = 90 * 1000; // 90 second limit
-
+        private static int _requestTimeout = 90 * 1000; // 90 second default limit.
         private static readonly object _syncpoint = new object();
         private static string _useragent = BuildDefaultUserAgent(RuntimeContext.Default);
 
@@ -65,6 +61,12 @@ namespace Microsoft.Alm.Authentication
             }
             set { lock (_syncpoint) _useragent = value; }
 
+        }
+
+        public static int RequestTimeout
+        {
+            get { lock (_syncpoint) return _requestTimeout; }
+            set { lock (_syncpoint) _requestTimeout = value; }
         }
 
         private static string BuildDefaultUserAgent(RuntimeContext context)

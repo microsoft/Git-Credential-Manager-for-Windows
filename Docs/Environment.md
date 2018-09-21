@@ -95,6 +95,15 @@ Supports `true` or `false`. Defaults to `false`.
 
 See [credential.preserve](Configuration.md#preserve).
 
+### GCM_HTTP_TIMEOUT
+
+Sets the maximum time, in milliseconds, for a network request to wait before timing out. 
+This allows changing the default for slow connections.
+
+Supports an integer value. Defaults to 90,000 miliseconds.
+
+See [credential.httpTimeout](Configuration.md#httpTimeout).
+
 ### GCM_TOKEN_DURATION
 
 Sets a duration, in hours, limit for the validity of Personal Access Tokens requested from Azure DevOps.

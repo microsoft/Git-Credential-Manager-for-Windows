@@ -684,6 +684,17 @@ namespace Microsoft.Alm.Cli
                     operationArguments.UrlOverride = value;
                 }
             }
+
+            // Look for timeout override.
+            if (program.TryReadString(operationArguments, KeyType.HttpTimeout, out value))
+            {
+                program.Trace.WriteLine($"{program.KeyTypeName(KeyType.HttpTimeout)} = '{value}'.");
+
+                if (int.TryParse(value, out int milliseconds))
+                {
+                    Global.RequestTimeout = milliseconds;
+                }
+            }
         }
 
         public static void LogEvent(Program program, string message, EventLogEntryType eventType)
