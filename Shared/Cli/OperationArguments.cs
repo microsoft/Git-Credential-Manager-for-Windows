@@ -743,8 +743,13 @@ namespace Microsoft.Alm.Cli
 
             queryUrl = buffer.ToString();
 
+            // if path is specified we should give the host/path priority
+            if (!string.IsNullOrWhiteSpace(_queryPath))
+            {
+                actualUrl = queryUrl;
+            }
             // If the actual-url override has been set, honor it.
-            if (!string.IsNullOrEmpty(_urlOverride))
+            else if (!string.IsNullOrEmpty(_urlOverride))
             {
                 if (Uri.TryCreate(_urlOverride, UriKind.Absolute, out Uri uri))
                 {
