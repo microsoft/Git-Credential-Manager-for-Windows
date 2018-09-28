@@ -1,4 +1,4 @@
-﻿/**** Git Credential Manager for Windows ****
+/**** Git Credential Manager for Windows ****
  *
  * Copyright (c) Microsoft Corporation
  * All rights reserved.
@@ -32,6 +32,7 @@ using System.Linq;
 using System.Net;
 using System.Net.Http;
 using System.Net.Http.Headers;
+using System.Net.Sockets;
 using System.Text;
 using System.Threading.Tasks;
 using static System.StringComparer;
@@ -370,7 +371,7 @@ namespace Microsoft.Alm.Authentication
                 using (var handler = GetHttpMessageHandler(targetUri, options))
                 using (var httpClient = GetHttpClient(targetUri, handler, options))
                 {
-                    var httpMessage = await httpClient.GetAsync(targetUri);
+                    var httpMessage = await httpClient.GetAsync();
                     var response = new NetworkResponseMessage(httpMessage);
 
                     if (httpMessage.Content != null)
@@ -395,16 +396,8 @@ namespace Microsoft.Alm.Authentication
             {
                 using (var httpMessageHandler = GetHttpMessageHandler(targetUri, options))
                 using (var httpClient = GetHttpClient(targetUri, httpMessageHandler, options))
-                using (var requestMessage = new HttpRequestMessage(HttpMethod.Head, targetUri))
                 {
-                    // Copy the headers from the client into the message because the framework
-                    // will not do this when using `SendAsync`.
-                    foreach (var header in httpClient.DefaultRequestHeaders)
-                    {
-                        requestMessage.Headers.Add(header.Key, header.Value);
-                    }
-
-                    var httpMessage = await httpClient.SendAsync(requestMessage, HttpCompletionOption.ResponseHeadersRead);
+                    var httpMessage = await httpClient.SendHeadAsync();
                     var response = new NetworkResponseMessage(httpMessage);
 
                     if (httpMessage.Content != null)
@@ -432,7 +425,7 @@ namespace Microsoft.Alm.Authentication
                 using (var handler = GetHttpMessageHandler(targetUri, options))
                 using (var httpClient = GetHttpClient(targetUri, handler, options))
                 {
-                    var httpMessage = await httpClient.PostAsync(targetUri, content);
+                    var httpMessage = await httpClient.PostAsync(content);
                     var response = new NetworkResponseMessage(httpMessage);
 
                     if (httpMessage.Content != null)
@@ -520,9 +513,9 @@ namespace Microsoft.Alm.Authentication
 
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Reliability", "CA2000:Dispose objects before losing scope")]
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA1801:ReviewUnusedParameters", MessageId = "targetUri")]
-        private HttpClient GetHttpClient(TargetUri targetUri, HttpMessageHandler handler, NetworkRequestOptions options)
+        private HttpFastFallbackClient GetHttpClient(TargetUri targetUri, HttpMessageHandler handler, NetworkRequestOptions options)
         {
-            var httpClient = new HttpClient(handler);
+            var httpClient = new HttpFastFallbackClient(targetUri, handler);
 
             if (options != null)
             {
@@ -531,13 +524,7 @@ namespace Microsoft.Alm.Authentication
                     httpClient.Timeout = options.Timeout;
                 }
 
-                if (options.Headers != null)
-                {
-                    foreach (var header in options.Headers)
-                    {
-                        httpClient.DefaultRequestHeaders.Add(header.Key, header.Value);
-                    }
-                }
+                httpClient.AddDefaultHeaders(options.Headers);
 
                 // Manually add the correct headers for the type of authentication that is happening because
                 // if we rely on the framework to correctly write the headers neither GitHub nor Azure DevOps
@@ -555,14 +542,14 @@ namespace Microsoft.Alm.Authentication
                                 case TokenType.BitbucketAccess:
                                 {
                                     // ADAL access tokens are packed into the Authorization header.
-                                    httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token.Value);
+                                    httpClient.SetAuthorizationHeader(new AuthenticationHeaderValue("Bearer", token.Value));
                                 }
                                 break;
 
                                 case TokenType.AzureFederated:
                                 {
                                     // Federated authentication tokens are sent as cookie(s).
-                                    httpClient.DefaultRequestHeaders.Add("Cookie", token.Value);
+                                    httpClient.AddDefaultHeader("Cookie", token.Value);
                                 }
                                 break;
 
@@ -573,7 +560,7 @@ namespace Microsoft.Alm.Authentication
                                     var credentials = (Credential)token;
 
                                     // Credentials are packed into the 'Authorization' header as a base64 encoded pair.
-                                    httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Basic", credentials.ToBase64String());
+                                    httpClient.SetAuthorizationHeader(new AuthenticationHeaderValue("Basic", credentials.ToBase64String()));
                                 }
                                 break;
 
@@ -587,7 +574,7 @@ namespace Microsoft.Alm.Authentication
                         case Credential credentials:
                         {
                             // Credentials are packed into the 'Authorization' header as a base64 encoded pair.
-                            httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Basic", credentials.ToBase64String());
+                            httpClient.SetAuthorizationHeader(new AuthenticationHeaderValue("Basic", credentials.ToBase64String()));
                         }
                         break;
                     }
@@ -595,11 +582,7 @@ namespace Microsoft.Alm.Authentication
             }
 
             // Ensure that the user-agent string is set.
-            if (httpClient.DefaultRequestHeaders.UserAgent is null
-                || httpClient.DefaultRequestHeaders.UserAgent.Count == 0)
-            {
-                httpClient.DefaultRequestHeaders.Add("User-Agent", Global.UserAgent);
-            }
+            httpClient.SetUserAgentIfMissing(Global.UserAgent);
 
             return httpClient;
         }
@@ -993,6 +976,169 @@ namespace Microsoft.Alm.Authentication
             {
                 _content = content;
             }
+        }
+    }
+
+
+    /// <summary>
+    /// Primitive implementation of Happy Eyeballs algorithm.
+    /// https://en.wikipedia.org/wiki/Happy_Eyeballs
+    /// When host name resolves into just IPv4 or IPv6 address then single HttpClient is used.
+    /// However if resolution is for both IPv4 and IPv6 then one HttpClient connects using IPv4 and
+    /// another one IPv6. Helps with situations where DNS returns unreachable IPv6 addresses.
+    /// </summary>
+    internal class HttpFastFallbackClient : IDisposable
+    {
+        /// <summary>
+        /// Original server URI
+        /// </summary>
+        private TargetUri targetUri;
+
+        /// <summary>
+        /// HttpClients. Secondary could be null if only one type of address is available
+        /// </summary>
+        private HttpClient primaryClient, secondaryClient;
+
+        /// <summary>
+        /// IP addresses to use instead of hosts name.
+        /// </summary>
+        private IPAddress primaryIP, secondaryIP;
+
+        public HttpFastFallbackClient(TargetUri targetUri, HttpMessageHandler handler)
+        {
+            this.targetUri = targetUri;
+            primaryClient = new HttpClient(handler);
+            // Add "host" header. Https fails without it.
+            primaryClient.DefaultRequestHeaders.Add("Host", targetUri.Host);
+
+            // Get both types of addressed for the host
+            var ips = GetIp4And6(targetUri);
+            if (ips == null) return;
+
+            // If returned is not null when we have both IPv4 and IPv6
+            primaryIP = ips.Item1;
+            secondaryIP = ips.Item2;
+
+            secondaryClient = new HttpClient(handler);
+            secondaryClient.DefaultRequestHeaders.Add("Host", targetUri.Host);
+        }
+
+        public void Dispose()
+        {
+            if (primaryClient != null) primaryClient.Dispose();
+            if (secondaryClient != null) secondaryClient.Dispose();
+        }
+
+        /// <summary>
+        /// Replace host name with numeric IP address
+        /// </summary>
+        /// <param name="uri"></param>
+        /// <param name="ip"></param>
+        /// <returns></returns>
+        static Uri ReplaceHostWithIP(TargetUri uri, IPAddress ip)
+        {
+            if (ip == null) return uri;
+
+            var uriBuilder = new UriBuilder(uri);
+            uriBuilder.Host = (ip.AddressFamily == AddressFamily.InterNetworkV6 ? $"[{ip}]" : ip.ToString());
+            return uriBuilder.Uri;
+        }
+
+        static Tuple<IPAddress, IPAddress> GetIp4And6(TargetUri targetUri)
+        {
+            var hostEntry = Dns.GetHostEntry(targetUri.Host);
+            if (hostEntry.AddressList.Length > 1 &&
+                hostEntry.AddressList.Select(addr => addr.AddressFamily).Distinct().Count() > 1)
+            {
+                return new Tuple<IPAddress, IPAddress>
+                (hostEntry.AddressList.First(addr => addr.AddressFamily == AddressFamily.InterNetwork),
+                    hostEntry.AddressList.First(addr => addr.AddressFamily == AddressFamily.InterNetworkV6));
+            }
+            return null;
+        }
+
+        public TimeSpan Timeout
+        {
+            get => primaryClient.Timeout;
+            set
+            {
+                primaryClient.Timeout = value;
+                if (secondaryClient != null) secondaryClient.Timeout = value;
+            }
+        }
+
+        public void AddDefaultHeaders(HttpRequestHeaders headers)
+        {
+            if (headers == null) return;
+            foreach (var header in headers)
+            {
+                primaryClient.DefaultRequestHeaders.Add(header.Key, header.Value);
+                secondaryClient?.DefaultRequestHeaders.Add(header.Key, header.Value);
+            }
+        }
+        public void AddDefaultHeader(string key, string value)
+        {
+            primaryClient.DefaultRequestHeaders.Add(key, value);
+            secondaryClient?.DefaultRequestHeaders.Add(key, value);
+        }
+
+        public void SetAuthorizationHeader(AuthenticationHeaderValue authHeaderValue)
+        {
+            primaryClient.DefaultRequestHeaders.Authorization = authHeaderValue;
+            if (secondaryClient != null) secondaryClient.DefaultRequestHeaders.Authorization = authHeaderValue;
+        }
+
+        public void SetUserAgentIfMissing(string userAgent)
+        {
+            if (!(primaryClient.DefaultRequestHeaders.UserAgent is null) &&
+                primaryClient.DefaultRequestHeaders.UserAgent.Count != 0) return;
+
+            primaryClient.DefaultRequestHeaders.Add("User-Agent", userAgent);
+            secondaryClient?.DefaultRequestHeaders.Add("User-Agent", userAgent);
+        }
+
+        public async Task<HttpResponseMessage> GetAsync()
+        {
+            var tasks = new List<Task<HttpResponseMessage>>
+                    {primaryClient.GetAsync(ReplaceHostWithIP(targetUri, primaryIP))};
+            if (secondaryClient != null) tasks.Add(secondaryClient.GetAsync(ReplaceHostWithIP(targetUri, secondaryIP)));
+            var task = await Task.WhenAny(tasks.ToArray());
+            return await task;
+        }
+
+        public async Task<HttpResponseMessage> SendHeadAsync()
+        {
+            var requestMessage = new HttpRequestMessage(HttpMethod.Head, ReplaceHostWithIP(targetUri, primaryIP));
+            // Copy the headers from the client into the message because the framework
+            // will not do this when using `SendAsync`.
+            foreach (var header in primaryClient.DefaultRequestHeaders)
+            {
+                requestMessage.Headers.Add(header.Key, header.Value);
+            }
+
+            var tasks = new List<Task<HttpResponseMessage>>
+                    {primaryClient.SendAsync(requestMessage, HttpCompletionOption.ResponseHeadersRead)};
+
+            if (secondaryClient != null)
+            {
+                var requestMessage2 = new HttpRequestMessage(HttpMethod.Head, ReplaceHostWithIP(targetUri, secondaryIP));
+                foreach (var header in secondaryClient.DefaultRequestHeaders)
+                {
+                    requestMessage2.Headers.Add(header.Key, header.Value);
+                }
+                tasks.Add(secondaryClient.SendAsync(requestMessage, HttpCompletionOption.ResponseHeadersRead));
+            }
+            var task = await Task.WhenAny(tasks.ToArray());
+            return await task;
+        }
+
+        public async Task<HttpResponseMessage> PostAsync(HttpContent content)
+        {
+            var tasks = new List<Task<HttpResponseMessage>>
+                    {primaryClient.PostAsync(ReplaceHostWithIP(targetUri, primaryIP), content)};
+            if (secondaryClient != null) tasks.Add(secondaryClient.PostAsync(ReplaceHostWithIP(targetUri, secondaryIP), content));
+            var task = await Task.WhenAny(tasks.ToArray());
+            return await task;
         }
     }
 }
