@@ -1126,7 +1126,7 @@ namespace Microsoft.Alm.Authentication
                 {
                     requestMessage2.Headers.Add(header.Key, header.Value);
                 }
-                tasks.Add(secondaryClient.SendAsync(requestMessage, HttpCompletionOption.ResponseHeadersRead));
+                tasks.Add(secondaryClient.SendAsync(requestMessage2, HttpCompletionOption.ResponseHeadersRead));
             }
             var task = await Task.WhenAny(tasks.ToArray());
             return await task;
