@@ -143,7 +143,7 @@ namespace AzureDevOps.Authentication
                 // trap the user in a limbo state of invalid credentials.
 
                 // Deserialize the cache and remove any matching entry.
-                string tenantUrl = targetUri.ToString();
+                string tenantUrl = GetTargetUrl(targetUri, keepUsername: false);
                 var cache = await DeserializeTenantCache(Context);
 
                 // Attempt to remove the URL entry, if successful serialize the cache.
