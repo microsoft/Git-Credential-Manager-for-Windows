@@ -39,7 +39,9 @@ namespace Microsoft.Alm.Authentication
         public abstract Task<bool> DeleteCredentials(TargetUri targetUri);
 
         public virtual Task<bool> DeleteCredentials(TargetUri targetUri, string username)
-            => DeleteCredentials(targetUri, null);
+            // Use default handling if not overwritten
+            // username should be on the Uri
+            => DeleteCredentials(targetUri);
 
         public abstract Task<Credential> GetCredentials(TargetUri targetUri);
 
