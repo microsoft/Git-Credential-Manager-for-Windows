@@ -131,31 +131,23 @@ namespace AzureDevOps.Authentication
             if (targetUri is null)
                 throw new ArgumentNullException(nameof(targetUri));
 
-            Credential credentials = await PersonalAccessTokenStore.ReadCredentials(targetUri);
+            await PersonalAccessTokenStore.DeleteCredentials(targetUri);
 
-            // Attempt to validate the credentials, if they're truly invalid delete them.
-            if (!await ValidateCredentials(targetUri, credentials))
+            // Remove any related entries from the tenant cache because tenant change
+            // could the be source of the invalidation, and not purging the cache will
+            // trap the user in a limbo state of invalid credentials.
+
+            // Deserialize the cache and remove any matching entry.
+            string tenantUrl = GetTargetUrl(targetUri, keepUsername: false);
+            var cache = await DeserializeTenantCache(Context);
+
+            // Attempt to remove the URL entry, if successful serialize the cache.
+            if (cache.Remove(tenantUrl))
             {
-                await PersonalAccessTokenStore.DeleteCredentials(targetUri);
-
-                // Remove any related entries from the tenant cache because tenant change
-                // could the be source of the invalidation, and not purging the cache will
-                // trap the user in a limbo state of invalid credentials.
-
-                // Deserialize the cache and remove any matching entry.
-                string tenantUrl = GetTargetUrl(targetUri, keepUsername: false);
-                var cache = await DeserializeTenantCache(Context);
-
-                // Attempt to remove the URL entry, if successful serialize the cache.
-                if (cache.Remove(tenantUrl))
-                {
-                    await SerializeTenantCache(Context, cache);
-                }
-
-                return true;
+                await SerializeTenantCache(Context, cache);
             }
 
-            return false;
+            return true;
         }
 
         /// <summary>
