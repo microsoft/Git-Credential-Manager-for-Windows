@@ -238,7 +238,7 @@ namespace AzureDevOps.Authentication
 
                                         var value = header.Parameter;
 
-                                        if (value.Length >= AuthorizationUriPrefix.Length + AuthorityHostUrlBase.Length + GuidStringLength)
+                                        if (value?.Length >= AuthorizationUriPrefix.Length + AuthorityHostUrlBase.Length + GuidStringLength)
                                         {
                                             // The header parameter will look something like "authorization_uri=https://login.microsoftonline.com/72f988bf-86f1-41af-91ab-2d7cd011db47"
                                             // and all we want is the portion after the '=' and before the last '/'.
