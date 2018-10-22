@@ -215,7 +215,7 @@ See [GCM_WRITELOG](Environment.md#gcm_writelog)
     authority = AAD
     interactive = never
     preserve = true
-    tokenDuration = 12
+    tokenDuration = 24
     validate = false
 [credential "visualstudio.com"]
     authority = MSA
