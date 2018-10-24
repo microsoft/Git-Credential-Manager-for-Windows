@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using static System.StringComparer;
 
@@ -79,13 +80,19 @@ namespace Microsoft.Alm.Authentication
         public IDictionary<string, string> GetEnvironmentVariables(EnvironmentVariableTarget target)
         {
             var variables = Environment.GetEnvironmentVariables(target);
+            return DeduplicateStringDictionary(variables);
+        }
+
+        internal IDictionary<string, string> DeduplicateStringDictionary(IDictionary variables)
+        {
             var result = new Dictionary<string, string>(variables.Count, OrdinalIgnoreCase);
 
-            foreach(var key in variables.Keys)
+            foreach (var key in variables.Keys)
             {
                 if (key is string name && variables[key] is string value)
                 {
-                    result.Add(name, value);
+                    // avoid trying to add duplicates, e.g. different case names, last entry wins
+                    result[name] = value;
                 }
             }
 
