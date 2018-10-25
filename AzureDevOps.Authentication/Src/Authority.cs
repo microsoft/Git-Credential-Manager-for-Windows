@@ -289,7 +289,7 @@ namespace AzureDevOps.Authentication
                         }
                     }
 
-                    Trace.WriteLine($"failed to acquire the token's target identity for `{targetUri}` [{(int)response.StatusCode}].");
+                    Trace.WriteLine($"failed to acquire the token's target identity for `{requestUri?.QueryUri}` [{(int)response.StatusCode}].");
                 }
             }
             catch (HttpRequestException exception)
@@ -372,13 +372,13 @@ namespace AzureDevOps.Authentication
                         }
                     }
 
-                    Trace.WriteLine($"failed to find Identity Service for '{targetUri}' via location service [{(int)response.StatusCode}].");
+                    Trace.WriteLine($"failed to find Identity Service for '{requestUri?.QueryUri}' via location service [{(int)response.StatusCode}].");
                 }
             }
             catch (Exception exception)
             {
                 Trace.WriteException(exception);
-                throw new LocationServiceException($"Helper for `{targetUri}`.", exception);
+                throw new LocationServiceException($"Helper for `{requestUri?.QueryUri}`.", exception);
             }
 
             return null;
@@ -454,7 +454,7 @@ namespace AzureDevOps.Authentication
                     // If the server responds with content, and said content matches the anonymous details the credentials are invalid.
                     if (content != null && Regex.IsMatch(content, AnonymousUserPattern, RegexOptions.CultureInvariant | RegexOptions.IgnoreCase))
                     {
-                        Trace.WriteLine($"credential validation for '{targetUri}' failed.");
+                        Trace.WriteLine($"credential validation for '{requestUri?.QueryUri}' failed.");
 
                         return false;
                     }
@@ -463,7 +463,7 @@ namespace AzureDevOps.Authentication
                     if (statusCode >= HttpStatusCode.OK && statusCode < HttpStatusCode.Ambiguous)
                         return true;
 
-                    Trace.WriteLine($"credential validation for '{targetUri}' failed [{(int)response.StatusCode}].");
+                    Trace.WriteLine($"credential validation for '{requestUri?.QueryUri}' failed [{(int)response.StatusCode}].");
 
                     // Even if the service responded, if the issue isn't a 400 class response then the credentials were likely not rejected.
                     if (statusCode < HttpStatusCode.BadRequest || statusCode >= HttpStatusCode.InternalServerError)
@@ -474,20 +474,20 @@ namespace AzureDevOps.Authentication
             {
                 // Since we're unable to invalidate the credentials, return optimistic results.
                 // This avoid credential invalidation due to network instability, etc.
-                Trace.WriteLine($"unable to validate credentials for '{targetUri}', failure occurred before server could respond.");
+                Trace.WriteLine($"unable to validate credentials for '{requestUri?.QueryUri}', failure occurred before server could respond.");
                 Trace.WriteException(exception);
 
                 return true;
             }
             catch (Exception exception)
             {
-                Trace.WriteLine($"credential validation for '{targetUri}' failed.");
+                Trace.WriteLine($"credential validation for '{requestUri?.QueryUri}' failed.");
                 Trace.WriteException(exception);
 
                 return false;
             }
 
-            Trace.WriteLine($"credential validation for '{targetUri}' failed.");
+            Trace.WriteLine($"credential validation for '{requestUri?.QueryUri}' failed.");
             return false;
         }
 
@@ -530,7 +530,7 @@ namespace AzureDevOps.Authentication
 
             string tokenUrl = GetTargetUrl(targetUri, false);
 
-            Trace.WriteLine($"creating access token scoped to '{tokenScope}' for '{targetUri}'");
+            Trace.WriteLine($"creating access token scoped to '{tokenScope}' for '{tokenUrl}'");
 
             string jsonContent = (duration.HasValue && duration.Value > TimeSpan.FromHours(1))
                 ? string.Format(Culture.InvariantCulture, ContentTimedJsonFormat, tokenScope, tokenUrl, Settings.MachineName, DateTime.UtcNow + duration.Value)
