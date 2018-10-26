@@ -16,10 +16,12 @@ git credential-manager [<command> [<args>]]
 
 ## Commands
 
-### delete
+### delete (deprecated)
 
 Removes stored credentials for a given URL.
 Any future attempts to authenticate with the remote will require authentication steps to be completed again.
+
+This method is being deprecated and users should use "git credential reject" instead
 
 ### deploy _\[--path \<installation_path\>\] \[--passive\] \[--force\]_
 
