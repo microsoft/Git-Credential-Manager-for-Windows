@@ -12,8 +12,8 @@ using System.Runtime.InteropServices;
 [assembly: AssemblyTrademark("Microsoft Corporation")]
 [assembly: AssemblyCulture("")]
 [assembly: Guid("19770407-63d4-1230-a9df-f1c4b473308a")]
-[assembly: AssemblyVersion("1.18.4.0")]
-[assembly: AssemblyFileVersion("1.18.4.0")]
+[assembly: AssemblyVersion("1.18.3.0")]
+[assembly: AssemblyFileVersion("1.18.3.0")]
 [assembly: NeutralResourcesLanguage("en-US")]
 
 // Only expose internals when the binary isn't signed.
