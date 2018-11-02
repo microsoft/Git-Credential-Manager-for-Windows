@@ -54,6 +54,7 @@
     <Compile Include="Git\GlobalSuppressions.cs" />
     <Compile Include="Git\WhereTests.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="SettingsTest.cs" />
     <Compile Include="TargetUriTests.cs" />
     <Compile Include="TokenTests.cs" />
     <Compile Include="WwwAuthenticateHelperTests.cs" />
