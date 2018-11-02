@@ -687,7 +687,7 @@ namespace Microsoft.Alm.Authentication
             if (content is null)
                 throw new ArgumentNullException(nameof(content));
 
-            if (content.Headers.ContentType.MediaType != null
+            if (content.Headers.ContentType?.MediaType != null
                 && (content.Headers.ContentType.MediaType.StartsWith("text/", StringComparison.OrdinalIgnoreCase)
                     || content.Headers.ContentType.MediaType.EndsWith("/json", StringComparison.OrdinalIgnoreCase)))
             {
@@ -755,7 +755,7 @@ namespace Microsoft.Alm.Authentication
 
                 lock (_syncpoint)
                 {
-                    _mediaType = content.Headers.ContentType.MediaType;
+                    _mediaType = content.Headers.ContentType?.MediaType;
                     _byteArray = asBytes;
                 }
             }
