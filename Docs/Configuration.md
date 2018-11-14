@@ -9,7 +9,7 @@ Global configuration settings override system configuration settings, and local 
 The GCM honors several levels of settings, in addition to the standard local \> global \> system tiering Git uses.
 Since the GCM is HTTPS based, it'll also honor URL specific settings.
 Regardless, all of the GCM's configuration settings begin with the term `credential`.
-Additionally, the GCM respects GCM specific [environment variables](EnvironmentVariables.md) as well.
+Additionally, the GCM respects GCM specific [environment variables](Environment.md) as well.
 
 Regardless, the GCM will only be used by Git if the GCM is installed and the key/value pair `credential.helper manager` is present in Git's configuration.
 
