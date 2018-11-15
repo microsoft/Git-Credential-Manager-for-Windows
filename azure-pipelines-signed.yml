@@ -22,29 +22,41 @@
 # AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
 # WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE."
 # 
-# == Continuous Integration Pipeline ==
+# == RealSign and Release Pipeline ==
 # 
 # Learn more at https://docs.microsoft.com/en-us/vsts/pipelines/get-started-yaml?view=vsts&tabs=gitvsts
-# https://microsoft-git-tools.visualstudio.com/Git-Credential-Manager-for-Windows
 
-phases:
-  - template: vsts-tt.yml
+jobs:
+  - template: azure-pipelines-common.yml
     parameters:
-      QueueName: 'Hosted VS2017'
+      PoolName: 'VSEng-MicroBuildVS2017'
 
       CoreBuild:
         - task: MSBuild@1
           displayName: 'Core Build'
           inputs:
             solution: 'Installer/Installer.proj'
-            msbuildArguments: '/nologo /verbosity:$(Build.Verbosity) /binaryLogger:$(Build.SourcesDirectory)/$(build.buildNumber).binlog'
+            msbuildArguments: '/nologo /verbosity:$(Build.Verbosity) "/binaryLogger:$(Build.SourcesDirectory)/$(build.buildNumber).binlog"'
             platform: '$(Build.Platform)'
             configuration: '$(Build.Configuration)'
             maximumCpuCount: false
             msbuildArchitecture: '$(Build.Architecture)'
 
-      MicrobuildSetup: []
-      MicrobuildClean: []
+      MicrobuildSetup:
+        - task: ms-vseng.MicroBuildTasks.30666190-6959-11e5-9f96-f56098202fef.MicroBuildSigningPlugin@1
+          displayName: Setup MicroBuild Signing
+          condition: and(succeeded(), or(eq(variables['signType'],'real'), eq(variables['signType'],'test')))
+          continueOnError: true
+          inputs:
+            feedSource: https://devdiv.pkgs.visualstudio.com/DefaultCollection/_packaging/MicroBuildToolset/nuget/v3/index.json
+            signType: '$(SignType)'
+            zipSources: true
+
+      MicrobuildClean:
+        - task: ms-vseng.MicroBuildTasks.521a94ea-9e68-468a-8167-6dcf361ea776.MicroBuildCleanup@1
+          displayName: MicroBuild Cleanup
+          condition: or(eq(variables['signType'],'real'), eq(variables['signType'],'test'))
+          continueOnError: true
 
       NugetCommand:
         - task: NuGetCommand@2
@@ -65,8 +77,8 @@ phases:
           continueOnError: true
           condition:  eq(variables['system.pullrequest.isfork'], false)
           inputs:
-            pathtoPublish: '$(Build.SourcesDirectory)\$(build.buildNumber).binlog'
-            artifactName: '$(build.buildNumber).binlog'
+            pathtoPublish: $(Build.SourcesDirectory)\$(build.buildNumber).binlog
+            artifactName: $(build.buildNumber).binlog
             publishLocation: Container
         
         - task: PublishBuildArtifacts@1
@@ -74,6 +86,6 @@ phases:
           continueOnError: true
           condition: and(succeeded(), eq(variables['system.pullrequest.isfork'], false))
           inputs:
-            pathtoPublish: '$(Build.SourcesDirectory)\Deploy\'
-            artifactName: '$(Build.BuildNumber).output'
+            pathtoPublish: $(Build.SourcesDirectory)\Deploy\
+            artifactName: $(Build.BuildNumber).output
             publishLocation: Container

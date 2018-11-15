@@ -27,10 +27,10 @@
 # Learn more at https://docs.microsoft.com/en-us/vsts/pipelines/get-started-yaml?view=vsts&tabs=gitvsts
 # https://microsoft-git-tools.visualstudio.com/Git-Credential-Manager-for-Windows
 
-phases:
-  - template: vsts-tt.yml
+jobs:
+  - template: azure-pipelines-common.yml
     parameters:
-      QueueName: 'Hosted VS2017'
+      PoolName: 'vs2017-win2016'
 
       CoreBuild:
         - task: MSBuild@1

@@ -27,17 +27,17 @@
 # Learn more at https://docs.microsoft.com/en-us/vsts/pipelines/get-started-yaml?view=vsts&tabs=gitvsts
 
 parameters:
-  QueueName: ''
+  PoolName: ''
   CoreBuild: []
   MicrobuildSetup: []
   MicrobuildClean: []
   NugetCommand: []
   PublishArtifacts: []
 
-phases:
-  - phase: Build
-    queue:
-      name: ${{ parameters.QueueName }}
+jobs:
+  - job: Build
+    pool:
+      vmImage: ${{ parameters.PoolName }}
       demands: 
       - msbuild
       - visualstudio
