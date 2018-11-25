@@ -10,7 +10,7 @@
     <ProjectGuid>{19770407-D7D8-4A37-914C-F552FF4B90D4}</ProjectGuid>
     <ProjectName>AzureDevOps.Authentication</ProjectName>
     <RootNamespace>AzureDevOps.Authentication</RootNamespace>
-    <TargetFrameworkVersion>v4.5.1</TargetFrameworkVersion>
+    <TargetFrameworkVersion>v4.5.2</TargetFrameworkVersion>
   </PropertyGroup>
   <Import Project="..\..\build.props" />
   <PropertyGroup>
