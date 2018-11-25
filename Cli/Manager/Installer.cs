@@ -40,15 +40,18 @@ namespace Microsoft.Alm.Cli
         internal const string ParamPathKey = "--path";
         internal const string ParamPassiveKey = "--passive";
         internal const string ParamForceKey = "--force";
+        internal const string ParamDestinationKey = "--destination";
         internal const string FailFace = "U_U";
         internal const string TadaFace = "^_^";
+
+        private const string CREDENTIAL_MANAGER_FILENAME = "git-credential-manager.exe";
 
         private static readonly IReadOnlyList<string> CopyList = new string[]
         {
             "AzureDevOps.Authentication.dll",
             "Bitbucket.Authentication.dll",
             "git-askpass.exe",
-            "git-credential-manager.exe",
+            CREDENTIAL_MANAGER_FILENAME,
             "GitHub.Authentication.exe",
             "Microsoft.Alm.Authentication.dll",
             "Microsoft.IdentityModel.Clients.ActiveDirectory.dll",
@@ -58,7 +61,7 @@ namespace Microsoft.Alm.Cli
             "AzureDevOps.Authentication.dll",
             "Bitbucket.Authentication.dll",
             "git-askpass.exe",
-            "git-credential-manager.exe",
+            CREDENTIAL_MANAGER_FILENAME,
             "GitHub.Authentication.exe",
             "Microsoft.Alm.Authentication.dll",
             "Microsoft.Alm.Git.dll",
@@ -92,6 +95,17 @@ namespace Microsoft.Alm.Cli
                         Program.Trace.WriteLine($"{ParamPathKey} = '{_customPath}'.");
                     }
                 }
+                else if (string.Equals(args[i], ParamDestinationKey, StringComparison.OrdinalIgnoreCase))
+                {
+                    if (args.Length > i + 1)
+                    {
+                        i += 1;
+                        _userBinPath = args[i];
+                        _isCustomDestination = true;
+
+                        Program.Trace.WriteLine($"{ParamDestinationKey} = '{_userBinPath}'.");
+                    }
+                }
                 else if (string.Equals(args[i], ParamPassiveKey, StringComparison.OrdinalIgnoreCase))
                 {
                     _isPassive = true;
@@ -115,6 +129,7 @@ namespace Microsoft.Alm.Cli
         private TextWriter _stdout = null;
         private TextWriter _stderr = null;
         private string _userBinPath = null;
+        private bool _isCustomDestination = false;
 
         public int ExitCode
         {
@@ -431,7 +446,8 @@ namespace Microsoft.Alm.Cli
                 ConfigurationLevel types = ConfigurationLevel.Global;
 
                 ConfigurationLevel updateTypes;
-                if (SetGitConfig(installations, GitConfigAction.Set, types, out updateTypes))
+                string credentialManagerPath = _isCustomDestination ? Path.Combine(UserBinPath, CREDENTIAL_MANAGER_FILENAME) : null;
+                if (SetGitConfig(installations, GitConfigAction.Set, types, credentialManagerPath, out updateTypes))
                 {
                     if ((updateTypes & ConfigurationLevel.Global) == ConfigurationLevel.Global)
                     {
@@ -565,7 +581,7 @@ namespace Microsoft.Alm.Cli
                 ConfigurationLevel types = ConfigurationLevel.Global | ConfigurationLevel.System;
 
                 ConfigurationLevel updateTypes;
-                if (SetGitConfig(installations, GitConfigAction.Unset, types, out updateTypes))
+                if (SetGitConfig(installations, GitConfigAction.Unset, types, null, out updateTypes))
                 {
                     if ((updateTypes & ConfigurationLevel.System) == ConfigurationLevel.System)
                     {
@@ -726,9 +742,10 @@ namespace Microsoft.Alm.Cli
             }
         }
 
-        public bool SetGitConfig(List<Installation> installations, GitConfigAction action, ConfigurationLevel type, out ConfigurationLevel updated)
+        public bool SetGitConfig(List<Installation> installations, GitConfigAction action, ConfigurationLevel type, string credentialManagerPath, out ConfigurationLevel updated)
         {
             Program.Trace.WriteLine($"action = '{action}'.");
+            Program.Trace.WriteLine($"credentialManagerPath = '{credentialManagerPath}'.");
 
             updated = ConfigurationLevel.None;
 
@@ -738,13 +755,22 @@ namespace Microsoft.Alm.Cli
                 return false;
             }
 
+            /*
+             * According to https://git-scm.com/docs/gitcredentials
+             * The name of an external credential helper, and any associated options. If the helper name is not an absolute path,
+             * then the string 'git-credential-' is prepended. The resulting string is executed by the shell
+             */
+            string manager = string.IsNullOrWhiteSpace(credentialManagerPath) ? "manager" : credentialManagerPath;
+            manager = manager.Replace('\\', '/');
             if ((type & ConfigurationLevel.Global) == ConfigurationLevel.Global)
             {
                 // the 0 entry in the installations list is the "preferred" instance of Git
                 string gitCmdPath = installations[0].Git;
                 string globalCmd = action == GitConfigAction.Set
-                    ? "config --global credential.helper manager"
-                    : "config --global --unset credential.helper";
+                    ? $"config --global credential.helper {manager}"
+                    : $"config --global --unset credential.helper";
+
+                Program.Trace.WriteLine($"Git global configuration = '{globalCmd}'");
 
                 if (ExecuteGit(gitCmdPath, globalCmd, 0, 5))
                 {
@@ -766,8 +792,10 @@ namespace Microsoft.Alm.Cli
             if ((type & ConfigurationLevel.System) == ConfigurationLevel.System)
             {
                 string systemCmd = action == GitConfigAction.Set
-                    ? "config --system credential.helper manager"
-                    : "config --system --unset credential.helper";
+                    ? $"config --system credential.helper {manager}"
+                    : $"config --system --unset credential.helper";
+
+                Program.Trace.WriteLine($"Git system configuration = '{systemCmd}'");
 
                 int successCount = 0;
 
