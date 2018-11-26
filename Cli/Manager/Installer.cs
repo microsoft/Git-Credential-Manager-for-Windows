@@ -41,6 +41,7 @@ namespace Microsoft.Alm.Cli
         internal const string ParamPassiveKey = "--passive";
         internal const string ParamForceKey = "--force";
         internal const string ParamDestinationKey = "--destination";
+        internal const string ParamDontIntegrate = "--dontintegrate";
         internal const string FailFace = "U_U";
         internal const string TadaFace = "^_^";
 
@@ -118,6 +119,12 @@ namespace Microsoft.Alm.Cli
 
                     Program.Trace.WriteLine($"{ParamForceKey} = true.");
                 }
+                else if (string.Equals(args[i], ParamDontIntegrate, StringComparison.OrdinalIgnoreCase))
+                {
+                    _dontIntegrate = true;
+
+                    Program.Trace.WriteLine($"{ParamDontIntegrate} = true.");
+                }
             }
         }
 
@@ -130,6 +137,7 @@ namespace Microsoft.Alm.Cli
         private TextWriter _stderr = null;
         private string _userBinPath = null;
         private bool _isCustomDestination = false;
+        private bool _dontIntegrate = false;
 
         public int ExitCode
         {
@@ -298,57 +306,60 @@ namespace Microsoft.Alm.Cli
                 }
 
                 List<string> copiedFiles;
-                foreach (var installation in installations)
+                if (!_dontIntegrate)
                 {
-                    Program.Out.WriteLine();
-                    Program.Out.WriteLine($"Deploying from '{Program.Location}' to '{installation.Path}'.");
-
-                    if (CleanFiles(installation.Libexec, CleanList, out _))
+                    foreach (var installation in installations)
                     {
-                        Program.Trace.WriteLine($"removed previous installation from '{installation.Libexec}'.");
-                    }
+                        Program.Out.WriteLine();
+                        Program.Out.WriteLine($"Deploying from '{Program.Location}' to '{installation.Path}'.");
 
-                    if (CopyFiles(Program.Location, installation.Libexec, CopyList, out copiedFiles))
-                    {
-                        int copiedCount = copiedFiles.Count;
-
-                        foreach (var file in copiedFiles)
+                        if (CleanFiles(installation.Libexec, CleanList, out _))
                         {
-                            Program.Out.WriteLine($"  {file}");
+                            Program.Trace.WriteLine($"removed previous installation from '{installation.Libexec}'.");
                         }
 
-                        // copy help documents
-                        if (Program.Storage.DirectoryExists(installation.Doc)
-                            && CopyFiles(Program.Location, installation.Doc, DocsList, out copiedFiles))
+                        if (CopyFiles(Program.Location, installation.Libexec, CopyList, out copiedFiles))
                         {
-                            copiedCount += copiedFiles.Count;
+                            int copiedCount = copiedFiles.Count;
 
                             foreach (var file in copiedFiles)
                             {
                                 Program.Out.WriteLine($"  {file}");
                             }
+
+                            // copy help documents
+                            if (Program.Storage.DirectoryExists(installation.Doc)
+                                && CopyFiles(Program.Location, installation.Doc, DocsList, out copiedFiles))
+                            {
+                                copiedCount += copiedFiles.Count;
+
+                                foreach (var file in copiedFiles)
+                                {
+                                    Program.Out.WriteLine($"  {file}");
+                                }
+                            }
+
+                            Program.LogEvent($"Deployment to '{installation.Path}' succeeded.", EventLogEntryType.Information);
+                            Program.Out.WriteLine($"     {copiedCount} file(s) copied");
                         }
+                        else if (_isForced)
+                        {
+                            Program.LogEvent($"Deployment to '{installation.Path}' failed.", EventLogEntryType.Warning);
+                            Program.WriteLine($"  deployment failed. {FailFace}");
+                        }
+                        else
+                        {
+                            Program.LogEvent($"Deployment to '{installation.Path}' failed.", EventLogEntryType.Error);
+                            Program.WriteLine($"  deployment failed. {FailFace}");
+                            Pause();
 
-                        Program.LogEvent($"Deployment to '{installation.Path}' succeeded.", EventLogEntryType.Information);
-                        Program.Out.WriteLine($"     {copiedCount} file(s) copied");
+                            Result = ResultValue.DeploymentFailed;
+                            return;
+                        }
                     }
-                    else if (_isForced)
-                    {
-                        Program.LogEvent($"Deployment to '{installation.Path}' failed.", EventLogEntryType.Warning);
-                        Program.WriteLine($"  deployment failed. {FailFace}");
-                    }
-                    else
-                    {
-                        Program.LogEvent($"Deployment to '{installation.Path}' failed.", EventLogEntryType.Error);
-                        Program.WriteLine($"  deployment failed. {FailFace}");
-                        Pause();
 
-                        Result = ResultValue.DeploymentFailed;
-                        return;
-                    }
+                    Program.Out.WriteLine();
                 }
-
-                Program.Out.WriteLine();
                 Program.Out.WriteLine($"Deploying from '{Program.Location}' to '{UserBinPath}'.");
 
                 if (!Program.Storage.DirectoryExists(UserBinPath))
@@ -446,7 +457,7 @@ namespace Microsoft.Alm.Cli
                 ConfigurationLevel types = ConfigurationLevel.Global;
 
                 ConfigurationLevel updateTypes;
-                string credentialManagerPath = _isCustomDestination ? Path.Combine(UserBinPath, CREDENTIAL_MANAGER_FILENAME) : null;
+                string credentialManagerPath = _isCustomDestination || _dontIntegrate ? Path.Combine(UserBinPath, CREDENTIAL_MANAGER_FILENAME) : null;
                 if (SetGitConfig(installations, GitConfigAction.Set, types, credentialManagerPath, out updateTypes))
                 {
                     if ((updateTypes & ConfigurationLevel.Global) == ConfigurationLevel.Global)
