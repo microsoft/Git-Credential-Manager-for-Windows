@@ -623,8 +623,10 @@ namespace Microsoft.Alm.Authentication
 
                     if (hasUserNameAndPassword)
                     {
-                        string userName = proxyUri.UserInfo.Substring(0, tokenIndex);
-                        string password = proxyUri.UserInfo.Substring(tokenIndex + 1);
+                        //Usernames and passwords in git config for proxies are expected to be Url encoded
+                        //so decode them.
+                        string userName = WebUtility.UrlDecode(proxyUri.UserInfo.Substring(0, tokenIndex));
+                        string password = WebUtility.UrlDecode(proxyUri.UserInfo.Substring(tokenIndex + 1));
 
                         var proxyCreds = new NetworkCredential(userName, password);
 
