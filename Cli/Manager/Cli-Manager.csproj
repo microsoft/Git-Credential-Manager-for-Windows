@@ -57,6 +57,7 @@
     <None Include="app.config">
       <InProject>false</InProject>
     </None>
+    <None Include="app.config" />
     <None Include="packages.config" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
