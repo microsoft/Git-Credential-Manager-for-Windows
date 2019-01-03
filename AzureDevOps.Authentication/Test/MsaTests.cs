@@ -109,7 +109,7 @@ namespace AzureDevOps.Authentication.Test
         {
             ICredentialStore tokenStore1 = new SecretCache(context, @namespace + 1, Secret.UriToIdentityUrl);
             ITokenStore tokenStore2 = new SecretCache(context, @namespace + 2, Secret.UriToIdentityUrl);
-            IAuthority liveAuthority = new AuthorityFake(MsaAuthentication.QueryParameters);
+            IAuthority liveAuthority = new AuthorityFake(null);
             return new MsaAuthentication(context, tokenStore1, tokenStore2, liveAuthority);
         }
     }
