@@ -33,16 +33,13 @@ namespace AzureDevOps.Authentication
 
     public sealed class MsaAuthentication : Authentication, IMsaAuthentication
     {
-        public const string DefaultAuthorityHost = AzureDevOps.Authentication.Authority.AuthorityHostUrlBase + "/live.com";
-        internal const string QueryParameters = "domain_hint=live.com&display=popup&site_id=501454&nux=1";
-
         public MsaAuthentication(
             RuntimeContext context,
             TokenScope tokenScope,
             ICredentialStore personalAccessTokenStore)
             : base(context, tokenScope, personalAccessTokenStore)
         {
-            Authority = new Authority(context, DefaultAuthorityHost);
+            Authority = new Authority(context, AzureDevOps.Authentication.Authority.DefaultAuthorityHostUrl);
         }
 
         /// <summary>
@@ -79,7 +76,12 @@ namespace AzureDevOps.Authentication
             try
             {
                 Token token;
-                if ((token = await Authority.InteractiveAcquireToken(targetUri, ClientId, Resource, new Uri(RedirectUrl), QueryParameters)) != null)
+                if ((token = await Authority.InteractiveAcquireToken(
+                    targetUri,
+                    ClientId,
+                    Resource,
+                    new Uri(RedirectUrl),
+                    queryParameters: null)) != null)
                 {
                     Trace.WriteLine($"token '{targetUri}' successfully acquired.");
 
@@ -109,7 +111,12 @@ namespace AzureDevOps.Authentication
             try
             {
                 Token token;
-                if ((token = await Authority.InteractiveAcquireToken(targetUri, ClientId, Resource, new Uri(RedirectUrl), QueryParameters)) != null)
+                if ((token = await Authority.InteractiveAcquireToken(
+                    targetUri,
+                    ClientId,
+                    Resource,
+                    new Uri(RedirectUrl),
+                    queryParameters: null)) != null)
                 {
                     Trace.WriteLine($"token '{targetUri}' successfully acquired.");
 
