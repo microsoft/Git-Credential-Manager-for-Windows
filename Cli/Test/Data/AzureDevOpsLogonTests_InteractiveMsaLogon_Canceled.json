@@ -3005,7 +3005,7 @@
     "Adal": {
       "Operations": [
         {
-          "AuthorityUrl": "https://login.microsoftonline.com/live.com",
+          "AuthorityUrl": "https://login.microsoftonline.com/common",
           "Error": {
             "Message": "User canceled authentication"
           },
@@ -3013,7 +3013,7 @@
             "Resource": "499b84ac-1321-427f-aa17-267ca6975798",
             "ClientId": "872cd9fa-d31f-45e0-9eab-6e460a02d1f1",
             "RedirectUrl": "urn:ietf:wg:oauth:2.0:oob",
-            "ExtraQueryParameters": "domain_hint=live.com&display=popup&site_id=501454&nux=1"
+            "ExtraQueryParameters": ""
           },
           "Result": {}
         }
