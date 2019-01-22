@@ -602,6 +602,8 @@ namespace Microsoft.Alm.Cli
         {
             if (Uri.TryCreate(url, UriKind.Absolute, out Uri tmp))
             {
+                // HACK: ADAL uses the default proxy sometimes
+                System.Net.WebRequest.DefaultWebProxy = new System.Net.WebProxy(tmp);
                 Trace.WriteLine($"successfully set proxy to '{tmp.AbsoluteUri}'.");
             }
             else
@@ -611,6 +613,7 @@ namespace Microsoft.Alm.Cli
                     Trace.WriteLine($"failed to parse '{url}'.");
                 }
 
+                System.Net.WebRequest.DefaultWebProxy = null;
                 Trace.WriteLine("proxy cleared.");
             }
 
@@ -769,30 +772,30 @@ namespace Microsoft.Alm.Cli
                 switch (parts.Length)
                 {
                     case 1:
-                    {
-                        if (Uri.TryCreate(parts[0], UriKind.Absolute, out Uri uri))
                         {
-                            actualUrl = uri.ToString();
+                            if (Uri.TryCreate(parts[0], UriKind.Absolute, out Uri uri))
+                            {
+                                actualUrl = uri.ToString();
+                            }
+                            else
+                            {
+                                Trace.WriteLine($"failed to parse \"{parts[0]}\", unable to set URL override.");
+                            }
                         }
-                        else
-                        {
-                            Trace.WriteLine($"failed to parse \"{parts[0]}\", unable to set URL override.");
-                        }
-                    }
-                    break;
+                        break;
 
                     case 3:
-                    {
-                        if (Uri.TryCreate(parts[2], UriKind.Absolute, out Uri uri))
                         {
-                            actualUrl = uri.ToString();
+                            if (Uri.TryCreate(parts[2], UriKind.Absolute, out Uri uri))
+                            {
+                                actualUrl = uri.ToString();
+                            }
+                            else
+                            {
+                                Trace.WriteLine($"failed to parse \"{parts[2]}\", unable to set URL override.");
+                            }
                         }
-                        else
-                        {
-                            Trace.WriteLine($"failed to parse \"{parts[2]}\", unable to set URL override.");
-                        }
-                    }
-                    break;
+                        break;
                 }
             }
 
@@ -825,7 +828,7 @@ namespace Microsoft.Alm.Cli
                     case ',':
                     case ';':
                     case '=':
-                    return true;
+                        return true;
                 }
             }
             return false;
