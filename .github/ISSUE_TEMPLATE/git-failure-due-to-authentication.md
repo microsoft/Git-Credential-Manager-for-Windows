@@ -20,9 +20,13 @@ You can see the GCM version by setting the env variable GCM_TRACE=1 and performi
 * [ ] Other? - please describe;
 
 
-**if AzureDevops Hosted describe your url**
+**If AzureDevops Hosted describe your url**
 * [ ] dev.azure.com/org
 * [ ] org.visualstudio.com
+
+**If AzureDevops, make sure verified that you can access the webpage of the remote url in browser.  Also double check that if you've been presented with an account picker you've selected the same one you used to access the webpage**
+* [ ] Yes, I've done both of these things
+* [ ] Other? - please describe;
 
 
 **Expected behavior**
