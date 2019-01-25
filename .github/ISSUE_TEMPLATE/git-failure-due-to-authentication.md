@@ -8,14 +8,14 @@ assignees: ''
 ---
 
 **Which Version of GCM are you using ?**
-You can see the GCM version by setting the env variable GCM_TRACE=1 and performing a command.
+From a command prompt, run ``git credential-manager version`` and paste the output.
 <!-- Ex: 1.18.1, 1.18.2, etc.. -->
 
 **Which service are you trying to connect to**
-* Azure Devops
-    * [ ] Hosted
-    * [ ] On-Prem
+* [ ] Azure DevOps
+* [ ] Azure DevOps Server (TFS/on-prem)
 * [ ] GitHub
+* [ ] GitHub Enterprise
 * [ ] Bitbucket
 * [ ] Other? - please describe;
 
@@ -24,10 +24,14 @@ You can see the GCM version by setting the env variable GCM_TRACE=1 and performi
 * [ ] dev.azure.com/org
 * [ ] org.visualstudio.com
 
-**If AzureDevops, make sure verified that you can access the webpage of the remote url in browser.  Also double check that if you've been presented with an account picker you've selected the same one you used to access the webpage**
-* [ ] Yes, I've done both of these things
-* [ ] Other? - please describe;
+**If you're using Azure DevOps, can you access the repository in the browser via the same URL?**
+* [ ] Yes
+* [ ] No, I get a permission error.
+* [ ] No, for a different reason: 
 
+**If you're using Azure DevOps, and the account picker shows more than one identity as you authenticate, check that you selected the same one that has access on the web.**
+* [ ] I only see one identity.
+* [ ] I checked each and none worked.
 
 **Expected behavior**
 A clear and concise description of what you expected to happen (or code).
