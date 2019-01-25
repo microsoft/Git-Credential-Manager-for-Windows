@@ -134,7 +134,10 @@ namespace AzureDevOps.Authentication
 
                 return new Result(result);
             }
-            catch (ActiveDirectory.AdalException exception)
+            // We should just be able to catch AdalException here but due to an ADAL bug an HttpRequestException can be leaked:
+            // https://github.com/AzureAD/azure-activedirectory-library-for-dotnet/issues/1285
+            // Until we update to ADAL 4.x or MSAL, we should just workaround this problem.
+            catch (Exception exception)
             {
                 throw new AuthenticationException(exception);
             }
@@ -164,7 +167,10 @@ namespace AzureDevOps.Authentication
 
                 return new Result(result);
             }
-            catch (ActiveDirectory.AdalException exception)
+            // We should just be able to catch AdalException here but due to an ADAL bug an HttpRequestException can be leaked:
+            // https://github.com/AzureAD/azure-activedirectory-library-for-dotnet/issues/1285
+            // Until we update to ADAL 4.x or MSAL, we should just workaround this problem.
+            catch (Exception exception)
             {
                 throw new AuthenticationException(exception);
             }
