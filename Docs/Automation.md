@@ -9,7 +9,7 @@ _Note:_ SSH is often a better choice for automated system because requiring inte
 
 The majority of build definitions will work with a single repository, or at least a set of repositories which all have the same authentication requirements.
 In this case, it is generally better to rely on [Azure DevOps Build Variables](https://docs.microsoft.com/en-us/vsts/build-release/concepts/definitions/build/variables?tabs=batch); specifically the `$(System.AccessToken)` build process OAuth token.
-To enable scripts to use the build process OAuth token, go to the Options tab of the build definition and select 'Allow Scripts to Access OAuth Token'.
+To enable scripts to use the build process OAuth token, go to the `Options` tab of the build definition and select `Allow Scripts to Access OAuth Token`.
 For more information, read [Azure DevOps: Use the OAuth token to access the REST API](https://docs.microsoft.com/en-us/vsts/build-release/actions/scripts/powershell#oauth).
 
 ## Recommendations for Other Build Services
