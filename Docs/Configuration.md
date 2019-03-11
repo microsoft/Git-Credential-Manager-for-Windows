@@ -116,7 +116,7 @@ See [GCM_PRESERVE](Environment.md#gcm_preserve)
 Sets the maximum time, in milliseconds, for a network request to wait before timing out. 
 This allows changing the default for slow connections.
 
-Supports an integer value. Defaults to 90,000 miliseconds.
+Supports an integer value. Defaults to 90,000 milliseconds.
 
 ```shell
 git config --global credential.visualstudio.com.httpTimeout 100000
@@ -196,7 +196,7 @@ See [GCM_VSTS_SCOPE](Environment.md#gcm_vsts_scope)
 ### writeLog
 
 Enables trace logging of all activities.
-Logs are written to the local .git/ folder at the root of the repository.
+Logs are written to the local `.git/` folder at the root of the repository.
 
 __Note:__ This setting will not override the `GCM_TRACE` environment variable.
 
