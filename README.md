@@ -62,6 +62,15 @@ To use the GCM along with git installed with `pacman` in an MSYS2 environment, s
 git config --global credential.helper manager
 ```
 
+### Installation for Cygwin environment
+
+To use the GCM along with git installed within Cygwin environment, [download a release zip](https://github.com/Microsoft/Git-Credential-Manager-for-Windows/releases) and extract the contents  into `/usr/libexec/git-core`. Then run:
+
+```shell
+git config --global credential.helper manager
+```
+…as usual. Please review [Docs/Configuration.md](Docs/Configuration.md) for all configuration options, especially the [modal prompt](Docs/Configuration.md#modalprompt) one, since GCM will unlikely be able to read passwords from Cygwin terminal.
+
 ## How to use
 
 You don't. It [magically](https://github.com/Microsoft/Git-Credential-Manager-for-Windows/issues/31) works when credentials are needed. For example, when pushing to [Azure DevOps](https://dev.azure.com), it automatically opens a window and initializes an oauth2 flow to get your token.
