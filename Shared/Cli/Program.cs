@@ -32,7 +32,7 @@ using System.Runtime.CompilerServices;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Alm.Authentication;
-using Azure = AzureDevOps.Authentication;
+using AzureDev = AzureDevOps.Authentication;
 using Bitbucket = Atlassian.Bitbucket.Authentication;
 using Git = Microsoft.Alm.Authentication.Git;
 using Github = GitHub.Authentication;
@@ -61,6 +61,11 @@ namespace Microsoft.Alm.Cli
         ParentHwnd,
         VstsScope,
         Writelog,
+        KeyVaultUrl,
+        KeyVaultUseMsi,
+        KeyVaultAuthCertificateThumbprint,
+        KeyVaultAuthCertificateStoreType,
+        KeyVaultAuthClientId
     }
 
     partial class Program
@@ -79,7 +84,7 @@ namespace Microsoft.Alm.Cli
         internal const string ConfigPrefix = "credential";
         internal const string SecretsNamespace = "git";
 
-        internal static readonly Azure.TokenScope DevOpsCredentialScope = Azure.TokenScope.CodeWrite | Azure.TokenScope.PackagingRead;
+        internal static readonly AzureDev.TokenScope DevOpsCredentialScope = AzureDev.TokenScope.CodeWrite | AzureDev.TokenScope.PackagingRead;
         internal static readonly Github.TokenScope GitHubCredentialScope = Github.TokenScope.Gist | Github.TokenScope.Repo;
 
         internal BasicCredentialPromptDelegate _basicCredentialPrompt = ConsoleFunctions.CredentialPrompt;
@@ -135,6 +140,11 @@ namespace Microsoft.Alm.Cli
             { KeyType.Validate, "validate" },
             { KeyType.VstsScope,"vstsScope" },
             { KeyType.Writelog, "writeLog" },
+            { KeyType.KeyVaultUrl, "keyvaultUrl" },
+            { KeyType.KeyVaultUseMsi, "keyVaultUseMsi" },
+            { KeyType.KeyVaultAuthCertificateStoreType, "keyvaultAuthCertificateStoreType" },
+            { KeyType.KeyVaultAuthCertificateThumbprint, "keyvaultAuthCertificateThumbprint" },
+            { KeyType.KeyVaultAuthClientId, "keyvaultAuthClientId" },
         };
         internal readonly Dictionary<KeyType, string> _environmentKeys = new Dictionary<KeyType, string>()
         {

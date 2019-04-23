@@ -29,7 +29,7 @@ using System.IO;
 using System.Text;
 using System.Threading.Tasks;
 using Microsoft.Alm.Authentication;
-using Azure = AzureDevOps.Authentication;
+using AzureDev = AzureDevOps.Authentication;
 using Bitbucket = Atlassian.Bitbucket.Authentication;
 using Git = Microsoft.Alm.Authentication.Git;
 using Github = GitHub.Authentication;
@@ -85,25 +85,25 @@ namespace Microsoft.Alm.Cli
                     program.Trace.WriteLine($"detecting authority type for '{operationArguments.TargetUri}'.");
 
                     // Detect the authority.
-                    authority = await Azure.Authentication.GetAuthentication(program.Context,
+                    authority = await AzureDev.Authentication.GetAuthentication(program.Context,
                                                                              operationArguments.TargetUri,
                                                                              Program.DevOpsCredentialScope,
-                                                                             new SecretStore(program.Context,
-                                                                                             secretsNamespace,
-                                                                                             Azure.Authentication.UriNameConversion))
+                                                                             CreateSecretStore(program.Context,
+                                                                                             operationArguments,
+                                                                                             AzureDev.Authentication.UriNameConversion))
                              ?? Github.Authentication.GetAuthentication(program.Context,
                                                                         operationArguments.TargetUri,
                                                                         Program.GitHubCredentialScope,
-                                                                        new SecretStore(program.Context,
-                                                                                        secretsNamespace,
+                                                                        CreateSecretStore(program.Context,
+                                                                                        operationArguments,
                                                                                         Secret.UriToName),
                                                                         githubCredentialCallback,
                                                                         githubAuthcodeCallback,
                                                                         null)
                             ?? Bitbucket.Authentication.GetAuthentication(program.Context,
                                                                           operationArguments.TargetUri,
-                                                                          new SecretStore(program.Context, 
-                                                                                          secretsNamespace, 
+                                                                          CreateSecretStore(program.Context, 
+                                                                                          operationArguments, 
                                                                                           Secret.UriToIdentityUrl),
                                                                           bitbucketCredentialCallback,
                                                                           bitbucketOauthCallback);
@@ -111,12 +111,12 @@ namespace Microsoft.Alm.Cli
                     if (authority != null)
                     {
                         // Set the authority type based on the returned value.
-                        if (authority is Azure.MsaAuthentication)
+                        if (authority is AzureDev.MsaAuthentication)
                         {
                             operationArguments.Authority = AuthorityType.MicrosoftAccount;
                             goto case AuthorityType.MicrosoftAccount;
                         }
-                        else if (authority is Azure.AadAuthentication)
+                        else if (authority is AzureDev.AadAuthentication)
                         {
                             operationArguments.Authority = AuthorityType.AzureDirectory;
                             goto case AuthorityType.AzureDirectory;
@@ -144,7 +144,7 @@ namespace Microsoft.Alm.Cli
                         Guid tenantId = Guid.Empty;
 
                         // Get the identity of the tenant.
-                        var result = await Azure.Authentication.DetectAuthority(program.Context, operationArguments.TargetUri);
+                        var result = await AzureDev.Authentication.DetectAuthority(program.Context, operationArguments.TargetUri);
 
                         if (result.HasValue)
                         {
@@ -152,12 +152,12 @@ namespace Microsoft.Alm.Cli
                         }
 
                         // Create the authority object.
-                        authority = new Azure.AadAuthentication(program.Context,
+                        authority = new AzureDev.AadAuthentication(program.Context,
                                                                 tenantId,
                                                                 operationArguments.DevOpsTokenScope,
-                                                                new SecretStore(program.Context,
-                                                                                secretsNamespace,
-                                                                                Azure.AadAuthentication.UriNameConversion));
+                                                                CreateSecretStore(program.Context,
+                                                                                operationArguments,
+                                                                                AzureDev.AadAuthentication.UriNameConversion));
                     }
 
                     // Return the allocated authority or a generic AAD backed Azure DevOps authentication object.
@@ -179,8 +179,8 @@ namespace Microsoft.Alm.Cli
                     return authority ?? new Github.Authentication(program.Context,
                                                                   operationArguments.TargetUri,
                                                                   Program.GitHubCredentialScope,
-                                                                  new SecretStore(program.Context,
-                                                                                  secretsNamespace,
+                                                                  CreateSecretStore(program.Context,
+                                                                                  operationArguments,
                                                                                   Secret.UriToName),
                                                                   githubCredentialCallback,
                                                                   githubAuthcodeCallback,
@@ -193,8 +193,8 @@ namespace Microsoft.Alm.Cli
 
                     // Return a Bitbucket authentication object.
                     return authority ?? new Bitbucket.Authentication(program.Context,
-                                                                     new SecretStore(program.Context,
-                                                                                     secretsNamespace,
+                                                                     CreateSecretStore(program.Context,
+                                                                                     operationArguments,
                                                                                      Secret.UriToIdentityUrl),
                                                                      bitbucketCredentialCallback,
                                                                      bitbucketOauthCallback);
@@ -205,11 +205,11 @@ namespace Microsoft.Alm.Cli
                     program.Trace.WriteLine($"authority for '{operationArguments.TargetUri}' is Microsoft Live.");
 
                     // Return the allocated authority or a generic MSA backed Azure DevOps authentication object.
-                    return authority ?? new Azure.MsaAuthentication(program.Context,
+                    return authority ?? new AzureDev.MsaAuthentication(program.Context,
                                                                     operationArguments.DevOpsTokenScope,
-                                                                    new SecretStore(program.Context,
-                                                                                    secretsNamespace,
-                                                                                    Azure.MsaAuthentication.UriNameConversion));
+                                                                    CreateSecretStore(program.Context,
+                                                                                    operationArguments,
+                                                                                    AzureDev.MsaAuthentication.UriNameConversion));
                 }
 
                 case AuthorityType.Ntlm:
@@ -225,13 +225,27 @@ namespace Microsoft.Alm.Cli
 
                     // Return a generic username + password authentication object.
                     return authority ?? new BasicAuthentication(program.Context,
-                                                                new SecretStore(program.Context,
-                                                                                secretsNamespace,
+                                                                CreateSecretStore(program.Context,
+                                                                                operationArguments,
                                                                                 Secret.UriToIdentityUrl),
                                                                 basicNtlmSupport,
                                                                 basicCredentialCallback,
                                                                 null);
                 }
+            }
+        }
+
+        private static ICredentialStore CreateSecretStore (RuntimeContext context, OperationArguments operationArguments, Secret.UriNameConversionDelegate getTargetName)
+        {
+            string secretsNamespace = operationArguments.CustomNamespace ?? Program.SecretsNamespace;
+
+            if (string.IsNullOrEmpty(operationArguments.KeyVaultUrl))
+            {
+                return new SecretStore(context, secretsNamespace, getTargetName);
+            }
+            else
+            {
+                return new KeyVaultSecretStore(context, secretsNamespace, operationArguments.KeyVaultUrl, operationArguments.KeyVaultUseMsi, operationArguments.KeyVaulyAuthCertificateStoreType, operationArguments.KeyVaultAuthCertificateThumbprint, operationArguments.KeyVaultAuthClientId);
             }
         }
 
@@ -257,7 +271,7 @@ namespace Microsoft.Alm.Cli
                 case AuthorityType.MicrosoftAccount:
                 {
                     program.Trace.WriteLine($"deleting Azure DevOps credentials for '{operationArguments.TargetUri}'.");
-                    var adoAuth = authentication as Azure.Authentication;
+                    var adoAuth = authentication as AzureDev.Authentication;
                     return await adoAuth.DeleteCredentials(operationArguments.TargetUri);
                 }
 
@@ -607,14 +621,14 @@ namespace Microsoft.Alm.Cli
             {
                 program.Trace.WriteLine($"{program.KeyTypeName(KeyType.DevOpsScope)} = '{value}'.");
 
-                Azure.TokenScope devopsTokenScope = Azure.TokenScope.None;
+                AzureDev.TokenScope devopsTokenScope = AzureDev.TokenScope.None;
 
                 var scopes = value.Split(TokenScopeSeparatorCharacters.ToCharArray(), StringSplitOptions.RemoveEmptyEntries);
                 for (int i = 0; i < scopes.Length; i += 1)
                 {
                     scopes[i] = scopes[i].Trim();
 
-                    if (Azure.TokenScope.Find(scopes[i], out Azure.TokenScope scope))
+                    if (AzureDev.TokenScope.Find(scopes[i], out AzureDev.TokenScope scope))
                     {
                         devopsTokenScope = devopsTokenScope | scope;
                     }
@@ -631,14 +645,14 @@ namespace Microsoft.Alm.Cli
                 program.Trace.WriteLine($"GCM_VSTS_SCOPE = '{value}'.");
                 program.WriteLine($"WARNING: the 'GCM_VSTS_SCOPE' variable has been deprecated, use 'GCM_DEVOPS_SCOPE' instead.");
 
-                Azure.TokenScope devopsTokenScope = Azure.TokenScope.None;
+                AzureDev.TokenScope devopsTokenScope = AzureDev.TokenScope.None;
 
                 var scopes = value.Split(TokenScopeSeparatorCharacters.ToCharArray(), StringSplitOptions.RemoveEmptyEntries);
                 for (int i = 0; i < scopes.Length; i += 1)
                 {
                     scopes[i] = scopes[i].Trim();
 
-                    if (Azure.TokenScope.Find(scopes[i], out Azure.TokenScope scope))
+                    if (AzureDev.TokenScope.Find(scopes[i], out AzureDev.TokenScope scope))
                     {
                         devopsTokenScope = devopsTokenScope | scope;
                     }
@@ -652,7 +666,7 @@ namespace Microsoft.Alm.Cli
             }
 
             // Check for configuration supplied user-info.
-                if (program.TryReadString(operationArguments, KeyType.Username, out value))
+            if (program.TryReadString(operationArguments, KeyType.Username, out value))
             {
                 program.Trace.WriteLine($"{program.KeyTypeName(KeyType.Username)} = '{value}'.");
 
@@ -694,6 +708,37 @@ namespace Microsoft.Alm.Cli
                 {
                     Global.RequestTimeout = milliseconds;
                 }
+            }
+
+            // KeyVault Credential Store Parameters
+            if (program.TryReadString(operationArguments, KeyType.KeyVaultUrl, out value))
+            {
+                program.Trace.WriteLine($"{program.KeyTypeName(KeyType.KeyVaultUrl)} = '{value}'.");
+                operationArguments.KeyVaultUrl = value;
+            }
+
+            if (program.TryReadBoolean(operationArguments, KeyType.KeyVaultUseMsi, out yesno))
+            {
+                program.Trace.WriteLine($"{program.KeyTypeName(KeyType.KeyVaultUseMsi)} = '{yesno}'.");
+                operationArguments.KeyVaultUseMsi = yesno;
+            }
+
+            if (program.TryReadString(operationArguments, KeyType.KeyVaultAuthCertificateStoreType, out value))
+            {
+                program.Trace.WriteLine($"{program.KeyTypeName(KeyType.KeyVaultAuthCertificateStoreType)} = '{value}'.");
+                operationArguments.KeyVaulyAuthCertificateStoreType = value;
+            }
+
+            if (program.TryReadString(operationArguments, KeyType.KeyVaultAuthCertificateThumbprint, out value))
+            {
+                program.Trace.WriteLine($"{program.KeyTypeName(KeyType.KeyVaultAuthCertificateThumbprint)} = '{value}'.");
+                operationArguments.KeyVaultAuthCertificateThumbprint = value;
+            }
+
+            if (program.TryReadString(operationArguments, KeyType.KeyVaultAuthClientId, out value))
+            {
+                program.Trace.WriteLine($"{program.KeyTypeName(KeyType.KeyVaultAuthClientId)} = '{value}'.");
+                operationArguments.KeyVaultAuthClientId = value;
             }
         }
 
@@ -791,8 +836,8 @@ namespace Microsoft.Alm.Cli
 
                 case AuthorityType.AzureDirectory:
                 {
-                    var aadAuth = authentication as Azure.AadAuthentication;
-                    var patOptions = new Azure.PersonalAccessTokenOptions()
+                    var aadAuth = authentication as AzureDev.AadAuthentication;
+                    var patOptions = new AzureDev.PersonalAccessTokenOptions()
                     {
                         RequireCompactToken = true,
                         TokenDuration = operationArguments.TokenDuration,
@@ -827,8 +872,8 @@ namespace Microsoft.Alm.Cli
 
                 case AuthorityType.MicrosoftAccount:
                 {
-                    var msaAuth = authentication as Azure.MsaAuthentication;
-                    var patOptions = new Azure.PersonalAccessTokenOptions()
+                    var msaAuth = authentication as AzureDev.MsaAuthentication;
+                    var patOptions = new AzureDev.PersonalAccessTokenOptions()
                     {
                         RequireCompactToken = true,
                         TokenDuration = operationArguments.TokenDuration,

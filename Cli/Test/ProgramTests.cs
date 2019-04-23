@@ -29,7 +29,7 @@ using System.Threading.Tasks;
 using Microsoft.Alm.Authentication;
 using Moq;
 using Xunit;
-using Azure = AzureDevOps.Authentication;
+using AzureDev = AzureDevOps.Authentication;
 using Git = Microsoft.Alm.Authentication.Git;
 
 namespace Microsoft.Alm.Cli.Test
@@ -108,7 +108,7 @@ namespace Microsoft.Alm.Cli.Test
 
             Assert.NotNull(opargs.DevOpsTokenScope);
 
-            var expectedScope = Azure.TokenScope.BuildAccess | Azure.TokenScope.CodeWrite;
+            var expectedScope = AzureDev.TokenScope.BuildAccess | AzureDev.TokenScope.CodeWrite;
             Assert.Equal(expectedScope, opargs.DevOpsTokenScope);
         }
 

@@ -10,7 +10,8 @@
     <ProjectGuid>{EE663736-5BAD-4CA6-A4F8-99978925AD8A}</ProjectGuid>
     <ProjectName>Bitbucket.Authentication</ProjectName>
     <RootNamespace>Atlassian.Bitbucket.Authentication</RootNamespace>
-    <TargetFrameworkVersion>v4.5.1</TargetFrameworkVersion>
+    <TargetFrameworkVersion>v4.5.2</TargetFrameworkVersion>
+    <TargetFrameworkProfile />
   </PropertyGroup>
   <Import Project="..\..\build.props" />
   <PropertyGroup>
