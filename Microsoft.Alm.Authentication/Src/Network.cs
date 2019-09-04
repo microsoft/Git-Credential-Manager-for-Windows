@@ -511,6 +511,9 @@ namespace Microsoft.Alm.Authentication
                     {
                         handler.Proxy = proxy;
                         handler.UseProxy = true;
+
+                        // Set the default web proxy for ADAL to use
+                        WebRequest.DefaultWebProxy = proxy;
                     }
                 }
             }
