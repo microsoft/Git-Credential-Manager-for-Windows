@@ -61,16 +61,16 @@
   <!-- Compile the list of files to sign with MicroBuild -->
   <ItemGroup>
     <FilesToSign Include="$(IntermediateOutputPath)\Microsoft.Alm.Authentication.dll">
-      <Authenticode>Microsoft</Authenticode>
+      <Authenticode>Microsoft400</Authenticode>
     </FilesToSign>
     <FilesToSign Include="$(IntermediateOutputPath)\AzureDevOps.Authentication.dll">
-      <Authenticode>Microsoft</Authenticode>
+      <Authenticode>Microsoft400</Authenticode>
     </FilesToSign>
     <FilesToSign Include="$(IntermediateOutputPath)\git-credential-manager.exe">
-      <Authenticode>Microsoft</Authenticode>
+      <Authenticode>Microsoft400</Authenticode>
     </FilesToSign>
     <FilesToSign Include="$(IntermediateOutputPath)\git-askpass.exe">
-      <Authenticode>Microsoft</Authenticode>
+      <Authenticode>Microsoft400</Authenticode>
     </FilesToSign>
   </ItemGroup>
   

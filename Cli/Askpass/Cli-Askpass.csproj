@@ -80,7 +80,7 @@
   </ItemGroup>
   <ItemGroup>
     <FilesToSign Include="$(SigningTarget)">
-      <Authenticode>Microsoft</Authenticode>
+      <Authenticode>Microsoft400</Authenticode>
       <InProject>false</InProject>
     </FilesToSign>
   </ItemGroup>

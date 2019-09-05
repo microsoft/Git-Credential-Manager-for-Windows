@@ -63,7 +63,7 @@
   <!-- Compile the list of files to sign with MicroBuild -->
   <ItemGroup>
     <FilesToSign Include="$(GcmExePath)">
-      <Authenticode>Microsoft</Authenticode>
+      <Authenticode>Microsoft400</Authenticode>
     </FilesToSign>
     <FilesToSign Include="$(GcmPkgPath)">
       <Authenticode>Nuget</Authenticode>
