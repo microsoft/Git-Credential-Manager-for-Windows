@@ -1,3 +1,4 @@
+Test
 # Git Credential Manager for Windows 
 [![GitHub Release](https://img.shields.io/github/release/microsoft/git-credential-manager-for-windows.svg?style=flat-square)](https://github.com/Microsoft/Git-Credential-Manager-for-Windows/releases)
 [![Build status](https://img.shields.io/appveyor/ci/whoisj/git-credential-manager-for-windows.svg?style=flat-square)](https://ci.appveyor.com/project/whoisj/git-credential-manager-for-windows/branch/master)
