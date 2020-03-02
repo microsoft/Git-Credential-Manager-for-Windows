@@ -96,7 +96,7 @@ namespace Microsoft.Alm.Cli
                                                                         Program.GitHubCredentialScope,
                                                                         new SecretStore(program.Context,
                                                                                         secretsNamespace,
-                                                                                        Secret.UriToName),
+                                                                                        Secret.UriToIdentityUrl),
                                                                         githubCredentialCallback,
                                                                         githubAuthcodeCallback,
                                                                         null)
@@ -181,7 +181,7 @@ namespace Microsoft.Alm.Cli
                                                                   Program.GitHubCredentialScope,
                                                                   new SecretStore(program.Context,
                                                                                   secretsNamespace,
-                                                                                  Secret.UriToName),
+                                                                                  Secret.UriToIdentityUrl),
                                                                   githubCredentialCallback,
                                                                   githubAuthcodeCallback,
                                                                   null);
