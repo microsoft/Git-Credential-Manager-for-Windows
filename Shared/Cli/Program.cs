@@ -80,7 +80,7 @@ namespace Microsoft.Alm.Cli
         internal const string SecretsNamespace = "git";
 
         internal static readonly Azure.TokenScope DevOpsCredentialScope = Azure.TokenScope.CodeWrite | Azure.TokenScope.PackagingRead;
-        internal static readonly Github.TokenScope GitHubCredentialScope = Github.TokenScope.Gist | Github.TokenScope.Repo;
+        internal static readonly Github.TokenScope GitHubCredentialScope = Github.TokenScope.Gist | Github.TokenScope.Repo | Github.TokenScope.Workflow;
 
         internal BasicCredentialPromptDelegate _basicCredentialPrompt = ConsoleFunctions.CredentialPrompt;
         internal BitbucketCredentialPromptDelegate _bitbucketCredentialPrompt = BitbucketFunctions.CredentialPrompt;

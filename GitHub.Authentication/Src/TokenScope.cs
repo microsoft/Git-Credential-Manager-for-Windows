@@ -135,6 +135,14 @@ namespace GitHub.Authentication
         /// </summary>
         public static readonly TokenScope UserFollow = new TokenScope("user:follow");
 
+        /// <summary>
+        /// Grants the ability to add and update GitHub Actions workflow files.
+        /// Workflow files can be committed without this scope if the same file
+        /// (with both the same path and contents) exists on another branch in
+        /// the same repository.
+        /// </summary>
+        public static readonly TokenScope Workflow = new TokenScope("workflow");
+
         private TokenScope(string value)
             : base(value)
         { }
@@ -165,6 +173,7 @@ namespace GitHub.Authentication
             yield return User;
             yield return UserEmail;
             yield return UserFollow;
+            yield return Workflow;
             yield break;
         }
 
