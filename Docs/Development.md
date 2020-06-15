@@ -11,11 +11,13 @@ The easiest way to get started is to:
 3. Open the solution file (GitCredentialManager.sln) using Visual Studio.
 4. Right-click the solution node in Solution Explorer and choose 'Restore NuGet Packages'.
    This will download and setup all of the dependencies.
-5. Right-click the 'Cli-CredentialHelper' project in Solution Explorer and select 'Properties'.
-6. In the 'Properties' window, select the 'Debug' tab from the left side.
-7. In the 'Properties: Debug' window, add the word "get" to the 'Command line arguments:' text box.
-8. Close the "Properties" window.
-9. Hit \<F5\>, or 'Debug' \>\> 'Start Debugging' from the top menu of Visual Studio.
+5. Right-click the solution node in Solution Explorer and choose 'Properties'.
+6. Select the 'Startup Project' tab from the left. Ensure the 'Single startup project' radio button is active, and switch the dropdown to 'Cli-Manager' if something else is selected. Hit OK.
+7. Right-click the 'Cli-Manager' project in Solution Explorer and select 'Properties'.
+8. In the 'Properties' window, select the 'Debug' tab from the left side.
+9. In the 'Properties: Debug' window, add the word "get" to the 'Command line arguments:' text box if not already present.
+10. Close the "Properties" window.
+11. Hit \<F5\>, or 'Debug' \>\> 'Start Debugging' from the top menu of Visual Studio.
 
 ### Debugging Code
 
