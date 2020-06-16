@@ -154,7 +154,32 @@ namespace Microsoft.Alm.Authentication
             if (targetUri is null)
                 throw new ArgumentNullException(nameof(targetUri));
 
-            return await _credentialStore.DeleteCredentials(targetUri);
+            // Delete the credentials for the explicit target uri first.
+
+            var initResult = await _credentialStore.DeleteCredentials(targetUri);
+
+            // If we deleted per user then we should try and delete the host level credentials too if
+            // they match the username.
+            var hostTargetUri = new TargetUri(targetUri.ToString(false, true, true));
+            var hostCredentials = await GetCredentials(hostTargetUri);
+
+            if (hostCredentials is null)
+            {
+                Trace.WriteLine($"No entry found for {hostTargetUri}, nothing more to delete");
+                return initResult;
+            }
+
+            var hostUsername = hostCredentials.Username;
+            var encodedUsername = Uri.EscapeDataString(targetUri.UserInfo);
+            if (encodedUsername != hostUsername)
+            {
+                Trace.WriteLine($"{hostTargetUri} entry has username {hostUsername} != {encodedUsername}, not deleting");
+                return initResult;
+            }
+
+            Trace.WriteLine($"Also deleting generic entry for {hostTargetUri} with username {hostUsername}");
+            return await _credentialStore.DeleteCredentials(hostTargetUri);
+
         }
 
         public override async Task<Credential> GetCredentials(TargetUri targetUri)
