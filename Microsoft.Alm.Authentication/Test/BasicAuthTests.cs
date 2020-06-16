@@ -25,6 +25,23 @@ namespace Microsoft.Alm.Authentication.Test
         }
 
         [Fact]
+        public async Task BasicAuthUserUriDeleteCredentialsTest()
+        {
+            TargetUri targetUserUri = new TargetUri("http://username@localhost");
+            TargetUri targetGenericUri = new TargetUri("http://localhost");
+            BasicAuthentication basicAuth = GetBasicAuthentication(RuntimeContext.Default, "basic-delete-user");
+
+            await basicAuth.CredentialStore.WriteCredentials(targetUserUri, new Credential("username", "password"));
+            await basicAuth.CredentialStore.WriteCredentials(targetGenericUri, new Credential("username", "password"));
+
+            /* User-included format is what comes out of "erase" action, so that's what we want to test */
+            await basicAuth.DeleteCredentials(targetUserUri);
+
+            Assert.Null(await basicAuth.CredentialStore.ReadCredentials(targetUserUri));
+            Assert.Null(await basicAuth.CredentialStore.ReadCredentials(targetGenericUri));
+        }
+
+        [Fact]
         public async Task BasicAuthGetCredentialsTest()
         {
             TargetUri targetUri = new TargetUri("http://localhost");
@@ -39,6 +56,26 @@ namespace Microsoft.Alm.Authentication.Test
             await basicAuth.CredentialStore.WriteCredentials(targetUri, credentials);
 
             Assert.NotNull(credentials = await basicAuth.GetCredentials(targetUri));
+        }
+
+        [Fact]
+        public async Task BasicAuthUserUriGetCredentialsTest()
+        {
+            TargetUri targetUserUri = new TargetUri("http://username@localhost");
+            TargetUri targetGenericUri = new TargetUri("http://localhost");
+
+            BasicAuthentication basicAuth = GetBasicAuthentication(RuntimeContext.Default, "basic-get-user");
+
+            Credential credentials = null;
+
+            Assert.Null(credentials = await basicAuth.GetCredentials(targetGenericUri));
+            Assert.Null(credentials = await basicAuth.GetCredentials(targetUserUri));
+
+            credentials = new Credential("username", "password");
+
+            await basicAuth.CredentialStore.WriteCredentials(targetGenericUri, credentials);
+
+            Assert.NotNull(credentials = await basicAuth.GetCredentials(targetUserUri));
         }
 
         [Fact]
