@@ -1,4 +1,5 @@
-# Git Credential Manager for Windows 
+# Git Credential Manager for Windows
+
 [![GitHub Release](https://img.shields.io/github/release/microsoft/git-credential-manager-for-windows.svg?style=flat-square)](https://github.com/Microsoft/Git-Credential-Manager-for-Windows/releases)
 [![Build status](https://img.shields.io/appveyor/ci/whoisj/git-credential-manager-for-windows.svg?style=flat-square)](https://ci.appveyor.com/project/whoisj/git-credential-manager-for-windows/branch/master)
 [![Coverity Scan Build Status](https://img.shields.io/coverity/scan/11371.svg?style=flat-square)](https://scan.coverity.com/projects/git-credential-manager-for-windows)
@@ -7,7 +8,30 @@
 
 * * *
 
+## NOTICE: This project is no longer being maintained. :warning:
+
+Git Credential Manager for Windows is no longer being maintained. The cross-platform
+[Git Credential Manager Core (GCM Core)](https://aka.ms/gcmcore) is the official replacement.
+
+GCM Core is included as an optional component of Git for Windows 2.28 and will be made the default credential
+helper as of Git for Windows 2.29. GCM Core can also be manually installed from [this page](https://github.com/microsoft/Git-Credential-Manager-Core/releases/latest).
+
+* * *
+
 ## NOTICE: Experiencing GitHub push/fetch problems?
+
+[GitHub will disable password-based authentication](https://github.blog/changelog/2019-08-08-password-based-http-basic-authentication-deprecation-and-removal/)
+on APIs Git Credential Manager for Windows uses to create tokens. As a result, GCM
+for Windows will no longer be able to create new access tokens for GitHub.
+
+[Git Credential Manager Core (GCM Core)](https://aka.ms/gcmcore) supports OAuth-based
+authentication with GitHub and is the replacement for GCM for Windows.
+
+Please update to Git for Windows 2.28 and select "Git Credential Manager Core" from
+the installer when asked to "select a credential helper", or manually install GCM Core
+from [here](https://github.com/microsoft/Git-Credential-Manager-Core/releases/latest).
+
+---
 
 As of 22 Feb 2018, [GitHub has disabled support for weak encryption](https://githubengineering.com/crypto-deprecation-notice/) which means many users will suddenly find themselves unable to authenticate using a Git for Windows which (impacts versions older than v2.16.0). **DO NOT PANIC**, there's a fix. [Update Git for Windows](https://github.com/git-for-windows/git/releases) to the latest (or at least v2.16.0).
 
