@@ -51,3 +51,4 @@ steps:
       #Convert from JSON to PSObject
       $tokobj = $tokenArray | ConvertFrom-Json
       Write-Verbose "Decoded Payload:"
+      Write-Verbose $tokobj
