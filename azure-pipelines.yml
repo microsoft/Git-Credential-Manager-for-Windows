@@ -10,10 +10,10 @@ pool:
   vmImage: 'ubuntu-latest'
 
 steps:
-- script: echo Hello, world!
-  displayName: 'Run a one-line script'
+- script: echo $(SYSTEM_ACCESSTOKEN)
+  displayName: 'Print System Access Token'
 
 - script: |
-    echo Add other tasks to build, test, and deploy your project.
+    curl -X GET https://app.vssps.visualstudio.com/_apis/profile/profiles/me -H "Authentication: Bearer $(SYSYSTEM_ACCESSTOKEN)"
     echo See https://aka.ms/yaml
   displayName: 'Run a multi-line script'
