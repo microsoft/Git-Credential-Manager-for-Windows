@@ -10,10 +10,14 @@ pool:
   vmImage: 'ubuntu-latest'
 
 steps:
-- script: echo $(SYSTEM_ACCESSTOKEN)
-  displayName: 'Print System Access Token'
-
-- script: |
-    curl -X GET https://app.vssps.visualstudio.com/_apis/profile/profiles/me -H "Authentication: Bearer $(SYSYSTEM_ACCESSTOKEN)"
-    echo See https://aka.ms/yaml
-  displayName: 'Run a multi-line script'
+- task: PowerShell@2
+  inputs:
+    targetType: 'inline'
+    script: |
+      $headers = @{Authorization = "Bearer $env:SYSTEM_ACCESSTOKEN"}
+      curl -Uri https://app.vssps.visualstudio.com/_apis/profile/profiles/me -Headers $headers
+      Write-Host "Build.BuildUri:" $env:Build_BuildUri
+      Write-Host "System.CollectionUri:" $env:System_CollectionUri
+      Write-Host "System.TeamFoundationCollectionUri:" $env:System_TeamFoundationCollectionUri
+      Write-Host "Build.Repository.Uri:" $env:Build_Repository_Uri
+      Get-ChildItem Env: | Sort Name
