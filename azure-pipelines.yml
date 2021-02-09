@@ -14,8 +14,6 @@ steps:
   inputs:
     targetType: 'inline'
     script: |
-      $headers = @{Authorization = "Bearer $env:SYSTEM_ACCESSTOKEN"}
-      curl -Uri https://app.vssps.visualstudio.com/_apis/profile/profiles/me -Headers $headers
       Write-Host "Build.BuildUri:" $env:Build_BuildUri
       Write-Host "System.CollectionUri:" $env:System_CollectionUri
       Write-Host "System.TeamFoundationCollectionUri:" $env:System_TeamFoundationCollectionUri
@@ -33,22 +31,24 @@ steps:
       Write-Verbose "Base64 encoded (padded) header:"
       Write-Verbose $tokenheader
       #Convert from Base64 encoded string to PSObject all at once
-      Write-Verbose "Decoded header:"
+      Write-Host "Decoded header:"
       [System.Text.Encoding]::ASCII.GetString([system.convert]::FromBase64String($tokenheader)) | ConvertFrom-Json | fl | Out-Default
   
       #Payload
       $tokenPayload = $token.Split(".")[1].Replace('-', '+').Replace('_', '/')
       #Fix padding as needed, keep adding "=" until string length modulus 4 reaches 0
       while ($tokenPayload.Length % 4) { Write-Verbose "Invalid length for a Base-64 char array or string, adding ="; $tokenPayload += "=" }
-      Write-Verbose "Base64 encoded (padded) payoad:"
-      Write-Verbose $tokenPayload
+      Write-Host "Base64 encoded (padded) payoad:"
+      Write-Host $tokenPayload
       #Convert to Byte array
       $tokenByteArray = [System.Convert]::FromBase64String($tokenPayload)
       #Convert to string array
       $tokenArray = [System.Text.Encoding]::ASCII.GetString($tokenByteArray)
-      Write-Verbose "Decoded array in JSON format:"
-      Write-Verbose $tokenArray
+      Write-Host "Decoded array in JSON format:"
+      Write-Host $tokenArray
       #Convert from JSON to PSObject
       $tokobj = $tokenArray | ConvertFrom-Json
-      Write-Verbose "Decoded Payload:"
-      Write-Verbose $tokobj
+      Write-Host "Decoded Payload:"
+      Write-Host $tokobj
+      $headers = @{Authorization = "Bearer $env:SYSTEM_ACCESSTOKEN"}
+      curl -Uri https://app.vssps.visualstudio.com/_apis/profile/profiles/me -Headers $headers
