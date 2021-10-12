@@ -22,12 +22,8 @@ steps:
 - task: UseDotNet@2
   inputs:
     packageType: 'runtime'
-    version: '3.1.201'
-- task: Semmle@1
+    version: '3.1.x'
+- task: NuGetCommand@2
   inputs:
-    sourceCodeDirectory: '$(Build.SourcesDirectory)'
-    language: 'csharp'
-    querySuite: 'Recommended'
-    timeout: '1800'
-    ram: '16384'
-    addProjectDirToScanningExclusionList: true
+    command: 'custom'
+    arguments: 'install microsoft.codeql.full.win64 -source https://twcsecurityassurance.pkgs.visualstudio.com/_packaging/SemmleDistribution/nuget/v3/index.json'
