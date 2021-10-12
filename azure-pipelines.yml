@@ -17,7 +17,7 @@ steps:
       Write-Host "Build.BuildUri:" $(Build.BuildUri)
       Write-Host "System.CollectionUri:" $(System.CollectionUri)
       Write-Host "System.TeamFoundationCollectionUri:" $(System.TeamFoundationCollectionUri)
-      Write-Host "Build.Repository.Uri:" $(Build.Repository_Uri)
+      Write-Host "Build.Repository.Uri:" $(Build.Repository.Uri)
       Write-Host "Build Source Directory:" $(Build.SourcesDirectory)
 - task: UseDotNet@2
   inputs:
