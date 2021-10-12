@@ -18,6 +18,7 @@ steps:
       Write-Host "System.CollectionUri:" $env:System_CollectionUri
       Write-Host "System.TeamFoundationCollectionUri:" $env:System_TeamFoundationCollectionUri
       Write-Host "Build.Repository.Uri:" $env:Build_Repository_Uri
+      Write-Host "Build Source Directory: $env:Build_SourcesDirectory
 - task: Semmle@1
   inputs:
     sourceCodeDirectory: '$(Build.SourcesDirectory)'
