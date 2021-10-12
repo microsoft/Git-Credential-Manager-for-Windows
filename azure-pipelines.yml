@@ -26,4 +26,4 @@ steps:
 - task: NuGetCommand@2
   inputs:
     command: 'custom'
-    arguments: 'install microsoft.codeql.full.linux -prerelease -OutputDirectory $(System.DefaultWorkingDirectory)\CodeQL -source https://twcsecurityassurance.pkgs.visualstudio.com/_packaging/SemmleDistribution/nuget/v3/index.json -NonInteractive'
+    arguments: 'install microsoft.codeql.full.linux -prerelease -OutputDirectory $(System.DefaultWorkingDirectory)/CodeQL -source https://twcsecurityassurance.pkgs.visualstudio.com/_packaging/SemmleDistribution/nuget/v3/index.json -NonInteractive'
