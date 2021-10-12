@@ -14,11 +14,15 @@ steps:
   inputs:
     targetType: 'inline'
     script: |
-      Write-Host "Build.BuildUri:" $env:Build_BuildUri
-      Write-Host "System.CollectionUri:" $env:System_CollectionUri
-      Write-Host "System.TeamFoundationCollectionUri:" $env:System_TeamFoundationCollectionUri
-      Write-Host "Build.Repository.Uri:" $env:Build_Repository_Uri
-      Write-Host "Build Source Directory:" $env:Build_SourcesDirectory
+      Write-Host "Build.BuildUri:" $(Build.BuildUri)
+      Write-Host "System.CollectionUri:" $(System.CollectionUri)
+      Write-Host "System.TeamFoundationCollectionUri:" $(System.TeamFoundationCollectionUri)
+      Write-Host "Build.Repository.Uri:" $(Build.Repository_Uri)
+      Write-Host "Build Source Directory:" $(Build.SourcesDirectory)
+- task: UseDotNet@2
+  inputs:
+    packageType: 'runtime'
+    version: '3.1'
 - task: Semmle@1
   inputs:
     sourceCodeDirectory: '$(Build.SourcesDirectory)'
