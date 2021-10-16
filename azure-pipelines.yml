@@ -32,7 +32,7 @@ steps:
   displayName: 'Core Build'
   inputs:
     solution: "GitCredentialManager.sln"
-    msbuildArguments: /nologo /verbosity:$(Build.Verbosity) "/binaryLogger:$(Build.SourcesDirectory)/$(build.buildNumber).binlog"
+    msbuildArguments: /nologo "/binaryLogger:$(Build.SourcesDirectory)/$(build.buildNumber).binlog"
     platform: '$(Build.Platform)'
     configuration: '$(Build.Configuration)'
     maximumCpuCount: false
