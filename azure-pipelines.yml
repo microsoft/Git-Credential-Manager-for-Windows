@@ -33,6 +33,6 @@ steps:
   inputs:
     solution: "GitCredentialManager.sln"
     msbuildArguments: /nologo "/binaryLogger:$(Build.SourcesDirectory)/$(build.buildNumber).binlog"
-    platform: 'AnyCPU'
+    platform: 'Any CPU'
     configuration: 'Debug'
     maximumCpuCount: false
