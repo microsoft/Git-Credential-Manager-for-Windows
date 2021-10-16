@@ -3,11 +3,9 @@
 # Add steps that build, run tests, deploy, and more:
 # https://aka.ms/yaml
 
-trigger:
-- main
 
 pool:
-  vmImage: 'ubuntu-latest'
+  vmImage: 'Hosted VS2017'
 
 steps:
 - task: PowerShell@2
@@ -23,7 +21,18 @@ steps:
   inputs:
     packageType: 'runtime'
     version: '3.1.x'
+
 - task: NuGetCommand@2
+  displayName: NuGet restore
   inputs:
-    command: 'custom'
-    arguments: 'install microsoft.codeql.full.linux -prerelease -OutputDirectory $(System.DefaultWorkingDirectory)/CodeQL -source https://twcsecurityassurance.pkgs.visualstudio.com/_packaging/SemmleDistribution/nuget/v3/index.json -NonInteractive'
+    restoreSolution: 'GitCredentialManager.sln'
+    verbosityRestore: 'quiet'
+
+- task: MSBuild@1
+  displayName: 'Core Build'
+  inputs:
+    solution: "GitCredentialManager.sln"
+    msbuildArguments: /nologo /verbosity:$(Build.Verbosity) "/binaryLogger:$(Build.SourcesDirectory)/$(build.buildNumber).binlog"
+    platform: '$(Build.Platform)'
+    configuration: '$(Build.Configuration)'
+    maximumCpuCount: false
