@@ -1,0 +1,38 @@
+# Starter pipeline
+# Start with a minimal pipeline that you can customize to build and deploy your code.
+# Add steps that build, run tests, deploy, and more:
+# https://aka.ms/yaml
+
+
+pool:
+  vmImage: 'windows-latest'
+
+steps:
+- task: PowerShell@2
+  inputs:
+    targetType: 'inline'
+    script: |
+      Write-Host "Build.BuildUri:" $(Build.BuildUri)
+      Write-Host "System.CollectionUri:" $(System.CollectionUri)
+      Write-Host "System.TeamFoundationCollectionUri:" $(System.TeamFoundationCollectionUri)
+      Write-Host "Build.Repository.Uri:" $(Build.Repository.Uri)
+      Write-Host "Build Source Directory:" $(Build.SourcesDirectory)
+- task: UseDotNet@2
+  inputs:
+    packageType: 'runtime'
+    version: '3.1.x'
+
+- task: NuGetCommand@2
+  displayName: NuGet restore
+  inputs:
+    restoreSolution: 'GitCredentialManager.sln'
+    verbosityRestore: 'quiet'
+
+- task: MSBuild@1
+  displayName: 'Core Build'
+  inputs:
+    solution: "GitCredentialManager.sln"
+    msbuildArguments: /nologo "/binaryLogger:$(Build.SourcesDirectory)/$(build.buildNumber).binlog"
+    platform: 'Any CPU'
+    configuration: 'Debug'
+    maximumCpuCount: false
