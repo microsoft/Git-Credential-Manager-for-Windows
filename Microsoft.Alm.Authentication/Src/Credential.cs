@@ -42,24 +42,16 @@ namespace Microsoft.Alm.Authentication
         /// <summary>
         /// Creates a credential object with a username and password pair.
         /// </summary>
-        /// <param name="username">The username value of the `<see cref="Credential"/>`.</param>
-        /// <param name="password">The password value of the `<see cref="Credential"/>`.</param>
-        public Credential(string username, string password)
+        /// <param name="Username">The username value of the `<see cref="Credential"/>`.</param>
+        /// <param name="Password">The password value of the `<see cref="Credential"/>`.</param>
+        public Credential(string Username, string Password)
         {
-            if (username is null)
-                throw new ArgumentNullException(nameof(username));
+            if (Username is null)
+                throw new ArgumentNullException(nameof(Username));
 
-            _password = password ?? string.Empty;
-            _username = username;
+            _password = Password ?? string.Empty;
+            _username = Username;
         }
-
-        /// <summary>
-        /// Creates a credential object with only a username.
-        /// </summary>
-        /// <param name="username">The username value of the `<see cref="Credential"/>`.</param>
-        public Credential(string username)
-            : this(username, string.Empty)
-        { }
 
         private readonly string _password;
         private readonly string _username;

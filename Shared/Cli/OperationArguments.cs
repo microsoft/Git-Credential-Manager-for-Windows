@@ -30,7 +30,7 @@ using System.Text;
 using System.Threading.Tasks;
 using Microsoft.Alm.Authentication;
 using static System.Globalization.CultureInfo;
-using Azure = AzureDevOps.Authentication;
+using AzureDev = AzureDevOps.Authentication;
 using Git = Microsoft.Alm.Authentication.Git;
 
 namespace Microsoft.Alm.Cli
@@ -69,7 +69,7 @@ namespace Microsoft.Alm.Cli
         private Git.Configuration _configuration;
         private Credential _credentials;
         private string _customNamespace;
-        private Azure.TokenScope _devopsTokenScope;
+        private AzureDev.TokenScope _devopsTokenScope;
         private Dictionary<string, string> _environmentVariables;
         private string _gitRemoteHttpCommandLine;
         private Interactivity _interactivity;
@@ -128,7 +128,7 @@ namespace Microsoft.Alm.Cli
         /// <para/>
         /// Default value is `<seealso cref="Program.DevOpsCredentialScope"/>`.
         /// </summary>
-        public virtual Azure.TokenScope DevOpsTokenScope
+        public virtual AzureDev.TokenScope DevOpsTokenScope
         {
             get { return _devopsTokenScope; }
             set { _devopsTokenScope = value; }
@@ -445,6 +445,20 @@ namespace Microsoft.Alm.Cli
             set { _writeLog = value; }
         }
 
+        /// <summary>
+        /// KeyVaultUrl for storing credentials and PAT tokens in KeyVault. 
+        /// If specified, KeyVault is used as a storage mechanism for secrets.
+        /// </summary>
+        public virtual string KeyVaultUrl { get; set; }
+
+        public virtual bool? KeyVaultUseMsi { get; set; }
+
+        public virtual string KeyVaulyAuthCertificateStoreType { get; set; }
+
+        public virtual string KeyVaultAuthCertificateThumbprint { get; set; }
+
+        public virtual string KeyVaultAuthClientId { get; set; }
+
         internal string DebuggerDisplay
         {
             get { return $"{nameof(OperationArguments)}: TargetUri: {TargetUri}, Authority: {Authority}, Credentials: {Credentials}"; }
@@ -655,20 +669,29 @@ namespace Microsoft.Alm.Cli
                    .Append(_queryPath ?? string.Empty)
                    .Append('\n');
 
-            // Only write out username if we know it.
-            if (_credentials?.Username != null)
+            if (_credentials == null)
             {
                 builder.Append("username=")
-                       .Append(_credentials.Username)
-                       .Append('\n');
+                   .Append(_username ?? string.Empty)
+                   .Append('\n');
             }
-
-            // Only write out password if we know it.
-            if (_credentials?.Password != null)
+            else
             {
-                builder.Append("password=")
-                       .Append(_credentials.Password)
-                       .Append('\n');
+                // Only write out username if we know it.
+                if (_credentials.Username != null)
+                {
+                    builder.Append("username=")
+                           .Append(_credentials.Username)
+                           .Append('\n');
+                }
+
+                // Only write out password if we know it.
+                if (_credentials.Password != null)
+                {
+                    builder.Append("password=")
+                           .Append(_credentials.Password)
+                           .Append('\n');
+                }
             }
 
             builder.Append('\n');

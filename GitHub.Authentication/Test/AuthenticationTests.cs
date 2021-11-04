@@ -27,7 +27,7 @@ namespace GitHub.Authentication.Test
                 new Authentication.AcquireAuthenticationCodeDelegate(prompts.AuthenticationCodeModalPrompt),
                 null);
 
-            await authentication.SetCredentials(new Uri(writeUriString), new Credential("haacked"));
+            await authentication.SetCredentials(new Uri(writeUriString), new Credential("haacked", string.Empty));
             var credentials = await authentication.GetCredentials(retrieveUri);
             Assert.Equal("haacked", credentials.Username);
         }
@@ -48,7 +48,7 @@ namespace GitHub.Authentication.Test
                 new Authentication.AcquireAuthenticationCodeDelegate(prompts.AuthenticationCodeModalPrompt),
                 null);
 
-            await authentication.SetCredentials(new Uri("https://github.com/"), new Credential("haacked"));
+            await authentication.SetCredentials(new Uri("https://github.com/"), new Credential("haacked", string.Empty));
 
             Assert.Null(await authentication.GetCredentials(retrieveUri));
         }
