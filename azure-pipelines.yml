@@ -18,6 +18,7 @@ steps:
       Write-Host "System.TeamFoundationCollectionUri:" $(System.TeamFoundationCollectionUri)
       Write-Host "Build.Repository.Uri:" $(Build.Repository.Uri)
       Write-Host "Build Source Directory:" $(Build.SourcesDirectory)
+      java --version
 - task: UseDotNet@2
   inputs:
     packageType: 'runtime'
